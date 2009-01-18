@@ -1,0 +1,26 @@
+                        unice68 - ice depacker
+                                           
+                 unice68 is part of the sc68 project
+                       
+                    (C) 1998-2009 Benjamin Gerard
+
+
+unice68  project is  a  "C" library  and  a command  line program  for
+depacking !ICE2.40 compressed files.
+
+ICE was  a common  compressor running on  Atari ST(tm)  and compatible
+machines. sc68 project needs to  handle the many ICE! compressed Atari
+ST music files (including Grazer' SNDh collection).
+
+In the  begin unice68  was a front-end  to the original  *native* ICE!
+depacker routine written in  68000 assembler. It was functional enough
+but pretty much slow so I decided to convert the 68000 assembly to "C"
+code. This conversion is straight forward and kinda ugly.
+
+The library can  not be used for true  streaming decompression meaning
+it  has to  load an  entire file  in order  to process  it. This  is a
+consequence of the way data is  stored by ICE!.  First data is located
+at  the  end of  the  file and  the  decompression  process read  data
+backward (from  end to beginning).  Fortunately most  ICE!  files used
+nowadays are pretty much small  for today's system and can be entirely
+loaded into memory.

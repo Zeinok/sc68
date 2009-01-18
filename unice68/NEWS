@@ -1,0 +1,17 @@
+                          ** unice68 NEWS **
+
+
+20090117	<ben>
+
+	Autotools up-to-date.
+
+
+20061227	<ben>
+
+	Release unice 20061227
+
+	unice68 has been removed from sc68 package and it is now
+	distribute within its own independant package.
+	
+	New library interface with a supplemental function for
+	querying library version string.
