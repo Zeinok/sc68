@@ -1,0 +1,16 @@
+                           desa68 library
+
+  desa68 is  a 68000 disassembler library with  enhanced features that
+  help to trace branch instructions.
+
+  Optionnally the disassembler may  disassemble with symbol instead of
+  absolute  address  or  long  immediat.  A  supplemental  control  is
+  available to choose  the range of address that  must be disassembled
+  as symbol.
+
+  A  good sample  is may  be found  in the  sourcer68  directory. This
+  library is also used by debug68 program.
+
+         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+         !!! desa68 library is **NOW** THREAD SAFE !!!!
+         !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

@@ -1,0 +1,21 @@
+			  ** desa68 NEWS **
+
+20090117	<ben>
+
+	autotools up-to-date. MsVC project file removed.
+
+
+20070112	<ben>
+
+	Release desa68 20070112
+
+	Thread safe version. Compile within Mingw or cygwin environment.
+	Add Microsoft Visual C (Express edition) project file.
+
+
+20070102	<ben>
+
+	Release desa68 20070102
+
+	desa68 has been removed from sc68 package and it is now
+	distribute within its own independant package.
