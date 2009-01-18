@@ -19,7 +19,7 @@
  *
  */
 
-/* $Id: desa68.c,v 1.2 2007/01/12 09:25:41 benjihan Exp $ */
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"

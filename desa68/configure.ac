@@ -6,7 +6,7 @@ dnl# Configuration script for desa68
 dnl#
 dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
 dnl#
-dnl# $Id: configure.ac,v 1.3 2007/01/12 09:43:07 benjihan Exp $
+dnl# $Id$
 dnl#
 
 
@@ -48,5 +48,5 @@ AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])
 
 dnl#
-dnl# End of "$Id: configure.ac,v 1.3 2007/01/12 09:43:07 benjihan Exp $".
+dnl# End of "$Id$".
 dnl#

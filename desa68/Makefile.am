@@ -7,7 +7,7 @@
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# $Id: Makefile.am,v 1.2 2007/01/12 09:28:14 benjihan Exp $
+# $Id$
 
 ACLOCAL_AMFLAGS = -I m4 --install
 AM_CPPFLAGS     = @DESA68_CPPFLAGS@ @LIBDESA68_CPPFLAGS@

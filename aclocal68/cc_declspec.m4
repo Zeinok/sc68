@@ -4,7 +4,7 @@ dnl# sc68 - autoconf macros
 dnl#
 dnl# by Benjamin Gerard <ben [at] sashipa [dot] com>
 dnl#
-dnl# $Id: configure.ac,v 1.3 2007/01/12 09:43:07 benjihan Exp $
+dnl# $Id$
 dnl#
 
 # AC_PROG_CC_DECLSPEC()
@@ -28,6 +28,6 @@ AC_MSG_RESULT($ac_cc_declspec)
 
 dnl# ########################################################################
 dnl#
-dnl# End Of $Id: configure.ac,v 1.3 2007/01/12 09:43:07 benjihan Exp $
+dnl# End Of $Id$
 dnl#
 dnl# ########################################################################

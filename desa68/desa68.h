@@ -27,7 +27,7 @@
  *
  */
 
-/* $Id: desa68.h,v 1.2 2007/01/12 09:28:14 benjihan Exp $ */
+/* $Id$ */
 
 #ifndef _DESA68_H_
 #define _DESA68_H_
