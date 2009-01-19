@@ -70,11 +70,29 @@ AC_DEFUN([SC68_PACKAGE],[
 # `----------------------------------------------------------------------'
 
     AM_MAINTAINER_MODE
-    AS_IF([test "x${enable_maintainer_mode}" = "xyes"],[
+    AS_IF([test "x${enable_maintainer_mode}" = "xyes"],
+      [
         AC_PATH_PROG([texinfo2man],[texinfo2man],[false])
-        AC_PATH_PROG([help2man],[help2man],[false])],
+        AS_IF([test "x${texinfo2man}" = "xfalse"],[
+            AC_MSG_NOTICE([texinfo2man is part of GNU/indent package])])
+        AC_PATH_PROG([help2man],[help2man],[false])
+        AS_IF([test "x${help2man}" = "xfalse"],[
+            AC_MSG_NOTICE([help2man is part of GNU/help2man package])])
+        AC_MSG_CHECKING([for package.texi.in in srcdir])
+        AS_IF([test -e "$srcdir/package.texi.in"],
+          [AC_MSG_RESULT([yes])],[
+            AC_MSG_RESULT([no])
+            AC_MSG_NOTICE([create missing file $srcdir/package.texi.in])
+cat <<EOF >$srcdir/package.texi.in
+@set PACKAGE     @PACKAGE_NAME@
+@set WEBSITE     @PACKAGE_URL@
+@set BUGREPORT   @PACKAGE_BUGREPORT@
+@set DESCRIPTION @PACKAGE_SHORTDESC@
+@set INFOCAT     @PACKAGE_INFOCAT@
+EOF
+          ])
+        ],
       [texinfo2man=false; help2man=false])
-
 
 # ,----------------------------------------------------------------------.
 # | Compiler and companions                                              |
