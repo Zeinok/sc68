@@ -1,0 +1,72 @@
+/**
+ * @ingroup  file68_istream68
+ * @file     file68/istream68_curl.h
+ * @author   Benjamin Gerard
+ * @date     2003-08-08
+ * @brief    @ref cURL stream header.
+ *
+ */
+
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
+
+#ifndef _FILE68_ISTREAM68_CURL_H_
+#define _FILE68_ISTREAM68_CURL_H_
+
+#include "istream68.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/** @name cURL stream
+ *  @ingroup file68_istream68
+ *
+ *  @anchor cURL
+ *
+ *    @b cURL is a client-side URL transfer library. For more informations
+ *    see <a href="http://curl.planetmirror.com/libcurl/">cURL website</a>.
+ *
+ *  @{
+ */
+
+/** Initialize curl engine.
+ *
+ *    The istream68_curl_init() function initializes curl library.  It
+ *    is called by the file68_init() function and everytime a new curl
+ *    stream is created with the istream68_curl_create() function.
+ *
+ *  @return error code
+ *  @retval  0   success
+ *  @retval  -1  failure
+ */
+int istream68_curl_init(void);
+
+/** Shutdown curl engine.
+ *
+ *    The istream68_curl_shutdoen() function shutdown curl library. It
+ *    is called by the file68_shutdown() function.
+ */
+void istream68_curl_shutdown(void);
+
+/** Creates an URL based stream using @ref cURL.
+ *
+ *  @param  url     URL
+ *  @param  mode    bit#0: read access, bit#1: write access.
+ *
+ *  @return stream
+ *  @retval 0 on error
+ *
+ *  @note     url is internally copied.
+ *  @todo     Implement write mode.
+ */
+istream68_t * istream68_curl_create(const char * url, int mode);
+
+/**@}*/
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* #define _FILE68_ISTREAM68_CURL_H_ */

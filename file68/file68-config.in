@@ -1,0 +1,117 @@
+#! /bin/sh
+#
+# @PACKAGE_NAME@-config for @PACKAGE_STRING@
+#
+# Copyright (C) 2007-2009 Benjamin Gerard <@PACKAGE_BUGREPORT@>
+#
+# $Id$
+#
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+libdir="@libdir@"
+includedir="@includedir@"
+pkgincludedir="${includedir}/sc68"
+datarootdir="@datarootdir@"
+datadir="@datadir@"
+pkgdatadir="${datadir}/sc68"
+
+defs="@PACKAGE_DEFS@"
+incs="-I${includedir}"
+cflags="@PACKAGE_CFLAGS@"
+cppflags="$defs $incs"
+ldflags="@PACKAGE_LDFLAGS@"
+libs="@PACKAGE_LIBS@"
+
+me="@PACKAGE_NAME@-config"
+
+while test $# -ge 1; do
+    case "$1" in
+	--help|--usage|-?)
+	    cat <<EOF
+Usage: ${me} [OPTION...]
+
+Options:
+  --exists            check module existence (pkg-config compatibility)
+  --help              output this message and exit
+  --version           output version and exit
+  --modversion        output version and exit (pkg-config compatibility)
+  --datadir           output data directory
+  --pkgdatadir        output data package directory
+  --includedir        output include directory
+  --pkgincludedir     output include package directory
+  --libs              link flags (-L & -l)
+  --libs-only-L       link flags (-L only)
+  --libs-only-l       link flags (-l only)
+  --cflags            pre-processor and compile flags
+
+Please report bugs to <@PACKAGE_BUGREPORT@>.
+EOF
+	    exit 1
+	    ;;
+	--exists)
+	    test "x$2" = "x@PACKAGE_NAME@"; exit $?;;
+	--package)
+	    echo "@PACKAGE_NAME@";;
+	--version|--modversion)
+	    echo "@VERSION@";;
+	--datadir)
+	    echo "${datadir}";;
+	--pkgdatadir)
+	    echo "${pkgdatadir}";;
+	--includedir)
+	    echo "${includedir}";;
+	--pkgincludedir)
+	    echo "${pkgincludedir}";;
+
+	# Linker
+	--libs-only-L|--libs-only-other)
+	    echo ${ldflags};;
+	--libs-only-l)
+	    echo ${libs};;
+	--libs)
+	    echo ${ldflags} ${libs};;
+
+	# compiler
+	--cflags-only-I)
+	    echo ${incs};;
+	--cflags-only-other)
+	    echo ${defs};;
+	--cflags)
+	    echo ${defs} ${incs} ${cflags};;
+	--cppflags)
+	    echo ${cppflags};;
+
+	# For pkg-config compatibility
+
+	--list-all)
+	    printf '%-27s %s\n' "@PACKAGE_NAME@" "@PACKAGE_DESC@"
+	    exit 0
+	    ;;
+
+	--errors-to-stdout) exec 1<&2;;
+	--silence-errors) exec 2>/dev/null;;
+	--print-errors);;
+	--short-errors);;
+	--debug);;
+	--atleast-version=*);;
+	--max-version=*);;
+	--exact-version=@VERSION@);;
+	--exact-version=*) exit 255;;
+	--atleast-pkgconfig-version=*);;
+	--variable=*);;
+	--define-variable=*);;
+	--uninstalled);;
+
+	--*)
+	    echo "${me}: unknown option `$1'" 1>&2
+	    exit 255
+	    ;;
+	*)
+	    echo "${me}: invalid argument `$1'" 1>&2
+	    exit 255
+	    ;;
+    esac
+    shift
+done
+exit 0
