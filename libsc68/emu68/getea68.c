@@ -1,0 +1,200 @@
+/**
+ * @ingroup   emu68_devel
+ * @file      getea68.c
+ * @author    Benjamin Gerard
+ * @date      1999/03/13
+ * @brief     Effective address calculation
+ * @version   $Id$
+ */
+
+/* Copyright (C) 1998-2007 Ben(jamin) Gerard */
+
+#include "getea68.h"
+#include "error68.h"
+#include "mem68.h"
+
+/* extern reg68_t reg68; */
+
+static addr68_t ea_error(emu68_t * const emu68, const int reg)
+{
+  /* BREAKPOINT68("invalid ea") */
+  return 0;
+}
+
+/* (AN) */
+static addr68_t ea_inAN(emu68_t * const emu68, const int reg)
+{
+  return REG68.a[reg];
+}
+
+/* (AN)+ */
+static addr68_t ea_inANpb(emu68_t * const emu68, const int reg)
+{
+  addr68_t addr = REG68.a[reg];
+  REG68.a[reg] += 1+(reg==7);
+  return addr;
+}
+
+static addr68_t ea_inANpw(emu68_t * const emu68, const int reg)
+{
+  addr68_t addr = REG68.a[reg];
+  REG68.a[reg] += 2;
+  return addr;
+}
+
+static addr68_t ea_inANpl(emu68_t * const emu68, const int reg)
+{
+  addr68_t addr = REG68.a[reg];
+  REG68.a[reg] += 4;
+  return addr;
+}
+
+/* -(AN) */
+static addr68_t ea_inmANb(emu68_t * const emu68, const int reg)
+{
+  return REG68.a[reg]-=1+(reg==7);
+}
+
+static addr68_t ea_inmANw(emu68_t * const emu68, const int reg)
+{
+  return REG68.a[reg]-=2;
+}
+
+static addr68_t ea_inmANl(emu68_t * const emu68, const int reg)
+{
+  return REG68.a[reg]-=4;
+}
+
+/* d(AN) */
+static addr68_t ea_indAN(emu68_t * const emu68, const int reg)
+{
+  return REG68.a[reg]+get_nextw();
+}
+
+/* d(AN,Xi) */
+static addr68_t ea_inANXI(emu68_t * const emu68, const int reg)
+{
+  int68_t w = get_nextw();
+  int68_t reg2;
+  reg2 = (w>>12)&15;
+  reg2 = (w&(1<<11)) ? (int68_t)REG68.d[reg2] : (int68_t)(s16)REG68.d[reg2];
+  return REG68.a[reg]+(s8)w+reg2;
+}
+
+/* ABS.W */
+static addr68_t ea_inABSW(emu68_t * const emu68, const int reg)
+{
+  return get_nextw();
+}
+
+/* ABS.L */
+static addr68_t ea_inABSL(emu68_t * const emu68, const int reg)
+{
+  return get_nextl();
+}
+
+/* d(PC) */
+static addr68_t ea_inrelPC(emu68_t * const emu68, const int reg)
+{
+  addr68_t pc = REG68.pc;
+  return pc+get_nextw();
+}
+
+/* d(PC,Xi) */
+static addr68_t ea_inPCXI(emu68_t * const emu68, const int reg)
+{
+  int68_t w = get_nextw();
+  int68_t reg2;
+  reg2 = (w>>12)&15;
+  reg2 = (w&(1<<11)) ? (int68_t)REG68.d[reg2] : (int68_t)(s16)REG68.d[reg2];
+  return REG68.pc+(s8)w+reg2-2;
+}
+
+/* # */
+static addr68_t ea_inIMMb(emu68_t * const emu68, const int reg)
+{
+  addr68_t pc = REG68.pc;
+  REG68.pc += 2;
+  return pc+1;
+}
+
+static addr68_t ea_inIMMw(emu68_t * const emu68, const int reg)
+{
+  addr68_t pc = REG68.pc;
+  REG68.pc += 2;
+  return pc;
+}
+
+static addr68_t ea_inIMMl(emu68_t * const emu68, const int reg)
+{
+  addr68_t pc = REG68.pc;
+  REG68.pc += 4;
+  return pc;
+}
+
+/***************************
+*                          *
+* Opmode tables for Get EA *
+*                          *
+***************************/
+
+/* Mode 7 tables */
+
+static addr68_t (* const ea_b7[8])(emu68_t * const, const int) =
+{
+  ea_inABSW, ea_inABSL, ea_inrelPC, ea_inPCXI,
+  ea_inIMMb, ea_error, ea_error, ea_error
+};
+
+static addr68_t (* const ea_w7[8])(emu68_t * const, const int) =
+{
+  ea_inABSW, ea_inABSL, ea_inrelPC, ea_inPCXI,
+  ea_inIMMw, ea_error, ea_error, ea_error
+};
+
+static addr68_t (* const ea_l7[8])(emu68_t * const, const int) =
+{
+  ea_inABSW, ea_inABSL, ea_inrelPC, ea_inPCXI,
+  ea_inIMMl, ea_error, ea_error, ea_error
+};
+
+/* Mode 7 redirect functions */
+
+static addr68_t ea_mode7b(emu68_t * const emu68, const int reg)
+{
+  return (ea_b7[reg])(emu68, reg);
+}
+
+static addr68_t ea_mode7w(emu68_t * const emu68, const int reg)
+{
+  return (ea_w7[reg])(emu68, reg);
+}
+
+static addr68_t ea_mode7l(emu68_t * const emu68, const int reg)
+{
+  return (ea_l7[reg])(emu68, reg);
+}
+
+/* Get EA tables */
+
+addr68_t (* const get_eab68[8])(emu68_t * const, const int) =
+{
+  ea_error, ea_error, ea_inAN, ea_inANpb,
+  ea_inmANb,ea_indAN,ea_inANXI,
+  ea_mode7b,
+};
+
+addr68_t (* const get_eaw68[8])(emu68_t * const, const int) =
+{
+  ea_error, ea_error, ea_inAN, ea_inANpw,
+  ea_inmANw,ea_indAN,ea_inANXI,
+  ea_mode7w,
+};
+
+addr68_t (* const get_eal68[8])(emu68_t * const, const int) =
+{
+  ea_error, ea_error, ea_inAN, ea_inANpl,
+  ea_inmANl,ea_indAN,ea_inANXI,
+  ea_mode7l,
+};
+

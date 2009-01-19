@@ -1,0 +1,24 @@
+                          ** libsc68 NEWS **
+
+2009-01-17
+
+	Release 3.0.0
+
+	Major changes in both API and internal codes.
+
+	This library appears in this release. It contains the former
+	io68, emu68 and api68 libraries from older sc68 releases. It
+	offers a simplier way to play an sc68 file within third party
+	applications.
+
+	The library reentrant is now *REENTRANT* aka (thread
+	safe). Pratically it means one can play several sc68 file at
+	the same time in the same program.
+
+	YM-2149 emulation rendering quality has been largely improved
+	by using lowpass and hipass filters.
+
+	It is now possible (let say easier) to use variant of an
+	emulator. For instance the YM-2149 could be rendered either
+	way by sc68 original emulator or by Antti Lankila's BLEP
+	(Bandlimited Step) synthesis emulator.
