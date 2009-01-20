@@ -1,0 +1,119 @@
+/* Configured types for sc68.
+ *
+ * $header$
+ *
+ */
+
+#ifndef _SC68_CONFIG_TYPE68_H_
+#define _SC68_CONFIG_TYPE68_H_
+
+#if defined(HAVE_CONFIG_H) && HAVE_CONFIG_H
+# include "config.h"
+#endif /* defined(HAVE_CONFIG_H) && HAVE_CONFIG_H /*
+
+#if defined(HAVE_STDINT_H) && HAVE_STDINT_H
+
+# ifndef TYPE_S8
+#  define TYPE_S8 int8_t
+# endif 
+# ifndef TYPE_U8
+#  define TYPE_U8 uint8_t
+# endif 
+
+# ifndef TYPE_S16
+#  define TYPE_S16 int16_t
+# endif 
+# ifndef TYPE_U16
+#  define TYPE_U16 uint16_t
+# endif 
+
+# ifndef TYPE_S32
+#  define TYPE_S32 int32_t
+# endif 
+# ifndef TYPE_U32
+#  define TYPE_U32 uint32_t
+# endif 
+
+# ifndef TYPE_S64
+#  define TYPE_S64 int64_t
+# endif 
+# ifndef TYPE_U64
+#  define TYPE_U64 uint64_t
+# endif 
+
+#endif /* #if defined(HAVE_STDINT_H) && HAVE_STDINT_H */
+
+/* Fallback */
+#ifndef NO_FALLBACK_CONFIG
+
+# ifndef SIZEOF_CHAR
+#  define SIZEOF_CHAR      sizeof(char)
+# endif
+
+# ifndef SIZEOF_SHORT
+#  define SIZEOF_SHORT     sizeof(short)
+# endif
+
+# ifndef SIZEOF_INT
+#  define SIZEOF_INT       sizeof(int)
+# endif
+
+# ifndef SIZEOF_LONG
+#  define SIZEOF_LONG      sizeof(long)
+# endif
+
+# ifndef SIZEOF_LONG_LONG
+#  define  SIZEOF_LONG_LONG sizeof(long long)
+# endif
+
+# ifndef TYPE_S8
+#  define TYPE_S8    signed char
+# endif
+
+# ifndef TYPE_U8
+#  define TYPE_U8  unsigned char
+# endif
+
+# ifndef TYPE_S16
+#  define TYPE_S16   signed short
+# endif
+
+# ifndef TYPE_U16
+#  define TYPE_U16 unsigned short
+# endif
+
+# ifndef TYPE_S32
+#  define TYPE_S32   signed int
+# endif
+
+# ifndef TYPE_U32
+#  define TYPE_U32 unsigned int
+# endif
+
+# ifndef TYPE_S64
+#  ifdef  _MSC_VER
+#   define TYPE_S64   signed __int64
+#  else
+#   define TYPE_S64   signed long long
+#  endif
+# endif
+
+# ifndef TYPE_U64
+#  ifdef  _MSC_VER
+#   define TYPE_U64 unsigned __int64
+#  else
+#   define TYPE_U64 unsigned long long
+#  endif
+# endif
+
+#endif /* #ifndef NO_FALLBACK_CONFIG */
+
+/* Everything MUST be define */
+#if ! defined(TYPE_U8)  || ! defined (TYPE_S8) ||\
+    ! defined(TYPE_U16) || ! defined (TYPE_S16) ||\
+    ! defined(TYPE_U32) || ! defined (TYPE_S32) ||\
+    ! defined(TYPE_U64) || ! defined (TYPE_S64)
+# error "Missing integer type configuration"
+#endif
+
+#endif /* #ifndef _SC68_CONFIG_TYPE68_H_ */

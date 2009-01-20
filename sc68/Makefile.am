@@ -1,0 +1,66 @@
+# ,----------------------------------------------------------------------.
+# |                                                                      |
+# |    sc68 -- Makefile.am -- Use with automake to produce Makefile.in   |
+# |                                                                      |
+# |                 (C) 2007-2009 Benjamin Gerard                        |
+# |          <benjihan -4t- users.sourceforge -d0t- net>                 |
+# |                                                                      |
+# `----------------------------------------------------------------------'
+# @configure_input@
+# $Id: Makefile.am,v 1.2 2007/01/12 09:28:14 benjihan Exp $
+
+SUBDIRS              = @subdirs@
+ACLOCAL_AMFLAGS      = -I m4 --install
+
+AM_CFLAGS            = @SC68_CFLAGS@ @BINSC68_CFLAGS@
+AM_CPPFLAGS          = @SC68_CPPFLAGS@ @BINSC68_CPPFLAGS@
+AM_LDFLAGS           = @SC68_LDFLAGS@ @BINSC68_LDFLAGS@
+
+
+# ,----------------------------------------------------------------------.
+# | Libtool program                                                      |
+# `----------------------------------------------------------------------'
+
+if SOURCE_SC68
+SC68_LA = $(sc68_dir)/libsc68.la
+@SET_MAKE@
+$(sc68_dir)/libsc68.la:
+        $(MAKE) -C $(sc68_dir) libsc68.la
+else
+SC68_LA =
+endif
+
+bin_PROGRAMS         = sc68
+sc68_SOURCES         = sc68.c
+sc68_LDADD           = $(SC68_LA)
+
+
+# ,----------------------------------------------------------------------.
+# | Documentation                                                        |
+# `----------------------------------------------------------------------'
+
+man_MANS             = sc68.1
+info_TEXINFOS        = sc68.texi
+sc68_TEXINFOS        = package.texi
+MAINTAINERCLEANFILES = \
+ $(srcdir)/sc68.info $(srcdir)/package.texi \
+ $(srcdir)/sc68.1 $(srcdir)/package.texi.in
+
+
+if MAINTAINER_MODE
+fail                 = { test -e '$@' && rm '$@'; test a = b; }
+
+$(srcdir)/package.texi: $(srcdir)/package.texi.in
+	$(SHELL) $(top_builddir)/config.status --file=$@:$<
+
+$(srcdir)/sc68.1: sc68.1.tpl $(srcdir)/sc68.texi
+	@texinfo2man@ $^ >$@ || $(fail)
+
+endif
+
+
+# ,----------------------------------------------------------------------.
+# | Extra distrib                                                        |
+# `----------------------------------------------------------------------'
+
+EXTRA_DIST = sc68.1 sc68.info package.texi
