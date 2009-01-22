@@ -20,12 +20,14 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
 SC68_PACKAGE([Motoral MC68000 macro assembler.])
 
+
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([
   as68-${VERSION}.ebuild:as68.ebuild.in
+  as68.1.tpl
   as68.spec
   Makefile])
 AC_OUTPUT

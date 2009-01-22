@@ -28,9 +28,9 @@ SC68_PACKAGE([ice depacker program and library.])
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([
-    unice68.spec
     unice68-${VERSION}.ebuild:unice68.ebuild.in
     unice68.1.tpl
+    unice68.spec
     Makefile])
 
 AC_OUTPUT

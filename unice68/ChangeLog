@@ -2,7 +2,7 @@
 
 	* unice68.vcproj: Removed deprecated old Visual C project files.
 
-2007-01-08  benjihan  <benjihan@doton>
+2007-01-08  benjihan
 
 	* cvs-prereq.sh: Linux env: building dll for mingw host works
 

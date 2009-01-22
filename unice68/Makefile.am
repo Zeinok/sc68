@@ -41,7 +41,7 @@ unice68_CPPFLAGS = @BINUNICE68_CPPFLAGS@ $(AM_CPPFLAGS)
 # | Installed headers                                                    |
 # `----------------------------------------------------------------------'
 
-include_HEADERS   = unice68.h
+include_HEADERS      = unice68.h
 
 
 # ,----------------------------------------------------------------------.

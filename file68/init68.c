@@ -61,7 +61,7 @@ static char * mygetenv(const char *name, int prefix)
   return 0;
 #else
   char tmp[256] = "SC68_";
-  prefix = prefix ? 5 : 0;
+  if (prefix) prefix = 5;
   opt2env(tmp+prefix,sizeof(tmp)-1-prefix,name);
   return getenv(tmp);
 #endif
@@ -435,7 +435,7 @@ int file68_init(char **argv, int argc)
     /* Get user path from HOME */
     if (!var_isset(var)) {
       const char path[] = "/.sc68";
-      const char * env = mygetenv("HOME",0);
+      const char * env = mygetenv("home",0);
       if(env && strlen(env)+sizeof(path) < sizeof(tmp)) {
 	strncpy(tmp,env,sizeof(tmp));
 	strcat68(tmp,path,sizeof(tmp));

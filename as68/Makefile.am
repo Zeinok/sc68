@@ -8,46 +8,44 @@
 # `----------------------------------------------------------------------'
 # $Id$
 
-ACLOCAL_AMFLAGS         = -I m4 --install
-AM_CFLAGS               = @AS68_CFLAGS@ @BINAS68_CFLAGS@
-AM_CPPFLAGS             = @AS68_CPPFLAGS@ @BINAS68_CPPFLAGS@
-AM_LDFLAGS              = @AS68_LDFLAGS@ @BINAS68_LDFLAGS@
+ACLOCAL_AMFLAGS      = -I m4 --install
+AM_CFLAGS            = @AS68_CFLAGS@ @BINAS68_CFLAGS@
+AM_CPPFLAGS          = @AS68_CPPFLAGS@ @BINAS68_CPPFLAGS@
+AM_LDFLAGS           = @AS68_LDFLAGS@ @BINAS68_LDFLAGS@
 
 # ,----------------------------------------------------------------------.
 # | Program                                                              |
 # `----------------------------------------------------------------------'
 
-mysources               = as68.c error.c expression.c opcode.c word.c
-myheaders               = as68.h error.h
+mysources            = as68.c error.c expression.c opcode.c word.c
+myheaders            = as68.h error.h
 
-bin_PROGRAMS            = as68
-as68_LDFLAGS            = $(AM_LDFLAGS)
-as68_SOURCES            = $(mysources) $(myheaders)
+bin_PROGRAMS         = as68
+as68_LDFLAGS         = $(AM_LDFLAGS)
+as68_SOURCES         = $(mysources) $(myheaders)
 
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-
-man_MANS                = as68.1
-info_TEXINFOS           = as68.texi
-as68_TEXINFOS           = package.texi
-MAINTAINERCLEANFILES    = \
- $(srcdir)/as68.1  $(srcdir)/as68.1.tpl\
- $(srcdir)/as68.info $(srcdir)/package.texi
+man_MANS             = as68.1
+info_TEXINFOS        = as68.texi
+as68_TEXINFOS        = package.texi
+MAINTAINERCLEANFILES = \
+ $(srcdir)/as68.info $(srcdir)/package.texi $(srcdir)/package.texi.in \
+ $(srcdir)/as68.1
 
 if MAINTAINER_MODE
-fail                    = { test -e '$@' && rm '$@'; test a = b; }
+
+fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
 $(srcdir)/package.texi: $(srcdir)/package.texi.in
 	$(SHELL) $(top_builddir)/config.status --file=$@:$<
 
-$(srcdir)/as68.1.tpl: $(srcdir)/as68.1.tpl.in
-	$(SHELL) $(top_builddir)/config.status --file=$@:$<
-
-$(srcdir)/as68.1: $(srcdir)/as68.1.tpl $(srcdir)/as68.texi
+$(srcdir)/as68.1: as68.1.tpl $(srcdir)/as68.texi
 	@texinfo2man@ $^ >$@ || $(fail)
+
 endif
 
 
@@ -57,5 +55,4 @@ endif
 
 EXTRA_DIST = \
 as68.1 as68.1.tpl as68.1.tpl.in \
-package.texi.in \
-as68-@PACKAGE_VERSION@.ebuild as68.spec
+package.texi.in

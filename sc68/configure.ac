@@ -14,7 +14,7 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
-AC_INIT([sc68],[20090117],[benjihan -4t- users.sourceforge -d0t- net])
+AC_INIT([sc68],[3.0.0],[benjihan -4t- users.sourceforge -d0t- net])
 AC_CONFIG_SRCDIR([sc68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
@@ -73,7 +73,7 @@ AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
 AC_MSG_NOTICE([|   debug-mode          : $enable_debug])
 AC_MSG_NOTICE([|   all-static-mode     : $enable_all_static])
-AC_MSG_NOTICE([*   libsc68             : $has_sc68 ($sc68_version)])
+AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
 AC_MSG_NOTICE([+-----------------------])
 
 dnl#
