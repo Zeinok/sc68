@@ -1,0 +1,240 @@
+texinfo \input @c -*-texinfo-*-
+
+@c %**start of header
+@setfilename info68.info
+@include package.texi
+@include version.texi
+@settitle @command{info68}: @value{DESCRIPTION}
+@finalout
+@c %**end of header
+
+@dircategory @value{INFOCAT}
+@direntry
+* info68: (info68).             @value{DESCRIPTION}.
+@end direntry
+
+@synindex cp ky
+@setchapternewpage odd
+
+@c !BEGIN INTRO
+@ifinfo
+This is Edition @value{EDITION} of @cite{The @command{info68} Manual},
+for @command{info68} version @value{VERSION}, last updated @value{UPDATED}.
+@c !END INTRO
+
+@c !BEGIN COPYING
+@*Copyright @copyright{} 1998-2009 Benjamin Gerard
+
+Permission is granted to make and distribute verbatim copies of
+this manual upon condition that the  provided the copyright notice
+and this permission notice are preserved on all copies.
+@c !END COPYING
+@end ifinfo
+
+@titlepage
+@title info68
+@subtitle 
+@sp 1
+@subtitle Edition @value{EDITION}, for @command{info68} version @value{VERSION} @value{UPDATED}
+@c !BEGIN AUTHORS
+@author Benjamin Gerard
+@c @value{BUGREPORT}
+@c !END AUTHORS
+@end titlepage
+@c @page
+
+@ifinfo
+@node Top, Info68 Program, (dir), (dir)
+@top @command{info68}: @value{DESCRIPTION}
+
+The @command{info68} is used to
+@c !BEGIN NAME
+display information on sc68 files.
+@c !END NAME
+
+@menu
+* Info68 Program::              The @command{info68} Program
+* Options Summary::             List of command line options
+* Track-List::                  Track-list syntax
+* Format string::               Format string definition
+* Examples::                    More concrete way to understand
+@end menu
+
+@center manual for info68 version @value{VERSION} edited on @value{UPDATED}
+
+@end ifinfo
+
+@node Info68 Program, Options Summary, Top, Top
+@section The @command{info68} Program
+
+@section Description
+@c !BEGIN DESCRIPTION
+@command{info68} is a program to display tags contained by sc68 files.  
+@c !END DESCRIPTION
+
+@c !BEGIN SYNOPSIS
+@section Synopsis
+@display
+@command{info68 [OPTION] [--] <URI> ([track-list] format)...}
+@command{info68 --help}
+@command{info68 --version}
+@end display
+@c !END SYNOPSIS
+
+@node Options Summary, Track-List, Info68 Program, Top
+@c !BEGIN OPTIONS
+@section Options Summary
+@table @samp
+@item @option{--}
+      Break option parsing
+@item @option{--help}
+@itemx @option{-h}
+      Display help message and exit.
+@item @option{--version}
+@itemx @option{-V}
+      Display build date and exit.
+@item @option{--output=<output-uri>}
+@itemx @option{-o <output-uri>}
+      Set output. Default is stdout. 
+@end table
+
+@include options68.texi
+
+@c !END OPTIONS
+
+@node Track-List, Format string, Options Summary, Top
+@c !BEGIN TRACKLIST
+@section Track-list
+track-list executes the next format string for all listed tracks one
+after another in the given order. Track number 0 in track-list is
+replaced by the last track number (equal to the number of track).
+
+@subsection Syntax
+
+@option{-DIGIT[[,DIGIT]|[-DIGIT]}
+
+@subsection Examples
+@table @samp
+@item @option{-1,5,4-6}
+will sequence tracks 1,5,4,5 and 6 in this order.
+@item @option{-1-0}
+will sequence all tracks in incremental order.
+@end table
+@c !END TRACKLIST
+
+@node Format string, Examples, Track-List, Top
+@c !BEGIN FORMAT
+@section Format string
+The format string is printed for all tracks listed by the track-list
+command (or the default track if track-list is omit). Special %-format
+commands may be inserted in the format string. These commands are
+composed of a percent (%) and a code character which defines the
+function of the %-command. There are 3 types of %-commands:
+@menu
+* Disk commands::               Print info about disk
+* Track commands::              Print info about current track
+* Misc commands::               Other commands
+@end menu
+
+@node Disk commands, Track commands, Format string, Format string
+@subsection Disk (album) commands
+
+The disk commands display information on the disk (album) such as
+album name, number of track, total play time ...
+
+@table @samp
+@item @option{%#}
+      number of tracks
+@item @option{%?}
+      default track
+@item @option{%N}
+      disk (album) name
+@item @option{%A}
+      default track author
+@item @option{%P}
+      default ripper name
+@item @option{%V}
+      default converter name
+@item @option{%C}
+      default track composer
+@item @option{%T}
+      disk total time in second
+@item @option{%Y}
+      disk total time in ``TT MM:SS'' format
+@item @option{%H}
+      all tracks ORed hardware flags
+@end table
+
+@node Track commands, Misc commands, Disk commands, Format string
+@subsection Track commands
+The track-commands print information according to the current
+track. The current track is the one being processed by the track-list
+command or the default track if no track-list has been specified.
+
+@table @samp
+@item @option{%$}
+      track number
+@item @option{%n}
+      track name
+@item @option{%a}
+      track author
+@item @option{%p}
+      ripper name
+@item @option{%v}
+      converter name
+@item @option{%r}
+      replay name
+@item @option{%f}
+      replay frequency (in hz)
+@item @option{%t}
+      track  time in second
+@item @option{%y}
+      track time in ``TT MM:SS'' format
+@item @option{%h}
+      track hardware flags [YSA], uppercase ON, lowercase OFF
+      Y:YM%2149 S:STE A:Amiga
+@item @option{%@@}
+      load address (hexadecimal)
+@end table
+
+@node Misc commands,  , Track commands, Format string
+@subsection Misc commands
+@table @samp
+@item @option{%L}
+      Display a newline character
+@item @option{%%}
+      Display a percent character
+@end table
+@c !END FORMAT
+
+@node Examples,  , Format string, Top
+@c !BEGIN EXAMPLES
+@section Examples
+@example
+info68 \
+ 'rsc68://music/Jochen Hippel (Mad Max)/0/Wings Of Death/' \
+ '-1,5,4-6' \
+ '> %&/%# %N - %a - %n%L'
+
+> 1/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #1
+> 5/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #5
+> 4/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #4
+> 5/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #5
+> 6/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #6
+@end example
+
+@c !END EXAMPLES
+
+@ignore
+@c !BEGIN SEEALSO
+The full documentation for @command{info68} is maintained as a Texinfo manual. If the @command{info} and @command{info68} programs are properly installed at your site, the command
+
+@command{info info68}
+
+should give you access to the complete manual.
+@c !END SEEALSO
+@end ignore
+
+@page
+@contents
+@bye
