@@ -17,7 +17,7 @@
 # ,----------------------------------------------------------------------.
 # |   io68 -- Makefile.am -- Use with automake to produce configure.in   | 
 # |                                                                      |
-# |                      (C) 2007 Benjamin Gerard                        |
+# |                 (C) 1998-2009 Benjamin Gerard                        |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
@@ -57,26 +57,25 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_arg_enable_allstatic.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/native_win32.m4 \
-	$(top_srcdir)/m4/platform_win32.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/platform_win32.m4 \
+	$(top_srcdir)/m4/sc68_package.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
+CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libio68_la_LIBADD =
-am__objects_1 = libio68_la-io68.lo libio68_la-mfp_io.lo \
-	libio68_la-mfpemul.lo libio68_la-mw_io.lo libio68_la-mwemul.lo \
-	libio68_la-paula_io.lo libio68_la-paulaemul.lo \
-	libio68_la-shifter_io.lo libio68_la-ym_io.lo \
-	libio68_la-ymemul.lo
+am__objects_1 = io68.lo mfp_io.lo mfpemul.lo mw_io.lo mwemul.lo \
+	paula_io.lo paulaemul.lo shifter_io.lo ym_io.lo ymemul.lo
 am__objects_2 =
 am_libio68_la_OBJECTS = $(am__objects_1) $(am__objects_2)
 libio68_la_OBJECTS = $(am_libio68_la_OBJECTS)
 libio68_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libio68_la_LDFLAGS) $(LDFLAGS) -o $@
-DEFAULT_INCLUDES = -I.@am__isrc@
-depcomp = $(SHELL) $(top_srcdir)/depcomp
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
+depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -101,6 +100,9 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BINLIBSC68_CFLAGS = @BINLIBSC68_CFLAGS@
+BINLIBSC68_CPPFLAGS = @BINLIBSC68_CPPFLAGS@
+BINLIBSC68_LDFLAGS = @BINLIBSC68_LDFLAGS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -126,13 +128,16 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBLIBSC68_CFLAGS = @LIBLIBSC68_CFLAGS@
+LIBLIBSC68_CPPFLAGS = @LIBLIBSC68_CPPFLAGS@
+LIBLIBSC68_LDFLAGS = @LIBLIBSC68_LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBSC68_CFLAGS = @LIBSC68_CFLAGS@
 LIBSC68_CPPFLAGS = @LIBSC68_CPPFLAGS@
-LIBSC68_LA_LDFLAGS = @LIBSC68_LA_LDFLAGS@
 LIBSC68_LDFLAGS = @LIBSC68_LDFLAGS@
 LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -148,10 +153,10 @@ OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_CFLAGS = @PACKAGE_CFLAGS@
-PACKAGE_DEFS = @PACKAGE_DEFS@
+PACKAGE_CPPFLAGS = @PACKAGE_CPPFLAGS@
 PACKAGE_DESC = @PACKAGE_DESC@
+PACKAGE_INFOCAT = @PACKAGE_INFOCAT@
 PACKAGE_LDFLAGS = @PACKAGE_LDFLAGS@
-PACKAGE_LIBS = @PACKAGE_LIBS@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_SHORTDESC = @PACKAGE_SHORTDESC@
 PACKAGE_STRING = @PACKAGE_STRING@
@@ -161,8 +166,6 @@ PACKAGE_VERNUM = @PACKAGE_VERNUM@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
-SC68_CFLAGS = @SC68_CFLAGS@
-SC68_CPPFLAGS = @SC68_CPPFLAGS@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -191,7 +194,14 @@ datarootdir = @datarootdir@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
+file68_abs = @file68_abs@
 file68_config = @file68_config@
+file68_def = @file68_def@
+file68_dir = @file68_dir@
+file68_inc = @file68_inc@
+file68_lib = @file68_lib@
+file68_src = @file68_src@
+help2man = @help2man@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -220,10 +230,14 @@ srcdir = @srcdir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+texinfo2man = @texinfo2man@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-ACLOCAL_AMFLAGS = -I ../../m4 --install
+ACLOCAL_AMFLAGS = -I ../m4 --install
+AM_CFLAGS = @LIBSC68_CFLAGS@ @LIBLIBSC68_CFLAGS@
+AM_CPPFLAGS = @LIBSC68_CPPFLAGS@ @LIBLIBSC68_CPPFLAGS@ $(SINC)
+SINC = -DSINCSTART -I$(top_srcdir) $(file68_inc) -DSINCEND
 mysources = \
  io68.c\
  mfp_io.c\
@@ -252,19 +266,19 @@ myheaders = \
  ymout1c5bit.h\
  ymoutorg.h
 
-myincludes = \
+srcextra = \
  ym_atarist_table.c\
  ym_linear_table.c
 
+myextra = $(srcextra)
 
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |
 # `----------------------------------------------------------------------'
 noinst_LTLIBRARIES = libio68.la
 libio68_la_SOURCES = $(mysources) $(myheaders)
-noinst_HEADERS = $(myincludes)
-libio68_la_CPPFLAGS = -I$(srcdir)/..
 libio68_la_LDFLAGS = -static -avoid-version -no-install
+noinst_HEADERS = $(myextra)
 all: all-am
 
 .SUFFIXES:
@@ -316,16 +330,16 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libio68_la-io68.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libio68_la-mfp_io.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libio68_la-mfpemul.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libio68_la-mw_io.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libio68_la-mwemul.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libio68_la-paula_io.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libio68_la-paulaemul.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libio68_la-shifter_io.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libio68_la-ym_io.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libio68_la-ymemul.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/io68.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfp_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mfpemul.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mw_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mwemul.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/paula_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/paulaemul.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shifter_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ym_io.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ymemul.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -347,76 +361,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
-
-libio68_la-io68.lo: io68.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libio68_la-io68.lo -MD -MP -MF $(DEPDIR)/libio68_la-io68.Tpo -c -o libio68_la-io68.lo `test -f 'io68.c' || echo '$(srcdir)/'`io68.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libio68_la-io68.Tpo $(DEPDIR)/libio68_la-io68.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='io68.c' object='libio68_la-io68.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libio68_la-io68.lo `test -f 'io68.c' || echo '$(srcdir)/'`io68.c
-
-libio68_la-mfp_io.lo: mfp_io.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libio68_la-mfp_io.lo -MD -MP -MF $(DEPDIR)/libio68_la-mfp_io.Tpo -c -o libio68_la-mfp_io.lo `test -f 'mfp_io.c' || echo '$(srcdir)/'`mfp_io.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libio68_la-mfp_io.Tpo $(DEPDIR)/libio68_la-mfp_io.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mfp_io.c' object='libio68_la-mfp_io.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libio68_la-mfp_io.lo `test -f 'mfp_io.c' || echo '$(srcdir)/'`mfp_io.c
-
-libio68_la-mfpemul.lo: mfpemul.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libio68_la-mfpemul.lo -MD -MP -MF $(DEPDIR)/libio68_la-mfpemul.Tpo -c -o libio68_la-mfpemul.lo `test -f 'mfpemul.c' || echo '$(srcdir)/'`mfpemul.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libio68_la-mfpemul.Tpo $(DEPDIR)/libio68_la-mfpemul.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mfpemul.c' object='libio68_la-mfpemul.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libio68_la-mfpemul.lo `test -f 'mfpemul.c' || echo '$(srcdir)/'`mfpemul.c
-
-libio68_la-mw_io.lo: mw_io.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libio68_la-mw_io.lo -MD -MP -MF $(DEPDIR)/libio68_la-mw_io.Tpo -c -o libio68_la-mw_io.lo `test -f 'mw_io.c' || echo '$(srcdir)/'`mw_io.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libio68_la-mw_io.Tpo $(DEPDIR)/libio68_la-mw_io.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mw_io.c' object='libio68_la-mw_io.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libio68_la-mw_io.lo `test -f 'mw_io.c' || echo '$(srcdir)/'`mw_io.c
-
-libio68_la-mwemul.lo: mwemul.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libio68_la-mwemul.lo -MD -MP -MF $(DEPDIR)/libio68_la-mwemul.Tpo -c -o libio68_la-mwemul.lo `test -f 'mwemul.c' || echo '$(srcdir)/'`mwemul.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libio68_la-mwemul.Tpo $(DEPDIR)/libio68_la-mwemul.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='mwemul.c' object='libio68_la-mwemul.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libio68_la-mwemul.lo `test -f 'mwemul.c' || echo '$(srcdir)/'`mwemul.c
-
-libio68_la-paula_io.lo: paula_io.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libio68_la-paula_io.lo -MD -MP -MF $(DEPDIR)/libio68_la-paula_io.Tpo -c -o libio68_la-paula_io.lo `test -f 'paula_io.c' || echo '$(srcdir)/'`paula_io.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libio68_la-paula_io.Tpo $(DEPDIR)/libio68_la-paula_io.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='paula_io.c' object='libio68_la-paula_io.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libio68_la-paula_io.lo `test -f 'paula_io.c' || echo '$(srcdir)/'`paula_io.c
-
-libio68_la-paulaemul.lo: paulaemul.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libio68_la-paulaemul.lo -MD -MP -MF $(DEPDIR)/libio68_la-paulaemul.Tpo -c -o libio68_la-paulaemul.lo `test -f 'paulaemul.c' || echo '$(srcdir)/'`paulaemul.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libio68_la-paulaemul.Tpo $(DEPDIR)/libio68_la-paulaemul.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='paulaemul.c' object='libio68_la-paulaemul.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libio68_la-paulaemul.lo `test -f 'paulaemul.c' || echo '$(srcdir)/'`paulaemul.c
-
-libio68_la-shifter_io.lo: shifter_io.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libio68_la-shifter_io.lo -MD -MP -MF $(DEPDIR)/libio68_la-shifter_io.Tpo -c -o libio68_la-shifter_io.lo `test -f 'shifter_io.c' || echo '$(srcdir)/'`shifter_io.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libio68_la-shifter_io.Tpo $(DEPDIR)/libio68_la-shifter_io.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='shifter_io.c' object='libio68_la-shifter_io.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libio68_la-shifter_io.lo `test -f 'shifter_io.c' || echo '$(srcdir)/'`shifter_io.c
-
-libio68_la-ym_io.lo: ym_io.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libio68_la-ym_io.lo -MD -MP -MF $(DEPDIR)/libio68_la-ym_io.Tpo -c -o libio68_la-ym_io.lo `test -f 'ym_io.c' || echo '$(srcdir)/'`ym_io.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libio68_la-ym_io.Tpo $(DEPDIR)/libio68_la-ym_io.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ym_io.c' object='libio68_la-ym_io.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libio68_la-ym_io.lo `test -f 'ym_io.c' || echo '$(srcdir)/'`ym_io.c
-
-libio68_la-ymemul.lo: ymemul.c
-@am__fastdepCC_TRUE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT libio68_la-ymemul.lo -MD -MP -MF $(DEPDIR)/libio68_la-ymemul.Tpo -c -o libio68_la-ymemul.lo `test -f 'ymemul.c' || echo '$(srcdir)/'`ymemul.c
-@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/libio68_la-ymemul.Tpo $(DEPDIR)/libio68_la-ymemul.Plo
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='ymemul.c' object='libio68_la-ymemul.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libio68_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libio68_la-ymemul.lo `test -f 'ymemul.c' || echo '$(srcdir)/'`ymemul.c
 
 mostlyclean-libtool:
 	-rm -f *.lo

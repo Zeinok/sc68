@@ -11,7 +11,7 @@ dnl#
 
 
 # ,----------------------------------------------------------------------.
-# | Autotools                                                            |
+# | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
 AC_INIT([unice68],[20090117],[benjihan -4t- users.sourcefourge -d0t- net])
@@ -19,8 +19,8 @@ AC_CONFIG_SRCDIR([unice68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
 SC68_PACKAGE([ice depacker program and library.])
-[LIBUNICE68_LDFLAGS="-version-info 2:0:0"]
 [LIBUNICE68_CPPFLAGS="-DUNICE68_EXPORT=1"]
+[LIBUNICE68_LDFLAGS="-version-info 2:0:0"]
 
 
 # ,----------------------------------------------------------------------.
@@ -28,10 +28,11 @@ SC68_PACKAGE([ice depacker program and library.])
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([
+    Makefile
     unice68-${VERSION}.ebuild:unice68.ebuild.in
     unice68.1.tpl
     unice68.spec
-    Makefile])
+  ])
 
 AC_OUTPUT
 

@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 
-/** @name      Memory stream
- *  @ingroup   file68_istream68
+/** @name     Memory stream
+ *  @ingroup  file68_istream68
  *
  *    Implements istream68_t for memory buffer.
  *

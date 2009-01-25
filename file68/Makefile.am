@@ -10,12 +10,13 @@
 
 SUBDIRS         = data68 @subdirs@
 ACLOCAL_AMFLAGS = -I m4 --install
+
 AM_CFLAGS       = @FILE68_CFLAGS@ @LIBFILE68_CFLAGS@
-AM_CPPFLAGS     = @FILE68_CPPFLAGS@ @LIBFILE68_CPPFLAGS@
+AM_CPPFLAGS     = @FILE68_CPPFLAGS@ @LIBFILE68_CPPFLAGS@ $(SINCS)
+AM_LDFLAGS      = @FILE68_LDFLAGS@ @LIBFILE68_LDFLAGS@
 
 sdir=.
-hdir=$(sdir)
-wdir=$(hdir)/sc68
+hdir=sc68
 
 mysources=\
  $(sdir)/alloc68.c\
@@ -65,34 +66,6 @@ myheaders=\
  $(hdir)/string68.h\
  $(hdir)/url68.h
 
-wrheaders=\
- $(wdir)/alloc68.h\
- $(wdir)/config_file68.h\
- $(wdir)/context68.h\
- $(wdir)/debugmsg68.h\
- $(wdir)/endian68.h\
- $(wdir)/error68.h\
- $(wdir)/file68.h\
- $(wdir)/file68_api.h\
- $(wdir)/gzip68.h\
- $(wdir)/ice68.h\
- $(wdir)/init68.h\
- $(wdir)/istream68.h\
- $(wdir)/istream68_ao.h\
- $(wdir)/istream68_curl.h\
- $(wdir)/istream68_def.h\
- $(wdir)/istream68_fd.h\
- $(wdir)/istream68_file.h\
- $(wdir)/istream68_mem.h\
- $(wdir)/istream68_null.h\
- $(wdir)/istream68_pa.h\
- $(wdir)/istream68_z.h\
- $(wdir)/registry68.h\
- $(wdir)/rsc68.h\
- $(wdir)/string68.h\
- $(wdir)/url68.h
-
-
 # ,----------------------------------------------------------------------.
 # | script binary                                                        |
 # `----------------------------------------------------------------------'
@@ -108,15 +81,15 @@ if SOURCE_UNICE68
 UNICE68_LA           = $(unice68_dir)/libunice68.la
 @SET_MAKE@
 $(unice68_dir)/libunice68.la:
-        $(MAKE) -C $(unice68_dir) libunice68.la
+	$(MAKE) -C $(unice68_dir) libunice68.la
 else
-UNICE68_LA =
+UNICE68_LA           =
 endif
+SINCS                = -I$(srcdir)/sc68 $(unice68_inc)
 
 
 lib_LTLIBRARIES      = libfile68.la
 libfile68_la_SOURCES = $(mysources) $(myheaders)
-libfile68_la_LDFLAGS = @LIBFILE68_LA_LDFLAGS@
 libfile68_la_LIBADD  = $(UNICE68_LA)
 
 
@@ -124,10 +97,8 @@ libfile68_la_LIBADD  = $(UNICE68_LA)
 # | Install headers                                                      |
 # `----------------------------------------------------------------------'
 
-noinst_HEADERS       = $(wrheaders)
 pkginclude_HEADERS   = $(myheaders)
 pkgincludedir        = $(includedir)/sc68
-
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |

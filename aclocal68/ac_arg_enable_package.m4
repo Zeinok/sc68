@@ -19,7 +19,8 @@ m4_define([REAL_ARG_ENABLE_PACKAGE],[
 		[],[enable_]$2[="$4"])
 	AS_CASE(["[$][enable_]$2"],
 	  [no|yes|check],[:],
-		[AC_MSG_ERROR([invalid value for --enable-$1 (use no/yes/check)])])
+		[AC_MSG_ERROR(
+				[invalid value ([$]enable_$2) for --enable-$1 (use no/yes/check)])])
 	$2_dir="[\$][srcdir/]$1"
 	AS_IF([test [$][enable_]$2 = no],[has_$2=no],[
 		AC_MSG_CHECKING([whether sub-package $1 exists])

@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 
-/** @defgroup   file68_rsc68  Resource files
- *  @ingroup    file68_lib
+/** @defgroup  file68_rsc68  Resource files
+ *  @ingroup   file68_lib
  *
  *    Provides resource access functions.
  *

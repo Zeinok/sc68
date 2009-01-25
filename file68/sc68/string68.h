@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_api
+ * @ingroup  file68_lib
  * @file     file68/string68.h
  * @author   Benjamin Gerard
  * @date     2003-08-11
@@ -15,15 +15,15 @@
 #define _FILE68_STRING68_H_
 
 #ifndef FILE68_API
-# include "file68_api.h"
+#include "file68_api.h"
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/** @defgroup   file68_string68  Strings
- *  @ingroup    file68_api
+/** @defgroup  file68_string68  Strings
+ *  @ingroup   file68_lib
  *
  *    Provides string manipulation functions.
  *

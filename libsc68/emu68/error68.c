@@ -1,13 +1,29 @@
-/**
- * @ingroup   emu68_devel
- * @file      error68.c
- * @author    Ben(jamin) Gerard
- * @date      1999/03/13
- * @brief     Error message handler
- * @version   $Id$
+/*
+ *                  emu68 - error message handler
+ *             Copyright (C) 2001-2009 Benjamin Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
+ *
+ * This  program is  free  software: you  can  redistribute it  and/or
+ * modify  it under the  terms of  the GNU  General Public  License as
+ * published by the Free Software  Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
+ * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * General Public License for more details.
+ *
+ * You should have  received a copy of the  GNU General Public License
+ * along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ * $Id$
+ *
  */
 
-/* Copyright (C) 1998-2007 Ben(jamin) Gerard */
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include <stdarg.h>
 #include <stdio.h>

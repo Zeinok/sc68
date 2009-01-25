@@ -6,7 +6,7 @@ dnl# Configuration script for sc68
 dnl#
 dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
 dnl#
-dnl# $Id: configure.ac,v 1.3 2007/01/12 09:43:07 benjihan Exp $
+dnl# $Id$
 dnl#
 
 
@@ -77,5 +77,5 @@ AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
 AC_MSG_NOTICE([+-----------------------])
 
 dnl#
-dnl# End of "$Id: configure.ac,v 1.1.1.1 2007/01/02 22:15:28 benjihan Exp $".
+dnl# End of "$Id$".
 dnl#

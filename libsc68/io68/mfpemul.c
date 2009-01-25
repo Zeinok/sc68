@@ -1,28 +1,34 @@
-/*                    sc68 - MFP 68901 emulator
- *             Copyright (C) 1999-2007 Benjamin Gerard
+/*
+ *                    sc68 - MFP 68901 emulator
+ *             Copyright (C) 2001-2009 Benjamin Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License as
- *  published by the Free Software Foundation; either version 2 of the
- *  License, or (at your option) any later version.
+ * This  program is  free  software: you  can  redistribute it  and/or
+ * modify  it under the  terms of  the GNU  General Public  License as
+ * published by the Free Software  Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
+ * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- *  02111-1307 USA
+ * You should have  received a copy of the  GNU General Public License
+ * along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
  *
- */ 
+ * $Id$
+ *
+ */
 
-/*$Id$*/
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
-#include <stdio.h> //$$$DEBUG
+/* #include <stdio.h> //$$$DEBUG */
 
 #include "mfpemul.h"
+#include <sc68/debugmsg68.h>
 
 #define cpp(V)      (V*prediv_width[(int)ptimer->tcr])
 #define timerfrq(V) ((8000000u*192u)/cpp(V))
@@ -31,7 +37,7 @@
 #define SEI             (mfp->map[0x17]&8)
 #define AEI             (!SEI)
 
-int mfp_feature = 0;
+int mfp_feature = debugmsg68_DEFAULT;
 
 /* Define for more accurate emulation (about pending bit...)
    $$$ May be broken $$$
@@ -143,14 +149,15 @@ static int timer_get_tdr(const char * tag,
 
   const uint68_t cti_verif = tdr * psw - psw + psr;
 
-  if (mfp_feature) fprintf(stderr,
-	  "timer-%c get TDR(%s) @%u cti:%u/%u cnt:%u psr:%u/%u => %u/%u\n",
-	  ptimer->def.letter, tag, bogoc,
-	  cti, cpp, cnt, psr, psw, tdr, ptimer->tdr_res);
-
+  debugmsg68(mfp_feature,
+	     "timer-%c get TDR(%s) @%u cti:%u/%u cnt:%u psr:%u/%u => %u/%u\n",
+	     ptimer->def.letter, tag, bogoc,
+	     cti, cpp, cnt, psr, psw, tdr, ptimer->tdr_res);
+  
   /* Verify */ 
   if (cti_verif != cti) {
-    if (mfp_feature) fprintf(stderr,"=> verify error (%u != %u)\n", cti_verif, cti);
+    debugmsg68(mfp_feature,
+	       "=> verify error (%u != %u)\n", cti_verif, cti);
   }
 
   return tdr;
@@ -175,7 +182,7 @@ void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
   const uint68_t  psw = prediv_width[ptimer->tcr]; /* cycles count-down   */
   const uint68_t  cnt = cti/psw;                   /* count-down          */
   const uint68_t  psr = cti % psw;
-  const uint68_t  psc = psw-psr;
+  /* const uint68_t  psc = psw-psr; */
 
   /* cnt%ptimer->tdr_res+1; no MODULO since TDR may have change and anyway
      cti was calculated with 1 timer cycle !!! */
@@ -184,9 +191,9 @@ void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
   
 
   if (bogoc > ptimer->cti) {
-    if (mfp_feature) fprintf(stderr,
-	    "Reconf timer-%c @%u > cti:%u !!!CYCLE OUT OF RANGE!!!\n",
-	    ptimer->def.letter, bogoc, ptimer->cti);
+    debugmsg68(mfp_feature,
+	       "Reconf timer-%c @%u > cti:%u !!!CYCLE OUT OF RANGE!!!\n",
+	       ptimer->def.letter, bogoc, ptimer->cti);
     ptimer->cti = bogoc + psw * ptimer->tdr_res;
   } else {
 
@@ -203,10 +210,11 @@ void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
 
   ptimer->tcr = tcr;
 
-  if (mfp_feature) fprintf(stderr, "Reconf timer-%c @%u cti:%u cpp:%u=> %d->%dhz\n", 
-	  ptimer->def.letter, bogoc,
-	  ptimer->cti, cpp(ptimer->tdr_res),
-	  frq,timerfrq(ptimer->tdr_res));
+  debugmsg68(mfp_feature,
+	     "Reconf timer-%c @%u cti:%u cpp:%u=> %d->%dhz\n", 
+	     ptimer->def.letter, bogoc,
+	     ptimer->cti, cpp(ptimer->tdr_res),
+	     frq,timerfrq(ptimer->tdr_res));
 }
 
 /* Stop a running timer: tcr !0->0
@@ -246,14 +254,14 @@ void resume_timer(mfp_timer_t * const ptimer, int tcr, bogoc68_t bogoc)
   ptimer->tcr = tcr;
   ptimer->cti = bogoc + ptimer->tdr_cur * prediv_width[tcr] - ptimer->psc;
   
-  if (mfp_feature) fprintf(stderr,
-	  "Resume timer-%c @%u cti:%u cpp:%u "
-	  "tdr:%u/%u psw:%u(%u) => %dhz\n", 
-	  ptimer->def.letter, bogoc, ptimer->cti,
-	  cpp(ptimer->tdr_res),
-	  (int)ptimer->tdr_cur,(int)ptimer->tdr_res,
-	  prediv_width[ptimer->tcr],ptimer->tcr,
-	  timerfrq(ptimer->tdr_res));
+  debugmsg68(mfp_feature,
+	     "Resume timer-%c @%u cti:%u cpp:%u "
+	     "tdr:%u/%u psw:%u(%u) => %dhz\n", 
+	     ptimer->def.letter, bogoc, ptimer->cti,
+	     cpp(ptimer->tdr_res),
+	     (int)ptimer->tdr_cur,(int)ptimer->tdr_res,
+	     prediv_width[ptimer->tcr],ptimer->tcr,
+	     timerfrq(ptimer->tdr_res));
 }
 
 /* Read timer data register:
@@ -286,7 +294,7 @@ int68_t mfp_get_tdr(mfp_t * const mfp, const int timer, const bogoc68_t bogoc)
    after a write can occur before the next MFP cycle in which case the
    current TDR (not the one written) is returned! Fortunatly we don't
    really need to emulate this since it is more a glitch than anything
-   a no one should have used it!
+   and no one should have used it!
 
    Motorola Datasheet: the TDRs contain the value of their respective
    main counter. This value was captured on the last low-to-high
@@ -310,18 +318,19 @@ void mfp_put_tdr(mfp_t * const mfp, int timer, int v, bogoc68_t bogoc)
 
   if (!ptimer->tcr) {
     ptimer->tdr_cur = v;
-    if (mfp_feature) fprintf(stderr, "Reload timer-%c TDR @%u => %u\n",
-	    ptimer->def.letter, bogoc, ptimer->tdr_res);
+    debugmsg68(mfp_feature,
+	       "Reload timer-%c TDR @%u => %u\n",
+	       ptimer->def.letter, bogoc, ptimer->tdr_res);
   } else if (ptimer->tcr && v != old_tdr) {
     uint68_t old_frq = timerfrq(old_tdr);
-    if (mfp_feature) fprintf(stderr,
-	    "Change timer-%c @%u cti:%u psw:%u(%u) cpp:%u"
-	    " => %u(%u)->%u(%u)hz\n",
-	    ptimer->def.letter, bogoc, ptimer->cti,
-	    prediv_width[ptimer->tcr], ptimer->tcr,
-	    cpp(ptimer->tdr_res),
-	    old_frq,old_tdr,
-	    timerfrq(ptimer->tdr_res), ptimer->tdr_res);
+    debugmsg68(mfp_feature,
+	       "Change timer-%c @%u cti:%u psw:%u(%u) cpp:%u"
+	       " => %u(%u)->%u(%u)hz\n",
+	       ptimer->def.letter, bogoc, ptimer->cti,
+	       prediv_width[ptimer->tcr], ptimer->tcr,
+	       cpp(ptimer->tdr_res),
+	       old_frq,old_tdr,
+	       timerfrq(ptimer->tdr_res), ptimer->tdr_res);
   }
 }
 
@@ -360,8 +369,9 @@ void mfp_put_tcr(mfp_t * const mfp, int timer, int v, const bogoc68_t bogoc)
     mfp->map[0x19+2*timer] = v;
     /* $$$ Event mode + Pulse mode not emulate */
     if (v&0x10) {
-      if (mfp_feature) fprintf(stderr,"timer-%c: mode(%02x) not supported\n",
-	      timer_def[timer].letter,(int)(u8)v);
+        debugmsg68(mfp_feature,
+		   "timer-%c: mode(%02x) not supported\n",
+		   timer_def[timer].letter,(int)(u8)v);
     }
     mfp_put_tcr_bogo(mfp->timers+timer, v&7, bogoc);
   } else {
@@ -462,8 +472,9 @@ void mfp_adjust_bogoc(mfp_t * const mfp, const bogoc68_t bogoc)
   for (ptimer = mfp->timers; ptimer != mfp->timers+4; ++ptimer) {
     if (ptimer->tcr) {
       if (ptimer->cti < bogoc) {
-	if (mfp_feature) fprintf(stderr, "Adjust timer-%c cti:%u cycle:%u",
-		ptimer->def.letter,ptimer->cti, bogoc);
+	debugmsg68(mfp_feature,
+		   "Adjust timer-%c cti:%u cycle:%u",
+		   ptimer->def.letter,ptimer->cti, bogoc);
       }
       while (ptimer->cti < bogoc) {
 	/* $$$ !!! SHOULD NOT HAPPEN !!! */
@@ -471,7 +482,8 @@ void mfp_adjust_bogoc(mfp_t * const mfp, const bogoc68_t bogoc)
 	ptimer->cti += cpp(ptimer->tdr_res);
       }
       if (ptimer->int_lost) {
-	if (mfp_feature) fprintf(stderr, " ->%d lost\n",ptimer->int_lost);
+	debugmsg68(mfp_feature,
+		   " ->%d lost\n",ptimer->int_lost);
 	ptimer->int_lost = 0;
       }
       ptimer->cti -= bogoc;
@@ -562,9 +574,12 @@ void mfp_cleanup(mfp_t * const mfp)
 
 int mfp_init(void)
 {
+  mfp_feature = debugmsg68_feature("mfp","MFP-68901 emulator",debugmsg68_DEFAULT);
   return 0;
 }
 
 void mfp_shutdown(void)
 {
+  debugmsg68_feature_free(mfp_feature);
+  mfp_feature = debugmsg68_DEFAULT;
 }

@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 
-/** @name cURL stream
- *  @ingroup file68_istream68
+/** @name     cURL stream
+ *  @ingroup  file68_istream68
  *
  *  @anchor cURL
  *

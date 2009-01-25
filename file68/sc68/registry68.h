@@ -22,8 +22,8 @@
 extern "C" {
 #endif
 
-/** @defgroup   file68_registry68_devel  Registry
- *  @ingroup    file68_lib
+/** @defgroup  file68_registry68_devel  Registry
+ *  @ingroup   file68_lib
  *
  *    Provides registry access functions.
  *

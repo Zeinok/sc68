@@ -14,8 +14,6 @@
 #ifndef _TYPE68_H_
 #define _TYPE68_H_
 
-/* #include <config_type68.h> */
-
 #ifdef HAVE_STDINT_H
 # include <stdint.h>
 #endif

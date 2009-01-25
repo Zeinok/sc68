@@ -2,13 +2,12 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2007 Benjamin Gerard <benjihan 4t users.sourceforge d0t net>
+dnl# (C) 2007-2009 Benjamin Gerard
 dnl#
-dnl# Distribued under the term of the GPL
+dnl# Distributed under the term of the GPL
 dnl#
 dnl# $Id$
 dnl#
-
 
 # serial 20090116
 

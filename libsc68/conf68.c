@@ -33,12 +33,15 @@
 
 #include "conf68.h"
 
+/* file68 headers */
 #include <sc68/error68.h>
-#include <sc68/rsc68.h>
+#include <sc68/file68.h>
 #include <sc68/url68.h>
 #include <sc68/string68.h>
 #include <sc68/debugmsg68.h>
 #include <sc68/alloc68.h>
+
+/* standard headers */
 #include <stdio.h>
 #include <string.h>
 

@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 
-/** @name      Null stream
- *  @ingroup   file68_istream68
+/** @name     Null stream
+ *  @ingroup  file68_istream68
  *
  *    Implements a null istream68_t.
  *

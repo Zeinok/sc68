@@ -7,7 +7,7 @@
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# $Id: Makefile.am,v 1.2 2007/01/12 09:28:14 benjihan Exp $
+# $Id$
 
 SUBDIRS              = @subdirs@
 ACLOCAL_AMFLAGS      = -I m4 --install
@@ -25,7 +25,7 @@ if SOURCE_SC68
 SC68_LA = $(sc68_dir)/libsc68.la
 @SET_MAKE@
 $(sc68_dir)/libsc68.la:
-        $(MAKE) -C $(sc68_dir) libsc68.la
+	$(MAKE) -C $(sc68_dir) libsc68.la
 else
 SC68_LA =
 endif

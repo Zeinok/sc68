@@ -19,8 +19,8 @@
 extern "C" {
 #endif
 
-/** @defgroup   file68_alloc68  Dynamic memory management
- *  @ingroup    file68_lib
+/** @defgroup  file68_alloc68  Dynamic memory management
+ *  @ingroup   file68_lib
  *
  *    Provides dynamic memory management functions. All dynamically
  *    allocated buffer in the file68 library should use this set of

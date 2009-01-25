@@ -15,7 +15,7 @@
 #define _FILE68_ERROR68_H_
 
 #ifndef FILE68_API
-# include "file68_api.h"
+#include "file68_api.h"
 #endif
 #include <stdarg.h>
 
@@ -23,8 +23,8 @@
 extern "C" {
 #endif
 
-/** @defgroup   file68_error68  Error message
- *  @ingroup    file68_lib
+/** @defgroup  file68_error68  Error message
+ *  @ingroup   file68_lib
  *
  *    Provides error message facilities.
  *

@@ -24,8 +24,8 @@
 extern "C" {
 #endif
 
-/** @defgroup   file68_context68  Instance context (multi-thread support)
- *  @ingroup    file68_lib
+/** @defgroup  file68_context68  Instance context (multi-thread support)
+ *  @ingroup   file68_lib
  *
  *    Provides functions for handling file68 instance context. Basically
  *    each thread must have its own context instance unless the application

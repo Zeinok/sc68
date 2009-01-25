@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 
-/** @name      FILE stream
- *  @ingroup   file68_istream68
+/** @name     FILE stream
+ *  @ingroup  file68_istream68
  *
  *    Implements istream68_t for stdio.h FILE.
  *

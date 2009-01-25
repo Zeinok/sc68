@@ -1,22 +1,25 @@
 /*
- *                 sc68 - MicroWire - STE soundchip emulator
- *                  Copyright (C) 1999-2007 Benjamin Gerard
+ *            sc68 - MicroWire - STE soundchip emulator
+ *             Copyright (C) 2001-2009 Benjamin Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
- *  This program is free software; you can redistribute it and/or modify it
- *  under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
- *  option) any later version.
+ * This  program is  free  software: you  can  redistribute it  and/or
+ * modify  it under the  terms of  the GNU  General Public  License as
+ * published by the Free Software  Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
+ * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * General Public License for more details.
  *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * You should have  received a copy of the  GNU General Public License
+ * along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
  *
- */ 
+ * $Id$
+ *
+ */
 
 /** @todo
  *
@@ -27,6 +30,10 @@
  * - And in the YM emul, skip emulation !!! 
  *
  */
+
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #ifdef HAVE_CONFIG_OPTION68_H
 # include "config_option68.h"
@@ -285,6 +292,8 @@ int mw_setup(mw_t * const mw,
 int mw_init(mw_parms_t * const parms_data)
 {
   mw_parms_t * parms = parms_data ? parms_data : &default_parms;
+
+  //mw_feature = debugmsg68_feature("mw","ym-2149 emulator",debugmsg68_DEFAULT);
 
   /* Default emulation mode */
   if (parms->emul == MW_EMUL_DEFAULT) {

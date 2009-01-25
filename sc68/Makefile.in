@@ -265,6 +265,7 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 sbindir = @sbindir@
 sc68_config = @sc68_config@
+sc68_dir = @sc68_dir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 subdirs = @subdirs@
@@ -1106,7 +1107,7 @@ uninstall-man: uninstall-man1
 
 @SOURCE_SC68_TRUE@@SET_MAKE@
 @SOURCE_SC68_TRUE@$(sc68_dir)/libsc68.la:
-@SOURCE_SC68_TRUE@        $(MAKE) -C $(sc68_dir) libsc68.la
+@SOURCE_SC68_TRUE@	$(MAKE) -C $(sc68_dir) libsc68.la
 
 @MAINTAINER_MODE_TRUE@$(srcdir)/package.texi: $(srcdir)/package.texi.in
 @MAINTAINER_MODE_TRUE@	$(SHELL) $(top_builddir)/config.status --file=$@:$<

@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 
-/** @name      Z stream
- *  @ingroup   file68_istream68
+/** @name     Z stream
+ *  @ingroup  file68_istream68
  *
  *  @anchor zlib
  *

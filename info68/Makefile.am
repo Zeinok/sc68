@@ -9,9 +9,12 @@
 # $Id$
 # @configure_input@
 
-BN              = info68
-ACLOCAL_AMFLAGS = -I m4 --install
-SUBDIRS         = @subdirs@
+SUBDIRS              = @subdirs@
+ACLOCAL_AMFLAGS      = -I m4 --install
+
+AM_CFLAGS            = @INFO68_CFLAGS@ @BININFO68_CFLAGS@
+AM_CPPFLAGS          = @INFO68_CPPFLAGS@ @BININFO68_CPPFLAGS@ $(SINCS)
+AM_LDFLAGS           = @INFO68_LDFLAGS@ @BININFO68_LDFLAGS@
 
 
 # ,----------------------------------------------------------------------.
@@ -22,36 +25,39 @@ if SOURCE_FILE68
 FILE68_LA = $(file68_dir)/libfile68.la
 @SET_MAKE@
 $(file68_dir)/libfile68.la:
-        $(MAKE) -C $(file68_dir) libfile68.la
+	$(MAKE) -C $(file68_dir) libfile68.la
 else
-FILE68_LA =
+FILE68_LA            =
 endif
+SINCS                = $(file68_inc)
 
-AM_CFLAGS      = @INFO68_CFLAGS@
-AM_CPPFLAGS    = @INFO68_CPPFLAGS@
-
-bin_PROGRAMS   = info68
-info68_SOURCES = info68.c
-info68_LDFLAGS = @INFO68_LA_LDFLAGS@ @INFO68_LDFLAGS@
-info68_LDADD   = $(FILE68_LA)
-noinst_HEADERS = info68_doc.h
+bin_PROGRAMS         = info68
+info68_SOURCES       = info68.c
+info68_LDADD         = $(FILE68_LA) $(DESA68_LA)
+noinst_HEADERS       = info68_doc.h
 
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-man_MANS        = $(BN).1
-info_TEXINFOS   = $(BN).texi
-info68_TEXINFOS	= package.texi options68.texi
+man_MANS             = info68.1
+info_TEXINFOS        = info68.texi
+info68_TEXINFOS      = package.texi
+MAINTAINERCLEANFILES = \
+ $(srcdir)/info68.info $(srcdir)/package.texi \
+ $(srcdir)/info68.1 $(srcdir)/package.texi.in
 
-EXTRA_DOC       = $(BN).1 $(BN).info
-MAINTAINERCLEANFILES =\
- $(srcdir)/$(BN).1 $(srcdir)/$(BN).info
 
 if MAINTAINER_MODE
-$(srcdir)/$(BN).1: $(BN).1.tpl $(srcdir)/$(BN).texi $(srcdir)/Makefile.am
-	if ! @texinfo2man@ $(BN).1.tpl $(srcdir)/$(BN).texi>$@; then rm -f $@; exit 255; fi
+fail                 = { test -e '$@' && rm '$@'; test a = b; }
+
+$(srcdir)/package.texi: $(srcdir)/package.texi.in
+	$(SHELL) $(top_builddir)/config.status --file=$@:$<
+
+$(srcdir)/info68.1: info68.1.tpl $(srcdir)/info68.texi
+	@texinfo2man@ $^ >$@ || $(fail)
+
 endif
 
 
@@ -59,7 +65,4 @@ endif
 # | Extra distrib                                                        |
 # `----------------------------------------------------------------------'
 
-EXTRA_DIST =\
- $(EXTRA_DOC)\
- $(PACKAGE)-$(PACKAGE_VERSION).ebuild\
- $(PACKAGE).spec
+EXTRA_DIST = info68.1 info68.info package.texi

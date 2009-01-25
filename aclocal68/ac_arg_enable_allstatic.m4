@@ -4,7 +4,7 @@ dnl# autoconf macros
 dnl#
 dnl# (C) 2007 Benjamin Gerard <benjihan 4t users.sourceforge d0t net>
 dnl#
-dnl# Distribued under the term of the GPL
+dnl# Distributed under the term of the GPL
 dnl#
 dnl# $Id$
 dnl#
@@ -31,10 +31,8 @@ AC_DEFUN_ONCE([AC_ARG_ENABLE_ALLSTATIC],
 	AS_IF([test "AC_PACKAGE_NAME" = "$ac_eopt"],[enable_all_static=yes])
       done
     ])
-  AS_IF([test "x${enable_all_static-no}" = "xyes" ],[
-      $1],[
-      enable_all_static=no
-      $2])
+  AS_IF([test "x${enable_all_static-no}" = "xyes" ],[$1],
+    [enable_all_static=no;$2])
 ])
 
 dnl# ----------------------------------------------------------------------

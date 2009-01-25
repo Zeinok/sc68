@@ -4,7 +4,9 @@
  * @author    Benjamin Gerard
  * @date      13/03/1999
  * @brief     Struture definitions.
- * @version   $Id$
+ * 
+ * $Id$
+ *
  */
 
 /* Copyright (C) 1998-2007 Benjamin Gerard */

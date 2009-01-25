@@ -1,13 +1,16 @@
 # ,----------------------------------------------------------------------.
-# |   emu68 -- Makefile.am -- Use with automake to produce configure.in  | 
+# |  emu68 -- Makefile.am -- Use with automake to produce configure.in   | 
 # |                                                                      |
-# |                  (C) 1998-2007 Benjamin Gerard                       |
+# |                 (C) 1998-2009 Benjamin Gerard                        |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# $Id: Makefile.am,v 1.2 2007/01/12 09:28:14 benjihan Exp $
+# $Id$
 
-ACLOCAL_AMFLAGS=-I ../../m4 --install
+ACLOCAL_AMFLAGS    = -I ../m4 --install
+AM_CFLAGS          = @LIBSC68_CFLAGS@ @LIBLIBSC68_CFLAGS@
+AM_CPPFLAGS        = @LIBSC68_CPPFLAGS@ @LIBLIBSC68_CPPFLAGS@ $(SINC)
+SINC               = -DSINCSTART -I$(top_srcdir) $(file68_inc) -DSINCEND 
 
 mysources=\
  cc68.c\
@@ -37,9 +40,6 @@ myheaders=\
  struct68.h\
  type68.h
 
-# emu68debug.vcproj
-# emu68.vcproj
-
 srcextra=\
  lines/line0.c lines/line1.c lines/line2.c lines/line3.c\
  lines/line4.c lines/line5.c lines/line6.c lines/line7.c\
@@ -48,6 +48,7 @@ srcextra=\
  lines/table.c
 myextra=$(srcextra)
 
+
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |
 # `----------------------------------------------------------------------'
@@ -55,10 +56,4 @@ myextra=$(srcextra)
 noinst_LTLIBRARIES  = libemu68.la
 libemu68_la_SOURCES = ${mysources} ${myheaders}
 libemu68_la_LDFLAGS = -static -avoid-version -no-install
-
-
-# ,----------------------------------------------------------------------.
-# | Extra dist                                                           |
-# `----------------------------------------------------------------------'
-
-EXTRA_DIST = $(myextra)
+noinst_HEADERS      = $(myextra)

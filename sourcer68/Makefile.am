@@ -13,7 +13,7 @@ SUBDIRS              = @subdirs@
 ACLOCAL_AMFLAGS      = -I m4 --install
 
 AM_CFLAGS            = @SOURCER68_CFLAGS@ @BINSOURCER68_CFLAGS@
-AM_CPPFLAGS          = @SOURCER68_CPPFLAGS@ @BINSOURCER68_CPPFLAGS@
+AM_CPPFLAGS          = @SOURCER68_CPPFLAGS@ @BINSOURCER68_CPPFLAGS@ $(SINCS)
 AM_LDFLAGS           = @SOURCER68_LDFLAGS@ @BINSOURCER68_LDFLAGS@
 
 
@@ -25,7 +25,7 @@ if SOURCE_DESA68
 DESA68_LA  = $(desa68_dir)/libdesa68.la
 @SET_MAKE@
 $(desa68_dir)/libdesa68.la:
-        $(MAKE) -C $(desa68_dir) libdesa68.la
+	$(MAKE) -C $(desa68_dir) libdesa68.la
 else
 DESA68_LA  = 
 endif
@@ -34,10 +34,12 @@ if SOURCE_FILE68
 FILE68_LA = $(file68_dir)/libfile68.la
 @SET_MAKE@
 $(file68_dir)/libfile68.la:
-        $(MAKE) -C $(file68_dir) libfile68.la
+	$(MAKE) -C $(file68_dir) libfile68.la
 else
 FILE68_LA =
 endif
+
+SINCS = $(desa68_inc) $(file68_inc)
 
 bin_PROGRAMS          = sourcer68
 sourcer68_SOURCES     = sourcer68.c

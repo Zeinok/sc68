@@ -11,35 +11,22 @@ dnl#
 
 
 # ,----------------------------------------------------------------------.
-# | Autotools                                                            |
+# | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
-AC_INIT([file68],[3.0.0],[benjihan -4t- users.sourceforge -d0t- net])
+AC_INIT([file68],[3.0.0],[benjihan -4t- users.sourcefourge -d0t- net])
 AC_CONFIG_SRCDIR([file68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
 AC_CONFIG_HEADERS([config.h])
-AM_MAINTAINER_MODE
+SC68_PACKAGE([sc68 file library.])
+[LIBFILE68_CPPFLAGS="-DFILE68_EXPORT=1"]
+[LIBFILE68_LDFLAGS="-version-info 2:0:0"]
 
-# ,----------------------------------------------------------------------.
-# | Package                                                              |
-# `----------------------------------------------------------------------'
-
-AC_PACKAGE_INFO(
-  [Library for using sc68 file. This is part of the sc68 project.],
-  [http://sc68.atari.org])
-[FILE68_CFLAGS=""]
-[FILE68_CPPFLAGS=""]
-[LIBFILE68_CFLAGS=""]
-[LIBFILE68_CPPFLAGS="-DFILE68_EXPORT"]
-[LIBFILE68_LA_LDFLAGS="-version-info 2:0:0"]
-[LIBFILE68_LDFLAGS=""]
 
 # ,----------------------------------------------------------------------.
 # | Optional Packages                                                    |
 # `----------------------------------------------------------------------'
-
-AC_WITH_PACKAGE([unice68],[no])
 
 AC_ARG_WITH(
   [zlib],
@@ -55,76 +42,8 @@ AC_ARG_WITH(
 
 
 # ,----------------------------------------------------------------------.
-# | Guess win32 platform                                                 |
-# `----------------------------------------------------------------------'
-
-AC_SYS_PLATFORM_WIN32
-AC_SYS_NATIVE_WIN32
-
-
-# ,----------------------------------------------------------------------.
-# | Compiler and companions                                              |
-# `----------------------------------------------------------------------'
-
-AC_PROG_CC
-AM_PROG_CC_STDC
-AC_PROG_INSTALL
-AC_LIBTOOL_WIN32_DLL
-AC_C_CONST
-AC_PROG_LIBTOOL
-AC_LANG([C])
-
-# ,----------------------------------------------------------------------.
-# | Additionnal binaries                                                 |
-# `----------------------------------------------------------------------'
-
-AC_PATH_PROG([pkgconfig],[pkg-config],[false])
-
-
-# ,----------------------------------------------------------------------.
-# | "C" Compiler specific                                                |
-# `----------------------------------------------------------------------'
-
-# Check for GCC visibility patch
-# ------------------------------
-AC_C_VISIBILITY_ATTRIBUT([has_visibility])
-AS_IF(
-  [test "x$has_visibility" = "xyes"],
-  [
-    AC_DEFINE([HAVE_VISIBILITY],[1],[Support visibility __attribute__])
-    AX_CHECK_COMPILER_FLAGS(
-      [-fvisibility=hidden],
-      [fvisibility=yes],
-      [fvisibility=no])
-    AS_IF([test "x$fvisibility" = "xyes"],
-      [LIBFILE68_CFLAGS="$LIBFILE68_CFLAGS -fvisibility=hidden"])])
-
-# Check for __dllspec
-# -------------------
-AC_PROG_CC_DECLSPEC
-AS_IF([test "x$ac_cc_declspec" = "xyes"],
-  [AC_DEFINE([HAVE_DECLSPEC],[1],[Support __declspec()])])
-
-
-# Check some more (mostly GCC) switch
-# -----------------------------------
-AC_FOREACH([FLAG],
-  [-std=c99 -pedantic -Wall],
-  [AX_CHECK_COMPILER_FLAGS(FLAG,
-      [LIBFILE68_CFLAGS="$LIBFILE68_CFLAGS "]FLAG)])
-
-
-# ,----------------------------------------------------------------------.
 # | Optional Features                                                    |
 # `----------------------------------------------------------------------'
-
-AC_ARG_ENABLE_DEBUG([
-  AX_CHECK_COMPILER_FLAGS([-g],
-    [LIBFILE68_CFLAGS="$LIBFILE68_CFLAGS -g"])
-])
-
-AC_ARG_ENABLE_ALLSTATIC(
-  [LIBFILE68_LDFLAGS="-all-static $LIBFILE68_LDFLAGS"])
 
 AC_ARG_ENABLE(
   [file],
@@ -151,10 +70,11 @@ AC_ARG_ENABLE(
   [],[enable_reg="check"])
 
 
-
 # ,----------------------------------------------------------------------.
 # | External libraries                                                   |
 # `----------------------------------------------------------------------'
+
+AC_WITH_PACKAGE([unice68],[],[],[])
 
 bundle_libs="curl zlib libao"
 AC_ARG_WITH(
@@ -282,33 +202,6 @@ AS_IF([test "x${has_curl}" = "xyes"],
     [LIBS="$LIBS $($curlconfig --libs)" ])
   )
 
-# Unice68 support
-# ---------------
-# [has_unice68="no";unice68_version="n/a"]
-# AS_IF([test "x${with_unice68}" != "xno"],
-#   [
-#     AS_IF([test "x${with_unice68}" = "xcheck" && test -d "${srcdir}/../unice68"],
-#       [
-#         AC_CONFIG_SUBDIRS([../unice68])
-#         has_unice68="yes" unice68_version="bundle"
-#         LIBFILE68_CPPFLAGS="-I../unice68 ${LIBFILE68_CPPFLAGS}"
-#         ],
-#       [
-#         AC_PATH_PROG([unice68],["unice68"],["false"])
-#         AC_CHECK_HEADERS([unice68.h],
-#           [AC_SEARCH_LIBS(
-#               [unice68_depacker],
-# 	      [unice68],
-#               [unice68_version="$($unice68 --version||echo n/a)" has_unice68="yes"])
-#           ])
-#       ])
-#   ])
-# AM_CONDITIONAL([BUNDLE_UNICE68],[test "x${unice68_version}" = "xbundle"])
-# AS_IF([test "${with_unice68}x${has_unice68}" = "yesxno"],
-#   [AC_MSG_ERROR([unice68 library and/or header file not found])])
-# AS_IF([test "x${has_unice68}" = "xyes"],
-#   [AC_DEFINE([USE_UNICE68],[1],[unice68 support])])
-
 # Registry68 support
 # ------------------
 AS_IF([test "x${enable_reg}"  = "xcheck"],
@@ -360,40 +253,18 @@ AC_SUBST([sc68datadir])
 AC_CHECK_FUNCS([malloc free sleep usleep vsprintf vsnprintf getenv])
 
 
-# ,----------------------------------------------------------------------.
-# | Maintainer mode                                                      |
-# `----------------------------------------------------------------------'
-
-AS_IF([test "x${enable_maintainer_mode}" = "xyes"],[
-    AC_PATH_PROG([texinfo2man],[texinfo2man],[false])
-    AC_PATH_PROG([help2man],[help2man],[false])],
-  [help2man=false;texinfo2man=false])
-
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
-# Used by other programs to compile and to link against this package
-AC_SUBST([PACKAGE_CFLAGS])      # cflags only (no cpp)
-AC_SUBST([PACKAGE_DEFS])        # defines only 
-AC_SUBST([PACKAGE_LDFLAGS])     # ldflags (-L)
-AC_SUBST([PACKAGE_LIBS])        # libraries (-l)
-
-# Used to compile this package
-AC_SUBST([FILE68_CFLAGS])        # overall cflags
-AC_SUBST([FILE68_CPPFLAGS])      # overall cppflags
-AC_SUBST([LIBFILE68_CFLAGS])     # library build cflags
-AC_SUBST([LIBFILE68_CPPFLAGS])   # library build cppflags
-AC_SUBST([LIBFILE68_LA_LDFLAGS]) # libtool library build options
-AC_SUBST([LIBFILE68_LDFLAGS])    # dependant libraries
-
 AC_CONFIG_FILES([
-    file68.spec
     file68-${VERSION}.ebuild:file68.ebuild.in
     file68-config
+    file68.spec
     Makefile
     data68/Makefile])
+
 AC_OUTPUT
 
 

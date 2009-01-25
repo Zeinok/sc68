@@ -20,9 +20,6 @@ AM_LDFLAGS      = @DESA68_LDFLAGS@ @LIBDESA68_LDFLAGS@
 
 lib_LTLIBRARIES       = libdesa68.la
 libdesa68_la_SOURCES  = desa68.c
-libdesa68_la_LDFLAGS  = $(AM_LDFLAGS)
-libdesa68_la_CPPFLAGS = $(AM_CPPFLAGS)
-
 
 # ,----------------------------------------------------------------------.
 # | Installed headers                                                    |

@@ -1,7 +1,6 @@
 /*
- *               info68 - Get sc68 file information
- *
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *		  info68 - get sc68 file information
+ *	       Copyright (C) 2001-2009 Benjamin Gerard
  *	     <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free software:  you can  redistribute  it and/or
@@ -18,9 +17,9 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
+ * $Id$
+ *
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>

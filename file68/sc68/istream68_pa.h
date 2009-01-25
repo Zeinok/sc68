@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 
-/** @name      PortAudio stream
- *  @ingroup   file68_istream68
+/** @name     PortAudio stream
+ *  @ingroup  file68_istream68
  *
  *    Implements istream68_t for libportaudio (audio input/output).
  *

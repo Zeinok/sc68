@@ -1,6 +1,6 @@
 /**
- * @ingroup   api68_devel
- * @file      api68/conf68.h
+ * @ingroup   sc68_lib
+ * @file      conf68.h
  * @author    Benjamin Gerard
  * @date      1999/07/27
  * @brief     configuration file.
@@ -15,8 +15,8 @@
 extern "C" {
 #endif
 
-/** @defgroup  api68_conf  configuration file
- *  @ingroup   api68_devel
+/** @defgroup  sc68_conf  configuration file
+ *  @ingroup   sc68_lib
  *
  *  This module prodives functions to access sc68 configuration file.
  *

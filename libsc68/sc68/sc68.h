@@ -1,9 +1,9 @@
 /**
- * @ingroup   sc68_devel
+ * @ingroup   sc68_lib
  * @file      sc68/sc68.h
  * @author    Benjamin Gerard
  * @date      2003/08/07
- * @brief     sc68 API.
+ * @brief     sc68 header.
  *
  * $Id$
  */
@@ -38,8 +38,8 @@ extern "C" {
 typedef void (*sc68_error_t)();
 typedef void (*sc68_debug_t)();
 
-/** @defgroup  sc68_api  sc68 main API
- *  @ingroup   sc68_devel
+/** @defgroup  sc68_lib  sc68 library
+ *  @ingroup   api68
  *
  *  This API provides functions to use sc68 libraries efficiently.
  *

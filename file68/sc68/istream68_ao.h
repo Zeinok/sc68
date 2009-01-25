@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 
-/** @name      AO stream
- *  @ingroup   file68_istream68
+/** @name     AO stream
+ *  @ingroup  file68_istream68
  *
  *    Implements istream68_t for XIPH libao (audio output).
  *

@@ -20,8 +20,8 @@
 extern "C" {
 #endif
 
-/** @name      File descriptor stream
- *  @ingroup   file68_istream68
+/** @name     File descriptor stream
+ *  @ingroup  file68_istream68
  *
  *    Implements istream68_t for "unix like" file descriptor.
  *

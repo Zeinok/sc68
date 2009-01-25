@@ -15,13 +15,14 @@
 @SET_MAKE@
 
 # ,----------------------------------------------------------------------.
-# |   emu68 -- Makefile.am -- Use with automake to produce configure.in  | 
+# |  emu68 -- Makefile.am -- Use with automake to produce configure.in   | 
 # |                                                                      |
-# |                  (C) 1998-2007 Benjamin Gerard                       |
+# |                 (C) 1998-2009 Benjamin Gerard                        |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
 # $Id$
+
 
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
@@ -42,7 +43,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = emu68
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(noinst_HEADERS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_arg_enable_allstatic.m4 \
 	$(top_srcdir)/m4/ac_arg_enable_debug.m4 \
@@ -55,10 +57,12 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/ac_arg_enable_allstatic.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
 	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
 	$(top_srcdir)/m4/native_win32.m4 \
-	$(top_srcdir)/m4/platform_win32.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/platform_win32.m4 \
+	$(top_srcdir)/m4/sc68_package.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
+CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 libemu68_la_LIBADD =
@@ -73,8 +77,8 @@ libemu68_la_OBJECTS = $(am_libemu68_la_OBJECTS)
 libemu68_la_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libemu68_la_LDFLAGS) $(LDFLAGS) -o $@
-DEFAULT_INCLUDES = -I.@am__isrc@
-depcomp = $(SHELL) $(top_srcdir)/depcomp
+DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
+depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -87,6 +91,7 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libemu68_la_SOURCES)
 DIST_SOURCES = $(libemu68_la_SOURCES)
+HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -98,6 +103,9 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BINLIBSC68_CFLAGS = @BINLIBSC68_CFLAGS@
+BINLIBSC68_CPPFLAGS = @BINLIBSC68_CPPFLAGS@
+BINLIBSC68_LDFLAGS = @BINLIBSC68_LDFLAGS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -123,13 +131,16 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBLIBSC68_CFLAGS = @LIBLIBSC68_CFLAGS@
+LIBLIBSC68_CPPFLAGS = @LIBLIBSC68_CPPFLAGS@
+LIBLIBSC68_LDFLAGS = @LIBLIBSC68_LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBSC68_CFLAGS = @LIBSC68_CFLAGS@
 LIBSC68_CPPFLAGS = @LIBSC68_CPPFLAGS@
-LIBSC68_LA_LDFLAGS = @LIBSC68_LA_LDFLAGS@
 LIBSC68_LDFLAGS = @LIBSC68_LDFLAGS@
 LIBTOOL = @LIBTOOL@
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -145,10 +156,10 @@ OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_CFLAGS = @PACKAGE_CFLAGS@
-PACKAGE_DEFS = @PACKAGE_DEFS@
+PACKAGE_CPPFLAGS = @PACKAGE_CPPFLAGS@
 PACKAGE_DESC = @PACKAGE_DESC@
+PACKAGE_INFOCAT = @PACKAGE_INFOCAT@
 PACKAGE_LDFLAGS = @PACKAGE_LDFLAGS@
-PACKAGE_LIBS = @PACKAGE_LIBS@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_SHORTDESC = @PACKAGE_SHORTDESC@
 PACKAGE_STRING = @PACKAGE_STRING@
@@ -158,8 +169,6 @@ PACKAGE_VERNUM = @PACKAGE_VERNUM@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
-SC68_CFLAGS = @SC68_CFLAGS@
-SC68_CPPFLAGS = @SC68_CPPFLAGS@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -188,7 +197,14 @@ datarootdir = @datarootdir@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
+file68_abs = @file68_abs@
 file68_config = @file68_config@
+file68_def = @file68_def@
+file68_dir = @file68_dir@
+file68_inc = @file68_inc@
+file68_lib = @file68_lib@
+file68_src = @file68_src@
+help2man = @help2man@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -217,10 +233,14 @@ srcdir = @srcdir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+texinfo2man = @texinfo2man@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-ACLOCAL_AMFLAGS = -I ../../m4 --install
+ACLOCAL_AMFLAGS = -I ../m4 --install
+AM_CFLAGS = @LIBSC68_CFLAGS@ @LIBLIBSC68_CFLAGS@
+AM_CPPFLAGS = @LIBSC68_CPPFLAGS@ @LIBLIBSC68_CPPFLAGS@ $(SINC)
+SINC = -DSINCSTART -I$(top_srcdir) $(file68_inc) -DSINCEND 
 mysources = \
  cc68.c\
  emu68.c\
@@ -249,9 +269,6 @@ myheaders = \
  struct68.h\
  type68.h
 
-
-# emu68debug.vcproj
-# emu68.vcproj
 srcextra = \
  lines/line0.c lines/line1.c lines/line2.c lines/line3.c\
  lines/line4.c lines/line5.c lines/line6.c lines/line7.c\
@@ -267,11 +284,7 @@ myextra = $(srcextra)
 noinst_LTLIBRARIES = libemu68.la
 libemu68_la_SOURCES = ${mysources} ${myheaders}
 libemu68_la_LDFLAGS = -static -avoid-version -no-install
-
-# ,----------------------------------------------------------------------.
-# | Extra dist                                                           |
-# `----------------------------------------------------------------------'
-EXTRA_DIST = $(myextra)
+noinst_HEADERS = $(myextra)
 all: all-am
 
 .SUFFIXES:
@@ -450,7 +463,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 installdirs:
 install: install-am
 install-exec: install-exec-am

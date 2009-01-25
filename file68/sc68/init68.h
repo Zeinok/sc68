@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-/** @addtogroup   file68_lib
+/** @addtogroup  file68_lib
  *  @{
  */
 

@@ -32,8 +32,8 @@
 # include <io68/default_option68.h>
 #endif
 
-#include <sc68/file68_api.h>
-#include <sc68/istream68.h> /* Need this before api68/sc68.h */
+#include <sc68/istream68.h> /* Need istream68.h before api68/sc68.h */
+
 #include "sc68.h"
 
 #include "mixer68.h"
@@ -42,6 +42,7 @@
 #include "emu68/ioplug68.h"
 #include "io68/io68.h"
 
+/* file68 includes */
 #include <sc68/init68.h>
 #include <sc68/error68.h>
 #include <sc68/string68.h>
@@ -51,6 +52,7 @@
 #include <sc68/rsc68.h>
 #include <sc68/debugmsg68.h>
 
+/* stardard includes */
 #include <string.h>
 #include <stdio.h>
 

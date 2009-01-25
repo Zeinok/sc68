@@ -47,13 +47,15 @@ host_triplet = @host@
 bin_PROGRAMS = sourcer68$(EXEEXT)
 subdir = .
 DIST_COMMON = README $(am__configure_deps) $(noinst_HEADERS) \
-	$(sourcer68_TEXINFOS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/sourcer68.1.tpl.in \
-	$(srcdir)/sourcer68.ebuild.in $(srcdir)/sourcer68.spec.in \
-	$(srcdir)/stamp-vti $(srcdir)/version.texi \
-	$(top_srcdir)/configure AUTHORS COPYING ChangeLog INSTALL NEWS \
-	compile config.guess config.sub depcomp install-sh ltmain.sh \
-	mdate-sh missing texinfo.tex
+	$(sourcer68_TEXINFOS) $(srcdir)/../compile \
+	$(srcdir)/../config.guess $(srcdir)/../config.sub \
+	$(srcdir)/../depcomp $(srcdir)/../install-sh \
+	$(srcdir)/../ltmain.sh $(srcdir)/../missing \
+	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/sourcer68.1.tpl.in $(srcdir)/sourcer68.ebuild.in \
+	$(srcdir)/sourcer68.spec.in $(srcdir)/stamp-vti \
+	$(srcdir)/version.texi $(top_srcdir)/configure AUTHORS COPYING \
+	ChangeLog INSTALL NEWS mdate-sh texinfo.tex
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ac_arg_enable_allstatic.m4 \
 	$(top_srcdir)/m4/ac_arg_enable_debug.m4 \
@@ -85,7 +87,7 @@ sourcer68_OBJECTS = $(am_sourcer68_OBJECTS)
 @SOURCE_DESA68_TRUE@am__DEPENDENCIES_2 = $(desa68_dir)/libdesa68.la
 sourcer68_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_2)
 DEFAULT_INCLUDES = -I.@am__isrc@
-depcomp = $(SHELL) $(top_srcdir)/depcomp
+depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
@@ -242,11 +244,23 @@ build_vendor = @build_vendor@
 builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
+desa68_abs = @desa68_abs@
 desa68_config = @desa68_config@
+desa68_def = @desa68_def@
+desa68_dir = @desa68_dir@
+desa68_inc = @desa68_inc@
+desa68_lib = @desa68_lib@
+desa68_src = @desa68_src@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
+file68_abs = @file68_abs@
 file68_config = @file68_config@
+file68_def = @file68_def@
+file68_dir = @file68_dir@
+file68_inc = @file68_inc@
+file68_lib = @file68_lib@
+file68_src = @file68_src@
 help2man = @help2man@
 host = @host@
 host_alias = @host_alias@
@@ -283,7 +297,7 @@ top_srcdir = @top_srcdir@
 SUBDIRS = @subdirs@
 ACLOCAL_AMFLAGS = -I m4 --install
 AM_CFLAGS = @SOURCER68_CFLAGS@ @BINSOURCER68_CFLAGS@
-AM_CPPFLAGS = @SOURCER68_CPPFLAGS@ @BINSOURCER68_CPPFLAGS@
+AM_CPPFLAGS = @SOURCER68_CPPFLAGS@ @BINSOURCER68_CPPFLAGS@ $(SINCS)
 AM_LDFLAGS = @SOURCER68_LDFLAGS@ @BINSOURCER68_LDFLAGS@
 @SOURCE_DESA68_FALSE@DESA68_LA = 
 
@@ -293,6 +307,7 @@ AM_LDFLAGS = @SOURCER68_LDFLAGS@ @BINSOURCER68_LDFLAGS@
 @SOURCE_DESA68_TRUE@DESA68_LA = $(desa68_dir)/libdesa68.la
 @SOURCE_FILE68_FALSE@FILE68_LA = 
 @SOURCE_FILE68_TRUE@FILE68_LA = $(file68_dir)/libfile68.la
+SINCS = $(desa68_inc) $(file68_inc)
 sourcer68_SOURCES = sourcer68.c
 sourcer68_LDADD = $(FILE68_LA) $(DESA68_LA)
 noinst_HEADERS = sourcer68_doc.h
@@ -1117,10 +1132,10 @@ uninstall-man: uninstall-man1
 
 @SOURCE_DESA68_TRUE@@SET_MAKE@
 @SOURCE_DESA68_TRUE@$(desa68_dir)/libdesa68.la:
-@SOURCE_DESA68_TRUE@        $(MAKE) -C $(desa68_dir) libdesa68.la
+@SOURCE_DESA68_TRUE@	$(MAKE) -C $(desa68_dir) libdesa68.la
 @SOURCE_FILE68_TRUE@@SET_MAKE@
 @SOURCE_FILE68_TRUE@$(file68_dir)/libfile68.la:
-@SOURCE_FILE68_TRUE@        $(MAKE) -C $(file68_dir) libfile68.la
+@SOURCE_FILE68_TRUE@	$(MAKE) -C $(file68_dir) libfile68.la
 
 @MAINTAINER_MODE_TRUE@$(srcdir)/package.texi: $(srcdir)/package.texi.in
 @MAINTAINER_MODE_TRUE@	$(SHELL) $(top_builddir)/config.status --file=$@:$<

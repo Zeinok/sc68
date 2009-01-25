@@ -1,13 +1,16 @@
 # ,----------------------------------------------------------------------.
 # |   io68 -- Makefile.am -- Use with automake to produce configure.in   | 
 # |                                                                      |
-# |                      (C) 2007 Benjamin Gerard                        |
+# |                 (C) 1998-2009 Benjamin Gerard                        |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# $Id: Makefile.am,v 1.2 2007/01/12 09:28:14 benjihan Exp $
+# $Id$
 
-ACLOCAL_AMFLAGS=-I ../../m4 --install
+ACLOCAL_AMFLAGS    = -I ../m4 --install
+AM_CFLAGS          = @LIBSC68_CFLAGS@ @LIBLIBSC68_CFLAGS@
+AM_CPPFLAGS        = @LIBSC68_CPPFLAGS@ @LIBLIBSC68_CPPFLAGS@ $(SINC)
+SINC               = -DSINCSTART -I$(top_srcdir) $(file68_inc) -DSINCEND
 
 mysources=\
  io68.c\
@@ -37,9 +40,11 @@ myheaders=\
  ymout1c5bit.h\
  ymoutorg.h
 
-myincludes=\
+srcextra=\
  ym_atarist_table.c\
  ym_linear_table.c
+myextra=$(srcextra)
+
 
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |
@@ -47,7 +52,5 @@ myincludes=\
 
 noinst_LTLIBRARIES  = libio68.la
 libio68_la_SOURCES  = $(mysources) $(myheaders)
-noinst_HEADERS      = $(myincludes)
-
-libio68_la_CPPFLAGS = -I$(srcdir)/..
 libio68_la_LDFLAGS  = -static -avoid-version -no-install
+noinst_HEADERS      = $(myextra)

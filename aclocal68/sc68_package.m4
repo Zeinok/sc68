@@ -66,6 +66,30 @@ AC_DEFUN([SC68_PACKAGE],[
     # others
     AC_PROG_INSTALL
 
+    AC_ARG_WITH(
+      [src-includes],
+      [AS_HELP_STRING([--with-src-includes],
+          [include paths for source packages])],
+      [],[with_src_includes=""])
+
+    
+    [set -- $(echo $with_src_includes | sed 's/:/ /g')]
+    while test [$][#] -gt 0; do
+      idir="[$]1"
+      if test "x[$]{idir:0:1}x" != "x/x"; then
+        idir=$(test -d "$srcdir/[$]1" && cd "[$]srcdir/[$]1" && pwd)
+      fi
+      [echo " ++ add-include-dir ${idir}"]
+      if test -n "[$]{idir}" && test -d "${idir}"; then
+        CPPFLAGS="[$]CPPFLAGS -I[$]{idir}"
+      else
+        AC_MSG_WARN([$idir is not a valid include dir])
+      fi
+      shift
+    done
+    [echo " ++ CPPFLAGS=$CPPFLAGS"]
+    
+
 # ,----------------------------------------------------------------------.
 # | Maintainer mode                                                      |
 # `----------------------------------------------------------------------'
