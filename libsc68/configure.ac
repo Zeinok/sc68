@@ -53,7 +53,7 @@ AC_CHECK_FUNCS([malloc free vsprintf vsnprintf getenv])
 # | Required  libraries                                                  |
 # `----------------------------------------------------------------------'
 
-AC_WITH_PACKAGE([file68],[yes],[],[file68/file68.h])
+AC_WITH_PACKAGE([file68],[yes],[],[sc68/file68.h])
 
 
 # ,----------------------------------------------------------------------.

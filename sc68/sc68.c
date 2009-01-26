@@ -28,9 +28,9 @@
 #endif
 
 /* need this before sc68.h to have all features defined. */
-#include <file68/istream68.h>
-#include <file68/debugmsg68.h>
-#include <file68/init68.h>
+#include <sc68/istream68.h>
+#include <sc68/debugmsg68.h>
+#include <sc68/init68.h>
 
 /* sc68 includes */
 #include <sc68/sc68.h>

@@ -128,7 +128,8 @@ AS_IF([test "x${enable_info68}"    = "xyes"],
     AC_CONFIG_SUBDIRS([info68])
   ])
 
-AS_IF([test "x${enable_sourcer68}" = "xyes"],[
+AS_IF([test "x${enable_sourcer68}" = "xyes"],
+  [
     AC_CONFIG_SUBDIRS([sourcer68])
   ])
 
@@ -137,9 +138,10 @@ AS_IF([test "x${enable_libsc68}"   = "xyes"],
     AC_CONFIG_SUBDIRS([libsc68])
   ])
 
-# AS_IF([test "x${enable_sc68}"      = "xyes"],[
-#     AC_CONFIG_SUBDIRSinfo ([sc68])
-#   ])
+AS_IF([test "x${enable_sc68}"      = "xyes"],
+  [
+    AC_CONFIG_SUBDIRS([sc68])
+  ])
 
 # AS_IF([test "x${enable_debug68}"   = "xyes"],[
 #     AC_CONFIG_SUBDIRS([debug68])

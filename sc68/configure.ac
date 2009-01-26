@@ -47,8 +47,8 @@ AC_INCLUDES_DEFAULT
 # | External libraries                                                   |
 # `----------------------------------------------------------------------'
 
-AC_WITH_PACKAGE([sc68],[yes],[],[sc68/sc68.h])
-
+AC_WITH_PACKAGE([sc68],[yes],[sc68_version],[sc68/sc68.h],[libsc68])
+AC_WITH_PACKAGE_HEADER([file68],[yes],[sc68/file68.h])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
@@ -73,6 +73,7 @@ AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
 AC_MSG_NOTICE([|   debug-mode          : $enable_debug])
 AC_MSG_NOTICE([|   all-static-mode     : $enable_all_static])
+AC_MSG_NOTICE([|   file68 headers      : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
 AC_MSG_NOTICE([+-----------------------])
 

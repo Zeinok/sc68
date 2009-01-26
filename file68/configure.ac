@@ -74,7 +74,7 @@ AC_ARG_ENABLE(
 # | External libraries                                                   |
 # `----------------------------------------------------------------------'
 
-AC_WITH_PACKAGE([unice68],[],[],[])
+AC_WITH_PACKAGE([unice68])
 
 bundle_libs="curl zlib libao"
 AC_ARG_WITH(

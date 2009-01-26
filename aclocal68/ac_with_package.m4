@@ -30,10 +30,7 @@ m4_define([DUMP_WITH_PACKAGE_VARS],[
  --  $1_src=[$]$1_src
  --  $1_abs=[$]$1_abs
  --  $1_dir=[$]$1_dir
-
- -- CPPFLAGS=[$]CPPFLAGS
- -- LDFLAGS=[$]LDFLAGS
- -- LIBS=[$]LIBS
+ --  $1_dbn=[$]$1_dbn
 ======================================================================
 EOF
   ])
@@ -44,7 +41,7 @@ EOF
 # $1:var name
 m4_define([UNSET_WITH_PACKAGE_VARS],[
     unset $1_req $1_ver $1_fct $1_hdr $1_def $1_inc
-    unset $1_lib $1_ldf $1_src $1_abs $1_dir
+    unset $1_lib $1_ldf $1_src $1_abs $1_dir $1_dbn
   ])
 
 # COPY_WITH_PACKAGE_VARS
@@ -52,12 +49,12 @@ m4_define([UNSET_WITH_PACKAGE_VARS],[
 # $1:dst var name
 # $2:src var name
 m4_define([COPY_WITH_PACKAGE_VARS],[
-    $1_req="[$]$2_req";    $1_ver="[$]$2_ver"
-    $1_fct="[$]$2_fct";    $1_hdr="[$]$2_hdr"
-    $1_def="[$]$2_def";    $1_inc="[$]$2_inc"
-    $1_lib="[$]$2_lib";    $1_ldf="[$]$2_ldf"
-    $1_src="[$]$2_src";    $1_abs="[$]$2_abs"
-    $1_dir="[$]$2_dir"
+    $1_req="[$]$2_req"; $1_ver="[$]$2_ver"
+    $1_fct="[$]$2_fct"; $1_hdr="[$]$2_hdr"
+    $1_def="[$]$2_def"; $1_inc="[$]$2_inc"
+    $1_lib="[$]$2_lib"; $1_ldf="[$]$2_ldf"
+    $1_src="[$]$2_src"; $1_abs="[$]$2_abs"
+    $1_dir="[$]$2_dir"; $1_dbn="[$]$2_dbn"
   ])
 
 # RESET_WITH_PACKAGE_VARS
@@ -66,6 +63,7 @@ m4_define([COPY_WITH_PACKAGE_VARS],[
 # $2:required           (yes|no)
 # $3:function           (function to link)
 # $4:header             (header file to test)
+# $5:dirbasename
 m4_define([RESET_WITH_PACKAGE_VARS],
   [
     has_$1=no                   # package found ?
@@ -80,17 +78,21 @@ m4_define([RESET_WITH_PACKAGE_VARS],
     $1_dir=""                   # package build (rel. to build)
     $1_fct="m4_default([$3],[$1_version])" # fonction to search
     $1_hdr="m4_default([$4],[$1.h])"       # header to search
+    $1_dbn="m4_default([$5],[$1])"         # dir basename
+
+    DUMP_WITH_PACKAGE_VARS($1)
   ])
 
 
 # DO_WITH_PACKAGE
 # ---------------
-# $1:package var name  (pack_age)
-# $2:package name      (pack-age)
-# $3:package def name  (PACK_AGE)
+# $1:package_var_name  (pack_age)
+# $2:package-name:dirname
+# $3:PACKAGE_DEF_NAME  (PACK_AGE)
 # $4:required
-# $5:function
-# $6:header
+# $5:function ('-' =>  ignore; '+' => header only)
+# $6:header   ('-' =>  ignore)
+# $7:dirbasename
 m4_define([DO_WITH_PACKAGE],
   [
     # Declare with options 
@@ -104,58 +106,64 @@ m4_define([DO_WITH_PACKAGE],
     AS_IF([test "x[$][1]" = "xcheck"],
       [set -- bundle source system])
 
-    RESET_WITH_PACKAGE_VARS([$1],[$4],[$5],[$6])
+    RESET_WITH_PACKAGE_VARS([$1],[$4],[$5],[$6],[$7])
     while test [$]# -gt 0; do
       COPY_WITH_PACKAGE_VARS([_$1],[$1])
 
-      case "x[$]1" in
+      case "x-[$]1" in
         
         # YES or NO: no check; assume evrything is configured
-	xno | xyes) has_$1=[$]1; break;;
-
+	x-no | x-yes) has_$1="[$]1"; break
+          ;;
 
         # bundle: source package inside source tree; SRCDIR/PACKAGE
-	xbundle)
-	  AC_MSG_CHECKING([for bundled $2])
-	  if _$1_abs=[$](cd "[$]{srcdir}/$2" 2>/dev/null && pwd); then
-	    test -e "[$]{_$1_abs}/configure.gnu" ||
-	    test -e "[$]{_$1_abs}/configure"
-	    if test [$][?] -eq 0; then
-	      has_$1=yes
- 	      _$1_ver=bundle
-              _$1_src="[$]{srcdir}/$2"
-              _$1_dir="[$](top_builddir)/$2"
-	      _$1_inc='-I[$](top_srcdir)/$2'
-              AC_CONFIG_SUBDIRS([$1])
-	    fi
-	  fi
-	  AC_MSG_RESULT([$]{has_$1})
-	  ;;
-        
-        # source: source package in parent source tree
-        xsource)
-	  AC_MSG_CHECKING([for source $2])
-	  if _$1_abs=[$](cd "[$]{srcdir}/../$2" 2>/dev/null && pwd); then
-	    test -e "[$]{_$1_abs}/configure.gnu" ||
-	    test -e "[$]{_$1_abs}/configure"
-	    if test [$][?] -eq 0; then
-	      has_$1=yes
- 	      _$1_ver=source
-              _$1_src="[$]{srcdir}/../$2"
-              _$1_dir='[$](top_builddir)/../$2'
-	      _$1_inc='-I[$](top_srcdir)/../$2'
-	    fi
-	  fi
-	  AC_MSG_RESULT([$]{has_$1})
-	  ;;
+	x-bundle | x-source)
+  	  _$1_ver="[$]1"
+ 	  AC_MSG_CHECKING([for [$]_$1_ver $2])
+          _$1_src="[$]srcdir/../[$]_$1_dbn"
+          test "x-[$]_$1_ver" = "x-bundle" &&
+          _$1_src="[$]srcdir/[$]_$1_dbn"
 
+ 	  if ! _$1_abs=[$](cd "[$]_$1_src" 2>/dev/null && pwd); then
+            _$1_src=""
+          elif test -e "[$]_$1_abs/configure.gnu" ||
+              test -e "[$]_$1_abs/configure"; then
+            has_$1='maybe'
+            test "x[$]_$1_hdr" = "x-" && has_$1=yes
+            if test "x-[$]_$1_ver" = "x-bundle"; then
+              _$1_dir='[$](top_builddir)/$2'
+              _$1_src='[$](top_srcdir)/'"[$]_$1_dbn"
+            else
+              _$1_dir='[$](top_builddir)/../'"[$]_$1_dbn"
+              _$1_src='[$](top_srcdir)/../'"[$]_$1_dbn"
+            fi
+	    _$1_inc="-I[$]_$1_src"
+          fi
+
+ 	  AC_MSG_RESULT([$]has_$1)
+
+          if test "x-[$]has_$1" = "x-maybe"; then
+            ac_wp_CPPFLAGS="[$]CPPFLAGS"
+            CPPFLAGS="-I[$]_$1_abs"
+            AC_CHECK_HEADERS([[$]_$1_hdr],[has_$1=yes],[has_$1=no])
+            CPPFLAGS="[$]ac_wp_CPPFLAGS"
+          fi
+          
+          if test "x-[$]has_$1" = "x-yes" &&
+            test "x-[$]_$1_ver" = "x-bundle" &&
+            test "x[$]_$1_fct" != "x+"; then
+            AC_CONFIG_SUBDIRS([$1])
+          fi
+ 	  ;;
+        
         # system: installed package
-        xsystem)
+        x-system)
           AC_PATH_PROG([pkgconfig],["pkg-config"],["false"])
 	  AC_MSG_CHECKING([for pkg-config $2 module])
           AS_IF([$][pkgconfig --exists "$2"],[
-              _$1_lib=[$]([$]pkgconfig "$2" --libs-only-l)
-              _$1_ldf=[$]([$]pkgconfig "$2" --libs-only-L)
+              AS_IF([test "x[$]{_$1_fct}" != "x+"],[
+                  _$1_lib=[$]([$]pkgconfig "$2" --libs-only-l)
+                  _$1_ldf=[$]([$]pkgconfig "$2" --libs-only-L)])
               _$1_inc=[$]([$]pkgconfig "$2" --cflags-only-I)
               _$1_def=[$]([$]pkgconfig "$2" --cflags-only-other)
               _$1_ver=[$]([$]pkgconfig "$2" --modversion||echo installed)
@@ -163,30 +171,34 @@ m4_define([DO_WITH_PACKAGE],
               ],[
               AC_MSG_RESULT([no])
               AC_PATH_PROG([$1_config],["$2-config"],["false"])
-              _$1_lib=[$]([$]$1_config --libs-only-l)
-              _$1_ldf=[$]([$]$1_config --libs-only-L)
+              AS_IF([test "x[$]{_$1_fct}" != "x+"],[
+                  _$1_lib=[$]([$]$1_config --libs-only-l)
+                  _$1_ldf=[$]([$]$1_config --libs-only-L)])
 #               _$1_inc=[$]([$]$1_config --cflags-only-I)
 #               _$1_def=[$]([$]$1_config --cflags-only-other)
               _$1_inc=[$]([$]$1_config --pkgincludedir)
               _$1_ver=[$]([$]$1_config --version||echo installed)
             ])
-
-          AS_IF([test "x[$]_$1_hdr" != "x-"],
-            [AC_CHECK_HEADER(
-                [$][_$1_hdr],
-                [AS_IF([test "x[$]_$1_fct" != "x-"],
-                    [AC_SEARCH_LIBS(
-                        [[$]_$1_fct],
-                        [$2],
-                        [has_$1=yes; _$1_lib="$(echo [$]_$1_lib -l$2)"],
-                        [],
-                        [[$]_$1_lib])])
-                ])])
+          
+          AS_IF([test "x[$]_$1_hdr" = "x-"],
+            [has_$1=maybe],
+            [AC_CHECK_HEADERS([$][_$1_hdr],[has_$1=maybe])])
+          
+          AS_IF([test "xhas_$1" = "xmaybe"],
+            [AS_CASE(["x[$]_$1_fct"],
+                [x- | x+],[has_$1=yes],
+                [AC_SEARCH_LIBS(
+                    [[$]_$1_fct],
+                    [$2],
+                    [has_$1=yes; _$1_lib="$(echo [$]_$1_lib -l$2)"],
+                    [has_$1=no],
+                    [[$]_$1_lib])])])
+          
 	  AC_MSG_RESULT([$]has_$1)
 	  ;;
         
 	*)
-	  ;;
+          ;;
         
       esac
       
@@ -197,12 +209,12 @@ m4_define([DO_WITH_PACKAGE],
       shift
     done
     UNSET_WITH_PACKAGE_VARS([_$1])
-
+    
     AS_IF([test "[$]{$1_req}x[$]{has_$1}" = "yesxno"],
       [AC_MSG_ERROR([unable to configure a required package ... $1])])
-   
-    AM_CONDITIONAL([SOURCE_]m4_toupper($1),[test -n "[$]$1_src"])
-    AC_SUBST($1[]_dir)
+
+    AM_CONDITIONAL([SOURCE_]$3,
+      [test "x[$]$1_src" != "x" && test "x[$]_$1_fct" != "x+"])
 
     AS_IF([test "x[$]has_$1" = "xyes"],
       [
@@ -219,20 +231,36 @@ m4_define([DO_WITH_PACKAGE],
   ])
 
 
-# AC_WITH_PACKAGE([PACKAGE],[REQ],[FUNC],[HEADER])
-# -----------------------------------------------
+# AC_WITH_PACKAGE([PACKAGE],[REQ],[FUNC],[HEADER],[DIRNAME])
+# ----------------------------------------------------------
 # 
-AC_DEFUN([AC_WITH_PACKAGE],[
-
+AC_DEFUN([AC_WITH_PACKAGE],
+  [
     DO_WITH_PACKAGE(
       AS_TR_SH(m4_strip[$1]),
       m4_strip([$1]),
       AS_TR_CPP(m4_strip[$1]),
       m4_if([yes],m4_default(m4_strip([$2]),[no]),[yes],[no]),
       m4_strip([$3]),
-      m4_strip([$4])
-      )
+      m4_strip([$4]),
+      m4_strip([$5]))
   ])
+
+# AC_WITH_PACKAGE_HEADER([PACKAGE],[REQ],[HEADER],[DIRNAME])
+# ----------------------------------------------------------
+# 
+AC_DEFUN([AC_WITH_PACKAGE_HEADER],
+  [
+    DO_WITH_PACKAGE(
+      AS_TR_SH(m4_strip[$1]),
+      m4_strip([$1]),
+      AS_TR_CPP(m4_strip[$1]),
+      m4_if([yes],m4_default(m4_strip([$2]),[no]),[yes],[no]),
+      [+],
+      m4_strip([$3]),
+      m4_strip([$4]))
+  ])
+
 
 dnl# ----------------------------------------------------------------------
 dnl#
