@@ -39,7 +39,8 @@ file_type() {
 action_list() {
     local type=$(file_type "$1") extra=""
     case "$type" in
-	D) extra="["$(find "$1" -type f | wc -l)" file(s)]";;
+	D) test -e "$1/.keep" && return 0
+	   extra="["$(find "$1" -type f | wc -l)" file(s)]";;
 	L) extra="--> "$(readlink "$1");;
     esac
     echo "$type $1 $extra"
@@ -48,7 +49,8 @@ action_list() {
 action_clean() {
     local type=$(file_type "$1")
     case "$type" in
-	D)  rm -r ${opt_verbose} ${opt_force} -- "$1" ;;
+	D)  test -e "$1/.keep" ||
+	    rm -r ${opt_verbose} ${opt_force} -- "$1" ;;
 	*)  rm ${opt_verbose} ${opt_force} -- "$1" ;;
     esac
 }
@@ -61,7 +63,11 @@ Usage: svn-mrproper <COMMAND> [OPTION]
 
  Clean SVN repository by removing all files and directories not under
  source control.
+
  Using 'list' command before 'clean' is *LARGELY* encouraged.
+
+ Directory not under source control that content a '.keep' file will
+ not be deleted.
 
  COMMAND:
 
