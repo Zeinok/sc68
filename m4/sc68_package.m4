@@ -1,1 +1,0 @@
-../aclocal68/sc68_package.m4
