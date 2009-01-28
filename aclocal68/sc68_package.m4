@@ -87,7 +87,6 @@ AC_DEFUN([SC68_PACKAGE],[
       fi
       shift
     done
-    [echo " ++ CPPFLAGS=$CPPFLAGS"]
     
 
 # ,----------------------------------------------------------------------.
@@ -99,7 +98,8 @@ AC_DEFUN([SC68_PACKAGE],[
       [
         texinfo2man=false; help2man=false;
         AS_IF([test -e "$srcdir/texinfo.tex"],[
-            AS_IF([test ! -e "$srcdir/package.texi.in"],
+            test -e "$srcdir/package.texi.in" || test -e "$srcdir/package.texi"
+            AS_IF([test [$][?] -ne 0],
               [AC_MSG_ERROR([
 Missing file srcdir/package.texi.in
 Did you forget --enable-maintainer-mode ?])

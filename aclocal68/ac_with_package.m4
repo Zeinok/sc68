@@ -79,8 +79,6 @@ m4_define([RESET_WITH_PACKAGE_VARS],
     $1_fct="m4_default([$3],[$1_version])" # fonction to search
     $1_hdr="m4_default([$4],[$1.h])"       # header to search
     $1_dbn="m4_default([$5],[$1])"         # dir basename
-
-    DUMP_WITH_PACKAGE_VARS($1)
   ])
 
 
@@ -227,7 +225,7 @@ m4_define([DO_WITH_PACKAGE],
         AC_SUBST($1[_abs])
       ])
 
-    DUMP_WITH_PACKAGE_VARS([$1],[ END ])
+    #DUMP_WITH_PACKAGE_VARS([$1],[ END ])
   ])
 
 

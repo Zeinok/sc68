@@ -112,11 +112,11 @@ struct ym2149_s
   int env_ct;               /**< Envelop period counter                  */
   int env_bit;              /**< Envelop level : 5 LSB are envelop level */
 #else
-  unsigned int env_ct;      /**< Envelop period counter */
+  unsigned int env_ct;      /**< Envelop period counter                  */
   unsigned int env_bit;     /**< Envelop level : 5 LSB are envelop level */
-  unsigned int env_cont;    /**< Continue mask [0 or 0x1f] */
-  unsigned int env_alt;     /**< Alternate mask [0 or 0x1f] */  
-  unsigned int env_bitstp;  /**< Envelop level step : [0 or 1] */
+  unsigned int env_cont;    /**< Continue mask [0 or 0x1f]               */
+  unsigned int env_alt;     /**< Alternate mask [0 or 0x1f]              */  
+  unsigned int env_bitstp;  /**< Envelop level step : [0 or 1]           */
 #endif
 
   /* Noise generator */
