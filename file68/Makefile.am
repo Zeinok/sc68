@@ -108,11 +108,11 @@ man_MANS             = file68-config.1
 MAINTAINERCLEANFILES = $(srcdir)/file68-config.1
 
 if MAINTAINER_MODE
-
+HELP2MAN             = $(SHELL) $(top_srcdir)/missing --run help2man
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
 $(srcdir)/file68-config.1: ./file68-config $(srcdir)/Makefile.am
-	$(help2man) -N  -m 'sc68-tools' \
+	$(HELP2MAN) -N  -m 'sc68-tools' \
 	'$(SHELL) ./$<' -o '$@' || $(fail)
 
 endif

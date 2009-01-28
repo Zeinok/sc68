@@ -106,16 +106,17 @@ if test $err -ne 0; then
     fatal "$err error(s): Not running autoreconf"
 fi
     # No error runs autoreconf to create missing files.
-autoreconf -ifs &&
-for dir in $dirs; do
-    if test -e ${dir}/texinfo.tex && test ! -e ${dir}/package.texi.in; then
-	msg "Creating '${dir}/package.texi.in'"
-	cat <<EOF >${dir}/package.texi.in
-@set PACKAGE     @PACKAGE_NAME@
-@set WEBSITE     @PACKAGE_URL@
-@set BUGREPORT   @PACKAGE_BUGREPORT@
-@set DESCRIPTION @PACKAGE_SHORTDESC@
-@set INFOCAT     @PACKAGE_INFOCAT@
-EOF
-    fi
-done
+autoreconf -ifs
+
+# for dir in $dirs; do
+#     if test -e ${dir}/texinfo.tex && test ! -e ${dir}/package.texi.in; then
+# 	msg "Creating '${dir}/package.texi.in'"
+# 	cat <<EOF >${dir}/package.texi.in
+# @set PACKAGE     @PACKAGE_NAME@
+# @set WEBSITE     @PACKAGE_URL@
+# @set BUGREPORT   @PACKAGE_BUGREPORT@
+# @set DESCRIPTION @PACKAGE_SHORTDESC@
+# @set INFOCAT     @PACKAGE_INFOCAT@
+# EOF
+#     fi
+# done

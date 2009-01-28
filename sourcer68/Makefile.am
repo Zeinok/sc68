@@ -60,14 +60,14 @@ MAINTAINERCLEANFILES = \
 
 
 if MAINTAINER_MODE
+TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
 $(srcdir)/package.texi: $(srcdir)/package.texi.in
 	$(SHELL) $(top_builddir)/config.status --file=$@:$<
 
 $(srcdir)/sourcer68.1: sourcer68.1.tpl $(srcdir)/sourcer68.texi
-	@texinfo2man@ $^ >$@ || $(fail)
-
+	$(TEXINFO2MAN) $^ >$@ || $(fail)
 endif
 
 

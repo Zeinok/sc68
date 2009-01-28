@@ -37,15 +37,14 @@ MAINTAINERCLEANFILES = \
  $(srcdir)/as68.1
 
 if MAINTAINER_MODE
-
+TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
 $(srcdir)/package.texi: $(srcdir)/package.texi.in
 	$(SHELL) $(top_builddir)/config.status --file=$@:$<
 
 $(srcdir)/as68.1: as68.1.tpl $(srcdir)/as68.texi
-	@texinfo2man@ $^ >$@ || $(fail)
-
+	$(TEXINFO2MAN) $^ >$@ || $(fail)
 endif
 
 
