@@ -139,35 +139,63 @@ static int sndh_is_magic(const char *buffer, int max)
   return i;
 }
 
-/* Verify header , return # byte to alloc & read
+/* Ensure enough data in id buffer;
+ *  retval  0      on error
+ *  retval  count  on success
+ */
+static inline
+int ensure_header(istream68_t * const is, char *id, int have, int need)
+{
+  if (have < need) {
+    int miss = need - have;
+    int read = istream68_read(is, id+have, miss);
+    if (read != miss) {
+      error68_add(0,"not an sc68 file (error:%d)",read);
+      have = 0;
+    } else {
+      have = need;
+    }
+  }
+  return have;
+}
+
+/* Verify header; returns # bytes to alloc & read
  * or -1 if error
  * or -gzip_cc if may be gzipped
  * or -ice_cc if may be iced
  * or -sndh_cc if may be sndh
- * or 
  */
 static int read_header(istream68_t * const is)
 {
   char id[256];
-  const int l = sizeof(file68_idstr_v2);
-  const int sndh_req = (l<=32) ? 32 : l;
-  int l2;
-  const char * missing_id = "Not SC68 file : Missing ID";
+  const int idv1_req = sizeof(file68_idstr);
+  const int idv2_req = sizeof(file68_idstr_v2);
+/*   const int gzip_req = 3; */
+/*   const int ice1_req = 16; */
+  const int sndh_req = 32;
+  int have = 0;
+  const char * missing_id = "not an sc68 file (no magic)";
 
   /* Read ID v2 string */
-  l2 = istream68_read(is, id, l);
-  if (l2 != l) {
-    return error68_add(0,"missing ID bytes (%d)", l2);
+  if(have = ensure_header(is, id, have, idv2_req), !have) {
+    return -1;
   }
   
-  if (!memcmp(id, file68_idstr, l)) {
-    /* ID V1: read missig bytes */
-    const int n = sizeof(file68_idstr) - l;
-    if (istream68_read(is, id, n) != n || memcmp(id, file68_idstr+l, n)) {
+  if (!memcmp(id, file68_idstr, idv2_req)) {
+    /* looks like idv1; need more bytes to confirm */
+    if (have = ensure_header(is, id, have, idv1_req), !have) {
+      return -1;
+    }
+    if (memcmp(id, file68_idstr, idv1_req)) {
       return error68_add(0,missing_id);
     }
     TRACE68(file68_feature,"found file-id: [%s]\n",file68_idstr);
-  } else if (memcmp(id, file68_idstr_v2, l)) {
+  } else if (!memcmp(id, file68_idstr_v2, idv2_req)) {
+    TRACE68(file68_feature,"found file-id: [%s]\n",file68_idstr_v2);
+  } else {
+    if (have = ensure_header(is, id, have, sndh_req), !have) {
+      return -1;
+    }
     if (gzip68_is_magic(id)) {
       TRACE68(file68_feature,"found GZIP signature\n");
       return -gzip_cc;
@@ -175,20 +203,16 @@ static int read_header(istream68_t * const is)
       TRACE68(file68_feature,"found ICE! signature\n");
       return -ice_cc;
     } else {
-      TRACE68(file68_feature,"try SNDH\n");
-      /* Need some more bytes for sndh */
-      if (istream68_read(is, id+l, sndh_req-l) == sndh_req-l
-	  && sndh_is_magic(id,sndh_req)) {
-      /* Must be done after gzip or ice becoz id-string may appear in
-       * compressed buffer too.
+      /* Must be done after gzip or ice becausez id-string may appear
+       * in compressed buffer too.
        */
+      TRACE68(file68_feature,"try SNDH\n");
+      if (sndh_is_magic(id,sndh_req)) {
 	TRACE68(file68_feature,"found SNDH signature\n");
 	return -sndh_cc;
       }
     }
     return error68_add(0,missing_id);
-  } else {
-    TRACE68(file68_feature,"found file-id: [%s]\n",file68_idstr_v2);
   }
 
   /* Check 1st chunk */
@@ -199,11 +223,11 @@ static int read_header(istream68_t * const is)
 
   /* Get base chunk : file total size */
   if (istream68_read(is, id, 4) != 4
-      || (l2 = LPeek(id), l2 <= 8)) {
+      || (have = LPeek(id), have <= 8)) {
     return error68_add(0,"Not SC68 file : Weird BASE Chunk size");
   }
-  TRACE68(file68_feature,"sc68-header: [%d bytes]\n",l2-8);
-  return l2 - 8;
+  TRACE68(file68_feature,"sc68-header: [%d bytes]\n",have-8);
+  return have-8;
 }
 
 static char noname[] = SC68_NOFILENAME;
