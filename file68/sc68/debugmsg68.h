@@ -197,7 +197,7 @@ void vdebugmsg68_dummy(const int feature, const char * fmt, va_list list) {}
 
 /** Define debugmsg68_DEFAULT macros */
 #ifndef debugmsg68_DEFAULT
-# if !defined(DEBUG) && !defined(DEBUG_FILE68)
+# ifndef DEBUG
 #  define debugmsg68_DEFAULT debugmsg68_NEVER
 # else
 #  define debugmsg68_DEFAULT debugmsg68_CURRENT

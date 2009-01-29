@@ -72,7 +72,7 @@ void * error68_set_cookie(void * cookie)
 int error68_va(void * cookie, const char * format, va_list list)
 {
   if (error68_fct && format) {
-    debugmsg68(error68_feature,"ERROR::");
+    debugmsg68(error68_feature,"E:");
     vdebugmsg68(error68_feature,format,list);
     error68_fct(cookie?cookie:default_cookie, format, list);
   }

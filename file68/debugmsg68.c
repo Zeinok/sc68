@@ -36,12 +36,15 @@ static debugmsg68_t debug  = 0;                /* Debug function.            */
 static void * debug_cookie = 0               ; /* Debug function user param. */
 static int current_feature = debugmsg68_DEBUG; /* Default current feature.   */
 
-
-#if defined(DEBUG) || defined(DEBUG_FILE68)
-unsigned int debugmsg68_mask = ~0;  /* Debug   : filter none. */
+#if defined(DEBUGMSG_MASK)
+unsigned int debugmsg68_mask = DEBUGMSG_MASK;  /* User defined mask.         */
+#elif defined(DEBUG)
+unsigned int debugmsg68_mask = ~0;             /* Filter none.               */
 #else
-unsigned int debugmsg68_mask =  0;  /* Release : filter all.  */
+unsigned int debugmsg68_mask =	               /* Filter almost all.         */
+  (1<<debugmsg68_CRITICAL)|(1<<debugmsg68_ERROR)|(1<<debugmsg68_WARNING)
 #endif
+
 
 #define MAX_FEATURES (((sizeof(int)<<3)))
 
@@ -241,7 +244,7 @@ int debugmsg68_feature_level(const int feature)
     v |= (1<<(feature+1))-1;
     debugmsg68_mask = v;
   }
-  return ret; 
+  return ret;
 }
 
 /* Get info on feature */
