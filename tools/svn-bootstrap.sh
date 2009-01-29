@@ -58,7 +58,7 @@ ln_or_cp() {
 bootstrap_dir() {
     local dir="$1" m4file=ac_package_extra.m4 force=''
 
-    test "$2" == '--force' && force='yes'
+    test "$2" = '--force' && force='yes'
 
     testfile "${dir}/../m4/${m4file}" || return 1
     testfile "${dir}/configure.ac"    || return 1
