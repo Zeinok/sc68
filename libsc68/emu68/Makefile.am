@@ -55,5 +55,5 @@ myextra=$(srcextra)
 
 noinst_LTLIBRARIES  = libemu68.la
 libemu68_la_SOURCES = ${mysources} ${myheaders}
-libemu68_la_LDFLAGS = -static -avoid-version -no-install
+libemu68_la_LDFLAGS = -avoid-version -no-install
 noinst_HEADERS      = $(myextra)

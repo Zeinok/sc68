@@ -10,7 +10,7 @@
 ACLOCAL_AMFLAGS    = -I ../m4 --install
 AM_CFLAGS          = @LIBSC68_CFLAGS@ @LIBLIBSC68_CFLAGS@
 AM_CPPFLAGS        = @LIBSC68_CPPFLAGS@ @LIBLIBSC68_CPPFLAGS@ $(SINC)
-SINC               = -DSINCSTART -I$(top_srcdir) $(file68_inc) -DSINCEND
+SINC               = -I$(top_srcdir) $(file68_inc)
 
 mysources=\
  io68.c\
@@ -52,5 +52,5 @@ myextra=$(srcextra)
 
 noinst_LTLIBRARIES  = libio68.la
 libio68_la_SOURCES  = $(mysources) $(myheaders)
-libio68_la_LDFLAGS  = -static -avoid-version -no-install
+libio68_la_LDFLAGS  = -avoid-version -no-install
 noinst_HEADERS      = $(myextra)
