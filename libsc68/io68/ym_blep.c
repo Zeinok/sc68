@@ -184,18 +184,18 @@ static void ym2149_clock(ym_t * const ym, cycle68_t cycles)
         tone_event[i] = ym->reg.index[i * 2] | ((ym->reg.index[i * 2 + 1] & TONE_HI_MASK) << 8);
         if (tone_event[i] == 0)
             tone_event[i] = 1;
-        tone_event[i] = tone_event[i] * 8 + 1;
+        tone_event[i] = tone_event[i] * 8;
     }
 
     noise_event = ym->reg.name.per_noise & NOISE_MASK;
     if (noise_event == 0)
         noise_event = 1;
-    noise_event = noise_event * 16 + 1;
+    noise_event = noise_event * 16;
 
     env_event = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi << 8);
     if (env_event == 0)
         env_event = 1;
-    env_event = 8 * env_event + 1;
+    env_event = 8 * env_event;
 
     while (cycles) {
         int iter = cycles;
