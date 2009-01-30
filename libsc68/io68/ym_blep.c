@@ -155,7 +155,7 @@ static void ym2149_mix_output(ym_t * const ym, cycle68_t cycles)
     for (i = 2; i >= 0; i -= 1) {
         volume <<= 5; 
         if (((ym->reg.name.ctl_mixer & (1<<i)) || orig->tonegen[i].flip_flop)
-            && ((ym->reg.name.ctl_mixer & (1<<(i+3))) || (orig->noise_state & 1))) {
+            || ((ym->reg.name.ctl_mixer & (1<<(i+3))) && (orig->noise_state & 1))) {
             if (*(&ym->reg.name.vol_a + i) & LEVEL_M_MASK)
                 /* Envelope reg */
                 volume |= orig->env_output;
