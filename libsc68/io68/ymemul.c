@@ -360,7 +360,7 @@ uint68_t ym_sampling_rate(ym_t * const ym, const uint68_t hz)
 int ym_setup(ym_t * const ym, ym_parms_t * const parms)
 {
   ym_parms_t * const p = parms ? parms : &default_parms;
-  int err;
+  int err = -1;
 
   /* engine */
   if (p->emul == YM_EMUL_DEFAULT) {
