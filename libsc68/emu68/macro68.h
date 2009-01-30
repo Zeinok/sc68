@@ -480,7 +480,7 @@ do {\
   REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT);\
 } while(0)
 
-#warning "fix mask and shift here"
+/* $$$ verifiy: this works only with exact 32bit types */
 #define RORB(ROR_A,ROR_B) ROR(ROR_A,ROR_B,0xFF000000,8)
 #define RORW(ROR_A,ROR_B) ROR(ROR_A,ROR_B,0xFFFF0000,16)
 #define RORL(ROR_A,ROR_B) ROR(ROR_A,ROR_B,0xFFFFFFFF,32)
