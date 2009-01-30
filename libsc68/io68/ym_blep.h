@@ -10,7 +10,7 @@
 int ym_blep_setup(ym_t * const ym);
 
 enum {
-    MAX_BLEPS = 150
+    MAX_BLEPS = 300
 };
 
 typedef struct {
