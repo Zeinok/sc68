@@ -195,7 +195,7 @@ static void ym2149_clock(ym_t * const ym, cycle68_t cycles)
     env_event = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi << 8);
     if (env_event == 0)
         env_event = 1;
-    env_event += 8 * env_event + 1;
+    env_event = 8 * env_event + 1;
 
     while (cycles) {
         int iter = cycles;
@@ -239,8 +239,7 @@ static void ym2149_clock(ym_t * const ym, cycle68_t cycles)
         if (orig->env_count >= env_event) {
             int envtype = ym->reg.name.env_shape & CTL_ENV_MASK;
 
-            orig->env_output = envelopes[envtype][orig->env_state];
-            orig->env_state += 1;
+            orig->env_output = envelopes[envtype][orig->env_state ++];
             if (orig->env_state == 96)
                 orig->env_state = 32;
             orig->env_count = 0;
