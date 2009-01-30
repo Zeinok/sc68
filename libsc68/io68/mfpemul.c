@@ -574,7 +574,8 @@ void mfp_cleanup(mfp_t * const mfp)
 
 int mfp_init(void)
 {
-  mfp_feature = debugmsg68_feature("mfp","MFP-68901 emulator",debugmsg68_DEFAULT);
+  mfp_feature =
+    debugmsg68_feature("mfp","MFP-68901 emulator",0);
   return 0;
 }
 

@@ -35,6 +35,7 @@ typedef struct
     int68_t  mul;
     uint68_t div;
   } clock;
+  
   ym_t ym;
 } ym_io68_t;
 

@@ -8,7 +8,7 @@
  * $Id$
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _IO68_YM_EMUL_H_
 #define _IO68_YM_EMUL_H_
@@ -19,32 +19,38 @@
 extern "C" {
 #endif
 
+/* Need these defines in ymemul.c and ym_orig.c */
+#define YM_OUT_MSK_A   0x001F
+#define YM_OUT_MSK_B   0x03E0
+#define YM_OUT_MSK_C   0x7C00
+#define YM_OUT_MSK_ALL 0x7FFF
+
 /** @defgroup   io68_ym_devel  YM-2149 emulator
  *  @ingroup    io68_devel
  *
  *  The YM-2149 (Atari-ST soundchip) emulator.
  *
- * @{
+ *  @{
  */
+
 
 /** @name YM-2149 registers.
  *  @{
  */
-#define YM_BASEPERL  0  /**< YM-2149 LSB period base (canal A)      */
-#define YM_BASEPERH  1  /**< YM-2149 MSB period base (canal A)      */
-#define YM_BASEVOL   8  /**< YM-2149 volume base register (canal A) */
-
-#define YM_PERL(N) (YM_BASEPERL+(N)*2) /**< Canal #N LSB period     */
-#define YM_PERH(N) (YM_BASEPERH+(N)*2) /**< Canal #N MSB periodr    */
-#define YM_VOL(N)  (YM_BASEVOL+(N))    /**< Canal #N volume         */
-
-#define YM_NOISE     6  /**< Noise period              */
-#define YM_MIXER     7  /**< Mixer control             */
-#define YM_ENVL      11 /**< Volume envelop LSB period */
-#define YM_ENVH      12 /**< Volume envelop MSB period */
-#define YM_ENVTYPE   13 /**< Volume envelop wave form  */
-#define YM_ENVSHAPE  13 /**< Alias for YM_ENVTYPE      */
+#define YM_BASEPERL  0  /**< YM-2149 LSB period base (chan A).      */
+#define YM_BASEPERH  1  /**< YM-2149 MSB period base (chan A).      */
+#define YM_BASEVOL   8  /**< YM-2149 volume base register (chan A). */
+#define YM_NOISE     6  /**< Noise period.                          */
+#define YM_MIXER     7  /**< Mixer control.                         */
+#define YM_ENVL      11 /**< Volume envelop LSB period.             */
+#define YM_ENVH      12 /**< Volume envelop MSB period.             */
+#define YM_ENVTYPE   13 /**< Volume envelop wave form.              */
+#define YM_ENVSHAPE  13 /**< Alias for YM_ENVTYPE.                  */
+#define YM_PERL(N) (YM_BASEPERL+(N)*2) /**< Canal #N LSB period.    */
+#define YM_PERH(N) (YM_BASEPERH+(N)*2) /**< Canal #N MSB period.    */
+#define YM_VOL(N)  (YM_BASEVOL+(N))    /**< Canal #N volume.        */
 /**@}*/
+
 
 /** @name YM-2149 internal register access. 
  *  @{
@@ -65,13 +71,14 @@ typedef struct ym_waccess_s ym_waccess_t;
 /** Sorted list of YM write access. */
 typedef struct
 {
-  char name[4];             /**< Name (for debug).           */
-  ym_waccess_t * head;      /**< First access in list.       */              
-  ym_waccess_t * tail;      /**< Last acces in list.         */
+  char name[4];               /**< Name (for debug).     */
+  ym_waccess_t * head;        /**< First access in list. */
+  ym_waccess_t * tail;        /**< Last acces in list.   */
 } ym_waccess_list_t;
 
 /**@}*/
 
+/** YM-2149 internal register mapping. */
 struct ym2149_reg_s {
   /* 0 */  u8 per_a_lo;
   /* 1 */  u8 per_a_hi;
@@ -91,88 +98,22 @@ struct ym2149_reg_s {
   /* F */  u8 io_b;
 };
 
-typedef union {
-  struct ym2149_reg_s name;
-  u8 index[16];
+/** Access YM-2149 internal register by name or by index. */
+typedef union ym_reg_u {
+  struct ym2149_reg_s name;	/* ym registers by name.  */
+  u8 index[16];			/* ym registers by index. */
 } ym_reg_t;
 
-/* define to use table for envelop emulation. */
-#define YM_ENV_TABLE 
-
-/** YM-2149 internal data structure */
-struct ym2149_s
-{
-  /* Internal YM register */
-  u8 ctrl;                  /**< Control (working) register.             */
-  ym_reg_t reg;             /**< YM registers.                           */
-  ym_reg_t shadow;          /**< Shadow YM registers (for reading).      */
-
-  /* Envelop generator */
-#ifdef YM_ENV_TABLE
-  int env_ct;               /**< Envelop period counter                  */
-  int env_bit;              /**< Envelop level : 5 LSB are envelop level */
-#else
-  unsigned int env_ct;      /**< Envelop period counter                  */
-  unsigned int env_bit;     /**< Envelop level : 5 LSB are envelop level */
-  unsigned int env_cont;    /**< Continue mask [0 or 0x1f]               */
-  unsigned int env_alt;     /**< Alternate mask [0 or 0x1f]              */  
-  unsigned int env_bitstp;  /**< Envelop level step : [0 or 1]           */
-#endif
-
-  /* Noise generator */
-  unsigned int noise_gen;   /**< Noise generator 17-bit shift register   */
-  unsigned int noise_ct;    /**< Noise generator period counter          */
-
-  /* Tone generator */
-  int voice_ctA;            /**< Canal A sound period counter            */
-  int voice_ctB;            /**< Canal B sound period counter            */
-  int voice_ctC;            /**< Canal C sound period counter            */
-  
-  unsigned int levels;      /**< Square level 0xCBA                      */
-
-  unsigned int voice_mute;  /**< Mask muted voices.                      */
-
-  unsigned int hz;          /**< Sampling rate.                          */
-
-  int outlevel;             /**< Output max level (volume) [0..65536].   */
-
-  /* Filter */
-  int hipass_inp1;
-  int hipass_out1;
-  int lopass_out1;
-
-  s16 * ymout5;             /**< DAC lookup table                        */
-
-  s32 * outbuf;             /**< output buffer given to ym_run()         */
-  s32 * outptr;             /**< generated sample pointer (into outbuf)  */
-  s32 * noiptr;             /**< generated noise pointer                 */
-  s32 * envptr;             /**< generated envelop pointer               */
-  s32 * tonptr;             /**< generated tone pointer                  */
-
-  /** Write access back storage. */
-  ym_waccess_list_t env_regs; /**< envelop generator access list.        */
-  ym_waccess_list_t noi_regs; /**< noise generator access list.          */
-  ym_waccess_list_t ton_regs; /**< tone generator access list.           */
-
-  int            waccess_max; /**< Maximum number of entry in waccess.   */
-  ym_waccess_t * waccess_nxt; /**< Next available ym_waccess_t.          */
-  ym_waccess_t * waccess;     /**< Static register entry list.           */
-
-  uint68_t clock;             /**< Master clock frequency in Hz.         */
-
-  /* $$$ TEMP: should be allocated... */
-  ym_waccess_t static_waccess[2048];
-
-};
-
-/** YM-2149 emulator instance type */
-typedef struct ym2149_s ym_t;
+/** Toggle table/calculated envelop emulation. */
+#ifndef YM_ENV_TABLE
+# define YM_ENV_TABLE 1
+#endif 
 
 /** Available emulation modes. */
 enum ym_emul_e {
-  YM_EMUL_DEFAULT = 0, /**< Use default mode.                             */
-  YM_EMUL_ORG,         /**< sc68 original emulation .                     */
-  YM_EMUL_BLEP,        /**< Antti Lankila's Band Limited Step synthesis.  */
+  YM_EMUL_DEFAULT = 0, /**< Use default mode.                            */
+  YM_EMUL_ORIG,        /**< sc68 original emulation.                     */
+  YM_EMUL_BLEP,        /**< Antti Lankila's Band Limited Step synthesis. */
 };
 
 /** Sampling rate. */
@@ -183,11 +124,71 @@ enum ym_hz_e {
 
 /** YM master clock frequency. */
 enum ym_clock_e {
-  /**< Default frequency (YM_CLOCK_ATARIST). */
+  /** Default frequency (YM_CLOCK_ATARIST). */
   YM_CLOCK_DEFAULT = 0,
   /** Atari-ST YM-2149 clock is about 2Mz. */
   YM_CLOCK_ATARIST = EMU68_ATARIST_CLOCK/4u,
 } ;
+
+/* struct ym_s; */
+typedef struct ym_s ym_t;
+
+#include "ym_orig.h" /* data structure for original ym emulator. */
+#include "ym_blep.h" /* data structure for blep ym emulator.     */
+
+struct ym_s {
+
+  /** @name Interface
+   *  @{
+   */
+  void     (*cb_cleanup)       (ym_t * const);
+  int      (*cb_reset)         (ym_t * const, const cycle68_t);
+  int      (*cb_run)           (ym_t * const, s32 *, const cycle68_t);
+  uint68_t (*cb_buffersize)    (const ym_t const *, const cycle68_t);
+  uint68_t (*cb_sampling_rate) (ym_t * const, const uint68_t);
+  /**@}*/
+
+  /** @name Internal YM registers
+   *  @{
+   */
+  u8 ctrl;                    /**< Control (working) register.           */
+  ym_reg_t reg;               /**< YM registers.                         */
+  ym_reg_t shadow;            /**< Shadow YM registers (for reading).    */
+  /**@}*/
+
+  s16 * ymout5;               /**< DAC lookup table                      */
+  unsigned int voice_mute;    /**< Mask muted voices.                    */
+  unsigned int hz;            /**< Sampling rate.                        */
+  int outlevel;               /**< Output max level (volume) [0..65536]. */
+  uint68_t clock;             /**< Master clock frequency in Hz.         */
+
+  /** @name  Write access back storage.
+   *  @{
+   */
+  ym_waccess_list_t env_regs; /**< envelop generator access list.        */
+  ym_waccess_list_t noi_regs; /**< noise generator access list.          */
+  ym_waccess_list_t ton_regs; /**< tone generator access list.           */
+  int            waccess_max; /**< Maximum number of entry in waccess.   */
+  ym_waccess_t * waccess_nxt; /**< Next available ym_waccess_t.          */
+  ym_waccess_t * waccess;     /**< Static register entry list.           */
+  /**@}*/
+
+  /* $$$ TEMP: should be allocated... */
+  ym_waccess_t static_waccess[2048];
+
+  /** @name  Output
+   *  @{
+   */
+  s32 * outbuf;             /**< output buffer given to ym_run()         */
+  s32 * outptr;             /**< generated sample pointer (into outbuf)  */
+  /**@}*/
+
+  /** Data */
+  union emu_u {
+    ym_orig_t orig; /**< Original YM emulator data. */
+    ym_blep_t blep; /**< BLEP YM emulator data.     */
+  } emu;
+};
 
 /** YM-2149 setup structure.
  *
@@ -200,16 +201,26 @@ enum ym_clock_e {
  */
 typedef struct
 {
-  int68_t  emul;     /**< Emulator mode. @see ym_emul_e. */
-  uint68_t hz;       /**< Sampling rate in Hz.           */
-  uint68_t clock;    /**< YM clock frequency.            */ 
-  uint68_t outlevel; /**< Output level [0..256].         */
+  int68_t  emul;     /**< @see Emulator mode.           */
+  uint68_t hz;       /**< Sampling rate in Hz.          */
+  uint68_t clock;    /**< @see ym_clock_e frequency.    */ 
+  uint68_t outlevel; /**< Output level [0..256].        */
 } ym_parms_t;
 
 
 /** @name  Initialization functions
  *  @{
  */
+
+/** Set or get default Yamaha-2149 emulator engine.
+ *
+ *    @param  emul  YM_EMUL_DEFAULT:get current; others:set new
+ *    @retval emul             on success
+ *    @retval YM_EMUL_DEFAULT  on failure (bad value)
+ *
+ *  @see ym_emul_e
+ */
+int ym_default_engine(int emul);
 
 /** Create an Yamaha-2149 emulator instance.
  *
@@ -223,7 +234,6 @@ typedef struct
  *   @see  ym_destroy()
  */
 int ym_setup(ym_t * const ym, ym_parms_t * const parms);
-
 
 /** Destroy an Yamaha-2149 emulator instance.
  *
@@ -317,11 +327,7 @@ int ym_run(ym_t * const ym, s32 * output, const cycle68_t ymcycles);
  *          ymcycles samples.
  *
  */
-static inline
-uint68_t ym_buffersize(const ym_t const * ym, const cycle68_t ymcycles)
-{
-  return ((ymcycles+7u) >> 3);
-}
+uint68_t ym_buffersize(const ym_t const * ym, const cycle68_t ymcycles);
 
 
 /** Change YM cycle counter base.
@@ -345,6 +351,7 @@ void ym_adjust_cycle(ym_t * const ym, const cycle68_t ymcycles);
  *  @{
  */
 
+
 /** Write in YM-2149 register.
  *
  *   The ym_writereg() function performs a write access to an YM-2149
@@ -361,9 +368,10 @@ void ym_adjust_cycle(ym_t * const ym, const cycle68_t ymcycles);
  *
  *  @see ym_readreg();
  */
-void ym_writereg(ym_t * const ym,
-		 const int val, const cycle68_t ymcycle);
+void ym_writereg(ym_t * const ym, const int val, const cycle68_t ymcycle);
 
+
+static inline
 /** Read a YM-2119 register.
  *
  *   The ym_readreg() function must be call to read an YM-2149
@@ -377,7 +385,6 @@ void ym_writereg(ym_t * const ym,
  *
  *  @see ym_writereg();
  */
-static inline
 int ym_readreg(ym_t * const ym, const cycle68_t ymcycle)
 {
   const int reg = ym->ctrl;
@@ -422,7 +429,6 @@ int ym_readreg(ym_t * const ym, const cycle68_t ymcycle)
  */
 int ym_active_channels(ym_t * const ym, const int off, const int on);
 
-
 /** Get/Set sampling rate.
  *
  *  @param  ym   YM-2149 emulator instance
@@ -432,11 +438,12 @@ int ym_active_channels(ym_t * const ym, const int off, const int on);
  *  @retval 0    Failure
  */
 uint68_t ym_sampling_rate(ym_t * const ym, const uint68_t hz);
+  
 
 /**@}*/
 
 /**
- *@}
+ * @}
  */
 
 #ifdef __cplusplus

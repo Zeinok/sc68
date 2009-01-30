@@ -21,7 +21,9 @@ mysources=\
  paula_io.c\
  paulaemul.c\
  shifter_io.c\
+ ym_blep.c\
  ym_io.c\
+ ym_orig.c\
  ymemul.c
 
 myheaders=\
@@ -34,8 +36,10 @@ myheaders=\
  paula_io.h\
  paulaemul.h\
  shifter_io.h\
+ ym_blep.h\
  ym_fixed_vol.h\
  ym_io.h\
+ ym_orig.h\
  ymemul.h\
  ymout1c5bit.h\
  ymoutorg.h
