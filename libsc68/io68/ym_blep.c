@@ -32,6 +32,7 @@
 #include "ymemul.h"
 #include <sc68/debugmsg68.h>
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -45,6 +46,8 @@ enum {
 
     BLEP_SIZE = 512,
     BLEP_SCALE = 17,
+    
+    MAX_MIXBUF = 2048,
 };
 
 const static int32_t sine_integral[BLEP_SIZE] = {
@@ -275,9 +278,11 @@ static int highpass(ym_t * const ym, int output)
 }
 
 /* run output synthesis for some clocks */
-static int mix_to_buffer(ym_t * const ym, cycle68_t cycles, s32 *output)
+static int mix_to_buffer(ym_t * const ym, int cycles, s32 *output)
 {
     ym_blep_t *orig = &ym->emu.blep;
+
+    assert(cycles >= 0);
 
     int len = 0;
     while (cycles) {
@@ -296,6 +301,7 @@ static int mix_to_buffer(ym_t * const ym, cycle68_t cycles, s32 *output)
         /* Generate output */
         if (makesample) {
             output[len ++] = highpass(ym, ym2149_output(ym));
+            assert(len < MAX_MIXBUF);
             orig->cycles_to_next_sample = orig->cycles_per_sample;
         }
     }
@@ -332,20 +338,24 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
 
         /* mix up to this cycle, update state */
         len += mix_to_buffer(ym, access->ymcycle - currcycle, output + len);
+        ym->reg.index[access->reg] = access->val;
         /* reset envelope on write */
         if (&ym->reg.index[access->reg] == &ym->reg.name.env_shape)
             orig->env_state = 0;
-        ym->reg.index[access->reg] = access->val;
         currcycle = access->ymcycle;
     }
 
-    /* Reset all access lists, even the unused ones... */
+    /* mix stuff outside writes */
+    len += mix_to_buffer(ym, ymcycles - currcycle, output + len);
+
+    /* Reset all access lists. */
     ym_waccess_list_t * const regs_n = &ym->noi_regs;
     ym_waccess_list_t * const regs_e = &ym->env_regs;
     ym_waccess_list_t * const regs_t = &ym->ton_regs;
     regs_n->head = regs_n->tail = regs_e->head = regs_e->tail = regs_t->head = regs_t->tail = 0;
 
     /* Set free ptr to start of list */
+    ym->waccess = ym->static_waccess;
     ym->waccess_nxt = ym->waccess;
     return len;
 }
@@ -353,7 +363,7 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
 /* Get required length of buffer at run(s32 *output) (number of frames). */
 static uint68_t buffersize(const ym_t const * ym, const cycle68_t ymcycles)
 {
-    return 2048; /* suffices to up to 96 kHz */
+    return MAX_MIXBUF;
 }
 
 static uint68_t sampling_rate(ym_t * const ym, const uint68_t hz)
@@ -364,8 +374,6 @@ static uint68_t sampling_rate(ym_t * const ym, const uint68_t hz)
 }
 
 int ym_blep_setup(ym_t * const ym) {
-    //interpolate_volumetable(volumetable);
-
     ym->cb_cleanup       = cleanup;
     ym->cb_reset         = reset;
     ym->cb_run           = run;
@@ -373,5 +381,3 @@ int ym_blep_setup(ym_t * const ym) {
     ym->cb_sampling_rate = sampling_rate;
     return 0;
 }
-
-
