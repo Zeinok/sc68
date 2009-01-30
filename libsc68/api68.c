@@ -55,6 +55,7 @@
 /* stardard includes */
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #define TRAP_14_ADDR 0x600
 /* ST xbios function emulator.
@@ -541,33 +542,72 @@ int sc68_init(sc68_init_t * init)
     goto error;
   }
 
-  /* Get the all pathes. */
-/*   rsc68_get_path(&init->shared_path, */
-/* 		 &init->user_path, */
-/* 		 &init->lmusic_path, */
-/* 		 &init->rmusic_path); */
-
-
-  /* Set resource pathes. */
-/*   if (init->user_path) { */
-/*     sc68_debug(sc68,"sc68_init(): user resource [%s]\n", init->user_path); */
-/*     rsc68_set_user(init->user_path); */
-/*   } */
-/*   if (init->shared_path) { */
-/*     sc68_debug(sc68,"sc68_init(): shared resource [%s]\n", init->shared_path); */
-/*     rsc68_set_share(init->shared_path); */
-/*   } */
-/*   if (init->lmusic_path) { */
-/*     sc68_debug(sc68,"sc68_init(): local musics [%s]\n", init->lmusic_path); */
-/*     rsc68_set_music(init->lmusic_path); */
-/*   } */
-/*   if (init->rmusic_path) { */
-/*     sc68_debug(sc68,"sc68_init(): remote musics [%s]\n", init->rmusic_path); */
-/*     rsc68_set_music(init->rmusic_path); */
-/*   } */
-
   /* Intialize file68. */
   init->argc = file68_init(init->argv, init->argc);
+
+  /* $$$ problem with denug-mask, sc68-debug is set beffore the
+     creation of all new features. file68_init() should not process it
+     now, but later in this function.
+  */
+
+  /* Option parsing */
+  if (1) {
+    char ** argv = init->argv;
+    int n,i,argc = init->argc;
+    
+    /* Parse arguments */
+    for (i=n=1; i<argc; ++i) {
+      /* const char * s; */
+      int negate = 0, k;
+      
+      /* Check for `--' prefix */
+      if (argv[i][0] != '-' || argv[i][1] != '-') {
+	goto keep_it;		/* Not an option; keep it */
+    }
+      
+      /* '--' breaks options parsing */
+      if (!argv[i][2]) {
+	argv[n++] = argv[i++];
+	break;
+      }
+      
+      /* Checking for sc68 prefixed options (--sc68- or --no-sc68-) */
+      if (strstr(argv[i]+2,"no-sc68-") == argv[i]+2) {
+	negate = 1;
+	k = 2 + 8;
+      } else if (strstr(argv[i]+2,"sc68-") == argv[i]+2) {
+	negate = 0;
+	k = 2 + 5;
+      } else {
+	goto keep_it;
+      }
+      
+      if (argv[i]+k == strstr(argv[i]+k,"engine=")) {
+	k += 7;
+	if (!strcmp(argv[i]+k,"orig")) {
+	  k = YM_EMUL_ORIG;
+	} else if (!strcmp(argv[i]+k,"blep")) {
+	  k = YM_EMUL_BLEP;
+	} else {
+	  k = YM_EMUL_DEFAULT;
+	}
+	ym_default_engine(k);
+	continue;
+      }
+      
+      /* Not our option; keep it */
+    keep_it:
+      argv[n++] = argv[i];
+      
+    }
+    /* Keep remaining arguments */
+    for (; i<argc; ++i) {
+      argv[n++] = argv[i];
+    }
+    init->argc = n;
+  }
+
+
 
   err = init_emu68(0);
 
