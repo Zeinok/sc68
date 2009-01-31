@@ -171,8 +171,7 @@ def main():
         print "  * residual: %f dB" % lin2db(error)
         print "  */"
         print
-        print '#include "sinctable.h"'
-        print "const int sine_integral[%d] = {"
+        print "const int sine_integral[%d] = {" % len(filtered)
         print_fir(filtered, format='c')
         print "};"
 
