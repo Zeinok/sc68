@@ -155,13 +155,13 @@ static void ym2149_mix_output(ym_t * const ym, cycle68_t cycles)
     for (i = 2; i >= 0; i -= 1) {
         volume <<= 5; 
         if (((ym->reg.name.ctl_mixer & (1<<i)) || orig->tonegen[i].flip_flop)
-            || ((ym->reg.name.ctl_mixer & (1<<(i+3))) && (orig->noise_state & 1))) {
+            && ((ym->reg.name.ctl_mixer & (1<<(i+3))) || (orig->noise_state & 1))) {
             if (*(&ym->reg.name.vol_a + i) & LEVEL_M_MASK)
                 /* Envelope reg */
                 volume |= orig->env_output;
             else
                 /* Level reg */
-                volume |= (*(&ym->reg.name.vol_a + i) & LEVEL_LEVEL_MASK) << 1;
+                volume |= ((*(&ym->reg.name.vol_a + i) & LEVEL_LEVEL_MASK) << 1) | 1;
         }
     }
 
@@ -250,7 +250,7 @@ static void ym2149_clock(ym_t * const ym, cycle68_t cycles)
         if (orig->noise_count >= noise_event) {
             orig->noise_state = 
                 (orig->noise_state >> 1) |
-                (((orig->noise_state ^ (orig->noise_state >> 2)) & 1) << 17);
+                (((orig->noise_state ^ (orig->noise_state >> 2)) & 1) << 16);
             orig->noise_count = 0;
         }
 
