@@ -293,7 +293,7 @@ int mw_init(mw_parms_t * const parms_data)
 {
   mw_parms_t * parms = parms_data ? parms_data : &default_parms;
 
-  //mw_feature = debugmsg68_feature("mw","ym-2149 emulator",debugmsg68_DEFAULT);
+  mw_feature = debugmsg68_feature("mw","ym-2149 emulator", 0);
 
   /* Default emulation mode */
   if (parms->emul == MW_EMUL_DEFAULT) {
