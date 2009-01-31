@@ -131,7 +131,7 @@ static int noise_generator(ym_t * const ym, int ymcycles)
   /* All inits */
   ct        = orig->noise_ct;
   noise_gen = orig->noise_gen;
-  per       = ym->reg.name.per_noise & 0x3F;
+  per       = ym->reg.name.per_noise & 0x1F;
     
   /*per      |= !per;*/ /* $$$ Must verify if 0 and 1 really are the same */
   per     <<= 1;    /* because the noise generator base frequency is
