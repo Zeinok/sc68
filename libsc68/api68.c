@@ -685,6 +685,7 @@ sc68_t * sc68_create(sc68_create_t * create)
 
   /* Set IO chipsets sampling rates */
   create->sampling_rate = sc68_sampling_rate(sc68, sc68->mix.rate);
+  sc68_debug(sc68," sampling rate = %d\n", create->sampling_rate);
 
   /* Finally gets all pathes. */
 /*   rsc68_get_path(&init->shared_path, */

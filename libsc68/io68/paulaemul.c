@@ -149,7 +149,7 @@ void paula_shutdown()
  * `-----------------------------------------------------------------'
  */
 
-static void set_clock(paula_t * const paula, int clock_type, uint68_t f)
+static int set_clock(paula_t * const paula, int clock_type, uint68_t f)
 {
   u64 tmp;
   const int ct_fix = paula->ct_fix;
@@ -160,17 +160,16 @@ static void set_clock(paula_t * const paula, int clock_type, uint68_t f)
   tmp <<= CT_FIX;
   tmp /= f;
   paula->dividand = (uint68_t) tmp;
+  return f;
 }
 
 uint68_t paula_sampling_rate(paula_t * const paula, uint68_t f)
 {
   uint68_t hz = default_parms.hz;
   if (paula) {
-    if (!f) {
-      hz = paula->hz;
-    } else {
-      set_clock(paula, paula->clock, f);
-    }
+    hz = !f
+      ? paula->hz
+      : set_clock(paula, paula->clock, f);
   }
   return hz;
 }
