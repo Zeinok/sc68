@@ -417,6 +417,15 @@ int main(int argc, char *argv[])
 /* #endif /\* ifdef HAVE_GETOPT *\/ */
 
 
+  /* Parse tracks */
+  if (!strcmp(tracks,"def")) {
+    track = -1;
+  } else if (!strcmp(tracks,"all")) {
+    track = 0;
+  } else {
+    track = strtol(tracks,0,0);
+  }
+
   /* Scan help and info options */
 /*   for (i=1; i<na; ++i) { */
 /*     if (!strcmp(a[i],"--")) { */
