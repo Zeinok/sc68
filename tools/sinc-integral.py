@@ -70,17 +70,22 @@ def quantize(x, bits, scale=False):
     if scale:
         correction_factor = x[-1] - x[0]
 
+    err = 0;
     for _ in range(len(x)):
-        val = x[_] * fact / correction_factor;
+        val = x[_] * fact / correction_factor - err;
         # correct rounding
         if val < 0:
-            val = int(val - 0.5)
+            intval = int(val - 0.5)
         else:
-            val = int(val + 0.5)
+            intval = int(val + 0.5)
+
+        # error feedback
+        err = intval - val;
+
         # leave scaled?
         if not scale:
-            val /= float(fact)
-        x[_] = val * -1
+            intval /= float(fact)
+        x[_] = intval * -1
     return x
 
 def lin2db(lin):
@@ -139,14 +144,14 @@ def main():
     # The output should be aliasingless for 48 kHz sampling frequency.
     # Sligh aliasing to 19 kHz for 44.1 kHz. SNR is only about 80 dB.
     # likely there are some sampling noise from phase errors, too...
-    unfiltered = firwin(1024, 20000.0 / 2e6 * 2, window=('kaiser', 8.0))
+    unfiltered = firwin(1024, 20000.0 / 2e6 * 2, window=('kaiser', 9.0))
 
     # move filtering effects to start to allow IIRs more time to settle
     unfiltered = fir_minphase(unfiltered)
 
     filter_fixed = make_rc_lopass(2e6, 10000.0)
 
-    # apply fixed filter to A500
+    # apply fixed filter
     filtered, error = run_filter(filter_fixed, unfiltered)
 
     if not spectrum:
