@@ -179,40 +179,21 @@ void ym2149_clock(ym_t * const ym, cycle68_t cycles)
 {
     ym_blep_t *orig = &ym->emu.blep;
 
-    int i, tone_event[3], env_event, noise_event;
-    
-    /* refresh all event count variables from registers */
-    for (i = 0; i < 3; i += 1) {
-        tone_event[i] = ym->reg.index[i * 2] | ((ym->reg.index[i * 2 + 1] & TONE_HI_MASK) << 8);
-        if (tone_event[i] == 0)
-            tone_event[i] = 1;
-        tone_event[i] = tone_event[i] << 3;
-    }
-
-    noise_event = ym->reg.name.per_noise & NOISE_MASK;
-    if (noise_event == 0)
-        noise_event = 1;
-    noise_event = noise_event << 4;
-
-    env_event = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi << 8);
-    if (env_event == 0)
-        env_event = 1;
-    env_event = env_event << 3;
-
     while (cycles) {
         int iter = cycles;
+        int i;
 
         /* establish length of period without state change */
         for (i = 0; i < 3; i ++) {
-            if (iter > tone_event[i] - orig->tonegen[i].count)
-                iter = tone_event[i] - orig->tonegen[i].count;
+            if (iter > orig->tonegen[i].event - orig->tonegen[i].count)
+                iter = orig->tonegen[i].event - orig->tonegen[i].count;
         }
 
-        if (iter > noise_event - orig->noise_count)
-            iter = noise_event - orig->noise_count;
+        if (iter > orig->noise_event - orig->noise_count)
+            iter = orig->noise_event - orig->noise_count;
 
-        if (iter > env_event - orig->env_count)
-            iter = env_event - orig->env_count;
+        if (iter > orig->env_event - orig->env_count)
+            iter = orig->env_event - orig->env_count;
 
         if (iter < 0)
             iter = 0;
@@ -224,14 +205,14 @@ void ym2149_clock(ym_t * const ym, cycle68_t cycles)
         /* clock subsystems forward */
         for (i = 0; i < 3; i ++) {
             orig->tonegen[i].count += iter;
-            if (orig->tonegen[i].count >= tone_event[i]) {
+            if (orig->tonegen[i].count >= orig->tonegen[i].event) {
                 orig->tonegen[i].flip_flop = ~orig->tonegen[i].flip_flop;
                 orig->tonegen[i].count = 0;
             }
         }
 
         orig->noise_count += iter;
-        if (orig->noise_count >= noise_event) {
+        if (orig->noise_count >= orig->noise_event) {
             orig->noise_state = 
                 (orig->noise_state >> 1) |
                 (((orig->noise_state ^ (orig->noise_state >> 2)) & 1) << 16);
@@ -240,7 +221,7 @@ void ym2149_clock(ym_t * const ym, cycle68_t cycles)
         }
 
         orig->env_count += iter;
-        if (orig->env_count >= env_event) {
+        if (orig->env_count >= orig->env_event) {
             int envtype = ym->reg.name.env_shape & CTL_ENV_MASK;
 
             orig->env_output = envelopes[envtype][orig->env_state ++];
@@ -322,11 +303,20 @@ static void cleanup(ym_t * const ym) {}
 static int reset(ym_t * const ym, const cycle68_t ymcycle)
 {
     ym_blep_t *orig = &ym->emu.blep;
+
     int tmp = orig->cycles_per_sample;
     memset(orig, 0, sizeof(ym_blep_t));
     orig->cycles_per_sample = tmp;
+
     orig->noise_state = 1;
     orig->systemtime = BLEP_SIZE;
+
+    orig->tonegen[0].event = 8;
+    orig->tonegen[1].event = 8;
+    orig->tonegen[2].event = 8;
+    orig->noise_event = 16;
+    orig->env_event = 8;
+
     return 0;
 }
 
@@ -335,7 +325,7 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
 {
     ym_blep_t *orig = &ym->emu.blep;
 
-    int len = 0;
+    int len = 0, voice;
 
     /* Walk  the static list of allocated events */
     int currcycle = 0;
@@ -349,9 +339,43 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
         /* mix up to this cycle, update state */
         len += mix_to_buffer(ym, access->ymcycle - currcycle, output + len);
         ym->reg.index[access->reg] = access->val;
-        /* reset envelope on write */
-        if (&ym->reg.index[access->reg] == &ym->reg.name.env_shape)
-            orig->env_state = 0;
+   
+        /* update various internal variables in response to writes.
+         * unfortunately pointers don't work for this, so... */ 
+        switch (access->reg) {
+            case 0: /* per_x_lo, per_x_hi */
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+                voice = access->reg >> 1;
+                orig->tonegen[voice].event = ym->reg.index[voice << 1] | (ym->reg.index[(voice << 1) + 1] << 8);
+                if (orig->tonegen[voice].event == 0)
+                    orig->tonegen[voice].event = 1;
+                orig->tonegen[voice].event <<= 3;
+                break;
+    
+            case 6: /* per_noise */
+                orig->noise_event = ym->reg.name.per_noise & NOISE_MASK;
+                if (orig->noise_event == 0)
+                    orig->noise_event = 1;
+                orig->noise_event <<= 4;
+                break;
+
+            case 11: /* per_env_lo, per_env_hi */
+            case 12:
+                orig->env_event = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi << 8);
+                if (orig->env_event == 0)
+                    orig->env_event = 1;
+                orig->env_event <<= 3;
+                break;
+
+            case 13: /* env_shape */
+                orig->env_state = 0;
+                break;
+        }
+
         currcycle = access->ymcycle;
     }
 

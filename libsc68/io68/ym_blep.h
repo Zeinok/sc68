@@ -14,6 +14,7 @@ enum {
 };
 
 typedef struct {
+    int event;
     int count;
     int flip_flop;
 } ym_blep_tone_t;
@@ -39,9 +40,12 @@ typedef struct {
 
     /* subsystem states */
     ym_blep_tone_t tonegen[3];
+    int noise_event;
     int noise_count;
     int noise_state;
     int noise_output;
+
+    int env_event;
     int env_count;
     int env_state;
     int env_output;
