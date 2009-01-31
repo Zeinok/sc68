@@ -42,6 +42,10 @@
 #endif
 #include "mwemul.h"
 
+#include <sc68/debugmsg68.h>
+int mw_feature = debugmsg68_CURRENT;
+
+
 /* #define MW_CALCUL_TABLE 1 */
 
 #define MW_N_DECIBEL 121
@@ -281,6 +285,10 @@ int mw_setup(mw_t * const mw,
 
   mw_reset(mw);
 
+  debugmsg68_info("micro-wire: select *%s* %dhz %d-bit memory\n",
+		  setup->parms.emul == MW_EMUL_SIMPLE ? "SIMPLE":"LINEAR",
+		  setup->parms.hz, setup->log2mem);
+
   return 0;
 }
 
@@ -293,7 +301,7 @@ int mw_init(mw_parms_t * const parms_data)
 {
   mw_parms_t * parms = parms_data ? parms_data : &default_parms;
 
-  mw_feature = debugmsg68_feature("mw","ym-2149 emulator", 0);
+  mw_feature = debugmsg68_feature("mw","micro-wire emulator", 0);
 
   /* Default emulation mode */
   if (parms->emul == MW_EMUL_DEFAULT) {
