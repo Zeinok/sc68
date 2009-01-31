@@ -321,9 +321,10 @@ static int IsIntParam(const char *parm,
   return cnt;
 }
 
+static char urlbuf[1024];
 int main(int argc, char *argv[]) 
 {
-  const char * outname = "audio://default";
+  const char * outname = 0;
   const char * inname  = 0;
   const char * tracks  = "def";
   int i,j;
@@ -497,6 +498,13 @@ int main(int argc, char *argv[])
   }
   if (!strcmp(inname,"-")) {
     inname = "stdin://sc68";
+  }
+
+  if (!outname) {
+    outname = urlbuf;		/*  */
+    snprintf(urlbuf,sizeof(urlbuf)-1,"audio://default/rate=%d",
+	     create68.sampling_rate);
+    urlbuf[sizeof(urlbuf)-1] = 0;
   }
 
   /* Output message to stdout except it is the output. */
