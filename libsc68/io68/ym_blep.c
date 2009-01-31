@@ -388,7 +388,7 @@ static uint68_t sampling_rate(ym_t * const ym, const uint68_t hz)
 {
     ym_blep_t *orig = &ym->emu.blep;
     orig->cycles_per_sample = (ym->clock << 8) / hz;
-    return 0;
+    return hz;
 }
 
 int ym_blep_setup(ym_t * const ym) {
