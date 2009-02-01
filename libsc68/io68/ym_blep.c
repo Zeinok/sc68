@@ -170,7 +170,7 @@ static void ym2149_new_output_level(ym_t * const ym)
         orig->blep_idx &= MAX_BLEPS - 1;
 
         orig->blepstate[orig->blep_idx].stamp = orig->systemtime;
-        orig->blepstate[orig->blep_idx].level = output - orig->global_output_level;
+        orig->blepstate[orig->blep_idx].level = orig->global_output_level - output;
         orig->global_output_level = output;
     }
 }
@@ -253,7 +253,7 @@ static int ym2149_output(ym_t * const ym)
         int age = systemtime - bs[i].stamp;
         if (age >= BLEP_SIZE)
             break;
-        output -= sine_integral[age] * bs[i].level;
+        output += sine_integral[age] * bs[i].level;
         i = (i + 1) & (MAX_BLEPS - 1);
     }
     return (output >> 16) + orig->global_output_level;
