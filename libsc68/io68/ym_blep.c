@@ -142,7 +142,7 @@ static const uint8_t envelopes[16][32+64] = {
 
 extern int ym_feature;		/* defined in ymemul.c */
 
-void ym2149_mix_output(ym_t * const ym, cycle68_t cycles)
+static void ym2149_new_output_level(ym_t * const ym)
 {
     ym_blep_t *orig = &ym->emu.blep;
 
@@ -175,13 +175,14 @@ void ym2149_mix_output(ym_t * const ym, cycle68_t cycles)
     }
 }
 
-void ym2149_clock(ym_t * const ym, cycle68_t cycles)
+static void ym2149_clock(ym_t * const ym, cycle68_t cycles)
 {
     ym_blep_t *orig = &ym->emu.blep;
 
     while (cycles) {
         int iter = cycles;
         int i;
+        int change = 0;
 
         /* establish length of period without state change */
         for (i = 0; i < 3; i ++) {
@@ -198,9 +199,8 @@ void ym2149_clock(ym_t * const ym, cycle68_t cycles)
         if (iter < 0)
             iter = 0;
 
-        /* produce pulse waveform for iter clocks */
+        cycles -= iter;
         orig->systemtime += iter;
-        ym2149_mix_output(ym, iter);
 
         /* clock subsystems forward */
         for (i = 0; i < 3; i ++) {
@@ -208,6 +208,7 @@ void ym2149_clock(ym_t * const ym, cycle68_t cycles)
             if (orig->tonegen[i].count >= orig->tonegen[i].event) {
                 orig->tonegen[i].flip_flop = ~orig->tonegen[i].flip_flop;
                 orig->tonegen[i].count = 0;
+                change = 1;
             }
         }
 
@@ -216,25 +217,31 @@ void ym2149_clock(ym_t * const ym, cycle68_t cycles)
             orig->noise_state = 
                 (orig->noise_state >> 1) |
                 (((orig->noise_state ^ (orig->noise_state >> 2)) & 1) << 16);
-            orig->noise_output = orig->noise_state & 1;
             orig->noise_count = 0;
+
+            if (! change)
+                change = orig->noise_output != (orig->noise_state & 1);
+            orig->noise_output = orig->noise_state & 1;
         }
 
         orig->env_count += iter;
         if (orig->env_count >= orig->env_event) {
-            int envtype = ym->reg.name.env_shape & CTL_ENV_MASK;
-
-            orig->env_output = envelopes[envtype][orig->env_state ++];
+            int new_env = envelopes[ym->reg.name.env_shape & CTL_ENV_MASK][orig->env_state ++];
             if (orig->env_state == 96)
                 orig->env_state = 32;
             orig->env_count = 0;
+
+            if (! change)
+                change = new_env != orig->env_output;
+            orig->env_output = new_env;
         }
 
-        cycles -= iter;
+        if (change)
+            ym2149_new_output_level(ym);
     }
 }
 
-int ym2149_output(ym_t * const ym)
+static int ym2149_output(ym_t * const ym)
 {
     ym_blep_t *orig = &ym->emu.blep;
     ym_blep_blep_state_t *bs = orig->blepstate;
@@ -252,7 +259,7 @@ int ym2149_output(ym_t * const ym)
     return (output >> 16) + orig->global_output_level;
 }
 
-int highpass(ym_t * const ym, int output)
+static int highpass(ym_t * const ym, int output)
 {
     ym_blep_t *orig = &ym->emu.blep;
     
@@ -375,6 +382,8 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
                 orig->env_state = 0;
                 break;
         }
+
+        ym2149_new_output_level(ym);
 
         currcycle = access->ymcycle;
     }
