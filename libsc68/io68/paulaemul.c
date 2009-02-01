@@ -110,14 +110,14 @@ static int msw_first = 0; /* big/little endian compliance */
  * `-----------------------------------------------------------------'
  */
 
-static volatile u32 tmp = 0x1234;
+static /* volatile */ u32 tmp = 0x1234;
 
 int paula_init(paula_parms_t * const parms_data)
 {
   paula_parms_t * parms = parms_data ? parms_data : &default_parms;
 
   /* Setup little/big endian swap */
-  msw_first = !(*(u16 *)&tmp);
+  msw_first = !(*(u8 *)&tmp);
 
   /* Default emulation mode */
   if (parms->emul == PAULA_EMUL_DEFAULT) {

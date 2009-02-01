@@ -12,8 +12,9 @@ SUBDIRS         = data68 @subdirs@
 ACLOCAL_AMFLAGS = -I m4 --install
 
 AM_CFLAGS       = @FILE68_CFLAGS@ @LIBFILE68_CFLAGS@
-AM_CPPFLAGS     = @FILE68_CPPFLAGS@ @LIBFILE68_CPPFLAGS@ $(SINCS)
+AM_CPPFLAGS     = @FILE68_CPPFLAGS@ @LIBFILE68_CPPFLAGS@ $(SINC)
 AM_LDFLAGS      = @FILE68_LDFLAGS@ @LIBFILE68_LDFLAGS@
+SINC            = -I$(srcdir)/sc68 $(unice68_inc)
 
 sdir=.
 hdir=sc68
@@ -85,7 +86,6 @@ $(unice68_dir)/libunice68.la:
 else
 UNICE68_LA           =
 endif
-SINCS                = -I$(srcdir)/sc68 $(unice68_inc)
 
 
 lib_LTLIBRARIES      = libfile68.la

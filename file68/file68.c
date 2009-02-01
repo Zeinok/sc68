@@ -379,7 +379,6 @@ int file68_is_our_url(const char * url, const char * exts, int * is_remote)
   has_protocol = !url68_get_protocol(protocol, sizeof(protocol), url);
 
   if (has_protocol) {
-    int i;
     is_our = !strcmp68(protocol,"SC68");
     if (!is_our && !strcmp68(protocol,"RSC68") && url+14<url_end) {
       is_our = strncmp(url+8, "music/", 6);

@@ -13,9 +13,9 @@ SUBDIRS            = io68 emu68 @subdirs@
 ACLOCAL_AMFLAGS    = -I m4 --install
 
 AM_CFLAGS          = @LIBSC68_CFLAGS@ @LIBLIBSC68_CFLAGS@
-AM_CPPFLAGS        = @LIBSC68_CPPFLAGS@ @LIBLIBSC68_CPPFLAGS@ $(SINCS)
+AM_CPPFLAGS        = @LIBSC68_CPPFLAGS@ @LIBLIBSC68_CPPFLAGS@ $(SINC)
 AM_LDFLAGS         = @LIBSC68_LDFLAGS@ @LIBLIBSC68_LDFLAGS@
-
+SINC               = -I$(srcdir)/sc68 $(file68_inc)
 
 # ,----------------------------------------------------------------------.
 # | script binary                                                        |
@@ -36,8 +36,6 @@ $(file68_dir)/libfile68.la:
 else
 FILE68_LA =
 endif
-
-SINCS              = -I$(srcdir)/sc68 $(file68_inc)
 
 lib_LTLIBRARIES    = libsc68.la
 libsc68_la_SOURCES = api68.c conf68.c mixer68.c libsc68.c

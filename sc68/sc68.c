@@ -458,10 +458,7 @@ int main(int argc, char *argv[])
 
 
   memset(&create68,0,sizeof(create68));
-#ifdef DEBUG
-  create68.debug_bit    = debugmsg68_CURRENT;
-#endif
-
+  create68.debug_bit = debugmsg68_DEBUG;
   sc68 = sc68_create(&create68);
   if (!sc68) {
     goto error;

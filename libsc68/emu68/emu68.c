@@ -132,7 +132,7 @@ u8 * emu68_memptr(emu68_t * const emu68,
     addr68_t end = (dst+sz)&MEMMSK68;
     if (sz > MEMMSK68+1) {
       emu68_error_add(emu68,
-		      "Not enougth 68K memory ($%X>=$%X)",sz,emu68->memmsk);
+		      "Not enough 68K memory ($%X>=$%X)",sz,emu68->memmsk);
     } else if (end < dst) {
       emu68_error_add(emu68,
 		      "68K memory overflow :($%X-%X,$%X)",dst,dst+sz,sz);

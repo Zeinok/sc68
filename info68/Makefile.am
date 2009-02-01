@@ -13,8 +13,9 @@ SUBDIRS              = @subdirs@
 ACLOCAL_AMFLAGS      = -I m4 --install
 
 AM_CFLAGS            = @INFO68_CFLAGS@ @BININFO68_CFLAGS@
-AM_CPPFLAGS          = @INFO68_CPPFLAGS@ @BININFO68_CPPFLAGS@ $(SINCS)
+AM_CPPFLAGS          = @INFO68_CPPFLAGS@ @BININFO68_CPPFLAGS@ $(SINC)
 AM_LDFLAGS           = @INFO68_LDFLAGS@ @BININFO68_LDFLAGS@
+SINC                 = $(file68_inc)
 
 
 # ,----------------------------------------------------------------------.
@@ -29,7 +30,6 @@ $(file68_dir)/libfile68.la:
 else
 FILE68_LA            =
 endif
-SINCS                = $(file68_inc)
 
 bin_PROGRAMS         = info68
 info68_SOURCES       = info68.c

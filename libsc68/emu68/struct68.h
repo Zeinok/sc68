@@ -129,6 +129,7 @@ typedef struct
 #define REG68_D5_IDX 005
 #define REG68_D6_IDX 006
 #define REG68_D7_IDX 007
+#define REG68_DN_IDX(N) (N&7)
 
 #define REG68_A0_IDX 010
 #define REG68_A1_IDX 011
@@ -138,6 +139,7 @@ typedef struct
 #define REG68_A5_IDX 015
 #define REG68_A6_IDX 016
 #define REG68_A7_IDX 017
+#define REG68_AN_IDX(N) (8+(N&7))
 
 #define REG68_US_IDX 020
 #define REG68_PC_IDX 021
@@ -174,7 +176,8 @@ struct emu68_s {
   /* Onboard memory. */
   addr68_t memmsk; /**< Onboard memory mask (2^log2mem-1).              */
   int log2mem;     /**< Onboard memory buffer size (2^log2mem).         */
-  u8 mem[16];      /**< Onboard memory buffer (must be last in struct). */
+  u8 mem[16];      /**< Onboard memory buffer.
+		        @notice Must be last in struct.                 */
 };
 
 /**

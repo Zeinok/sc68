@@ -15,6 +15,7 @@ ACLOCAL_AMFLAGS      = -I m4 --install
 AM_CFLAGS            = @SC68_CFLAGS@ @BINSC68_CFLAGS@
 AM_CPPFLAGS          = @SC68_CPPFLAGS@ @BINSC68_CPPFLAGS@ $(SINC)
 AM_LDFLAGS           = @SC68_LDFLAGS@ @BINSC68_LDFLAGS@
+SINC                 = $(sc68_inc) $(file68_inc)
 
 
 # ,----------------------------------------------------------------------.
@@ -30,7 +31,6 @@ else
 SC68_LA =
 endif
 
-SINC                 = $(sc68_inc) $(file68_inc)
 
 bin_PROGRAMS         = sc68
 sc68_SOURCES         = sc68.c

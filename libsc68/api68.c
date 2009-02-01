@@ -101,26 +101,30 @@ struct _sc68_s {
   char          name[32];     /**< short name.                           */
 
   int            version;     /**< sc68 version.                         */
+
+  /** 68k emulator. */
   emu68_t      * emu68;       /**< 68k emulator instance.                */
   emu68_parms_t  emu68_parms; /**< 68k emulator parameters.              */
 
-  /** All io chip */
+  /** All IO chips.
+   *  @notice Do not change order; debug68 haxxx depends on it).
+   */
   io68_t *ymio,*mwio,*shifterio,*paulaio,*mfpio;
 
-  ym_t * ym;                  /**< YM emulator.                        */ 
-  mw_t * mw;		      /**< MicroWire emulator.                 */
-  paula_t * paula;	      /**< Amiga emulator.                     */
+  ym_t * ym;                  /**< YM emulator.                          */ 
+  mw_t * mw;		      /**< MicroWire emulator.                   */
+  paula_t * paula;	      /**< Amiga emulator.                       */
 
-  int ym_emul;                /**< YM emulation type.                   */
-  int mw_emul;                /**< MicroWire emulation type.            */
-  int amiga_emul;             /**< Amiga emulation type.                */
+  int ym_emul;                /**< YM emulation type.                    */
+  int mw_emul;                /**< MicroWire emulation type.             */
+  int amiga_emul;             /**< Amiga emulation type.                 */
 
   disk68_t     * disk;        /**< Current loaded disk.                  */
   music68_t    * mus;         /**< Current playing music.                */
   int            track;       /**< Current playing track.                */
   int            track_to;    /**< Track to set (0:n/a).                 */
-  int            loop_to;     /**< Loop to set (-1:default 0:infinite)   */
-  int            force_loop;  /**< Loop to set if default (-1:music)     */
+  int            loop_to;     /**< Loop to set (-1:default 0:infinite).  */
+  int            force_loop;  /**< Loop to set if default (-1:music).    */
   int            track_here;  /**< Force first track here.               */
   unsigned int   playaddr;    /**< Current play address in 68 memory.    */
   int            seek_to;     /**< Seek to this time (-1:n/a)            */
@@ -138,28 +142,29 @@ struct _sc68_s {
   /** Mixer info struture. */
   struct
   {
-    unsigned int   rate;         /**< Sampling rate in hz.              */
-    unsigned int * buffer;       /**< Current PCM buffer.               */
-    int            bufmax;       /**< buffer allocated size.            */
-    int            bufreq;       /**< Required buffer size for track.   */
-    unsigned int * bufptr;       /**< Current PCM position.             */
-    int            buflen;       /**< PCM count in buffer.              */
-    int            stdbuflen;    /**< Default number of PCM per pass.   */
-    unsigned int   cycleperpass; /**< Number of 68K cycles per pass.    */
-    int            amiga_blend;  /**< Amiga LR blend factor [0..65536]. */
-    unsigned int   sample_cnt;   /**< Number of mixed PCM.              */
-    unsigned int   pass_cnt;     /**< Current pass.                     */
-    unsigned int   pass_total;   /**< Total number of pass.             */
-    unsigned int   loop_cnt;     /**< Loop counter.                     */
-    unsigned int   loop_total;   /**< Total # of loop (0:infinite)      */
-    int            stp;          /**< pitch frq (fixed int 8).          */
-    int            max_stp;      /**< max pitch frq (0:no seek).        */
+    unsigned int   rate;         /**< Sampling rate in hz.               */
+    unsigned int * buffer;       /**< Current PCM buffer.                */
+    int            bufmax;       /**< buffer allocated size.             */
+    int            bufreq;       /**< Required buffer size for track.    */
+    unsigned int * bufptr;       /**< Current PCM position.              */
+    int            buflen;       /**< PCM count in buffer.               */
+    int            stdbuflen;    /**< Default number of PCM per pass.    */
+    unsigned int   cycleperpass; /**< Number of 68K cycles per pass.     */
+    int            amiga_blend;  /**< Amiga LR blend factor [0..65536].  */
+    unsigned int   sample_cnt;   /**< Number of mixed PCM.               */
+    unsigned int   pass_cnt;     /**< Current pass.                      */
+    unsigned int   pass_total;   /**< Total number of pass.              */
+    unsigned int   loop_cnt;     /**< Loop counter.                      */
+    unsigned int   loop_total;   /**< Total # of loop (0:infinite).      */
+    int            stp;          /**< pitch frq (fixed int 8).           */
+    int            max_stp;      /**< max pitch frq (0:no seek).         */
   } mix;
 
-  sc68_estack_t estack;	         /**< error messages storage.           */
+  sc68_estack_t estack;	         /**< error messages storage.            */
 
   /* debug bit to be used for debugmsg68(). */
   int debug_bit;
+
 };
 
 static volatile int sc68_init_flag; /* Library init flag     */
@@ -188,19 +193,19 @@ static int stream_read_68k(sc68_t * sc68, unsigned int dest,
   return (istream68_read(is, mem68, sz) == sz) ? 0 : -1;
 }
 
-static int init_emu68(sc68_t * sc68)
+static int init_emu68(sc68_t * const sc68)
 {
   int err;
-  emu68_init_t emu68_parms;
-  io68_init_t io68_parms;
+  emu68_init_t emu68_inits;
+  io68_init_t  io68_inits;
 
   sc68_debug(sc68,"init_emu68() {\n");
 
   /* Initialize emu68 */
   sc68_debug(sc68,"init_emu68() : Initialize emu68 (68k emulator)\n");
-  emu68_parms.alloc = sc68_alloc;
-  emu68_parms.free  = sc68_free;
-  err = emu68_init(&emu68_parms);
+  emu68_inits.alloc = sc68_alloc;
+  emu68_inits.free  = sc68_free;
+  err = emu68_init(&emu68_inits);
   sc68_debug(sc68,"init_emu68() : emu68 library init %s\n", ok_int(err));
   if (err) {
     goto error;
@@ -208,8 +213,8 @@ static int init_emu68(sc68_t * sc68)
 
   /* Initialize chipset */
   sc68_debug(sc68,"init_emu68() : Initialise io68 (chipset)\n");
-  memset(&io68_parms, 0, sizeof(io68_parms));
-  err = io68_init(&io68_parms);
+  memset(&io68_inits, 0, sizeof(io68_inits)); /* set all to default */
+  err = io68_init(&io68_inits);
   sc68_debug(sc68,"init_emu68() : io68 library init %s\n", ok_int(err));
 
  error:
@@ -229,10 +234,10 @@ static void safe_emu68_destroy(emu68_t **pemu)
   *pemu = 0;
 }
 
-static int init68k(sc68_t * sc68, int log2mem)
+static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
 {
   int err = -1;
-  emu68_parms_t parms;
+  emu68_parms_t * const parms = &sc68->emu68_parms;
 
   sc68_debug(sc68,"init_68k() {\n");
 
@@ -243,11 +248,11 @@ static int init68k(sc68_t * sc68, int log2mem)
   }
 
   /* setup parameters. */
-  memset(&parms,0,sizeof(parms));
-  parms.name    = "sc68/emu68";
-  parms.log2mem = log2mem;
-  parms.clock   = EMU68_ATARIST_CLOCK;
-  parms.debug   = 0;
+  /* memset(&parms,0,sizeof(parms)); */
+  parms->name    = "sc68/emu68";
+  parms->log2mem = log2mem;
+  parms->clock   = EMU68_ATARIST_CLOCK;
+  parms->debug   = emu68_debug;
 
   sc68_debug(sc68,
 	     "init_68k() : parameters:\n"
@@ -255,14 +260,14 @@ static int init68k(sc68_t * sc68, int log2mem)
 	     "             mem   :  %d => %dKb\n"
 	     "             clock :  %uhz\n"
 	     "             debug :  %s\n",
-	     parms.name,
-	     parms.log2mem,parms.log2mem>10?1<<(parms.log2mem-10):0,
-	     parms.clock,parms.debug?"On":"Off");
+	     parms->name,
+	     parms->log2mem,parms->log2mem>10?1<<(parms->log2mem-10):0,
+	     parms->clock,parms->debug?"On":"Off");
 
   /* Do initialization. */
   sc68_debug(sc68,"init_68k() : Create emulator\n");
 
-  sc68->emu68 = emu68_create(&parms);
+  sc68->emu68 = emu68_create(parms);
   if (!sc68->emu68) {
     sc68_debug(sc68,"init_68k() : Emulator creation failed\n");
     sc68_error_add(sc68,"68k emulator creation failed");
@@ -270,7 +275,7 @@ static int init68k(sc68_t * sc68, int log2mem)
   }
   sc68_debug(sc68,"init_68k() : Emulator creation success\n");
   
-  sc68->emu68->reg.sr = 0x2000;
+  sc68->emu68->reg.sr   = 0x2000;
   sc68->emu68->reg.a[7] = sc68->emu68->memmsk+1-4;
 
   /* Initialize chipset */
@@ -374,7 +379,6 @@ static void set_config(sc68_t * sc68)
   sc68->ym_emul     = myconfig_get_int(c, "stf_emul", YM_EMUL_DEFAULT);
   sc68->mw_emul     = myconfig_get_int(c, "ste_emul", MW_EMUL_DEFAULT);
 
-
   sc68->track_here      = myconfig_get_int(c, "force_track",   1);
   sc68->time.def_ms     = myconfig_get_int(c, "default_time",  3*60) * 1000;
   sc68->mix.rate        = myconfig_get_int(c, "sampling_rate", SAMPLING_RATE_DEF);
@@ -401,7 +405,7 @@ static void set_config(sc68_t * sc68)
 
 static void myconfig_set_int(config68_t * c,
 			     const char * name,
-			    int v)
+			     int v)
 {
   if (c) {
     config68_set(c, -1, name, v, 0);
@@ -679,7 +683,7 @@ sc68_t * sc68_create(sc68_create_t * create)
   }
 
   /* Create 68k emulator and pals. */
-  if (init68k(sc68, log2mem)) {
+  if (init68k(sc68, log2mem, create->emu68_debug)) {
     goto error;
   }
 
@@ -1650,3 +1654,16 @@ void sc68_debug(sc68_t * sc68, const char * fmt, ...)
   va_end(list);
 }
 
+/* Hidden function to be used by debug68 tool to haxxx into emulators
+ * as it needs.
+ */
+SC68_API
+void sc68_emulators(sc68_t    * sc68, 
+		    emu68_t  ** p_emu68,
+		    io68_t  *** p_ios68)
+{
+  if (sc68) {
+    if (p_emu68) * p_emu68 =  sc68->emu68;
+    if (p_ios68) * p_ios68 = &sc68->ymio;
+  }
+}

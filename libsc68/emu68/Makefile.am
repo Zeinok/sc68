@@ -10,7 +10,7 @@
 ACLOCAL_AMFLAGS    = -I ../m4 --install
 AM_CFLAGS          = @LIBSC68_CFLAGS@ @LIBLIBSC68_CFLAGS@
 AM_CPPFLAGS        = @LIBSC68_CPPFLAGS@ @LIBLIBSC68_CPPFLAGS@ $(SINC)
-SINC               = -DSINCSTART -I$(top_srcdir) $(file68_inc) -DSINCEND 
+SINC               = -I$(top_srcdir) $(file68_inc)
 
 mysources=\
  cc68.c\

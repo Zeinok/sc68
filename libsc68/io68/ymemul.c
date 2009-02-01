@@ -172,8 +172,13 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 *                  Yamaha init                        *
 ******************************************************/
 
+/* -DYM_EMUL=YM_EMUL_BLEP choose BLEP as default engine */
+#ifndef YM_EMUL
+# define YM_EMUL_ORIG
+#endif
+
 static ym_parms_t default_parms =  {
-  /* emul     */ YM_EMUL_ORIG,
+  /* emul     */ YM_EMUL,
   /* hz       */ SAMPLING_RATE_DEF,
   /* clock    */ YM_CLOCK_ATARIST,
   /* outlevel */ 0x70, /* 0x100, */ /* 0x93, */

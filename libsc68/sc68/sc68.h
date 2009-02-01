@@ -180,6 +180,9 @@ typedef struct {
   /** 68k memory size (2^log2mem). */
   int log2mem;
 
+  /** Run  68k emulator in debug mode (enable memory access trace). */
+  int emu68_debug;
+
 } sc68_create_t;
 
 /** Music information.

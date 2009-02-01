@@ -1097,6 +1097,7 @@ int main(int na, char **a)
     fprintf(stderr, "Missing input file. Try --help.\n");
     return 3;
   }
+  debugmsg("sourcer68: input is '%s'\n",fname);
 
   /* Init 68000 memory buffer */
   if (Init68k(size68)) {
@@ -1107,14 +1108,23 @@ int main(int na, char **a)
 #ifdef USE_FILE68
   if (!file68_verify_url(fname)) {
     music68_t * m;
+    debugmsg("sourcer68: sc68 file detected\n");
+
     d = file68_load_url(fname);
     if (!d) {
       return SpoolError(4);
     }
     m = d->mus+(d->default_six%(unsigned)d->nb_six);
+    debugmsg("sourcer68: sc68 using default music %d/%d\n",
+	     d->default_six,d->nb_six);
+    
 
     if (m->replay) {
-      error_add(0, "Music with external replay (%s) not supported", m->replay);
+      debugmsg("sourcer68: sc68 use external replay '%s'\n",
+	       m->replay);
+
+      error_add(0, "Music with external replay (%s) not yet supported",
+		m->replay);
       return SpoolError(4);
     }
 
