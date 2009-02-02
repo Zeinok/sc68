@@ -87,9 +87,10 @@ void emu68_set_registers(emu68_t * emu68, const reg68_t *r, int mask)
     if (mask&(1<<REG68_US_IDX)) REG68.usp = r->usp;
     if (mask&(1<<REG68_PC_IDX)) REG68.pc  = r->pc;
     if (mask&(1<<REG68_SR_IDX)) REG68.sr  = r->sr;
-    for(i=0; i<16; i++) {
+    for(i=0; i<8; i++)
       if (mask&(1<<(REG68_D0_IDX+i))) REG68.d[i] = r->d[i];
-    }
+    for(i=0; i<8; i++)
+      if (mask&(1<<(REG68_A0_IDX+i))) REG68.a[i] = r->a[i];
   }
 }
 
@@ -103,9 +104,10 @@ void emu68_get_registers(const emu68_t * const emu68, reg68_t *r, int mask)
   if (mask&(1<<REG68_US_IDX)) r->usp = REG68.usp;
   if (mask&(1<<REG68_PC_IDX)) r->pc  = REG68.pc;
   if (mask&(1<<REG68_SR_IDX)) r->sr  = REG68.sr;
-  for(i=0; i<16; i++) {
+  for(i=0; i<8; i++)
     if (mask&(1<<(REG68_D0_IDX+i))) r->d[i] = REG68.d[i];
-  }
+  for(i=0; i<8; i++)
+    if (mask&(1<<(REG68_A0_IDX+i))) r->a[i] = REG68.a[i];
 }
 
 void emu68_set_cycle(emu68_t * const emu68, cycle68_t cycle)
