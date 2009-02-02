@@ -243,8 +243,8 @@ static s32 ym2149_output(ym_t * const ym, const u8 subsample)
         /* JOS says that we should have several subphases of SINC for
          * this, and we should then interpolate between them linearly.
          * What I got here is better than nothing, though. */
-        output += ((sine_integral[age] * subsample
-                    + sine_integral[age+1] * (256 - subsample)
+        output += ((sine_integral[age] * (256 - subsample)
+                    + sine_integral[age+1] * subsample
                     + 128) >> 8) * orig->blepstate[i].level;
         i = (i + 1) & (MAX_BLEPS - 1);
     }
