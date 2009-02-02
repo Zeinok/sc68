@@ -275,7 +275,7 @@ static int mix_to_buffer(ym_t * const ym, cycle68_t cycles, s32 *output)
     while (cycles) {
         cycle68_t iter = cycles;
         u8 makesample = 0;
-        if (iter >= orig->cycles_to_next_sample >> 8) {
+        if (iter > orig->cycles_to_next_sample >> 8) {
             iter = orig->cycles_to_next_sample >> 8;
             makesample = 1;
         }
