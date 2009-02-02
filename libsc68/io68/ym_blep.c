@@ -168,7 +168,7 @@ static void ym2149_new_output_level(ym_t * const ym)
         dacstate |= mask & ((orig->env_output & orig->tonegen[i].envmask) | orig->tonegen[i].volmask);
     }
 
-    output = ym->ymout5[dacstate] >> 1;
+    output = (ym->ymout5[dacstate] + 1) >> 1;
 
     if (output != orig->global_output_level) {
         /* find next blep position */
@@ -265,7 +265,7 @@ static s32 ym2149_output(ym_t * const ym, const u8 subsample)
     /* Terminate the blep train by keeping the last stamp invalid. */
     orig->blepstate[i].stamp = orig->time - BLEP_SIZE;
 
-    return (output >> 16) + orig->global_output_level;
+    return (output + (1 << 15) >> 16) + orig->global_output_level;
 }
 
 static s32 highpass(ym_t * const ym, s32 output)
