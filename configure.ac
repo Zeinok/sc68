@@ -37,7 +37,7 @@ AC_ARG_ENABLE(
   [all],
   [AS_HELP_STRING(
     [--enable-all],
-    [enable all package @<:@default=no@:>@])],
+    [enable all sub-packages @<:@default=no@:>@])],
   [],[enable_all="check"])
 
 AS_CASE(["x$enable_all"],
@@ -47,7 +47,7 @@ AS_CASE(["x$enable_all"],
 # Dev Tools
 AC_ARG_ENABLE_PACKAGE([as68],[68k macro assembler],[[$]enable_devtools])
 AC_ARG_ENABLE_PACKAGE([sourcer68],[68k sourcer],[[$]enable_devtools])
-# AC_ARG_ENABLE_PACKAGE([debug68],[68k debugger],[[$]enable_devtools])
+AC_ARG_ENABLE_PACKAGE([debug68],[68k debugger],[[$]enable_devtools])
 AC_ARG_ENABLE_PACKAGE([desa68],[68k disassembler library],[[$]enable_devtools])
 
 # API Libraries
@@ -143,9 +143,9 @@ AS_IF([test "x${enable_sc68}"      = "xyes"],
     AC_CONFIG_SUBDIRS([sc68])
   ])
 
-# AS_IF([test "x${enable_debug68}"   = "xyes"],[
-#     AC_CONFIG_SUBDIRS([debug68])
-#   ])
+AS_IF([test "x${enable_debug68}"   = "xyes"],[
+    AC_CONFIG_SUBDIRS([debug68])
+  ])
 
 AC_SUBST([subdirs])
 
@@ -167,6 +167,7 @@ AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
 AC_MSG_NOTICE([|   debug-mode          : $enable_debug])
+AC_MSG_NOTICE([|   release-mode        : $enable_release])
 AC_MSG_NOTICE([|   all-static-mode     : $enable_all_static])
 AC_MSG_NOTICE([|   sub-dirs            : $subdirs])
 AC_MSG_NOTICE([+-----------------------])

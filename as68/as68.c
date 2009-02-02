@@ -452,7 +452,9 @@ static int assemble(char *fin, char *fout, char *frel)
 
       printf("Writing binary output : %s , %d byte%s\n",
              fout, max_pc, max_pc > 1 ? "s" : "");
-      fwrite(code, 1, max_pc, fd);
+      if (fwrite(code, 1, max_pc, fd) != max_pc) {
+	
+      };
       fclose(fd);
     }
   }

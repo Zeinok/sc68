@@ -253,7 +253,6 @@ AC_SUBST([sc68datadir])
 AC_CHECK_FUNCS([malloc free sleep usleep vsprintf vsnprintf getenv])
 
 
-
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
@@ -277,6 +276,7 @@ AC_MSG_NOTICE([,----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|----------------------])
 AC_MSG_NOTICE([|   debug-mode          : $enable_debug])
+AC_MSG_NOTICE([|   release-mode        : $enable_release])
 AC_MSG_NOTICE([|   file-stream         : $enable_file])
 AC_MSG_NOTICE([|   fd-stream           : $enable_fd])
 AC_MSG_NOTICE([|   memory-stream       : $enable_mem])

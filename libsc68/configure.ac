@@ -23,6 +23,27 @@ SC68_PACKAGE([sc68 engine library.])
 [LIBSC68_CPPFLAGS="-DSC68_EXPORT=1"]
 [LIBSC68_LDFLAGS="-version-info 3:0:0"]
 
+# ,----------------------------------------------------------------------.
+# | Optional features                                                    |
+# `----------------------------------------------------------------------'
+
+AC_ARG_WITH(
+  [ym-engine],
+  [AS_HELP_STRING([--with-ym-engine],
+      [set default YM-2149 engine (orig or blep) @<:@default=auto-select@:>@])],
+  [],[with_ym_engine='x'])
+
+AS_CASE([x-${with_ym_engine}],
+  [x-blep],[YM_EMUL='YM_EMUL_BLEP';with_ym_engine='BLEP synthesis'],
+  [x-orig],[YM_EMUL='YM_EMUL_ORIG';with_ym_engine='sc68 original'],
+  [x-x | x-yes | x-no],[YM_EMUL='x'],[
+    YM_EMUL="YM_EMUL_"[]AS_TR_CPP($with_ym_engine)
+    with_ym_engine="unknown (3rd party?) $with_ym_engine engine"
+    AC_MSG_WARN([Using unknown YM engine may break compilation.])])
+
+AS_IF([test "x-$YM_EMUL" != "x-x"],
+  [AC_DEFINE_UNQUOTED([YM_EMUL],[$YM_EMUL],[set default YM engine])],
+  [with_ym_engine='auto-select (should be sc68 original)'])
 
 # ,----------------------------------------------------------------------.
 # | Sized size integers                                                  |
@@ -78,8 +99,10 @@ AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
 AC_MSG_NOTICE([|   debug-mode          : $enable_debug])
+AC_MSG_NOTICE([|   release-mode        : $enable_release])
 AC_MSG_NOTICE([|   all-static          : $enable_all_static])
 AC_MSG_NOTICE([|   file68              : $has_file68 ($file68_ver)])
+AC_MSG_NOTICE([|   default YM engine   : $with_ym_engine])
 AC_MSG_NOTICE([+-----------------------])
 
 dnl#
