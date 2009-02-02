@@ -320,7 +320,8 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
 {
     ym_blep_t *orig = &ym->emu.blep;
 
-    int len = 0, voice, newevent;
+    u32 len = 0, voice;
+    s32 newevent;
 
     /* Walk  the static list of allocated events */
     int currcycle = 0;
@@ -345,7 +346,7 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
             case 4:
             case 5:
                 voice = access->reg >> 1;
-                newevent = ym->reg.index[voice << 1] | (ym->reg.index[(voice << 1) + 1] << 8);
+                newevent = ym->reg.index[voice << 1] | ((ym->reg.index[(voice << 1) + 1] & TONE_HI_MASK) << 8);
                 if (newevent == 0)
                     newevent = 1;
                 newevent <<= 3;
