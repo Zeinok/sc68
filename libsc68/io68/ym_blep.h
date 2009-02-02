@@ -14,40 +14,44 @@ enum {
 };
 
 typedef struct {
-    int event;
-    int count;
-    int flip_flop;
+    s32 count;
+    u32 event;
+    u16 flip_flop;
+    u16 tonemix;
+    u16 noisemix;
+    u16 envmask;
+    u16 volmask;
 } ym_blep_tone_t;
 
 typedef struct {
-    int stamp;
-    int level;
+    u32 stamp;
+    s32 level;
 } ym_blep_blep_state_t;
 
 typedef struct {
     /* sampling parameters */
-    int cycles_per_sample; /* 8 bit fixed point ym clocks */
-    int cycles_to_next_sample;
+    u32 cycles_per_sample; /* 8 bit fixed point ym clocks */
+    u32 cycles_to_next_sample;
 
     /* hp filter */
-    int hp;
+    s32 hp;
 
     /* blep stuff */
-    int global_output_level;
-    int blep_idx;
-    int systemtime;
+    s32 global_output_level;
+    u32 blep_idx;
+    u32 systemtime;
     ym_blep_blep_state_t blepstate[MAX_BLEPS];
 
     /* subsystem states */
     ym_blep_tone_t tonegen[3];
-    int noise_event;
-    int noise_count;
-    int noise_state;
-    int noise_output;
+    u32 noise_event;
+    s32 noise_count;
+    u32 noise_state;
+    u16 noise_output;
 
-    int env_event;
-    int env_count;
-    int env_state;
-    int env_output;
+    u32 env_event;
+    s32 env_count;
+    u8 env_state;
+    u16 env_output;
 
 } ym_blep_t;

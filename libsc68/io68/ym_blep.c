@@ -39,8 +39,6 @@ enum {
     TONE_HI_MASK = 0xf,
     NOISE_MASK = 0x1f,
     CTL_ENV_MASK = 0xf,
-    LEVEL_M_MASK = 0x10,
-    LEVEL_LEVEL_MASK = 0xf,
 
     BLEP_SIZE = 1024,
     
@@ -147,22 +145,15 @@ static void ym2149_new_output_level(ym_t * const ym)
     ym_blep_t *orig = &ym->emu.blep;
 
     int i, output;
-    int volume = 0;
 
-    for (i = 2; i >= 0; i -= 1) {
-        volume <<= 5; 
-        if (((ym->reg.name.ctl_mixer & (1<<i)) || orig->tonegen[i].flip_flop)
-            && ((ym->reg.name.ctl_mixer & (1<<(i+3))) || orig->noise_output)) {
-            if (*(&ym->reg.name.vol_a + i) & LEVEL_M_MASK)
-                /* Envelope reg */
-                volume |= orig->env_output;
-            else
-                /* Level reg */
-                volume |= ((*(&ym->reg.name.vol_a + i) & LEVEL_LEVEL_MASK) << 1) | 1;
-        }
+    u16 dacstate = 0;
+    for (i = 0; i < 3; i ++) {
+        u16 mask = orig->tonegen[i].tonemix | orig->tonegen[i].flip_flop;
+        mask &= orig->tonegen[i].noisemix | orig->noise_output;
+        dacstate |= mask & ((orig->env_output & orig->tonegen[i].envmask) | orig->tonegen[i].volmask);
     }
 
-    output = ym->ymout5[volume] >> 1;
+    output = ym->ymout5[dacstate] >> 1;
 
     if (output != orig->global_output_level) {
         /* find next blep position */
@@ -184,55 +175,52 @@ static void ym2149_clock(ym_t * const ym, cycle68_t cycles)
         int i;
         int change = 0;
 
-        /* establish length of period without state change */
         for (i = 0; i < 3; i ++) {
-            if (iter > orig->tonegen[i].event - orig->tonegen[i].count)
-                iter = orig->tonegen[i].event - orig->tonegen[i].count;
+            if (iter > orig->tonegen[i].count)
+                iter = orig->tonegen[i].count;
         }
 
-        if (iter > orig->noise_event - orig->noise_count)
-            iter = orig->noise_event - orig->noise_count;
+        if (iter > orig->noise_count)
+            iter = orig->noise_count;
 
-        if (iter > orig->env_event - orig->env_count)
-            iter = orig->env_event - orig->env_count;
-
-        if (iter < 0)
-            iter = 0;
+        if (iter > orig->env_count)
+            iter = orig->env_count;
 
         cycles -= iter;
         orig->systemtime += iter;
 
         /* clock subsystems forward */
         for (i = 0; i < 3; i ++) {
-            orig->tonegen[i].count += iter;
-            if (orig->tonegen[i].count >= orig->tonegen[i].event) {
+            orig->tonegen[i].count -= iter;
+            if (orig->tonegen[i].count == 0) {
                 orig->tonegen[i].flip_flop = ~orig->tonegen[i].flip_flop;
-                orig->tonegen[i].count = 0;
+                orig->tonegen[i].count = orig->tonegen[i].event;
                 change = 1;
             }
         }
 
-        orig->noise_count += iter;
-        if (orig->noise_count >= orig->noise_event) {
+        orig->noise_count -= iter;
+        if (orig->noise_count == 0) {
+            u16 new_noise;
             orig->noise_state = 
                 (orig->noise_state >> 1) |
                 (((orig->noise_state ^ (orig->noise_state >> 2)) & 1) << 16);
-            orig->noise_count = 0;
+            orig->noise_count = orig->noise_event;
 
-            if (! change)
-                change = orig->noise_output != (orig->noise_state & 1);
-            orig->noise_output = orig->noise_state & 1;
+            new_noise = orig->noise_state & 1 ? 0xffff : 0x0000;
+            change = change || orig->noise_output != new_noise;
+            orig->noise_output = new_noise;
         }
 
-        orig->env_count += iter;
-        if (orig->env_count >= orig->env_event) {
-            int new_env = envelopes[ym->reg.name.env_shape & CTL_ENV_MASK][orig->env_state ++];
-            if (orig->env_state == 96)
+        orig->env_count -= iter;
+        if (orig->env_count == 0) {
+            u16 new_env = envelopes[ym->reg.name.env_shape & CTL_ENV_MASK][orig->env_state];
+            new_env |= (new_env << 5) | (new_env << 10);
+            if (++ orig->env_state == 96)
                 orig->env_state = 32;
-            orig->env_count = 0;
+            orig->env_count = orig->env_event;
 
-            if (! change)
-                change = new_env != orig->env_output;
+            change = change || new_env != orig->env_output;
             orig->env_output = new_env;
         }
 
@@ -332,7 +320,7 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
 {
     ym_blep_t *orig = &ym->emu.blep;
 
-    int len = 0, voice;
+    int len = 0, voice, newevent;
 
     /* Walk  the static list of allocated events */
     int currcycle = 0;
@@ -346,7 +334,7 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
         /* mix up to this cycle, update state */
         len += mix_to_buffer(ym, access->ymcycle - currcycle, output + len);
         ym->reg.index[access->reg] = access->val;
-   
+  
         /* update various internal variables in response to writes.
          * unfortunately pointers don't work for this, so... */ 
         switch (access->reg) {
@@ -357,25 +345,66 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
             case 4:
             case 5:
                 voice = access->reg >> 1;
-                orig->tonegen[voice].event = ym->reg.index[voice << 1] | (ym->reg.index[(voice << 1) + 1] << 8);
-                if (orig->tonegen[voice].event == 0)
-                    orig->tonegen[voice].event = 1;
-                orig->tonegen[voice].event <<= 3;
+                newevent = ym->reg.index[voice << 1] | (ym->reg.index[(voice << 1) + 1] << 8);
+                if (newevent == 0)
+                    newevent = 1;
+                newevent <<= 3;
+
+                /* The chip performs count >= event. If the condition is
+                 * true, event triggers immediately. However, I have inverted
+                 * the count to occur towards zero. Changes in event must
+                 * therefore affect the prevailing count. If new event time
+                 * is greater than current, the count must increase as the
+                 * current state will be delayed. */
+                orig->tonegen[voice].count += newevent - orig->tonegen[voice].event;
+                orig->tonegen[voice].event = newevent;
+                /* I do not deal with negative counts in the hot path. */
+                if (orig->tonegen[voice].count < 0)
+                    orig->tonegen[voice].count = 0;
                 break;
     
             case 6: /* per_noise */
-                orig->noise_event = ym->reg.name.per_noise & NOISE_MASK;
-                if (orig->noise_event == 0)
-                    orig->noise_event = 1;
-                orig->noise_event <<= 4;
+                newevent = ym->reg.name.per_noise & NOISE_MASK;
+                if (newevent == 0)
+                    newevent = 1;
+                newevent <<= 4;
+
+                orig->noise_count += newevent - orig->noise_event;
+                orig->noise_event = newevent;
+                if (orig->noise_count < 0)
+                    orig->noise_count = 0;
+                break;
+
+            case 7: /* mixer */
+                orig->tonegen[0].tonemix = access->val & 1 ? 0xffff : 0;
+                orig->tonegen[1].tonemix = access->val & 2 ? 0xffff : 0;
+                orig->tonegen[2].tonemix = access->val & 4 ? 0xffff : 0;
+                orig->tonegen[0].noisemix = access->val & 8 ? 0xffff : 0;
+                orig->tonegen[1].noisemix = access->val & 16 ? 0xffff : 0;
+                orig->tonegen[2].noisemix = access->val & 32 ? 0xffff : 0;
+                break;
+
+            case 8: /* volume */
+            case 9:
+            case 10:
+                voice = access->reg - 8;
+                orig->tonegen[voice].envmask = access->val & 0x10
+                    ? 0x1f << (voice*5) : 0;
+                orig->tonegen[voice].volmask = access->val & 0x10
+                    ? 0 : (((access->val & 0xf) << 1) | 1) << (voice*5);
                 break;
 
             case 11: /* per_env_lo, per_env_hi */
             case 12:
-                orig->env_event = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi << 8);
-                if (orig->env_event == 0)
-                    orig->env_event = 1;
-                orig->env_event <<= 3;
+                newevent = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi << 8);
+                if (newevent == 0)
+                    newevent = 1;
+                newevent <<= 3;
+
+                orig->env_count += newevent - orig->env_event;
+                orig->env_event = newevent;
+                if (orig->env_count < 0)
+                    orig->env_count = 0;
                 break;
 
             case 13: /* env_shape */
