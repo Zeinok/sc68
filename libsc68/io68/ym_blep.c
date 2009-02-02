@@ -230,7 +230,7 @@ static void ym2149_clock(ym_t * const ym, cycle68_t cycles)
     }
 }
 
-static s32 ym2149_output(ym_t * const ym)
+static s32 ym2149_output(ym_t * const ym, const u8 subsample)
 {
     ym_blep_t *orig = &ym->emu.blep;
 
@@ -238,9 +238,14 @@ static s32 ym2149_output(ym_t * const ym)
     s32 output = 0;
     while (1) {
         s16 age = orig->time - orig->blepstate[i].stamp;
-        if (age >= BLEP_SIZE)
+        if (age >= BLEP_SIZE-1)
             break;
-        output += sine_integral[age] * orig->blepstate[i].level;
+        /* JOS says that we should have several subphases of SINC for
+         * this, and we should then interpolate between them linearly.
+         * What I got here is better than nothing, though. */
+        output += ((sine_integral[age] * subsample
+                    + sine_integral[age+1] * (256 - subsample)
+                    + 128) >> 8) * orig->blepstate[i].level;
         i = (i + 1) & (MAX_BLEPS - 1);
     }
     /* Terminate the blep train by keeping the last stamp invalid. */
@@ -285,9 +290,10 @@ static int mix_to_buffer(ym_t * const ym, cycle68_t cycles, s32 *output)
         cycles -= iter;
         orig->cycles_to_next_sample -= iter << 8;
 
-        /* Generate output */
+        /* Generate output.
+         * To improve accuracy, we interpolate the sinc table. */
         if (makesample) {
-            output[len ++] = highpass(ym, ym2149_output(ym));
+            output[len ++] = highpass(ym, ym2149_output(ym, orig->cycles_to_next_sample & 0xff));
             assert(len < MAX_MIXBUF);
             orig->cycles_to_next_sample += orig->cycles_per_sample;
         }

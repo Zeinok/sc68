@@ -46,7 +46,7 @@ typedef struct {
     u16 env_output;
 
     /* blep stuff */
-    s32 global_output_level;
+    s16 global_output_level;
     u32 blep_idx;
     u16 time;
     s32 hp;
