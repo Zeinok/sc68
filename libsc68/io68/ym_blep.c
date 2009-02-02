@@ -144,7 +144,8 @@ static void ym2149_new_output_level(ym_t * const ym)
 {
     ym_blep_t *orig = &ym->emu.blep;
 
-    int i, output;
+    u32 i;
+    s16 output;
 
     u16 dacstate = 0;
     for (i = 0; i < 3; i ++) {
@@ -160,7 +161,7 @@ static void ym2149_new_output_level(ym_t * const ym)
         orig->blep_idx -= 1;
         orig->blep_idx &= MAX_BLEPS - 1;
 
-        orig->blepstate[orig->blep_idx].stamp = orig->systemtime;
+        orig->blepstate[orig->blep_idx].stamp = orig->time;
         orig->blepstate[orig->blep_idx].level = orig->global_output_level - output;
         orig->global_output_level = output;
     }
@@ -187,7 +188,7 @@ static void ym2149_clock(ym_t * const ym, cycle68_t cycles)
             iter = orig->env_count;
 
         cycles -= iter;
-        orig->systemtime += iter;
+        orig->time += iter;
 
         /* clock subsystems forward */
         for (i = 0; i < 3; i ++) {
@@ -229,29 +230,30 @@ static void ym2149_clock(ym_t * const ym, cycle68_t cycles)
     }
 }
 
-static int ym2149_output(ym_t * const ym)
+static s32 ym2149_output(ym_t * const ym)
 {
     ym_blep_t *orig = &ym->emu.blep;
-    ym_blep_blep_state_t *bs = orig->blepstate;
-    int i = orig->blep_idx;
-    int systemtime = orig->systemtime;
 
-    int output = 0;
+    u32 i = orig->blep_idx;
+    s32 output = 0;
     while (1) {
-        int age = systemtime - bs[i].stamp;
+        s16 age = orig->time - orig->blepstate[i].stamp;
         if (age >= BLEP_SIZE)
             break;
-        output += sine_integral[age] * bs[i].level;
+        output += sine_integral[age] * orig->blepstate[i].level;
         i = (i + 1) & (MAX_BLEPS - 1);
     }
+    /* Terminate the blep train by keeping the last stamp invalid. */
+    orig->blepstate[i].stamp = orig->time - BLEP_SIZE;
+
     return (output >> 16) + orig->global_output_level;
 }
 
-static int highpass(ym_t * const ym, int output)
+static s32 highpass(ym_t * const ym, s32 output)
 {
     ym_blep_t *orig = &ym->emu.blep;
     
-    orig->hp = (orig->hp * 255 + (output << 4)) >> 8;
+    orig->hp = (orig->hp * 511 + (output << 4)) >> 9;
     output -= orig->hp >> 4;
 
     if (output > 32767)
@@ -263,16 +265,16 @@ static int highpass(ym_t * const ym, int output)
 }
 
 /* run output synthesis for some clocks */
-static int mix_to_buffer(ym_t * const ym, int cycles, s32 *output)
+static int mix_to_buffer(ym_t * const ym, cycle68_t cycles, s32 *output)
 {
     ym_blep_t *orig = &ym->emu.blep;
 
     assert(cycles >= 0);
 
-    int len = 0;
+    u32 len = 0;
     while (cycles) {
         cycle68_t iter = cycles;
-        int makesample = 0;
+        u8 makesample = 0;
         if (iter >= orig->cycles_to_next_sample >> 8) {
             iter = orig->cycles_to_next_sample >> 8;
             makesample = 1;
@@ -287,32 +289,10 @@ static int mix_to_buffer(ym_t * const ym, int cycles, s32 *output)
         if (makesample) {
             output[len ++] = highpass(ym, ym2149_output(ym));
             assert(len < MAX_MIXBUF);
-            orig->cycles_to_next_sample = orig->cycles_per_sample;
+            orig->cycles_to_next_sample += orig->cycles_per_sample;
         }
     }
     return len;
-}
-
-static void cleanup(ym_t * const ym) {}
-
-static int reset(ym_t * const ym, const cycle68_t ymcycle)
-{
-    ym_blep_t *orig = &ym->emu.blep;
-
-    int tmp = orig->cycles_per_sample;
-    memset(orig, 0, sizeof(ym_blep_t));
-    orig->cycles_per_sample = tmp;
-
-    orig->noise_state = 1;
-    orig->systemtime = BLEP_SIZE;
-
-    orig->tonegen[0].event = 8;
-    orig->tonegen[1].event = 8;
-    orig->tonegen[2].event = 8;
-    orig->noise_event = 16;
-    orig->env_event = 8;
-
-    return 0;
 }
 
 /* mix for ymcycles cycles. */
@@ -324,7 +304,7 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
     s32 newevent;
 
     /* Walk  the static list of allocated events */
-    int currcycle = 0;
+    cycle68_t currcycle = 0;
     ym_waccess_t *access;
     for (access = ym->waccess; access != ym->waccess_nxt; access ++) {
         if (access->ymcycle > ymcycles) {
@@ -433,6 +413,25 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
     return len;
 }
 
+static int reset(ym_t * const ym, const cycle68_t ymcycle)
+{
+    ym_blep_t *orig = &ym->emu.blep;
+
+    u32 tmp = orig->cycles_per_sample;
+    memset(orig, 0, sizeof(ym_blep_t));
+
+    orig->cycles_per_sample = tmp;
+    orig->noise_state = 1;
+    orig->time = BLEP_SIZE;
+    orig->tonegen[0].event = 8;
+    orig->tonegen[1].event = 8;
+    orig->tonegen[2].event = 8;
+    orig->noise_event = 16;
+    orig->env_event = 8;
+
+    return 0;
+}
+
 /* Get required length of buffer at run(s32 *output) (number of frames). */
 static uint68_t buffersize(const ym_t const * ym, const cycle68_t ymcycles)
 {
@@ -447,7 +446,7 @@ static uint68_t sampling_rate(ym_t * const ym, const uint68_t hz)
 }
 
 int ym_blep_setup(ym_t * const ym) {
-    ym->cb_cleanup       = cleanup;
+    ym->cb_cleanup       = 0;
     ym->cb_reset         = reset;
     ym->cb_run           = run;
     ym->cb_buffersize    = buffersize;

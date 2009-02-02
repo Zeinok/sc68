@@ -15,7 +15,7 @@ enum {
 
 typedef struct {
     s32 count;
-    s32 event;
+    u32 event;
     u16 flip_flop;
     u16 tonemix;
     u16 noisemix;
@@ -24,8 +24,8 @@ typedef struct {
 } ym_blep_tone_t;
 
 typedef struct {
-    u32 stamp;
-    s32 level;
+    u16 stamp;
+    s16 level;
 } ym_blep_blep_state_t;
 
 typedef struct {
@@ -35,12 +35,12 @@ typedef struct {
 
     /* subsystem states */
     ym_blep_tone_t tonegen[3];
-    s32 noise_event;
+    u32 noise_event;
     s32 noise_count;
     u32 noise_state;
     u16 noise_output;
 
-    s32 env_event;
+    u32 env_event;
     s32 env_count;
     u8 env_state;
     u16 env_output;
@@ -48,7 +48,7 @@ typedef struct {
     /* blep stuff */
     s32 global_output_level;
     u32 blep_idx;
-    u32 systemtime;
+    u16 time;
     s32 hp;
 
     ym_blep_blep_state_t blepstate[MAX_BLEPS];
