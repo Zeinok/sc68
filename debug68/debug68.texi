@@ -1,0 +1,141 @@
+\input texinfo  @c -*-texinfo-*-
+
+@c %**start of header
+@setfilename debug68.info
+@include version.texi
+@include package.texi
+@settitle @command{sc68}: @value{DESCRIPTION}
+@finalout
+@c %**end of header
+
+@dircategory @value{INFOCAT}
+@direntry
+* debug68: (debug68).             @value{DESCRIPTION}
+@end direntry
+
+@synindex cp ky
+@setchapternewpage odd
+
+@ifinfo
+This is Edition @value{EDITION} of @cite{The @command{debug68} Manual},
+for @command{debug68} version @value{VERSION}, last updated @value{UPDATED}.
+@c !BEGIN INTRO
+@c !END INTRO
+
+@c !BEGIN COPYING
+@*Copyright @copyright{} 1998-2009 Benjamin Gerard
+
+Permission is granted to make and distribute verbatim copies of
+this manual upon condition that the  provided the copyright notice
+and this permission notice are preserved on all copies.
+@c !END COPYING
+@end ifinfo
+
+@titlepage
+@title debug68
+@subtitle 
+@sp 1
+@subtitle Edition @value{EDITION}, for @command{debug68} version @value{VERSION} @value{UPDATED}
+@c !BEGIN AUTHORS
+@author Benjamin Gerard
+@c !END AUTHORS
+@end titlepage
+@c @page
+
+@ifinfo
+@node Top, debug68 Program, (dir), (dir)
+@top @command{debug68}: get debug68 file information
+
+The @command{debug68} is used to play Atari ST and Amiga music files.
+
+
+@ignore
+@c !BEGIN NAME
+/|\ Atari ST and C= Amiga music player.
+@c !END NAME
+@end ignore
+
+
+@menu
+* debug68 Program::                The @command{debug68} Program
+* Options Summary::             Options Summary
+@end menu
+
+@center manual for debug68 version @value{VERSION} edited on @value{UPDATED}
+
+@end ifinfo
+
+@node debug68 Program, Options Summary, Top, Top
+@section The @command{debug68} Program
+
+@section Description
+@c !BEGIN DESCRIPTION
+@command{debug68} is a program to play debug68 music file.
+@c !END DESCRIPTION
+
+@c !BEGIN SYNOPSIS
+@section Synopsis
+@display
+@command{debug68 [OPTION] [--] <URI>}
+@end display
+@c !END SYNOPSIS
+
+@node Options Summary,  , debug68 Program, Top
+@c !BEGIN OPTIONS
+@section Options Summary
+
+@option{--} breaks option parsing.
+
+@subsection Informationnal Options
+@table @samp
+@item  @option{-h}
+@itemx @option{--help}
+Display help message and exit.
+@item  @option{-V}
+@itemx @option{--version}
+Display build date and exit.
+@item  @option{--debug-list}
+Display debug features and exit.
+@end table
+
+@subsection General Options
+@table @samp
+@item  @option{-t}
+@itemx @option{--track=track[,loop]}
+Choose track to play [0=all-tracks] and number of loop [0=infinite]
+@item  @option{-o <output-uri>}
+@itemx @option{--output=<output-uri>}
+Set output. Default is stdout. 
+@end table
+
+@subsection debug68 Engine Options
+@table @samp
+@item  @option{--debug68-no-debug}
+Disable all debug output ($DEBUG68_NO_DEBUG).
+@item  @option{--debug68-debug=features}
+Set debug features ($DEBUG68_DEBUG). Currently features is a number which
+bit match a feature as given by @option{--debug-list}.
+@item  @option{--debug68-data=path}
+Set shared resource path (prior to @env{DEBUG68_DATA}).
+@item  @option{--debug68-user=path}
+Set user resource path (prior to @env{DEBUG68_USER}).
+@item  @option{--debug68-music=path}
+Set local music path (prior to @env{DEBUG68_MUSIC}).
+@item  @option{--debug68-rmusic=path}
+Set remote music path (prior to @env{DEBUG68_RMUSIC}).
+@end table
+@c !END OPTIONS
+
+@ignore
+@c !BEGIN SEEALSO
+The full documentation for @command{debug68} is maintained as a Texinfo manual. If the @command{info} and @command{debug68} programs are properly installed at your site, the command
+
+@command{info debug68}
+
+should give you access to the complete manual.
+@c !END SEEALSO
+@end ignore
+
+@page
+@contents
+@bye
