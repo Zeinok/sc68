@@ -9,7 +9,7 @@
  *
  */
  
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _EMU68_EMU68_H_
 #define _EMU68_EMU68_H_
@@ -45,8 +45,10 @@ extern "C" {
 
 /** Emulator initialization structure type. */
 typedef struct {
-  emu68_alloc_t alloc; /**< Alloc function. */
-  emu68_free_t  free;  /**< Free function.  */
+  emu68_alloc_t  alloc; /**< Alloc function. */
+  emu68_free_t   free;  /**< Free function.  */
+  int           *argc;	/**< Argument count. */
+  char         **argv;  /**< Arguments.      */
 } emu68_init_t;
 
 /** Init 68K emulator.

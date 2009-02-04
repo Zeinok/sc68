@@ -42,6 +42,9 @@
 #include <ctype.h>
 
 
+#ifndef DEBUG_RSC68_O
+#define DEBUG_RSC68_O 0
+#endif
 int rsc68_feature = debugmsg68_DEFAULT; 
 
 static volatile int init = 0;
@@ -655,32 +658,31 @@ istream68_t * rsc68_open(rsc68_t type, const char *name, int mode,
   return rsc68(type, name, mode, info);
 }
 
-
 int rsc68_init(void)
 {
   int err = -1;
 
-  TRACE68(-1,"rsc68_init() {\n");
-  if (!init) {
-    rsc68 = default_open;
+  if (init) {
+    TRACE68(rsc68_feature,"rsc68_init: already initialized\n");
+  } else {
+    rsc68_feature =
+      debugmsg68_feature("rsc","resource access protocol",DEBUG_RSC68_O);
 
+    TRACE68(rsc68_feature,"rsc68_init() {\n");
+    rsc68 = default_open;
     rsc68_init_table();
     rsc68_set_share(FILE68_SHARED_PATH);
     rsc68_set_user(FILE68_USER_PATH);
     rsc68_set_music(FILE68_MUSIC_PATH);
     rsc68_set_remote_music(FILE68_RMUSIC_PATH);
-
+    
     TRACE68(rsc68_feature,"rsc68_init: shared-data = [%s]\n",share_path);
     TRACE68(rsc68_feature,"rsc68_init: user_path   = [%s]\n",user_path);
     TRACE68(rsc68_feature,"rsc68_init: lmusic_path = [%s]\n",lmusic_path);
     TRACE68(rsc68_feature,"rsc68_init: rmusic_path = [%s]\n",rmusic_path);
-
+    
     err = 0;
-  } else {
-    TRACE68(rsc68_feature,"rsc68_init: already initialized\n");
   }
-  TRACE68(rsc68_feature,"} rsc68_init() => [%s]\n",strok68(err));
-
   debugmsg68_info("rsc68: init => [%s]\n", strok68(err));
   return err;
 }

@@ -26,16 +26,6 @@ extern "C" {
  *  @{
  */
 
-/** Options help display function.
- *
- *  -# user data
- *  -# option
- *  -# envvar
- *  -# short description
- */
-typedef void (*init68_help_t)(void *, const char*, const char*, const char*);
-
-
 FILE68_API
 /** Initialize file68 library.
  *
@@ -51,13 +41,6 @@ FILE68_API
  */
 void file68_shutdown(void);
 
-FILE68_API
-/** Print defined options.
- *
- * @param  cookie  User data used as 1st argument for fct
- * @param  fct     Fonction call for each possible option
- */
-void file68_option_help(void * cookie, init68_help_t fct);
 
 /**
  *@}

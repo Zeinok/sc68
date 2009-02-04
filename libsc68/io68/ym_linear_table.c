@@ -37,7 +37,7 @@ void ym_create_5bit_linear_table(s16 * out, unsigned int level)
   int i;
   const unsigned int min = ymout1c5bit[00];
   const unsigned int max = ymout1c5bit[31];
-  const unsigned int div = max-min;
+  const unsigned int div = max-min ? max-min : 1;
   const int center = level>>1;
   for (i=0; i<32*32*32; ++i) {
     int tmp =
@@ -46,6 +46,6 @@ void ym_create_5bit_linear_table(s16 * out, unsigned int level)
 	 (unsigned int) ymout1c5bit[0x1F & (i>> 0)] -
 	 3u * min ) / 3u * level / div;
     out[i] = tmp - center;
-    /* fprintf(stderr,"%d \n",(int)out[i]); */
   }
+  debugmsg68_info("ym-2149: using *LINEAR* volumes (%d)\n", level);
 }

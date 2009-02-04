@@ -37,6 +37,12 @@ int io68_init(io68_init_t * const parms)
 {
   int err = 0;
 
+  /* Copy argc and argv where applicable. */
+  if (parms) {
+    parms->mw.argc = parms->ym.argc = parms->paula.argc = parms->argc;
+    parms->mw.argv = parms->ym.argv = parms->paula.argv = parms->argv;
+  }
+
   if (!isinit_paula) {
     isinit_paula = !paulaio_init(parms?&parms->paula:0); 
   }

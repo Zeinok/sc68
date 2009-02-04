@@ -30,9 +30,9 @@
 
 #include "debugmsg68.h"
 
-/* Always declare debug features because it's not a great deal and avoid
- * a lot more conditionnal in init68.c
- */
+#ifndef DEBUG_AO68_O
+# define DEBUG_AO68_O 0
+#endif
 int ao68_feature = debugmsg68_DEFAULT;
 
 /* Define this if you want xiph libao support. */
@@ -72,24 +72,25 @@ typedef struct {
 
 static volatile int init;
 
-static int istream68_ao_init(void)
+int istream68_ao_init(void)
 {
-  int err;
+  int err = -1;
 
-  TRACE68(ao68_feature,"istream68_ao_init() {\n");
-  if (!init) {
+  if (init) {
+    TRACE68(ao68_feature,"istream68_ao_init() already initialized\n");
+  } else {
+    ao68_feature = 
+      debugmsg68_feature("audio","Xiph AO audio stream",DEBUG_AO68_O);
+    TRACE68(ao68_feature,"istream68_ao_init() {\n");
     ao_initialize();
     err = 0;
     init = 1;
-  } else {
-    TRACE68(ao68_feature,"istream68_ao_init() already initialzed\n");
-    err = -1;
+    TRACE68(ao68_feature,"} istream68_ao_init() => [%s]\n",strok68(err));
   }
-  TRACE68(ao68_feature,"} istream68_ao_init() => [%s]\n",strok68(err));
   return err;
 }
 
-static void istream68_ao_shutdown(void)
+void istream68_ao_shutdown(void)
 {
   TRACE68(ao68_feature,"istream68_ao_init() {\n");
   if (init) {
@@ -428,7 +429,8 @@ istream68_t * istream68_ao_create(const char * fname, int mode)
   TRACE68(ao68_feature,"istream68_ao_create(%s,%d) {\n",
 	  strnevernull68(fname),mode);
 
-  if (istream68_ao_init()) {
+  if (!init) {
+    TRACE68(ao68_feature,"istream68_ao_create: ao is not initialized.\n");
     goto error;
   }
 

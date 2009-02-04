@@ -33,12 +33,18 @@
 
 #include "ymemul.h"
 #include <sc68/debugmsg68.h>
+#include <sc68/option68.h>
+
+#include <string.h>
 
 #ifndef BREAKPOINT68
 # define BREAKPOINT68 while(0)
 #endif
 
-int ym_feature = debugmsg68_CURRENT;
+#ifndef DEBUG_YM_O
+# define DEBUG_YM_O 0
+#endif
+int ym_feature = debugmsg68_DEFAULT;
 
 #include "ym_linear_table.c"
 #include "ym_atarist_table.c"
@@ -134,28 +140,11 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 
     /* Reset envelop generator */
     ym->reg.name.env_shape = 0x0A;
-/*     ym->env_bit            = 0; */
-/*     ym->env_ct             = 0; */
-
-    /* Reset noise generator */
-/*     ym->noise_gen          = 1; */
-/*     ym->noise_ct           = 0; */
-
-    /* Reset tone generator */
-/*     ym->voice_ctA          = 0; */
-/*     ym->voice_ctB          = 0; */
-/*     ym->voice_ctC          = 0; */
-/*     ym->levels             = 0; */
 
     /* Reset access lists */
     access_list_reset(&ym->ton_regs, "Ton", ymcycle); 
     access_list_reset(&ym->noi_regs, "Noi", ymcycle); 
     access_list_reset(&ym->env_regs, "Env", ymcycle); 
-
-    /* Reset filters */
-/*     ym->hipass_inp1 = 0; */
-/*     ym->hipass_out1 = 0; */
-/*     ym->lopass_out1 = 0; */
 
     /* Copy registers to shadow */
     for (i=0; i<sizeof(ym->reg.index)/sizeof(*ym->reg.index); ++i) {
@@ -177,8 +166,14 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 # define YM_EMUL YM_EMUL_ORIG
 #endif
 
+/* -DYM_VOL_TABLE=YM_VOL_LINEAR choose linear volume table */
+#ifndef YM_VOL_TABLE
+# define YM_VOL_TABLE  YM_VOL_ATARIST
+#endif
+
 static ym_parms_t default_parms =  {
   /* emul     */ YM_EMUL,
+  /* voltable */ YM_VOL_TABLE,
   /* hz       */ SAMPLING_RATE_DEF,
   /* clock    */ YM_CLOCK_ATARIST,
   /* outlevel */ 0x70, /* 0x100, */ /* 0x93, */
@@ -207,21 +202,79 @@ int ym_default_engine(int emul)
 /* Max output level for volume tables. */
 int ym_output_level = 0xEFFF;//DEAD;
 
+/* command line options option */
+static const char prefix[] = "sc68-";
+static const char engcat[] = "ym-2149";
+static option68_t opts[] = {
+  { option68_STR, prefix, "ym-engine", engcat,
+    "set ym-2149 engine [orig|blep]" },
+  { option68_STR, prefix, "ym-voltable", engcat,
+    "set ym-2149 volume table [atari|linear]" }
+};
+
 int ym_init(ym_parms_t * const parms)
 {
-  ym_feature = debugmsg68_feature("ym","ym-2149 emulator",debugmsg68_DEFAULT);
+  int argc = 0;
+  char ** argv = 0;
+  option68_t * opt;
+
+  /* Debug */
+  ym_feature = debugmsg68_feature("ym","ym-2149 emulator",DEBUG_YM_O);
 
   /* Set default parameters. */
   if (parms) {
     if (parms->emul)     default_parms.emul     = parms->emul;
+    if (parms->voltable) default_parms.voltable = parms->voltable;
     if (parms->hz)       default_parms.hz       = parms->hz;
     if (parms->clock)    default_parms.clock    = parms->clock;
     if (parms->outlevel) default_parms.outlevel = parms->outlevel;
+    if (parms->argc) {
+      argc = *parms->argc;
+      argv = parms->argv;
+    }
   }
 
-  ym_create_5bit_linear_table(ymout5, ym_output_level);
-  /* ym_create_5bit_atarist_table(ymout5, ym_output_level); */
+  /* ym- Options */
+  option68_append(opts,sizeof(opts)/sizeof(*opts));
+  argc = option68_parse(argc,argv,0);
+  if (parms && parms->argc) {
+    *parms->argc =  argc;
+  }
 
+  /* --sc68-ym-engine */
+  opt = option68_get("ym-engine",1);
+  if (opt) {
+    int k;
+    if (!strcmp(opt->val.str,"orig")) {
+      k = YM_EMUL_ORIG;
+    } else if (!strcmp(opt->val.str,"blep")) {
+      k = YM_EMUL_BLEP;
+    } else {
+      k = YM_EMUL_DEFAULT;
+    }
+    ym_default_engine(k);
+  }
+
+  /* --sc68-ym-voltable */
+  opt = option68_get("ym-voltable",1);
+  if (opt) {
+    if (!strcmp(opt->val.str,"linear")) {
+      default_parms.voltable = YM_VOL_LINEAR;
+    } else if (!strcmp(opt->val.str,"atari")) {
+      default_parms.voltable = YM_VOL_ATARIST;
+    }
+  }
+
+  /* Set volume table (unique for all instance) */
+  switch (default_parms.voltable) {
+  case YM_VOL_LINEAR:
+    ym_create_5bit_linear_table(ymout5, ym_output_level);
+    break;
+  case YM_VOL_DEFAULT:
+  case YM_VOL_ATARIST:
+  default:
+    ym_create_5bit_atarist_table(ymout5, ym_output_level);
+  }
   return 0;
 }
 
@@ -403,7 +456,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
     ym->waccess     = ym->static_waccess;
     ym->waccess_nxt = ym->waccess;
     ym->clock       = p->clock;
-    ym->outlevel    = p->outlevel;
+    /* ym->outlevel    = p->outlevel; */
     ym->voice_mute  = YM_OUT_MSK_ALL;
     /* clearing sampling rate callback ensure requested rate to be in
        valid range. */

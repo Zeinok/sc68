@@ -43,8 +43,11 @@
 #include "mwemul.h"
 
 #include <sc68/debugmsg68.h>
-int mw_feature = debugmsg68_CURRENT;
 
+#ifndef DEBUG_MW_O
+# define DEBUG_MW_O 0
+#endif
+int mw_feature = debugmsg68_DEFAULT;
 
 /* #define MW_CALCUL_TABLE 1 */
 
@@ -301,7 +304,7 @@ int mw_init(mw_parms_t * const parms_data)
 {
   mw_parms_t * parms = parms_data ? parms_data : &default_parms;
 
-  mw_feature = debugmsg68_feature("mw","micro-wire emulator", 0);
+  mw_feature = debugmsg68_feature("mw","micro-wire emulator", DEBUG_MW_O);
 
   /* Default emulation mode */
   if (parms->emul == MW_EMUL_DEFAULT) {

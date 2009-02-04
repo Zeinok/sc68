@@ -78,7 +78,20 @@
 const char file68_idstr[]    = SC68_IDSTR;
 const char file68_idstr_v2[] = SC68_IDSTR_V2;
 
+#ifndef DEBUG_FILE68_O
+# define DEBUG_FILE68_O 0
+#endif
 int file68_feature = debugmsg68_DEFAULT; 
+
+int file68_o_init(void)
+{
+  file68_feature =
+    debugmsg68_feature("loader", "music file loader", DEBUG_FILE68_O);
+  return 0;
+}
+
+void file68_o_shutdown(void) {
+}
 
 /* Peek Little Endian Unaligned 32 bit value */
 static int LPeek(const void *a)

@@ -31,6 +31,7 @@
 #include <sc68/istream68.h>
 #include <sc68/debugmsg68.h>
 #include <sc68/init68.h>
+#include <sc68/option68.h>
 
 /* sc68 includes */
 #include <sc68/sc68.h>
@@ -82,11 +83,7 @@ typedef struct my_option_s my_option_t;
 
 static sc68_t * sc68 = 0;
 
-#if defined(DEBUG) || defined(DEBUG_SC68)
-static int sc68_feature = debugmsg68_NEVER;
-#else
-static int sc68_feature = debugmsg68_CURRENT;
-#endif
+static const int sc68_feature = debugmsg68_DEFAULT;
 
 static void Debug(const char * fmt, ...)
 {
@@ -137,7 +134,10 @@ static void print_option(void * data,
 			 const char * envvar,
 			 const char * desc)
 {
-  fprintf(data, "  %-19s %s ($%s)\n", option, desc, envvar);
+  fprintf(data, 
+	  "  %s or `$%s'\n"
+	  "     %s \n",
+	  option, envvar, desc);
 }	 
 
 static void print_feature(void * data, 
@@ -168,34 +168,36 @@ static int print_usage(void)
      "  An /!\\ Atari ST and C= Amiga music player.\n"
      "\n"
      "Options:\n"
-     "  -h --help           Display this message and exit\n"
-     "  -v --version        Display sc68 version x.y.z and licence and exit\n"
+     "  -h --help           Print this message and exit\n"
+     "  -v --version        Print sc68 version x.y.z and licence and exit\n"
+     "  -D --debug-list     Print debug categories and exit\n"
      "  -v --verbose        Print more info\n"
      "  -q --quiet          Do not display music info\n"
-     "  -t --track=#[,#]    Choose track to play [0=all tracks]\n"
-     "                      and number of loop [0=infinite]\n"
+     "  -t --track=<val>    Choose track to play [\"all\"|\"def\"|track-#]\n"
+     "  -l --loop=<val>     Track loop [\"def\"|\"inf\"|loop-#]\n"
      "  -o --output=<URI>   Set output\n" 
      "  -c --stdout         Set stdout for output (--output=stdout://)\n"
      "  -n --null           Set null for output (--output=null://)\n"
      );
 
-  file68_option_help(stdout,print_option);
+  option68_help(stdout,print_option);
 
   puts
     (
      "\n"
      "URI:\n"
-     "  - or \n"
-     "  stdin://           : Read file fron standard input.\n"
-     "  path or\n"
-     "  file://path or \n"
-     "  local://path       : Local sc68 music file.\n"
-     "  http://path or \n"
-     "  ftp://path or\n"
-     "  ...                : Load nusic file via given protocol (see curl)\n"
-     "  sc68://author/hw/title[/#track]\n"
-     "  Access sc68 music database. The music file is searched first in local\n"
-     "  music path and if not found in remote music path.\n"
+     "  stdin://<name>      Standard input\n"
+     "  stdout://<name>     Standard output\n"
+     "  sterr://<name>      Standard error\n"
+     "  null://<name>       Null/Zero\n"
+     "  <path> or file://path\n"
+     "   or local://path    Local file\n"
+     "  http://path or ftp://path\n"
+     "   or others          Remote protocol (see curl)\n"
+     "  sc68://author/hw/title[/:track[:loop:[time]]]\n"
+     "                      Access sc68 music database. The music file is\n"
+     "                      searched in `sc68-music' music path, then in\n"
+     "                      `sc68-rmusic' music path.\n"
      "\n"
      "Copyright (C) 1998-2009 Benjamin Gerard\n"
      "Visit <" PACKAGE_URL ">\n"
@@ -301,32 +303,13 @@ static int PlayLoop(istream68_t * out, int track, int loop)
   return -(code == SC68_MIX_ERROR);
 }
 
-static int IsIntParam(const char *parm,
-		      const char *what,
-		      int * res, int * res2)
-{
-  int cnt = 0;
-  if (strstr(parm, what) == parm) {
-    int len = strlen(what);
-    if (isdigit(parm[len])) {
-      char *e;
-      *res = strtol(parm+len, &e, 0);
-      cnt = 1;
-      if (res2 && *e==',' && isdigit(e[1])) {
-	*res2 = strtol(e+1,&e, 0);
-	cnt = 2;
-      }
-    }
-  }
-  return cnt;
-}
-
 static char urlbuf[1024];
 int main(int argc, char *argv[]) 
 {
   const char * outname = 0;
   const char * inname  = 0;
   const char * tracks  = "def";
+  const char * loops   = "def";
   int i,j;
   int track = -1;
   int loop  = -1;
@@ -348,6 +331,7 @@ int main(int argc, char *argv[])
     {"null",       0, 0, 'n'},
     {"output",     1, 0, 'o'},
     {"track",      1, 0, 't'},
+    {"loop",       1, 0, 'l'},
     {0,0,0,0}
   };
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
@@ -385,20 +369,22 @@ int main(int argc, char *argv[])
       getopt_long(argc, argv, shortopts, longopts, &longindex);
 
     switch (val) {
-    case  -1: break;		    /* Scan finish */
-    case 'h': opt_help = 1; break;  /* --help */
-    case 'V': opt_vers = 1; break;  /* --version */
-    case 'D': opt_list = 1; break;  /* --debug-list */
-    case 'v': ++opt_verb; break;    /* --verbose */
-    case 'q': --opt_verb; break;    /* --quiet */
+    case  -1: break;		    /* Scan finish   */
+    case 'h': opt_help = 1; break;  /* --help        */
+    case 'V': opt_vers = 1; break;  /* --version     */
+    case 'D': opt_list = 1; break;  /* --debug-list  */
+    case 'v': ++opt_verb; break;    /* --verbose     */
+    case 'q': --opt_verb; break;    /* --quiet       */
     case 'n':
-      outname = "null://"; break;   /* --null */
+      outname = "null://"; break;   /* --null        */
     case 'c':
-      outname = "stdout://"; break; /* --stdout */
+      outname = "stdout://"; break; /* --stdout      */
     case 'o':			  
-      outname = optarg; break;	    /* --output= */
+      outname = optarg; break;	    /* --output=     */
     case 't':			  
-      tracks = optarg; break;	    /* --track= */
+      tracks = optarg; break;	    /* --track=      */
+    case 'l':			  
+      loops = optarg; break;	    /* --loop=       */
     case '?':			    /* Unknown or missing parameter */
       goto error;
     default:
@@ -413,36 +399,9 @@ int main(int argc, char *argv[])
 #endif
   i = optind;
 
-/* #if defined(HAVE_GETOPT) || defined(HAVE_GETOPT_LONG) */
-/* # endif /\* ifdef HAVE_GETOPT_LONG *\/ */
-/* #endif /\* ifdef HAVE_GETOPT *\/ */
-
-
-  /* Parse tracks */
-  if (!strcmp(tracks,"def")) {
-    track = -1;
-  } else if (!strcmp(tracks,"all")) {
-    track = 0;
-  } else {
-    track = strtol(tracks,0,0);
-  }
-
-  /* Scan help and info options */
-/*   for (i=1; i<na; ++i) { */
-/*     if (!strcmp(a[i],"--")) { */
-/*       break; */
-/*     } else if (!strcmp(a[i],"--help")) { */
-/*       help = 1; */
-/*       break; */
-/*     } else if (!strcmp(a[i],"--version")) { */
-/*       return Version(); */
-/*     } else if (!strcmp(a[i],"--quiet")) { */
-/*       quiet = 1; */
-/*     } else if (!strcmp(a[i],"--debug-features")) { */
-/*       debug_list = 1; */
-/*     } */
-
-/*   } */
+  /* #if defined(HAVE_GETOPT) || defined(HAVE_GETOPT_LONG) */
+  /* # endif /\* ifdef HAVE_GETOPT_LONG *\/ */
+  /* #endif /\* ifdef HAVE_GETOPT *\/ */
 
   if (opt_help) {
     return print_usage();
@@ -457,35 +416,33 @@ int main(int argc, char *argv[])
   }
 
 
+  /* Parse tracks */
+  if (!strcmp(tracks,"def")) {
+    track = -1;
+  } else if (!strcmp(tracks,"all")) {
+    track = 0;
+  } else {
+    track = strtol(tracks,0,0);
+  }
+
+  /* Parse loops */
+  if (!strcmp(loops,"def")) {
+    loop = -1;
+  } else if (!strcmp(loops,"inf")) {
+    loop = 0;
+  } else {
+    loop = strtol(loops,0,0);
+  }
+
+
+
   memset(&create68,0,sizeof(create68));
   create68.debug_bit = debugmsg68_DEBUG;
   sc68 = sc68_create(&create68);
   if (!sc68) {
     goto error;
   }
-
-  /* */
-/*   na = init68.argc; */
-/*   for (i=1; i<na; ++i) { */
-/*     if (!strcmp(a[i],"--")) { */
-/*       break; */
-/*     } else if (a[i] == strstr(a[i],"--output=")) { */
-/*       outname = a[i]+9; */
-/*       fprintf (stderr, "set output to %s\n",outname); */
-/*     } else if (!strcmp(a[i],"--stdout")) { */
-/*       outname = "stdout://"; */
-/*     } else if (!strcmp(a[i],"--null")) { */
-/*       outname = "null://"; */
-/*     } else if (!IsIntParam(a[i],"--track=", &track, &loop)) { */
-/*       if (inname) { */
-/* 	fprintf(stderr, "Invalid parameters \"%s\"\n", a[i]); */
-/* 	return 2; */
-/*       } else { */
-/* 	inname = a[i]; */
-/*       } */
-/*     } */
-/*   } */
-
+  
   if (!inname && i<argc) {
     inname = argv[i];
   }

@@ -45,7 +45,6 @@ unsigned int debugmsg68_mask =	               /* Filter almost all.         */
   (1<<debugmsg68_CRITICAL)|(1<<debugmsg68_ERROR)|(1<<debugmsg68_WARNING);
 #endif
 
-
 #define MAX_FEATURES (((sizeof(int)<<3)))
 
 struct struct_debug_bit {

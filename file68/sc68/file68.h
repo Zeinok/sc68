@@ -188,14 +188,14 @@ FILE68_API
  *
  * @see SC68_IDSTR
  */
-extern const char file68_idstr[];
+const char file68_idstr[];
 
 FILE68_API
 /** SC68 file identifier string V2.
  *
  * @see SC68_IDSTR_V2
  */
-extern const char file68_idstr_v2[];
+const char file68_idstr_v2[];
 
 /** @name  File verify functions.
  *  @{

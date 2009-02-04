@@ -27,10 +27,13 @@ extern "C" {
 /* #include "mfpemul.h" */
 /* #include "paulaemul.h" */
 
+/** IO chip init parameters. */
 typedef struct {
-  paula_parms_t paula;
-  mw_parms_t mw;
-  ym_parms_t ym;
+  paula_parms_t paula;		/**< paula init parms.      */
+  mw_parms_t    mw;		/**< microwire init parms.  */
+  ym_parms_t    ym;		/**< ym-2149 init parms.    */
+  int          *argc;		/**< Argument count.        */
+  char        **argv;		/**< Arguments.             */
 } io68_init_t;
 
 int io68_init(io68_init_t * const parms);

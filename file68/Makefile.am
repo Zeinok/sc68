@@ -37,6 +37,7 @@ mysources=\
  $(sdir)/istream68_null.c\
  $(sdir)/istream68_pa.c\
  $(sdir)/istream68_z.c\
+ $(sdir)/option68.c\
  $(sdir)/registry68.c\
  $(sdir)/rsc68.c\
  $(sdir)/string68.c\
@@ -62,6 +63,7 @@ myheaders=\
  $(hdir)/istream68_null.h\
  $(hdir)/istream68_pa.h\
  $(hdir)/istream68_z.h\
+ $(hdir)/option68.h\
  $(hdir)/registry68.h\
  $(hdir)/rsc68.h\
  $(hdir)/string68.h\

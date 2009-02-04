@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 #include "as68.h"
 #include "error.h"
 
@@ -43,10 +44,10 @@ static int convchar(char a)
   return a & 127;
 }
 
-static int ischareql(char a, char b)
-{
-  return convchar(a)==convchar(b);
-}
+/* static int ischareql(char a, char b) */
+/* { */
+/*   return convchar(a)==convchar(b); */
+/* } */
 
 int streql(char *a, char *b)
 {
@@ -1909,7 +1910,9 @@ void Fincbin()
 	  if(cur_pass > 1)
 	    {
 	      fd = fopen(name, "rb");
-	      fread(code+pc, 1, size, fd);
+	      if (fread(code+pc, 1, size, fd) != size) {
+		fatal_error("incbin '%s': %s\n", name, strerror(errno));
+	      }
 	      fclose(fd);
 	    }
 	  pc += size;

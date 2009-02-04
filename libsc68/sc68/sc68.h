@@ -17,7 +17,7 @@
 # if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
 #   define SC68_API __declspec(dllexport)
 # elif defined(HAVE_VISIBILITY)
-#  define SC68_API __attribute__ ((visibility("default")))
+#  define SC68_API extern __attribute__ ((visibility("default")))
 # endif
 
 /* Using */
@@ -26,7 +26,7 @@
 # if defined(SC68_DLL) && defined(HAVE_DECLSPEC)
 #  define SC68_API __declspec(dllimport)
 # elif defined(HAVE_VISIBILITY)
-#  define SC68_API /* __attribute__ ((visibility("default"))) */
+#  define SC68_API extern
 # endif
 
 #endif
@@ -109,7 +109,7 @@ typedef void (*sc68_debug_t)();
  *  - __declspec(dllexport): creating a win32 DLL.
  *  - __declspec(dllimport): using a win32 DLL.
  */
-#define SC68_API
+#define SC68_API extern
 #endif
 
 

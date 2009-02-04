@@ -41,6 +41,7 @@
 # include <sc68/file68.h>
 # include <sc68/url68.h>
 # include <sc68/debugmsg68.h>
+# include <sc68/option68.h>
 
 static void debugmsg(const char * fmt, ...)
 {
@@ -965,7 +966,10 @@ static void print_option(void * data,
 			 const char * envvar,
 			 const char * desc)
 {
-  fprintf(data, "  %-19s %s ($%s)\n", option, desc, envvar);
+  fprintf(data, 
+	  "  %s or `$%s'\n"
+	  "     %s \n",
+	  option, envvar, desc);
 }	 
 
 static int print_usage(void)
@@ -994,7 +998,7 @@ static int print_usage(void)
      "  --no-symbol            Disable symbol in disassembly output\n");
 
 #ifdef USE_FILE68
-  file68_option_help(stdout,print_option);
+  option68_help(stdout,print_option);
 #endif
   puts
     (

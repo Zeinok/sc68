@@ -235,6 +235,8 @@ typedef struct
   int68_t  emul;  /**< Default emulation mode. @see paula_emul_e.     */
   uint68_t hz;    /**< Default sampling rate in Hz.                   */
   int68_t  clock; /**< Default clock type. @see paula_clock_e.        */
+  int    * argc;  /**< Argument count (before and after).             */
+  char  ** argv;  /**< Arguments.                                     */
 } paula_parms_t;
 
 /** setup data. */

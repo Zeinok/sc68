@@ -68,6 +68,8 @@ typedef struct
 {
   int68_t  emul;  /**< Default interpolation mode. @see mw_emul_e. */
   uint68_t hz;    /**< Default sampling rate in Hz.                */
+  int    * argc;  /**< Argument count (before and after).          */
+  char  ** argv;  /**< Arguments.                                  */
 } mw_parms_t;
 
 /** setup data. */

@@ -116,6 +116,13 @@ enum ym_emul_e {
   YM_EMUL_BLEP,        /**< Antti Lankila's Band Limited Step synthesis. */
 };
 
+/** Available emulation modes. */
+enum ym_vol_e {
+  YM_VOL_DEFAULT = 0, /**< Use default mode.           */
+  YM_VOL_ATARIST,     /**< Atari-ST volume table.      */
+  YM_VOL_LINEAR,      /**< Linear mixing volume table. */
+};
+
 /** Sampling rate. */
 enum ym_hz_e {
   YM_HZ_DEFAULT = 0    /**< Default sampling rate. */
@@ -159,7 +166,7 @@ struct ym_s {
   s16 * ymout5;               /**< DAC lookup table                      */
   unsigned int voice_mute;    /**< Mask muted voices.                    */
   unsigned int hz;            /**< Sampling rate.                        */
-  int outlevel;               /**< Output max level (volume) [0..65536]. */
+  /* int outlevel; */         /**< Output max level (volume) [0..65536]. */
   uint68_t clock;             /**< Master clock frequency in Hz.         */
 
   /** @name  Write access back storage.
@@ -201,10 +208,13 @@ struct ym_s {
  */
 typedef struct
 {
-  int68_t  emul;     /**< @see Emulator mode.           */
-  uint68_t hz;       /**< Sampling rate in Hz.          */
-  uint68_t clock;    /**< @see ym_clock_e frequency.    */ 
-  uint68_t outlevel; /**< Output level [0..256].        */
+  int68_t  emul;     /**< @see ym_emul_e emulator mode.      */
+  int68_t  voltable; /**< @see ym_vol_e volume table type.   */
+  uint68_t hz;       /**< Sampling rate in Hz.               */
+  uint68_t clock;    /**< @see ym_clock_e frequency.         */ 
+  uint68_t outlevel; /**< Output level [0..256] (disabled).  */
+  int    * argc;     /**< Argument count (before and after). */
+  char  ** argv;     /**< Arguments.                         */
 } ym_parms_t;
 
 

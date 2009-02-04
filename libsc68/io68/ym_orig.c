@@ -40,6 +40,8 @@ extern int ym_feature;		/* defined in ymemul.c */
 # define INTMSB (sizeof(int)*8-1)
 #endif
 
+#define YM_ORIG_FILTER 1	/* 0:none 1:fast 2:slow */
+
 #define YM_OUT_MSK(C,B,A) \
  (((((C)&0x1F)<<10))\
  |((((B)&0x1F)<< 5))\
@@ -56,29 +58,6 @@ const int ym_smsk_table[8] = {
   /* 111 */ YM_OUT_MSK(-1,-1,-1)
 };
 
-/* static const int ym_out_msk[3] = {  */
-/*  YM_OUT_MSK_A, YM_OUT_MSK_B, YM_OUT_MSK_C */
-/* }; */
-
-
-#if 0
-static const struct filter_def_t {
-  s64 A0,B0; /* A1 = -A0 */
-} filter_def[8] =
-{
-  /* 0123456789ABCDEF     0123456789ABCDEF  cutoff/sampling */
-  {0x0000ffb4522a469bLL,0x0000ff68a4548d37LL}, /* 23/62500 */
-  {0x0000ff9a09ef0019LL,0x0000ff3413de0032LL}, /* 31/62500 */
-  {0x0000ff72a7ba0de5LL,0x0000fee54f741bcbLL}, /* 43/62500 */
-  {0x0000ff586d0271f6LL,0x0000feb0da04e3edLL}, /* 51/62500 */
-
-  {0x0000ff94cbfc73a4LL,0x0000ff2997f8e748LL}, /* 23/44100 */
-  {0x0000ff6f974da2b8LL,0x0000fedf2e9b4571LL}, /* 31/44100 */
-  {0x0000ff37dc9e7a33LL,0x0000fe6fb93cf466LL}, /* 43/44100 */
-  {0x0000ff12c309cd7aLL,0x0000fe2586139af5LL}  /* 51/44100 */
-};
-#endif
-
 
 static int reset(ym_t * const ym, const cycle68_t ymcycle)
 {
@@ -91,6 +70,7 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
   /* Reset noise generator */
   orig->noise_gen          = 1;
   orig->noise_ct           = 0;
+
   /* Reset tone generator */
   orig->voice_ctA          = 0;
   orig->voice_ctB          = 0;
@@ -133,7 +113,6 @@ static int noise_generator(ym_t * const ym, int ymcycles)
   noise_gen = orig->noise_gen;
   per       = ym->reg.name.per_noise & 0x1F;
     
-  /*per      |= !per;*/ /* $$$ Must verify if 0 and 1 really are the same */
   per     <<= 1;    /* because the noise generator base frequency is
 		       master/16 but we have to match the envelop
 		       generator frequency which is master/8.
@@ -201,8 +180,6 @@ static void do_noise(ym_t * const ym, cycle68_t ymcycle)
       lastcycle = access->ymcycle - noise_generator(ym,ymcycles);
     }
     ym->reg.index[access->reg] = access->val;
-/*     TRACE68(ym_feature,"ReadBack %s #%X => %02X (%u)\n", */
-/* 	    regs->name,access->reg,access->val,access->ymcycle); */
   }
   lastcycle = ymcycle - noise_generator(ym, ymcycle-lastcycle);
   regs->head = regs->tail = 0;
@@ -439,10 +416,6 @@ static int envelop_generator(ym_t * const ym, int ymcycles)
         cont = recont;
         alt ^= altalt;
       }
-
-/*       if ((bit ^ alt) & cont) */
-/*       TRACE68(ym_feature,"v:%02x\n",(bit ^ alt) & cont); */
-
     }
 
     /* 5 bit version */
@@ -527,21 +500,12 @@ static void do_envelop(ym_t * const ym, cycle68_t ymcycle)
       orig->env_bit    = 0;
       orig->env_bitstp = 1;
       orig->env_cont   = 0x1f;
-      orig->env_ct = 0;
+      orig->env_ct = 0; /* $$$ Needs to be verifed. It seems cleaner. */
 #endif
 
-  /* $$$ Not sure, that this counter is resetted, but it seems
-         cleaner. */
-
-
-
     }
-/*     if (access->reg >= 8 && access->reg <= 10) { */
-/*       TRACE68(ym_feature,"ReadBack %s #%X => %02X (%u)\n", */
-/* 	      regs->name,access->reg,access->val,access->ymcycle); */
-/*     } */
   }
-  /* lastcycle = ymcycle -  */envelop_generator(ym, ymcycle-lastcycle);
+  envelop_generator(ym, ymcycle-lastcycle);
   regs->head = regs->tail = 0;
 }
 
@@ -671,14 +635,8 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
       lastcycle = access->ymcycle - tone_generator(ym, ymcycles);
     }
     ym->reg.index[access->reg] = access->val;
-    
-/*     if (access->reg >= 8 && access->reg <= 10) { */
-/*       TRACE68(ym_feature,"ReadBack %s #%X => %02X (%u)\n", */
-/* 	      regs->name,access->reg,access->val,access->ymcycle); */
-/*     } */
-
   }
-  /* lastcycle = ymcycle -  */tone_generator(ym, ymcycle-lastcycle);
+  tone_generator(ym, ymcycle-lastcycle);
   regs->head = regs->tail = 0;
 }
 
@@ -691,8 +649,10 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
  *
  * In order to emulate envelop tone half level trick, the function
  * works by block of 4 PCM which are averaged. Since number of PCM in
- * source buffer may not be a multiple of 4, the funcion uses a filter
- * accumulator.
+ * source buffer may not be a multiple of 4, the function uses a
+ * filter accumulator.
+ *
+ * Not true anymore. Always have a multiple of 4. 
  *
  * The accumulator has been disable. See ym_run().
  */
@@ -711,27 +671,46 @@ static void filter(ym_t * const ym)
   n >>= 2; /* Number of block */
 
   if (n > 0) {
-    const int outlevel = ym->outlevel;
+/*     const int outlevel = ym->outlevel; */
     int h_i1 = orig->hipass_inp1;
     int h_o1 = orig->hipass_out1;
     int l_o1 = orig->lopass_out1;
     int m = n;
-    int hasclip = 0;
 
     do {
       int i0,o0;
 
-      /* Empirical filter from 250Khz to 62.5Khz.
-       * It allows to emulate half level buzz sounds.
+      /* 4-tap boxcar filter; lower sampling rate from 250Khz to
+       * 62.5Khz; emulates half level buzz sounds.
        */
       i0  = *src++;
       i0 += *src++; i0 += *src++; i0 += *src++;
-      i0 >>= 2; /* i0 => 16bit */
+      i0 >>= 2;			/* i0 => 16bit */
 
-      if (1) {
-	o0 = i0;
-	goto apply_volume;
-      }
+#if YM_ORIG_FILTER == 0      
+      
+      /* No filter mode */
+      o0 = i0;		/* o0 => 16bit */
+
+#elif YM_ORIG_FILTER == 1
+      /* 16 bit filters */
+
+      /* lowpass */
+      l_o1 = ((i0 * 3) + (l_o1)) >> 2; /* i0 => 16 bit */
+
+      /* hipass */
+      {
+	const int A0 = 0x7FDA; /* 15 bit */
+	const int B1 = 0x7FB4; /* 15 bit */
+	int tmp0 =
+	  ((l_o1 - h_i1) * A0) + (h_o1 * B1);
+	h_i1 = l_o1;
+	h_o1 = tmp0 >> 15;
+	o0 = h_o1;
+      } 
+
+#elif YM_ORIG_FILTER == 2
+      /* 32 bit filters */
 
       /*
        * Recursive single pole lowpass filter.
@@ -749,10 +728,13 @@ static void filter(ym_t * const ym)
       {
 	const int B = 0x0DF2A3a9; /* 31 bit */
 	const int A = 0x720d5c57; /* 31 bit */
+	/* 	  /\* cutoff @ 15000 *\/ */
+	/* 	  const int B = 0x1c558724; /\* 31 bit *\/ */
+	/* 	  const int A = 0x63aa78dc; /\* 31 bit *\/ */
 
 	s64 tmp0 =
 	  ((i0<<15) * (s64) A) +
-	  (l_o1 * (s64) B);       /* tmp0 => 62 bit */
+	  (l_o1 * (s64) B);	   /* tmp0 => 62 bit */
 	l_o1 = tmp0>>31;
 	/* i0 => 31 bit */
       }
@@ -774,19 +756,21 @@ static void filter(ym_t * const ym)
       {
 	const int A0 = 0x7FDA2915; /* 31 bit */
 	const int B1 = 0x7FB4522A; /* 31 bit */
-
+	  
 	s64 tmp0 =
 	  ((l_o1 - h_i1) * (s64) A0) +
 	  (h_o1 * (s64) B1);
 	h_i1 = l_o1;
 	h_o1 = tmp0 >> 31;
 	o0 = h_o1 >> 15;
-      }
-
-    apply_volume:
-      o0 = (o0 * outlevel) >> 6;
-
-      if (1) {
+      } 
+#endif
+      
+      /*       o0 = (o0 * outlevel) >> 6; */
+      o0 >>= 1;
+      
+#ifndef NDEBUG
+      if (0) {
 	static int min, max;
 	if (o0 < min) {
 	  TRACE68(ym_feature,"min: %6d -> %6d\n",min,o0);
@@ -797,77 +781,29 @@ static void filter(ym_t * const ym)
 	  max = o0;
 	}
       }
+#endif
 
-      /* Clipping methods. */
-      if (0) {
-	int tmp;
-	o0 += 0x8000; /* Switch to unsigned range [0..65536]
-		       *
-		       * CLIP-MIN:
-		       *  - condition :  o0 < 0
-		       *  - effects   :  o0 = 0
-		       *  - logic     : o0 & -(o0>=0)
-		       *           or   o0 & ~(o0>>INT_MSB)
-		       *
-		       * CLIP-MAX:
-		       *  - condition :  o0 > 65535
-		       *          <=>    o0-65535 > 0
-		       *          <=>    o0-65535 > 0
-		       *          <=>    65535-o0 < 0
-		       *  - effects   :  o0 = 65535
-		       *  - logic     : o0 | -(o0>65535)
-		       *           or   o0 | ((65535-o0)>>INTMSB)&0xFFFF
-		       *  - haxxx       o0 | (o0<<(INTMSB-16)>>INTMSB)&0xFFFF
-		       *                works only for clipping < 0x20000
-		       */
-
-	/* Clip MIN */
-	tmp = (o0>>INTMSB);
-	hasclip |= tmp;
-	o0 &= ~tmp;
-
-	/* Clip MAX */
-	tmp = (o0<<(INTMSB-16))>>INTMSB;
-	hasclip |= tmp;
-	o0 |= tmp;
-
-	o0 &= 0xFFFF; /* ensure in range [0..65536]           */
-	o0 -= 0x8000; /* restore signed range [-32768..32767] */
-      } else if (1) {
-	/* Traditionnal method */
-	if (o0 < -32768) {
-	  hasclip = 1;
-	  o0 = -32768;
-	} else if (o0 > 32767) {
-	  hasclip = 1;
-	  o0 = 32767;
-	}
+      /* clipping */
+      if (o0 > 32767) {
+	o0 = 32767;
+      } else if (o0 < -32768) {
+	o0 = -32768;
       }
 
-
-      /* store: */
+      /* store */
       *dst++ = o0;
-
+      
     } while (--m);
 
-    orig->hipass_inp1 =  h_i1;
-    orig->hipass_out1 =  h_o1;
-    orig->lopass_out1 =  l_o1;
-
-    /* $$$ dynamic output level ? May be not that good an idea ! */
-    ym->outlevel = outlevel - !!hasclip;
-    if (hasclip) {
-      TRACE68(ym_feature,"has clip: new level: %02x\n",ym->outlevel);
-    }
+    orig->hipass_inp1 = h_i1;
+    orig->hipass_out1 = h_o1;
+    orig->lopass_out1 = l_o1;
 
     /* Copy remaining sample in the beginning of buffer. */
     dst = ym->outbuf;
-    /* if (filter_cnt & 1) { *dst++ = *src++; } */
-    /* if (filter_cnt & 2) { *dst++ = *src++; *dst++ = *src++; } */
     src = dst;
 
-
-    /* Rougth resampling. Should be ok thanks to lowpass filter.
+    /* Rough resampling. Should be ok thanks to lowpass filter.
      * Current sampling rate is clock / 8 (prediv) / 4 (filter)
      */
     {
@@ -887,7 +823,6 @@ static void filter(ym_t * const ym)
 static
 int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
   ym->outbuf = ym->outptr = output;
 
   do_noise(ym,ymcycles);
@@ -897,27 +832,7 @@ int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
   ym->waccess = ym->static_waccess;
   ym->waccess_nxt = ym->waccess;
 
-  if (0) {
-    int i;
-    TRACE68(ym_feature,"pre-filter:");
-    for (i=0; i<orig->tonptr - ym->outbuf; ++i) {
-      TRACE68(ym_feature,"%d ",output[i]);
-    }
-    TRACE68(ym_feature,"->%d\n",ym->outptr - ym->outbuf);
-  }
-
   filter(ym);
-
-  if (0) {
-    int i;
-    TRACE68(ym_feature,"post-filter:");
-    for (i=0; i<ym->outptr - ym->outbuf; ++i) {
-      TRACE68(ym_feature,"%d ",output[i]);
-    }
-    TRACE68(ym_feature,"->%d\n",ym->outptr - ym->outbuf);
-  }
-  
-  /* TRACE68(ym_feature,"Generated PCM:%d -> %d \n",ym->tonptr - ym->outbuf, ym->outptr - ym->outbuf); */
 
   return ym->outptr - ym->outbuf;
 }

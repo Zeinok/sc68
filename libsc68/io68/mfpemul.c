@@ -37,6 +37,9 @@
 #define SEI             (mfp->map[0x17]&8)
 #define AEI             (!SEI)
 
+#ifndef DEBUG_MFP_O
+# define DEBUG_MFP_O 0
+#endif
 int mfp_feature = debugmsg68_DEFAULT;
 
 /* Define for more accurate emulation (about pending bit...)
@@ -575,7 +578,7 @@ void mfp_cleanup(mfp_t * const mfp)
 int mfp_init(void)
 {
   mfp_feature =
-    debugmsg68_feature("mfp","MFP-68901 emulator",0);
+    debugmsg68_feature("mfp","MFP-68901 emulator", DEBUG_MFP_O);
   return 0;
 }
 

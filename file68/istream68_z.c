@@ -47,11 +47,10 @@ const istream68_z_option_t istream68_z_default_option = {
 #include <zlib.h>
 #include <string.h>
 
-#if defined(DEBUG_ZLIB)
-static int z_debug = debugmsg68_ALWAYS;
-#else
-static int z_debug = debugmsg68_NEVER;
+#ifndef DEBUG_ZLIB_O
+# define DEBUG_ZLIB_O 0
 #endif
+static int zlib_feature = debugmsg68_DEFAULT;
 
 /* defined in zutil.h */
 #ifndef DEF_MEM_LEVEL
@@ -141,13 +140,13 @@ static int isf_flush_output_buffer(istream68_z_t * isf)
   int n, w;
 
   w = n = isf->c_stream.next_out - isf->buffer_out; 
-/*   TRACE68(z_debug," FLUSH:%d",n); */
+/*   TRACE68(zlib_feature," FLUSH:%d",n); */
   if (n > 0) {
     w = istream68_write(isf->is, isf->buffer_out, n);
     isf->is_eof = (w != n);
     isf->is_err = (w == -1);
     if (isf->is_err) {
-/*       TRACE68(z_debug," WRITE-ERROR"); */
+/*       TRACE68(zlib_feature," WRITE-ERROR"); */
       w = 0;
       n = -1;
     } else {
@@ -156,7 +155,7 @@ static int isf_flush_output_buffer(istream68_z_t * isf)
       if (rem) {
 	/* Damned! ... Could be an error ... Trust istream & Pray */
 	int i;
-/* 	TRACE68(z_debug," FLUSH-MISS:%d", rem); */
+/* 	TRACE68(zlib_feature," FLUSH-MISS:%d", rem); */
 	for (i=0; i<rem; ++i) {
 	  isf->buffer_out[i] = isf->buffer_out[i+w];
 	}
@@ -167,7 +166,7 @@ static int isf_flush_output_buffer(istream68_z_t * isf)
     isf->c_stream.next_out = isf->buffer_out + w;
   }
   isf->c_stream.avail_out = sizeof(isf->buffer_out) - w;
-/*   TRACE68(z_debug,"->%d ", n); */
+/*   TRACE68(zlib_feature,"->%d ", n); */
 
   return n;
 }
@@ -374,22 +373,22 @@ static int isf_inflate_buffer(istream68_z_t * isf)
 
   while (isf->c_stream.avail_out) {
 
-/*     TRACE68(z_debug,"INFLATE: (%d,%d)", */
+/*     TRACE68(zlib_feature,"INFLATE: (%d,%d)", */
 /* 	       isf->c_stream.avail_in, isf->c_stream.avail_out); */
     if (!isf->c_stream.avail_in) {
       err = isf_fill_input_buffer(isf,sizeof(isf->buffer_in));
-/*       TRACE68(z_debug," fill_in(%d) ",err); */
+/*       TRACE68(zlib_feature," fill_in(%d) ",err); */
       if (err <= 0) {
 	break;
       }
     }
-/*     TRACE68(z_debug," (%d,%d), inflate->", */
+/*     TRACE68(zlib_feature," (%d,%d), inflate->", */
 /* 	       isf->c_stream.avail_in, isf->c_stream.avail_out); */
     err = inflate(&isf->c_stream, Z_NO_FLUSH);
-/*     TRACE68(z_debug,"(%d,%d)", isf->c_stream.avail_in, isf->c_stream.avail_out); */
+/*     TRACE68(zlib_feature,"(%d,%d)", isf->c_stream.avail_in, isf->c_stream.avail_out); */
 
     if (err == Z_STREAM_END) {
-/*       TRACE68(z_debug," Z_STREAM_END\n"); */
+/*       TRACE68(zlib_feature," Z_STREAM_END\n"); */
       if (isf->gzip) {
 	unsigned char data[8];
 
@@ -406,7 +405,7 @@ static int isf_inflate_buffer(istream68_z_t * isf)
 	    | (data[6]<<16)
 	    | (data[7]<<24);
 	}
-	TRACE68(z_debug,"Total In  : %8d\n"
+	TRACE68(zlib_feature,"Total In  : %8d\n"
 		   "Total Out : %8d\n"
 		   "Crc32     : %08X\n"
 		   "Gzip-Size : %8d\n",
@@ -418,10 +417,10 @@ static int isf_inflate_buffer(istream68_z_t * isf)
       err = 0;
       break;
     } else if (err == Z_OK) {
-/*       TRACE68(z_debug," Z_STREAM_OK\n"); */
+/*       TRACE68(zlib_feature," Z_STREAM_OK\n"); */
       err = 0;
     } else {
-      TRACE68(z_debug,"Z_ERROR:[%s]\n", isf->c_stream.msg);
+      TRACE68(zlib_feature,"Z_ERROR:[%s]\n", isf->c_stream.msg);
       break;
     }
 
@@ -430,7 +429,7 @@ static int isf_inflate_buffer(istream68_z_t * isf)
   n = isf->c_stream.next_out - isf->buffer_out;
   if (isf->gzip) {
     isf->c_crc32 = crc32(isf->c_crc32, isf->buffer_out, n);
-/*     TRACE68(z_debug,"CRC32:%08X\n",isf->c_crc32); */
+/*     TRACE68(zlib_feature,"CRC32:%08X\n",isf->c_crc32); */
   }
   
   return err
@@ -454,7 +453,7 @@ static int isf_deflate_buffer(istream68_z_t * isf, int finish)
 
   /* Loop while there is data to compress ... */
   while (!zeof || isf->c_stream.avail_in) {
-/*     TRACE68(z_debug,"%sDEFLATE: (%d:%d/%d:%d) ", */
+/*     TRACE68(zlib_feature,"%sDEFLATE: (%d:%d/%d:%d) ", */
 /* 	       finish ? "F-" : "", */
 /* 	       isf->c_stream.next_in - isf->buffer_in, */
 /* 	       isf->c_stream.avail_in, */
@@ -464,12 +463,12 @@ static int isf_deflate_buffer(istream68_z_t * isf, int finish)
     /* Flush output buffer and win a fresh one. */
     err = isf_flush_output_buffer(isf);
     if (err == -1) {
-/*       TRACE68(z_debug,"\n"); */
+/*       TRACE68(zlib_feature,"\n"); */
       return -1;
     }
 
     /* Do the deflate thing */
-/*     TRACE68(z_debug,"(%d:%d/%d:%d), deflate->", */
+/*     TRACE68(zlib_feature,"(%d:%d/%d:%d), deflate->", */
 /* 	       isf->c_stream.next_in - isf->buffer_in, */
 /* 	       isf->c_stream.avail_in, */
 /* 	       isf->c_stream.next_out - isf->buffer_out, */
@@ -482,7 +481,7 @@ static int isf_deflate_buffer(istream68_z_t * isf, int finish)
 	isf->c_crc32 = crc32(isf->c_crc32, start, len-isf->c_stream.avail_in);
       }
     }
-/*     TRACE68(z_debug,"(%d:%d/%d:%d) ", */
+/*     TRACE68(zlib_feature,"(%d:%d/%d:%d) ", */
 /* 	       isf->c_stream.next_in - isf->buffer_in, */
 /* 	       isf->c_stream.avail_in, */
 /* 	       isf->c_stream.next_out - isf->buffer_out, */
@@ -490,24 +489,24 @@ static int isf_deflate_buffer(istream68_z_t * isf, int finish)
 
     if (err == Z_STREAM_END) {
       /* Zlib tell us this is the end my friend ?? */
-/*       TRACE68(z_debug,"Z_STREAM_END!! "); */
+/*       TRACE68(zlib_feature,"Z_STREAM_END!! "); */
       err = isf_flush_output_buffer(isf) == -1;
       zeof = 1;
       break;
     }
     if (err != Z_OK) {
-      TRACE68(z_debug,"Z_ERROR(%d:[%s])\n", err, isf->c_stream.msg);
+      TRACE68(zlib_feature,"Z_ERROR(%d:[%s])\n", err, isf->c_stream.msg);
       err = -1;
       break;
     } else {
       err = 0;
-/*       TRACE68(z_debug,"Z_OK "); */
+/*       TRACE68(zlib_feature,"Z_OK "); */
     }
   }
 
   /* Are there "Missing In Action" bytes in the input buffer ? */
   mia = isf->c_stream.avail_in;
-/*   TRACE68(z_debug,"MIA:%d\n", mia); */
+/*   TRACE68(zlib_feature,"MIA:%d\n", mia); */
 
   isf->write_in = isf->buffer_in + mia;
   if (mia > 0) {
@@ -529,22 +528,22 @@ static int isf_close(istream68_t * istream)
   istream68_z_t * isf = (istream68_z_t *)istream;
   int err = -1;
 
-  TRACE68(z_debug,"istream68_z: close(%s) {\n",
+  TRACE68(zlib_feature,"istream68_z: close(%s) {\n",
 	  istream68_filename(istream));
 
   if (isf) {
     err = isf->is_err;
 
     if (isf->deflate) {
-      TRACE68(z_debug,"DEFLATED ");
+      TRACE68(zlib_feature,"DEFLATED ");
       isf->deflate = 0;
       if (!err) {
 	err = isf_deflate_buffer(isf, 1) == -1;
       }
-      TRACE68(z_debug,"in:%d out:%d ",
+      TRACE68(zlib_feature,"in:%d out:%d ",
 	      isf->c_stream.total_in,isf->c_stream.total_out);
       if (isf->gzip) {
-	TRACE68(z_debug,"crc:%08X ",isf->c_crc32);
+	TRACE68(zlib_feature,"crc:%08X ",isf->c_crc32);
       }
       if (!err) {
 	int i, c, t;
@@ -561,9 +560,9 @@ static int isf_close(istream68_t * istream)
     }
 
     if (isf->inflate) {
-      TRACE68(z_debug,"INFLATED ");
+      TRACE68(zlib_feature,"INFLATED ");
       if (isf->gzip) {
-	TRACE68(z_debug,"crc:%08X/%08X ",
+	TRACE68(zlib_feature,"crc:%08X/%08X ",
 		isf->c_crc32,isf->gz_crc32);
       }
       inflateEnd(&isf->c_stream);
@@ -571,7 +570,7 @@ static int isf_close(istream68_t * istream)
     }
   
   }
-  TRACE68(z_debug, " => [%s]\n", strok68(err));
+  TRACE68(zlib_feature, " => [%s]\n", strok68(err));
   
   debugmsg68_info("istream_z: close(%s) => [%s]\n",
 		  istream68_filename(istream), strok68(err));
@@ -832,13 +831,8 @@ istream68_t * istream68_z_create(istream68_t * is, int mode,
 int istream68_z_init(void)
 {
 #if defined(USE_ZLIB)
-#if defined(DEBUG_ZLIB)
-  const int z_msk = 1;
-#else
-  const int z_msk = 0;
-#endif
-  z_debug = debugmsg68_feature("zlib","Zlib stream message",z_msk);
-  debugmsg68_info("istream68_z: " "initialized\n", strok68(0));
+  zlib_feature = debugmsg68_feature("zlib","Zlib stream message",DEBUG_ZLIB_O);
+  debugmsg68_debug("istream68_z: " "init => [%s]\n", strok68(0));
 #endif
   return 0;
 }
@@ -846,10 +840,10 @@ int istream68_z_init(void)
 void istream68_z_shutdown(void)
 {
 #if defined(USE_ZLIB)
-  if (z_debug > 0) {
-    debugmsg68_info("istream68_z: " "shutdowned\n");
-    debugmsg68_feature_free(z_debug);
-    z_debug = debugmsg68_NEVER;
+  if (zlib_feature > 0) {
+    debugmsg68_debug("istream68_z: " "shutdowned\n");
+    debugmsg68_feature_free(zlib_feature);
+    zlib_feature = debugmsg68_NEVER;
   }
 #endif
 }

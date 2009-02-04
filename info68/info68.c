@@ -33,6 +33,7 @@
 #include <sc68/init68.h>
 #include <sc68/debugmsg68.h>
 #include <sc68/url68.h>
+#include <sc68/option68.h>
 
 /* Standard includes */
 #include <stdio.h>
@@ -70,8 +71,12 @@ static void print_option(void * data,
 			 const char * envvar,
 			 const char * desc)
 {
-  fprintf(data, "  %-19s %s ($%s)\n", option, desc, envvar);
+  fprintf(data, 
+	  "  %s or `$%s'\n"
+	  "     %s \n",
+	  option, envvar, desc);
 }	 
+
 
 static int display_help(void)
 {
@@ -88,7 +93,7 @@ static int display_help(void)
      "  -V --version        display version and exit\n"
      "  -o --output=<URI>   change output to file (- is stdout)\n");
    
-  file68_option_help(stdout,print_option);
+  option68_help(stdout,print_option);
    
   puts
     ("\n"

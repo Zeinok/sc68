@@ -38,7 +38,7 @@
 # if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
 #   define UNICE68_API __declspec(dllexport)
 # elif defined(HAVE_VISIBILITY)
-#  define UNICE68_API __attribute__ ((visibility("default")))
+#  define UNICE68_API extern __attribute__ ((visibility("default")))
 # endif
 
 /* Using */
@@ -47,7 +47,7 @@
 # if defined(UNICE68_DLL) && defined(HAVE_DECLSPEC)
 #  define UNICE68_API __declspec(dllimport)
 # elif defined(HAVE_VISIBILITY)
-#  define UNICE68_API /* __attribute__ ((visibility("default"))) */
+#  define UNICE68_API extern
 # endif
 
 #endif

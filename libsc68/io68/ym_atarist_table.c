@@ -1,7 +1,5 @@
 /*
  *          sc68 - YM-2149 emulator - Atari ST Volume Table
- *             Copyright (C) 1999-2009 Benjamin Gerard
- *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -72,7 +70,7 @@ volumetable_set(s16 * const volumetable, int i, int j, int k, int val)
     val = -32768;
   }
   if (val > 32767) {
-    TRACE68(ym_feature,"set [%02x %02x %02x] sature:%d\n",k,j,i,val);
+/*     TRACE68(ym_feature,"set [%02x %02x %02x] sature:%d\n",k,j,i,val); */
     val = 32767;
   }
 
@@ -87,11 +85,11 @@ volumetable_interpolate(int y1, int y2)
   int erpolate;
   erpolate = (y1 * 4 + y2 * 6) / 10u;
   if (erpolate > 65535) {
-    TRACE68(ym_feature, "sature>:%d %d %d\n",erpolate,y1,y2);
+/*     TRACE68(ym_feature, "sature>:%d %d %d\n",erpolate,y1,y2); */
     erpolate = 65535;
   }
   if (erpolate < 0) {
-    TRACE68(ym_feature, "sature<:%d %d %d\n",erpolate,y1,y2);
+/*     TRACE68(ym_feature, "sature<:%d %d %d\n",erpolate,y1,y2); */
     erpolate = 0;
   }
 /*   TRACE68(ym_feature, "erpole:%d <-%d %d\n",erpolate,y1,y2); */
@@ -173,12 +171,13 @@ void ym_create_5bit_atarist_table(s16 * out, unsigned int level)
     int h;
     const int min = out[0x0000];
     const int max = out[0x7fff];
-    const int div = max-min;
+    const int div = max-min ? max-min : 1;
     const int center = level>>1;
-    if (div>0) for (h=0; h<32*32*32; ++h) {
+    for (h=0; h<32*32*32; ++h) {
       int tmp = out[h], res;
       res = (tmp-min) * level / div - center;
       out[h] = res;
     }
   }
+  debugmsg68_info("ym-2149: using *ATARI-ST* volumes (%d)\n", level);
 }

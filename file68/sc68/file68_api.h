@@ -20,7 +20,7 @@
 # if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC) && HAVE_DECLSPEC
 #   define FILE68_API __declspec(dllexport)
 # elif defined(HAVE_VISIBILITY) && HAVE_VISIBILITY
-#  define FILE68_API __attribute__ ((visibility("default")))
+#  define FILE68_API extern __attribute__ ((visibility("default")))
 # endif
 
 /* Using */
@@ -29,7 +29,7 @@
 # if defined(FILE68_DLL) && defined(HAVE_DECLSPEC) && HAVE_DECLSPEC
 #  define FILE68_API __declspec(dllimport)
 # elif defined(HAVE_VISIBILITY)
-#  define FILE68_API /* __attribute__ ((visibility("default"))) */
+#  define FILE68_API extern /* __attribute__ ((visibility("default"))) */
 # endif
 
 #endif
@@ -52,7 +52,7 @@
  *  - __declspec(dllexport): creating a win32 DLL.
  *  - __declspec(dllimport): using a win32 DLL.
  */
-#define FILE68_API
+#define FILE68_API extern
 #endif
 
 /**

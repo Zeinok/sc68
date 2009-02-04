@@ -51,6 +51,7 @@
 #include <sc68/url68.h>
 #include <sc68/rsc68.h>
 #include <sc68/debugmsg68.h>
+#include <sc68/option68.h>
 
 /* stardard includes */
 #include <string.h>
@@ -167,6 +168,13 @@ struct _sc68_s {
 
 };
 
+/* command line options option */
+/* static const char prefix[] = "sc68-"; */
+/* static const char engcat[] = "ym-2149"; */
+/* static option68_t opts[] = { */
+/*   { option68_STR,prefix,"ym-engine",engcat,"select ym-2149 engine" } */
+/* }; */
+
 static volatile int sc68_init_flag; /* Library init flag     */
 static sc68_estack_t sc68_estack;   /* Library error message */
 static unsigned int sc68_sampling_rate_def = SAMPLING_RATE_DEF;
@@ -193,7 +201,7 @@ static int stream_read_68k(sc68_t * sc68, unsigned int dest,
   return (istream68_read(is, mem68, sz) == sz) ? 0 : -1;
 }
 
-static int init_emu68(sc68_t * const sc68)
+static int init_emu68(sc68_t * const sc68, int * pargc, char ** argv)
 {
   int err;
   emu68_init_t emu68_inits;
@@ -205,6 +213,8 @@ static int init_emu68(sc68_t * const sc68)
   sc68_debug(sc68,"init_emu68() : Initialize emu68 (68k emulator)\n");
   emu68_inits.alloc = sc68_alloc;
   emu68_inits.free  = sc68_free;
+  emu68_inits.argc  = pargc;
+  emu68_inits.argv  = argv;
   err = emu68_init(&emu68_inits);
   sc68_debug(sc68,"init_emu68() : emu68 library init %s\n", ok_int(err));
   if (err) {
@@ -214,6 +224,8 @@ static int init_emu68(sc68_t * const sc68)
   /* Initialize chipset */
   sc68_debug(sc68,"init_emu68() : Initialise io68 (chipset)\n");
   memset(&io68_inits, 0, sizeof(io68_inits)); /* set all to default */
+  io68_inits.argc = pargc;
+  io68_inits.argv = argv;
   err = io68_init(&io68_inits);
   sc68_debug(sc68,"init_emu68() : io68 library init %s\n", ok_int(err));
 
@@ -478,10 +490,10 @@ config68_type_t sc68_config_get(sc68_t * sc68,
 }
 
 config68_type_t sc68_config_set(sc68_t * sc68,
-				   int idx,
-				   const char * name,
-				   int v,
-				   const char * s)
+				int idx,
+				const char * name,
+				int v,
+				const char * s)
 {
   return sc68
     ? config68_set(sc68->config,idx,name,v,s)
@@ -500,6 +512,7 @@ void sc68_config_apply(sc68_t * sc68)
 int sc68_init(sc68_init_t * init)
 {
   int err = -1;
+  option68_t * opt;
 
   if (sc68_init_flag) {
     err = sc68_error_add(0, "sc68_init() : already initialized");
@@ -549,82 +562,28 @@ int sc68_init(sc68_init_t * init)
   /* Intialize file68. */
   init->argc = file68_init(init->argv, init->argc);
 
-  /* $$$ problem with denug-mask, sc68-debug is set beffore the
+  /* $$$ problem with debug-mask, sc68-debug is set before the
      creation of all new features. file68_init() should not process it
      now, but later in this function.
   */
 
-  /* Option parsing */
-  if (1) {
-    char ** argv = init->argv;
-    int n,i,argc = init->argc;
-    
-    /* Parse arguments */
-    for (i=n=1; i<argc; ++i) {
-      /* const char * s; */
-      int negate = 0, k;
-      
-      /* Check for `--' prefix */
-      if (argv[i][0] != '-' || argv[i][1] != '-') {
-	goto keep_it;		/* Not an option; keep it */
-    }
-      
-      /* '--' breaks options parsing */
-      if (!argv[i][2]) {
-	argv[n++] = argv[i++];
-	break;
-      }
-      
-      /* Checking for sc68 prefixed options (--sc68- or --no-sc68-) */
-      if (strstr(argv[i]+2,"no-sc68-") == argv[i]+2) {
-	negate = 1;
-	k = 2 + 8;
-      } else if (strstr(argv[i]+2,"sc68-") == argv[i]+2) {
-	negate = 0;
-	k = 2 + 5;
-      } else {
-	goto keep_it;
-      }
-      
-      if (argv[i]+k == strstr(argv[i]+k,"engine=")) {
-	k += 7;
-	if (!strcmp(argv[i]+k,"orig")) {
-	  k = YM_EMUL_ORIG;
-	} else if (!strcmp(argv[i]+k,"blep")) {
-	  k = YM_EMUL_BLEP;
-	} else {
-	  k = YM_EMUL_DEFAULT;
-	}
-	ym_default_engine(k);
-	continue;
-      }
-      
-      /* Not our option; keep it */
-    keep_it:
-      argv[n++] = argv[i];
-      
-    }
-    /* Keep remaining arguments */
-    for (; i<argc; ++i) {
-      argv[n++] = argv[i];
-    }
-    init->argc = n;
+  err = init_emu68(0, &init->argc, init->argv);
+
+  opt = option68_get("debug", 1);
+  if (opt) {
+    debugmsg68_mask = opt->val.num;
   }
-
-
-
-  err = init_emu68(0);
-
+  
   sc68_init_flag = !err;
 
- error:
-  if (err) {
-    sc68_shutdown();
+  error:
+    if (err) {
+      sc68_shutdown();
+    }
+  error_no_shutdown:
+    sc68_debug(0,"} sc68_init() -> [%s]\n", ok_int(err));
+    return err;
   }
- error_no_shutdown:
-  sc68_debug(0,"} sc68_init() -> [%s]\n", ok_int(err));
-  return err;
-}
 
 
 void sc68_shutdown(void)
@@ -643,13 +602,6 @@ sc68_t * sc68_create(sc68_create_t * create)
   sc68_t *sc68 = 0;
 
   sc68_debug(0,"sc68_create() {\n");
-
-  /* $$$ temporary should be remove as soon as it become possible to
-     have multiple instance. */
-/*   if (sc68_unic) { */
-/*     sc68_error_add(0,"sc68_create() : sc68 instance already exist\n"); */
-/*     goto error; */
-/*   } */
 
   /* Alloc SC68 struct. */
   sc68 = calloc68(sizeof(sc68_t));
@@ -1555,8 +1507,8 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
   info->replay    = info->replay ? info->replay : "built-in";
 
   hw = 7 &
-    (  (hwf.bit.ym ? SC68_YM : 0)
-     | (hwf.bit.ste ? SC68_STE : 0)
+    (  (hwf.bit.ym    ? SC68_YM    : 0)
+     | (hwf.bit.ste   ? SC68_STE   : 0)
      | (hwf.bit.amiga ? SC68_AMIGA : 0)
        )
     ;
