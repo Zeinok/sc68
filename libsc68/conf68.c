@@ -98,7 +98,7 @@ static const config68_entry_t conftab[] = {
     "major*100+minor",
     {0}, {10000}, {PACKAGE_VERNUM}
   },
-  { 1,
+  { 0,				/* controled by application */
     "sampling-rate", CONFIG68_INT,
     "sampling rate in Hz",
     {SAMPLING_RATE_MIN},{SAMPLING_RATE_MAX},{SAMPLING_RATE_DEF}
@@ -121,7 +121,7 @@ static const config68_entry_t conftab[] = {
   },
   { 1,
     "skip-time", CONFIG68_INT,
-    "prevent short track (often sfx) from being played (in second) {0:off}",
+    "prevent short track from being played (in sec) {0:off}",
     {0}, {MAX_TIME}, {SKIP_TIME}
   },
   { 1,
