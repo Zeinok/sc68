@@ -71,6 +71,27 @@ typedef struct {
 } istream68_ao_t;
 
 static volatile int init;
+static unsigned int istream68_ao_defaut_rate = 44100;
+
+/* $$$ AO is the only audio backend we have. No need for much
+   complicated mechanism right now. */
+unsigned int audio68_sampling_rate(const unsigned int rate)
+{
+  unsigned int f;
+  if (!rate) {
+    f = istream68_ao_defaut_rate;
+  } else {
+    f = rate;
+    if (f < 8000u) {
+      f = 8000u;
+    } else if (f > 96000u) {
+      f = 96000u;
+    }
+    istream68_ao_defaut_rate = f;
+    debugmsg68_info("audio output: default sampling rate [%uhz]\n",f);
+  }
+  return f;
+}
 
 int istream68_ao_init(void)
 {
@@ -458,7 +479,7 @@ istream68_t * istream68_ao_create(const char * fname, int mode)
   ao.default_device     = 0;
   ao.format.bits        = 16;
   ao.format.channels    = 2;
-  ao.format.rate        = 44100;
+  ao.format.rate        = istream68_ao_defaut_rate;
   ao.format.byte_format = AO_FMT_NATIVE;
   ao.options            = 0;
 

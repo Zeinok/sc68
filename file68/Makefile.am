@@ -45,6 +45,7 @@ mysources=\
 
 myheaders=\
  $(hdir)/alloc68.h\
+ $(hdir)/audio68.h\
  $(hdir)/debugmsg68.h\
  $(hdir)/endian68.h\
  $(hdir)/error68.h\
@@ -54,9 +55,9 @@ myheaders=\
  $(hdir)/ice68.h\
  $(hdir)/init68.h\
  $(hdir)/istream68.h\
- $(hdir)/istream68_def.h\
  $(hdir)/istream68_ao.h\
  $(hdir)/istream68_curl.h\
+ $(hdir)/istream68_def.h\
  $(hdir)/istream68_fd.h\
  $(hdir)/istream68_file.h\
  $(hdir)/istream68_mem.h\
