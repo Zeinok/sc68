@@ -175,6 +175,7 @@ static int print_usage(void)
      "  -D --debug-list     Print debug categories and exit\n"
      "  -v --verbose        Print more info\n"
      "  -q --quiet          Do not display music info\n"
+     "  -r --rate=<val>     Sampling rate (in hz)\n"
      "  -t --track=<val>    Choose track to play [\"all\"|\"def\"|track-#]\n"
      "  -l --loop=<val>     Track loop [\"def\"|\"inf\"|loop-#]\n"
      "  -o --output=<URI>   Set output\n" 
@@ -312,9 +313,12 @@ int main(int argc, char *argv[])
   const char * inname  = 0;
   const char * tracks  = "def";
   const char * loops   = "def";
+  const char * rates   = "def";
+  
   int i,j;
   int track = -1;
   int loop  = -1;
+  int rate  = 0;
   int err   = 1;
   sc68_init_t init68;
   sc68_create_t create68;
@@ -334,6 +338,7 @@ int main(int argc, char *argv[])
     {"output",     1, 0, 'o'},
     {"track",      1, 0, 't'},
     {"loop",       1, 0, 'l'},
+    {"rate",       1, 0, 'r'},
     {0,0,0,0}
   };
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
@@ -387,6 +392,8 @@ int main(int argc, char *argv[])
       tracks = optarg; break;	    /* --track=      */
     case 'l':			  
       loops = optarg; break;	    /* --loop=       */
+    case 'r':			  
+      rates = optarg; break;	    /* --rate=       */
     case '?':			    /* Unknown or missing parameter */
       goto error;
     default:
@@ -436,10 +443,16 @@ int main(int argc, char *argv[])
     loop = strtol(loops,0,0);
   }
 
-
+  /* Parse rate */
+  if (!strcmp(rates,"def")) {
+    rate = 0;
+  } else {
+    rate = strtol(rates,0,0);
+  }
 
   memset(&create68,0,sizeof(create68));
   create68.debug_bit = debugmsg68_DEBUG;
+  create68.sampling_rate = rate;
   sc68 = sc68_create(&create68);
   if (!sc68) {
     goto error;
@@ -457,14 +470,7 @@ int main(int argc, char *argv[])
   }
 
   if (!outname) {
-    outname = urlbuf;		/*  */
-    snprintf(urlbuf,sizeof(urlbuf)-1,"audio://default/rate=%d",
-	     create68.sampling_rate);
-
-    /* $$$ deprecated */
     outname = "audio://default";
-
-    urlbuf[sizeof(urlbuf)-1] = 0;
   }
 
   /* Output message to stdout except it is the output. */
