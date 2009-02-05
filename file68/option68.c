@@ -138,7 +138,7 @@ void option68_unset_all(void)
 int option68_set(option68_t * opt, const char * str)
 {
   int err = -1;
-  if (!opt) {
+  if (opt) {
     err = 0;
     switch (opt_type(opt)) {
     case option68_STR:
@@ -156,7 +156,7 @@ int option68_set(option68_t * opt, const char * str)
 int option68_iset(option68_t * opt, int val) 
 {
   int err = -1;
-  if (!opt) {
+  if (opt) {
     err = 0;
     switch (opt_type(opt)) {
     case option68_BOL:
