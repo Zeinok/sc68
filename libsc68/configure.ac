@@ -67,7 +67,7 @@ AC_TYPE_UNSIGNED_LONG_LONG_INT
 # | Standard functions                                                   |
 # `----------------------------------------------------------------------'
 
-AC_CHECK_FUNCS([malloc free vsprintf vsnprintf getenv])
+AC_CHECK_FUNCS([malloc free vsprintf vsnprintf getenv strtol])
 
 
 # ,----------------------------------------------------------------------.

@@ -44,6 +44,12 @@
 /* standard headers */
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+
+#ifndef DEBUG_CONFIG68_O
+# define DEBUG_CONFIG68_O 0
+#endif
+static int config68_feature = debugmsg68_DEFAULT;
 
 typedef union {
   int i;          /**< Used with CONFIG68_INT fields.     */
@@ -213,6 +219,10 @@ static int digit(int c, unsigned int base)
   return -1;
 }
 
+#ifdef HAVE_STRTOL
+# define mystrtoul strtol
+#else
+
 /** $$$ Need this function for dcplaya version. */
 static long mystrtoul(const char * s,
 		      char * * end,
@@ -223,7 +233,7 @@ static long mystrtoul(const char * s,
   int neg = 0, c;
 
   /* Skip starting spaces. */
-  for (c = *s; (c == ' ' || c == '9' || c =='\n'); c = *++s)
+  for (c = *s; (c == ' ' || c == 9 || c == 10 || c == 13); c = *++s)
     ;
 
   /* Get optionnal sign. */
@@ -272,15 +282,24 @@ static long mystrtoul(const char * s,
   return neg ? -(signed long)v : v;
 }
 
+#endif
+
 static int config_set_int(config68_t * conf, config68_entry_t *e, int v)
 {
   int m,M;
 
   if (e->type != CONFIG68_INT) {
+    debugmsg68(config68_feature,
+	       "conf: set int name='%s' bad type (%d)\n", e->name, e->type);
     return -1;
   }
   m = e->min.i;
   M = e->max.i;
+
+  debugmsg68(config68_feature,
+	     "conf: set int name='%s' [%d..%d] cur:%d req:%d \n",
+	     e->name, m, M, e->val.i, v);
+
   if (m != M) {
     if (m==0 && M == 1) {
       v = !!v;
@@ -294,6 +313,9 @@ static int config_set_int(config68_t * conf, config68_entry_t *e, int v)
   if (v != e->val.i) {
     conf->saved = 0;
     e->val.i = v;
+    debugmsg68(config68_feature,
+	       "conf: set int name='%s' [%d..%d] new:%d\n",
+	       e->name, m, M, e->val.i);
   }
   return 0;
 }
@@ -496,7 +518,7 @@ static int save_config_entry(istream68_t * os, const config68_entry_t * e)
     err |= istream68_putc(os, '=') < 0;
     sprintf(tmp, "%d", e->val.i);
     err |= istream68_puts(os, tmp) < 0;
-    debugmsg68(-1,"conf_save:[%s]=%d (int)\n",e->name, e->val.i);
+    debugmsg68(config68_feature,"conf_save:[%s]=%d (int)\n",e->name, e->val.i);
     break;
 
   case CONFIG68_STR: {
@@ -509,7 +531,7 @@ static int save_config_entry(istream68_t * os, const config68_entry_t * e)
     err |= istream68_putc(os, '"') < 0;
     err |= istream68_puts(os, s) < 0;
     err |= istream68_putc(os, '"') < 0;
-    debugmsg68(-1,"conf_save:[%s]='%s' (str)\n",e->name, s);
+    debugmsg68(config68_feature,"conf_save:[%s]='%s' (str)\n",e->name, s);
   } break;
 
   default:
@@ -525,18 +547,18 @@ int config68_save(config68_t * conf)
   istream68_t * os=0; 
   const int sizeof_config_hd = sizeof(config_header)-1; /* Remove '\0' */
 
-  debugmsg68(-1,"config68_save(%p) {\n", conf);
+  debugmsg68(config68_feature,"config68_save(%p) {\n", conf);
 
   if (!conf) {
     err = error68(0,"config68_save: <nul> pointer");
-    /* err = debugmsg68(-1,"config68_save: <nul> pointer"); */
+    /* err = debugmsg68(config68_feature,"config68_save: <nul> pointer"); */
     goto error;
   }
   os = url68_stream_create("RSC68://config", 2);
 
   err = istream68_open(os);
   if (err) {
-    debugmsg68(-1,"config68_save: open failed\n");
+    debugmsg68(config68_feature,"config68_save: open failed\n");
   }
 
   if (!err) {
@@ -545,7 +567,7 @@ int config68_save(config68_t * conf)
 	 != sizeof_config_hd);
 
     if (err) {
-      debugmsg68(-1,"config68_save: write header failed\n");
+      debugmsg68(config68_feature,"config68_save: write header failed\n");
     }
   }	 
   for (i=0; !err && i < conf->n; ++i) {
@@ -556,7 +578,7 @@ int config68_save(config68_t * conf)
   istream68_close(os);
   istream68_destroy(os);
 
-  debugmsg68(-1, "} config68_save => [%s]\n",strok68(err));
+  debugmsg68(config68_feature, "} config68_save => [%s]\n",strok68(err));
   return err;
 }
 
@@ -570,7 +592,7 @@ int config68_load(config68_t * conf)
   int err;
   config68_type_t type;
 
-  debugmsg68(-1, "config68_load(conf:%p) {\n",conf);
+  debugmsg68(config68_feature, "conf: load %p {\n",conf);
 
   err = config68_default(conf);
   if (err) {
@@ -582,6 +604,8 @@ int config68_load(config68_t * conf)
   if (err) {
     goto error;
   }
+  debugmsg68(config68_feature, "conf: filename='%s'\n",
+	     istream68_filename(is));
 
   for(;;) {
     char * name;
@@ -612,7 +636,7 @@ int config68_load(config68_t * conf)
       ;
     s[i-1] = 0;
 
-    /*debugmsg68("conf_load:get name [%s]\n", name);*/
+    debugmsg68(config68_feature,"conf: load get key name='%s\n", name);
 
     /* Skip space */
     while (i < len && (c == ' ' || c == 9)) {
@@ -632,28 +656,36 @@ int config68_load(config68_t * conf)
     if (c == '"') {
       type = CONFIG68_STR;
       word = s + i;
+      debugmsg68(config68_feature,
+		 "conf: load name='%s' looks like a string(%d)\n", name, type);
     } else if (c == '-' || digit(c, 10) != -1) {
       type = CONFIG68_INT;
       word = s + i - 1;
+      debugmsg68(config68_feature,
+		 "conf: load name='%s' looks like an int(%d)\n", name, type);
     } else {
+      debugmsg68(config68_feature,
+		 "conf: load name='%s' looks like nothing valid\n", name);
       continue;
     }
-    /*debugmsg68("conf_load:get type (%d)\n",type);*/
+      debugmsg68(config68_feature,
+		 "conf: load name='%s' not parsed value='%s'\n", name, word);
 
     idx = config68_get_idx(conf, name);
     if (idx < 0) {
       /* Create this config entry */
+      debugmsg68(config68_feature, "conf: load name='%s' unknown\n", name);
+      continue;
     }
-    if (idx < 0 || conf->entries[idx].type != type) {
-      debugmsg68(-1, "conf_load:[%s] (%d) missing\n",
-		 conf->entries[idx].name, conf->entries[idx].type);
+    if (conf->entries[idx].type != type) {
+      debugmsg68(config68_feature, "conf: load name='%s' types differ\n", name);
       continue;
     }
 
     switch (type) {
     case CONFIG68_INT:
       config_set_int(conf, conf->entries+idx, mystrtoul(word, 0, 0));
-      debugmsg68(-1, "conf_load:[%s]=%d\n",
+      debugmsg68(config68_feature, "conf: load name='%s'=<int>%d\n",
 		 conf->entries[idx].name, conf->entries[idx].val.i);
       break;
     case CONFIG68_STR:
@@ -661,7 +693,7 @@ int config68_load(config68_t * conf)
 	;
       s[i-1] = 0;
       config_set_str(conf, conf->entries+idx, word);
-      debugmsg68(-1, "conf_load:[%s]='%s'\n",
+      debugmsg68(config68_feature, "conf_load:[%s]='%s'\n",
 		 conf->entries[idx].name, conf->entries[idx].val.s);
     default:
       break;
@@ -673,7 +705,7 @@ int config68_load(config68_t * conf)
 
  error:
   istream68_destroy(is);
-  debugmsg68(-1, "} config68_load => [%s]\n",strok68(err));
+  debugmsg68(config68_feature, "} config68_load => [%s]\n",strok68(err));
   return err;
 }
 
@@ -708,7 +740,7 @@ config68_t * config68_create(int size)
   config68_t * c;
   int i,j;
 
-  debugmsg68(-1, "config68_create(size=%d) {\n",size);
+  debugmsg68(config68_feature, "config68_create(size=%d) {\n",size);
 
   if (size < nconfig) {
     size = nconfig;
@@ -738,14 +770,14 @@ config68_t * config68_create(int size)
     }
     c->n = j;
   }
-  debugmsg68(-1, "} config68_create => [%s]\n",strok68(!c));
+  debugmsg68(config68_feature, "} config68_create => [%s]\n",strok68(!c));
 
   return c;
 }
 
 void config68_destroy(config68_t * c)
 {
-  debugmsg68(-1, "config68_destroy(%p) {\n",c);
+  debugmsg68(config68_feature, "config68_destroy(%p) {\n",c);
   if (c) {
     int i;
 
@@ -756,5 +788,17 @@ void config68_destroy(config68_t * c)
     }
     free68(c);
   }
-  debugmsg68(-1, "} config68_destroy\n");
+  debugmsg68(config68_feature, "} config68_destroy\n");
+}
+
+int config68_init(void)
+{
+  config68_feature = debugmsg68_feature("conf","config file", DEBUG_CONFIG68_O);
+  return 0;
+}
+
+void config68_shutdown()
+{
+  debugmsg68_feature_free(config68_feature);
+  config68_feature = debugmsg68_DEFAULT;
 }

@@ -113,6 +113,13 @@ config68_t * config68_create(int size);
 /** Destroy config. */
 void config68_destroy(config68_t * conf);
 
+/** library init. */
+int config68_init(void);
+
+/** library shutdown. */
+void config68_shutdown();
+
+
 /**
  *  @}
  */

@@ -560,6 +560,9 @@ int sc68_init(sc68_init_t * init)
     goto error;
   }
 
+  /* Init config module */
+  config68_init();
+
   /* Intialize file68. */
   init->argc = file68_init(init->argv, init->argc);
 
@@ -590,9 +593,11 @@ int sc68_init(sc68_init_t * init)
 void sc68_shutdown(void)
 {
   sc68_debug(0,"sc68_shutdown() {\n");
+  
   if (sc68_init_flag) {
     sc68_init_flag = 0;
     sc68_estack.cookie = 0;
+    config68_shutdown();
   }
   sc68_debug(0,"} sc68_shutdown()\n");
 }
