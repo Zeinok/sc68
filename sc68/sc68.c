@@ -458,6 +458,10 @@ int main(int argc, char *argv[])
     outname = urlbuf;		/*  */
     snprintf(urlbuf,sizeof(urlbuf)-1,"audio://default/rate=%d",
 	     create68.sampling_rate);
+
+    /* $$$ deprecated */
+    outname = "audio://default";
+
     urlbuf[sizeof(urlbuf)-1] = 0;
   }
 

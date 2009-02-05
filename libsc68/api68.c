@@ -52,6 +52,7 @@
 #include <sc68/rsc68.h>
 #include <sc68/debugmsg68.h>
 #include <sc68/option68.h>
+#include <sc68/audio68.h>
 
 /* stardard includes */
 #include <string.h>
@@ -690,14 +691,19 @@ unsigned int sc68_sampling_rate(sc68_t * sc68, unsigned int f)
       f = paulaio_sampling_rate(sc68->paulaio,f);
       sc68_debug(sc68,"sc68_sampling_rate() : after paula %u hz\n", f);
       sc68->mix.rate = f;
+      audio68_sampling_rate(f);
+      debugmsg68_info("%s: sampling rate [%u]\n", sc68->name, f);
     } else {
       const unsigned int min = SAMPLING_RATE_MIN, max = SAMPLING_RATE_MAX;
+
       if (f < min) f = min;
       else if (f > max) f = max;
+      /* Assuming interface audio accepts this value. */
+      audio68_sampling_rate(f);
       sc68_sampling_rate_def = f;
+      debugmsg68_info("sc68: default sampling rate [%u]\n", f);
     }
   }
-  sc68_debug(sc68,"sc68_sampling_rate() : %u hz\n", f);
   return f;
 }
 
