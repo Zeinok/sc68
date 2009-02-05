@@ -209,41 +209,43 @@ int option68_parse(int argc, char ** argv, int reset)
     rearg = arg;
     FOREACH_OPT(opt) {
       const int opttype = opt_type(opt);
-      const char * s;
       arg = rearg;
       
       if (opt->prefix) {
 	if (strncmp(arg,opt->prefix,opt->prefix_len)) {
-	  continue;
+	  continue;		/* prefix does not match */
 	}
 	arg += opt->prefix_len;
       }
 
       if (strncmp(arg,opt->name,opt->name_len)) {
-	continue;
+	continue;		/* name does not match */
       }
       
-      if (0 == arg[opt->name_len]) {
-	s = (i >= argc)
-	  ? 0			/* No more args */
-	  : argv[++i]		/* Get next arg */
-	  ;
-      } else if ('=' == arg[opt->name_len]) {
-	s = arg+opt->name_len+1;
+      arg += opt->name_len;
+      if (*arg != 0 && *arg != '=') {
+	continue;		/* name does not match (incomplet) */
+      }
+
+
+      if (0 == *arg) {
 	if (opttype == option68_BOL) {
 	  opt_set_bool(opt,!negate); /* No arg required, set the option */
 	  break;
 	}
+	if (i+1 >= argc) {
+	  break;		/* $$$ should trigger an error */
+	}
+	arg = argv[++i];	/* Get next arg */
       } else {
-	s = 0;
+	++arg;
       }
-      if (!s) continue;
 
       if (opttype == option68_STR) {
 	/* string option; ``negate'' does not have much meaning. */
-	opt_set_str(opt, s);
+	opt_set_str(opt, arg);
       } else {
-	opt_set_strtol(opt, s);
+	opt_set_strtol(opt, arg);
 	if (negate) opt_set_int(opt, ~opt->val.num);
       }
       break;
