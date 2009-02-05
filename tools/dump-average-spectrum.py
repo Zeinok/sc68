@@ -39,13 +39,11 @@ def pow2db(x):
 
 def main():
     channel = None
-    if len(sys.argv) != 3 and len(sys.argv) != 4:
-        raise RuntimeError, "usage: spectral-content.py <rawfile> <fft size>"
-    if len(sys.argv) == 4:
-        channel = int(sys.argv[3])
+    if len(sys.argv) != 4:
+        raise RuntimeError, "usage: spectral-content.py <rawfile> <fft size> <freq>"
 
-    freq = 44100
     fft = get_one_spectrum(file(sys.argv[1]), FFT_SIZE=int(sys.argv[2]))
+    freq = int(sys.argv[3])
 
     for i in range(len(fft) / 2 + 1):
         print "%f %f" % (float(i) / len(fft) * freq, pow2db(fft[i]))
