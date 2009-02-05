@@ -105,7 +105,7 @@ static option68_t opts[] = {
   { option68_STR,prefix,"rmusic"  ,rsccat,"online music base URI"         }
 };
 
-int file68_init(char **argv, int argc)
+int file68_init(int argc, char **argv)
 {
 /*   int i,n; */
   char tmp[1024];

@@ -40,6 +40,7 @@
 #include <sc68/string68.h>
 #include <sc68/debugmsg68.h>
 #include <sc68/alloc68.h>
+#include <sc68/option68.h>
 
 /* standard headers */
 #include <stdio.h>
@@ -60,13 +61,14 @@ typedef struct _config68_field_s config68_field_t;
 
 typedef struct
 {
-  const char * name;      /**< name of the entry.         */
-  config68_type_t type;   /**< Type of this config entry. */
-  const char * comment;   /**< Comment.                   */
-  config68_value_t min;   /**< Minimum value allowed.     */
-  config68_value_t max;   /**< Maximum value allowed.     */
-  config68_value_t def;   /**< Default value the entry.   */
-  config68_value_t val;   /**< Value for the entry.       */
+  int              exported; /**< exported as cli option.    */
+  const char      *name;     /**< name of the entry.         */
+  config68_type_t  type;     /**< Type of this config entry. */
+  const char      *comment;  /**< Comment.                   */
+  config68_value_t min;      /**< Minimum value allowed.     */
+  config68_value_t max;      /**< Maximum value allowed.     */
+  config68_value_t def;      /**< Default value the entry.   */
+  config68_value_t val;      /**< Value for the entry.       */
 } config68_entry_t;
 
 struct _config68_s {
@@ -91,86 +93,69 @@ struct _config68_s {
 #define MAX_SEEKSPD     0x1F00
 
 static const config68_entry_t conftab[] = {
-  {
+  { 0,
     "version", CONFIG68_INT,
     "major*100+minor",
     {0}, {10000}, {PACKAGE_VERNUM}
   },
-  {
-    "sampling_rate", CONFIG68_INT,
+  { 1,
+    "sampling-rate", CONFIG68_INT,
     "sampling rate in Hz",
     {SAMPLING_RATE_MIN},{SAMPLING_RATE_MAX},{SAMPLING_RATE_DEF}
   },
-  {
-    "amiga_blend", CONFIG68_INT,
-    "Amiga left/right voices blending factor",
+  { 1,
+    "amiga-blend", CONFIG68_INT,
+    "Amiga left/right voices blending factor {32768:center}",
     {0},{65535},{AMIGA_BLEND}
   },
 
-  {
-    "stf_emul", CONFIG68_INT,
-    "STF/YM-2149 emulator (0:default 1:classic 2:BLEP)",
-    {0},{2},{0}
-  },
-  {
-    "ste_emul", CONFIG68_INT,
-    "STE/MicroWire/LMC emulator (0:default 1:classic)",
-    {0},{1},{0}
-  },
-
-  {
-    "amiga_emul", CONFIG68_INT,
-    "Amiga/Paula emulator (0:default 1:plain 2:linear-interp)",
-    {0},{1},{0}
-  },
-
-  {
-    "force_track", CONFIG68_INT,
-    "override default track (0:OFF)",
+  { 0,				/* could be export but is it useful */
+    "force-track", CONFIG68_INT,
+    "override default track {0:off}",
     {0}, {99}, {FORCE_TRACK}
   },
-  {
-    "force_loop", CONFIG68_INT,
-    "override default loop (-1:OFF 0:Infinite)",
+  { 0,				/* could be export but is it useful */
+    "force-loop", CONFIG68_INT,
+    "override default loop {-1:off 0:inf}",
     {-1}, {100}, {-1}
   },
-  {
-    "skip_time", CONFIG68_INT,
-    "skip track less than given seconds (0:OFF)",
+  { 1,
+    "skip-time", CONFIG68_INT,
+    "prevent short track (often sfx) from being played (in second) {0:off}",
     {0}, {MAX_TIME}, {SKIP_TIME}
   },
-  {
-    "default_time", CONFIG68_INT,
-    "default time in second if unknown",
+  { 1,
+    "default-time", CONFIG68_INT,
+    "default track time (in second)",
     {0}, {MAX_TIME}, {DEFAULT_TIME}
   },
-  {
-    "seek_speed", CONFIG68_INT,
-    "seek speed factor * 256 (0:OFF)",
+  { 0,				/* could be export but is it useful */
+    "seek-speed", CONFIG68_INT,
+    "seek speed factor {0:OFF 256:1 512:2 ...}",
     {0}, {MAX_SEEKSPD}, {DEFAULT_SEEKSPD}
   },
-  {
-    "total_time", CONFIG68_INT,
+  { 0,
+    "total-time", CONFIG68_INT,
     "total playing time since first launch",
     {0}, {0}, {0}
   },
-  {
-    "total_ms", CONFIG68_INT,
-    "total_time adjustment",
+  { 0,
+    "total-ms", CONFIG68_INT,
+    "total-time adjustment",
     {0}, {999}, {0}
   },
-  {
-    "music_path", CONFIG68_STR,
+  { 0,				/* already exported by file68 */
+    "music-path", CONFIG68_STR,
     "local sc68 music path",
     {0}, {0}, {0}
   },
-  {
-    "remote_on", CONFIG68_INT,
-    "Enable sc68 remote access (using curl)",
+  { 0,				/* currently unsupported */
+    "allow-remote", CONFIG68_INT,
+    "enable remote access (using curl) (disable is not upported)",
     {0}, {1}, {1}
   },
-  {
-    "remote_music_path", CONFIG68_STR,
+  { 0,				/* already exported by file68 */
+    "remote-music-path", CONFIG68_STR,
     "remote sc68 music path",
     {0}, {0}, {0}
   }
@@ -296,9 +281,9 @@ static int config_set_int(config68_t * conf, config68_entry_t *e, int v)
   m = e->min.i;
   M = e->max.i;
 
-  debugmsg68(config68_feature,
-	     "conf: set int name='%s' [%d..%d] cur:%d req:%d \n",
-	     e->name, m, M, e->val.i, v);
+/*   debugmsg68(config68_feature, */
+/* 	     "conf: set int name='%s' [%d..%d] cur:%d req:%d \n", */
+/* 	     e->name, m, M, e->val.i, v); */
 
   if (m != M) {
     if (m==0 && M == 1) {
@@ -385,6 +370,21 @@ int config68_valid(config68_t * conf)
   return -!!err;
 }
 
+static int keycmp(const char * k1, const char * k2)
+{
+  int c1,c2;
+  
+  if (k1 == k2) return 0;
+  if (!k1) return -1;
+  if (!k2) return  1;
+  do {
+    c1 = *k1++; if (c1 == '_') c1 = '-';
+    c2 = *k2++; if (c2 == '_') c2 = '-';
+  } while (c1 == c2 && c1);
+  return c1 - c2;
+}
+  
+
 int config68_get_idx(const config68_t * conf, const char * name)
 {
   if (!conf) {
@@ -393,7 +393,7 @@ int config68_get_idx(const config68_t * conf, const char * name)
   if (name) {
     int i;
     for (i=0; i<conf->n; i++) {
-      if (!strcmp68(name,conf->entries[i].name)) {
+      if (!keycmp(name, conf->entries[i].name)) {
 	return i;
       }
     }
@@ -402,7 +402,7 @@ int config68_get_idx(const config68_t * conf, const char * name)
 }
 
 config68_type_t config68_range(const config68_t * conf, int idx,
-                                   int * min, int * max, int * def)
+			       int * min, int * max, int * def)
 {
   config68_type_t type = CONFIG68_ERR;
   int vmin = 0 , vmax = 0, vdef = 0;
@@ -442,7 +442,7 @@ config68_type_t config68_get(const config68_t * conf,
 		    ? conf->entries[idx].val.s
 		    : conf->entries[idx].def.s;
 	break;
-
+	
       default:
 	type = CONFIG68_ERR;
 	break;
@@ -452,11 +452,8 @@ config68_type_t config68_get(const config68_t * conf,
   return type;
 }
 
-config68_type_t config68_set(config68_t * conf,
-				 int idx,
-				 const char * name,
-				 int v,
-				 const char * s)
+config68_type_t config68_set(config68_t * conf, int idx, const char * name,
+			     int v, const char * s)
 {
   config68_type_t type = CONFIG68_ERR;
   if (conf) {
@@ -482,16 +479,14 @@ config68_type_t config68_set(config68_t * conf,
   return type;
 }
 
-
-
 static int save_config_entry(istream68_t * os, const config68_entry_t * e)
 {
-  int err = 0;
+  int i,err = 0;
   char tmp[64];
 
   err |= istream68_puts(os, "\n# ") < 0;
   err |= istream68_puts(os, e->comment) < 0;
-
+  
   switch (e->type) {
   case CONFIG68_INT:
     sprintf(tmp, "; *int* [%d..%d]", e->min.i, e->max.i);
@@ -512,13 +507,20 @@ static int save_config_entry(istream68_t * os, const config68_entry_t * e)
     return -1;
   }
 
+  /* transform name */
+  for (i=0; e->name[i]; ++i) {
+    int c = e->name[i];
+    tmp[i] = (c == '-') ? '_' : c;
+  }
+  tmp[i] = 0;
+
   switch (e->type) {
   case CONFIG68_INT:
-    err |= istream68_puts(os, e->name) < 0;
+    err |= istream68_puts(os, tmp) < 0;
     err |= istream68_putc(os, '=') < 0;
     sprintf(tmp, "%d", e->val.i);
     err |= istream68_puts(os, tmp) < 0;
-    debugmsg68(config68_feature,"conf_save:[%s]=%d (int)\n",e->name, e->val.i);
+    debugmsg68(config68_feature,"conf: save name='%s'=%d\n",e->name,e->val.i);
     break;
 
   case CONFIG68_STR: {
@@ -526,12 +528,12 @@ static int save_config_entry(istream68_t * os, const config68_entry_t * e)
     if (!s) {
       err |= istream68_putc(os, '#') < 0;
     }
-    err |= istream68_puts(os, e->name) < 0;
+    err |= istream68_puts(os, tmp) < 0;
     err |= istream68_putc(os, '=') < 0;
     err |= istream68_putc(os, '"') < 0;
     err |= istream68_puts(os, s) < 0;
     err |= istream68_putc(os, '"') < 0;
-    debugmsg68(config68_feature,"conf_save:[%s]='%s' (str)\n",e->name, s);
+    debugmsg68(config68_feature,"conf: save name='%s'=\"%s\"\n",e->name,s);
   } break;
 
   default:
@@ -547,29 +549,21 @@ int config68_save(config68_t * conf)
   istream68_t * os=0; 
   const int sizeof_config_hd = sizeof(config_header)-1; /* Remove '\0' */
 
-  debugmsg68(config68_feature,"config68_save(%p) {\n", conf);
+  debugmsg68(config68_feature,"conf: saving ...\n", conf);
 
   if (!conf) {
-    err = error68(0,"config68_save: <nul> pointer");
-    /* err = debugmsg68(config68_feature,"config68_save: <nul> pointer"); */
+    err = error68(0,"conf: null pointer");
     goto error;
   }
   os = url68_stream_create("RSC68://config", 2);
-
   err = istream68_open(os);
-  if (err) {
-    debugmsg68(config68_feature,"config68_save: open failed\n");
-  }
-
   if (!err) {
+    debugmsg68(config68_feature,"conf: save into \"%s\"\n",
+	       istream68_filename(os));
     err =
       - (istream68_write(os, config_header, sizeof_config_hd)
 	 != sizeof_config_hd);
-
-    if (err) {
-      debugmsg68(config68_feature,"config68_save: write header failed\n");
-    }
-  }	 
+  }
   for (i=0; !err && i < conf->n; ++i) {
     err = save_config_entry(os, conf->entries+i);
   }
@@ -578,7 +572,7 @@ int config68_save(config68_t * conf)
   istream68_close(os);
   istream68_destroy(os);
 
-  debugmsg68(config68_feature, "} config68_save => [%s]\n",strok68(err));
+  debugmsg68(config68_feature, "config68_save => [%s]\n",strok68(err));
   return err;
 }
 
@@ -592,7 +586,7 @@ int config68_load(config68_t * conf)
   int err;
   config68_type_t type;
 
-  debugmsg68(config68_feature, "conf: load %p {\n",conf);
+  debugmsg68(config68_feature, "conf: loading ...\n",conf);
 
   err = config68_default(conf);
   if (err) {
@@ -633,10 +627,10 @@ int config68_load(config68_t * conf)
     /* Get symbol name. */
     name = s+i-1;
     while (i < len && is_symbol_char(c = s[i++]))
-      ;
+      if (c == '_') s[i-1] = c = '-';
     s[i-1] = 0;
 
-    debugmsg68(config68_feature,"conf: load get key name='%s\n", name);
+    /* debugmsg68(config68_feature,"conf: load get key name='%s\n", name); */
 
     /* Skip space */
     while (i < len && (c == ' ' || c == 9)) {
@@ -656,20 +650,21 @@ int config68_load(config68_t * conf)
     if (c == '"') {
       type = CONFIG68_STR;
       word = s + i;
-      debugmsg68(config68_feature,
-		 "conf: load name='%s' looks like a string(%d)\n", name, type);
+/*       debugmsg68(config68_feature, */
+/* 		 "conf: load name='%s' looks like a string(%d)\n", */
+/* 		 name, type); */
     } else if (c == '-' || digit(c, 10) != -1) {
       type = CONFIG68_INT;
       word = s + i - 1;
-      debugmsg68(config68_feature,
-		 "conf: load name='%s' looks like an int(%d)\n", name, type);
+/*       debugmsg68(config68_feature, */
+/* 		 "conf: load name='%s' looks like an int(%d)\n", name, type); */
     } else {
       debugmsg68(config68_feature,
 		 "conf: load name='%s' looks like nothing valid\n", name);
       continue;
     }
-      debugmsg68(config68_feature,
-		 "conf: load name='%s' not parsed value='%s'\n", name, word);
+/*     debugmsg68(config68_feature, */
+/* 	       "conf: load name='%s' not parsed value='%s'\n", name, word); */
 
     idx = config68_get_idx(conf, name);
     if (idx < 0) {
@@ -685,7 +680,7 @@ int config68_load(config68_t * conf)
     switch (type) {
     case CONFIG68_INT:
       config_set_int(conf, conf->entries+idx, mystrtoul(word, 0, 0));
-      debugmsg68(config68_feature, "conf: load name='%s'=<int>%d\n",
+      debugmsg68(config68_feature, "conf: load name='%s'=%d\n",
 		 conf->entries[idx].name, conf->entries[idx].val.i);
       break;
     case CONFIG68_STR:
@@ -693,7 +688,7 @@ int config68_load(config68_t * conf)
 	;
       s[i-1] = 0;
       config_set_str(conf, conf->entries+idx, word);
-      debugmsg68(config68_feature, "conf_load:[%s]='%s'\n",
+      debugmsg68(config68_feature, "conf: load name='%s'=\"%s\"\n",
 		 conf->entries[idx].name, conf->entries[idx].val.s);
     default:
       break;
@@ -705,7 +700,7 @@ int config68_load(config68_t * conf)
 
  error:
   istream68_destroy(is);
-  debugmsg68(config68_feature, "} config68_load => [%s]\n",strok68(err));
+  debugmsg68(config68_feature, "conf: loaded => [%s]\n",strok68(err));
   return err;
 }
 
@@ -791,14 +786,67 @@ void config68_destroy(config68_t * c)
   debugmsg68(config68_feature, "} config68_destroy\n");
 }
 
+option68_t * config68_options;
+int config68_option_count;
+
 int config68_init(void)
 {
-  config68_feature = debugmsg68_feature("conf","config file", DEBUG_CONFIG68_O);
+  if (config68_feature == debugmsg68_DEFAULT) {
+    config68_feature =
+      debugmsg68_feature("conf","config file", DEBUG_CONFIG68_O);
+  }
+
+  if (!config68_options) {
+    int i,n;
+    option68_t * options = 0;
+
+    /* count exported config key. */
+    for (i=n=0; i<nconfig; ++i) {
+      n += !!conftab[i].exported;
+    }
+
+    TRACE68(config68_feature,"conf: got %d exportable keys\n",n); 
+
+    if (n > 0) {
+      options = alloc68(n*sizeof(*options));
+      if (!options) {
+	debugmsg68_error("conf: alloc error\n");
+      } else {
+	int j;
+	for (i=j=0; i<nconfig; ++i) {
+	  if (!conftab[i].exported) continue;
+	  options[j].has_arg = (conftab[i].type == CONFIG68_INT)
+	    ? option68_INT : option68_STR;
+	  options[j].prefix  = "sc68-";
+	  options[j].name    = conftab[i].name;
+	  options[j].cat     = "config";
+	  options[j].desc    = conftab[i].comment;
+	  options[j].val.num = 0;
+	  options[j].val.str = 0;
+	  options[j].next    = 0;
+	  options[j].name_len = 
+	    options[j].prefix_len = 0;
+	  TRACE68(config68_feature,"conf: export %s %s%s\n",
+		  options[j].cat, options[j].prefix, options[j].name);
+	  ++j;
+	}
+      }
+    }
+    config68_options      = options;
+    config68_option_count = n;
+  }
   return 0;
 }
 
 void config68_shutdown()
 {
+  /* release debug feature. */
   debugmsg68_feature_free(config68_feature);
   config68_feature = debugmsg68_DEFAULT;
+
+  /* release options */
+  free68(config68_options);
+  config68_options = 0;
+  config68_option_count = 0;
 }
+

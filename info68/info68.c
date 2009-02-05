@@ -66,17 +66,18 @@ static int tracklist_error(const char *command)
   return 4;
 }
 
-static void print_option(void * data, 
+static void print_option(void * data,
 			 const char * option,
 			 const char * envvar,
 			 const char * desc)
 {
   fprintf(data, 
 	  "  %s or `$%s'\n"
-	  "     %s \n",
-	  option, envvar, desc);
+	  "                      %c%s\n",
+	  option, envvar, 
+	  (desc[0]>='a' && desc[0]<='z') ? desc[0]-'a'+'A' : desc[0],
+	  desc+1);
 }	 
-
 
 static int display_help(void)
 {
@@ -88,10 +89,10 @@ static int display_help(void)
   puts
     ("Options:\n"
      "\n"
-     "  --                  break option parsing\n"
-     "  -h --help           display this message and exit\n"
-     "  -V --version        display version and exit\n"
-     "  -o --output=<URI>   change output to file (- is stdout)\n");
+     "  --                  Break option parsing\n"
+     "  -h --help           Display this message and exit\n"
+     "  -V --version        Display version and exit\n"
+     "  -o --output=<URI>   Change output to file (- is stdout)\n");
    
   option68_help(stdout,print_option);
    
@@ -166,7 +167,7 @@ static int display_help(void)
   puts
     ("Examples:\n"
      "\n"
-     "  info68 'rsc68://music/Jochen Hippel (Mad Max)/0/Wings Of Death/' '-1,5,4-6' '> %&/%# %N - %a - %n%L'\n"
+     "  info68 'sc68://Jochen Hippel (Mad Max)/0/Wings Of Death/' '-1,5,4-6' '> %&/%# %N - %a - %n%L'\n"
      "\n"
      "  > 1/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #1\n"
      "  > 5/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #5\n"
@@ -296,7 +297,7 @@ static int ReadTrackList(char **trackList, int max, int *from, int *to)
   return 1;
 }
 
-int main(int na, char **a)
+int main(int argc, char ** argv)
 {
   int i;
   /*   hwflags68_t diskHW; */
@@ -307,47 +308,47 @@ int main(int na, char **a)
   const char * inname  = 0;
   const char * outname = "stdout://";
 
-  a[0] = "info68";
+  argv[0] = "info68";
   alloc68_set(malloc);
   free68_set(free);
-  na = file68_init(a,na);
-  if (na < 0) {
+  argc = file68_init(argc, argv);
+  if (argc < 0) {
     error("info68: file68 initialisation failed.\n");
     return -1;
   }
 
-  if (na < 2) {
+  if (argc < 2) {
     error("info68: missing argument. Try --help.\n");
     return 1;
   }
      
-  /* Scan options ...   */
-  for (i=1; i<na; ++i) {
-    if (!strcmp(a[i],"--")) {
+  /* Scan options ...  */
+  for (i=1; i<argc; ++i) {
+    if (!strcmp(argv[i],"--")) {
       ++i;
       break;
-    } else if (!strcmp(a[i],"--help") || !strcmp(a[i],"-h")) {
+    } else if (!strcmp(argv[i],"--help") || !strcmp(argv[i],"-h")) {
       return display_help();
-    } else if (!strcmp(a[i],"--version") || !strcmp(a[i],"-V")) {
+    } else if (!strcmp(argv[i],"--version") || !strcmp(argv[i],"-V")) {
       return display_version();
-    } else if ((!strcmp(a[i], "-o") || !strcmp(a[i],"--output"))) {
-      if (++i >= na) {
-	error("info69: option `%s' missing argument.\n", a[i-1]);
+    } else if ((!strcmp(argv[i], "-o") || !strcmp(argv[i],"--output"))) {
+      if (++i >= argc) {
+	error("info69: option `%s' missing argument.\n", argv[i-1]);
 	return 2;
       }
-      outname = a[i];
-    } else if (a[i] == strstr(a[i],"--output=")) {
-      outname = a[i]+9;
+      outname = argv[i];
+    } else if (argv[i] == strstr(argv[i],"--output=")) {
+      outname = argv[i]+9;
     } else {
       break;
     }
   }
 
-  if (i >= na) {
+  if (i >= argc) {
     error ("info68: missing input file.\n");
     return 2;
   }
-  inname = a[i];
+  inname = argv[i];
 
   out = url68_stream_create(outname, 2);
   if (istream68_open(out)) {
@@ -367,10 +368,10 @@ int main(int na, char **a)
   toTrack = curTrack = d->default_six;
 
   /* Main loop */
-  for (++i; i<na; ++i) {
-    if (!trackList && a[i][0] == '-' && isdigit(a[i][1])) {
+  for (++i; i<argc; ++i) {
+    if (!trackList && argv[i][0] == '-' && isdigit(argv[i][1])) {
       int res;
-      trackList = a[i]+1;
+      trackList = argv[i]+1;
       res = ReadTrackList(&trackList, d->nb_six, &curTrack , &toTrack);
       if (res < 0) {
 	return tracklist_error(trackList);
@@ -389,7 +390,7 @@ int main(int na, char **a)
       music68_t *m = d->mus + curTrack;
 
       /* Parse format string for this track */
-      for (s=a[i], esc=0; (c = *s, c); ++s) {
+      for (s=argv[i], esc=0; (c = *s, c); ++s) {
 	if (!esc) {
 	  /* Not escaped */
 	  if(esc = (c=='%'), !esc) {

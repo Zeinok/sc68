@@ -29,11 +29,11 @@ extern "C" {
 FILE68_API
 /** Initialize file68 library.
  *
- *  @param  argv  argument array (as for main())
  *  @param  argc  argument count
+ *  @param  argv  argument array (as for main())
  *  @return new argument count
  */
-int file68_init(char **argv, int argc);
+int file68_init(int argc, char **argv);
 
 FILE68_API
 /** Shutdown file68 library.

@@ -119,7 +119,6 @@ int config68_init(void);
 /** library shutdown. */
 void config68_shutdown();
 
-
 /**
  *  @}
  */

@@ -113,13 +113,9 @@ struct _sc68_s {
    */
   io68_t *ymio,*mwio,*shifterio,*paulaio,*mfpio;
 
-  ym_t * ym;                  /**< YM emulator.                          */ 
-  mw_t * mw;		      /**< MicroWire emulator.                   */
+  ym_t    * ym;               /**< YM emulator.                          */ 
+  mw_t    * mw;		      /**< MicroWire emulator.                   */
   paula_t * paula;	      /**< Amiga emulator.                       */
-
-  int ym_emul;                /**< YM emulation type.                    */
-  int mw_emul;                /**< MicroWire emulation type.             */
-  int amiga_emul;             /**< Amiga emulation type.                 */
 
   disk68_t     * disk;        /**< Current loaded disk.                  */
   music68_t    * mus;         /**< Current playing music.                */
@@ -131,6 +127,8 @@ struct _sc68_s {
   unsigned int   playaddr;    /**< Current play address in 68 memory.    */
   int            seek_to;     /**< Seek to this time (-1:n/a)            */
   config68_t   * config;      /**< Config.                               */
+  int            remote;      /**< Allow remote access.                  */
+
 
   /** Playing time info. */
   struct {
@@ -152,7 +150,7 @@ struct _sc68_s {
     int            buflen;       /**< PCM count in buffer.               */
     int            stdbuflen;    /**< Default number of PCM per pass.    */
     unsigned int   cycleperpass; /**< Number of 68K cycles per pass.     */
-    int            amiga_blend;  /**< Amiga LR blend factor [0..65536].  */
+    int            aga_blend;    /**< Amiga LR blend factor [0..65536].  */
     unsigned int   sample_cnt;   /**< Number of mixed PCM.               */
     unsigned int   pass_cnt;     /**< Current pass.                      */
     unsigned int   pass_total;   /**< Total number of pass.              */
@@ -169,16 +167,11 @@ struct _sc68_s {
 
 };
 
-/* command line options option */
-/* static const char prefix[] = "sc68-"; */
-/* static const char engcat[] = "ym-2149"; */
-/* static option68_t opts[] = { */
-/*   { option68_STR,prefix,"ym-engine",engcat,"select ym-2149 engine" } */
-/* }; */
-
-static volatile int sc68_init_flag; /* Library init flag     */
-static sc68_estack_t sc68_estack;   /* Library error message */
-static unsigned int sc68_sampling_rate_def = SAMPLING_RATE_DEF;
+static volatile int  sc68_init_flag; /* Library init flag     */
+static sc68_estack_t sc68_estack;    /* Library error message */
+static unsigned int  sc68_sampling_rate_def = SAMPLING_RATE_DEF;
+extern option68_t  * config68_options; /* conf68.c */
+extern int config68_option_count;      /* conf68.c */
 
 static inline const char * ok_int(const int const err) {
   return !err ? "success" : "failure";
@@ -353,11 +346,21 @@ static int myconfig_get_int(config68_t * c,
 {
   config68_type_t type;
   int v = def;
-  if (c) {
+  option68_t * opt;
+
+  sc68_debug(0,"getconfig: name='%s' def=%d\n", name, def);
+
+  /* cli options are prior to config keys */
+  opt = option68_get(name, 1);
+  if (opt) {
+    v = opt->val.num;
+    sc68_debug(0,"getconfig: from cli name='%s' val=%d\n", name, v);
+  } else if (c) {
     v = -1;
     type = config68_get(c, &v, &name);  
     if (type != CONFIG68_INT) {
       v = def;
+      sc68_debug(0,"getconfig: from cfg name='%s' val=%d\n", name, v);
     }
   }
   return v;
@@ -385,20 +388,16 @@ static void set_config(sc68_t * sc68)
   config68_t * c = sc68->config;
   const char * lmusic, * rmusic;
 
-  sc68->version         = myconfig_get_int(c, "version",       PACKAGE_VERNUM);
-  sc68->mix.amiga_blend = myconfig_get_int(c, "amiga_blend",   0x4000);
-
-  sc68->amiga_emul  = myconfig_get_int(c, "amiga_emul", PAULA_EMUL_DEFAULT);
-  sc68->ym_emul     = myconfig_get_int(c, "stf_emul", YM_EMUL_DEFAULT);
-  sc68->mw_emul     = myconfig_get_int(c, "ste_emul", MW_EMUL_DEFAULT);
-
-  sc68->track_here      = myconfig_get_int(c, "force_track",   1);
-  sc68->time.def_ms     = myconfig_get_int(c, "default_time",  3*60) * 1000;
-  sc68->mix.rate        = myconfig_get_int(c, "sampling_rate", SAMPLING_RATE_DEF);
-  sc68->force_loop      = myconfig_get_int(c, "force_loop",    -1);
-  sc68->mix.max_stp     = myconfig_get_int(c, "seek_speed",    0xF00);
-  sc68->time.total      = myconfig_get_int(c, "total_time",    0);
-  sc68->time.total_ms   = myconfig_get_int(c, "total_ms",      0);
+  sc68->version       = myconfig_get_int(c, "version",       PACKAGE_VERNUM);
+  sc68->remote        = myconfig_get_int(c, "allow-remote",  1);
+  sc68->mix.aga_blend = myconfig_get_int(c, "amiga-blend",   0x4000);
+  sc68->track_here    = myconfig_get_int(c, "force-track",   0);
+  sc68->time.def_ms   = myconfig_get_int(c, "default-time",  3*60) * 1000;
+  sc68->mix.rate      = myconfig_get_int(c, "sampling-rate", SAMPLING_RATE_DEF);
+  sc68->force_loop    = myconfig_get_int(c, "force-loop",    -1);
+  sc68->mix.max_stp   = myconfig_get_int(c, "seek-speed",    0xF00);
+  sc68->time.total    = myconfig_get_int(c, "total-time",    0);
+  sc68->time.total_ms = myconfig_get_int(c, "total-ms",      0);
 
   if (sc68->time.def_ms<=0) {
     sc68->time.def_ms = 3*60*1000;
@@ -430,15 +429,14 @@ static void get_config(sc68_t * sc68)
   config68_t * c = sc68->config;
 
   myconfig_set_int(c, "version",       PACKAGE_VERNUM);
-  myconfig_set_int(c, "stf_emul",      sc68->ym_emul);
-  myconfig_set_int(c, "ste_emul",      sc68->mw_emul);
-  myconfig_set_int(c, "amiga_emul",    sc68->amiga_emul);
-  myconfig_set_int(c, "amiga_blend",   sc68->mix.amiga_blend);
-  myconfig_set_int(c, "force_track",   sc68->track_here);
-  myconfig_set_int(c, "default_time",  (sc68->time.def_ms+999)/1000u);
-  myconfig_set_int(c, "sampling_rate", sc68->mix.rate);
-  myconfig_set_int(c, "force_loop",    sc68->force_loop);
-  myconfig_set_int(c, "seek_speed",    sc68->mix.max_stp);
+  /* Do not change user config ! */
+/*   myconfig_set_int(c, "aga_blend",   sc68->mix.aga_blend); */
+/*   myconfig_set_int(c, "force_track",   sc68->track_here); */
+/*   myconfig_set_int(c, "default_time",  (sc68->time.def_ms+999)/1000u); */
+/*   myconfig_set_int(c, "sampling_rate", sc68->mix.rate); */
+/*   myconfig_set_int(c, "force_loop",    sc68->force_loop); */
+/*   myconfig_set_int(c, "seek_speed",    sc68->mix.max_stp); */
+/*   myconfig_set_int(c, "allow_remote",  sc68->remote); */
   myconfig_set_int(c, "total_time",    sc68->time.total);
   myconfig_set_int(c, "total_ms",      sc68->time.total_ms);
 }
@@ -564,7 +562,12 @@ int sc68_init(sc68_init_t * init)
   config68_init();
 
   /* Intialize file68. */
-  init->argc = file68_init(init->argv, init->argc);
+  init->argc = file68_init(init->argc, init->argv);
+  
+  if (config68_options) {
+    option68_append(config68_options,config68_option_count);
+    init->argc = option68_parse(init->argc, init->argv, 0);
+  }
 
   /* $$$ problem with debug-mask, sc68-debug is set before the
      creation of all new features. file68_init() should not process it
@@ -1078,7 +1081,7 @@ int sc68_process(sc68_t * sc68, void * buf16st, int n)
 	/* Amiga - Paula */
         paula_mix(sc68->paula,(s32*)sc68->mix.bufptr,sc68->mix.buflen);
         mixer68_blend_LR(sc68->mix.bufptr, sc68->mix.bufptr, sc68->mix.buflen,
-			 sc68->mix.amiga_blend, 0, 0);
+			 sc68->mix.aga_blend, 0, 0);
       } else {
 	if (sc68->mus->hwflags.bit.ym) {
 	  int err = 
@@ -1338,7 +1341,13 @@ int sc68_play(sc68_t * sc68, int track, int loop)
       : sc68->track;
   }
 
-  /* track == 0 : set track to disk default. */
+  /* track == 0 : try force-track. */
+  if (track == 0 && sc68->track_here) {
+    track = sc68->track_here;
+    if (track > d->default_six) track = 0;
+  }
+
+  /* track == 0 : force-track out of range, restore disk default. */
   if (track == 0) {
     track = d->default_six + 1;
   }
@@ -1346,7 +1355,7 @@ int sc68_play(sc68_t * sc68, int track, int loop)
   /* Check track range. */
   if (track <= 0 || track > d->nb_six) {
     return sc68_error_add(sc68,"track [%d] out of range [%d]",
-		       track, d->nb_six);
+			  track, d->nb_six);
   }
 
   /* Set change track. Real track loading occurs during process thread to
@@ -1474,37 +1483,33 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
   }
 
   m = d->mus + ((!track) ? d->default_six : (track - 1));
-  info->track = track;
+  info->track  = track;
   info->tracks = d->nb_six;
-  force_loop = sc68?sc68->force_loop:-1;
-  loop_to = sc68?sc68->loop_to:-1;
-  loop = calc_loop_total(force_loop, loop_to, m->loop);
+  force_loop   = sc68?sc68->force_loop:-1;
+  loop_to      = sc68?sc68->loop_to:-1;
+  loop         = calc_loop_total(force_loop, loop_to, m->loop);
 
   if (!track) {
     /* disk info */
-    info->title = d->name;
-    info->replay = 0;
-    info->time_ms = calc_disk_time(sc68,d);
+    info->title    = d->name;
+    info->replay   = 0;
+    info->time_ms  = calc_disk_time(sc68,d);
     info->start_ms = 0;
-    hwf.all = d->hwflags.all;
-    track = info->tracks;
+    hwf.all        = d->hwflags.all;
+    track          = info->tracks;
   } else {
     /* track info */
-    info->title = m->name;
-    info->replay = m->replay;
-    info->time_ms = (sc68 && m == sc68->mus)
-      ? sc68->time.length_ms : m->time_ms;
+    info->title    = m->name;
+    info->replay   = m->replay;
+    info->time_ms  = (sc68 && m==sc68->mus) ? sc68->time.length_ms : m->time_ms;
     info->start_ms = m->start_ms;
-    hwf.all = m->hwflags.all;
+    hwf.all        = m->hwflags.all;
   }
   loop = calc_loop_total(force_loop,
 			 (sc68 && m==sc68->mus) ? loop_to : 1,
 			 m->loop);
   info->time_ms  *= loop;
   info->start_ms *= loop;
-
-  /* sc68_debug(sc68,"mus:%p %p, loop:%d , time:%d\n",
-     m,sc68->mus,loop,info->time_ms); */
 
   /* If there is a track remapping always use it. */
   if (m->track) {
@@ -1523,7 +1528,7 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
      | (hwf.bit.amiga ? SC68_AMIGA : 0)
        )
     ;
-
+  
   info->hw.ym    = hwf.bit.ym;
   info->hw.ste   = hwf.bit.ste;
   info->hw.amiga = hwf.bit.amiga;
@@ -1531,7 +1536,7 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
   info->addr     = m->a0;
   info->hwname   = hwtable[hw];
   strtime68(info->time, track, (info->time_ms+999u)/1000u);
-
+  
   return 0;
 }
 

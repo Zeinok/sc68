@@ -22,7 +22,7 @@
  */
 
 /* Table of 5 bit D/A output level for 1 channel.*/
-static const u16 ymout1c5bit[] =
+static const u16 ymout1c5bit[32] =
 {
   310,  369,  438,  521,  619,  735,  874, 1039,
  1234, 1467, 1744, 2072, 2463, 2927, 3479, 4135,
@@ -38,7 +38,7 @@ void ym_create_5bit_linear_table(s16 * out, unsigned int level)
   const unsigned int min = ymout1c5bit[00];
   const unsigned int max = ymout1c5bit[31];
   const unsigned int div = max-min ? max-min : 1;
-  const int center = level>>1;
+  const int center = (level+1)>>1;
   for (i=0; i<32*32*32; ++i) {
     int tmp =
       (  (unsigned int) ymout1c5bit[0x1F & (i>>10)] +
@@ -47,5 +47,6 @@ void ym_create_5bit_linear_table(s16 * out, unsigned int level)
 	 3u * min ) / 3u * level / div;
     out[i] = tmp - center;
   }
-  debugmsg68_info("ym-2149: using *LINEAR* volumes (%d)\n", level);
+  debugmsg68_info("ym-2149: using *LINEAR* volumes %d [%d..%d])\n",
+		  level,out[0],out[0x7FFF]);
 }

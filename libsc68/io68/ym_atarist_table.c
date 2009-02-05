@@ -1,3 +1,4 @@
+
 /*
  *          sc68 - YM-2149 emulator - Atari ST Volume Table
  *
@@ -46,7 +47,7 @@ volumetable_get(int i, int j, int k)
   
   v = volumetable_original[i + 16 * j + 16 * 16 * k];
   v2 = (v*12)>>4;
-/*   TRACE68(ym_feature,"v[%x %x %x] = %d->%d\n",k,j,i,v,v2); */
+  /*   TRACE68(ym_feature,"v[%x %x %x] = %d->%d\n",k,j,i,v,v2); */
 
   return v2;
 }
@@ -77,19 +78,20 @@ volumetable_set(s16 * const volumetable, int i, int j, int k, int val)
   volumetable[i + 32 * j + 32 * 32 * k] = val;
 }
 
-/* the table is exponential in nature. These weighing factors approximate
- * that the value in-between needs to be closer to the lower value in y2 */
+/* the table is exponential in nature. These weighing factors
+ * approximate that the value in-between needs to be closer to the
+ * lower value in y2 */
 static int
 volumetable_interpolate(int y1, int y2)
 {
   int erpolate;
   erpolate = (y1 * 4 + y2 * 6) / 10u;
   if (erpolate > 65535) {
-/*     TRACE68(ym_feature, "sature>:%d %d %d\n",erpolate,y1,y2); */
+    TRACE68(ym_feature, "sature>:%d %d %d\n",erpolate,y1,y2);
     erpolate = 65535;
   }
   if (erpolate < 0) {
-/*     TRACE68(ym_feature, "sature<:%d %d %d\n",erpolate,y1,y2); */
+    TRACE68(ym_feature, "sature<:%d %d %d\n",erpolate,y1,y2);
     erpolate = 0;
   }
 /*   TRACE68(ym_feature, "erpole:%d <-%d %d\n",erpolate,y1,y2); */
@@ -103,8 +105,8 @@ interpolate_volumetable(s16 * const out)
   int i, j, k;
   int i1, i2;
 
-  /* we are doing 4-dimensional interpolation here. For each
-   * known measurement point, we must find 8 new values. These values occur
+  /* we are doing 4-dimensional interpolation here. For each known
+   * measurement point, we must find 8 new values. These values occur
    * as follows:
    *
    * - one at the exact same position
@@ -116,11 +118,12 @@ interpolate_volumetable(s16 * const out)
    * - one half-way in j+k direction
    * - one half-way in i+j+k direction
    *
-   * The algorithm currently is very simplistic. Probably more points should be
-   * weighted in the multicomponented directions, for instance i+j+k should be
-   * an average of all surrounding data points. This probably doesn't matter much,
-   * though. This is because the only way to reach those locations is to modulate
-   * more than one voice with the envelope, and this is rare.
+   * The algorithm currently is very simplistic. Probably more points
+   * should be weighted in the multicomponented directions, for
+   * instance i+j+k should be an average of all surrounding data
+   * points. This probably doesn't matter much, though. This is
+   * because the only way to reach those locations is to modulate more
+   * than one voice with the envelope, and this is rare.
    */
 
   for (i = 0; i < 16; i += 1) {
@@ -172,12 +175,20 @@ void ym_create_5bit_atarist_table(s16 * out, unsigned int level)
     const int min = out[0x0000];
     const int max = out[0x7fff];
     const int div = max-min ? max-min : 1;
-    const int center = level>>1;
+    const int center = (level+1)>>1;
     for (h=0; h<32*32*32; ++h) {
       int tmp = out[h], res;
+      
+      if (tmp < min || tmp > max) 
+	debugmsg68_critical
+	  ("ym-2149: *ATARI-ST* volumes value %d out of range [%d..%d]\n",
+	   tmp,min,max);
+      
       res = (tmp-min) * level / div - center;
       out[h] = res;
     }
   }
-  debugmsg68_info("ym-2149: using *ATARI-ST* volumes (%d)\n", level);
+  debugmsg68_info("ym-2149: using *ATARI-ST* volumes %d [%d..%d]\n",
+		  level, out[0],out[0x7FFF]);
+  
 }

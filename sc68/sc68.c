@@ -129,15 +129,17 @@ static int print_version(void)
   return 0;
 }
 
-static void print_option(void * data, 
+static void print_option(void * data,
 			 const char * option,
 			 const char * envvar,
 			 const char * desc)
 {
   fprintf(data, 
 	  "  %s or `$%s'\n"
-	  "     %s \n",
-	  option, envvar, desc);
+	  "                      %c%s\n",
+	  option, envvar, 
+	  (desc[0]>='a' && desc[0]<='z') ? desc[0]-'a'+'A' : desc[0],
+	  desc+1);
 }	 
 
 static void print_feature(void * data, 
