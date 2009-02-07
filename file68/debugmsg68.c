@@ -56,7 +56,8 @@ struct struct_debug_bit {
   { debugmsg68_ERROR   , "error"   , "error message"          },
   { debugmsg68_WARNING , "warning" , "warning message"        },
   { debugmsg68_INFO    , "info"    , "informational message"  },
-  { debugmsg68_DEBUG   , "debug"   , "debug message"          }
+  { debugmsg68_DEBUG   , "debug"   , "debug message"          },
+  { debugmsg68_TRACE   , "trace"   , "trace message"          }
 };
 
 /* Set handler. */
@@ -81,11 +82,21 @@ void vdebugmsg68(int bit, const char * fmt, va_list list)
   if (debug) {
     const int feature = (bit == debugmsg68_CURRENT)
       ? current_feature
-      : bit;
-
-    if (feature != debugmsg68_NEVER &&  
-	(feature == debugmsg68_ALWAYS || (debugmsg68_mask&(1<<feature))))
-      debug(debug_cookie, /* feature,  */fmt, list);
+      : bit
+      ;
+    
+    switch (feature) {
+    case debugmsg68_NEVER:
+      break;
+    default:
+      if ( ! (debugmsg68_mask&(1<<feature)) )
+	break;
+      if (feature>debugmsg68_TRACE &&
+	  ! (debugmsg68_mask&(1<<debugmsg68_TRACE)))
+	break;
+    case debugmsg68_ALWAYS:
+      debug(feature, debug_cookie, fmt, list);
+    }
   }
 }
 
@@ -94,6 +105,14 @@ void debugmsg68(const int bit, const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
   vdebugmsg68(bit, fmt, list);
+  va_end(list);
+}
+
+/* Print debug message (debug level) */
+void debugmsg68_trace(const char * fmt, ...)
+{
+  va_list list; va_start(list,fmt);
+  vdebugmsg68(debugmsg68_TRACE,fmt,list);
   va_end(list);
 }
 
@@ -166,12 +185,12 @@ static inline int get_feature(const char *name)
   return i;
 }
 
-static /* inline */ int is_free_feature(const int i)
+static inline int is_free_feature(const int i)
 {
   return debug_bits[i].bit != i;
 }
 
-static /* inline */ int get_free_feature(void)
+static inline int get_free_feature(void)
 {
   int i;
   for (i=MAX_FEATURES; --i>=0 && !is_free_feature(i);)
@@ -213,9 +232,9 @@ int debugmsg68_feature(const char * name, const char * desc, const int masked)
 }
 
 /* Free/Destroy a debug feature. */
-  void debugmsg68_feature_free(const int feature)
+void debugmsg68_feature_free(const int feature)
 {
-  if (is_valid_feature(feature)) {
+  if (is_valid_feature(feature) && feature>debugmsg68_TRACE) {
     debug_bits[feature].bit = -1;
     debugmsg68_mask |= 1<<feature;
   }
@@ -237,9 +256,9 @@ int debugmsg68_feature_current(const int feature)
 /* Set all predefined features mask according to given level. */
 int debugmsg68_feature_level(const int feature)
 {
-  int ret = -(feature < debugmsg68_CRITICAL || feature > debugmsg68_DEBUG);
+  int ret = -(feature < debugmsg68_CRITICAL || feature > debugmsg68_TRACE);
   if (!ret) {
-    unsigned int v = debugmsg68_mask & ~((1<<(debugmsg68_DEBUG+1))-1);
+    unsigned int v = debugmsg68_mask & ~((1<<(debugmsg68_TRACE+1))-1);
     v |= (1<<(feature+1))-1;
     debugmsg68_mask = v;
   }

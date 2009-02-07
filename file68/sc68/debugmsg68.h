@@ -34,11 +34,12 @@ extern "C" {
 
 /** Debug handler type.
  *
+ *  - bit
  *  - user data
  *  - format
  *  - va_list
  */
-typedef void (*debugmsg68_t)(void*, const char*, va_list);
+typedef void (*debugmsg68_t)(const int, void*, const char*, va_list);
 
 /** Debug feature help display function.
  *
@@ -72,8 +73,9 @@ enum enum_debugmsg68_bit
   debugmsg68_CRITICAL = 0,  /**< Critical error message. */
   debugmsg68_ERROR    = 1,  /**< Error message.          */
   debugmsg68_WARNING  = 2,  /**< Warning message.        */
-  debugmsg68_INFO     = 3,  /**< Informationnal message. a*/
+  debugmsg68_INFO     = 3,  /**< Informationnal message. */
   debugmsg68_DEBUG    = 4,  /**< Debug message.          */
+  debugmsg68_TRACE    = 5,  /**< Trace message.          */
 };
 
 FILE68_API
@@ -146,6 +148,13 @@ FILE68_API
  *  @see vdebugmsg68
  */
 void debugmsg68(const int feature, const char * fmt, ...);
+
+FILE68_API
+/** Print trace message (trace level).
+ *  @param  fmt   printf() like format string.
+ *  @see debugmsg68
+ */
+void debugmsg68_trace(const char * fmt, ...);
 
 FILE68_API
 /** Print debug message (debug level).
