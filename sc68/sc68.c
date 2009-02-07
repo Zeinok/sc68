@@ -32,6 +32,7 @@
 #include <sc68/debugmsg68.h>
 #include <sc68/init68.h>
 #include <sc68/option68.h>
+#include <sc68/url68.h>
 
 /* sc68 includes */
 #include <sc68/sc68.h>
@@ -82,35 +83,79 @@ typedef struct my_option_s my_option_t;
 #endif
 
 static sc68_t * sc68 = 0;
+static const int sc68_feature = debugmsg68_DEBUG;
+static int opt_verb = debugmsg68_WARNING;
+static int opt_vers = 0;
+static int opt_help = 0;
+static int opt_list = 0;
+static int opt_owav = 0;
 
-static const int sc68_feature = debugmsg68_DEFAULT;
+struct sc68_debug_data_s {
+  FILE * stdout;
+  FILE * stderr;
+};
+static struct sc68_debug_data_s sc68_debug_data;
 
+static void
+sc68_debug_cb(const int bit, void *data, const char *fmt, va_list list)
+{
+  struct sc68_debug_data_s * debug_data = data;
+  FILE * out;
+
+  /* select output: always error output except for INFO messages */
+  out = bit == debugmsg68_INFO
+    ? debug_data->stdout
+    : debug_data->stderr
+    ;
+
+  vfprintf(out,fmt,list);
+}
+
+/* Debug message. */
 static void Debug(const char * fmt, ...)
 {
   va_list list;
-
   va_start(list,fmt);
   vdebugmsg68(sc68_feature,fmt,list);
   va_end(list);
 }
 
-static FILE * msgfile = 0;
-
-static int opt_verb = 0;
-static int opt_help = 0;
-static int opt_vers = 0;
-static int opt_list = 0;
-
-/* Display standard message */
-void Message(const char * fmt, ...)
+/* Info message. */
+void Info(const char * fmt, ...)
 {
   va_list list;
+  va_start(list, fmt);
+  vdebugmsg68(debugmsg68_INFO,fmt,list);
+  va_end(list);
+}
 
-  if (opt_verb >= 0 && msgfile) {
+/* Standard message. */
+void Print(const char * fmt, ...)
+{
+  if (opt_verb >= debugmsg68_WARNING) {
+    va_list list;
     va_start(list, fmt);
-    vfprintf(msgfile, fmt, list);
+    vfprintf(sc68_debug_data.stdout,fmt,list);
     va_end(list);
   }
+}
+
+/* Warning message. */
+void Warning(const char * fmt, ...)
+{
+  va_list list;
+  va_start(list, fmt);
+  vdebugmsg68(debugmsg68_WARNING,fmt,list);
+  va_end(list);
+}
+
+/* Error message. */
+void Error(const char * fmt, ...)
+{
+  va_list list;
+  va_start(list, fmt);
+  vdebugmsg68(debugmsg68_ERROR,fmt,list);
+  va_end(list);
 }
 
 /* Display version number. */
@@ -129,10 +174,10 @@ static int print_version(void)
   return 0;
 }
 
-static void print_option(void * data,
-			 const char * option,
-			 const char * envvar,
-			 const char * desc)
+/* Callback for option printing. */
+static void
+print_option(void * data,
+	     const char * option, const char * envvar, const char * desc)
 {
   fprintf(data, 
 	  "  %s or `$%s'\n"
@@ -142,16 +187,17 @@ static void print_option(void * data,
 	  desc+1);
 }	 
 
-static void print_feature(void * data, 
-			  const int bit,
-			  const char * name,
-			  const char * desc)
+/* Callback for debug feature printing. */
+static void
+print_feature(void * data, 
+	      const int bit, const char * name, const char * desc)
 {
   const char * fmt = "%02d | %-10s | %-40s | %-3s\n";
   const int mask = (debugmsg68_mask >> bit) & 1;
   fprintf(data,fmt, bit, name, desc, mask?"ON":"OFF");
 } 
 
+/* Print debug features. */
 static int print_features(void)
 {
   printf("debug features: current mask is %08X\n",debugmsg68_mask);
@@ -159,8 +205,7 @@ static int print_features(void)
   return 0;
 }
 
-
-/** Display usage message. */
+/* Print usage. */
 static int print_usage(void)
 {
   puts
@@ -179,8 +224,9 @@ static int print_usage(void)
      "  -t --track=<val>    Choose track to play [\"all\"|\"def\"|track-#]\n"
      "  -l --loop=<val>     Track loop [\"def\"|\"inf\"|loop-#]\n"
      "  -o --output=<URI>   Set output\n" 
-     "  -c --stdout         Set stdout for output (--output=stdout://)\n"
-     "  -n --null           Set null for output (--output=null://)\n"
+     "  -c --stdout         Output raw to stdout (--output=stdout://)\n"
+     "  -n --null           No output (--output=null://)\n"
+     "  -w --wav            Riff Wav output. Use in combination with -o.\n"
      );
 
   option68_help(stdout,print_option);
@@ -209,7 +255,35 @@ static int print_usage(void)
   return 1;
 }
 
+/* Get filename extension */
+static char * myext(char * fname)
+{
+  static const char delims[] = "\\/:";
+  int pos, len = strlen(fname);
+  /* pos > 0 is correct : don't want '^.ext$' */
+  for (pos = len-1; pos > 0; --pos) {
+    if (fname[pos] == '.') return fname+pos;
+    if (strchr(delims,fname[pos])) break;
+  }
+  return fname+len;
+}
 
+/* Get basename */
+static char * mybasename(char * fname)
+{
+#ifdef HAVE_BASENAME
+  fname = basename(fname);
+#else
+  int pos, len = strlen(fname);
+  for (pos = len-1; pos >= 0; --pos) {
+    switch (fname[pos]) {
+    case '/': case '\\':
+      return fname+pos+1;
+    }
+  }
+#endif
+  return fname;
+}
 
 /** Display to output debug statcked error messages.
  */
@@ -218,9 +292,9 @@ static void spool_error_message(sc68_t * sc68)
   const char * s;
 
   if (s = sc68_error_get(sc68), s) {
-    fprintf(stderr, "Stacked Error Message:\n");
+    debugmsg68_error("%s\n","sc68: stacked error message:");
     do {
-      fprintf(stderr, "%s\n", s);
+      debugmsg68_error("      - %s\n",s);
     } while (sc68 && (s = sc68_error_get(sc68), !s));
   }
 }
@@ -229,17 +303,17 @@ static void DisplayInfo(int track)
 {
   sc68_music_info_t info;
   if (!sc68_music_info(sc68,&info,track,0)) {
-    Message("Track      : %d/%d\n",info.track, info.tracks);
-    Message("Title      : %s\n",info.title);
-    Message("Author     : %s\n",info.author);
-    Message("Composer   : %s\n",info.composer);
-    Message("Ripper     : %s\n",info.ripper);
-    Message("Converter  : %s\n",info.converter);
-    Message("Replay     : %s\n",info.replay);
-    Message("Hardware   : %s\n",info.hwname);
-    Message("Start time : %u:%02u\n",
-	    info.start_ms/60000u, (info.start_ms/1000u)%60u);
-    Message("Duration   : %s\n", info.time);
+    Print("Track      : %d/%d\n",info.track, info.tracks);
+    Print("Title      : %s\n",info.title);
+    Print("Author     : %s\n",info.author);
+    Print("Composer   : %s\n",info.composer);
+    Print("Ripper     : %s\n",info.ripper);
+    Print("Converter  : %s\n",info.converter);
+    Print("Replay     : %s\n",info.replay);
+    Print("Hardware   : %s\n",info.hwname);
+    Print("Start time : %u:%02u\n",
+	 info.start_ms/60000u, (info.start_ms/1000u)%60u);
+    Print("Duration   : %s\n", info.time);
   }
 }
 
@@ -253,9 +327,9 @@ static int PlayLoop(istream68_t * out, int track, int loop)
   Debug("PlayLoop:\n"
 	" track  : %d\n"
 	" loop   : %d\n"
-	" output : %s\n",
+	" output : '%s'\n",
 	track,loop,istream68_filename(out));
-
+  
   if (track == -1) {
     Debug("PlayLoop: default track resquested\n");
     track = 0;
@@ -267,7 +341,7 @@ static int PlayLoop(istream68_t * out, int track, int loop)
     Debug("PlayLoop: track #%d resquested\n",track);
   }
   Debug(" all    : %s\n",all?"yes":"no");
-
+  
   /* Set track. */
   sc68_play(sc68, track, loop);
   
@@ -296,21 +370,55 @@ static int PlayLoop(istream68_t * out, int track, int loop)
     }
 
     /* Send audio PCM to stdout. */
-    if (1) {
-      if (istream68_write(out, buffer, sizeof(buffer)) != sizeof(buffer)) {
-	return -1;
-      }
+    if (istream68_write(out, buffer, sizeof(buffer)) != sizeof(buffer)) {
+      return -1;
     }
   }
-
+  
   return -(code == SC68_MIX_ERROR);
 }
+  
+/* Build output URI for wav output */
+static char * build_output_uri(char * inname, char * outname)
+{
+  static char prefix[] = "audio://ao/driver=wav/output=";
+  char protocol[32];
+  char * namebuf = 0, * ext = 0;
+  int len;
 
-static char urlbuf[1024];
+  Debug("sc68: create output URI in:'%s' out:'%s'\n",inname,outname);
+
+  if (outname) {
+    if (!url68_get_protocol(protocol, 32, outname)) {
+      fprintf(stderr,"sc68: can't create wav here '%s://'\n", protocol);
+      return 0;
+    }
+    Debug("sc68: don't have a protocol\n");
+  } else {
+    /* no output given, make it from inname */
+    outname = mybasename(inname);
+    ext = ".wav";
+    Debug("sc68: basename '%s'\n",outname);
+  }
+
+  len  = sizeof(prefix) + strlen(outname) + 8;
+  namebuf = malloc(len);
+  if (!namebuf) {
+    fprintf(stderr,"sc68: %s\n", strerror(errno));
+    return 0;
+  }
+  memcpy(namebuf,prefix,sizeof(prefix));
+  strcpy(namebuf+sizeof(prefix)-1, outname);
+  if (ext)
+    strcpy(myext(namebuf),ext);
+
+
+  return namebuf;
+}
+
 int main(int argc, char *argv[]) 
 {
-  const char * outname = 0;
-  const char * inname  = 0;
+  char *namebuf = 0, *outname = 0, *inname  = 0;
   const char * tracks  = "def";
   const char * loops   = "def";
   const char * rates   = "def";
@@ -335,6 +443,7 @@ int main(int argc, char *argv[])
     {"verbose",    0, 0, 'v'},
     {"stdout",     0, 0, 'c'},
     {"null",       0, 0, 'n'},
+    {"wav",        0, 0, 'w'},
     {"output",     1, 0, 'o'},
     {"track",      1, 0, 't'},
     {"loop",       1, 0, 'l'},
@@ -354,13 +463,13 @@ int main(int argc, char *argv[])
   shortopts[j++] = 0;
 
   /* Initialize sc68 api. */
+  sc68_debug_data.stdout = stdout;
+  sc68_debug_data.stderr = stderr;
   memset(&init68, 0, sizeof(init68));
   init68.argc = argc;
   init68.argv = argv;
-#ifdef DEBUG
-  init68.debug        = (sc68_debug_t) vfprintf;
-  init68.debug_cookie = stderr;
-#endif
+  init68.debug        = sc68_debug_cb;
+  init68.debug_cookie = &sc68_debug_data;
   if (sc68_init(&init68)) {
     goto error;
   }
@@ -382,18 +491,29 @@ int main(int argc, char *argv[])
     case 'D': opt_list = 1; break;  /* --debug-list  */
     case 'v': ++opt_verb; break;    /* --verbose     */
     case 'q': --opt_verb; break;    /* --quiet       */
-    case 'n':
-      outname = "null://"; break;   /* --null        */
-    case 'c':
-      outname = "stdout://"; break; /* --stdout      */
-    case 'o':			  
-      outname = optarg; break;	    /* --output=     */
+    case 'n': case 'c': case 'o':			  
+      if (outname) {
+	fprintf(stderr,"%s: output already setted -- '%c'\n", argv[0], val);
+	goto error;
+      }
+      switch (val) {
+      case 'n':
+	outname = "null://"; break; /* --null        */
+      case 'c':
+	outname = "-"; break;  	    /* --stdout      */
+      case 'o':			  
+	outname = optarg; break;    /* --output=     */
+      }
+      break;
     case 't':			  
       tracks = optarg; break;	    /* --track=      */
     case 'l':			  
       loops = optarg; break;	    /* --loop=       */
     case 'r':			  
       rates = optarg; break;	    /* --rate=       */
+    case 'w':	  
+      opt_owav = 1; break;          /* --wav         */
+
     case '?':			    /* Unknown or missing parameter */
       goto error;
     default:
@@ -408,9 +528,7 @@ int main(int argc, char *argv[])
 #endif
   i = optind;
 
-  /* #if defined(HAVE_GETOPT) || defined(HAVE_GETOPT_LONG) */
-  /* # endif /\* ifdef HAVE_GETOPT_LONG *\/ */
-  /* #endif /\* ifdef HAVE_GETOPT *\/ */
+  /* Special program mode for --help --version and --debug-list */
 
   if (opt_help) {
     return print_usage();
@@ -420,44 +538,17 @@ int main(int argc, char *argv[])
     return print_version();
   }
 
+  if (opt_verb < debugmsg68_CRITICAL) opt_verb = debugmsg68_CRITICAL;
+  if (opt_verb > debugmsg68_TRACE)    opt_verb = debugmsg68_TRACE;
+  debugmsg68_feature_level(opt_verb);
+
   if (opt_list) {
     return print_features();
   }
 
 
-  /* Parse tracks */
-  if (!strcmp(tracks,"def")) {
-    track = -1;
-  } else if (!strcmp(tracks,"all")) {
-    track = 0;
-  } else {
-    track = strtol(tracks,0,0);
-  }
+  /* Select input */
 
-  /* Parse loops */
-  if (!strcmp(loops,"def")) {
-    loop = -1;
-  } else if (!strcmp(loops,"inf")) {
-    loop = 0;
-  } else {
-    loop = strtol(loops,0,0);
-  }
-
-  /* Parse rate */
-  if (!strcmp(rates,"def")) {
-    rate = 0;
-  } else {
-    rate = strtol(rates,0,0);
-  }
-
-  memset(&create68,0,sizeof(create68));
-  create68.debug_bit = debugmsg68_DEBUG;
-  create68.sampling_rate = rate;
-  sc68 = sc68_create(&create68);
-  if (!sc68) {
-    goto error;
-  }
-  
   if (!inname && i<argc) {
     inname = argv[i];
   }
@@ -469,13 +560,68 @@ int main(int argc, char *argv[])
     inname = "stdin://sc68";
   }
 
-  if (!outname) {
+  /* Select output
+   *
+   *  - Doing this earlier so that proper message handler can be set.
+   *  - Default output is audio:// even if libsc68 does not have audio
+   *    backend.
+   */
+  if (outname && !strcmp(outname,"-")) {
+    outname = "stdout://sc68";
+  }
+  
+  if (opt_owav) {
+    outname = namebuf = build_output_uri(inname, outname);
+    if (!outname) goto error;
+  } else if (!outname) {
     outname = "audio://default";
   }
 
   /* Output message to stdout except it is the output. */
-  msgfile = (strstr(outname,"stdout://") == outname) ? stderr : stdout;
+  if (!strncasecmp(outname,"stdout://",8)) {
+    /* output to stdout; divert stdout message to stderr */
+    sc68_debug_data.stdout = stderr;
+  } else if (!strncasecmp(outname,"stderr://",8)) {
+    /* output to stderr; divert stderr message to stdout */
+    sc68_debug_data.stderr = stdout;
+  }
 
+  Debug("sc68: input  '%s'\n",inname);
+  Debug("sc68: output '%s'\n",outname);
+
+  /* Parse --track= */
+  if (!strcmp(tracks,"def")) {
+    track = -1;
+  } else if (!strcmp(tracks,"all")) {
+    track = 0;
+  } else {
+    track = strtol(tracks,0,0);
+  }
+
+  /* Parse --loop= */
+  if (!strcmp(loops,"def")) {
+    loop = -1;
+  } else if (!strcmp(loops,"inf")) {
+    loop = 0;
+  } else {
+    loop = strtol(loops,0,0);
+  }
+
+  /* Parse --rate= */
+  if (!strcmp(rates,"def")) {
+    rate = 0;
+  } else {
+    rate = strtol(rates,0,0);
+  }
+
+  /* Create emulator instance */
+  memset(&create68,0,sizeof(create68));
+  create68.sampling_rate = rate;
+  sc68 = sc68_create(&create68);
+  if (!sc68) {
+    goto error;
+  }
+  
   out = sc68_stream_create(outname, 2);
   if (!out) {
     goto error;
@@ -496,12 +642,12 @@ int main(int argc, char *argv[])
   }
     
   /* Loop */
-  Debug("Enter Playloop\n");
+  Debug("sc68: Enter Playloop\n");
   if (PlayLoop(out, track, loop) < 0) {
-    Debug("Exit Playloop with error\n");
+    Debug("sc68: Exit Playloop with error\n");
     goto error;
   }
-  Debug("Exit Playloop normally\n");
+  Debug("sc68: Exit Playloop normally\n");
   err = 0;
 
  error:
@@ -509,6 +655,7 @@ int main(int argc, char *argv[])
     spool_error_message(sc68);
   }
   istream68_destroy(out);
+  free(namebuf);
 
   sc68_destroy(sc68);
   sc68_shutdown();
