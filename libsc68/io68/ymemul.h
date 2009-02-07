@@ -166,7 +166,7 @@ struct ym_s {
   s16 * ymout5;               /**< DAC lookup table                      */
   unsigned int voice_mute;    /**< Mask muted voices.                    */
   unsigned int hz;            /**< Sampling rate.                        */
-  /* int outlevel; */         /**< Output max level (volume) [0..65536]. */
+  int outlevel;               /**< Output level (volume) [0..64].        */
   uint68_t clock;             /**< Master clock frequency in Hz.         */
 
   /** @name  Write access back storage.
@@ -189,6 +189,8 @@ struct ym_s {
   s32 * outbuf;             /**< output buffer given to ym_run()         */
   s32 * outptr;             /**< generated sample pointer (into outbuf)  */
   /**@}*/
+
+  int type;			/**< engine type @see ym_emul_e */
 
   /** Data */
   union emu_u {

@@ -46,6 +46,8 @@
 #endif
 int ym_feature = debugmsg68_DEFAULT;
 
+int ym_default_chans = 7;
+
 #include "ym_linear_table.c"
 #include "ym_atarist_table.c"
 
@@ -176,7 +178,7 @@ static ym_parms_t default_parms =  {
   /* voltable */ YM_VOL_TABLE,
   /* hz       */ SAMPLING_RATE_DEF,
   /* clock    */ YM_CLOCK_ATARIST,
-  /* outlevel */ 0x70, /* 0x100, */ /* 0x93, */
+  /* outlevel */ 0x80,
 };
 
 int ym_default_engine(int emul)
@@ -185,22 +187,23 @@ int ym_default_engine(int emul)
   case YM_EMUL_DEFAULT:		/* Get current value. */
     emul = default_parms.emul;
     break;
+
+  default:			/* Invalid values */
+    debugmsg68_error("ym-2149: unknown ym-engine (%d)\n",emul);
+    emul = default_parms.emul;
   case YM_EMUL_ORIG:
   case YM_EMUL_BLEP:
+    default_parms.emul = emul;
     debugmsg68_info("ym-2149: switch default engine to *%s*\n",
 		    emul==YM_EMUL_ORIG ? "SC68 ORIGINAL":"BLEP SYSNTHESIS");
-    default_parms.emul = emul;
     break;
-
-  default:			/*  */
-    TRACE68(ym_feature,"ym-2149: ym_set_default_type bad value (%d)\n",emul);
-    emul = YM_EMUL_DEFAULT;
   }
+
   return emul;
 }
 
 /* Max output level for volume tables. */
-int ym_output_level = 0xEFFF;//DEAD;
+static const int ym_output_level = 0xEFFF;
 
 /* command line options option */
 static const char prefix[] = "sc68-";
@@ -209,7 +212,9 @@ static option68_t opts[] = {
   { option68_STR, prefix, "ym-engine", engcat,
     "set ym-2149 engine [orig|blep]" },
   { option68_STR, prefix, "ym-voltable", engcat,
-    "set ym-2149 volume table [atari|linear]" }
+    "set ym-2149 volume table [atari|linear]" },
+  { option68_INT, prefix, "ym-chans", engcat,
+    "set ym-2149 active channel [bit-0:A ... bit-2:C]" }
 };
 
 int ym_init(ym_parms_t * const parms)
@@ -237,9 +242,6 @@ int ym_init(ym_parms_t * const parms)
   /* ym- Options */
   option68_append(opts,sizeof(opts)/sizeof(*opts));
   argc = option68_parse(argc,argv,0);
-  if (parms && parms->argc) {
-    *parms->argc =  argc;
-  }
 
   /* --sc68-ym-engine */
   opt = option68_get("ym-engine",1);
@@ -265,6 +267,12 @@ int ym_init(ym_parms_t * const parms)
     }
   }
 
+  /* --sc68-ym-chans */
+  opt = option68_get("ym-chans",1);
+  if (opt) {
+    ym_default_chans = opt->val.num & 7;
+  }
+
   /* Set volume table (unique for all instance) */
   switch (default_parms.voltable) {
   case YM_VOL_LINEAR:
@@ -275,6 +283,15 @@ int ym_init(ym_parms_t * const parms)
   default:
     ym_create_5bit_atarist_table(ymout5, ym_output_level);
   }
+
+  /* Process ym-orig options */
+  argc = ym_orig_options(argc, argv);
+
+  /* Save remaining cli options */
+  if (parms && parms->argc) {
+    *parms->argc =  argc;
+  }
+
   return 0;
 }
 
@@ -379,6 +396,8 @@ int ym_active_channels(ym_t * const ym, const int off, const int on)
     v = (voice_mute&1) | ((voice_mute>>5)&2) | ((voice_mute>>10)&4);
     v = ((v&~off)|on)&7;
     ym->voice_mute = ym_smsk_table[v];
+    debugmsg68_debug("ym-2149: active channels -- %c%c%c\n",
+		     (v&1)?'A':'.', (v&1)?'B':'.', (v&1)?'B':'.');
   }
   return v;
 }
@@ -405,8 +424,10 @@ uint68_t ym_sampling_rate(ym_t * const ym, const uint68_t hz)
 	ret = ym->cb_sampling_rate(ym,ret);
       }
       ym->hz = ret;
+      debugmsg68_debug("ym-2149: rate -- %d -> %d\n", hz, ret);
     }
   }
+  
   return ret;
 }
 
@@ -439,7 +460,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
     p->clock = default_parms.clock;
   }
 
-  /* outout level */
+  /* output level */
   if (p->outlevel == 0) {
     p->outlevel = default_parms.outlevel;
   }
@@ -450,14 +471,17 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
   }
   p->outlevel >>= 2;
 
+  debugmsg68_debug("ym-2149: setup -- engine:%d rate:%d clock:%d level:%d\n",
+		   p->emul,p->hz,p->clock,p->outlevel);
+
   if (ym) {
     ym->ymout5      = ymout5;
     ym->waccess_max = sizeof(ym->static_waccess)/sizeof(*ym->static_waccess);
     ym->waccess     = ym->static_waccess;
     ym->waccess_nxt = ym->waccess;
     ym->clock       = p->clock;
-    /* ym->outlevel    = p->outlevel; */
-    ym->voice_mute  = YM_OUT_MSK_ALL;
+    ym->outlevel    = p->outlevel;
+    ym->voice_mute  = ym_smsk_table[7 & ym_default_chans];
     /* clearing sampling rate callback ensure requested rate to be in
        valid range. */
     ym->cb_sampling_rate = 0;
@@ -490,7 +514,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
  */
 void ym_cleanup(ym_t * const ym)
 {
-  debugmsg68_info("ym-2149: cleanup\n");
+  debugmsg68_debug("ym-2149: cleanup\n");
   if (ym && ym->cb_cleanup) {
     ym->cb_cleanup(ym);
   }

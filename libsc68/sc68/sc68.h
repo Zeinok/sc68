@@ -168,12 +168,6 @@ typedef struct {
    */
   unsigned int sampling_rate;
 
-  /** error cookie. */
-  void * error_cookie;
-
-  /** debug bit. */
-  int debug_bit;
-
   /** short name. */
   const char * name;
 

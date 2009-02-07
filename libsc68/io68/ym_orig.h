@@ -9,6 +9,17 @@
  */
 int ym_orig_setup(ym_t * const ym);
 
+/** Creates and parse ym original engine options
+ *
+ *  @params  argc  argument count
+ *  @params  argv  argument values
+ *  @retval  remaining argument count
+ */
+int ym_orig_options(int argc, char ** argv);
+
+
+typedef void (*ym_orig_filter_t)(ym_t * const);
+
 /** YM-2149 internal data structure for original emulator. */
 struct ym2149_orig_s
 {
@@ -47,13 +58,23 @@ struct ym2149_orig_s
   s32 * tonptr;             /**< generated tone pointer                  */
   /**@}*/
 
-  /** @name  Filters
+  /** @name  1-pole filter
    *  @{
    */
-  int hipass_inp1;          /**< high pass filter input                  */
-  int hipass_out1;          /**< high pass filter output                 */
-  int lopass_out1;          /**< low pass filter output                  */
+  int68_t hipass_inp1;      /**< high pass filter input                  */
+  int68_t hipass_out1;      /**< high pass filter output                 */
+  int68_t lopass_out1;      /**< low pass filter output                  */
   /**@}*/
+
+  /** 2-poles butterworth filter */
+  struct {
+    int68_t x[2];
+    int68_t y[2];
+    int68_t a[3];
+    int68_t b[2];
+  } btw;
+
+  int ifilter;	            /**< filter function to use.                 */
 
 };
 

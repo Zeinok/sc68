@@ -100,8 +100,7 @@ typedef struct _sc68_estack_s sc68_estack_t;
 
 
 struct _sc68_s {
-  char          name[32];     /**< short name.                           */
-
+  char           name[32];    /**< short name.                           */
   int            version;     /**< sc68 version.                         */
 
   /** 68k emulator. */
@@ -113,9 +112,9 @@ struct _sc68_s {
    */
   io68_t *ymio,*mwio,*shifterio,*paulaio,*mfpio;
 
-  ym_t    * ym;               /**< YM emulator.                          */ 
-  mw_t    * mw;		      /**< MicroWire emulator.                   */
-  paula_t * paula;	      /**< Amiga emulator.                       */
+  ym_t         * ym;          /**< YM emulator.                          */ 
+  mw_t         * mw;	      /**< MicroWire emulator.                   */
+  paula_t      * paula;	      /**< Amiga emulator.                       */
 
   disk68_t     * disk;        /**< Current loaded disk.                  */
   music68_t    * mus;         /**< Current playing music.                */
@@ -162,11 +161,18 @@ struct _sc68_s {
 
   sc68_estack_t estack;	         /**< error messages storage.            */
 
-  /* debug bit to be used for debugmsg68(). */
-  int debug_bit;
-
 };
 
+#ifndef DEBUG_SC68_O
+# ifndef DEBUG 
+#  define DEBUG_SC68_O 0
+# else
+#  define DEBUG_SC68_O 1
+# endif
+#endif
+
+static int           sc68_feature = debugmsg68_NEVER;
+static int           sc68_id;	     /* counter for auto generated name. */
 static volatile int  sc68_init_flag; /* Library init flag     */
 static sc68_estack_t sc68_estack;    /* Library error message */
 static unsigned int  sc68_sampling_rate_def = SAMPLING_RATE_DEF;
@@ -245,85 +251,78 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
   int err = -1;
   emu68_parms_t * const parms = &sc68->emu68_parms;
 
-  sc68_debug(sc68,"init_68k() {\n");
-
+  
   if (sc68->emu68) {
-    sc68_debug(sc68,"init_68k() : found previous emu68\n");
+    sc68_debug(sc68,"init_68k: found previous emu68\n");
     safe_emu68_destroy(&sc68->emu68);
-    sc68_debug(sc68,"init_68k() : previous emu68 destroyed\n");
+    sc68_debug(sc68,"init_68k: previous emu68 destroyed\n");
   }
 
   /* setup parameters. */
-  /* memset(&parms,0,sizeof(parms)); */
   parms->name    = "sc68/emu68";
   parms->log2mem = log2mem;
   parms->clock   = EMU68_ATARIST_CLOCK;
   parms->debug   = emu68_debug;
 
   sc68_debug(sc68,
-	     "init_68k() : parameters:\n"
-	     "             name  : '%s'\n"
-	     "             mem   :  %d => %dKb\n"
-	     "             clock :  %uhz\n"
-	     "             debug :  %s\n",
+	     "init_68k: '%s' mem:%d-bit(%dkB) clock:%uhz debug:%s\n",
 	     parms->name,
 	     parms->log2mem,parms->log2mem>10?1<<(parms->log2mem-10):0,
 	     parms->clock,parms->debug?"On":"Off");
 
   /* Do initialization. */
-  sc68_debug(sc68,"init_68k() : Create emulator\n");
+  sc68_debug(sc68,"init_68k: Creating emulators ...\n");
 
   sc68->emu68 = emu68_create(parms);
   if (!sc68->emu68) {
-    sc68_debug(sc68,"init_68k() : Emulator creation failed\n");
     sc68_error_add(sc68,"68k emulator creation failed");
     goto error;
   }
-  sc68_debug(sc68,"init_68k() : Emulator creation success\n");
+  sc68_debug(sc68,"init_68k: - CPU emlator created\n");
   
   sc68->emu68->reg.sr   = 0x2000;
   sc68->emu68->reg.a[7] = sc68->emu68->memmsk+1-4;
 
   /* Initialize chipset */
-  sc68_debug(sc68,"init_68k() : chipset io create\n");
+  sc68_debug(sc68,"init_68k: - Chipset ...\n");
 
-  sc68_debug(sc68,"init_68k() : create YM IO\n");
   sc68->ymio = ymio_create(sc68->emu68,0);
   sc68->ym   = ymio_emulator(sc68->ymio);
   if (!sc68->ymio) {
     sc68_error_add(sc68,"YM IO creation failed");
     goto error;
   }
+  sc68_debug(sc68,"init_68k:   - YM-2149\n");
   
-  sc68_debug(sc68,"init_68k() : create MW IO\n");
   sc68->mwio = mwio_create(sc68->emu68,0);
   sc68->mw   = mwio_emulator(sc68->mwio);
   if (!sc68->mwio) {
     sc68_error_add(sc68,"MW IO creation failed");
     goto error;
   }
+  sc68_debug(sc68,"init_68k:   - MicroWire\n");
 
-  sc68_debug(sc68,"init_68k() : create Shifter IO\n");
   sc68->shifterio = shifterio_create(sc68->emu68,0);
   if (!sc68->shifterio) {
     sc68_error_add(sc68,"Shifter IO creation failed");
     goto error;
   }
+  sc68_debug(sc68,"init_68k:   - Atari shifter\n");
 
-  sc68_debug(sc68,"init_68k() : create Paula IO\n");
   sc68->paulaio = paulaio_create(sc68->emu68,0);
   sc68->paula   = paulaio_emulator(sc68->paulaio);
   if (!sc68->paulaio) {
     sc68_error_add(sc68,"Paula IO creation failed");
     goto error;
   }
+  sc68_debug(sc68,"init_68k:   - Amiga Paula\n");
 
-  sc68_debug(sc68,"init_68k() : create MFP IO\n");
   sc68->mfpio = mfpio_create(sc68->emu68);
   if (!sc68->mfpio) {
     sc68_error_add(sc68,"MFP IO creation failed");
     goto error;
   }
+  sc68_debug(sc68,"init_68k:   - MFP\n");
 
   err = 0;
  error:
@@ -335,7 +334,8 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
     safe_io68_destroy(&sc68->mfpio);
     safe_emu68_destroy(&sc68->emu68);
   }
-  sc68_debug(sc68,"} init_68k() => %s\n", strok68(err));
+
+  sc68_debug(sc68,"init_68k: => %s\n", strok68(err));
 
   return err;
 }
@@ -517,6 +517,7 @@ int sc68_init(sc68_init_t * init)
     err = sc68_error_add(0, "sc68_init() : already initialized");
     goto error_no_shutdown;
   }
+  sc68_feature = debugmsg68_feature("sc68","sc68 library",DEBUG_SC68_O);
 
   /* 1st thing to do : set debug handler. */
   if (init) {
@@ -618,14 +619,11 @@ sc68_t * sc68_create(sc68_create_t * create)
     goto error;
   }
   
-  /* debug bit. */
-  sc68->debug_bit = create->debug_bit;
-
   /* Pick a short name */
   if (create->name) {
     strncpy(sc68->name, create->name, sizeof(sc68->name));
   } else {
-    snprintf(sc68->name,sizeof(sc68->name),"sc68:%p",(void*)sc68);
+    snprintf(sc68->name,sizeof(sc68->name),"sc68#%03d",++sc68_id);
   }
   sc68->name[sizeof(sc68->name)-1] = 0;
 
@@ -693,14 +691,14 @@ unsigned int sc68_sampling_rate(sc68_t * sc68, unsigned int f)
   } else {
     if (sc68) {
       f = ymio_sampling_rate(sc68->ymio,f);
-      sc68_debug(sc68,"sc68_sampling_rate() : after ym %u hz\n", f);
+      sc68_debug(sc68,"sc68_sampling_rate: after ym %u hz\n", f);
       f = mwio_sampling_rate(sc68->mwio,f);
-      sc68_debug(sc68,"sc68_sampling_rate() : after mw %u hz\n", f);
+      sc68_debug(sc68,"sc68_sampling_rate: after mw %u hz\n", f);
       f = paulaio_sampling_rate(sc68->paulaio,f);
-      sc68_debug(sc68,"sc68_sampling_rate() : after paula %u hz\n", f);
+      sc68_debug(sc68,"sc68_sampling_rate: after paula %u hz\n", f);
       sc68->mix.rate = f;
       audio68_sampling_rate(f);
-      debugmsg68_info("%s: sampling rate [%u]\n", sc68->name, f);
+      debugmsg68_info("%s: sampling rate [%uhz]\n", sc68->name, f);
     } else {
       const unsigned int min = SAMPLING_RATE_MIN, max = SAMPLING_RATE_MAX;
 
@@ -1618,7 +1616,7 @@ void sc68_debug(sc68_t * sc68, const char * fmt, ...)
 {
   va_list list;
   va_start(list,fmt);
-  vdebugmsg68(sc68?sc68->debug_bit:-1,fmt,list);
+  vdebugmsg68(sc68_feature,fmt,list);
   va_end(list);
 }
 

@@ -33,6 +33,10 @@
 
 #include "ymemul.h"
 #include <sc68/debugmsg68.h>
+#include <sc68/string68.h>
+#include <sc68/option68.h>
+
+/* #include <math.h> */
 
 extern int ym_feature;		/* defined in ymemul.c */
 
@@ -59,6 +63,28 @@ const int ym_smsk_table[8] = {
 };
 
 
+/*********************/
+/* Filters functions */
+/*********************/
+
+static void filter_none(ym_t * const);
+static void filter_1pole(ym_t * const);
+static void filter_2pole(ym_t * const);
+static void filter_mixed(ym_t * const);
+static void filter_boxcar(ym_t * const);
+static struct {
+  const char * name;
+  ym_orig_filter_t filter;
+} filters[] = {
+  { "2-pole", filter_2pole },	/* first is default */
+  { "none",   filter_none  },
+  { "boxcar", filter_boxcar},
+  { "1-pole", filter_1pole },
+  { "mixed",  filter_mixed }
+};
+static const int n_filters = sizeof(filters) / sizeof(*filters);
+static int default_filter = 0;
+
 static int reset(ym_t * const ym, const cycle68_t ymcycle)
 {
   ym_orig_t * const orig = &ym->emu.orig;
@@ -81,6 +107,55 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
   orig->hipass_inp1 = 0;
   orig->hipass_out1 = 0;
   orig->lopass_out1 = 0;
+
+  /* Reset butterworth */
+  orig->btw.x[0] = orig->btw.x[1] = 0;
+  orig->btw.y[0] = orig->btw.y[1] = 0;
+
+#if 1
+
+  /* butterworth low-pass cutoff=15.625khz sampling=250khz */
+  orig->btw.a[0] = 0x3d5;
+  orig->btw.a[1] = 0x7ab;
+  orig->btw.a[2] = 0x3d5;
+  orig->btw.b[0] = -0xba24;
+  orig->btw.b[1] = 0x497a;
+
+#else
+  {
+    double inrate    = 250000.0;
+    double frequency = 15625.0;
+    double c
+      = 1.0 / tan (M_PI * frequency / inrate);
+
+    double a0,a1,a2;
+    double b0,b1;
+    double fix = 32768.0;
+
+    a0 = 1.0 / (1.0 + sqrt(2.0) * c + c * c);
+    a1 = 2.0 * a0;
+    a2 = a0;
+    b0 = 2 * (1.0 - c * c) * a0;
+    b1 = (1.0 - sqrt(2.0) * c + c * c) * a0;
+
+    debugmsg68_info("a0:%.3lf a1:%.3lf a2:%.3lf b0:%.3lf b1:%.3lf\n",
+		    a0,a1,a2,b0,b1);
+    
+    orig->btw.a[0] = fix * a0;
+    orig->btw.a[1] = fix * a1;
+    orig->btw.a[2] = fix * a2;
+    orig->btw.b[0] = fix * b0;
+    orig->btw.b[1] = fix * b1;
+
+    debugmsg68_info("orig->btw.a[0]=0x%x;\n"
+		    "orig->btw.a[1]=0x%x;\n"
+		    "orig->btw.a[2]=0x%x;\n"
+		    "orig->btw.b[0]=-0x%x;\n"
+		    "orig->btw.b[1]=0x%x;\n",
+		    orig->btw.a[0],orig->btw.a[1],orig->btw.a[2],
+		    -orig->btw.b[0],orig->btw.b[1]);
+  }
+#endif
 
   return 0;
 }
@@ -645,143 +720,182 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
  * `-----------------------------------------------------------------'
  */
 
-/* Transform 250000Hz buffer to current sampling rate.
- *
- * In order to emulate envelop tone half level trick, the function
- * works by block of 4 PCM which are averaged. Since number of PCM in
- * source buffer may not be a multiple of 4, the function uses a
- * filter accumulator.
- *
- * Not true anymore. Always have a multiple of 4. 
- *
- * The accumulator has been disable. See ym_run().
+/******************************************/
+/* Recursive single pole low-pass filter: */
+/* 					  */
+/*   o[N] = i[N] * A + output[N-1] * B	  */
+/* 					  */
+/*   X = exp(-2.0 * pi * Fc)		  */
+/*   A = 1 - X = 1 - B			  */
+/*   B = X				  */
+/*   Fc = cutoff freq / sample rate	  */
+/******************************************/
+
+/**************************************************/
+/* Recursive single pole high-pass filter:	  */
+/* 						  */
+/*   o[N] = A0 * i[N] + A1 * i[N-1] + B1 * o[N-1] */
+/*        = A0 * i[N] - A0 * i[N-1] + B1 * o[N-1] */
+/*        = A0 * ( i[N] - i[N-1] )  + B1 * o[N-1] */
+/*   X  = exp(-2.0 * pi * Fc)			  */
+/*   A0 = (1 + X) / 2				  */
+/*   A1 = -(1 + X) / 2 = -A0			  */
+/*   B1 = X					  */
+/*   Fc = cutoff freq / sample rate		  */
+/**************************************************/
+
+
+/* Resample ``n'' input samples from ``irate'' to ``orate''
+ * 
+ * @warning irate <= 262143 or 32bit overflow
  */
-static void filter(ym_t * const ym)
+static s32 * resampling(s32 * dst, int n, uint68_t irate, uint68_t orate)
+{
+   s32   * const src = dst;
+  const int68_t  stp = (irate << 14) / orate; /* step into source */
+  const int68_t  end = n << 14;		      /* max source index */
+  int68_t        idx = 0;		      /* cur source index */
+
+  if (stp >= 1<<14) {
+    /* forward */
+    do {
+      *dst++ = src[(int)(idx>>14)];
+    } while ((idx += stp) < end);
+  } else {
+    /* backward */
+    const int m = (n * orate + irate - 1) / irate; /* output samples */
+    dst  = src + m - 1;
+    idx  = end;
+    do {
+      *dst = src[(int)((idx -= stp)>>14)];
+    } while (--dst != src);
+
+    if (dst != src)
+      debugmsg68_critical("dst != src (%p != %p)\n",dst,src);
+    if (idx < 0)
+      debugmsg68_critical("idx < 0 (%d)\n",idx,src);
+    
+    dst = src+m;
+  }
+  return dst;
+}
+
+static void filter_none(ym_t * const ym)
 {
   ym_orig_t * const orig = &ym->emu.orig;
-
-  int n;
-  s32 * src, * dst;
-
-  n = orig->tonptr - ym->outbuf;
-  if (n <= 0) return;
-
-  src = ym->outbuf;
-  dst = src/*  + (filter_cnt = n&3) */;
-  n >>= 2; /* Number of block */
+  const int n = (orig->tonptr - ym->outbuf);
 
   if (n > 0) {
-/*     const int outlevel = ym->outlevel; */
-    int h_i1 = orig->hipass_inp1;
-    int h_o1 = orig->hipass_out1;
-    int l_o1 = orig->lopass_out1;
+    s32 * dst = ym->outbuf;
+    /* Resampling to output rate */
+    ym->outptr = resampling(ym->outbuf, n, ym->clock>>3, ym->hz);
+    /* Apply output level */
+    do {
+      *dst = (*dst * ym->outlevel) >> 6;
+    } while (++dst < ym->outptr);
+  }
+}
+
+static void filter_boxcar2(ym_t * const ym)
+{
+  ym_orig_t * const orig = &ym->emu.orig;
+  const int n = (orig->tonptr - ym->outbuf) >> 1;
+
+  if (n > 0) {
+    int m = n;
+    s32 * src = ym->outbuf, * dst = ym->outbuf;
+    do {
+      *dst++ = ( (src[0] + src[1]) * ym->outlevel) >> (6+1);
+      src += 2;
+    } while (--m);
+
+    ym->outptr = resampling(ym->outbuf, n, ym->clock>>(3+1), ym->hz);
+  }
+}
+
+static void filter_boxcar4(ym_t * const ym)
+{
+  ym_orig_t * const orig = &ym->emu.orig;
+  const int n = (orig->tonptr - ym->outbuf) >> 2;
+
+  if (n > 0) {
+    int m = n;
+    s32 * src = ym->outbuf, * dst = ym->outbuf;
+    do {
+      *dst++ = ( (src[0] + src[1] + src[2] + src[3]) * ym->outlevel) >> (6+2);
+      src += 4;
+    } while (--m);
+    ym->outptr = resampling(ym->outbuf, n, ym->clock>>(3+2), ym->hz);
+  }
+}
+
+/** Use 2-boxcar or 4-boxcar filter so that boxcar output rate not
+    less than output sampling rate. */
+static void filter_boxcar(ym_t * const ym) {
+  /* Select boxcar width  */
+  if (ym->hz > (ym->clock >> (3+2)))
+    filter_boxcar2(ym);
+  else
+    filter_boxcar4(ym);
+}
+
+
+/* - 4-boxcar filter resamples to 62500hz
+ * - Empirical lowpass filter (+adjust output level)
+ * - 1-pole 25hz hipass filter.
+ */
+static void filter_mixed(ym_t * const ym)
+{
+  ym_orig_t * const orig = &ym->emu.orig;
+  const int n = (orig->tonptr - ym->outbuf) >> 2; /* Number of block */
+
+  if (n > 0) {
+    s32 * src = ym->outbuf, * dst = src;
+    int68_t h_i1 = orig->hipass_inp1;
+    int68_t h_o1 = orig->hipass_out1;
+    int68_t l_o1 = orig->lopass_out1;
     int m = n;
 
     do {
-      int i0,o0;
+      int68_t i0,o0;
 
-      /* 4-tap boxcar filter; lower sampling rate from 250Khz to
-       * 62.5Khz; emulates half level buzz sounds.
-       */
+      /***********************************************************/
+      /* 4-tap boxcar filter; lower sampling rate from 250Khz to */
+      /* 62.5Khz; emulates half level buzz sounds.		 */
+      /***********************************************************/
       i0  = *src++;
       i0 += *src++; i0 += *src++; i0 += *src++;
       i0 >>= 2;			/* i0 => 16bit */
 
-#if YM_ORIG_FILTER == 0      
+      /*****************************************/
+      /* Recursive single pole low-pass filter */
+      /* - cutoff   : 15.625 Khz	       */
+      /* - sampling : 62.5 Khz		       */
+      /*****************************************/
+      if (0) {
+	l_o1 = (i0 * ym->outlevel) >> 6;
+      } else {
+	const int68_t B = 0x1a9c; /* 15 bit */
+	const int68_t A = ((1<<15)-B) * ym->outlevel >> 6;
+	l_o1 = ( (i0 * A) + l_o1 * B) >> 15;
+      }
       
-      /* No filter mode */
-      o0 = i0;		/* o0 => 16bit */
-
-#elif YM_ORIG_FILTER == 1
-      /* 16 bit filters */
-
-      /* lowpass */
-      l_o1 = ((i0 * 3) + (l_o1)) >> 2; /* i0 => 16 bit */
-
-      /* hipass */
-      {
-	const int A0 = 0x7FDA; /* 15 bit */
-	const int B1 = 0x7FB4; /* 15 bit */
+      /******************************************/
+      /* Recursive single pole high-pass filter */
+      /* - cutoff   : 25 hz		        */
+      /* - sampling : 62.5 Khz		        */
+      /******************************************/
+      if (1) {
+	const int A0 = 0x7FD7; /* 15 bit */
+	const int B1 = 0x7FAE; /* 15 bit */
 	int tmp0 =
 	  ((l_o1 - h_i1) * A0) + (h_o1 * B1);
 	h_i1 = l_o1;
 	h_o1 = tmp0 >> 15;
 	o0 = h_o1;
-      } 
-
-#elif YM_ORIG_FILTER == 2
-      /* 32 bit filters */
-
-      /*
-       * Recursive single pole lowpass filter.
-       *
-       * Harcoded for a 22.5Khz cutoff frequency with a 62.5Kz sampling rate.
-       *
-       *   o[N] = i[N] * A + output[N-1] * B
-       *
-       *   X = exp(-2.0 * pi * Fc)
-       *   A = 1 - X = 1 - B
-       *   B = X
-       *   Fc = cutoff freq / sample rate
-       *
-       */
-      {
-	const int B = 0x0DF2A3a9; /* 31 bit */
-	const int A = 0x720d5c57; /* 31 bit */
-	/* 	  /\* cutoff @ 15000 *\/ */
-	/* 	  const int B = 0x1c558724; /\* 31 bit *\/ */
-	/* 	  const int A = 0x63aa78dc; /\* 31 bit *\/ */
-
-	s64 tmp0 =
-	  ((i0<<15) * (s64) A) +
-	  (l_o1 * (s64) B);	   /* tmp0 => 62 bit */
-	l_o1 = tmp0>>31;
-	/* i0 => 31 bit */
+      } else {
+	o0 = l_o1;
       }
-
-      /* Recursive single pole high-pass filter
-       *
-       * Harcoded for a 23Hz cutoff with a 62.5Kz sampling rate.
-       *
-       *   o[N] = A0 * i[N] + A1 * i[N-1] + B1 * o[N-1]
-       *        = A0 * i[N] - A0 * i[N-1] + B1 * o[N-1]
-       *        = A0 * ( i[N] - i[N-1] )  + B1 * o[N-1]
-       *   X  = exp(-2.0 * pi * Fc)
-       *   A0 = (1 + X) / 2
-       *   A1 = -(1 + X) / 2 = -A0
-       *   B1 = X
-       *   Fc = cutoff freq / sample rate
-       *
-       */
-      {
-	const int A0 = 0x7FDA2915; /* 31 bit */
-	const int B1 = 0x7FB4522A; /* 31 bit */
-	  
-	s64 tmp0 =
-	  ((l_o1 - h_i1) * (s64) A0) +
-	  (h_o1 * (s64) B1);
-	h_i1 = l_o1;
-	h_o1 = tmp0 >> 31;
-	o0 = h_o1 >> 15;
-      } 
-#endif
-      
-      /*       o0 = (o0 * outlevel) >> 6; */
-      o0 >>= 1;
-      
-#ifndef NDEBUG
-      if (0) {
-	static int min, max;
-	if (o0 < min) {
-	  TRACE68(ym_feature,"min: %6d -> %6d\n",min,o0);
-	  min = o0;
-	}
-	if (o0 > max) {
-	  TRACE68(ym_feature,"max: %6d -> %6d\n",max,o0);
-	  max = o0;
-	}
-      }
-#endif
 
       /* clipping */
       if (o0 > 32767) {
@@ -799,26 +913,169 @@ static void filter(ym_t * const ym)
     orig->hipass_out1 = h_o1;
     orig->lopass_out1 = l_o1;
 
-    /* Copy remaining sample in the beginning of buffer. */
-    dst = ym->outbuf;
-    src = dst;
-
-    /* Rough resampling. Should be ok thanks to lowpass filter.
-     * Current sampling rate is clock / 8 (prediv) / 4 (filter)
+    /* Rough resampling. 
+     * Inout sampling rate is: clock / 8 (prediv) / 4 (filter)
      */
-    {
-      unsigned int stp, ct, end;
-      ct  = 0;
-      stp = (ym->clock<<(16-3-2)) / ym->hz;
-      end = n << 16;
-      do {
-	*dst++ = src[(int)(ct>>16)];
-      } while ((ct += stp) < end);
-    }
+    ym->outptr =
+      resampling(ym->outbuf, n, ym->clock>>(3+2), ym->hz);
   }
-  ym->outptr = dst;
 }
 
+static void filter_1pole(ym_t * const ym)
+{
+  ym_orig_t * const orig = &ym->emu.orig;
+  const int n = orig->tonptr - ym->outbuf;
+
+  if (n > 0) {
+    s32 * src = ym->outbuf, * dst = src;
+
+    int68_t h_i1 = orig->hipass_inp1;
+    int68_t h_o1 = orig->hipass_out1;
+    int68_t l_o1 = orig->lopass_out1;
+    int m = n;
+
+    do {
+      int68_t i0,o0;
+
+      i0  = *src++;
+
+      /*****************************************/
+      /* Recursive single pole low-pass filter */
+      /* - cutoff   : 15.625 Khz	       */
+      /* - sampling : 250 Khz		       */
+      /*****************************************/
+      if (0) {
+	l_o1 = (i0 * ym->outlevel) >> 6;
+      } else {
+	const int68_t B = 0x7408; /* 15 bit */
+	const int68_t A = ((1<<15)-B) * ym->outlevel >> 3;
+	l_o1 = ( ((i0 * A) >> 3) + l_o1 * B) >> 15;
+      }
+
+      /******************************************/
+      /* Recursive single pole high-pass filter */
+      /* - cutoff   : 25 hz		        */
+      /* - sampling : 250 Khz		        */
+      /******************************************/
+      if (1) {
+	const int68_t A0 = 0x7FF6; /* 15 bit */
+	const int68_t B1 = 0x7FEB; /* 15 bit */
+	
+	int68_t tmp0 =
+	  ((l_o1 - h_i1) * A0) + (h_o1 * B1);
+	h_i1 = l_o1;
+	h_o1 = tmp0 >> 15;
+	o0 = h_o1;
+      } else {
+	o0 = l_o1;
+      }
+      
+      /* clipping */
+      if (o0 > 32767) {
+	o0 = 32767;
+      } else if (o0 < -32768) {
+	o0 = -32768;
+      }
+
+      /* store */
+      *dst++ = o0;
+      
+    } while (--m);
+
+    orig->hipass_inp1 = h_i1;
+    orig->hipass_out1 = h_o1;
+    orig->lopass_out1 = l_o1;
+
+    ym->outptr =
+      resampling(ym->outbuf, n, ym->clock>>(3+0), ym->hz);
+  }
+}
+
+
+/* Transform 250000Hz buffer to current sampling rate.
+ *
+ * Using a butterworth passband filter
+ *
+ */
+static void filter_2pole(ym_t * const ym)
+{
+  ym_orig_t * const orig = &ym->emu.orig;
+  const int n = orig->tonptr - ym->outbuf;
+
+  if (n > 0) {
+    s32 * src = ym->outbuf, * dst = src;
+    int m = n;
+
+    int68_t h_i1 = orig->hipass_inp1;
+    int68_t h_o1 = orig->hipass_out1;
+
+    const int68_t a0 = orig->btw.a[0];
+    const int68_t a1 = orig->btw.a[1];
+    const int68_t a2 = orig->btw.a[2];
+    const int68_t b0 = orig->btw.b[0];
+    const int68_t b1 = orig->btw.b[1];
+    int68_t x0 = orig->btw.x[0];
+    int68_t x1 = orig->btw.x[1];
+    int68_t y0 = orig->btw.y[0];
+    int68_t y1 = orig->btw.y[1];
+
+
+    do {
+      int68_t in,out;
+
+      in  = *src++ * ym->outlevel >> 6;
+
+      /******************************************/
+      /* Recursive single pole high-pass filter */
+      /* - cutoff   : 25 hz		        */
+      /* - sampling : 250 Khz		        */
+      /******************************************/
+      if (1) {
+	const int68_t A0 = 0x7FF6; /* 15 bit */
+	const int68_t B1 = 0x7FEB; /* 15 bit */
+	int68_t tmp0 =
+	  ((in - h_i1) * A0) + (h_o1 * B1);
+	h_i1 = in;
+	h_o1 = tmp0 >> 15;
+	out = h_o1;
+      } else {
+	out = in;
+      }
+
+      in = out;
+
+      if (0) {
+	out = in;
+      } else {
+	/* low pass butterworth */
+	out =
+	  a0 * in + a1 * x0 + a2 * x1 -
+	  b0 * y0 - b1 * y1;
+	out >>= 15;
+	x1 = x0; x0 = in;
+	y1 = y0; y0 = out;
+      }
+
+      /* clip */
+      if (out < -32768 ) out = -32768;
+      if (out >  32767 ) out =  32767;
+    
+      *dst++ = out;
+
+    } while (--m);
+
+    orig->btw.x[0] = x0;
+    orig->btw.x[1] = x1;
+    orig->btw.y[0] = y0;
+    orig->btw.y[1] = y1;
+
+    orig->hipass_inp1 = h_i1;
+    orig->hipass_out1 = h_o1;
+
+    ym->outptr =
+      resampling(ym->outbuf, n, ym->clock>>3, ym->hz);
+  }
+}  
 
 static
 int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
@@ -832,7 +1089,7 @@ int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
   ym->waccess = ym->static_waccess;
   ym->waccess_nxt = ym->waccess;
 
-  filter(ym);
+  filters[ym->emu.orig.ifilter].filter(ym);
 
   return ym->outptr - ym->outbuf;
 }
@@ -851,7 +1108,7 @@ void cleanup(ym_t * const ym)
 
 int ym_orig_setup(ym_t * const ym)
 {
-  /* ym_orig_t * const orig = &ym->emu.orig; */
+  ym_orig_t * const orig = &ym->emu.orig;
   int err = 0;
 
   /* fill callback functions */
@@ -861,6 +1118,51 @@ int ym_orig_setup(ym_t * const ym)
   ym->cb_buffersize    = buffersize;
   ym->cb_sampling_rate = (void*)0;
 
+  /* use default filter */
+  orig->ifilter        = default_filter;
+  debugmsg68_info("ym-2149: select *%s* filter\n",
+		  filters[orig->ifilter].name);
+
   return err;
 }
 
+/* command line options option */
+static const char prefix[] = "sc68-";
+static const char engcat[] = "ym-orig";
+static option68_t opts[] = {
+  { option68_STR, prefix, "ym-filter", engcat,
+    "set ym-2149 filter [none|boxcar|mixed|1-pole|2-pole*]" },
+};
+
+int ym_orig_options(int argc, char ** argv)
+{
+  option68_t * opt;
+  const int n_opts = sizeof(opts) / sizeof(*opts);
+
+  /* Add local options */
+  option68_append(opts, n_opts);
+
+  /* Parse options */
+  argc = option68_parse(argc,argv,0);
+
+  /* --sc68-ym-filter= */
+  opt = option68_get("ym-filter",1);
+  if (opt) {
+    int i;
+    for (i=0; i<n_filters; ++i) {
+      if (!strcmp68(opt->val.str, filters[i].name)) {
+	default_filter = i;
+	break;
+      }
+    }
+    if (i == n_filters) {
+      debugmsg68_warning("ym-2149: bad filter (%s)\n"
+			 "       : %s\n",
+			 opt->val.str, opt->desc);
+    }
+  }
+  debugmsg68_info("ym-2149: set default filter *%s* \n",
+		  filters[default_filter].name);
+
+  return argc;
+}
