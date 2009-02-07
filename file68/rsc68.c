@@ -683,13 +683,12 @@ int rsc68_init(void)
     
     err = 0;
   }
-  debugmsg68_info("rsc68: init => [%s]\n", strok68(err));
+  debugmsg68_debug("rsc68: init [%s]\n", strok68(err));
   return err;
 }
 
 void rsc68_shutdown(void)
 {
-  TRACE68(rsc68_feature,"rsc68_shutdown() {\n");
   if (init) {
     /* destroy pathes. */
     rsc68_set_share(0);
@@ -698,10 +697,6 @@ void rsc68_shutdown(void)
     rsc68_set_remote_music(0);
     rsc68 = default_open;
     init = 0;
-  } else {
-    TRACE68(rsc68_feature,"rsc68_shutdown: not initialized\n");
   }
-  TRACE68(rsc68_feature,"} rsc68_shutdown\n");
-
-  debugmsg68_info("rsc68: " "shutdown\n");
+  debugmsg68_debug("rsc68: shutdown\n");
 }

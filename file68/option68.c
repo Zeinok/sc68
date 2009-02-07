@@ -26,6 +26,7 @@
 #endif
 
 #include "file68_api.h"
+#include "debugmsg68.h"
 #include "option68.h"
 #include "string68.h"
 
@@ -289,7 +290,16 @@ int option68_append(option68_t * options, int n)
 {
   int i;
   for (i=0; i<n; ++i) {
-    if (!options[i].name || !*options[i].name) continue; /* skip invalid */
+    if (!options[i].name || !*options[i].name) {
+      debugmsg68_warning("option68: invalid options name\n");
+      continue;
+    }
+    if (options[i].next) {
+      debugmsg68_warning("option68: --%s%s already in used\n",
+			 options[i].prefix ? options[i].prefix : "",
+			 options[i].name);
+      continue;
+    }
     options[i].prefix_len = options[i].prefix ? strlen(options[i].prefix) : 0;
     options[i].name_len   = strlen(options[i].name);
     options[i].next       = opts;

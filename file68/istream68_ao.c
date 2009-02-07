@@ -334,7 +334,15 @@ static int isao_open(istream68_t * istream)
 
   if (!is->ao.device) {
     goto error;
-  }   
+  }
+
+  if (info->type == AO_TYPE_LIVE) {
+    debugmsg68_info("xiph-ao: using *%s* driver\n", info->short_name);
+  } else {
+    debugmsg68_info("xiph-ao: using *%s* driver to write '%s'\n",
+		    info->short_name,is->outname);
+  }
+   
   is->count = 0;
 
   err = 0;
