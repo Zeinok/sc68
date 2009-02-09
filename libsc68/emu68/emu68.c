@@ -544,7 +544,6 @@ static emu68_parms_t def_parms = {
   0        /* debug mode off              */ 
 };
 
-
 emu68_t * emu68_create(emu68_parms_t * const parms)
 {
   emu68_t * emu68 = 0;
@@ -585,6 +584,37 @@ emu68_t * emu68_create(emu68_parms_t * const parms)
 
   emu68_mem_init(emu68);
   emu68_reset(emu68);
+
+ error:
+  return emu68;
+}
+
+emu68_t * emu68_duplicate(emu68_t * emu68src, const char * dupname)
+{
+  emu68_parms_t parms;
+  emu68_t * emu68 = 0;
+
+  if (!emu68src)
+    goto error;
+
+  /* Create an instance with the same parameters */
+  parms.name    = dupname;
+  parms.log2mem = emu68->log2mem;
+  parms.clock   = emu68->clock;
+  parms.debug   = !!emu68->chk;
+  emu68 = emu68_create(&parms);
+  if (!emu68)
+    goto error;
+
+  /* Copy registers */
+  emu68->reg      = emu68src->reg;
+  emu68->cycle    = emu68src->cycle;
+  emu68->framechk = emu68src->framechk;
+  
+  /* Copy memory */
+  memcpy(emu68->mem, emu68src->mem, 1<<emu68->log2mem);
+  if (emu68->chk)
+    memcpy(emu68->chk, emu68src->chk, 1<<emu68->log2mem);
 
  error:
   return emu68;

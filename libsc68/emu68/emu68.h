@@ -97,7 +97,7 @@ typedef struct {
   int debug;         /**< Run in debug mode (0:off).               */
 } emu68_parms_t;
 
-/** Create 68k emulator instance.
+/** Create a 68k emulator instance.
  *
  *   The emu68_create() function creates an instance of the 68k emulator.
  *   The logmem parameter is the size of the 68K memory expressed in power
@@ -111,7 +111,22 @@ typedef struct {
  */
 emu68_t * emu68_create(emu68_parms_t * const parms);
 
-/** Destroy 68k emulator instance.
+/** Duplicate a 68k emulator instance.
+ *
+ *   The emu68_dup() function creates an new instance of the 68k
+ *   emulator which is a duplicate of the given emu68 instance.
+ *
+ *  @param  emu68  Emulator instance to duplicate
+ *  @param  name   Duplicate emulator name [0:auto]
+ *
+ *  @return  duplicate emu68 instance   
+ *  @retval  0  Failure
+ *
+ *  @todo    Duplicate attached IO
+ */
+emu68_t * emu68_duplicate(emu68_t * emu68, const char * name);
+
+/** Destroy a 68k emulator instance.
  *
  *  @param  emu68  emulator instance
  *
