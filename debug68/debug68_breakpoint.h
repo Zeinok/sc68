@@ -23,7 +23,7 @@ extern "C" {
  * @return  breakpoint internal number.
  * @retval  -1:breakpoint does not exist
  */
-int debug68_debugger_breakp_kill(addr68_t addr);
+int debug68_breakp_kill(addr68_t addr);
 
 /** Display breakpoint info.
  *
@@ -31,7 +31,7 @@ int debug68_debugger_breakp_kill(addr68_t addr);
  * @return  error-code
  * @retval  0:exist
  */
-int debug68_debugger_breakp_display(addr68_t addr);
+int debug68_breakp_display(addr68_t addr);
 
 /** Set breakpoint.
  *
@@ -42,7 +42,7 @@ int debug68_debugger_breakp_display(addr68_t addr);
  * @return  breakpoint internal number.
  * @retval  -1:breakpoint does not exist
  */
-int debug68_debugger_breakp_set(addr68_t addr, int count, int reset);
+int debug68_breakp_set(addr68_t addr, int count, int reset);
 
 /** General break test.
  *
@@ -52,7 +52,7 @@ int debug68_debugger_breakp_set(addr68_t addr, int count, int reset);
  * @retval -1:do not break
  *
  */
-int debug68_debugger_breakp_test(addr68_t addr);
+int debug68_breakp_test(addr68_t addr);
 
 #ifdef __cplusplus
 }

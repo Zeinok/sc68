@@ -1,39 +1,30 @@
-/**
- * @ingroup   debug68_devel
- * @file      SC68debug_eval.c
- * @author    Ben(jamin) Gerard <ben@sashipa.com>
- * @date      1999/07/12
- * @brief     debug68 expression evaluator. 
- * @version   $Id: SC68debug_eval.c,v 2.0 2003/08/21 04:58:35 benjihan Exp $
+/*
+ *                  debug68 - expression evaluator
+ *
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
+ *
+ * This  program is  free  software: you  can  redistribute it  and/or
+ * modify  it under the  terms of  the GNU  General Public  License as
+ * published by the Free Software  Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
+ * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * General Public License for more details.
+ *
+ * You should have  received a copy of the  GNU General Public License
+ * along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ * $Id: sc68.c 57 2009-01-31 18:24:54Z benjihan $
  */
 
-/*
- *                   sc68 - debug68 expression evaluator
- *         Copyright (C) 2001 Ben(jamin) Gerard <ben@sashipa.com>
- *
- *  This program is free software; you can redistribute it and/or modify it
- *  under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
- *  option) any later version.
- *
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
+#include "debug68_eval.h"
+#include "emu68/srdef68.h"
 
 #include <ctype.h>
-
-#include "debug68/SC68debug_eval.h"
-
-#include "emu68/struct68.h"
-#include "emu68/srdef68.h"
-extern reg68_t reg68;
 
 /* Operator pririority level */
 #define ADD_LEVEL 0x80
@@ -47,13 +38,13 @@ extern reg68_t reg68;
 /* Prototype operator caller */
 #define OP(NAME,OP) static int NAME(int a, int b){ return a OP b; }
 
-OP(add,+);
-OP(sub,-);
-OP(mul,*);
-OP(div,/);
-OP(and,&);
-OP(orr,|);
-OP(eor,^);
+OP(add,+)
+OP(sub,-)
+OP(mul,*)
+OP(div,/)
+OP(and,&)
+OP(orr,|)
+OP(eor,^)
 
 /* Operator look-up table ( 0 terminated )
  */
@@ -115,8 +106,9 @@ static int get_hexa(char **ps, char **error)
 
 /* Retrieve 68K register value (d0-d7, a0-a7, pc, sp, sr ,usp, ccr)
  */
-static int get_reg(char **ps, char **error)
+static int get_reg(emu68_t * emu68, char **ps, char **error)
 {
+  reg68_t * const reg68 = &emu68->reg;
   char *s=*ps;
   int  regbase = -1;
 
@@ -128,7 +120,7 @@ static int get_reg(char **ps, char **error)
       if(toupper(s[1])=='C')
       {
         *ps = s+2;
-        return reg68.pc;
+        return reg68->pc;
       }
       break;
     case 'S':
@@ -136,31 +128,31 @@ static int get_reg(char **ps, char **error)
       {
         case 'R': /* SR */
           *ps = s+2;
-          return reg68.sr;
+          return reg68->sr;
         case 'P': /* SP */
           *ps = s+2;
-          return reg68.a[7];
+          return reg68->a[7];
       }
       break;
     case 'U': /* USP */
       if(toupper(s[1])=='S' && toupper(s[2])=='P')
       {
         *ps = s+3;
-        return reg68.usp;
+        return reg68->usp;
       }
       break;
     case 'C': /* CCR */
       if(toupper(s[1])=='C' && toupper(s[2])=='R')
       {
         *ps = s+3;
-        return GET_CCR(reg68.sr);
+        return GET_CCR(reg68->sr);
       }
       break;
   }
   if(regbase>=0 && s[1]>='0' && s[1]<='7')
   {
     *ps = s+2;
-    return reg68.d[regbase+s[1]-'0'];
+    return reg68->d[regbase+s[1]-'0'];
   }
   else *error = s;
   return 0;
@@ -171,13 +163,14 @@ static int get_reg(char **ps, char **error)
  * error is a pointer to string location where error occurs : first call with NULL
  * oplvl is previous operator level : first call with 0
  */
-static int r_eval(char **s, char **error, int oplvl)
+static int r_eval(emu68_t * emu68, char **s, char **error, int oplvl)
 {
+/*   reg68_t * const reg68 = &emu68->reg; */
   static int level = 0; /* Bracket level */
   int v=0;
   int c;
 
-  if(*error!=NULL) return v;
+  if(*error) return v;
 
   //printf( "entering:%s oplvl=%d\n",*s,oplvl);
 
@@ -192,34 +185,33 @@ static int r_eval(char **s, char **error, int oplvl)
     /* Open Bracket */
     case '(':
       level++;
-      v = r_eval(s, error, 0);
+      v = r_eval(emu68, s, error, 0);
       break;
 
     /* Unaire */
     case '+':
-      v =  r_eval(s, error, oplvl);
+      v =  r_eval(emu68, s, error, oplvl);
       break;
     case '-':
-      v = -r_eval(s, error, oplvl);
+      v = -r_eval(emu68, s, error, oplvl);
       break;
     case '~':
-      v = ~r_eval(s, error, oplvl);
+      v = ~r_eval(emu68, s, error, oplvl);
       break;
 
     /* Indirect 68K memory */
     case 'b': case 'w': case 'l':
     {
-      u32 addr = r_eval(s, error, oplvl);
-      if(reg68.mem==NULL) v=0;
-      else
-      {
-        v = reg68.mem[ (addr++) & reg68.memmsk ];
+      u32 addr = r_eval(emu68, s, error, oplvl);
+      if(!emu68->mem) v=0;
+      else {
+        v = emu68->mem[ (addr++) & emu68->memmsk ];
         if(c!='b')
-          v = (v<<8) | reg68.mem[ (addr++) & reg68.memmsk ];
+          v = (v<<8) | emu68->mem[ (addr++) & emu68->memmsk ];
         if(c=='l')
         {
-          v = (v<<8) | reg68.mem[ (addr++) & reg68.memmsk ];
-          v = (v<<8) | reg68.mem[ (addr++) & reg68.memmsk ];
+          v = (v<<8) | emu68->mem[ (addr++) & emu68->memmsk ];
+          v = (v<<8) | emu68->mem[ (addr++) & emu68->memmsk ];
         }
       }
       break;
@@ -242,10 +234,10 @@ static int r_eval(char **s, char **error, int oplvl)
     /* Default is 68K register , else error is setted by get_reg() */
     default:
       (*s)--;
-      v = get_reg(s, error);
+      v = get_reg(emu68, s, error);
       break;
   }
-  if(*error!=NULL) goto Error;
+  if(*error) goto Error;
 
   while(1)
   {
@@ -287,9 +279,9 @@ static int r_eval(char **s, char **error, int oplvl)
           /* */
           else
           {
-            w = r_eval(s, error, optable[i].level);
-            if(*error!=NULL) goto Error;
-            if(c=='/' && w==0) goto Error; /* 0 Divide check */
+            w = r_eval(emu68, s, error, optable[i].level);
+            if(*error) goto Error;
+            if(c=='/' && !w) goto Error; /* 0 Divide check */
             v = (optable[i].fct)(v,w);
             break;
           }
@@ -304,7 +296,7 @@ static int r_eval(char **s, char **error, int oplvl)
   }
 
 Error:
-  if(*error==NULL) *error = (*s)-1;
+  if(!*error) *error = (*s)-1;
   level = 0;
   return v;
 }
@@ -313,9 +305,9 @@ Error:
  * s       : string to evaluate
  * err_loc : pointer to error location : *err_loc is a position to syntax error or NULL
  */
-int SC68debugger_eval( char *s, char **err_loc )
+int debug68_eval(emu68_t * emu68, char *s, char **err_loc)
 {
-  if(s==NULL || err_loc==NULL) return 0;
-  *err_loc = NULL;
-  return r_eval(&s, err_loc, 0);
+  if(!s || !err_loc) return 0;
+  *err_loc = 0;
+  return r_eval(emu68, &s, err_loc, 0);
 }

@@ -1,288 +1,295 @@
-/**
- * @ingroup   debug68_devel
- * @file      SC68debug_io.c
- * @author    Ben(jamin) Gerard <ben@sashipa.com>
- * @date      1999/08/14
- * @brief     debug68 fake IO emulation
- * @version   $Id: SC68debug_io.c,v 2.3 2003/11/20 21:10:39 benjihan Exp $
- */
-
 /*
- *                    sc68 - debug68 fake IO emulation
- *         Copyright (C) 2001 Ben(jamin) Gerard <ben@sashipa.com>
+ *                   debug68 - fake IO emulation                      
  *
- *  This program is free software; you can redistribute it and/or modify it
- *  under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
- *  option) any later version.
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  General Public License for more details.
+ * This  program is  free  software: you  can  redistribute it  and/or
+ * modify  it under the  terms of  the GNU  General Public  License as
+ * published by the Free Software  Foundation, either version 3 of the
+ * License, or (at your option) any later version.
  *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
+ * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * General Public License for more details.
  *
+ * You should have  received a copy of the  GNU General Public License
+ * along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ * $Id: sc68.c 57 2009-01-31 18:24:54Z benjihan $
  */
 
-#include "debug68/SC68debug_io.h"
+#include "debug68_io.h"
+#include "emu68/ioplug68.h"
 
-static u8 vposr;
-int paula_debug_access = 0;
-
-/* Macro for word and long access based on byte access. */
-#define READ_WORD(NAME) \
-static u32 NAME##_readW(u32 addr, u32 cycle) \
-{ return (NAME##_readB(addr,cycle)<<8) | NAME##_readB(addr+1,cycle); }
-
-#define READ_LONG(NAME) \
-static u32 NAME##_readL(u32 addr, u32 cycle) \
-{ return (NAME##_readW(addr,cycle)<<16) | NAME##_readW(addr+2,cycle+4); }
-
-#define WRITE_WORD(NAME) \
-static void NAME##_writeW(u32 addr, u32 v, u32 cycle) \
-{ NAME##_writeB(addr,v>>8,cycle); NAME##_writeB(addr+1,v,cycle); }
-
-#define WRITE_LONG(NAME) \
-static void NAME##_writeL(u32 addr, u32 v, u32 cycle) \
-{ NAME##_writeW(addr,v>>16,cycle); NAME##_writeW(addr+2,v,cycle+4); }
+#define DIO(NAME,DESC,LO,HI)					\
+  {								\
+    {								\
+      0,DESC,LO,HI,						\
+	any_readB,any_readW,any_readL,				\
+	any_writeB,any_writeW,any_writeL,			\
+	any_int,any_nextint,any_adjust,any_reset,any_destroy,	\
+	0							\
+	},							\
+      0,NAME##_read, NAME##_write, NAME##_reset			\
+	}
 
 
+/***********************/
 /* Common to all chips */
+/***********************/
 
-static int68_t *any_int(cycle68_t cycle)
+static int68_t dummy_read(debug68_io_t * dio, addr68_t addr) {return 0;}
+static void dummy_write(debug68_io_t * dio, addr68_t addr, int68_t val) {}
+static int dummy_reset(debug68_io_t * dio) { return 0; }
+
+static void any_readB(io68_t * const io)
 {
-  cycle = cycle;
-  return 0L;
+  emu68_t * const emu68 = io->emu68;
+  addr68_t addr = emu68->bus_addr;
+  debug68_io_t * const dio = (debug68_io_t *) io;
+  dio->access |= 1;
+  emu68->bus_data = !dio->read ? 0 : dio->read(dio,addr&0xFF);
 }
 
-static cycle68_t any_nextint(cycle68_t cycle)
+static void any_readW(io68_t * const io)
 {
-  cycle = cycle;
+  emu68_t * const emu68 = io->emu68;
+  addr68_t addr = emu68->bus_addr;
+  debug68_io_t * const dio = (debug68_io_t *) io;
+  int68_t a0, a1;
+  dio->access |= 1;
+  a0 = dio->read(dio,(addr+0)&255) & 255;
+  a1 = dio->read(dio,(addr+1)&255) & 255;
+  emu68->bus_data = (a0<<8) + a1;
+}
+
+static void any_readL(io68_t * const io)
+{
+  emu68_t * const emu68 = io->emu68;
+  addr68_t addr = emu68->bus_addr;
+  debug68_io_t * const dio = (debug68_io_t *) io;
+  int68_t a0, a1, a2, a3;
+  dio->access |= 1;
+  a0 = dio->read(dio,(addr+0)&255) & 255;
+  a1 = dio->read(dio,(addr+1)&255) & 255;
+  a2 = dio->read(dio,(addr+2)&255) & 255;
+  a3 = dio->read(dio,(addr+3)&255) & 255;
+  emu68->bus_data = (a0<<24) + (a1<<16) + (a2<<8) + a3;
+}
+
+static void
+any_writeB(io68_t * const io)
+{
+  emu68_t * const emu68 = io->emu68;
+  debug68_io_t * const dio = (debug68_io_t *) io;
+  addr68_t addr = emu68->bus_addr;
+  int68_t data  = emu68->bus_data;
+  dio->access |= 2;
+  dio->write(dio,addr&255,data&255);
+}
+
+static void
+any_writeW(io68_t * const io)
+{
+  emu68_t * const emu68 = io->emu68;
+  debug68_io_t * const dio = (debug68_io_t *) io;
+  addr68_t addr = emu68->bus_addr;
+  int68_t  data = emu68->bus_data;
+  dio->access |= 2;
+  dio->write(dio,(addr+0)&255,(data>>8)&255);
+  dio->write(dio,(addr+1)&255,(data>>0)&255);
+}
+
+static void
+any_writeL(io68_t * const io)
+{
+  emu68_t * const emu68 = io->emu68;
+  debug68_io_t * const dio = (debug68_io_t *) io;
+  addr68_t addr = emu68->bus_addr;
+  int68_t  data = emu68->bus_data;
+  dio->access |= 2;
+  dio->write(dio,(addr+0)&255,(data>>24)&255);
+  dio->write(dio,(addr+1)&255,(data>>16)&255);
+  dio->write(dio,(addr+2)&255,(data>> 8)&255);
+  dio->write(dio,(addr+3)&255,(data>> 0)&255);
+}
+
+static interrupt68_t *any_int(io68_t * const io, const cycle68_t cycle) {
+  return 0;
+}
+
+static cycle68_t any_nextint(io68_t * const io, const cycle68_t cycle) {
   return IO68_NO_INT;
 }
 
-static void any_subcycle(cycle68_t sub)
-{
-  sub = sub;
+static void any_adjust(io68_t * const io, const cycle68_t sub) {}
+
+static int any_reset(io68_t * io) {
+  debug68_io_t * const dio = (debug68_io_t *) io;
+  dio->access = 0;
+  return dio->reset(dio);
 }
+
+static void any_destroy(io68_t * const io) {}
 
 /* ----------------------------------------------------------------------
    Paula Part
    ---------------------------------------------------------------------- */
 
-static u32 paula_readB(u32 addr, u32 cycle)
+static int68_t pl_read(debug68_io_t * dio, addr68_t addr);
+#define pl_write dummy_write
+static int pl_reset(debug68_io_t * dio);
+
+struct pl_io_t {
+  debug68_io_t io;
+  u8 vposr;
+} pl_io = {
+  DIO(pl,"AMIGA Paula",0xFFDFF000,0xFFDFF0DF),
+  0
+};
+
+static int68_t pl_read(debug68_io_t * dio, addr68_t addr)
 {
-  addr=addr; cycle=cycle;
-  addr &= 0xFF;
-  paula_debug_access |= 1;
-  /* Big Cheat : Increment vertical raster pos at each read */
-  if (addr==6) {
-    return vposr++;
+  struct pl_io_t * pl = (struct pl_io_t *) dio;
+  if (addr == 6) {
+    /* Big Cheat : Increment vertical raster pos at each read */
+    return pl->vposr++;
   }
   return 0;
 }
 
-READ_WORD(paula)
-READ_LONG(paula)
 
-static void paula_writeB(u32 addr, u32 v, u32 cycle)
+static int pl_reset(debug68_io_t * dio)
 {
-  paula_debug_access |= 2;
-  addr=addr; v=v; cycle=cycle;
-}
-WRITE_WORD(paula)
-WRITE_LONG(paula)
-
-static int paula_reset(void)
-{
-  vposr = 0;
-  paula_debug_access = 0;
+  struct pl_io_t * pl = (struct pl_io_t *) dio;
+  pl->vposr = 0;
   return 0;
 }
-
-
-io68_t paula_io =
-{
-  NULL,
-  "AMIGA Paula",
-  0xFFDFF000, 0xFFDFF0DF,
-  {paula_readB,  paula_readW,  paula_readL},
-  {paula_writeB, paula_writeW, paula_writeL},
-  any_int, any_nextint,
-  any_subcycle,
-  paula_reset,
-  0,0
-};
 
 /* ----------------------------------------------------------------------
    YM-2149 Part
    ---------------------------------------------------------------------- */
 
-static int ym_cur_reg;
-static u8 ym_debug_reg[256];
-int ym_debug_access = 0;
+static int68_t ym_read(debug68_io_t * dio, addr68_t addr);
+static void ym_writeB(debug68_io_t * dio, addr68_t addr, int68_t v);
+static int ym_reset(debug68_io_t * dio);
 
 
-static u32 ym_readB(u32 addr, u32 cycle)
+struct ym_io_t {
+  debug68_io_t io;
+  int cur;
+  u8 reg[256];
+} ym_io = {
+  DIO(pl,"YM-2149",0xFFFF8800,0xFFFF88FF)
+};
+
+static int68_t ym_read(debug68_io_t * dio, addr68_t addr)
 {
-  addr=addr; cycle=cycle;
-  addr &= 0xFF;
-  ym_debug_access |= 1;
+  struct ym_io_t * ym = (struct ym_io_t *) dio;
   if (addr&3) return 0;
-  return ym_debug_reg[ym_cur_reg&255];
+  return ym->reg[ym->cur&255];
 }
 
-READ_WORD(ym)
-READ_LONG(ym)
-
-static void ym_writeB(u32 addr, u32 v, u32 cycle)
+static void ym_writeB(debug68_io_t * dio, addr68_t addr, int68_t v)
 {
-  cycle=cycle;
+  struct ym_io_t * ym = (struct ym_io_t *) dio;
   addr &= 2;
-  /* control register */
-  if(!addr) ym_cur_reg = v&255;
-  /* Data register [ control ] */
-  else ym_debug_reg[ym_cur_reg&255] = v;
-  ym_debug_access |= 2;
+  if(!addr) ym->cur = v&255;	 /* control register          */
+  else ym->reg[ym->cur&255] = v; /* data register [ control ] */
 }
 
-static void ym_writeW(u32 addr, u32 v, u32 cycle)
+static int ym_reset(debug68_io_t * dio)
 {
-  ym_writeB(addr, v>>8, cycle);
-}
-
-WRITE_LONG(ym)
-
-static int ym_reset(void)
-{
+  struct ym_io_t * ym = (struct ym_io_t *) dio;
   int i;
-  for (i=0; i<sizeof(ym_debug_reg); ++i) {
-    ym_debug_reg[i] = 0;
+  for (i=0; i<sizeof(ym->reg); ++i) {
+    ym->reg[i] = 0;
   }
-  ym_cur_reg = 0;
-  ym_debug_access = 0;
+  ym->cur = 0;
   return 0;
 }
 
-
-io68_t ym_io =
-{
-  NULL,
-  "YM-2149",
-  0xFFFF8800, 0xFFFF88FF,
-  {ym_readB,  ym_readW,  ym_readL},
-  {ym_writeB, ym_writeW, ym_writeL},
-  any_int, any_nextint,
-  any_subcycle,
-  ym_reset,
-  0,0
-};
 
 /* ----------------------------------------------------------------------
    Microwire and LMC Part
    ---------------------------------------------------------------------- */
 
-int mw_debug_access = 0;
+#define mw_read  dummy_read
+#define mw_write dummy_write
+#define mw_reset dummy_reset
 
-static u32 mw_readB(u32 addr, cycle68_t cycle)
-{
-  cycle=cycle;
-  addr=addr;
-  mw_debug_access |= 1;
-  return 0;
-}
-
-READ_WORD(mw)
-READ_LONG(mw)
-
-static void mw_writeB(u32 addr, u32 v, cycle68_t cycle)
-{
-  addr=addr;
-  v=v;
-  cycle=cycle;
-  mw_debug_access |= 2;
-}
-
-WRITE_WORD(mw)
-WRITE_LONG(mw)
-
-static int mw_reset(void)
-{
-  mw_debug_access = 0;
-  return 0;
-}
-
-io68_t mw_io = {
-  0,
-  "STE-MicroWire",
-  0xFFFF8900, 0xFFFF8925,
-  {mw_readB,  mw_readW,  mw_readL},
-  {mw_writeB, mw_writeW, mw_writeL},
-  any_int, any_nextint,
-  any_subcycle,
-  mw_reset,
-  0,0
+struct mw_io_t {
+  debug68_io_t io;
+} mw_io = {
+  DIO(mw,"STE-MicroWire", 0xFFFF8900, 0xFFFF8925)
 };
 
 /* ----------------------------------------------------------------------
    Shifter Part
    ---------------------------------------------------------------------- */
 
-static u8 shifter_0a = 0xfe;
-static u8 shifter_60 = 0x00;
+static int68_t sh_read(debug68_io_t *, addr68_t);
+static void    sh_write(debug68_io_t *, addr68_t, int68_t);
+static int     sh_reset(debug68_io_t *);
 
-int sh_debug_access = 0;
-
-static u32 sh_readB(u32 addr, cycle68_t cycle)
-{
-  cycle=cycle;
-  addr=addr&0xFF;
-  sh_debug_access |= 1;
-  if (addr == 0x0A) {
-    return shifter_0a;
-  } else if (addr == 0x60) {
-    return shifter_60;
-  }
-  return 0;
-}
-
-READ_WORD(sh)
-READ_LONG(sh)
-
-static void sh_writeB(u32 addr, u32 v, cycle68_t cycle)
-{
-  addr=addr&0xFF;
-  cycle=cycle;
-  sh_debug_access |= 2;
-  if (addr == 0x0A) {
-    shifter_0a = v;
-  } else if (addr == 0x60) {
-    shifter_60 = v;
-  }
-}
-
-WRITE_WORD(sh)
-WRITE_LONG(sh)
-
-static int sh_reset(void)
-{
-  sh_debug_access = 0;
-  shifter_0a = 0xfe;
-  shifter_60 = 0x00;
-  return 0;
-}
-
-io68_t sh_io = {
-  0,
-  "Shifter",
-  0xFFFF8200, 0xFFFF82FF,
-  {sh_readB,  sh_readW,  sh_readL},
-  {sh_writeB, sh_writeW, sh_writeL},
-  any_int, any_nextint,
-  any_subcycle,
-  sh_reset,
-  0,0
+struct sh_io_t {
+  debug68_io_t io;
+  u8 data_0a;
+  u8 data_60;
+} sh_io = {
+  DIO(sh,"Shifter",0xFFFF8200, 0xFFFF82FF)
 };
+
+static int sh_reset(debug68_io_t * dio)
+{
+  struct sh_io_t * sh = (struct sh_io_t *) dio;
+  sh->data_0a = 0xfe;
+  sh->data_60 = 0x00;
+  return 0;
+}
+
+static int68_t sh_read(debug68_io_t * dio, addr68_t addr)
+{
+  struct sh_io_t * sh = (struct sh_io_t *) dio;
+  switch (addr & 255) {
+  case 0x0a: return sh->data_0a;
+  case 0x60: return sh->data_60;
+  }
+  return 0;
+}
+
+
+static void sh_write(debug68_io_t * dio, addr68_t addr, int68_t data)
+{
+  struct sh_io_t * sh = (struct sh_io_t *) dio;
+  switch (addr & 255) {
+  case 0x0a: sh->data_0a = data; break;
+  case 0x60: sh->data_60 = data; break;
+  }
+}
+  
+
+
+int debug68_io_plug(emu68_t * emu68) {
+  if (!emu68) return -1;
+  emu68_ioplug(emu68, &ym_dio->io);
+  emu68_ioplug(emu68, &sh_dio->io);
+  emu68_ioplug(emu68, &mw_dio->io);
+  emu68_ioplug(emu68, &pl_dio->io);
+  return 0;
+}
+
+void debug68_io_unplug(emu68_t * emu68) {
+  if (!emu68) return;
+  emu68_ioplug_unplug_all(emu68);
+}
+
+
+/* Exported io  */
+debug68_io_t * mw_dio = &mw_io.io;
+debug68_io_t * pl_dio = &pl_io.io;
+debug68_io_t * sh_dio = &sh_io.io;
+debug68_io_t * ym_dio = &ym_io.io;

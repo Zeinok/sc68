@@ -31,13 +31,15 @@
 #ifndef _SC68DEBUG_DEBUGCOM_H_
 #define _SC68DEBUG_DEBUGCOM_H_
 
+#include "emu68/struct68.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /** Enter debugger mode.
  */
-int SC68debugger_entering(void);
+  int debug68_entering(emu68_t *);
 
 /** Run a new debugger command.
  *
@@ -45,7 +47,7 @@ int SC68debugger_entering(void);
  * @param   a   array of argument.
  *
  */
-int SC68debugger_newcom(int na, char **a);
+int debug68_newcom(int na, char **a);
 
 /** Display debugger shell prompt as "diskname track desa>".
  *
@@ -56,7 +58,7 @@ int SC68debugger_newcom(int na, char **a);
  *
  * @warning Return pointer to a static buffer.
  */
-char * SC68debugger_prompt(char *diskname, int track_num);
+char * debug68_prompt(char *diskname, int track_num);
 
 #ifdef __cplusplus
 }

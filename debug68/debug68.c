@@ -26,12 +26,6 @@
 # include <config.h>
 #endif
 
-/* #ifndef EMU68DEBUG */
-/* # define EMU68DEBUG 1 */
-/* #endif */
-
-/* #define SC68_68KMEMSIZE  512 */
-
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -1057,10 +1051,9 @@ static int find_time(u32 nbsec,
   printf("Running init code:"); fflush(stdout);
   if (mus->frq == 60 && mus->hwflags.bit.ym) {
     printf(" -> Force shifter to 60Hz...\n");
-
-    sh_io.emu68->bus_addr = 0xFF820a;
-    sh_io.emu68->bus_data = 0xFC;
-    sh_io.w_byte(&sh_io);
+/*     sh_dio.io.emu68->bus_addr = 0xFF820a; */
+/*     sh_dio.io.emu68->bus_data = 0xFC; */
+    sh_dio->write(sh_dio, 0x0a, 0xFC);
   }
 
   emu68_level_and_interrupt(emu68,0);
@@ -1126,39 +1119,39 @@ static int find_time(u32 nbsec,
   printf("Last frame       : %u [%s]\n", lastframe, strtime68(0,-1, nbsec));
   printf("Memory hit       : [$%x-$%x] (%d bytes)\n", min,max,max-min);
   printf("Paula access     : %c%c\n",
-	 (paula_debug_access & 1) ? 'R' : '-',
-	 (paula_debug_access & 2) ? 'W' : '-');
+	 (pl_dio->access & 1) ? 'R' : '-',
+	 (pl_dio->access & 2) ? 'W' : '-');
   printf("YM-2149 access   : %c%c\n",
-	 (ym_debug_access & 1) ? 'R' : '-',
-	 (ym_debug_access & 2) ? 'W' : '-');
+	 (ym_dio->access & 1) ? 'R' : '-',
+	 (ym_dio->access & 2) ? 'W' : '-');
   printf("MicroWire access : %c%c\n",
-	 (mw_debug_access & 1) ? 'R' : '-',
-	 (mw_debug_access & 2) ? 'W' : '-');
+	 (mw_dio->access & 1) ? 'R' : '-',
+	 (mw_dio->access & 2) ? 'W' : '-');
   printf("shifter access   : %c%c\n",
-	 (sh_debug_access & 1) ? 'R' : '-',
-	 (sh_debug_access & 2) ? 'W' : '-');
+	 (sh_dio->access & 1) ? 'R' : '-',
+	 (sh_dio->access & 2) ? 'W' : '-');
 
-  if (!(paula_debug_access|ym_debug_access|mw_debug_access|sh_debug_access)) {
+  if (!(pl_dio->access|ym_dio->access|mw_dio->access|sh_dio->access)) {
     printf("No hardware access detected !!!\n");
-  } else if (paula_debug_access &&
-	     (ym_debug_access|mw_debug_access|sh_debug_access)) {
+  } else if (pl_dio->access &&
+	     (ym_dio->access|mw_dio->access|sh_dio->access)) {
     printf("Both Atari and Amiga hardware detected !!!\n");
   } else {
     int old;
     old = mus->hwflags.bit.amiga;
-    mus->hwflags.bit.amiga = !!paula_debug_access;
+    mus->hwflags.bit.amiga = !!pl_dio->access;
     if (old != mus->hwflags.bit.amiga) {
       printf("%s PAULA hardware\n", old ? "CLEAR" : "FORCE");
     }
 
     old = mus->hwflags.bit.ym;
-    mus->hwflags.bit.ym = !!(ym_debug_access|sh_debug_access);
+    mus->hwflags.bit.ym = !!(ym_dio->access|sh_dio->access);
     if (old != mus->hwflags.bit.ym) {
       printf("%s YM-2149 hardware\n", old ? "CLEAR" : "FORCE");
     }
 
     old = mus->hwflags.bit.ste;
-    mus->hwflags.bit.ste = !!mw_debug_access;
+    mus->hwflags.bit.ste = !!mw_dio->access;
     if (old != mus->hwflags.bit.ste) {
       printf("%s STE hardware\n", old ? "CLEAR" : "FORCE");
     }
@@ -1183,7 +1176,7 @@ static char * prompt(void)
     if (!disk) {
 	return "Nothing to debug ('x' to exit debug mode)>";
     } else {
-      return SC68debugger_prompt(disk->name,track+1);
+      return debug68_prompt(disk->name,track+1);
     }
   }
 }
@@ -1213,7 +1206,7 @@ static int interractif(void)
 
     /* Debugger mode */
     if(debugmode) {
-      if(err=SC68debugger_newcom(na,a), err<0) {
+      if(err=debug68_newcom(na,a), err<0) {
 	spoolerror();
       } else if (err > 0) {
 	debugmode = 0;
@@ -1352,7 +1345,6 @@ int main(int argc, char *argv[])
   }
 
   memset(&create68,0,sizeof(create68));
-  create68.debug_bit   = debugmsg68_DEBUG;
   create68.log2mem     = 512;
   create68.emu68_debug = 1;
   sc68 = sc68_create(&create68);
@@ -1679,7 +1671,7 @@ static int debug_com(int na, char **a)
     return debug68_error_add("Nothing to debug");
   if(err=prepare_reg68(), err<0)
     return err;
-  if(err=SC68debugger_entering(), err<0)
+  if(err=debug68_entering(emu68), err<0)
     return err;
   debugmode = 1;
   return 0;

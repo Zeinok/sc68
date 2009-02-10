@@ -43,8 +43,9 @@
 
 #include "desa68.h"
 
-extern reg68_t * reg68;
-extern emu68_t * emu68;
+/* static reg68_t * reg68;		/\*  *\/ */
+/* static emu68_t * emu68;		/\*  *\/ */
+static emu68_t * dbg68;		/*  */
 
 /* Entering status backup */
 static struct {
@@ -53,17 +54,14 @@ static struct {
   addr68_t   memmsk;
 } save;
 
-static u8 *    savemem68;
-//static emu68_t *a
-
 /* Command line backup */
 #define DEBUGGER_MAX_ARG 32
 static int argc = 0;
 static char *argv[DEBUGGER_MAX_ARG];
 static int last_com;
 
-/* disassembler */
-static DESA68parm_t desaparm;
+/* Disassembler */
+static desa68_parm_t desaparm;
 static int default_ndesa=10;
 static char desastr[256];
 
@@ -76,7 +74,7 @@ static void line()
   printf("------ ----  ------------\n");
 }
 
-static int mydesa(DESA68parm_t *d, u8 *chk, u32 curpc, char *tail)
+static int mydesa(desa68_parm_t *d, u8 *chk, u32 curpc, char *tail)
 {
   u32 pc = d->pc & d->memmsk;
   d->flags = DESA68_ASCII_FLAG;
@@ -94,7 +92,7 @@ static int mydesa(DESA68parm_t *d, u8 *chk, u32 curpc, char *tail)
   return 0;
 }
 
-static char * mydesa_str(DESA68parm_t *d, u8 *chk, u32 curpc, char *tail)
+static char * mydesa_str(desa68_parm_t *d, u8 *chk, u32 curpc, char *tail)
 {
   static char tmp[128];
   u32 pc = d->pc & d->memmsk;
@@ -119,45 +117,53 @@ static unsigned last_desa = (unsigned)~0;
 
 static int desa(u32 pc, int ndesa)
 {
+  reg68_t * const reg68 = &dbg68->reg;
   int i;
+
   desaparm.pc     = (pc==(unsigned)~0)? reg68->pc : pc;
-  desaparm.mem    = emu68->mem;
-  desaparm.memmsk = emu68->memmsk;
+  desaparm.mem    = dbg68->mem;
+  desaparm.memmsk = dbg68->memmsk;
   desaparm.str    = desastr;
   desaparm.flags  = 0;
   if (!ndesa) ndesa = default_ndesa;
   for(i=0; i<ndesa; i++)
     {
       last_desa = desaparm.pc;
-      mydesa(&desaparm,emu68->chk,reg68->pc,NULL);
+      mydesa(&desaparm,dbg68->chk,reg68->pc,NULL);
     }
   return 0;
 }
 
 static int desa1(u32 pc)
 {
+  reg68_t * const reg68 = &dbg68->reg;
+
   desaparm.pc     = (pc==(unsigned)~0)? reg68->pc : pc;
-  desaparm.mem    = emu68->mem;
-  desaparm.memmsk = emu68->memmsk;
+  desaparm.mem    = dbg68->mem;
+  desaparm.memmsk = dbg68->memmsk;
   desaparm.str    = desastr;
   desaparm.flags  = 0;
-  mydesa(&desaparm,emu68->chk,reg68->pc,"!");
+  mydesa(&desaparm,dbg68->chk,reg68->pc,"!");
   return 0;
 }
 
 static char * desa1_str(u32 pc)
 {
+  reg68_t * const reg68 = &dbg68->reg;
+
   desaparm.pc     = (pc==(unsigned)~0)? reg68->pc : pc;
-  desaparm.mem    = emu68->mem;
-  desaparm.memmsk = emu68->memmsk;
+  desaparm.mem    = dbg68->mem;
+  desaparm.memmsk = dbg68->memmsk;
   desaparm.str    = desastr;
   desaparm.flags  = 0;
-  return mydesa_str(&desaparm,emu68->chk,reg68->pc,"!");
+  return mydesa_str(&desaparm,dbg68->chk,reg68->pc,"!");
 }
 
 
 static u32 next_inst(u32 pc)
 {
+  reg68_t * const reg68 = &dbg68->reg;
+
   u32 spc = desaparm.pc, ni;
   desaparm.pc     = (pc==(unsigned)~0) ? reg68->pc : pc;;
   desaparm.mem    = save.mem;
@@ -169,29 +175,30 @@ static u32 next_inst(u32 pc)
   return ni;
 }
 
-static int trace(u32 addr, int display, int do_bp)
+static int trace(addr68_t addr, int display, int do_bp)
 {
-  int bp,i;
   reg68_t oldreg68;
+  reg68_t * const reg68 = &dbg68->reg;
+  int bp,i;
 
   if (addr!=(unsigned)~0)
     reg68->pc = addr;
 
-  last_desa = reg68->pc&emu68->memmsk;
+  last_desa = reg68->pc & dbg68->memmsk;
 
   /* Evaluate breakpoint */
-  if (do_bp && (bp=debug68_debugger_breakp_test(reg68->pc), bp>=0))
+  if (do_bp && (bp=debug68_breakp_test(reg68->pc), bp>=0))
     return bp;
 
   oldreg68 = *reg68;
-  emu68_step(emu68);
+  emu68_step(dbg68);
   if (display)
     for(i=0; i<16; i++)
       if (reg68->d[i]!=oldreg68.d[i])
 	printf("%c%d : %08X => %08X\n",
 	       i<8 ? 'D' : 'A', i&7, oldreg68.d[i], reg68->d[i]);
 
-  last_desa = reg68->pc&emu68->memmsk;
+  last_desa = reg68->pc&dbg68->memmsk;
   return -1;
 
 }
@@ -225,8 +232,9 @@ void debug68_debugger_help(void)
 
 /* Display debugger shell prompt as diskname track disasm >
  */
-char * debug68_debugger_prompt(char *diskname, int track_num)
+char * debug68_prompt(char *diskname, int track_num)
 {
+  reg68_t * const reg68 = &dbg68->reg;
   return desa1_str(reg68->pc);
 }
 
@@ -254,11 +262,10 @@ static void and_or_chk(addr68_t start, addr68_t end, u8 anded, u8 ored)
 static void free_arg(void)
 {
   int i;
-  for(i=0; i<argc; i++)
-    {
-      free68(argv[i]);
-      argv[i] = NULL;
-    }
+  for (i=0; i<argc; i++) {
+    free68(argv[i]);
+    argv[i] = NULL;
+  }
   argc = 0;
 }
 
@@ -267,7 +274,7 @@ static int copy_arg(int na, char **a)
   int i;
   free_arg();
   if (na>DEBUGGER_MAX_ARG) na=DEBUGGER_MAX_ARG;
-  for(i=0; i<na; i++) {
+  for (i=0; i<na; i++) {
     if (!a[i]) continue;
     argv[i] = strdup68(a[i]);
     if (!argv[i]) {
@@ -278,51 +285,58 @@ static int copy_arg(int na, char **a)
   return 0;
 }
 
-/********************************
+/*********************************
  * 68K environment backup things *
  ********************************/
-static void free_restore(void)
-{
-  free68(savemem68);
-  savemem68 = 0;
-  memset(&savereg68,0,sizeof(savereg68));
-}
 
 /*  Restore entering status
  */
 static int restore_entering_status( void )
 {
-  memcpy(saveemu68->mem, savemem68,                  saveemu68->memsz);
-  memcpy(saveemu68->chk, savemem68+saveemu68->memsz, saveemu68->memsz);
-  reg68 = savereg68;
+/*   reg68_t * const reg68 = &dbg68->reg; */
+
+/*   memcpy(saveemu68->mem, savemem68,                  saveemu68->memsz); */
+/*   memcpy(saveemu68->chk, savemem68+saveemu68->memsz, saveemu68->memsz); */
+/*   reg68 = savereg68; */
   return 0;
 }
 
+static void debugger_destroy_emu(void)
+{
+  emu68_destroy(dbg68);
+  dbg68 = 0;
+}
+
+static int debugger_create_emu(emu68_t * slave_emu68)
+{
+  int err = -1;
+  debugger_destroy_emu();
+  dbg68 = emu68_duplicate(slave_emu68,"debug68/debugger");
+  if (!dbg68)
+    goto error;
+
+ error:
+  return err;
+}
+  
+
 /* Debugger mode clean enter
  */
-int debug68_debugger_entering(void)
+int debug68_entering(emu68_t * emu68)
 {
-  /* Safer !! */
-  free_restore();
-  free_arg();
+  int err;
+
+  err = debugger_create_emu(emu68);
 
   /* Save 68K registers and info */
-  savereg68 = reg68;
+
+/*   savereg68 = reg68; */
 
   /* No previous command */
-  last_com  =
-    last_desa = (unsigned)~0;
-
-  if (saveemu68->mem!=NULL && saveemu68->chk!=NULL)
-    {
-      /* Alloc a block for both mem and chk ... */
-      if (savemem68 = (u8 *)alloc68(saveemu68->memsz * 2), savemem68==NULL)
-	return -1;
-      memcpy(savemem68,                 saveemu68->mem, saveemu68->memsz);
-      memcpy(savemem68+saveemu68->memsz, saveemu68->chk, saveemu68->memsz);
-    }
+  last_com = last_desa = (unsigned)~0;
 
   restore_entering_status();
+
   return 0;
 }
 
@@ -330,13 +344,15 @@ int debug68_debugger_entering(void)
  */
 static int debug68_debugger_exit(int return_code)
 {
-  free_restore();
-  free_arg();
+/*   free_restore(); */
+/*   free_arg(); */
   return return_code;
 }
 
 static void show_reg(void)
 {
+  reg68_t * const reg68 = &dbg68->reg;
+
   int i;
   int ccr = GET_CCR(reg68->sr);
   for(i=0; i<8; i++)
@@ -358,8 +374,10 @@ static int *is_reg_change(char *s);
 /* Run a new debugger command. If no arg are given, previous command
  * is used.
  */
-int debug68_debugger_newcom(int na, char **a)
+int debug68_newcom(int na, char **a)
 {
+  reg68_t * const reg68 = &dbg68->reg;
+
   int err;
   if (na>0 && a) {
     if (err=copy_arg(na,a), err<0)
@@ -369,7 +387,7 @@ int debug68_debugger_newcom(int na, char **a)
   }
 
   if (!strcmp68(argv[0],"x") || !strcmp68(argv[0],"exit")) {
-    free_restore();
+/*     free_restore(); */
     return debug68_debugger_exit(1);
   }
 
@@ -388,7 +406,7 @@ int debug68_debugger_newcom(int na, char **a)
     char *error;
 
     if (na>1) {
-      addr = debug68_eval(argv[1],&error);
+      addr = debug68_eval(dbg68, argv[1],&error);
       if (error!=NULL) {
 	printf( "Can't trace at this address : syntax error\n");
 	return 0;
@@ -397,7 +415,7 @@ int debug68_debugger_newcom(int na, char **a)
     bp = trace(addr,1,0);
     if (bp >= 0) {
       printf("Reach: ");
-      debug68_debugger_breakp_display(addr);
+      debug68_breakp_display(addr);
     }
   }
 
@@ -413,21 +431,21 @@ int debug68_debugger_newcom(int na, char **a)
     char *err=NULL;
 
     if (na>1) {
-      addr = debug68_eval(argv[1], &err);
+      addr = debug68_eval(dbg68, argv[1], &err);
       if (err) {
 	printf("Invalid breakpoint address : Syntax error\n");
 	return 0;
       }
     }
     if (na>2) {
-      count = debug68_eval(argv[2], &err);
+      count = debug68_eval(dbg68, argv[2], &err);
       if (err) {
 	printf("Invalid breakpoint count : Syntax error\n");
 	return 0;
       }
     }
     if (na>3) {
-      reset = debug68_eval(argv[3], &err);
+      reset = debug68_eval(dbg68, argv[3], &err);
       if (err) {
 	printf("Invalid breakpoint count-reset : Syntax error\n");
 	return 0;
@@ -437,7 +455,7 @@ int debug68_debugger_newcom(int na, char **a)
 
     /* count==0 : KILL */
     if (!count) {
-      n = debug68_debugger_breakp_kill(addr);
+      n = debug68_breakp_kill(addr);
       if (addr==(unsigned)~0) {
 	printf("All breakpoint exterminated\n");
       } else {
@@ -453,15 +471,15 @@ int debug68_debugger_newcom(int na, char **a)
     else {
       /* addr==-1 : DISPLAY */
       if (addr==(unsigned)~0) {
-	n=debug68_debugger_breakp_display(addr);
+	n=debug68_breakp_display(addr);
 	if (n<=0) printf("No breakpoint\n");
       }
       /* SET */
       else {
-	n=debug68_debugger_breakp_set(addr,count,reset);
+	n=debug68_breakp_set(addr,count,reset);
 	if (n>=0) {
 	  printf("New breakpoint : ");
-	  debug68_debugger_breakp_display(addr);
+	  debug68_breakp_display(addr);
 	} else {
 	  printf("Can't set this breakpoint !!! sorry !!!");
 	}
@@ -475,7 +493,7 @@ int debug68_debugger_newcom(int na, char **a)
     char *error_loc;
     int v;
     if (na>1) {
-      v=debug68_eval(argv[1], &error_loc);
+      v = debug68_eval(dbg68, argv[1], &error_loc);
       if (error_loc) {
 	printf("syntax error at %s\n",error_loc);
       } else {
@@ -490,14 +508,14 @@ int debug68_debugger_newcom(int na, char **a)
     int ndesa = 0;
     char *err;
     if (na>1) {
-      addr = debug68_eval(argv[1], &err);
+      addr = debug68_eval(dbg68, argv[1], &err);
       if (err) {
 	printf("Invalid disassemble address : Syntax error\n");
 	return 0;
       }
     }
     if (na>2) {
-      ndesa = debug68_eval(argv[2], &err);
+      ndesa = debug68_eval(dbg68, argv[2], &err);
       if (err) {
 	ndesa = 0;
       }
@@ -519,10 +537,10 @@ int debug68_debugger_newcom(int na, char **a)
     }
 
     if (na>1) {
-      addr = debug68_eval(argv[1],&err);
+      addr = debug68_eval(dbg68, argv[1],&err);
     }
     if (na>2 && !err) {
-      n = debug68_eval(argv[2],&err);
+      n = debug68_eval(dbg68, argv[2],&err);
     }
     if (n<=0) n = 1;
 
@@ -538,13 +556,13 @@ int debug68_debugger_newcom(int na, char **a)
       l = n-i;
       if (l>16) l=16;
       for(j=0; j<l; j++)
-	printf("%02X",emu68_peek(addr+i+j));
+	printf("%02X",emu68_peek(dbg68, addr+i+j));
       for(  ; j<16; j++) printf("  ");
       printf("|");
       
       for(j=0; j<l; j++) {
 	u8 c;
-	c = emu68_peek(addr+i+j);
+	c = emu68_peek(dbg68, addr+i+j);
 	printf("%c", isgraph(c) ? c : '.');
       }
       for(  ; j<16; j++) printf(" ");
@@ -561,7 +579,7 @@ int debug68_debugger_newcom(int na, char **a)
     char *err;
     
     if (na>1) {
-      addr = debug68_eval(argv[1],&err);
+      addr = debug68_eval(dbg68, argv[1],&err);
       if (err!=NULL) {
 	printf("Invalid run address");
 	return 0;
@@ -570,7 +588,7 @@ int debug68_debugger_newcom(int na, char **a)
     }
     
     if (na>2) {
-      max = debug68_eval(argv[2],&err);
+      max = debug68_eval(dbg68, argv[2],&err);
       if (err!=NULL) {
 	printf("Invalid instruction limit");
 	return 0;
@@ -583,7 +601,7 @@ int debug68_debugger_newcom(int na, char **a)
       bp = trace((unsigned)~0,0,1);
       if (bp>=0) {
 	printf("Reach: ");
-	debug68_debugger_breakp_display(reg68->pc);
+	debug68_breakp_display(reg68->pc);
 	return 0;
       }
     }
@@ -606,15 +624,15 @@ int debug68_debugger_newcom(int na, char **a)
       return 0;
     }
 
-    addr = debug68_eval(argv[1],&err);
+    addr = debug68_eval(dbg68, argv[1],&err);
     if (err) {
       printf("Invalid break point address");
       return 0;
     }
-    breakat = addr&emu68->memmsk;
+    breakat = addr&dbg68->memmsk;
 
     if (na>2) {
-      max = debug68_eval(argv[2],&err);
+      max = debug68_eval(dbg68, argv[2],&err);
       if (err) {
 	printf("Invalid instructions limit");
 	return 0;
@@ -622,23 +640,23 @@ int debug68_debugger_newcom(int na, char **a)
     }
     
     for(ct=0;
-	(max==0 || ct!=max) && (reg68->pc&emu68->memmsk)!=(emu68->memmsk&breakat);
+	(max==0 || ct!=max) && (reg68->pc&dbg68->memmsk)!=(dbg68->memmsk&breakat);
 	ct++) {
       int bp;
       bp = trace((unsigned)~0,0,1);
       if (bp>=0) {
 	printf("Reach: ");
-	debug68_debugger_breakp_display(reg68->pc);
+	debug68_breakp_display(reg68->pc);
 	return 0;
       }
     }
-    if ((reg68->pc&emu68->memmsk)!=(emu68->memmsk&breakat)) {
+    if ((reg68->pc&dbg68->memmsk)!=(dbg68->memmsk&breakat)) {
       printf("%u instrction%s executed\n",max,max>1 ? "s" : "");
       return 0;
     }
   }
 
-  /* Save Bin */
+  /* Save binary */
   else if (!strcmp68(argv[0],"sbin")) {
     if (argc<4) {
       printf("sbin filename start-@ size\n");
@@ -648,22 +666,27 @@ int debug68_debugger_newcom(int na, char **a)
       unsigned int start,size;
       int err=0;
       char *errstr=NULL;
-      if (start=debug68_eval(argv[2],&errstr),errstr!=NULL)
+      
+      u8 * onboard;
+
+      if (start=debug68_eval(dbg68, argv[2],&errstr),errstr!=NULL)
 	return debug68_error_add("Invalid start address");
-      if (size=debug68_eval(argv[3],&errstr),errstr!=NULL)
+      if (size=debug68_eval(dbg68, argv[3],&errstr),errstr!=NULL)
 	return debug68_error_add("Invalid size");
-      if (emu68_memvalid(start,size)<0)
-	debug68_error_add(emu68_error_get());
-      if (os=istream_file_create(argv[1],2), !os)
+      onboard = emu68_memptr(dbg68, start,size);
+      if (!onboard) {
+	debug68_error_add(emu68_error_get(dbg68));
 	return -1;
-      if (istream_open(os)) {
-	istream_destroy(os);
+      }
+      if (os=istream68_file_create(argv[1],2), !os)
+	return -1;
+      if (istream68_open(os)) {
+	istream68_destroy(os);
 	return -1;
       }
       err =
-	istream_write(os, emu68->mem+start,size)
-	!= size;
-      istream_destroy(os);
+	istream68_write(os, onboard, size) != size;
+      istream68_destroy(os);
       if (!err)
 	printf("[%x-%x] (%d bytes) => <%s>\n",
 	       start,start+size-1,size,argv[1]);
@@ -671,7 +694,7 @@ int debug68_debugger_newcom(int na, char **a)
     }
   }
   
-  /* set register */
+  /* Set register */
   else {
       int *p;
       if (p=is_reg_change(a[0]), p) {
@@ -680,7 +703,7 @@ int debug68_debugger_newcom(int na, char **a)
 	for(n=a[0]+3; *n && isspace(*n); n++);
 	if (*n==0 && argc>1)
 	  for(n=a[1]; *n && isspace(*n); n++);
-	if (*n==0 || (v=debug68_eval(n,&err),err!=NULL))
+	if (*n==0 || (v=debug68_eval(dbg68, n,&err),err!=NULL))
 	  printf("Bad value for register\n");
 	else *p = v;
       } else {
@@ -691,8 +714,13 @@ int debug68_debugger_newcom(int na, char **a)
   return 0;
 }
 
-static int * is_reg_change(char *s)
+/* @return pointer to register
+ * @retval 0 not a REG= command
+ */
+static int68_t * is_reg_change(char *s)
 {
+  reg68_t * const reg68 = &dbg68->reg;
+
   if (!s || strlen(s)<3) {
     return 0;
   }
@@ -700,7 +728,7 @@ static int * is_reg_change(char *s)
     return 0;
   }
 
-  switch(toupper(*s)) {
+  switch (toupper(*s)) {
   case 'D':
     return (s[1]<'0' || s[1]>'7') ? 0 : reg68->d+(s[1]-'0');
   case 'A':
@@ -708,7 +736,7 @@ static int * is_reg_change(char *s)
   case 'P':
     return (toupper(s[1])!='C') ? 0 : &reg68->pc;
   case 'S':
-    switch(toupper(s[1])) {
+    switch (toupper(s[1])) {
     case 'R': return (int*)&reg68->sr;
     case 'P': return &reg68->usp;
     }

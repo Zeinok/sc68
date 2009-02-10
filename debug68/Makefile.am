@@ -58,7 +58,7 @@ header =\
 
 bin_PROGRAMS         = debug68
 debug68_SOURCES      = $(sources) $(headers) 
-debug68_LDADD        = $(LIBSC68_LA) $(DESA68_LA)
+debug68_LDADD        = $(SC68_LA) $(DESA68_LA)
 noinst_HEADERS       = debug68_doc.h 
 
 
@@ -75,7 +75,7 @@ MAINTAINERCLEANFILES = \
 
 
 if MAINTAINER_MODE
-TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
+TEXINFO2MAN          = @texinfo2man@
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
 $(srcdir)/package.texi: $(srcdir)/package.texi.in

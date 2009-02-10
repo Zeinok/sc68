@@ -10,6 +10,8 @@
 #ifndef _DEBUG68_EVAL_H_
 #define _DEBUG68_EVAL_H_
 
+#include "emu68/struct68.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -19,7 +21,7 @@ extern "C" {
  * @param   s        string to evaluate
  * @param   err_loc  pointer to error location
  */
-int debug68_eval(char *s, char **err_loc);
+int debug68_eval(emu68_t * emu68, char *s, char **err_loc);
 
 #ifdef __cplusplus
 }

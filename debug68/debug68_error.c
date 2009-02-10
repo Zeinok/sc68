@@ -29,8 +29,9 @@
 #include "debug68_error.h"
 
 #include "sc68/debugmsg68.h"
+#include "sc68/sc68.h"
 
-int debug68_error_add_va(const char * fmt, valist list)
+int debug68_error_add_va(const char * fmt, va_list list)
 {
   vdebugmsg68(debugmsg68_ERROR, fmt, list);
   return -1;
@@ -51,5 +52,3 @@ const char * debug68_error_get(void * sc68)
 {
   return sc68_error_get(sc68);
 }
-
-toto
