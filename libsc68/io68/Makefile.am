@@ -10,8 +10,7 @@
 ACLOCAL_AMFLAGS    = -I ../m4 --install
 AM_CFLAGS          = @LIBSC68_CFLAGS@ @LIBLIBSC68_CFLAGS@
 AM_CPPFLAGS        = @LIBSC68_CPPFLAGS@ @LIBLIBSC68_CPPFLAGS@ $(SINC)
-SINC               = -I$(top_srcdir) $(file68_inc)
-
+SINC               = -I$(top_srcdir) $(file68_inc) -DIO68_EXPORT
 mysources=\
  io68.c\
  mfp_io.c\

@@ -36,8 +36,6 @@
 #include <sc68/string68.h>
 #include <sc68/option68.h>
 
-/* #include <math.h> */
-
 extern int ym_feature;		/* defined in ymemul.c */
 
 #ifndef INTMSB
@@ -112,50 +110,12 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
   orig->btw.x[0] = orig->btw.x[1] = 0;
   orig->btw.y[0] = orig->btw.y[1] = 0;
 
-#if 1
-
-  /* butterworth low-pass cutoff=15.625khz sampling=250khz */
-  orig->btw.a[0] = 0x3d5;
-  orig->btw.a[1] = 0x7ab;
-  orig->btw.a[2] = 0x3d5;
-  orig->btw.b[0] = -0xba24;
-  orig->btw.b[1] = 0x497a;
-
-#else
-  {
-    double inrate    = 250000.0;
-    double frequency = 15625.0;
-    double c
-      = 1.0 / tan (M_PI * frequency / inrate);
-
-    double a0,a1,a2;
-    double b0,b1;
-    double fix = 32768.0;
-
-    a0 = 1.0 / (1.0 + sqrt(2.0) * c + c * c);
-    a1 = 2.0 * a0;
-    a2 = a0;
-    b0 = 2 * (1.0 - c * c) * a0;
-    b1 = (1.0 - sqrt(2.0) * c + c * c) * a0;
-
-    debugmsg68_info("a0:%.3lf a1:%.3lf a2:%.3lf b0:%.3lf b1:%.3lf\n",
-		    a0,a1,a2,b0,b1);
-    
-    orig->btw.a[0] = fix * a0;
-    orig->btw.a[1] = fix * a1;
-    orig->btw.a[2] = fix * a2;
-    orig->btw.b[0] = fix * b0;
-    orig->btw.b[1] = fix * b1;
-
-    debugmsg68_info("orig->btw.a[0]=0x%x;\n"
-		    "orig->btw.a[1]=0x%x;\n"
-		    "orig->btw.a[2]=0x%x;\n"
-		    "orig->btw.b[0]=-0x%x;\n"
-		    "orig->btw.b[1]=0x%x;\n",
-		    orig->btw.a[0],orig->btw.a[1],orig->btw.a[2],
-		    -orig->btw.b[0],orig->btw.b[1]);
-  }
-#endif
+  /* Butterworth low-pass cutoff=15.625khz sampling=250khz */
+  orig->btw.a[0] =  0x01eac69f;	/* fix 30 */
+  orig->btw.a[1] =  0x03d58d3f;
+  orig->btw.a[2] =  0x01eac69f;
+  orig->btw.b[0] = -0x5d1253b0;
+  orig->btw.b[1] =  0x24bd6e2f;
 
   return 0;
 }
@@ -720,62 +680,107 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
  * `-----------------------------------------------------------------'
  */
 
-/******************************************/
-/* Recursive single pole low-pass filter: */
-/* 					  */
-/*   o[N] = i[N] * A + output[N-1] * B	  */
-/* 					  */
-/*   X = exp(-2.0 * pi * Fc)		  */
-/*   A = 1 - X = 1 - B			  */
-/*   B = X				  */
-/*   Fc = cutoff freq / sample rate	  */
-/******************************************/
+/******************************************************/
+/*                                                    */
+/* Recursive single pole low-pass filter              */
+/* -------------------------------------              */
+/*                                                    */
+/*   o[N] = i[N] * A + o[N-1] * B                     */
+/*                                                    */
+/*   X  = exp(-2.0 * pi * Fc)                         */
+/*   A  = 1 - X = 1 - B                               */
+/*   B  = X                                           */
+/*   Fc = cutoff / rate                               */
+/*                                                    */
+/*                                                    */
+/* Recursive single pole high-pass filter             */
+/* --------------------------------------             */
+/*                                                    */
+/*   o[N] = A0 * i[N] + A1 * i[N-1] + B1 * o[N-1]     */
+/*        = A0 * i[N] - A0 * i[N-1] + B1 * o[N-1]     */
+/*        = A0 * ( i[N] - i[N-1] )  + B1 * o[N-1]     */
+/*                                                    */
+/*   X  = exp(-2.0 * pi * Fc)                         */
+/*   A0 = (1 + X) / 2                                 */
+/*   A1 = -A0                                         */
+/*   B1 = X                                           */
+/*   Fc = cutoff / rate                               */
+/*                                                    */
+/*                                                    */
+/* Butterworth                                        */
+/* -----------                                        */
+/*     o[N] = A0 * i[N-0] + A1 * i[N-1] + A2 * i[N-2] */
+/*                        - B0 * o[N-1] - B1 * o[N-2] */
+/*                                                    */
+/*                                                    */
+/* Butterworth low-pass                               */
+/* --------------------                               */
+/*                                                    */
+/*   c  = 1 / tan(pi * cutoff / rate)                 */
+/*   a0 = 1 / (1 + sqrt(2) * c + c^2)                 */
+/*   a1 = 2 * a0                                      */
+/*   a2 = a0                                          */
+/*   b0 = 2 * (1 - c^2) * a0                          */
+/*   b1 = (1 - sqrt(2.0) * c + c^2) * a0              */
+/*                                                    */
+/*                                                    */
+/* Butterworth high-pass                              */
+/* ---------------------                              */
+/*                                                    */
+/*   c  = tan(M_PI * cutoff / rate                    */
+/*   a0 = 1 / (1 + sqrt(2) * c + c^2)                 */
+/*   a1 = -2 * a0                                     */
+/*   a2 = a0                                          */
+/*   b0 = 2 * (c^2 - 1) * a0                          */
+/*   b1 = (1 - sqrt(2) * c + c^2) * a0                */
+/*                                                    */
+/******************************************************/
 
-/**************************************************/
-/* Recursive single pole high-pass filter:	  */
-/* 						  */
-/*   o[N] = A0 * i[N] + A1 * i[N-1] + B1 * o[N-1] */
-/*        = A0 * i[N] - A0 * i[N-1] + B1 * o[N-1] */
-/*        = A0 * ( i[N] - i[N-1] )  + B1 * o[N-1] */
-/*   X  = exp(-2.0 * pi * Fc)			  */
-/*   A0 = (1 + X) / 2				  */
-/*   A1 = -(1 + X) / 2 = -A0			  */
-/*   B1 = X					  */
-/*   Fc = cutoff freq / sample rate		  */
-/**************************************************/
 
+#define CLIP3(V,A,B) ( V < A ? A : ( V > B ? B : V ) )
+#define CLIP(V) CLIP3(V,-32768,32767)
 
 /* Resample ``n'' input samples from ``irate'' to ``orate''
- * 
+ * With volume adjustement [0..64]
  * @warning irate <= 262143 or 32bit overflow
  */
-static s32 * resampling(s32 * dst, int n, uint68_t irate, uint68_t orate)
+static s32 * resampling(s32 * dst, const int n,
+			const int vol,
+			const uint68_t irate, const uint68_t orate)
 {
-   s32   * const src = dst;
-  const int68_t  stp = (irate << 14) / orate; /* step into source */
-  const int68_t  end = n << 14;		      /* max source index */
-  int68_t        idx = 0;		      /* cur source index */
+  s32   * const src = dst;
+  const int68_t stp = (irate << 14) / orate; /* step into source */
 
-  if (stp >= 1<<14) {
+  if ( 0 == (stp & ((1<<14)-1)) ) {
+    const int istp = stp >> 14;
+    const int iend = n;
+    int idx        = 0;
     /* forward */
     do {
-      *dst++ = src[(int)(idx>>14)];
-    } while ((idx += stp) < end);
+      int o = src[idx] * vol >> 6;
+      *dst++ = CLIP(o);
+    } while ((idx += istp) < iend);
   } else {
-    /* backward */
-    const int m = (n * orate + irate - 1) / irate; /* output samples */
-    dst  = src + m - 1;
-    idx  = end;
-    do {
-      *dst = src[(int)((idx -= stp)>>14)];
-    } while (--dst != src);
+    const int68_t end = n << 14;
+    int68_t       idx = 0;
 
-    if (dst != src)
-      debugmsg68_critical("dst != src (%p != %p)\n",dst,src);
-    if (idx < 0)
-      debugmsg68_critical("idx < 0 (%d)\n",idx,src);
-    
-    dst = src+m;
+    if (stp >= 1<<14) {
+      /* forward */
+      do {
+	int o = src[(int)(idx>>14)] * vol >> 6;
+	*dst++ = CLIP(o);
+      } while ((idx += stp) < end);
+    } else {
+      /* backward */
+      const int m = (n * orate + irate - 1) / irate; /* output samples */
+      dst  = src + m - 1;
+      idx  = end;
+      do {
+	int o = src[(int)((idx -= stp)>>14)] * vol >> 6;
+	*dst = CLIP(o);
+      } while (--dst != src);
+      dst = src+m;
+    }
   }
   return dst;
 }
@@ -786,13 +791,8 @@ static void filter_none(ym_t * const ym)
   const int n = (orig->tonptr - ym->outbuf);
 
   if (n > 0) {
-    s32 * dst = ym->outbuf;
-    /* Resampling to output rate */
-    ym->outptr = resampling(ym->outbuf, n, ym->clock>>3, ym->hz);
-    /* Apply output level */
-    do {
-      *dst = (*dst * ym->outlevel) >> 6;
-    } while (++dst < ym->outptr);
+    ym->outptr =
+      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>3, ym->hz);
   }
 }
 
@@ -804,12 +804,14 @@ static void filter_boxcar2(ym_t * const ym)
   if (n > 0) {
     int m = n;
     s32 * src = ym->outbuf, * dst = ym->outbuf;
+
     do {
-      *dst++ = ( (src[0] + src[1]) * ym->outlevel) >> (6+1);
+      *dst++ = ( src[0] + src[1] ) >> 1;
       src += 2;
     } while (--m);
-
-    ym->outptr = resampling(ym->outbuf, n, ym->clock>>(3+1), ym->hz);
+    
+    ym->outptr =
+      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>(3+1), ym->hz);
   }
 }
 
@@ -821,11 +823,14 @@ static void filter_boxcar4(ym_t * const ym)
   if (n > 0) {
     int m = n;
     s32 * src = ym->outbuf, * dst = ym->outbuf;
+
     do {
-      *dst++ = ( (src[0] + src[1] + src[2] + src[3]) * ym->outlevel) >> (6+2);
+      *dst++ = ( src[0] + src[1] + src[2] + src[3] ) >> 2;
       src += 4;
     } while (--m);
-    ym->outptr = resampling(ym->outbuf, n, ym->clock>>(3+2), ym->hz);
+
+    ym->outptr =
+      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>(3+2), ym->hz);
   }
 }
 
@@ -863,21 +868,20 @@ static void filter_mixed(ym_t * const ym)
       /* 4-tap boxcar filter; lower sampling rate from 250Khz to */
       /* 62.5Khz; emulates half level buzz sounds.		 */
       /***********************************************************/
-      i0  = *src++;
-      i0 += *src++; i0 += *src++; i0 += *src++;
-      i0 >>= 2;			/* i0 => 16bit */
+      i0  = ( src[0] + src[1] + src[2] + src[3] ) >> 2;
+      src += 4;
 
       /*****************************************/
       /* Recursive single pole low-pass filter */
       /* - cutoff   : 15.625 Khz	       */
       /* - sampling : 62.5 Khz		       */
       /*****************************************/
-      if (0) {
-	l_o1 = (i0 * ym->outlevel) >> 6;
-      } else {
+      if (1) {
 	const int68_t B = 0x1a9c; /* 15 bit */
-	const int68_t A = ((1<<15)-B) * ym->outlevel >> 6;
-	l_o1 = ( (i0 * A) + l_o1 * B) >> 15;
+	const int68_t A = (1<<15)-B;
+	l_o1 = ( (i0 * A) + l_o1 * B ) >> 15;
+      } else {
+	l_o1 = i0;
       }
       
       /******************************************/
@@ -888,20 +892,10 @@ static void filter_mixed(ym_t * const ym)
       if (1) {
 	const int A0 = 0x7FD7; /* 15 bit */
 	const int B1 = 0x7FAE; /* 15 bit */
-	int tmp0 =
-	  ((l_o1 - h_i1) * A0) + (h_o1 * B1);
+	o0 = h_o1 = ( (l_o1 - h_i1) * A0 + (h_o1 * B1) ) >> 15;
 	h_i1 = l_o1;
-	h_o1 = tmp0 >> 15;
-	o0 = h_o1;
       } else {
-	o0 = l_o1;
-      }
-
-      /* clipping */
-      if (o0 > 32767) {
-	o0 = 32767;
-      } else if (o0 < -32768) {
-	o0 = -32768;
+	o0 = i0;
       }
 
       /* store */
@@ -913,11 +907,8 @@ static void filter_mixed(ym_t * const ym)
     orig->hipass_out1 = h_o1;
     orig->lopass_out1 = l_o1;
 
-    /* Rough resampling. 
-     * Inout sampling rate is: clock / 8 (prediv) / 4 (filter)
-     */
     ym->outptr =
-      resampling(ym->outbuf, n, ym->clock>>(3+2), ym->hz);
+      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>(3+2), ym->hz);
   }
 }
 
@@ -944,12 +935,10 @@ static void filter_1pole(ym_t * const ym)
       /* - cutoff   : 15.625 Khz	       */
       /* - sampling : 250 Khz		       */
       /*****************************************/
-      if (0) {
-	l_o1 = (i0 * ym->outlevel) >> 6;
-      } else {
+      {
 	const int68_t B = 0x7408; /* 15 bit */
-	const int68_t A = ((1<<15)-B) * ym->outlevel >> 3;
-	l_o1 = ( ((i0 * A) >> 3) + l_o1 * B) >> 15;
+	const int68_t A = (1<<15)-B;
+	l_o1 = ( (i0 * A) + l_o1 * B ) >> 15;
       }
 
       /******************************************/
@@ -957,24 +946,11 @@ static void filter_1pole(ym_t * const ym)
       /* - cutoff   : 25 hz		        */
       /* - sampling : 250 Khz		        */
       /******************************************/
-      if (1) {
+      {
 	const int68_t A0 = 0x7FF6; /* 15 bit */
 	const int68_t B1 = 0x7FEB; /* 15 bit */
-	
-	int68_t tmp0 =
-	  ((l_o1 - h_i1) * A0) + (h_o1 * B1);
+	o0 = h_o1 = ( (l_o1 - h_i1) * A0 + (h_o1 * B1) ) >> 15;
 	h_i1 = l_o1;
-	h_o1 = tmp0 >> 15;
-	o0 = h_o1;
-      } else {
-	o0 = l_o1;
-      }
-      
-      /* clipping */
-      if (o0 > 32767) {
-	o0 = 32767;
-      } else if (o0 < -32768) {
-	o0 = -32768;
       }
 
       /* store */
@@ -987,7 +963,7 @@ static void filter_1pole(ym_t * const ym)
     orig->lopass_out1 = l_o1;
 
     ym->outptr =
-      resampling(ym->outbuf, n, ym->clock>>(3+0), ym->hz);
+      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>(3+0), ym->hz);
   }
 }
 
@@ -1009,58 +985,45 @@ static void filter_2pole(ym_t * const ym)
     int68_t h_i1 = orig->hipass_inp1;
     int68_t h_o1 = orig->hipass_out1;
 
-    const int68_t a0 = orig->btw.a[0];
-    const int68_t a1 = orig->btw.a[1];
-    const int68_t a2 = orig->btw.a[2];
-    const int68_t b0 = orig->btw.b[0];
-    const int68_t b1 = orig->btw.b[1];
+    const int68_t a0 = orig->btw.a[0] >> 15;
+    const int68_t a1 = orig->btw.a[1] >> 15;
+    const int68_t a2 = orig->btw.a[2] >> 15;
+    const int68_t b0 = orig->btw.b[0] >> 15;
+    const int68_t b1 = orig->btw.b[1] >> 15;
+
     int68_t x0 = orig->btw.x[0];
     int68_t x1 = orig->btw.x[1];
     int68_t y0 = orig->btw.y[0];
     int68_t y1 = orig->btw.y[1];
 
-
     do {
-      int68_t in,out;
+      int68_t i0,o0;
 
-      in  = *src++ * ym->outlevel >> 6;
+      i0  = *src++;
 
       /******************************************/
       /* Recursive single pole high-pass filter */
       /* - cutoff   : 25 hz		        */
       /* - sampling : 250 Khz		        */
       /******************************************/
-      if (1) {
+      {
 	const int68_t A0 = 0x7FF6; /* 15 bit */
 	const int68_t B1 = 0x7FEB; /* 15 bit */
-	int68_t tmp0 =
-	  ((in - h_i1) * A0) + (h_o1 * B1);
-	h_i1 = in;
-	h_o1 = tmp0 >> 15;
-	out = h_o1;
-      } else {
-	out = in;
+	h_o1 = (((i0 - h_i1) * A0) + (h_o1 * B1)) >> 15;
+	h_i1 = i0;
+	i0   = h_o1;
       }
 
-      in = out;
-
-      if (0) {
-	out = in;
-      } else {
-	/* low pass butterworth */
-	out =
-	  a0 * in + a1 * x0 + a2 * x1 -
-	  b0 * y0 - b1 * y1;
-	out >>= 15;
-	x1 = x0; x0 = in;
-	y1 = y0; y0 = out;
+      /* Butterworth low-pass  */
+      {
+	o0 = (
+	       a0 * i0 + a1 * x0 + a2 * x1 -
+	       b0 * y0 - b1 * y1 ) >> 15;
+	x1 = x0; x0 = i0;
+	y1 = y0; y0 = o0;
       }
-
-      /* clip */
-      if (out < -32768 ) out = -32768;
-      if (out >  32767 ) out =  32767;
     
-      *dst++ = out;
+      *dst++ = o0;
 
     } while (--m);
 
@@ -1073,7 +1036,7 @@ static void filter_2pole(ym_t * const ym)
     orig->hipass_out1 = h_o1;
 
     ym->outptr =
-      resampling(ym->outbuf, n, ym->clock>>3, ym->hz);
+      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>3, ym->hz);
   }
 }  
 

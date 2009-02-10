@@ -58,13 +58,12 @@ struct ym2149_orig_s
   s32 * tonptr;             /**< generated tone pointer                  */
   /**@}*/
 
-  /** @name  1-pole filter
+  /** @name  Filter
    *  @{
    */
   int68_t hipass_inp1;      /**< high pass filter input                  */
   int68_t hipass_out1;      /**< high pass filter output                 */
   int68_t lopass_out1;      /**< low pass filter output                  */
-  /**@}*/
 
   /** 2-poles butterworth filter */
   struct {
@@ -73,8 +72,10 @@ struct ym2149_orig_s
     int68_t a[3];
     int68_t b[2];
   } btw;
+  /**@}*/
 
-  int ifilter;	            /**< filter function to use.                 */
+
+  int ifilter;	            /**< filter function to use                  */
 
 };
 

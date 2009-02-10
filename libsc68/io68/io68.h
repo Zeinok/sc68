@@ -13,19 +13,13 @@
 #ifndef _IO68_H_
 #define _IO68_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "io68_api.h"
 
 #include "ym_io.h"
 #include "mw_io.h"
 #include "shifter_io.h"
 #include "mfp_io.h"
 #include "paula_io.h"
-/* #include "ymemul.h" */
-/* #include "mwemul.h" */
-/* #include "mfpemul.h" */
-/* #include "paulaemul.h" */
 
 /** IO chip init parameters. */
 typedef struct {
@@ -36,8 +30,17 @@ typedef struct {
   char        **argv;		/**< Arguments.             */
 } io68_init_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+IO68_API
 int io68_init(io68_init_t * const parms);
+
+IO68_API
 void io68_shutdown(void);
+
+IO68_API
 void io68_destroy(io68_t * const io);
 
 #ifdef __cplusplus

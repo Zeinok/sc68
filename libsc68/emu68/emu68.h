@@ -14,6 +14,8 @@
 #ifndef _EMU68_EMU68_H_
 #define _EMU68_EMU68_H_
 
+#include "emu68_api.h"
+
 #include "struct68.h"
 #include "getea68.h"
 #include "macro68.h"
@@ -51,6 +53,7 @@ typedef struct {
   char         **argv;  /**< Arguments.      */
 } emu68_init_t;
 
+EMU68_API
 /** Init 68K emulator.
  *
  *  @param  init  Initialization parameters
@@ -63,6 +66,7 @@ typedef struct {
  */
 int emu68_init(emu68_init_t * init);
 
+EMU68_API
 /** Shutdown 68K emulator.
   *
   *   The emu68_shutdown() function shutdown the EM68 library.
@@ -97,6 +101,7 @@ typedef struct {
   int debug;         /**< Run in debug mode (0:off).               */
 } emu68_parms_t;
 
+EMU68_API
 /** Create a 68k emulator instance.
  *
  *   The emu68_create() function creates an instance of the 68k emulator.
@@ -111,6 +116,7 @@ typedef struct {
  */
 emu68_t * emu68_create(emu68_parms_t * const parms);
 
+EMU68_API
 /** Duplicate a 68k emulator instance.
  *
  *   The emu68_dup() function creates an new instance of the 68k
@@ -126,6 +132,7 @@ emu68_t * emu68_create(emu68_parms_t * const parms);
  */
 emu68_t * emu68_duplicate(emu68_t * emu68, const char * name);
 
+EMU68_API
 /** Destroy a 68k emulator instance.
  *
  *  @param  emu68  emulator instance
@@ -133,6 +140,7 @@ emu68_t * emu68_duplicate(emu68_t * emu68, const char * name);
  */
 void emu68_destroy(emu68_t * const emu68);
 
+EMU68_API
 /** Hardware Reset.
  *
  *    Perform following operations :
@@ -159,6 +167,7 @@ void emu68_reset(emu68_t * const emu68);
  *  @{
  */
 
+EMU68_API
 /** Set new interrupt IO.
  *
  *     This version of EMU68 was specially build for SC68. For optimization
@@ -172,6 +181,7 @@ void emu68_reset(emu68_t * const emu68);
 io68_t * emu68_set_interrupt_io(emu68_t * const emu68,
 				io68_t * io);
 
+EMU68_API
 /** Set EMU68 internal cycle counter.
  *
  *  @param  emu68  emulator instance
@@ -180,6 +190,7 @@ io68_t * emu68_set_interrupt_io(emu68_t * const emu68,
 void emu68_set_cycle(emu68_t * const emu68,
 		     cycle68_t cycle);
 
+EMU68_API
 /** Get EMU68 internal cycle counter.
  *
  *  @param  emu68  emulator instance
@@ -199,6 +210,7 @@ cycle68_t emu68_get_cycle(emu68_t * const emu68);
  *  @{
  */
 
+EMU68_API
 /** Check if a memory block is in 68K on-board memory range.
  *
  *  @param  emu68  emulator instance
@@ -209,6 +221,7 @@ cycle68_t emu68_get_cycle(emu68_t * const emu68);
 u8 * emu68_memptr(emu68_t * const emu68,
 		  addr68_t dest, uint68_t sz);
 
+EMU68_API
 /** Get byte in 68K onboard memory.
  *
  *  @param  emu68  emulator instance
@@ -219,6 +232,7 @@ u8 * emu68_memptr(emu68_t * const emu68,
 int emu68_peek(emu68_t * const emu68,
 	       addr68_t addr);
 
+EMU68_API
 /** Put a byte in 68K onboard memory.
  *
  *  @param  emu68  emulator instance
@@ -228,6 +242,7 @@ int emu68_peek(emu68_t * const emu68,
 int emu68_poke(emu68_t * const emu68,
 	       addr68_t addr, int68_t v);
 
+EMU68_API
 /** Put a memory block to 68K on-board memory.
  *
  *    The function copy a memory block in 68K on-board memory after verifying
@@ -241,6 +256,7 @@ int emu68_poke(emu68_t * const emu68,
 int emu68_memput(emu68_t * const emu68,
 		 addr68_t dst, u8 * src, uint68_t sz);
 
+EMU68_API
 /** Get 68K on-board memory into a memory block.
  *
  *    The function copy a 68K on-board memory to a memory location after
@@ -254,6 +270,7 @@ int emu68_memput(emu68_t * const emu68,
 int emu68_memget(emu68_t * const emu68,
 		 u8 * dst, addr68_t src, uint68_t sz);
 
+EMU68_API
 /* Fill a 68k on board memory block with a value.
  *
  *  @param  emu68  emulator instance
@@ -273,6 +290,7 @@ int emu68_memset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz);
  *  @{
  */
 
+EMU68_API
 /** Execute one instruction.
  *
  *   @param  emu68  emulator instance
@@ -280,6 +298,7 @@ int emu68_memset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz);
  */
 void emu68_step(emu68_t * const emu68);
 
+EMU68_API
 /** Execute a JSR at pc.
  *
  *   @param  emu68  emulator instance
@@ -287,6 +306,7 @@ void emu68_step(emu68_t * const emu68);
 void emu68_run_rts(emu68_t * const emu68,
 		   addr68_t pc, cycle68_t cycleperpass);
 
+EMU68_API
 /** Execute until RTS.
  *
  *   The emu68_level_and_interrupt() function runs an emulation loop
@@ -302,6 +322,7 @@ void emu68_run_rts(emu68_t * const emu68,
 void emu68_level_and_interrupt(emu68_t * const emu68,
 			       cycle68_t cycleperpass);
 
+EMU68_API
 /** Execute for given number of cycle.
  *
  *   @param   emu68         emulator instance
@@ -311,6 +332,7 @@ void emu68_level_and_interrupt(emu68_t * const emu68,
 void emu68_cycle(emu68_t * const emu68,
 		 cycle68_t cycleperpass);
 
+EMU68_API
 /** Execute until PC reachs breakpoint.
  *
  *   @param  emu68    emulator instance
@@ -326,6 +348,7 @@ void emu68_break(emu68_t * const emu68,
  *  @{
  */
 
+EMU68_API
 /** Get EMU68 debug mode.
  *
  *  @param  emu68  emulator instance

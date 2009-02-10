@@ -14,6 +14,7 @@
 #ifndef _EMU68_IOPLUG68_H_
 #define _EMU68_IOPLUG68_H_
 
+#include "emu68_api.h"
 #include "struct68.h"
 
 #ifdef __cplusplus
@@ -33,6 +34,7 @@ extern "C" {
  * @{
  */
 
+EMU68_API
 /** Unplug all IO.
  *
  *    Process emu68_ioplug_unplug() function for all pluged IO.
@@ -40,6 +42,7 @@ extern "C" {
  */
 void emu68_ioplug_unplug_all(emu68_t * const emu68);
 
+EMU68_API
 /** Unplug and destroy all IO.
  *
  *    Process emu68_ioplug_unplug() function for all pluged IO and
@@ -48,6 +51,7 @@ void emu68_ioplug_unplug_all(emu68_t * const emu68);
  */
 void emu68_ioplug_destroy_all(emu68_t * const emu68);
 
+EMU68_API
 /** Unplug an IO.
  *
  *    The emu68_ioplug_unplug() function removes an IO from pluged IO
@@ -61,6 +65,7 @@ void emu68_ioplug_destroy_all(emu68_t * const emu68);
  */
 int emu68_ioplug_unplug(emu68_t * const emu68, io68_t * const io);
 
+EMU68_API
 /** Plug an IO.
  *
  *    The emu68_ioplug() function add an IO to pluged IO list and add

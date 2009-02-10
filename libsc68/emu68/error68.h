@@ -14,6 +14,7 @@
 #ifndef _EMU68_ERROR68_H_
 #define _EMU68_ERROR68_H_
 
+#include "emu68_api.h"
 #include "struct68.h"
 
 #ifdef __cplusplus
@@ -31,6 +32,7 @@ extern "C" {
  * @{
  */
 
+EMU68_API
 /** Push formatted error message.
  *
  *     The emu68_error_add() format error message and push it in error
@@ -45,6 +47,7 @@ extern "C" {
  */
 int emu68_error_add(emu68_t * emu68, char *format, ... );
 
+EMU68_API
 /** Pop last error message.
  *
  *    Retrieve and remove last error message from error stack.
@@ -56,6 +59,7 @@ int emu68_error_add(emu68_t * emu68, char *format, ... );
  */
 const char * emu68_error_get(emu68_t * emu68);
 
+EMU68_API
 /** Return by emu68_error_get() value in case of empty message
  *  error stack.
  */
