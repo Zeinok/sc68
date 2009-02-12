@@ -10,7 +10,7 @@
 
 @dircategory @value{INFOCAT}
 @direntry
-* debug68: (debug68).             @value{DESCRIPTION}
+* debug68: (debug68).           @value{DESCRIPTION}
 @end direntry
 
 @synindex cp ky
@@ -57,7 +57,7 @@ The @command{debug68} is used to play Atari ST and Amiga music files.
 
 
 @menu
-* debug68 Program::                The @command{debug68} Program
+* debug68 Program::             The @command{debug68} Program
 * Options Summary::             Options Summary
 @end menu
 

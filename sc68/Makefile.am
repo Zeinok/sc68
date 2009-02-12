@@ -6,8 +6,8 @@
 # |          <benjihan -4t- users.sourceforge -d0t- net>                 |
 # |                                                                      |
 # `----------------------------------------------------------------------'
-# @configure_input@
 # $Id$
+# @configure_input@
 
 SUBDIRS              = @subdirs@
 ACLOCAL_AMFLAGS      = -I m4 --install
@@ -26,7 +26,7 @@ if SOURCE_SC68
 SC68_LA = $(sc68_dir)/libsc68.la
 @SET_MAKE@
 $(sc68_dir)/libsc68.la:
-	$(MAKE) -C $(sc68_dir) libsc68.la
+	cd "$(sc68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libsc68.la
 else
 SC68_LA =
 endif
@@ -41,28 +41,23 @@ sc68_LDADD           = $(SC68_LA)
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-man_MANS             = sc68.1
+dist_man_MANS        = sc68.1
 info_TEXINFOS        = sc68.texi
-sc68_TEXINFOS        = package.texi
-MAINTAINERCLEANFILES = \
- $(srcdir)/sc68.info $(srcdir)/package.texi \
- $(srcdir)/sc68.1 $(srcdir)/package.texi.in
+#sc68_TEXINFOS        = package.texi
+MAINTAINERCLEANFILES = $(srcdir)/sc68.1
+# $(srcdir)/sc68.info $(srcdir)/package.texi
 
-
-if MAINTAINER_MODE
+#if MAINTAINER_MODE
 TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
-$(srcdir)/package.texi: $(srcdir)/package.texi.in
-	$(SHELL) $(top_builddir)/config.status --file=$@:$<
-
-$(srcdir)/sc68.1: sc68.1.tpl $(srcdir)/sc68.texi
-	$(TEXINFO2MAN) $^ >$@ || $(fail)
-endif
+$(srcdir)/sc68.1: sc68.1.tpl.in $(srcdir)/sc68.texi
+	$(TEXINFO2MAN) sc68.1.tpl $(srcdir)/sc68.texi >$@ || $(fail)
+#endif
 
 
 # ,----------------------------------------------------------------------.
 # | Extra distrib                                                        |
 # `----------------------------------------------------------------------'
 
-EXTRA_DIST = sc68.1 sc68.info package.texi
+#EXTRA_DIST = sc68.1 sc68.info package.texi

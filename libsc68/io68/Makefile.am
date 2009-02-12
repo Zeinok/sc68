@@ -28,6 +28,7 @@ mysources=\
 myheaders=\
  default_option68.h\
  io68.h\
+ io68_api.h\
  mfp_io.h\
  mfpemul.h\
  mw_io.h\

@@ -1,5 +1,4 @@
 /*                     debug68 - sc68 debugger
- *    
  *
  *            Copyright (C) 1998-2009 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
@@ -60,6 +59,28 @@ emu68_t  * emu68;
 io68_t  ** ios68;
 
 typedef struct option my_option_t;
+
+/* struct sc68_debug_data_s { */
+/*   FILE * stdout; */
+/*   FILE * stderr; */
+/* }; */
+/* static struct sc68_debug_data_s sc68_debug_data; */
+
+static void
+sc68_debug_cb(const int bit, void *data, const char *fmt, va_list list)
+{
+  struct sc68_debug_data_s * debug_data = data;
+  FILE * out = stderr;
+
+  /* select output: always error output except for INFO messages */
+/*   out = bit == debugmsg68_INFO */
+/*     ? debug_data->stdout */
+/*     : debug_data->stderr */
+/*     ; */
+
+  vfprintf(out,fmt,list);
+}
+
 
 typedef int (command_fct_t)(int,char**);
 
@@ -1307,10 +1328,9 @@ int main(int argc, char *argv[])
   memset(&init68, 0, sizeof(init68));
   init68.argc = argc;
   init68.argv = argv;
-#ifdef DEBUG
-  init68.debug        = (sc68_debug_t) vfprintf;
-  init68.debug_cookie = stderr;
-#endif
+  init68.debug        = sc68_debug_cb;
+  init68.debug_cookie = 0;
+
   if (sc68_init(&init68)) {
     return -1;
   }

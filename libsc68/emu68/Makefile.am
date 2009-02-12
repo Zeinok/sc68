@@ -29,6 +29,7 @@ mysources=\
 myheaders=\
  cc68.h\
  emu68.h\
+ emu68_api.h\
  error68.h\
  excep68.h\
  getea68.h\

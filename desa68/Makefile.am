@@ -25,4 +25,4 @@ libdesa68_la_SOURCES  = desa68.c
 # | Installed headers                                                    |
 # `----------------------------------------------------------------------'
 
-include_HEADERS   = desa68.h
+include_HEADERS       = desa68.h

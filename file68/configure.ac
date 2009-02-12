@@ -258,11 +258,12 @@ AC_CHECK_FUNCS([malloc free sleep usleep vsprintf vsnprintf getenv])
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([
+    Makefile
+    data68/Makefile
     file68-${VERSION}.ebuild:file68.ebuild.in
     file68-config
     file68.spec
-    Makefile
-    data68/Makefile])
+    package.texi])
 
 AC_OUTPUT
 

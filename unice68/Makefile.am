@@ -48,28 +48,22 @@ include_HEADERS      = unice68.h
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-man_MANS             = unice68.1
+dist_man_MANS        = unice68.1
 info_TEXINFOS        = unice68.texi
-unice68_TEXINFOS     = package.texi
-MAINTAINERCLEANFILES = \
- $(srcdir)/unice68.info $(srcdir)/package.texi \
- $(srcdir)/unice68.1
+#unice68_TEXINFOS     = package.texi
+MAINTAINERCLEANFILES = $(srcdir)/unice68.1
 
-
-if MAINTAINER_MODE
+#if MAINTAINER_MODE
 TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
-$(srcdir)/package.texi: $(srcdir)/package.texi.in
-	$(SHELL) $(top_builddir)/config.status --file=$@:$<
-
-$(srcdir)/unice68.1: unice68.1.tpl $(srcdir)/unice68.texi
-	$(TEXINFO2MAN) $^ >$@ || $(fail)
-endif
+$(srcdir)/unice68.1: unice68.1.tpl.in $(srcdir)/unice68.texi
+	$(TEXINFO2MAN) unice68.1.tpl $(srcdir)/unice68.texi >$@ || $(fail)
+#endif
 
 
 # ,----------------------------------------------------------------------.
 # | Extra distrib                                                        |
 # `----------------------------------------------------------------------'
 
-EXTRA_DIST = unice68.1 unice68.info package.texi
+#EXTRA_DIST = unice68.1 unice68.info package.texi

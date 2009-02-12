@@ -26,7 +26,7 @@ if SOURCE_DESA68
 DESA68_LA  = $(desa68_dir)/libdesa68.la
 @SET_MAKE@
 $(desa68_dir)/libdesa68.la:
-	$(MAKE) -C $(desa68_dir) libdesa68.la
+	cd "$(desa68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libdesa68.la
 else
 DESA68_LA  = 
 endif
@@ -51,28 +51,24 @@ noinst_HEADERS        = sourcer68_doc.h
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-man_MANS             = sourcer68.1
+dist_man_MANS        = sourcer68.1
 info_TEXINFOS        = sourcer68.texi
-sourcer68_TEXINFOS   = package.texi
-MAINTAINERCLEANFILES = \
- $(srcdir)/sourcer68.info $(srcdir)/package.texi \
- $(srcdir)/sourcer68.1 $(srcdir)/package.texi.in
+#sourcer68_TEXINFOS   = package.texi
+MAINTAINERCLEANFILES = $(srcdir)/sourcer68.1
+# $(srcdir)/sourcer68.info $(srcdir)/package.texi
 
 
-if MAINTAINER_MODE
+#if MAINTAINER_MODE
 TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
-$(srcdir)/package.texi: $(srcdir)/package.texi.in
-	$(SHELL) $(top_builddir)/config.status --file=$@:$<
-
-$(srcdir)/sourcer68.1: sourcer68.1.tpl $(srcdir)/sourcer68.texi
-	$(TEXINFO2MAN) $^ >$@ || $(fail)
-endif
+$(srcdir)/sourcer68.1: sourcer68.1.tpl.in $(srcdir)/sourcer68.texi
+	$(TEXINFO2MAN) sourcer68.1.tpl $(srcdir)/sourcer68.texi >$@ || $(fail)
+#endif
 
 
 # ,----------------------------------------------------------------------.
 # | Extra distrib                                                        |
 # `----------------------------------------------------------------------'
 
-EXTRA_DIST = sourcer68.1 sourcer68.info package.texi
+#EXTRA_DIST = sourcer68.1 sourcer68.info package.texi

@@ -107,22 +107,14 @@ pkgincludedir        = $(includedir)/sc68
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-man_MANS             = file68-config.1
+dist_man_MANS        = file68-config.1
 MAINTAINERCLEANFILES = $(srcdir)/file68-config.1
 
-if MAINTAINER_MODE
+#if MAINTAINER_MODE
 HELP2MAN             = $(SHELL) $(top_srcdir)/missing --run help2man
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
-$(srcdir)/file68-config.1: ./file68-config $(srcdir)/Makefile.am
+$(srcdir)/file68-config.1: ./file68-config.in $(srcdir)/Makefile.am
 	$(HELP2MAN) -N  -m 'sc68-tools' \
-	'$(SHELL) ./$<' -o '$@' || $(fail)
-
-endif
-
-
-# ,----------------------------------------------------------------------.
-# | Extra distrib                                                        |
-# `----------------------------------------------------------------------'
-
-EXTRA_DIST = $(man_MANS)
+	'$(SHELL) ./file68-config' -o '$@' || $(fail)
+#endif

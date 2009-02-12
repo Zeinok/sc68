@@ -36,10 +36,11 @@ AC_WITH_PACKAGE([file68],[yes],[],[sc68/file68.h])
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([
+    Makefile
     info68-${VERSION}.ebuild:info68.ebuild.in
     info68.1.tpl
     info68.spec
-    Makefile])
+    package.texi])
 
 AC_OUTPUT
 

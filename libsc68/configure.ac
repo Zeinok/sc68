@@ -86,8 +86,7 @@ AC_CONFIG_FILES([
     io68/Makefile
     libsc68-${VERSION}.ebuild:libsc68.ebuild.in
     libsc68.spec
-    sc68-config
-  ])
+    sc68-config])
 AC_OUTPUT
 
 # ,----------------------------------------------------------------------.

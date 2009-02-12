@@ -1,4 +1,5 @@
 # ,----------------------------------------------------------------------.
+# |                                                                      |
 # |  debug68 -- Makefile.am -- Use with automake to produce Makefile.in  |
 # |                                                                      |
 # |                 (C) 2006-2009 Benjamin Gerard                        |
@@ -16,6 +17,7 @@ AM_CPPFLAGS          = @DEBUG68_CPPFLAGS@ @BINDEBUG68_CPPFLAGS@ $(SINC)
 AM_LDFLAGS           = @DEBUG68_LDFLAGS@ @BINDEBUG68_LDFLAGS@
 SINC                 = $(sc68_inc) $(file68_inc) $(desa68_inc)
 
+
 # ,----------------------------------------------------------------------.
 # | Libtool program                                                      |
 # `----------------------------------------------------------------------'
@@ -24,7 +26,7 @@ if SOURCE_DESA68
 DESA68_LA  = $(desa68_dir)/libdesa68.la
 @SET_MAKE@
 $(desa68_dir)/libdesa68.la:
-	$(MAKE) -C $(desa68_dir) libdesa68.la
+	cd "$(desa68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libdesa68.la
 else
 DESA68_LA  = 
 endif
@@ -33,7 +35,7 @@ if SOURCE_SC68
 SC68_LA = $(sc68_dir)/libsc68.la
 @SET_MAKE@
 $(sc68_dir)/libsc68.la:
-	$(MAKE) -C $(sc68_dir) libsc68.la
+	cd "$(sc68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libsc68.la
 else
 SC68_LA =
 endif
@@ -66,28 +68,22 @@ noinst_HEADERS       = debug68_doc.h
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-man_MANS             = debug68.1
+dist_man_MANS        = debug68.1
 info_TEXINFOS        = debug68.texi
-debug68_TEXINFOS      = package.texi
-MAINTAINERCLEANFILES = \
- $(srcdir)/debug68.info $(srcdir)/package.texi \
- $(srcdir)/debug68.1 $(srcdir)/package.texi.in
+#debug68_TEXINFOS     = package.texi
+MAINTAINERCLEANFILES = $(srcdir)/debug68.1
 
-
-if MAINTAINER_MODE
-TEXINFO2MAN          = @texinfo2man@
+#if MAINTAINER_MODE
+TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
-$(srcdir)/package.texi: $(srcdir)/package.texi.in
-	$(SHELL) $(top_builddir)/config.status --file=$@:$<
-
-$(srcdir)/debug68.1: debug68.1.tpl $(srcdir)/debug68.texi
-	$(TEXINFO2MAN) $^ >$@ || $(fail)
-endif
+$(srcdir)/debug68.1: debug68.1.tpl.in $(srcdir)/debug68.texi
+	$(TEXINFO2MAN) debug68.1.tpl $(srcdir)/debug68.texi >$@ || $(fail)
+#endif
 
 
 # ,----------------------------------------------------------------------.
 # | Extra distrib                                                        |
 # `----------------------------------------------------------------------'
 
-EXTRA_DIST = debug68.1 debug68.info package.texi
+#EXTRA_DIST = debug68.1 debug68.info package.texi

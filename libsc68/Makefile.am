@@ -32,7 +32,7 @@ if SOURCE_FILE68
 FILE68_LA = $(file68_dir)/libfile68.la
 @SET_MAKE@
 $(file68_dir)/libfile68.la:
-	$(MAKE) -C $(file68_dir) libfile68.la
+	cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libfile68.la
 else
 FILE68_LA =
 endif

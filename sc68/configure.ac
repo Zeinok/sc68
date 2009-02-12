@@ -55,10 +55,11 @@ AC_WITH_PACKAGE_HEADER([file68],[yes],[sc68/file68.h])
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([
+    Makefile
+    package.texi
     sc68-${VERSION}.ebuild:sc68.ebuild.in
     sc68.1.tpl
-    sc68.spec
-    Makefile])
+    sc68.spec])
 
 AC_OUTPUT
 

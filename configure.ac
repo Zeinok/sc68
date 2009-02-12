@@ -59,6 +59,9 @@ AC_ARG_ENABLE_PACKAGE([libsc68],[sc68 engine],[[$]enable_all])
 AC_ARG_ENABLE_PACKAGE([info68],[sc68 files info program],[[$]enable_all])
 AC_ARG_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_all])
 
+# DOC
+AC_ARG_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[[$]enable_all])
+
 # ,----------------------------------------------------------------------.
 # | Package Dependencies                                                 |
 # `----------------------------------------------------------------------'
@@ -76,32 +79,17 @@ AC_ARG_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_all])
 # | Subdirs                                                              |
 # `----------------------------------------------------------------------'
 
-# Absolute source
-src_adir=$(cd $srcdir; pwd || echo $PWD)
-AS_IF([test -z "$src_adir" || test ! -d "$src_adir"],
-  [AC_MSG_ERROR([unable to guess absolute source dir])])
-AC_MSG_NOTICE([absolute source dir $src_adir])
+# # Absolute source
+# src_adir=$(cd $srcdir; pwd || echo $PWD)
+# AS_IF([test -z "$src_adir" || test ! -d "$src_adir"],
+#   [AC_MSG_ERROR([unable to guess absolute source dir])])
+# AC_MSG_NOTICE([absolute source dir $src_adir])
 
-# Absolute built
-blt_adir=$(pwd || echo $PWD)
-AS_IF([test -z "$blt_adir" || test ! -d "$blt_adir"],
-  [AC_MSG_ERROR([unable to guess absolute built dir])])
-AC_MSG_NOTICE([absolute built dir $blt_adir])
-
-# [
-#   packs="as68 desa68 unice68 file68 info68 sourcer68 libsc68 sc68 debug68"
-#   save_configure_args="$ac_configure_args"
-#   set -- $packs
-#   while test $# -gt 0; do
-#     ac_configure_args="$ac_configure_args --with-$1=../$1"
-#     shift
-#   done
-#   ac_configure_args="$ac_configure_args --with-src-includes=$absdir:$absdir/desa68:$absdir/libsc68"
-# ]
-
-# cat <<EOF
-#  -- ac_configure_args=$ac_configure_args
-# EOF
+# # Absolute built
+# blt_adir=$(pwd || echo $PWD)
+# AS_IF([test -z "$blt_adir" || test ! -d "$blt_adir"],
+#   [AC_MSG_ERROR([unable to guess absolute built dir])])
+# AC_MSG_NOTICE([absolute built dir $blt_adir])
 
 AS_IF([test "x${enable_as68}"      = "xyes"],
   [
@@ -145,6 +133,10 @@ AS_IF([test "x${enable_sc68}"      = "xyes"],
 
 AS_IF([test "x${enable_debug68}"   = "xyes"],[
     AC_CONFIG_SUBDIRS([debug68])
+  ])
+
+AS_IF([test "x${enable_sc68_doc}"   = "xyes"],[
+    AC_CONFIG_SUBDIRS([sc68-doc])
   ])
 
 AC_SUBST([subdirs])

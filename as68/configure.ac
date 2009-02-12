@@ -26,10 +26,11 @@ SC68_PACKAGE([Motoral MC68000 macro assembler.])
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([
+  Makefile
   as68-${VERSION}.ebuild:as68.ebuild.in
   as68.1.tpl
   as68.spec
-  Makefile])
+  package.texi])
 AC_OUTPUT
 
 

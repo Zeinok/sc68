@@ -38,10 +38,11 @@ AC_WITH_PACKAGE([file68],[no],[],[sc68/file68.h])
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([
+    Makefile
+    package.texi
     sourcer68-${VERSION}.ebuild:sourcer68.ebuild.in
     sourcer68.1.tpl
-    sourcer68.spec
-    Makefile])
+    sourcer68.spec])
 
 AC_OUTPUT
 

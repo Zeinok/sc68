@@ -38,10 +38,11 @@ AC_WITH_PACKAGE_HEADER([file68],[yes],[sc68/file68.h])
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([
+    Makefile
     debug68-${VERSION}.ebuild:debug68.ebuild.in
     debug68.1.tpl
     debug68.spec
-    Makefile])
+    package.texi])
 
 AC_OUTPUT
 

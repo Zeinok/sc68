@@ -26,7 +26,7 @@ if SOURCE_FILE68
 FILE68_LA = $(file68_dir)/libfile68.la
 @SET_MAKE@
 $(file68_dir)/libfile68.la:
-	$(MAKE) -C $(file68_dir) libfile68.la
+	cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libfile68.la
 else
 FILE68_LA            =
 endif
@@ -41,28 +41,24 @@ noinst_HEADERS       = info68_doc.h
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-man_MANS             = info68.1
+dist_man_MANS        = info68.1
 info_TEXINFOS        = info68.texi
-info68_TEXINFOS      = package.texi
-MAINTAINERCLEANFILES = \
- $(srcdir)/info68.info $(srcdir)/package.texi \
- $(srcdir)/info68.1 $(srcdir)/package.texi.in
+#info68_TEXINFOS      = package.texi
+MAINTAINERCLEANFILES = $(srcdir)/info68.1
+# $(srcdir)/info68.info $(srcdir)/package.texi
 
 
-if MAINTAINER_MODE
+#if MAINTAINER_MODE
 TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
-$(srcdir)/package.texi: $(srcdir)/package.texi.in
-	$(SHELL) $(top_builddir)/config.status --file=$@:$<
-
-$(srcdir)/info68.1: info68.1.tpl $(srcdir)/info68.texi
-	$(TEXINFO2MAN) $^ >$@ || $(fail)
-endif
+$(srcdir)/info68.1: info68.1.tpl.in $(srcdir)/info68.texi
+	$(TEXINFO2MAN) info68.1.tpl $(srcdir)/info68.texi >$@ || $(fail)
+#endif
 
 
 # ,----------------------------------------------------------------------.
 # | Extra distrib                                                        |
 # `----------------------------------------------------------------------'
 
-EXTRA_DIST = info68.1 info68.info package.texi
+#EXTRA_DIST = info68.1 info68.info package.texi

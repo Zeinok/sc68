@@ -97,26 +97,15 @@ mkdir -p m4 && testdir m4 fatal
 )
 
 # Bootstrap all sub-directories.
-dirs="as68 desa68 file68 info68 unice68 file68 sourcer68 libsc68 sc68 debug68"
-for dir in $dirs; do
+dirs="as68 desa68 file68 info68 unice68 file68 sourcer68 libsc68 "
+dirs="$dirs sc68 debug68 sc68-doc"
+for dir in ${dirs}; do
     bootstrap_dir $dir "$@" || err=$((err+1))
 done
 
-if test $err -ne 0; then
+if test ${err} -ne 0; then
     fatal "$err error(s): Not running autoreconf"
 fi
-    # No error runs autoreconf to create missing files.
-autoreconf -ifs
 
-# for dir in $dirs; do
-#     if test -e ${dir}/texinfo.tex && test ! -e ${dir}/package.texi.in; then
-# 	msg "Creating '${dir}/package.texi.in'"
-# 	cat <<EOF >${dir}/package.texi.in
-# @set PACKAGE     @PACKAGE_NAME@
-# @set WEBSITE     @PACKAGE_URL@
-# @set BUGREPORT   @PACKAGE_BUGREPORT@
-# @set DESCRIPTION @PACKAGE_SHORTDESC@
-# @set INFOCAT     @PACKAGE_INFOCAT@
-# EOF
-#     fi
-# done
+# No error runs autoreconf to create missing files.
+autoreconf -vifs
