@@ -1,0 +1,11 @@
+# -*- makefile -*-
+#
+# $Id$
+#
+doxygen                  = @doxygen@
+
+dox-clean-local:
+	-rm -rf -- doc-@PACKAGE_VERSION@/
+
+dox-all: doxygen.cfg
+	-srcdir="$(srcdir)" $(doxygen) doxygen.cfg
