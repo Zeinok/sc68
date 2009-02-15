@@ -20,7 +20,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
 SC68_PACKAGE([ice depacker program and library.])
 [LIBUNICE68_CPPFLAGS="-DUNICE68_EXPORT=1"]
-[LIBUNICE68_LDFLAGS="-version-info 2:0:0"]
+[LIBUNICE68_LDFLAGS="-version-info 3:0:1"]
 
 
 # ,----------------------------------------------------------------------.

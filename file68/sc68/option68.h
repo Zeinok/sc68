@@ -1,9 +1,9 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/option68.h
+ * @file     sc68/option68.h
  * @author   Benjamin Gerard
  * @date     2009-02-04
- * @brief    Option header.
+ * @brief    Command line option manipulation header.
  *
  */
 
@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_option68  Options
+/** @defgroup  file68_option  Options manipulation
  *  @ingroup   file68_lib
  *
  *    Provides command line options manipulation functions.
@@ -37,8 +37,6 @@ enum option68_e {
   option68_INT = 2		/**< Intrger value.          */
 };
 
-typedef struct option68_s option68_t;
-
 /** Options help display function.
  *
  *  -# user data
@@ -48,6 +46,9 @@ typedef struct option68_s option68_t;
  */
 typedef void (*option68_help_t)(void *, const char*, const char*, const char*);
 
+typedef struct option68_s option68_t;
+
+/** Command line option description and parsing info. */ 
 struct option68_s {
   int            has_arg; /**< @see option68_e. 1st complement => setted */
   const char   * prefix;  /**< Key prefix.                               */
@@ -109,18 +110,43 @@ FILE68_API
 option68_t * option68_get(const char * key, const int setonly);
 
 FILE68_API
-int option68_isset(const option68_t * option);
+/** Test if option has been set.
+ * @param   opt  option to test
+ * @retval  1    option has been set
+ * @retval  0    option has not been set
+ */
+int option68_isset(const option68_t * opt);
 
 FILE68_API
+/** Set option.
+ * @param   option  option to set
+ * @retval  0       on success
+ * @retval -1       on failure
+ */
 int option68_set(option68_t * opt, const char * str);
 
 FILE68_API
+/** Set option (integer and boolean only).
+ * @param   opt  option to set
+ * @retval  0    on success
+ * @retval -1    on failure
+ */
 int option68_iset(option68_t * opt, int val);
 
 FILE68_API
+/** Unset option.
+ * @param   opt  option to unset
+ * @retval  0    on success
+ * @retval -1    on failure
+ */
 int option68_unset(option68_t * opt);
 
 FILE68_API
+/** Get associate environment variable value.
+ * @param   opt  option
+ * @param   set  enable option set at the same time
+ * @retval  0    on error (or envvar does not exist)
+ */
 const char * option68_getenv(option68_t * opt, const int set); 
 
 

@@ -1,9 +1,9 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/url68.h
+ * @file     sc68/url68.h
  * @author   Benjamin Gerard
  * @date     2003-10-28
- * @brief    URL header.
+ * @brief    URL manipulation header.
  *
  */
 
@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_url68_devel sc68 URL
+/** @defgroup  file68_url  URL manipulation
  *  @ingroup   file68_lib
  *
  *     Provides functions for sc68 URL manipulation.

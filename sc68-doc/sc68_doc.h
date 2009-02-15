@@ -25,7 +25,7 @@
 */
 
 /**
-@defgroup  api68 sc68 APIs
+@defgroup  api68 sc68 libraries
 
   Documents sc68 and buddies libraries.
 
@@ -34,10 +34,11 @@
 
   The @ref sc68_lib is the higher level component. It depends on @ref
   file68_lib which main purpose is to handle sc68 resources (player,
-  files, config ...). @ref unice68_lib is optionnaly used for depacking
-  ICE! file a common compressor format in the Atari ST world. Finally
-  @ref desa68_lib is used by extra programs such as @ref sourcer68_cli
-  or debug68_cli for disassemble M68k machine code.
+  files, config ...). @ref unice68_lib is optionnaly used for
+  depacking ICE! file a common compressor format in the Atari ST
+  world.  Finally @ref desa68_lib is used by extra programs such as
+  @ref sourcer68_prg or @ref debug68_prg for disassemble M68000
+  machine code.
   
 
 */

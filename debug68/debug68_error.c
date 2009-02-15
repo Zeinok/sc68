@@ -28,12 +28,12 @@
 
 #include "debug68_error.h"
 
-#include "sc68/debugmsg68.h"
+#include "sc68/msg68.h"
 #include "sc68/sc68.h"
 
 int debug68_error_add_va(const char * fmt, va_list list)
 {
-  vdebugmsg68(debugmsg68_ERROR, fmt, list);
+  msg68_va(msg68_ERROR, fmt, list);
   return -1;
 }
 
@@ -42,7 +42,7 @@ int debug68_error_add(const char * fmt, ...)
   va_list list;
   int err;
   va_start(list,fmt);
-  vdebugmsg68(debugmsg68_ERROR, fmt, list);
+  msg68_va(msg68_ERROR, fmt, list);
   err = debug68_error_add_va(fmt, list);
   va_end(list);
   return err;

@@ -1,9 +1,9 @@
 /**
- * @ingroup  file68_istream68
- * @file     file68/istream68_z.h
+ * @ingroup  file68_lib
+ * @file     sc68/istream68_z.h
  * @author   Benjamin Gerard
  * @date     2003-10-06
- * @brief    Z stream header.
+ * @brief    Zlib stream header.
  *
  */
 
@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 /** @name     Z stream
- *  @ingroup  file68_istream68
+ *  @ingroup  file68_istream
  *
  *  @anchor zlib
  *

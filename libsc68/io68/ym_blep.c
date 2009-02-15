@@ -30,7 +30,7 @@
 #endif
 
 #include "ymemul.h"
-#include <sc68/debugmsg68.h>
+#include <sc68/msg68.h>
 
 #include <assert.h>
 #include <string.h>

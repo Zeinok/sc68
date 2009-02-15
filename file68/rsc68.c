@@ -34,7 +34,7 @@
 #include "istream68_file.h"
 #include "istream68_fd.h"
 #include "istream68_curl.h"
-#include "debugmsg68.h"
+#include "msg68.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -45,7 +45,7 @@
 #ifndef DEBUG_RSC68_O
 #define DEBUG_RSC68_O 0
 #endif
-int rsc68_feature = debugmsg68_DEFAULT; 
+int rsc68_feature = msg68_DEFAULT; 
 
 static volatile int init = 0;
 
@@ -666,7 +666,7 @@ int rsc68_init(void)
     TRACE68(rsc68_feature,"rsc68_init: already initialized\n");
   } else {
     rsc68_feature =
-      debugmsg68_feature("rsc","resource access protocol",DEBUG_RSC68_O);
+      msg68_feature("rsc","resource access protocol",DEBUG_RSC68_O);
 
     TRACE68(rsc68_feature,"rsc68_init() {\n");
     rsc68 = default_open;
@@ -683,7 +683,7 @@ int rsc68_init(void)
     
     err = 0;
   }
-  debugmsg68_debug("rsc68: init [%s]\n", strok68(err));
+  TRACE68(rsc68_feature,"rsc68: init [%s]\n", strok68(err));
   return err;
 }
 
@@ -698,5 +698,5 @@ void rsc68_shutdown(void)
     rsc68 = default_open;
     init = 0;
   }
-  debugmsg68_debug("rsc68: shutdown\n");
+  TRACE68(rsc68_feature,"rsc68: shutdown\n");
 }

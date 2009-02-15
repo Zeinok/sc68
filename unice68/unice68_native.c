@@ -507,8 +507,12 @@ get_length_bit:
   DBF(R->d4,dep_b);
 }
 
-
 int unice68_get_depacked_size(const void * buffer, int * p_csize)
+{
+  return unice68_depacked_size(buffer,p_csize);
+}
+
+int unice68_depacked_size(const void * buffer, int * p_csize)
 {
   int id, csize, dsize;
   int csize_verif = p_csize ? *p_csize : 0;

@@ -1,6 +1,6 @@
 /**
- * @ingroup  file68_istream68
- * @file     file68/istream68_mem.h
+ * @ingroup  file68_lib
+ * @file     sc68/istream68_mem.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
  * @brief    Memory stream header.
@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 /** @name     Memory stream
- *  @ingroup  file68_istream68
+ *  @ingroup  file68_istream
  *
  *    Implements istream68_t for memory buffer.
  *

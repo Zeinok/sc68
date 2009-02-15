@@ -1,9 +1,9 @@
 /**
- * @ingroup   sc68_lib
+ * @ingroup   sc68_headers
  * @file      sc68/sc68.h
  * @author    Benjamin Gerard
  * @date      2003/08/07
- * @brief     sc68 header.
+ * @brief     sc68 API header.
  *
  * $Id$
  */
@@ -35,8 +35,6 @@
 extern "C" {
 #endif
 
-typedef void (*sc68_error_t)();
-typedef void (*sc68_debug_t)();
 
 /** @defgroup  sc68_lib  sc68 library
  *  @ingroup   api68
@@ -112,6 +110,9 @@ typedef void (*sc68_debug_t)();
 #define SC68_API extern
 #endif
 
+/** message function */
+typedef void (*sc68_msg_t)();
+
 
 /** API initialization parameters.
  *
@@ -137,20 +138,17 @@ typedef struct {
    */
   void (*free)(void *);
 
-  /** error message handler. */
-  sc68_error_t error;
+  /** message handler. */
+  sc68_msg_t msg_handler;
 
-  /** default error cookie. */
-  void * error_cookie;
-
-  /** debug message handler. */
-  sc68_debug_t debug;
-
-  /** debug cookie. */
-  void * debug_cookie;
+  /** default message cookie. */
+  void * msg_cookie;
 
   /** debug mask (set bit to clear in debugmsg68). */
-  int debug_mask;
+  int debug_clr_mask;
+
+  /** debug mask (set bit to set in debugmsg68). */
+  int debug_set_mask;
 
   /** number of arguments in command line (modified) */
   int argc;

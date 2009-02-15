@@ -1,9 +1,9 @@
 /**
- * @ingroup  file68_istream68
- * @file     file68/istream68.h
+ * @ingroup  file68_lib
+ * @file     sc68/istream68.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
- * @brief    Generic stream header.
+ * @brief    Stream interface header.
  *
  */
 
@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_istream68  I/O streams.
+/** @defgroup  file68_istream  I/O streams.
  *  @ingroup   file68_lib
  *
  *    Provides access functions for generic I/O streams..
@@ -30,7 +30,7 @@ extern "C" {
  *  @{
  */
 
-/** Stream type. */
+/* Stream type. */
 typedef struct _istream68_t istream68_t;
 
 /** @name Generic access functions.

@@ -1,9 +1,9 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/endian68.h
+ * @file     sc68/endian68.h
  * @author   Benjamin Gerard
  * @date     2003-08-12
- * @brief    Byte order header.
+ * @brief    Byte ordering header.
  *
  */
 
@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_endian68  Byte ordering
+/** @defgroup  file68_endian  Byte ordering
  *  @ingroup   file68_lib
  *
  *    Provides functions for dealing with host byte order.

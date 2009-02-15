@@ -32,7 +32,7 @@
 
 #include "istream68_def.h"
 #include "alloc68.h"
-#include "debugmsg68.h"
+#include "msg68.h"
 
 #include <curl/curl.h>
 #include <string.h>
@@ -144,7 +144,8 @@ static const char * isf_name(istream68_t * istream)
 
   return (!isf || !isf->name[0])
     ? 0
-    : isf->name;
+    : isf->name
+    ;
 }
 
 /* $$$ TODO */
@@ -174,7 +175,7 @@ static size_t isf_write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
   bytes = org_bytes = (int)(size * nmemb);
   pos = isf->curl_pos;
 
-  debugmsg68(-1,"istream68_curl::write_cb(%s:%p,%d) pos=%x\n",
+  msg68(-1,"istream68_curl::write_cb(%s:%p,%d) pos=%x\n",
 	     isf->name, isf->curm, bytes, pos);
   isf->has_write = 1;
   if (!bytes) {
@@ -268,7 +269,7 @@ static int isf_debug_cb(CURL *handle, curl_infotype type,
     break;
   }
 
-  debugmsg68(-1,"%s:%p:%p >%s\n", isf->name, isf->curm, handle, typestr);
+  msg68(-1,"%s:%p:%p >%s\n", isf->name, isf->curm, handle, typestr);
   if (data) {
     int i;
     char tmp[256];
@@ -281,7 +282,7 @@ static int isf_debug_cb(CURL *handle, curl_infotype type,
     }
     tmp[i] = 0;
     if (i>0) {
-      debugmsg68(-1,"[%s]\n", tmp);
+      msg68(-1,"[%s]\n", tmp);
     }
   }
 #endif
@@ -307,7 +308,7 @@ static int match_header(int *v,
 	len = len * 10 + c - '0';
       }
       *v = len;
-/*       debugmsg68(-1,"Match header %s-> %d\n", header, len); */
+/*       msg68(-1,"Match header %s-> %d\n", header, len); */
       return 1;
     }
   }
@@ -330,13 +331,13 @@ static size_t isf_header_cb(void  *ptr, size_t  size,
 
   isf->has_hd_write = 1;
 
-/*   debugmsg68(-1,"istream68_curl::header_cb(%s:%p, %d)\n", */
+/*   msg68(-1,"istream68_curl::header_cb(%s:%p, %d)\n", */
 /*  	     isf->name, isf->curm, size*nmemb); */
 
   if (match_header(&len, ptr, bytes, content_length, sizeof(content_length))
       || match_header(&len, ptr, bytes, ftp_size, sizeof(ftp_size))) {
     isf->length = len;
-/*     debugmsg68(-1,"%s::Set length to %d\n", isf->name, len); */
+/*     msg68(-1,"%s::Set length to %d\n", isf->name, len); */
   }
 
   /* $$$ TODO : Add transfert complete checks */
@@ -363,10 +364,10 @@ static int isf_open(istream68_t * istream)
   /* Reset info. */
   isf->has_read = isf->has_write = isf->has_hd_read = isf->has_hd_write = 0;
   isf->curl_pos = isf->pos = 0;
-  isf->length = -1;
+  isf->length   = -1;
   isf->error[0] = 0;
-  isf->code = 0;
-  isf->mcode = 0;
+  isf->code     = 0;
+  isf->mcode    = 0;
 
   /*
   FD_ZERO(&isf->sets.r);
@@ -383,7 +384,7 @@ static int isf_open(istream68_t * istream)
   /* Create curl handle */
   isf->curl = curl_easy_init();
   isf->curm = curl_multi_init();
-/*   debugmsg68(-1,"%s:%p:%p:open()\n",isf->name, isf->curm, isf->curl); */
+/*   msg68(-1,"%s:%p:%p:open()\n",isf->name, isf->curm, isf->curl); */
   if (!isf->curl || !isf->curm) {
     goto error;
   }
@@ -443,15 +444,15 @@ static int isf_open(istream68_t * istream)
     do {
       int n;
       mcode = curl_multi_perform(isf->curm, &n);
-/*       debugmsg68(-1,"READ_HEADER: MCODE=[%s]\n", */
+/*       msg68(-1,"READ_HEADER: MCODE=[%s]\n", */
 /* 		 mcode == CURLM_OK ? "OK" : */
 /* 		 (mcode == CURLM_CALL_MULTI_PERFORM) ? "MULTI" : "OTHER"); */
 
       if (mcode == CURLM_OK) {
-	debugmsg68(-1,"OK, timeleft:%d\n",timeout);
+	msg68(-1,"OK, timeleft:%d\n",timeout);
 	timeout -= mysleep(200);
 	if (timeout < 0) {
-	  debugmsg68(-1,"READ_HEADER: TIME-OUT\n");
+	  msg68(-1,"READ_HEADER: TIME-OUT\n");
 	  break;
 	}
       } else if (mcode != CURLM_CALL_MULTI_PERFORM) {
@@ -492,7 +493,7 @@ static int isf_close(istream68_t * istream)
   int err = -1;
 
   if (isf) {
-/*     debugmsg68(-1,"istream68_curl::%s:%p:%p:close()\n", */
+/*     msg68(-1,"istream68_curl::%s:%p:%p:close()\n", */
 /* 	       isf->name, isf->curm, isf->curl); */
     if (isf->curm) {
       err = 0;
@@ -516,7 +517,7 @@ static int isf_need_more(istream68_curl_t * isf)
   isf->mcode = curl_multi_perform(isf->curm, &n);
   n = isf->curl_pos - pos;
   if (n) {
-/*     debugmsg68(-1,"%s:%p:GETS MORE\n" */
+/*     msg68(-1,"%s:%p:GETS MORE\n" */
 /* 	       "-> %d (code=%d)\n", */
 /* 	       isf->name, isf->curm, */
 /* 	       n, isf->mcode); */
@@ -526,7 +527,7 @@ static int isf_need_more(istream68_curl_t * isf)
       break;
     case CURLM_CALL_MULTI_PERFORM:
     default:
-/*       debugmsg68(-1,"%s:%p:GETS MORE DETECTS EOF\n" */
+/*       msg68(-1,"%s:%p:GETS MORE DETECTS EOF\n" */
 /* 		 "-> pos:%d length:%d (code=%d)\n", */
 /* 		 isf->name, isf->curm, */
 /* 		 isf->curl_pos, isf->length, isf->mcode); */
@@ -561,15 +562,14 @@ static int isf_read(istream68_t * istream, void * data, int n)
     char * src = 0;
     int n = -1;
 
-
     if (isf->length != -1 && pos >= isf->length) {
-/*       debugmsg68(-1,"%s:%p, EOF:\n" */
+/*       msg68(-1,"%s:%p, EOF:\n" */
 /* 		 "->pos:%p/%p\n", */
 /* 		 isf->name, isf->curm, */
 /* 		 pos, isf->length); */
       break;
     } else if (timeout < 0) {
-      debugmsg68(-1,"%s:%p, TIME-OUT :\n"
+      msg68(-1,"%s:%p, TIME-OUT :\n"
 		 "->pos:%d/%d (%d ms)\n",
 		 isf->name, isf->curm,
 		   pos, isf->length, re_timeout);
@@ -582,7 +582,7 @@ static int isf_read(istream68_t * istream, void * data, int n)
 
     if (top == isf->cache[blk].top) {
 
-/*       debugmsg68(-1,"%s:%p, read block:\n" */
+/*       msg68(-1,"%s:%p, read block:\n" */
 /* 		 "->pos:%x top:%x blk:%x off:%x bytes:%d cache:[%x:%d]\n", */
 /* 	       isf->name, isf->curm, */
 /* 	       pos, top, blk, off, bytes, */
@@ -594,12 +594,12 @@ static int isf_read(istream68_t * istream, void * data, int n)
 	n = bytes;
       }
     } else {
-/*       debugmsg68(-1,"NOT MY TOP\n"); */
+/*       msg68(-1,"NOT MY TOP\n"); */
     }
 
     if (n <= 0) {
       if (pos < isf->curl_pos) {
-	debugmsg68(-1,"%s:%p: Can not seek backward from %d to %d\n",
+	msg68(-1,"%s:%p: Can not seek backward from %d to %d\n",
 		   isf->name, isf->curm, isf->curl_pos, pos);
 	break;
       }
@@ -623,11 +623,11 @@ static int isf_read(istream68_t * istream, void * data, int n)
   isf->pos = pos;
 
   if (isf->mcode != CURLM_OK && isf->mcode != CURLM_CALL_MULTI_PERFORM) {
-    debugmsg68(-1,"%s:%p:read-error:[%s]\n",
+    msg68(-1,"%s:%p:read-error:[%s]\n",
 	       isf->name, isf->curm, isf->error);
     return -1;
   }
-/*   debugmsg68(-1,"%s:%p:read -> %d\n", isf->name, isf->curm, n-bytes); */
+/*   msg68(-1,"%s:%p:read -> %d\n", isf->name, isf->curm, n-bytes); */
   return n - bytes;
 }
 
@@ -638,7 +638,8 @@ static int isf_write(istream68_t * istream, const void * data, int n)
 
   return (!isf || !isf->curl)
     ? -1
-    : 0;
+    : 0
+    ;
 }
 
 
@@ -651,7 +652,8 @@ static int isf_length(istream68_t * istream)
 
   return (!isf || !isf->curl)
     ? -1
-    : isf->length;
+    : isf->length
+    ;
 }
 
 static int isf_tell(istream68_t * istream)
@@ -659,7 +661,8 @@ static int isf_tell(istream68_t * istream)
   istream68_curl_t * isf = (istream68_curl_t *)istream;
   return (!isf || !isf->curl)
     ? -1
-    : isf->pos;
+    : isf->pos
+    ;
 }
 
 static int isf_seek(istream68_t * istream, int offset)

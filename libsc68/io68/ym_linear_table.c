@@ -47,6 +47,6 @@ void ym_create_5bit_linear_table(s16 * out, unsigned int level)
 	 3u * min ) / 3u * level / div;
     out[i] = tmp - center;
   }
-  debugmsg68_info("ym-2149: using *LINEAR* volumes %d [%d..%d])\n",
-		  level,out[0],out[0x7FFF]);
+  msg68_info("ym-2149: using *LINEAR* volumes %d [%d..%d])\n",
+	     level,out[0],out[0x7FFF]);
 }

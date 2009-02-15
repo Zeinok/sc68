@@ -1,6 +1,6 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/init68.h
+ * @file     sc68/init68.h
  * @author   Benjamin Gerard
  * @date     2003-09-26
  * @brief    Initialization.
@@ -37,7 +37,6 @@ int file68_init(int argc, char **argv);
 
 FILE68_API
 /** Shutdown file68 library.
- *
  */
 void file68_shutdown(void);
 

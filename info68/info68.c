@@ -31,7 +31,7 @@
 #include <sc68/file68.h>
 #include <sc68/string68.h>
 #include <sc68/init68.h>
-#include <sc68/debugmsg68.h>
+#include <sc68/msg68.h>
 #include <sc68/url68.h>
 #include <sc68/option68.h>
 
@@ -49,7 +49,7 @@ static int error(const char *format, ...)
 {
   va_list list;
   va_start(list, format);
-  error68_va(0, format, list);
+  error68_va(format, list);
   va_end(list);
   return -1;
 }
@@ -62,7 +62,7 @@ static int file_error(const char *filename)
 
 static int tracklist_error(const char *command)
 {
-  error("Bad track-list \"%s\"\n", command);
+  error("info68: bad track-list \"%s\"\n", command);
   return 4;
 }
 

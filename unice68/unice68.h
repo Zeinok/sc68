@@ -8,27 +8,6 @@
  * $Id$
  */
 
-/*
- *                       sc68 - ICE! depacker
- *             Copyright (C) 1998-2009 Benjamin Gerard
- *           <benjihan -4t- users.sourceforge -d0t- net>
- *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
- * General Public License for more details.
- *
- * You should have  received a copy of the  GNU General Public License
- * along with this program.
- * If not, see <http://www.gnu.org/licenses/>.
- *
- */
-
 #ifndef _UNICE68_H_
 #define _UNICE68_H_
 
@@ -114,7 +93,7 @@ int unice68_ice_version(void);
 UNICE68_API
 /** Test ICE and get compressed and uncompresed size.
  *
- *    The unice68_get_depacked_size() function returns the uncompressed
+ *    The unice68_depacked_size() function returns the uncompressed
  *    size of a ICE compressed buffer. If p_size is not 0 it is fill with
  *    the size of the compressed data found in header (useful for stream
  *    operation). 
@@ -133,6 +112,12 @@ UNICE68_API
  *  @retval -1   Error; not a valid ICE packed buffer
  *  @retval <0   Bitwise NOT of uncompressed size but verify failed.
  *
+ */
+int unice68_depacked_size(const void * buffer, int * p_csize);
+
+UNICE68_API
+/** Test ICE and get compressed and uncompresed size.
+ *  @deprecated in favor of unice68_depacked_size()
  */
 int unice68_get_depacked_size(const void * buffer, int * p_csize);
 

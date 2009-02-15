@@ -1,9 +1,9 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/file68_api.h
+ * @file     sc68/file68_api.h
  * @author   Benjamin Gerard
  * @date     2007-02-25
- * @brief    Symbol exportation.
+ * @brief    Symbol exportation header.
  *
  */
 
@@ -29,13 +29,12 @@
 # if defined(FILE68_DLL) && defined(HAVE_DECLSPEC) && HAVE_DECLSPEC
 #  define FILE68_API __declspec(dllimport)
 # elif defined(HAVE_VISIBILITY)
-#  define FILE68_API extern /* __attribute__ ((visibility("default"))) */
+#  define FILE68_API extern
 # endif
 
 #endif
 
-/** @defgroup  file68_file68_api  sc68 files
- *  @ingroup   file68_lib
+/** @addtogroup file68_lib
  *
  *     How symbols are exported.
  *

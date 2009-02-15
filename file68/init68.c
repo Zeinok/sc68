@@ -29,7 +29,7 @@
 #include "init68.h"
 #include "option68.h"
 
-#include "debugmsg68.h"
+#include "msg68.h"
 #include "error68.h"
 #include "alloc68.h"
 #include "registry68.h"
@@ -107,7 +107,6 @@ static option68_t opts[] = {
 
 int file68_init(int argc, char **argv)
 {
-/*   int i,n; */
   char tmp[1024];
   option68_t * opt;
 
@@ -116,7 +115,7 @@ int file68_init(int argc, char **argv)
     const char *message[4] = {
       "clean","initialized","shutdowning","initializing"
     };
-    error68_add("file68_init() : [error] %s", message[i]);
+    error68("file68: init error on %s", message[i]);
     argc = -1;
     goto out_no_init;
   }
@@ -147,7 +146,7 @@ int file68_init(int argc, char **argv)
   opt = option68_get("no-debug", 1);
   if (opt && opt->val.num) {
     /* Remove all debug messages whatsoever. */
-    debugmsg68_set_handler(0);
+    msg68_set_handler(0);
   }
 
   /* Check for --sc68-debug= */

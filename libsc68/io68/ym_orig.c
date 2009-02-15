@@ -32,7 +32,7 @@
 #endif
 
 #include "ymemul.h"
-#include <sc68/debugmsg68.h>
+#include <sc68/msg68.h>
 #include <sc68/string68.h>
 #include <sc68/option68.h>
 
@@ -737,15 +737,24 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
 /******************************************************/
 
 
-#define CLIP3(V,A,B) ( V < A ? A : ( V > B ? B : V ) )
+#if 0
+/* What it should be */
+# define REVOL(V) ((V) * _vol >> 6)
+# define CLIP3(V,A,B) ( V < A ? A : ( V > B ? B : V ) )
+#else
+  /* What it really is (BLEP does not honnor it anyway) */
+# define REVOL(V) ((V) >> 1)	  
+# define CLIP3(V,A,B) ( V )
+#endif
 #define CLIP(V) CLIP3(V,-32768,32767)
+
 
 /* Resample ``n'' input samples from ``irate'' to ``orate''
  * With volume adjustement [0..64]
  * @warning irate <= 262143 or 32bit overflow
  */
 static s32 * resampling(s32 * dst, const int n,
-			const int vol,
+			const int _vol,
 			const uint68_t irate, const uint68_t orate)
 {
   s32   * const src = dst;
@@ -757,7 +766,7 @@ static s32 * resampling(s32 * dst, const int n,
     int idx        = 0;
     /* forward */
     do {
-      int o = src[idx] * vol >> 6;
+      int o = REVOL(src[idx]);
       *dst++ = CLIP(o);
     } while ((idx += istp) < iend);
   } else {
@@ -767,7 +776,7 @@ static s32 * resampling(s32 * dst, const int n,
     if (stp >= 1<<14) {
       /* forward */
       do {
-	int o = src[(int)(idx>>14)] * vol >> 6;
+	int o = REVOL(src[(int)(idx>>14)]);
 	*dst++ = CLIP(o);
       } while ((idx += stp) < end);
     } else {
@@ -776,7 +785,7 @@ static s32 * resampling(s32 * dst, const int n,
       dst  = src + m - 1;
       idx  = end;
       do {
-	int o = src[(int)((idx -= stp)>>14)] * vol >> 6;
+	int o = REVOL(src[(int)((idx -= stp)>>14)]);
 	*dst = CLIP(o);
       } while (--dst != src);
       dst = src+m;
@@ -1083,7 +1092,7 @@ int ym_orig_setup(ym_t * const ym)
 
   /* use default filter */
   orig->ifilter        = default_filter;
-  debugmsg68_info("ym-2149: select *%s* filter\n",
+  msg68_info("ym-2149: select *%s* filter\n",
 		  filters[orig->ifilter].name);
 
   return err;
@@ -1119,13 +1128,13 @@ int ym_orig_options(int argc, char ** argv)
       }
     }
     if (i == n_filters) {
-      debugmsg68_warning("ym-2149: bad filter (%s)\n"
-			 "       : %s\n",
-			 opt->val.str, opt->desc);
+      msg68_warning("ym-2149: bad filter (%s)\n"
+		    "       : %s\n",
+		    opt->val.str, opt->desc);
     }
   }
-  debugmsg68_info("ym-2149: set default filter *%s* \n",
-		  filters[default_filter].name);
+  msg68_info("ym-2149: set default filter *%s* \n",
+	     filters[default_filter].name);
 
   return argc;
 }

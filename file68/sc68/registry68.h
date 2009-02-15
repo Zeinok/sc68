@@ -1,6 +1,6 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/registry68.h
+ * @file     sc68/registry68.h
  * @author   Benjamin Gerard
  * @date     2003-08-11
  * @brief    Registry header.
@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_registry68_devel  Registry
+/** @defgroup  file68_registry  Registry access
  *  @ingroup   file68_lib
  *
  *    Provides registry access functions.

@@ -29,7 +29,7 @@
 #include "rsc68.h"
 
 #include "string68.h"
-#include "debugmsg68.h"
+#include "msg68.h"
 #include "istream68_null.h"
 #include "istream68_file.h"
 #include "istream68_fd.h"
@@ -88,7 +88,7 @@ istream68_t * url68_stream_create(const char * url, int mode)
   istream68_t * isf = 0;
   int has_protocol;		/* in fact protocol:// length */
 
-  debugmsg68(-1,"url68_stream_create(url:[%s],mode:[%d,%c%c]) {\n",
+  msg68(-1,"url68_stream_create(url:[%s],mode:[%d,%c%c]) {\n",
 	     url?url:"<nul>", mode, (mode&1)?'R':'.',(mode&2)?'W':'.');
 
   has_protocol = parse_protocol(protocol, sizeof(protocol), url);
@@ -108,7 +108,7 @@ istream68_t * url68_stream_create(const char * url, int mode)
       strncpy(tmp, "rsc68://music/",max);
       strncpy(tmp+14, url, max-14);
       tmp[max] = 0;
-      debugmsg68(-1,"url is now [%s]\n",tmp);
+      msg68(-1,"url is now [%s]\n",tmp);
       isf = rsc68_create_url(tmp, mode, 0);
     } else if (!strcmp68(protocol, "FILE") ||
 	       !strcmp68(protocol, "LOCAL")) {
@@ -150,7 +150,7 @@ istream68_t * url68_stream_create(const char * url, int mode)
     }
   }
   
-  debugmsg68(-1,"} url68_stream_create() => [%s,%s]\n",
+  msg68(-1,"} url68_stream_create() => [%s,%s]\n",
 	     strok68(!isf),istream68_filename(isf));
 
   return isf;

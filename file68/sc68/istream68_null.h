@@ -1,6 +1,6 @@
 /**
- * @ingroup  file68_istream68
- * @file     file68/istream68_null.h
+ * @ingroup  file68_lib
+ * @file     sc68/istream68_null.h
  * @author   Benjamin Gerard
  * @date     2003-10-10
  * @brief    Null stream header.
@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 /** @name     Null stream
- *  @ingroup  file68_istream68
+ *  @ingroup  file68_istream
  *
  *    Implements a null istream68_t.
  *

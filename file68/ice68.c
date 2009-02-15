@@ -32,7 +32,7 @@
 
 #ifdef USE_UNICE68
 
-#include "debugmsg68.h"
+#include "msg68.h"
 #include "alloc68.h"
 #include "istream68_file.h"
 #include "unice68.h"
@@ -58,7 +58,7 @@ void * ice68_load(istream68_t *is, int *ulen)
   fname = istream68_filename(is);
 
   if (istream68_read(is,header,12) != 12) {
-    error68_add(0, "ice68_load(%s) : no header", fname);
+    error68("ice68: load '%s' [no header]", fname);
     goto error;
   }
 
@@ -66,27 +66,27 @@ void * ice68_load(istream68_t *is, int *ulen)
   dsize = unice68_get_depacked_size(header, &csize);
 
   if (dsize < 0) {
-    error68_add(0, "ice68_load(%s) : not ICE!", fname);
+    error68("ice68: load '%s' [not ICE!]", fname);
     goto error;
   }
 
   inbuf = alloc68(csize+12);
 
   if (!inbuf) {
-    error68_add(0, "ice68_load(%s) : alloc input buffer failed", fname);
+    error68("ice68: load '%s' [alloc input buffer failed]", fname);
     goto error;
   }
 
   memcpy(inbuf,header,12);
   if (istream68_read(is,inbuf+12,csize) != csize) {
-    error68_add(0, "ice68_load(%s) : read failed", fname);
+    error68("ice68: load '%s' [read failed]", fname);
     goto error;
   }
 
   outbuf = alloc68(dsize);
 
   if (!outbuf) {
-    error68_add(0,"ice68_load(%s) : alloc output buffer failed", fname);
+    error68("ice68: load '%s' [alloc output buffer failed]", fname);
     goto error;
   }
 
@@ -141,13 +141,13 @@ int ice68_is_magic(const void * buffer)
 void * ice68_load(istream68_t * is, int * ulen)
 {
   const char * fname = istream68_filename(is);
-  error68_add(0,"ice68_load(%s) : ICE! not supported", fname);
+  error68("ice68: load stream '%s' [ICE! not supported]", fname);
   return 0;
 }
 
 void * ice68_load_file(const char * fname, int * ulen)
 {
-  error68_add(0,"ice68_load_file(%s) : ICE! not supported", fname);
+  error68("ice68: load file '%s' [ICE! not supported]", fname);
   return 0;
 }
 

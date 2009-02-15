@@ -129,18 +129,18 @@ void *gzip68_load(const char *fname, int *ptr_ulen)
 
   fd = open(fname, omode);
   if (fd == -1) {
-    error68_add("gzip68_load(%s) : %s", fname, strerror(errno));
+    error68("gzip68: load '%s' (%s)", fname, strerror(errno));
     goto error;
   }
 
   len = lseek(fd, 0, SEEK_END);
   if (len == (off_t) -1) {
-    error68_add("gzip68_load(%s) : %s", fname, strerror(errno));
+    error68("gzip68: load '%s' (%s)", fname, strerror(errno));
     goto error;
   }
 
   if (lseek(fd, 0, SEEK_SET) != 0) {
-    error68_add("gzip68_load(%s) : %s", fname, strerror(errno));
+    error68("gzip68: load '%s' (%s)", fname, strerror(errno));
     goto error;
   }
 
@@ -151,20 +151,20 @@ void *gzip68_load(const char *fname, int *ptr_ulen)
 
   f = gzdopen(fd, "rb");
   if (!f) {
-    error68_add("gzip68_load(%s) :  %s", fname, gzerror(f, &err));
+    error68("gzip68: load '%s' (%s)", fname, gzerror(f, &err));
     goto error;
   }
   fd = 0; /* $$$ Closed by gzclose(). Verify fdopen() rules. */
 
   uncompr = alloc68(ulen);
   if (!uncompr) {
-    error68_add("gzip68_load(%s) : alloc (%d) failed", fname, ulen);
+    error68("gzip68: load '%s' alloc (%d) failed", fname, ulen);
     goto error;
   }
   len = gzread(f, uncompr, ulen);
 
   if (len != ulen) {
-    error68_add("gzip68_load(%s) : read : %s",fname, gzerror (f, &err));
+    error68("gzip68: load '%s' read error (%s)",fname, gzerror(f, &err));
     goto error;
   }
   goto end;
@@ -197,7 +197,7 @@ void *gzip68_load(const char *fname, int *ptr_ulen)
 void *gzip68_load(const char *fname, int *ptr_ulen)
 {
   if (ptr_ulen) *ptr_ulen=0;
-  error68_add("gzip68_load(%s) : no zlib support", fname);
+  error68("gzip68: load '%s' no zlib support", fname);
   return 0;
 }
 

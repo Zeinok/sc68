@@ -1,6 +1,6 @@
 /**
- * @ingroup  file68_istream68
- * @file     file68/istream68_fd.h
+ * @ingroup  file68_lib
+ * @file     sc68/istream68_fd.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
  * @brief    File descriptor stream header.
@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 /** @name     File descriptor stream
- *  @ingroup  file68_istream68
+ *  @ingroup  file68_istream
  *
  *    Implements istream68_t for "unix like" file descriptor.
  *

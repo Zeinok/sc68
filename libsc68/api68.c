@@ -50,7 +50,7 @@
 #include <sc68/file68.h>
 #include <sc68/url68.h>
 #include <sc68/rsc68.h>
-#include <sc68/debugmsg68.h>
+#include <sc68/msg68.h>
 #include <sc68/option68.h>
 #include <sc68/audio68.h>
 
@@ -171,7 +171,7 @@ struct _sc68_s {
 # endif
 #endif
 
-static int           sc68_feature = debugmsg68_NEVER;
+static int           sc68_feature = msg68_NEVER;
 static int           sc68_id;	     /* counter for auto generated name. */
 static volatile int  sc68_init_flag; /* Library init flag     */
 static sc68_estack_t sc68_estack;    /* Library error message */
@@ -512,41 +512,34 @@ int sc68_init(sc68_init_t * init)
 {
   int err = -1;
   option68_t * opt;
+  sc68_init_t dummy_init;
 
   if (sc68_init_flag) {
     err = sc68_error_add(0, "sc68_init() : already initialized");
     goto error_no_shutdown;
   }
-  sc68_feature = debugmsg68_feature("sc68","sc68 library",DEBUG_SC68_O);
+
+  if (!init) {
+    memset(&dummy_init,0,sizeof(dummy_init));
+    init = &dummy_init;
+  }
+
+  /* Use malloc() and free() as default dynamic memory handler */
+  if (!init->alloc) init->alloc = malloc;
+  if (!init->free)  init->free  = free;
+
+  sc68_feature = msg68_feature("sc68","sc68 library",DEBUG_SC68_O);
 
   /* 1st thing to do : set debug handler. */
-  if (init) {
-    debugmsg68_set_handler((debugmsg68_t)init->debug);
-    debugmsg68_set_cookie(init->debug_cookie);
-    debugmsg68_mask &= ~init->debug_mask;
-  }
+  msg68_set_handler((msg68_t)init->msg_handler);
+  msg68_set_cookie(init->msg_cookie);
+
+  msg68_mask &= ~init->debug_clr_mask;
+  msg68_mask |=  init->debug_set_mask;
+
   sc68_debug(0,"sc68_init() {\n");
 
-  /* 2nd thing to do : set error handler. */
-
-  /* Change error handler and assume cookie should be change
-   * whatever its value else set the cookie only if it is
-   * non null.
-   */
-  if (init) {
-    if (init->error) {
-      sc68_debug(0,"sc68_init: set error handler/cookie\n");
-      error68_set_handler((error68_t)init->error);
-      error68_set_cookie(init->error_cookie);
-    } else if (init->error_cookie) {
-      sc68_debug(0,"sc68_init: set error cookie only\n");
-      error68_set_cookie(init->error_cookie);
-    }
-  } else {
-    err = sc68_error_add(0, "sc68_init() : <NUL> pointer");
-    goto error;
-  }
-
+  /* Dynamic Memory Handlers */
   alloc68_set(init->alloc);
   if (!alloc68_set(0)) {
     err = sc68_error_add(0, "sc68_init() : null alloc handler(s)");
@@ -570,16 +563,11 @@ int sc68_init(sc68_init_t * init)
     init->argc = option68_parse(init->argc, init->argv, 0);
   }
 
-  /* $$$ problem with debug-mask, sc68-debug is set before the
-     creation of all new features. file68_init() should not process it
-     now, but later in this function.
-  */
-
   err = init_emu68(0, &init->argc, init->argv);
 
   opt = option68_get("debug", 1);
   if (opt) {
-    debugmsg68_mask = opt->val.num;
+    msg68_mask = opt->val.num;
   }
   
   sc68_init_flag = !err;
@@ -698,7 +686,7 @@ unsigned int sc68_sampling_rate(sc68_t * sc68, unsigned int f)
       sc68_debug(sc68,"sc68_sampling_rate: after paula %u hz\n", f);
       sc68->mix.rate = f;
       audio68_sampling_rate(f);
-      debugmsg68_info("%s: sampling rate [%uhz]\n", sc68->name, f);
+      msg68_info("%s: sampling rate [%uhz]\n", sc68->name, f);
     } else {
       const unsigned int min = SAMPLING_RATE_MIN, max = SAMPLING_RATE_MAX;
 
@@ -707,7 +695,7 @@ unsigned int sc68_sampling_rate(sc68_t * sc68, unsigned int f)
       /* Assuming interface audio accepts this value. */
       audio68_sampling_rate(f);
       sc68_sampling_rate_def = f;
-      debugmsg68_info("sc68: default sampling rate [%u]\n", f);
+      msg68_info("sc68: default sampling rate [%u]\n", f);
     }
   }
   return f;
@@ -1568,15 +1556,8 @@ int sc68_error_add(sc68_t * sc68, const char * fmt, ...)
   const int maxlen = sizeof(estack->str) / maxstr;
   char tmp[256] = { 0 };
 
-#if defined(DEBUG) && !defined(NDEBUG)
-  va_start(list,fmt);
-  debugmsg68(-1,"sc68_estack_add::");
-  vdebugmsg68(-1,fmt,list);
-  va_end(list);
-#endif
-
   va_start(list, fmt);
-  error68(estack->cookie,fmt,list);
+  error68(fmt,list);
   va_end(list);
 
   va_start(list, fmt);
@@ -1616,7 +1597,7 @@ void sc68_debug(sc68_t * sc68, const char * fmt, ...)
 {
   va_list list;
   va_start(list,fmt);
-  vdebugmsg68(sc68_feature,fmt,list);
+  msg68_va(sc68_feature,fmt,list);
   va_end(list);
 }
 

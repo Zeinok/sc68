@@ -1,6 +1,6 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/gzip68.h
+ * @file     sc68/gzip68.h
  * @author   Benjamin Gerard
  * @date     2003-09-03
  * @brief    Gzip loader header.
@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_gzip68  gzip file support.
+/** @defgroup  file68_gzip  gzip file support.
  *  @ingroup   file68_lib
  *
  *    Provides functions for loading and saving gzip file.

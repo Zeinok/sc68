@@ -1,6 +1,6 @@
 /**
- * @ingroup  file68_istream68
- * @file     file68/istream68_file.h
+ * @ingroup  file68_lib
+ * @file     sc68/istream68_file.h
  * @author   Benjamin Gerard
  * @date     2007/08/08
  * @brief    FILE stream header.
@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 /** @name     FILE stream
- *  @ingroup  file68_istream68
+ *  @ingroup  file68_istream
  *
  *    Implements istream68_t for stdio.h FILE.
  *

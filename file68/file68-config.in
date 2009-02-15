@@ -7,6 +7,8 @@
 # $Id$
 #
 
+me="@PACKAGE_NAME@-config"
+
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 libdir="@libdir@"
@@ -16,30 +18,27 @@ datarootdir="@datarootdir@"
 datadir="@datadir@"
 pkgdatadir="${datadir}/sc68"
 
-defs="@PACKAGE_DEFS@"
-incs="-I${includedir}"
-cflags="@PACKAGE_CFLAGS@"
-cppflags="$defs $incs"
-ldflags="@PACKAGE_LDFLAGS@"
-libs="@PACKAGE_LIBS@"
-
-me="@PACKAGE_NAME@-config"
+cflags=$(echo @PACKAGE_CFLAGS@)
+cppflags=$(echo @PACKAGE_CPPFLAGS@ -I${includedir})
+ldflags=$(echo @PACKAGE_LDFLAGS@)
 
 while test $# -ge 1; do
     case "$1" in
-	--help|--usage|-?)
+	--help | --usage | -h)
 	    cat <<EOF
 Usage: ${me} [OPTION...]
 
 Options:
-  --exists            check module existence (pkg-config compatibility)
   --help              output this message and exit
   --version           output version and exit
+  --exists            check module existence (pkg-config compatibility)
   --modversion        output version and exit (pkg-config compatibility)
+
   --datadir           output data directory
   --pkgdatadir        output data package directory
   --includedir        output include directory
   --pkgincludedir     output include package directory
+
   --libs              link flags (-L & -l)
   --libs-only-L       link flags (-L only)
   --libs-only-l       link flags (-l only)
@@ -65,20 +64,49 @@ EOF
 	    echo "${pkgincludedir}";;
 
 	# Linker
-	--libs-only-L|--libs-only-other)
-	    echo ${ldflags};;
+	--libs-only-L | --libs-only-other)
+	    for i in : ${ldflags}; do
+		case "${i:0:2}" in
+		    :);;
+		    -L) echo -n " $i";;
+		esac
+	    done
+	    echo ;;
+	
 	--libs-only-l)
-	    echo ${libs};;
-	--libs)
-	    echo ${ldflags} ${libs};;
+	    for i in : ${ldflags}; do
+		case "${i:0:2}" in
+		    :);;
+		    -l) echo -n " $i";;
+		esac
+	    done
+	    echo ;;
+
+	--libs | --ldflags)
+	    echo ${ldflags};;
 
 	# compiler
 	--cflags-only-I)
-	    echo ${incs};;
+	    for i in : ${cppflags} ${cflags}; do
+		case "${i:0:2}" in 
+		    :);;
+		    -I) echo -n " $i" ;;
+		esac
+	    done
+	    echo ;;
+
 	--cflags-only-other)
-	    echo ${defs};;
+	    for i in : ${cppflags} ${cflags}; do
+		case "${i:0:2}" in 
+		    :);;
+		    -D | -U) echo -n " $i" ;;
+		esac
+	    done
+	    echo ;;
+
 	--cflags)
-	    echo ${defs} ${incs} ${cflags};;
+	    echo ${cppflags} ${cflags};;
+
 	--cppflags)
 	    echo ${cppflags};;
 

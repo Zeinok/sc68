@@ -6,26 +6,6 @@
  * @brief     Motorola 68K disassembler header
  *
  */
-/*
- *		     desa68 - 68000 disassembler
- *	       Copyright (C) 1999-2009 Benjamin Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
- *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
- * License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
- * General Public License for more details.
- *
- * You should have  received a copy of the  GNU General Public License
- * along with this program.
- * If not, see <http://www.gnu.org/licenses/>.
- *
- */
 
 /* $Id$ */
 
@@ -160,6 +140,9 @@ extern "C" {
 
 /**@}*/
 
+/* Type for the 68K disassemble pass parameters structure. */
+typedef struct desa68_parm_s desa68_parm_t;
+
 /** 68K disassemble pass parameters.
  *
  *    The desa68_parm_t data structure contains the information necessary to
@@ -265,12 +248,6 @@ struct desa68_parm_s
   /**@}*/
 
 };
-
-/** @deprecated in the favor of desa68_parm_t */
-typedef struct desa68_parm_s DESA68parm_t;
-
-/** Type for the 68K disassemble pass parameters structure. */
-typedef struct desa68_parm_s desa68_parm_t;
 
 DESA68_API
 /** Disassemble a single 68000 instruction.

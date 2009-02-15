@@ -1,6 +1,6 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/alloc68.h
+ * @file     sc68/alloc68.h
  * @author   Benjamin Gerard
  * @date     2003-04-11
  * @brief    Dynamic memory management header.
@@ -19,7 +19,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_alloc68  Dynamic memory management
+/** @defgroup  file68_alloc  Dynamic memory management
  *  @ingroup   file68_lib
  *
  *    Provides dynamic memory management functions. All dynamically

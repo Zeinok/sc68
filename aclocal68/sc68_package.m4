@@ -79,7 +79,6 @@ AC_DEFUN([SC68_PACKAGE],[
       if test "x[$]{idir:0:1}x" != "x/x"; then
         idir=$(test -d "$srcdir/[$]1" && cd "[$]srcdir/[$]1" && pwd)
       fi
-      [echo " ++ add-include-dir ${idir}"]
       if test -n "[$]{idir}" && test -d "${idir}"; then
         CPPFLAGS="[$]CPPFLAGS -I[$]{idir}"
       else

@@ -1,9 +1,9 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/string68.h
+ * @file     sc68/string68.h
  * @author   Benjamin Gerard
  * @date     2003-08-11
- * @brief    String header.
+ * @brief    String manipulation header.
  *
  */
 
@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_string68  Strings
+/** @defgroup  file68_string  String manipulation
  *  @ingroup   file68_lib
  *
  *    Provides string manipulation functions.
@@ -139,7 +139,7 @@ FILE68_API
  */
 char * strlongtime68(char * buffer, int time);
 
-#define strnevernull68 strnevernull68
+#define strnevernull68 strnevernull68 /**< @see strnevernull68 */
 #ifdef strnevernull68
 static inline
 const char * strnevernull68(const char *s)

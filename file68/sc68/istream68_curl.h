@@ -1,6 +1,6 @@
 /**
- * @ingroup  file68_istream68
- * @file     file68/istream68_curl.h
+ * @ingroup  file68_lib
+ * @file     sc68/istream68_curl.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
  * @brief    @ref cURL stream header.
@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 /** @name     cURL stream
- *  @ingroup  file68_istream68
+ *  @ingroup  file68_istream
  *
  *  @anchor cURL
  *

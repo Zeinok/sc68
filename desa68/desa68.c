@@ -113,7 +113,7 @@ static const u16 dbcc_ascii[] = {
 
 /* Add a char to disassembly string */
 #if 0
-static void desa_char(DESA68parm_t * d,const unsigned char c)
+static void desa_char(desa68_parm_t * d,const unsigned char c)
 {
   *d->s++ = c;
 }
@@ -122,7 +122,7 @@ static void desa_char(DESA68parm_t * d,const unsigned char c)
 #endif
 
 /* Add a string to disassembly string */
-static void desa_str(DESA68parm_t * d, char *str)
+static void desa_str(desa68_parm_t * d, char *str)
 {
   char c;
   while(c=*str++, c)
@@ -130,7 +130,7 @@ static void desa_str(DESA68parm_t * d, char *str)
 }
 
 /* Add a string to disassembly string */
-static void desa_ascii(DESA68parm_t * d, unsigned int n)
+static void desa_ascii(desa68_parm_t * d, unsigned int n)
 {
   int shift;
   for (shift=(sizeof(int)-1)*8; shift>=0; shift-=8) {
@@ -142,7 +142,7 @@ static void desa_ascii(DESA68parm_t * d, unsigned int n)
 
 /* Add a N-digit unsigned hexa number with header char
    to disassembly string */
-static void desa_uhexacat(DESA68parm_t * d, unsigned int n,
+static void desa_uhexacat(desa68_parm_t * d, unsigned int n,
 			  int ndigit, int header_char)
 {
   int shf;
@@ -155,7 +155,7 @@ static void desa_uhexacat(DESA68parm_t * d, unsigned int n,
 /* Add a signifiant digit only unsigned hexa number
  * with heading '$' to disassembly string
  */
-static void desa_usignifiant(DESA68parm_t * d, unsigned int n)
+static void desa_usignifiant(desa68_parm_t * d, unsigned int n)
 {
   int shf;
   desa_char(d,'$');
@@ -167,7 +167,7 @@ static void desa_usignifiant(DESA68parm_t * d, unsigned int n)
 }
 
 /* idem desa_usignifiant, except it is signed */
-static void desa_signifiant(DESA68parm_t * d, int n)
+static void desa_signifiant(desa68_parm_t * d, int n)
 {
   if (n<0) {
     desa_char(d,'-');
@@ -190,7 +190,7 @@ static int my_isascii(u8 c)
  *******************************/
 
 /* Read next word , increment pc */
-static int read_pc(DESA68parm_t * d)
+static int read_pc(desa68_parm_t * d)
 {
   unsigned int pc = d->pc;
   d->w   = (s8)d->mem[pc++&d->memmsk]<<8;
@@ -199,36 +199,36 @@ static int read_pc(DESA68parm_t * d)
   return d->w;
 }
 
-static s32 immB(DESA68parm_t * d)
+static s32 immB(desa68_parm_t * d)
 {
   return (s32)(s8)read_pc(d);
 }
 
 #define immW read_pc
 
-static s32 immL(DESA68parm_t * d)
+static s32 immL(desa68_parm_t * d)
 {
   return (read_pc(d)<<16) | (read_pc(d)&0xffff);
 }
 
-static s32 adrW(DESA68parm_t * d)
+static s32 adrW(desa68_parm_t * d)
 {
   return immW(d);
 }
 
-static s32 adrL(DESA68parm_t * d)
+static s32 adrL(desa68_parm_t * d)
 {
   return immL(d);
 }
 
-static s32 relPC(DESA68parm_t * d)
+static s32 relPC(desa68_parm_t * d)
 {
   read_pc(d);
   return (d->pc + d->w - 2) & d->memmsk;
 }
 
 /* return [AD][0-7][d][WL] : SZ='W'/'L' XI = hexa value for reg ($D0) */
-static s32 indAnXi(DESA68parm_t * d)
+static s32 indAnXi(desa68_parm_t * d)
 {
   s32 v;
   read_pc(d);
@@ -239,7 +239,7 @@ static s32 indAnXi(DESA68parm_t * d)
   return v;
 }
 
-static void desa_dcw(DESA68parm_t * d)
+static void desa_dcw(desa68_parm_t * d)
 {
   desa_ascii(d,'DC.W');
   desa_char (d,' ');
@@ -247,7 +247,7 @@ static void desa_dcw(DESA68parm_t * d)
   d->status = 0;
 }
 
-static void update_ea(DESA68parm_t * d, unsigned int v)
+static void update_ea(desa68_parm_t * d, unsigned int v)
 {
   if (d->ea_src == -1) {
     d->ea_src = v;
@@ -256,12 +256,12 @@ static void update_ea(DESA68parm_t * d, unsigned int v)
   }
 }
 
-static void desa_label(DESA68parm_t * d, unsigned int v)
+static void desa_label(desa68_parm_t * d, unsigned int v)
 {
   desa_uhexacat(d, v, 6, 'L');
 }
 
-static int desa_is_symbol(DESA68parm_t * d, unsigned int v2, unsigned int bit)
+static int desa_is_symbol(desa68_parm_t * d, unsigned int v2, unsigned int bit)
 {
   int r = 
     ((d->flags & DESA68_SYMBOL_FLAG)
@@ -272,7 +272,7 @@ static int desa_is_symbol(DESA68parm_t * d, unsigned int v2, unsigned int bit)
   return r;
 }
 
-static void desa_immL(DESA68parm_t * d, int v, int pc)
+static void desa_immL(desa68_parm_t * d, int v, int pc)
 {
   unsigned int v2 = v;
   const int bit = (pc == -1)
@@ -297,7 +297,7 @@ static void desa_immL(DESA68parm_t * d, int v, int pc)
   }
 }
 
-static void desa_absL(DESA68parm_t * d, int v, int pc)
+static void desa_absL(desa68_parm_t * d, int v, int pc)
 {
   unsigned int v2 = v & 0xFFFFFF;
   const int bit = (pc == -1)
@@ -311,7 +311,7 @@ static void desa_absL(DESA68parm_t * d, int v, int pc)
   }
 }
 
-static void get_ea_2(DESA68parm_t * d, u32 mode, u32 reg, u8 sz)
+static void get_ea_2(desa68_parm_t * d, u32 mode, u32 reg, u8 sz)
 {
   s32 v;
 
@@ -423,7 +423,7 @@ static void get_ea_2(DESA68parm_t * d, u32 mode, u32 reg, u8 sz)
  * bit : 0/6 -> src/dest
  * w   : current opcode
  */
-static void get_ea_move(DESA68parm_t * d, int bit, s32 w, u32 easz)
+static void get_ea_move(desa68_parm_t * d, int bit, s32 w, u32 easz)
 {
   u32 ea    = (w>>bit)&63;
 
@@ -433,13 +433,13 @@ static void get_ea_move(DESA68parm_t * d, int bit, s32 w, u32 easz)
     get_ea_2(d, ea>>3,ea&7, easz);
 }
 
-static void desa_reg(DESA68parm_t * d, int reg)
+static void desa_reg(desa68_parm_t * d, int reg)
 {
   desa_ascii(d,((reg&8)? 'A0':'D0') + (reg&7));
 }
 
 /* Used with ABCD, SBCD, ADDX, SUBX */
-static void desa_ry_rx(DESA68parm_t * d, int inst, int size)
+static void desa_ry_rx(desa68_parm_t * d, int inst, int size)
 {
   desa_ascii(d,inst);
   desa_ascii(d,size);
@@ -455,7 +455,7 @@ static void desa_ry_rx(DESA68parm_t * d, int inst, int size)
   }
 }
 
-static void desa_dn_ae(DESA68parm_t * d, int name)
+static void desa_dn_ae(desa68_parm_t * d, int name)
 {
   desa_ascii(d, name);
   desa_ascii(d, d->szchar);
@@ -483,7 +483,7 @@ static void desa_dn_ae(DESA68parm_t * d, int name)
  *
  ***************/
 
-static int check_desa_bitop(DESA68parm_t * d)
+static int check_desa_bitop(desa68_parm_t * d)
 {
   static u32 fn[] = { 'BTST', 'BCHG', 'BCLR', 'BSET'};
   int modemsk = 00775;
@@ -512,7 +512,7 @@ static int check_desa_bitop(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_IMM_SR(DESA68parm_t * d)
+static int check_desa_IMM_SR(desa68_parm_t * d)
 {
   u32 modemsk = 1 + (1<<2) + (1<<10);
   int mode = (d->w>>8)&15, inst='ORI';
@@ -540,7 +540,7 @@ static int check_desa_IMM_SR(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_movep(DESA68parm_t * d)
+static int check_desa_movep(desa68_parm_t * d)
 {
   if ((d->w & 0470) != 0410 )
     return 0;
@@ -560,7 +560,7 @@ static int check_desa_movep(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_imm_op(DESA68parm_t * d)
+static int check_desa_imm_op(desa68_parm_t * d)
 {
   static u32 fn[8] = {
     'ORI' , 'ANDI', 'SUBI', 'ADDI',
@@ -579,7 +579,7 @@ static int check_desa_imm_op(DESA68parm_t * d)
   return 1;
 }
 
-static void desa_line0(DESA68parm_t * d)
+static void desa_line0(desa68_parm_t * d)
 {
   if (check_desa_movep(d) ) 	return;
   if (check_desa_bitop(d) ) 	return;
@@ -590,7 +590,7 @@ static void desa_line0(DESA68parm_t * d)
 
 /* General move(a) disassemble
  */
-static void desa_move(DESA68parm_t * d)
+static void desa_move(desa68_parm_t * d)
 {
   s32 w=d->w;
   int movsz  = (u8)('WLB?' >> ((w&(3<<12))>>(12-3)));
@@ -605,7 +605,7 @@ static void desa_move(DESA68parm_t * d)
 /* Check and disassemble a valid move
  * return TRUE if valid move
  */
-static int check_desa_move(DESA68parm_t * d)
+static int check_desa_move(desa68_parm_t * d)
 {
   u32 srcmsk = 0xFFF, dstmsk = 0x1FF;
   /* Remove An source & destination addressing mode for byte access */
@@ -631,7 +631,7 @@ static int check_desa_move(DESA68parm_t * d)
  *
  ***************/
 
-static void desa_li123(DESA68parm_t * d)
+static void desa_li123(desa68_parm_t * d)
 {
   if (!check_desa_move(d))
     desa_dcw(d);
@@ -644,7 +644,7 @@ static void desa_li123(DESA68parm_t * d)
  *
  ***************/
 
-static void get_movemsub(DESA68parm_t * d,
+static void get_movemsub(desa68_parm_t * d,
 			 s32 i, s32 j)
 {
   desa_reg(d, i);
@@ -654,7 +654,7 @@ static void get_movemsub(DESA68parm_t * d,
   }
 }
 
-static void get_movemreg(DESA68parm_t * d,
+static void get_movemreg(desa68_parm_t * d,
 			 u32 v, u32 rev)
 {
   s32 i,j,p=0;
@@ -669,7 +669,7 @@ static void get_movemreg(DESA68parm_t * d,
   }
 }
 
-static int desa_check_imp(DESA68parm_t * d,
+static int desa_check_imp(desa68_parm_t * d,
 			  unsigned int name, int mskmode)
 {
   if ((d->w&0400) || !(mskmode&(1<<d->adrmode0)))
@@ -681,7 +681,7 @@ static int desa_check_imp(DESA68parm_t * d,
   return 1;
 }
 
-static int check_desa_lea(DESA68parm_t * d)
+static int check_desa_lea(desa68_parm_t * d)
 {
   int modemsk = 03744;
   if ((d->w&0700) != 0700 || !(modemsk&(1<<d->adrmode0)))
@@ -692,7 +692,7 @@ static int check_desa_lea(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_chk(DESA68parm_t * d)
+static int check_desa_chk(desa68_parm_t * d)
 {
   int modemsk = 07775;
   if ((d->w&0700) != 0600 || !(modemsk&(1<<d->adrmode0)))
@@ -705,7 +705,7 @@ static int check_desa_chk(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_ext(DESA68parm_t * d)
+static int check_desa_ext(desa68_parm_t * d)
 {
   if ((d->w&07670)!=04200)
     return 0;
@@ -714,7 +714,7 @@ static int check_desa_ext(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_movem(DESA68parm_t * d)
+static int check_desa_movem(desa68_parm_t * d)
 {
   int modemsk, regmsk;
   int mode3, reg0, w;
@@ -748,7 +748,7 @@ static int check_desa_movem(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_jmp(DESA68parm_t * d)
+static int check_desa_jmp(desa68_parm_t * d)
 {
   int modemsk = 03744;
   if ((d->w&07600) != 07200) {
@@ -776,7 +776,7 @@ static int check_desa_jmp(DESA68parm_t * d)
   /*return 0;*/
 }
 
-static int check_desa_line4_mode3(DESA68parm_t * d)
+static int check_desa_line4_mode3(desa68_parm_t * d)
 {
   if (d->mode6 != 3) {
     return 0;
@@ -846,7 +846,7 @@ static int check_desa_line4_mode3(DESA68parm_t * d)
 }
 
 
-static void desa_line4(DESA68parm_t * d)
+static void desa_line4(desa68_parm_t * d)
 {
   switch (d->mode6) {
 
@@ -987,7 +987,7 @@ static void desa_line4(DESA68parm_t * d)
  *
  ***************/
 
-static void desa_addq_subq(DESA68parm_t * d)
+static void desa_addq_subq(desa68_parm_t * d)
 {
   int v;
 
@@ -1000,7 +1000,7 @@ static void desa_addq_subq(DESA68parm_t * d)
   get_ea_2(d, d->mode3, d->reg0, d->szchar);
 }
 
-static void desa_Dcc(DESA68parm_t * d)
+static void desa_Dcc(desa68_parm_t * d)
 {
   desa_ascii(d,('DB'<<16) + dbcc_ascii[(d->w>>8)&15]);
   desa_ascii(d,' D0,' + (d->reg0<<8));
@@ -1010,13 +1010,13 @@ static void desa_Dcc(DESA68parm_t * d)
   d->status = DESA68_INST | DESA68_BSR;
 }
 
-static void desa_Scc(DESA68parm_t * d)
+static void desa_Scc(desa68_parm_t * d)
 {
   desa_ascii(d, ('S'<<24) + (scc_ascii[(d->w>>8)&15]<<8) + ' ');
   get_ea_2(d, d->mode3, d->reg0, d->szchar);
 }
 
-static void desa_line5(DESA68parm_t * d)
+static void desa_line5(desa68_parm_t * d)
 {
   if ( (d->w&0370) == 0310 ) {
     desa_Dcc(d);
@@ -1036,7 +1036,7 @@ static void desa_line5(DESA68parm_t * d)
  * !!! COND=0001(false) => BSR
  ***************/
 
-static void desa_line6(DESA68parm_t * d)
+static void desa_line6(desa68_parm_t * d)
 {
   s32 a;
 
@@ -1072,7 +1072,7 @@ static void desa_line6(DESA68parm_t * d)
  * Format : 01111 REG 0 XXXXXXXX
  *
  ***************/
-static void desa_line7(DESA68parm_t * d)
+static void desa_line7(desa68_parm_t * d)
 {
   if (d->w & 0400) {
     desa_dcw(d);
@@ -1093,7 +1093,7 @@ static void desa_line7(DESA68parm_t * d)
  *
  ***************/
 
-static int check_desa_cmpa(DESA68parm_t * d)
+static int check_desa_cmpa(desa68_parm_t * d)
 {
   int modemsk = 07777;
 
@@ -1109,7 +1109,7 @@ static int check_desa_cmpa(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_eor_cmp(DESA68parm_t * d)
+static int check_desa_eor_cmp(desa68_parm_t * d)
 {
   int modemsk, inst;
 
@@ -1135,7 +1135,7 @@ static int check_desa_eor_cmp(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_cmpm(DESA68parm_t * d)
+static int check_desa_cmpm(desa68_parm_t * d)
 {
   if ((d->w&0470) != 0410)
     return 0;
@@ -1146,7 +1146,7 @@ static int check_desa_cmpm(DESA68parm_t * d)
   return 1;
 }
 
-static void desa_lineB(DESA68parm_t * d)
+static void desa_lineB(desa68_parm_t * d)
 {
   if (check_desa_cmpa(d))         return;
   else if (check_desa_eor_cmp(d)) return;
@@ -1172,7 +1172,7 @@ static void desa_lineB(DESA68parm_t * d)
  *
  ***************/
 
-static int check_desa_exg(DESA68parm_t * d)
+static int check_desa_exg(desa68_parm_t * d)
 {
   unsigned int reg;
   switch(d->w&0770) {
@@ -1195,7 +1195,7 @@ static int check_desa_exg(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_mul_div(DESA68parm_t * d)
+static int check_desa_mul_div(desa68_parm_t * d)
 {
   int modemsk = 0xFFD;
   if ( (d->w&0300) != 0300 || !( modemsk & (1<<d->adrmode0) ) )
@@ -1207,7 +1207,7 @@ static int check_desa_mul_div(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_abcd_sbcd(DESA68parm_t * d)
+static int check_desa_abcd_sbcd(desa68_parm_t * d)
 {
   if ( (d->w&0x1f0) != 0x100 )
     return 0;
@@ -1216,7 +1216,7 @@ static int check_desa_abcd_sbcd(DESA68parm_t * d)
 }
 
 
-static int check_desa_and_or(DESA68parm_t * d)
+static int check_desa_and_or(desa68_parm_t * d)
 {
   int modemsk = !(d->w&0400)? 0xFFD : 0x1FC;
   if ( ! (modemsk & (1<<d->adrmode0) ) )
@@ -1225,7 +1225,7 @@ static int check_desa_and_or(DESA68parm_t * d)
   return 1;
 }
 
-static void desa_lin8C(DESA68parm_t * d)
+static void desa_lin8C(desa68_parm_t * d)
 {
   if (check_desa_abcd_sbcd(d))    return;
   else if (check_desa_mul_div(d)) return;
@@ -1245,7 +1245,7 @@ static void desa_lin8C(DESA68parm_t * d)
  *
  **************/
 
-static int check_desa_addx_subx(DESA68parm_t * d)
+static int check_desa_addx_subx(desa68_parm_t * d)
 {
   if ( (d->w&0460) != 0400 )
     return 0;
@@ -1253,7 +1253,7 @@ static int check_desa_addx_subx(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_adda_suba(DESA68parm_t * d)
+static int check_desa_adda_suba(desa68_parm_t * d)
 {
   if (d->opsz != 3)
     return 0;
@@ -1268,7 +1268,7 @@ static int check_desa_adda_suba(DESA68parm_t * d)
   return 1;
 }
 
-static int check_desa_add_sub(DESA68parm_t * d)
+static int check_desa_add_sub(desa68_parm_t * d)
 {
   int modemsk = !(d->w&0400) ? 07777 : 00774;
 
@@ -1281,7 +1281,7 @@ static int check_desa_add_sub(DESA68parm_t * d)
   return 1;
 }
 
-static void desa_lin9D(DESA68parm_t * d)
+static void desa_lin9D(desa68_parm_t * d)
 {
   if (check_desa_adda_suba(d))           return;
   else if (check_desa_addx_subx(d))	return;
@@ -1299,7 +1299,7 @@ static void desa_lin9D(DESA68parm_t * d)
  * Format Mem: 1110 0TY D 11 MODRG0
  ***************/
 
-static void desa_lineE(DESA68parm_t * d)
+static void desa_lineE(desa68_parm_t * d)
 {
   static u16 shf_ascii[4] = { 'AS', 'LS', 'RO', 'RO' };
 
@@ -1346,7 +1346,7 @@ static void desa_lineE(DESA68parm_t * d)
  *
  ***************/
 
-static void desa_linAF(DESA68parm_t * d)
+static void desa_linAF(desa68_parm_t * d)
 {
   int vector = d->line - 0xA;
 
@@ -1356,7 +1356,7 @@ static void desa_linAF(DESA68parm_t * d)
   d->branch = 0x40 + ( (!!vector) <<2 );
 }
 
-static void (*desa_line[16])(DESA68parm_t *) =
+static void (*desa_line[16])(desa68_parm_t *) =
 {
   desa_line0, desa_li123, desa_li123, desa_li123,
   desa_line4, desa_line5, desa_line6, desa_line7,
@@ -1364,7 +1364,7 @@ static void (*desa_line[16])(DESA68parm_t *) =
   desa_lin8C, desa_lin9D, desa_lineE, desa_linAF,
 };
 
-void desa68(DESA68parm_t * d)
+void desa68(desa68_parm_t * d)
 {
   char tmp[128];
 

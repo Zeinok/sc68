@@ -245,6 +245,7 @@ AS_IF([test "x$ac_native_win32" = "xyes"],
 sc68datadir='$(datadir)/sc68'
 AC_SUBST([sc68datadir])
 
+PACKAGE_LDFLAGS=$(echo $PACKAGE_LDFLAGS $LDFLAGS)
 
 # ,----------------------------------------------------------------------.
 # | Standard functions                                                   |

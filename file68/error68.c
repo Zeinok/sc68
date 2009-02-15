@@ -25,64 +25,34 @@
 # include "config.h"
 #endif
 #include "error68.h"
-#include "debugmsg68.h"
+#include "msg68.h"
 
-#include <stdarg.h>
-#include <stdio.h>
 #include <string.h>
 
-const int error68_feature = debugmsg68_ERROR;
-
-/* Default cookie. */
-static void * default_cookie = 0;
-
-/* Default error handler prints to stderr and adds an additionnal '\n'
- * if neccessary.
- */
-static void default_handler(void * cookie, const char * fmt, va_list list)
-{
-  FILE * out = cookie?(FILE*)cookie:stderr;
-  int l = strlen(fmt)-1;
-  vfprintf(out,fmt,list);
-  if (l>=0 && fmt[l] != '\n') {
-    fputc('\n',out);
-  }
-}
-
-/* Error handler. */
-static error68_t error68_fct = default_handler;
-
-/* Set error handler. */
-error68_t error68_set_handler(error68_t handler)
-{
-  error68_t old = error68_fct;
-  error68_fct = handler;
-  return old;
-}
-
-/* Set error default cookie. */
-void * error68_set_cookie(void * cookie)
-{
-  void * old = default_cookie;
-  default_cookie = cookie;
-  return old;
-}
+#define error68_feature msg68_ERROR
 
 /* Process error message (printf like format). */
-int error68_va(void * cookie, const char * format, va_list list)
+int error68_va(const char * format, va_list list)
 {
-  if (error68_fct && format) {
-    debugmsg68(error68_feature,"E:");
-    vdebugmsg68(error68_feature,format,list);
-    error68_fct(cookie?cookie:default_cookie, format, list);
+  if (format) {
+    msg68_va(error68_feature,format,list);
   }
   return -1;
 }
 
 /* Process error message (printf like format). */
-int error68(void * cookie, const char * format, ...)
+int error68(const char * format, ...)
 {
+  int err;
   va_list list;
+  int len = strlen(format);
+
   va_start(list, format);
-  return error68_va(cookie, format, list);
+  err = error68_va(format, list);
+  if (len > 0 && format[len-1] != '\n') {
+    err = error68("\n");
+  }
+  va_end(list);
+
+  return err;
 }

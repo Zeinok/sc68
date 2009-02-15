@@ -1,9 +1,9 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/rsc68.h
+ * @file     sc68/rsc68.h
  * @author   Benjamin Gerard
  * @date     1998-10-07
- * @brief    Resources header.
+ * @brief    Resources access header.
  *
  */
 
@@ -20,7 +20,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_rsc68  Resource files
+/** @defgroup  file68_rsc  Resource access
  *  @ingroup   file68_lib
  *
  *    Provides resource access functions.

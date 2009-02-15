@@ -32,7 +32,7 @@
 #endif
 
 #include "ymemul.h"
-#include <sc68/debugmsg68.h>
+#include <sc68/msg68.h>
 #include <sc68/option68.h>
 
 #include <string.h>
@@ -44,7 +44,7 @@
 #ifndef DEBUG_YM_O
 # define DEBUG_YM_O 0
 #endif
-int ym_feature = debugmsg68_DEFAULT;
+int ym_feature = msg68_DEFAULT;
 
 int ym_default_chans = 7;
 
@@ -189,12 +189,12 @@ int ym_default_engine(int emul)
     break;
 
   default:			/* Invalid values */
-    debugmsg68_error("ym-2149: unknown ym-engine (%d)\n",emul);
+    msg68_error("ym-2149: unknown ym-engine (%d)\n",emul);
     emul = default_parms.emul;
   case YM_EMUL_ORIG:
   case YM_EMUL_BLEP:
     default_parms.emul = emul;
-    debugmsg68_info("ym-2149: switch default engine to *%s*\n",
+    msg68_info("ym-2149: switch default engine to *%s*\n",
 		    emul==YM_EMUL_ORIG ? "SC68 ORIGINAL":"BLEP SYSNTHESIS");
     break;
   }
@@ -224,7 +224,7 @@ int ym_init(ym_parms_t * const parms)
   option68_t * opt;
 
   /* Debug */
-  ym_feature = debugmsg68_feature("ym","ym-2149 emulator",DEBUG_YM_O);
+  ym_feature = msg68_feature("ym","ym-2149 emulator",DEBUG_YM_O);
 
   /* Set default parameters. */
   if (parms) {
@@ -396,7 +396,7 @@ int ym_active_channels(ym_t * const ym, const int off, const int on)
     v = (voice_mute&1) | ((voice_mute>>5)&2) | ((voice_mute>>10)&4);
     v = ((v&~off)|on)&7;
     ym->voice_mute = ym_smsk_table[v];
-    debugmsg68_debug("ym-2149: active channels -- %c%c%c\n",
+    TRACE68(ym_feature,"ym-2149: active channels -- %c%c%c\n",
 		     (v&1)?'A':'.', (v&1)?'B':'.', (v&1)?'B':'.');
   }
   return v;
@@ -424,7 +424,7 @@ uint68_t ym_sampling_rate(ym_t * const ym, const uint68_t hz)
 	ret = ym->cb_sampling_rate(ym,ret);
       }
       ym->hz = ret;
-      debugmsg68_debug("ym-2149: rate -- %d -> %d\n", hz, ret);
+      TRACE68(ym_feature,"ym-2149: rate -- %d -> %d\n", hz, ret);
     }
   }
   
@@ -469,10 +469,9 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
   } else if (p->outlevel >= 0x100) {
     p->outlevel = 0x100;
   }
-  p->outlevel >>= 2;
 
-  debugmsg68_debug("ym-2149: setup -- engine:%d rate:%d clock:%d level:%d\n",
-		   p->emul,p->hz,p->clock,p->outlevel);
+  TRACE68(ym_feature,"ym-2149: setup -- engine:%d rate:%d clock:%d level:%d\n",
+	      p->emul,p->hz,p->clock,p->outlevel);
 
   if (ym) {
     ym->ymout5      = ymout5;
@@ -480,7 +479,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
     ym->waccess     = ym->static_waccess;
     ym->waccess_nxt = ym->waccess;
     ym->clock       = p->clock;
-    ym->outlevel    = p->outlevel;
+    ym->outlevel    = p->outlevel >> 2;
     ym->voice_mute  = ym_smsk_table[7 & ym_default_chans];
     /* clearing sampling rate callback ensure requested rate to be in
        valid range. */
@@ -489,17 +488,17 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
 
     switch (p->emul) {
     case YM_EMUL_ORIG:
-      debugmsg68_info("ym-2149: select *SC68 ORIGINAL* engine\n");
+      msg68_info("ym-2149: select *SC68 ORIGINAL* engine\n");
       err = ym_orig_setup(ym);
       break;
 
     case YM_EMUL_BLEP:
-      debugmsg68_info("ym-2149: select *BLEP SYSNTHESIS* engine\n");
+      msg68_info("ym-2149: select *BLEP SYSNTHESIS* engine\n");
       err = ym_blep_setup(ym);
       break;
       
     default:
-      debugmsg68_critical("ym-2149: invalid ym engine (%d)\n", p->emul);
+      msg68_critical("ym-2149: invalid ym engine (%d)\n", p->emul);
       err = -1;
     }
     /* at this point specific sampling rate callback can be call */
@@ -514,7 +513,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
  */
 void ym_cleanup(ym_t * const ym)
 {
-  debugmsg68_debug("ym-2149: cleanup\n");
+  TRACE68(ym_feature,"ym-2149: cleanup\n");
   if (ym && ym->cb_cleanup) {
     ym->cb_cleanup(ym);
   }

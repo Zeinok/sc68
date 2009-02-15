@@ -225,7 +225,11 @@ m4_define([DO_WITH_PACKAGE],
         AC_SUBST($1[_abs])
       ])
 
-    #DUMP_WITH_PACKAGE_VARS([$1],[ END ])
+#     [PACKAGE_CFLAGS=$](echo [$PACKAGE_CFLAGS])
+#     [PACKAGE_CPPFLAGS=$](echo [$PACKAGE_CPPFLAGS] [$]$1[_def] [$]$1[_inc])
+#     [PACKAGE_LDFLAGS=$](echo [$PACKAGE_LDFLAGS] [$]$1[_ldf] [$]$1[_lib])
+
+    DUMP_WITH_PACKAGE_VARS([$1],[ END ])
   ])
 
 

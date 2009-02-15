@@ -1,6 +1,6 @@
 /**
- * @ingroup  file68_istream68
- * @file     file68/istream68_ao.h
+ * @ingroup  file68_lib
+ * @file     sc68/istream68_ao.h
  * @author   Benjamin Gerard
  * @date     2007-03-08
  * @brief    AO stream header.
@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 /** @name     AO stream
- *  @ingroup  file68_istream68
+ *  @ingroup  file68_istream
  *
  *    Implements istream68_t for XIPH libao (audio output).
  *

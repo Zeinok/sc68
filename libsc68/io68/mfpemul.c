@@ -28,7 +28,7 @@
 /* #include <stdio.h> //$$$DEBUG */
 
 #include "mfpemul.h"
-#include <sc68/debugmsg68.h>
+#include <sc68/msg68.h>
 
 #define cpp(V)      (V*prediv_width[(int)ptimer->tcr])
 #define timerfrq(V) ((8000000u*192u)/cpp(V))
@@ -40,7 +40,7 @@
 #ifndef DEBUG_MFP_O
 # define DEBUG_MFP_O 0
 #endif
-int mfp_feature = debugmsg68_DEFAULT;
+int mfp_feature = msg68_DEFAULT;
 
 /* Define for more accurate emulation (about pending bit...)
    $$$ May be broken $$$
@@ -152,14 +152,14 @@ static int timer_get_tdr(const char * tag,
 
   const uint68_t cti_verif = tdr * psw - psw + psr;
 
-  debugmsg68(mfp_feature,
+  msg68(mfp_feature,
 	     "timer-%c get TDR(%s) @%u cti:%u/%u cnt:%u psr:%u/%u => %u/%u\n",
 	     ptimer->def.letter, tag, bogoc,
 	     cti, cpp, cnt, psr, psw, tdr, ptimer->tdr_res);
   
   /* Verify */ 
   if (cti_verif != cti) {
-    debugmsg68(mfp_feature,
+    msg68(mfp_feature,
 	       "=> verify error (%u != %u)\n", cti_verif, cti);
   }
 
@@ -194,7 +194,7 @@ void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
   
 
   if (bogoc > ptimer->cti) {
-    debugmsg68(mfp_feature,
+    msg68(mfp_feature,
 	       "Reconf timer-%c @%u > cti:%u !!!CYCLE OUT OF RANGE!!!\n",
 	       ptimer->def.letter, bogoc, ptimer->cti);
     ptimer->cti = bogoc + psw * ptimer->tdr_res;
@@ -213,7 +213,7 @@ void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
 
   ptimer->tcr = tcr;
 
-  debugmsg68(mfp_feature,
+  msg68(mfp_feature,
 	     "Reconf timer-%c @%u cti:%u cpp:%u=> %d->%dhz\n", 
 	     ptimer->def.letter, bogoc,
 	     ptimer->cti, cpp(ptimer->tdr_res),
@@ -257,7 +257,7 @@ void resume_timer(mfp_timer_t * const ptimer, int tcr, bogoc68_t bogoc)
   ptimer->tcr = tcr;
   ptimer->cti = bogoc + ptimer->tdr_cur * prediv_width[tcr] - ptimer->psc;
   
-  debugmsg68(mfp_feature,
+  msg68(mfp_feature,
 	     "Resume timer-%c @%u cti:%u cpp:%u "
 	     "tdr:%u/%u psw:%u(%u) => %dhz\n", 
 	     ptimer->def.letter, bogoc, ptimer->cti,
@@ -321,12 +321,12 @@ void mfp_put_tdr(mfp_t * const mfp, int timer, int v, bogoc68_t bogoc)
 
   if (!ptimer->tcr) {
     ptimer->tdr_cur = v;
-    debugmsg68(mfp_feature,
+    msg68(mfp_feature,
 	       "Reload timer-%c TDR @%u => %u\n",
 	       ptimer->def.letter, bogoc, ptimer->tdr_res);
   } else if (ptimer->tcr && v != old_tdr) {
     uint68_t old_frq = timerfrq(old_tdr);
-    debugmsg68(mfp_feature,
+    msg68(mfp_feature,
 	       "Change timer-%c @%u cti:%u psw:%u(%u) cpp:%u"
 	       " => %u(%u)->%u(%u)hz\n",
 	       ptimer->def.letter, bogoc, ptimer->cti,
@@ -372,7 +372,7 @@ void mfp_put_tcr(mfp_t * const mfp, int timer, int v, const bogoc68_t bogoc)
     mfp->map[0x19+2*timer] = v;
     /* $$$ Event mode + Pulse mode not emulate */
     if (v&0x10) {
-        debugmsg68(mfp_feature,
+        msg68(mfp_feature,
 		   "timer-%c: mode(%02x) not supported\n",
 		   timer_def[timer].letter,(int)(u8)v);
     }
@@ -475,7 +475,7 @@ void mfp_adjust_bogoc(mfp_t * const mfp, const bogoc68_t bogoc)
   for (ptimer = mfp->timers; ptimer != mfp->timers+4; ++ptimer) {
     if (ptimer->tcr) {
       if (ptimer->cti < bogoc) {
-	debugmsg68(mfp_feature,
+	msg68(mfp_feature,
 		   "Adjust timer-%c cti:%u cycle:%u",
 		   ptimer->def.letter,ptimer->cti, bogoc);
       }
@@ -485,7 +485,7 @@ void mfp_adjust_bogoc(mfp_t * const mfp, const bogoc68_t bogoc)
 	ptimer->cti += cpp(ptimer->tdr_res);
       }
       if (ptimer->int_lost) {
-	debugmsg68(mfp_feature,
+	msg68(mfp_feature,
 		   " ->%d lost\n",ptimer->int_lost);
 	ptimer->int_lost = 0;
       }
@@ -578,12 +578,12 @@ void mfp_cleanup(mfp_t * const mfp)
 int mfp_init(void)
 {
   mfp_feature =
-    debugmsg68_feature("mfp","MFP-68901 emulator", DEBUG_MFP_O);
+    msg68_feature("mfp","MFP-68901 emulator", DEBUG_MFP_O);
   return 0;
 }
 
 void mfp_shutdown(void)
 {
-  debugmsg68_feature_free(mfp_feature);
-  mfp_feature = debugmsg68_DEFAULT;
+  msg68_feature_free(mfp_feature);
+  mfp_feature = msg68_DEFAULT;
 }

@@ -29,7 +29,7 @@
 
 /* need this before sc68.h to have all features defined. */
 #include <sc68/istream68.h>
-#include <sc68/debugmsg68.h>
+#include <sc68/msg68.h>
 #include <sc68/init68.h>
 #include <sc68/option68.h>
 #include <sc68/url68.h>
@@ -83,8 +83,8 @@ typedef struct my_option_s my_option_t;
 #endif
 
 static sc68_t * sc68 = 0;
-static const int sc68_feature = debugmsg68_DEBUG;
-static int opt_verb = debugmsg68_WARNING;
+static const int sc68_feature = msg68_TRACE;
+static int opt_verb = msg68_WARNING;
 static int opt_vers = 0;
 static int opt_help = 0;
 static int opt_list = 0;
@@ -103,7 +103,7 @@ sc68_debug_cb(const int bit, void *data, const char *fmt, va_list list)
   FILE * out;
 
   /* select output: always error output except for INFO messages */
-  out = bit == debugmsg68_INFO
+  out = bit == msg68_INFO
     ? debug_data->stdout
     : debug_data->stderr
     ;
@@ -116,7 +116,7 @@ static void Debug(const char * fmt, ...)
 {
   va_list list;
   va_start(list,fmt);
-  vdebugmsg68(sc68_feature,fmt,list);
+  msg68_va(sc68_feature,fmt,list);
   va_end(list);
 }
 
@@ -125,14 +125,14 @@ void Info(const char * fmt, ...)
 {
   va_list list;
   va_start(list, fmt);
-  vdebugmsg68(debugmsg68_INFO,fmt,list);
+  msg68_va(msg68_INFO,fmt,list);
   va_end(list);
 }
 
 /* Standard message. */
 void Print(const char * fmt, ...)
 {
-  if (opt_verb >= debugmsg68_WARNING) {
+  if (opt_verb >= msg68_WARNING) {
     va_list list;
     va_start(list, fmt);
     vfprintf(sc68_debug_data.stdout,fmt,list);
@@ -145,7 +145,7 @@ void Warning(const char * fmt, ...)
 {
   va_list list;
   va_start(list, fmt);
-  vdebugmsg68(debugmsg68_WARNING,fmt,list);
+  msg68_va(msg68_WARNING,fmt,list);
   va_end(list);
 }
 
@@ -154,7 +154,7 @@ void Error(const char * fmt, ...)
 {
   va_list list;
   va_start(list, fmt);
-  vdebugmsg68(debugmsg68_ERROR,fmt,list);
+  msg68_va(msg68_ERROR,fmt,list);
   va_end(list);
 }
 
@@ -193,15 +193,15 @@ print_feature(void * data,
 	      const int bit, const char * name, const char * desc)
 {
   const char * fmt = "%02d | %-10s | %-40s | %-3s\n";
-  const int mask = (debugmsg68_mask >> bit) & 1;
+  const int mask = (msg68_mask >> bit) & 1;
   fprintf(data,fmt, bit, name, desc, mask?"ON":"OFF");
 } 
 
 /* Print debug features. */
 static int print_features(void)
 {
-  printf("debug features: current mask is %08X\n",debugmsg68_mask);
-  debugmsg68_feature_help(stdout,print_feature);
+  printf("debug features: current mask is %08X\n",msg68_mask);
+  msg68_feature_help(stdout,print_feature);
   return 0;
 }
 
@@ -292,9 +292,9 @@ static void spool_error_message(sc68_t * sc68)
   const char * s;
 
   if (s = sc68_error_get(sc68), s) {
-    debugmsg68_error("%s\n","sc68: stacked error message:");
+    msg68_error("%s\n","sc68: stacked error message:");
     do {
-      debugmsg68_error("      - %s\n",s);
+      msg68_error("      - %s\n",s);
     } while (sc68 && (s = sc68_error_get(sc68), !s));
   }
 }
@@ -468,8 +468,8 @@ int main(int argc, char *argv[])
   memset(&init68, 0, sizeof(init68));
   init68.argc = argc;
   init68.argv = argv;
-  init68.debug        = sc68_debug_cb;
-  init68.debug_cookie = &sc68_debug_data;
+  init68.msg_handler = sc68_debug_cb;
+  init68.msg_cookie  = &sc68_debug_data;
   if (sc68_init(&init68)) {
     goto error;
   }
@@ -538,9 +538,9 @@ int main(int argc, char *argv[])
     return print_version();
   }
 
-  if (opt_verb < debugmsg68_CRITICAL) opt_verb = debugmsg68_CRITICAL;
-  if (opt_verb > debugmsg68_TRACE)    opt_verb = debugmsg68_TRACE;
-  debugmsg68_feature_level(opt_verb);
+  if (opt_verb < msg68_CRITICAL) opt_verb = msg68_CRITICAL;
+  if (opt_verb > msg68_TRACE)    opt_verb = msg68_TRACE;
+  msg68_feature_level(opt_verb);
 
   if (opt_list) {
     return print_features();

@@ -1,9 +1,9 @@
 /**
- * @ingroup  file68_istream68
- * @file     file68/istream68_def.h
+ * @ingroup  file68_lib
+ * @file     sc68/istream68_def.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
- * @brief    Generic stream interface.
+ * @brief    Generic stream definition header.
  *
  */
 
@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 /** @name     Open modes
- *  @ingroup  file68_istream68
+ *  @ingroup  file68_istream
  *  @{
  */
 
@@ -52,7 +52,7 @@ extern "C" {
 /**@}*/
 
 /** @name     Stream function prototypes.
- *  @ingroup  file68_istream68
+ *  @ingroup  file68_istream
  *  @{
  */
 typedef const char * (* istream68_name_t) (istream68_t *);
@@ -70,7 +70,7 @@ typedef void (* istream68_destroy_t) (istream68_t *);
  *
  *     Set of functions needed to handle a stream.
  *
- *  @ingroup  file68_istream68
+ *  @ingroup  file68_istream
  */
 struct _istream68_t {
   istream68_name_t name;       /**< Get stream name.        */

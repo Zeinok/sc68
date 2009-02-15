@@ -1,6 +1,6 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/file68.h
+ * @file     sc68/file68.h
  * @author   Benjamin Gerard
  * @date     1998-09-03
  * @brief    Music file header.
@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_file68 sc68 files
+/** @defgroup  file68_file  Music file manipulation
  *  @ingroup   file68_lib
  *
  *     Provides various functions for sc68 file manipulation.

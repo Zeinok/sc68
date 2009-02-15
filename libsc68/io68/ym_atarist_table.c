@@ -1,4 +1,3 @@
-
 /*
  *          sc68 - YM-2149 emulator - Atari ST Volume Table
  *
@@ -180,7 +179,7 @@ void ym_create_5bit_atarist_table(s16 * out, unsigned int level)
       int tmp = out[h], res;
       
       if (tmp < min || tmp > max) 
-	debugmsg68_critical
+	msg68_critical
 	  ("ym-2149: *ATARI-ST* volumes value %d out of range [%d..%d]\n",
 	   tmp,min,max);
       
@@ -188,7 +187,7 @@ void ym_create_5bit_atarist_table(s16 * out, unsigned int level)
       out[h] = res;
     }
   }
-  debugmsg68_info("ym-2149: using *ATARI-ST* volumes %d [%d..%d]\n",
+  msg68_info("ym-2149: using *ATARI-ST* volumes %d [%d..%d]\n",
 		  level, out[0],out[0x7FFF]);
   
 }

@@ -41,7 +41,7 @@
 #include "sc68/string68.h"
 #include "sc68/rsc68.h"
 #include "sc68/init68.h"
-#include "sc68/debugmsg68.h"
+#include "sc68/msg68.h"
 
 #include "debug68_error.h"
 #include "debug68_cli.h"
@@ -69,7 +69,7 @@ typedef struct option my_option_t;
 static void
 sc68_debug_cb(const int bit, void *data, const char *fmt, va_list list)
 {
-  struct sc68_debug_data_s * debug_data = data;
+  //struct sc68_debug_data_s * debug_data = data;
   FILE * out = stderr;
 
   /* select output: always error output except for INFO messages */
@@ -1328,8 +1328,8 @@ int main(int argc, char *argv[])
   memset(&init68, 0, sizeof(init68));
   init68.argc = argc;
   init68.argv = argv;
-  init68.debug        = sc68_debug_cb;
-  init68.debug_cookie = 0;
+  init68.msg_handler = sc68_debug_cb;
+  init68.msg_cookie  = 0;
 
   if (sc68_init(&init68)) {
     return -1;

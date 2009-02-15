@@ -1,6 +1,6 @@
 /* This file exists for documentation purpose only. */
 /**
-@defgroup  unice68_prg unice68 program
+@defgroup  unice68_prg  unice68 program
 @ingroup   usertools68
 
 Ice depacker based on 68000 ICE 2.40 original.

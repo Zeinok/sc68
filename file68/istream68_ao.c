@@ -28,12 +28,12 @@
 #include "istream68_ao.h"
 
 
-#include "debugmsg68.h"
+#include "msg68.h"
 
 #ifndef DEBUG_AO68_O
 # define DEBUG_AO68_O 0
 #endif
-int ao68_feature = debugmsg68_DEFAULT;
+int ao68_feature = msg68_DEFAULT;
 
 /* Define this if you want xiph libao support. */
 #ifdef USE_AO
@@ -88,7 +88,7 @@ unsigned int audio68_sampling_rate(const unsigned int rate)
       f = 96000u;
     }
     istream68_ao_defaut_rate = f;
-    debugmsg68_info("audio output: default sampling rate [%uhz]\n",f);
+    msg68_info("audio output: default sampling rate [%uhz]\n",f);
   }
   return f;
 }
@@ -98,28 +98,25 @@ int istream68_ao_init(void)
   int err = -1;
 
   if (init) {
-    TRACE68(ao68_feature,"istream68_ao_init() already initialized\n");
+    TRACE68(ao68_feature,"xiph-ao: init already initialized\n");
   } else {
     ao68_feature = 
-      debugmsg68_feature("audio","Xiph AO audio stream",DEBUG_AO68_O);
-    TRACE68(ao68_feature,"istream68_ao_init() {\n");
+      msg68_feature("audio","Xiph AO audio stream",DEBUG_AO68_O);
     ao_initialize();
     err = 0;
     init = 1;
-    TRACE68(ao68_feature,"} istream68_ao_init() => [%s]\n",strok68(err));
+    TRACE68(ao68_feature,"xiph-ao: init => [%s]\n",strok68(err));
   }
   return err;
 }
 
 void istream68_ao_shutdown(void)
 {
-  TRACE68(ao68_feature,"istream68_ao_init() {\n");
+  TRACE68(ao68_feature,"xiph-ao: shutdown\n");
   if (init) {
     init = 0;
-    TRACE68(ao68_feature,"istream68_ao_init() ao_shutdown()\n");
     ao_shutdown();
   }
-  TRACE68(ao68_feature,"} istream68_ao_init()\n");
 }
 
 static const char * isao_name(istream68_t * istream)
@@ -128,37 +125,35 @@ static const char * isao_name(istream68_t * istream)
 
   return (!ism || !ism->name[0])
     ? 0
-    : ism->name;
+    : ism->name
+    ;
 }
 
 static void dump_ao_info(const int id, const ao_info * info, const int full)
 {
   if (info) {
-    TRACE68(ao68_feature,
-	    "\n"
-	    "ao_driver #%02d\n"
-	    "-------------\n"
-	    "  type       : %s\n"
-	    "  name       : %s\n"
-	    "  short-name : %s\n"
-	    "  author     : %s\n"
-	    "  comment    : %s\n"
-	    "  priority   : %d\n",
-	    id, info->type==AO_TYPE_LIVE?"live":"file",
-	    strnevernull68(info->name),
-	    strnevernull68(info->short_name),
-	    strnevernull68(info->author),
-	    strnevernull68(info->comment),info->priority);
+    msg68(ao68_feature,
+	  "\n"
+	  "ao_driver #%02d\n"
+	  "-------------\n"
+	  "  type       : %s\n"
+	  "  name       : %s\n"
+	  "  short-name : %s\n"
+	  "  author     : %s\n"
+	  "  comment    : %s\n"
+	  "  priority   : %d\n",
+	  id, info->type==AO_TYPE_LIVE?"live":"file",
+	  strnevernull68(info->name),
+	  strnevernull68(info->short_name),
+	  strnevernull68(info->author),
+	  strnevernull68(info->comment),info->priority);
     if (full) {
       int i;
-      TRACE68(ao68_feature,
-	      "  options    : %d\n", info->option_count);
-
+      msg68(ao68_feature, "  options    : %d\n", info->option_count);
       for (i=0; i<info->option_count; ++i) {
-	TRACE68(ao68_feature,"                - %s\n",info->options[i]);
+	msg68(ao68_feature,"                - %s\n",info->options[i]);
       }
     }
-
   }
 }
 
@@ -169,15 +164,13 @@ static int isao_open(istream68_t * istream)
   ao_info * info;
   char * url;
 
-  TRACE68(ao68_feature,"isao_open(%s) {\n",
-	  istream68_filename(istream));
-
+  TRACE68(ao68_feature,"xiph-ao: open '%s'\n", istream68_filename(istream));
   if (!is || is->ao.device) {
     goto error;
   }
 
   url = is->name;
-  TRACE68(ao68_feature,"isao_open: parsing url [%s]\n",url);
+  TRACE68(ao68_feature,"xiph-ao: open parsing url [%s]\n",url);
 
   do {
     char * s = strchr(url,'/'), *s2;
@@ -188,28 +181,28 @@ static int isao_open(istream68_t * istream)
       char * val = s2+1;
       *s2 = 0;
 
-      TRACE68(ao68_feature,"isao_open: key=%s, val=%s\n",key,val);
+      TRACE68(ao68_feature,"xiph-ao: open key=%s, val=%s\n",key,val);
       if (!strcmp68(key,"output")) {
 	if (s) *s = '/';
 	s = 0;
-	TRACE68(ao68_feature,"isao_open: set OUTPUT-FILENAME to [%s]\n", val);
+	TRACE68(ao68_feature,"xiph-ao: open set OUTPUT-FILENAME to [%s]\n", val);
 	is->outname = val;
       } else if (!strcmp68(key,"driver")) {
 	int id = !strcmp68(val,"default")
 	  ? ao_default_driver_id()
 	  : ao_driver_id(val);
-	  TRACE68(ao68_feature,"isao_open: DRIVER '%s', id:%d\n",val,id);
+	  TRACE68(ao68_feature,"xiph-ao: open DRIVER '%s', id:%d\n",val,id);
 	  info = ao_driver_info(id);
 	  if (info) {
 	    is->ao.driver_id = id;
-	    TRACE68(ao68_feature,"isao_open: set DRIVER to [%s,%s]\n",
+	    TRACE68(ao68_feature,"xiph-ao: open set DRIVER to [%s,%s]\n",
 		    info->short_name,info->name);
 	  }
       } else if (!strcmp68(key,"rate")) {
 	int frq = 0;
 	while (*val>='0' && *val<='9') frq = frq*10 + *val++ - '0';
 	if (frq > 0) {
-	  TRACE68(ao68_feature,"isao_open: set SAMPLING-RATE to %d\n",frq);
+	  TRACE68(ao68_feature,"xiph-ao: open set SAMPLING-RATE to %d\n",frq);
 	  is->ao.format.rate = frq;
 	}
       } else if (!strcmp68(key,"format")) {
@@ -218,54 +211,54 @@ static int isao_open(istream68_t * istream)
 
 	    /* ENDIANESS */
 	  case 'n': /* native (same as cpu) */
-	    TRACE68(ao68_feature,"isao_open: set NATIVE-ENDIAN pcm\n");
+	    TRACE68(ao68_feature,"xiph-ao: open set NATIVE-ENDIAN pcm\n");
 	    is->ao.format.byte_format = AO_FMT_NATIVE;
 	    break;
 	  case 'l': /* little */
-	    TRACE68(ao68_feature,"isao_open: set LITTLE-ENDIAN pcm\n");
+	    TRACE68(ao68_feature,"xiph-ao: open set LITTLE-ENDIAN pcm\n");
 	    is->ao.format.byte_format = AO_FMT_LITTLE;
 	    break;
 	  case 'b': /* big    */
-	    TRACE68(ao68_feature,"isao_open: set BIG-ENDIAN pcm\n");
+	    TRACE68(ao68_feature,"xiph-ao: open set BIG-ENDIAN pcm\n");
 	    is->ao.format.byte_format = AO_FMT_BIG;
 	    break;
 
 	    /* SIGNE */
 	  case '+': /* unsigned */
-	    TRACE68(ao68_feature,"isao_open: ignore UNSIGNED pcm\n");
+	    TRACE68(ao68_feature,"xiph-ao: open ignore UNSIGNED pcm\n");
 	    break;
 	  case '-': /*   signed */
-	    TRACE68(ao68_feature,"isao_open: set SIGNED pcm\n");
+	    TRACE68(ao68_feature,"xiph-ao: open set SIGNED pcm\n");
 	    break;
 
 	    /* CHANNELS */
 	  case '1': /* mono, 1 channel */
-	    TRACE68(ao68_feature,"isao_open: set MONO pcm\n");
+	    TRACE68(ao68_feature,"xiph-ao: open set MONO pcm\n");
 	    is->ao.format.channels = 1;
 	    break;
 	  case '2': /* stereo, 2 channels */
-	    TRACE68(ao68_feature,"isao_open: set STEREO pcm\n");
+	    TRACE68(ao68_feature,"xiph-ao: open set STEREO pcm\n");
 	    is->ao.format.channels = 2;
 	    break;
 
 	    /* FORMAT */
 	  case 'W': /* 16 bit */
-	    TRACE68(ao68_feature,"isao_open: set 16-BIT pcm\n");
+	    TRACE68(ao68_feature,"xiph-ao: open set 16-BIT pcm\n");
 	    is->ao.format.bits = 16;
 	    break;
 	  case 'B': /*  8 bit */
-	    TRACE68(ao68_feature,"isao_open: set 16-BIT pcm\n");
+	    TRACE68(ao68_feature,"xiph-ao: open set 16-BIT pcm\n");
 	    is->ao.format.bits = 8;
 	    break;
 	  case 'F': /* float  */
-	    TRACE68(ao68_feature,"isao_open: ignore FLOAT pcm\n");
+	    TRACE68(ao68_feature,"xiph-ao: open ignore FLOAT pcm\n");
 	    break;
 	  } /* switch */
 	} /* while */
       } else {
 	/* Unknown options -> append to driver */
 	int res = ao_append_option(&is->ao.options, key, val);
-	TRACE68(ao68_feature,"isao_open: add option %s=%s to driver [%s]\n",
+	TRACE68(ao68_feature,"xiph-ao: open add option %s=%s to driver [%s]\n",
 		key,val,strok68(!res));
       }
       *s2 = '=';
@@ -293,7 +286,8 @@ static int isao_open(istream68_t * istream)
 
   info = ao_driver_info(is->ao.driver_id);
   if (!info) {
-    TRACE68(ao68_feature,"isao_open:  ao_driver_info: => [%s]\n",strok68(-1));
+    TRACE68(ao68_feature,
+	    "xiph-ao: open ao_driver_info: => [%s]\n", strok68(-1));
     goto error;
   }
 
@@ -322,8 +316,8 @@ static int isao_open(istream68_t * istream)
     strcpy(is->defoutname,"sc68");
     strcat68(is->defoutname,ext,sizeof(is->defoutname)-1);
     is->outname = is->defoutname;
-    TRACE68(ao68_feature,"isao_open: set default OUTPUT-FILENAME to [%s]\n",
-	    is->outname);
+    TRACE68(ao68_feature,
+	    "xiph-ao: set default OUTPUT-FILENAME to [%s]\n", is->outname);
   }
 
   is->ao.device =
@@ -337,9 +331,9 @@ static int isao_open(istream68_t * istream)
   }
 
   if (info->type == AO_TYPE_LIVE) {
-    debugmsg68_info("xiph-ao: using *%s* driver\n", info->short_name);
+    msg68_info("xiph-ao: using *%s* driver\n", info->short_name);
   } else {
-    debugmsg68_info("xiph-ao: using *%s* driver to write '%s'\n",
+    msg68_info("xiph-ao: using *%s* driver to write '%s'\n",
 		    info->short_name,is->outname);
   }
    
@@ -347,7 +341,7 @@ static int isao_open(istream68_t * istream)
 
   err = 0;
  error:
-  TRACE68(ao68_feature, "} isao_open() => [%s]\n", strok68(err));
+  TRACE68(ao68_feature, "xiph-ao: open => [%s]\n", strok68(err));
   return err;
 }
 
@@ -356,7 +350,7 @@ static int isao_close(istream68_t * istream)
   istream68_ao_t * is = (istream68_ao_t *)istream;
   int err = -1;
 
-  TRACE68(ao68_feature,"isao_close(%s) {\n",istream68_filename(istream));
+  TRACE68(ao68_feature, "xiph-ao: close '%s'\n",istream68_filename(istream));
 
   if (!is || !is->ao.device) {
     goto error;
@@ -367,7 +361,7 @@ static int isao_close(istream68_t * istream)
 
   err = 0;
  error:
-  TRACE68(ao68_feature,"} isao_close() => [%s]\n",strok68(err));
+  TRACE68(ao68_feature, "xiph-ao: close => [%s]\n",strok68(err));
   return err;
 }
 
@@ -419,10 +413,9 @@ static int isao_seek(istream68_t * istream, int offset)
 
 static void isao_destroy(istream68_t * istream)
 {
-  TRACE68(ao68_feature,"isao_destroy(%s) {\n",istream68_filename(istream));
+  TRACE68(ao68_feature, "xiph-ao: destroy '%s'\n",istream68_filename(istream));
   istream68_ao_shutdown();
   free68(istream);
-  TRACE68(ao68_feature,"} isao_destroy()\n");
 }
 	
 static const istream68_t istream68_ao = {
@@ -455,11 +448,11 @@ istream68_t * istream68_ao_create(const char * fname, int mode)
   int len;
   ao68_info_t ao;
 
-  TRACE68(ao68_feature,"istream68_ao_create(%s,%d) {\n",
+  TRACE68(ao68_feature,"xiph-ao: create '%s' mode:%d\n",
 	  strnevernull68(fname),mode);
 
   if (!init) {
-    TRACE68(ao68_feature,"istream68_ao_create: ao is not initialized.\n");
+    TRACE68(ao68_feature,"xiph-ao: ao is not initialized.\n");
     goto error;
   }
 
@@ -499,8 +492,7 @@ istream68_t * istream68_ao_create(const char * fname, int mode)
 
  error:
   fname = istream68_filename(&isf->istream);
-  TRACE68(ao68_feature,
-	  "} istream68_ao_create() => [%s,%s]\n",
+  TRACE68(ao68_feature,"xiph-ao: create => [%s,%s]\n",
 	  strok68(!isf),strnevernull68(fname));
   return isf ? &isf->istream : 0;
 }

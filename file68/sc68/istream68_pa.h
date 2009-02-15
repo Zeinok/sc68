@@ -1,9 +1,9 @@
 /**
- * @ingroup  file68_istream68
- * @file     file68/istream68_pa.h
+ * @ingroup  file68_lib
+ * @file     sc68/istream68_pa.h
  * @author   Benjamin Gerard
  * @date     2007-03-08
- * @brief    PA stream header.
+ * @brief    PortAudio stream header.
  *
  */
 
@@ -21,7 +21,7 @@ extern "C" {
 #endif
 
 /** @name     PortAudio stream
- *  @ingroup  file68_istream68
+ *  @ingroup  file68_istream
  *
  *    Implements istream68_t for libportaudio (audio input/output).
  *

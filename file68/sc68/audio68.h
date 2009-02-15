@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_audio68  audio backend
+/** @defgroup  file68_audio  Audio backend
  *  @ingroup   file68_lib
  *
  *  @{

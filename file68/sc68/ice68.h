@@ -1,6 +1,6 @@
 /**
  * @ingroup  file68_lib
- * @file     file68/ice68.h
+ * @file     sc68/ice68.h
  * @author   Benjamin Gerard
  * @date     2003-09-06
  * @brief    ICE loader header.
@@ -20,7 +20,7 @@
 extern "C" {
 #endif
 
-/** @defgroup  file68_ice68  ICE loader support.
+/** @defgroup  file68_ice  ICE loader support.
  *  @ingroup   file68_lib
  *
  *    Provides functions for loading ICE stream.

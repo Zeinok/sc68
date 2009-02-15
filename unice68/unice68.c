@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
     goto error;
   }
   csize = 0;
-  dsize = unice68_get_depacked_size(header, &csize);
+  dsize = unice68_depacked_size(header, &csize);
   if (dsize == -1) {
     fprintf(stderr, "unice68: Not a valid ice file : missing magic.\n");
     goto error;

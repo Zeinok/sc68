@@ -21,13 +21,12 @@ hdir=sc68
 
 mysources=\
  $(sdir)/alloc68.c\
- $(sdir)/debugmsg68.c\
  $(sdir)/endian68.c\
  $(sdir)/error68.c\
  $(sdir)/file68.c\
  $(sdir)/gzip68.c\
- $(sdir)/init68.c\
  $(sdir)/ice68.c\
+ $(sdir)/init68.c\
  $(sdir)/istream68.c\
  $(sdir)/istream68_ao.c\
  $(sdir)/istream68_curl.c\
@@ -37,6 +36,7 @@ mysources=\
  $(sdir)/istream68_null.c\
  $(sdir)/istream68_pa.c\
  $(sdir)/istream68_z.c\
+ $(sdir)/msg68.c\
  $(sdir)/option68.c\
  $(sdir)/registry68.c\
  $(sdir)/rsc68.c\
@@ -46,7 +46,6 @@ mysources=\
 myheaders=\
  $(hdir)/alloc68.h\
  $(hdir)/audio68.h\
- $(hdir)/debugmsg68.h\
  $(hdir)/endian68.h\
  $(hdir)/error68.h\
  $(hdir)/file68.h\
@@ -64,6 +63,7 @@ myheaders=\
  $(hdir)/istream68_null.h\
  $(hdir)/istream68_pa.h\
  $(hdir)/istream68_z.h\
+ $(hdir)/msg68.h\
  $(hdir)/option68.h\
  $(hdir)/registry68.h\
  $(hdir)/rsc68.h\

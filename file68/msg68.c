@@ -29,20 +29,20 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "debugmsg68.h"
+#include "msg68.h"
 #include "string68.h"
 
-static debugmsg68_t debug  = 0;                /* Debug function.            */
-static void * debug_cookie = 0               ; /* Debug function user param. */
-static int current_feature = debugmsg68_DEBUG; /* Default current feature.   */
+static msg68_t debug  = 0;	          /* Debug function.            */
+static void * debug_cookie = 0;           /* Debug function user param. */
+static int current_feature = msg68_DEBUG; /* Default current feature.   */
 
 #if defined(DEBUGMSG_MASK)
-unsigned int debugmsg68_mask = DEBUGMSG_MASK;  /* User defined mask.         */
+unsigned int msg68_mask = DEBUGMSG_MASK;  /* User defined mask.         */
 #elif defined(DEBUG)
-unsigned int debugmsg68_mask = ~0;             /* Filter none.               */
+unsigned int msg68_mask = ~0;	          /* Filter none.               */
 #else
-unsigned int debugmsg68_mask =	               /* Filter almost all.         */
-  (1<<debugmsg68_CRITICAL)|(1<<debugmsg68_ERROR)|(1<<debugmsg68_WARNING);
+unsigned int msg68_mask =	          /* Filter almost all.         */
+  (1<<msg68_CRITICAL)|(1<<msg68_ERROR)|(1<<msg68_WARNING);
 #endif
 
 #define MAX_FEATURES (((sizeof(int)<<3)))
@@ -52,24 +52,24 @@ struct struct_debug_bit {
   const char * name; /* feature name.                                  */
   const char * desc; /* short descrition.                              */
 } debug_bits[MAX_FEATURES] = {
-  { debugmsg68_CRITICAL, "critical", "critical error message" },
-  { debugmsg68_ERROR   , "error"   , "error message"          },
-  { debugmsg68_WARNING , "warning" , "warning message"        },
-  { debugmsg68_INFO    , "info"    , "informational message"  },
-  { debugmsg68_DEBUG   , "debug"   , "debug message"          },
-  { debugmsg68_TRACE   , "trace"   , "trace message"          }
+  { msg68_CRITICAL, "critical", "critical error message" },
+  { msg68_ERROR   , "error"   , "error message"          },
+  { msg68_WARNING , "warning" , "warning message"        },
+  { msg68_INFO    , "info"    , "informational message"  },
+  { msg68_DEBUG   , "debug"   , "debug message"          },
+  { msg68_TRACE   , "trace"   , "trace message"          }
 };
 
 /* Set handler. */
-debugmsg68_t debugmsg68_set_handler(debugmsg68_t handler)
+msg68_t msg68_set_handler(msg68_t handler)
 {
-  debugmsg68_t old = debug;
+  msg68_t old = debug;
   debug = handler;
   return old;
 }
 
 /* Set cookie. */
-void * debugmsg68_set_cookie(void * cookie)
+void * msg68_set_cookie(void * cookie)
 {
   void * old = debug_cookie;
   debug_cookie = cookie;
@@ -77,98 +77,98 @@ void * debugmsg68_set_cookie(void * cookie)
 }
 
 /* Print debug message (variable argument). */
-void vdebugmsg68(int bit, const char * fmt, va_list list)
+void msg68_va(int bit, const char * fmt, va_list list)
 {
   if (debug) {
-    const int feature = (bit == debugmsg68_CURRENT)
+    const int feature = (bit == msg68_CURRENT)
       ? current_feature
       : bit
       ;
     
     switch (feature) {
-    case debugmsg68_NEVER:
+    case msg68_NEVER:
       break;
     default:
-      if ( ! (debugmsg68_mask&(1<<feature)) )
+      if ( ! (msg68_mask&(1<<feature)) )
 	break;
-      if (feature>debugmsg68_TRACE &&
-	  ! (debugmsg68_mask&(1<<debugmsg68_TRACE)))
+      if (feature>msg68_TRACE &&
+	  ! (msg68_mask&(1<<msg68_TRACE)))
 	break;
-    case debugmsg68_ALWAYS:
+    case msg68_ALWAYS:
       debug(feature, debug_cookie, fmt, list);
     }
   }
 }
 
 /* Print debug message. */
-void debugmsg68(const int bit, const char * fmt, ...)
+void msg68(const int bit, const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
-  vdebugmsg68(bit, fmt, list);
+  msg68_va(bit, fmt, list);
   va_end(list);
 }
 
 /* Print debug message (debug level) */
-void debugmsg68_trace(const char * fmt, ...)
+void msg68_trace(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
-  vdebugmsg68(debugmsg68_TRACE,fmt,list);
+  msg68_va(msg68_TRACE,fmt,list);
   va_end(list);
 }
 
 /* Print debug message (debug level) */
-void debugmsg68_debug(const char * fmt, ...)
+void msg68_debug(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
-  vdebugmsg68(debugmsg68_DEBUG,fmt,list);
+  msg68_va(msg68_DEBUG,fmt,list);
   va_end(list);
 }
 
 /* Print debug message (info level) */
-void debugmsg68_info(const char * fmt, ...)
+void msg68_info(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
-  vdebugmsg68(debugmsg68_INFO,fmt,list);
+  msg68_va(msg68_INFO,fmt,list);
   va_end(list);
 }
 
 /* Print debug message (warning level) */
-void debugmsg68_warning(const char * fmt, ...)
+void msg68_warning(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
-  vdebugmsg68(debugmsg68_WARNING,fmt,list);
+  msg68_va(msg68_WARNING,fmt,list);
   va_end(list);
 }
 
 /* Print debug message (error level) */
-void debugmsg68_error(const char * fmt, ...)
+void msg68_error(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
-  vdebugmsg68(debugmsg68_ERROR,fmt,list);
+  msg68_va(msg68_ERROR,fmt,list);
   va_end(list);
 }
 
 /* Print debug message (critical level) */
-void debugmsg68_critical(const char * fmt, ...)
+void msg68_critical(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
-  vdebugmsg68(debugmsg68_CRITICAL,fmt,list);
+  msg68_va(msg68_CRITICAL,fmt,list);
   va_end(list);
 }
 
 /* Print debug message (current level) */
-void debugmsg68_current(const char * fmt, ...)
+void msg68_current(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
-  vdebugmsg68(debugmsg68_CURRENT,fmt,list);
+  msg68_va(msg68_CURRENT,fmt,list);
   va_end(list);
 }
 
 /* Print debug message (always) */
-void debugmsg68_always(const char * fmt, ...)
+void msg68_always(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
-  vdebugmsg68(debugmsg68_ALWAYS,fmt,list);
+  msg68_va(msg68_ALWAYS,fmt,list);
   va_end(list);
 }
 
@@ -202,15 +202,15 @@ static inline int get_free_feature(void)
 
 
 /* Get named features. */
-int debugmsg68_feature_bit(const char * name)
+int msg68_feature_bit(const char * name)
 {
   return name ? get_feature(name) : -1;
 }
 
 /* Create/Modify a feature. */
-int debugmsg68_feature(const char * name, const char * desc, const int masked)
+int msg68_feature(const char * name, const char * desc, const int masked)
 {
-  int i = debugmsg68_NEVER;
+  int i = msg68_NEVER;
 
   if (name && desc) {
     i = get_feature(name);
@@ -221,9 +221,9 @@ int debugmsg68_feature(const char * name, const char * desc, const int masked)
       debug_bits[i].name = name;
       debug_bits[i].desc = desc;
       if (masked) {
-	debugmsg68_mask |= 1<<i;
+	msg68_mask |= 1<<i;
       } else {
-	debugmsg68_mask &= ~(1<<i);
+	msg68_mask &= ~(1<<i);
       }
     }
   }
@@ -232,21 +232,21 @@ int debugmsg68_feature(const char * name, const char * desc, const int masked)
 }
 
 /* Free/Destroy a debug feature. */
-void debugmsg68_feature_free(const int feature)
+void msg68_feature_free(const int feature)
 {
-  if (is_valid_feature(feature) && feature>debugmsg68_TRACE) {
+  if (is_valid_feature(feature) && feature>msg68_TRACE) {
     debug_bits[feature].bit = -1;
-    debugmsg68_mask |= 1<<feature;
+    msg68_mask |= 1<<feature;
   }
 }
 
 /* Get/Set current feature. */
-int debugmsg68_feature_current(const int feature)
+int msg68_feature_current(const int feature)
 {
   int old = current_feature;
 
   /* Allow always or never or any other existing feature */
-  if (feature == debugmsg68_ALWAYS || feature == debugmsg68_NEVER ||
+  if (feature == msg68_ALWAYS || feature == msg68_NEVER ||
       (is_valid_feature(feature) && !is_free_feature(feature))) {
       current_feature = feature;
   }
@@ -254,26 +254,26 @@ int debugmsg68_feature_current(const int feature)
 }
 
 /* Set all predefined features mask according to given level. */
-int debugmsg68_feature_level(const int feature)
+int msg68_feature_level(const int feature)
 {
-  int ret = -(feature < debugmsg68_CRITICAL || feature > debugmsg68_TRACE);
+  int ret = -(feature < msg68_CRITICAL || feature > msg68_TRACE);
   if (!ret) {
-    unsigned int v = debugmsg68_mask & ~((1<<(debugmsg68_TRACE+1))-1);
+    unsigned int v = msg68_mask & ~((1<<(msg68_TRACE+1))-1);
     v |= (1<<(feature+1))-1;
-    debugmsg68_mask = v;
+    msg68_mask = v;
   }
   return ret;
 }
 
 /* Get info on feature */
-int debugmsg68_feature_info(const int feature, const char **pname,
+int msg68_feature_info(const int feature, const char **pname,
 			    const char **pdesc, int *pnext)
 {
   int ret = -1, next = feature;
   if (is_valid_feature(feature)) {
     if (pname) *pname = debug_bits[feature].name;
     if (pdesc) *pdesc = debug_bits[feature].desc;
-    ret = 1 & (debugmsg68_mask>>feature);
+    ret = 1 & (msg68_mask>>feature);
   } else {
     next = -1;
   }
@@ -287,7 +287,7 @@ int debugmsg68_feature_info(const int feature, const char **pname,
   return ret;
 }
 
-void debugmsg68_feature_help(void * cookie, debugmsg68_help_t fct)
+void msg68_feature_help(void * cookie, msg68_help_t fct)
 {
   if (fct) {
     int i;

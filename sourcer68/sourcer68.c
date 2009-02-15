@@ -40,7 +40,7 @@
 # include <sc68/alloc68.h>
 # include <sc68/file68.h>
 # include <sc68/url68.h>
-# include <sc68/debugmsg68.h>
+# include <sc68/msg68.h>
 # include <sc68/option68.h>
 
 static void debugmsg(const char * fmt, ...)
@@ -49,11 +49,11 @@ static void debugmsg(const char * fmt, ...)
   va_list list;
   if (sourcer68_feature == -1) {
     sourcer68_feature =
-      debugmsg68_feature("src","sourcer68 specific message",1);
+      msg68_feature("src","sourcer68 specific message",1);
   }
     va_start(list,fmt);
   if (sourcer68_feature != -1) {
-    vdebugmsg68(sourcer68_feature,fmt,list);
+    msg68_va(sourcer68_feature,fmt,list);
   } else {
     vfprintf(stderr,fmt,list);
   }
@@ -82,7 +82,7 @@ static void debugmsg(const char * fmt, ...)
 #define SRC68_DONE  (1<<3) /**< Color processed memory              */
 /* bits 0-2 are reserved for opcode size (in word) */
 
-static DESA68parm_t desa;
+static desa68_parm_t desa;
 static char desastr[512];
 
 static char * tabs = "\t";
@@ -1029,7 +1029,7 @@ static int print_usage(void)
 }
 
 
-int main(int na, char **a)
+int main(int argc, char **argv)
 {
   int i;
   char *fname = 0, *s;
@@ -1053,21 +1053,21 @@ int main(int na, char **a)
 #ifdef USE_FILE68
   alloc68_set(malloc);
   free68_set(free);
-  na = file68_init(a, na);
+  argc = file68_init(argc, argv);
 #endif
 
-  for (i=1; i<na; ++i) {
-    if (!strcmp(a[i],"--help")) {
+  for (i=1; i<argc; ++i) {
+    if (!strcmp(argv[i],"--help")) {
       return print_usage();
-    } else if (!strcmp(a[i],"--version")) {
+    } else if (!strcmp(argv[i],"--version")) {
       return print_version();
-    } else if (!strcmp(a[i], "--opcode")) {
+    } else if (!strcmp(argv[i], "--opcode")) {
       opcode = 1;
-    } else if (!strcmp(a[i], "--ascii")) {
+    } else if (!strcmp(argv[i], "--ascii")) {
       ascii = 1;
-    } else if (!strcmp(a[i], "--no-symbol")) {
+    } else if (!strcmp(argv[i], "--no-symbol")) {
       no_symbol = 1;
-    } else if (s = IsOption(a[i],"--org="), s) {
+    } else if (s = IsOption(argv[i],"--org="), s) {
       char * err = 0;
       int v = strtol(s, &err, 0);
       if (err == s || *err || v<0 || v>0xFFFFFF) {
@@ -1075,7 +1075,7 @@ int main(int na, char **a)
 	return 2;
       }
       org = v;
-    } else if (s = IsOption(a[i],"--reloc="), s) {
+    } else if (s = IsOption(argv[i],"--reloc="), s) {
       if (!strcmp(s, "no")) {
         tosreloc = TOS_RELOC_NEVER;
       } else if (!strcmp(s, "yes")) {
@@ -1086,12 +1086,12 @@ int main(int na, char **a)
         fprintf(stderr, "--reloc bad value. Try --help.\n");
         return 2;
       }
-    } else if (s = IsOption(a[i],"--entry="), s) {
+    } else if (s = IsOption(argv[i],"--entry="), s) {
         entry = s;
-    } else if (s = IsOption(a[i],"--tab="), s) {
+    } else if (s = IsOption(argv[i],"--tab="), s) {
         tabs = s;
     } else if (!fname) {
-      fname = a[i];
+      fname = argv[i];
     } else {
       fprintf(stderr, "Too many parameters. Try --help.\n");
       return 2;

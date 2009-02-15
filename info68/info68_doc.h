@@ -1,6 +1,6 @@
 /* This file exists for documentation purpose only. */
 /**
-@defgroup  info68_prg info68 program
+@defgroup  info68_prg  info68 program
 @ingroup   usertools68
 
 Get and format information on sc68 files.
