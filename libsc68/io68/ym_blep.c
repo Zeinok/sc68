@@ -171,7 +171,7 @@ static void ym2149_new_output_level(ym_t * const ym)
     output = (ym->ymout5[dacstate] + 1) >> 1;
 
     if (output != orig->global_output_level) {
-        /* find next blep position */
+        /* add a new blep before the others */
         orig->blep_idx -= 1;
         orig->blep_idx &= MAX_BLEPS - 1;
 
@@ -272,8 +272,8 @@ static s32 highpass(ym_t * const ym, s32 output)
 {
     ym_blep_t *orig = &ym->emu.blep;
     
-    orig->hp = (orig->hp * 511 + (output << 4)) >> 9;
-    output -= orig->hp >> 4;
+    orig->hp = (orig->hp * 511 + (output << 6) + (1 << 8)) >> 9;
+    output -= (orig->hp + (1 << 5)) >> 6;
 
     if (output > 32767)
         output = 32767;
@@ -307,7 +307,8 @@ static int mix_to_buffer(ym_t * const ym, cycle68_t cycles, s32 *output)
         /* Generate output.
          * To improve accuracy, we interpolate the sinc table. */
         if (makesample) {
-            output[len ++] = highpass(ym, ym2149_output(ym, orig->cycles_to_next_sample & 0xff));
+            assert(orig->cycles_to_next_sample <= 0xff);
+            output[len ++] = highpass(ym, ym2149_output(ym, orig->cycles_to_next_sample));
             assert(len < MAX_MIXBUF);
             orig->cycles_to_next_sample += orig->cycles_per_sample;
         }
