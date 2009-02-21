@@ -28,7 +28,7 @@
 
 #ifdef USE_REGISTRY68
 
-#include "debugmsg68.h"
+#include "msg68.h"
 #include "string68.h"
 #include <windows.h>
 #include <winreg.h>
@@ -82,12 +82,10 @@ static HKEY keyhandle(const enum registry68_key_e const key)
 registry68_key_t registry68_rootkey(enum registry68_key_e rootkey)
 {
   registry68_key_t key = (registry68_key_t) keyhandle(rootkey);
-  debugmsg68(-1,"registry68_rootkey(%d,%s) => [%p,%s]\n",
-	     rootkey, keyname(rootkey), (void*)key, keyhdlname(key));
+  msg68_trace("registry68: rootkey %d '%s' => %p '%s'\n",
+	      rootkey, keyname(rootkey), (void*)key, keyhdlname(key));
   return key;
 }
-
-/* const char registry68ErrorStr[] = "Registry not supported"; */
 
 static void SetSystemError(char * str, int max)
 {
@@ -99,24 +97,25 @@ static void SetSystemError(char * str, int max)
     str = registry68_errorstr;
     max = sizeof(registry68_errorstr);
   }
-  FormatMessage(
-		/* source and processing options */
-		FORMAT_MESSAGE_FROM_SYSTEM,
-		/* pointer to message source */
-		0,
+  FormatMessage
+    (
+     /* source and processing options */
+     FORMAT_MESSAGE_FROM_SYSTEM,
+     /* pointer to message source */
+     0,
 		/* requested message identifier */
-		err,
-		/* language identifier for requested message */
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		/* pointer to message buffer */
-		str,
-		/* maximum size of message buffer */
-		max,
-		/* pointer to array of message inserts */
-		0
-		);
+     err,
+     /* language identifier for requested message */
+     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+     /* pointer to message buffer */
+     str,
+     /* maximum size of message buffer */
+     max,
+     /* pointer to array of message inserts */
+     0
+     );
   str[max-1] = 0;
-  debugmsg68(-1,"registry68_system_error: %s\n",str);
+  msg68_error("registry68: system error '%s'\n",str);
 }
 
 static int GetOneLevelKey(HKEY hkey, char **kname, HKEY *hkeyres)
@@ -179,23 +178,24 @@ registry68_key_t registry68_open(registry68_key_t hkey, const char *kname_cst)
   int len;
   char kname[1024];
 
-  debugmsg68(-1,"registry68_open(%s,%s) {\n",
-	     keyhdlname(hkey), strnevernull68(kname_cst));
-
-  if (!kname_cst || (len=strlen(kname_cst))>=sizeof(kname) ) {
+  msg68_trace("registry68: open '%s' '%s'\n",
+	      keyhdlname(hkey), strnevernull68(kname_cst));
+  
+  if (!kname_cst || (len=strlen(kname_cst))>=sizeof(kname)) {
+    msg68_error("registry68: key name too long\n", kname_cst);
     goto error;
   }
   memcpy(kname, kname_cst, len+1);
-
+  
   if (rGetRegistryKey((HKEY)hkey, kname, (HKEY *)&hdl)) {
     SetSystemError(0,0);
     hdl = HKEY_INVALID;
   }
  error:
-
-  debugmsg68(-1,"} registry68_open() => [%s]\n",
-	     keyhdlname(hdl), strok68(hdl==HKEY_INVALID));
-
+  
+  msg68_trace("registry68: open => [%s]\n",
+	      keyhdlname(hdl), strok68(hdl==HKEY_INVALID));
+  
   return (registry68_key_t) hdl;
 }
 
@@ -211,7 +211,7 @@ int registry68_gets(registry68_key_t rootkey,
   char * name;
   char kname[1024];
 
-  debugmsg68(-1,"registry68_gets(%s,%s) {\n", keyhdlname(rootkey), kname_cst);
+  msg68_trace("registry68: gets '%s'%s\n", keyhdlname(rootkey), kname_cst);
 
   if (!kname_cst|| !kdata || kdatasz < 0) {
     goto error_out;
@@ -229,18 +229,17 @@ int registry68_gets(registry68_key_t rootkey,
 	   && keys[i].name[1]!=kname_cst[1]; ++i)
       ;
     rootkey = keys[i].hkey;
-    debugmsg68(-1,"registry68_gets: get root key fron name: %s\n",
-	       keys[i].name);
+    msg68_trace("registry68: get root key from name: %s\n",
+		keys[i].name);
   }
 
   if (rootkey == HKEY_INVALID) {
-    debugmsg68(-1,"registry68_gets: INVALID rootkey\n");
+    msg68_error("registry68: INVALID rootkey\n");
     goto error_out;
   }
 
   if (len >= sizeof(kname)) {
-    debugmsg68(-1,"registry68_gets: key-path too long %d>=%d\n",
-	       len,sizeof(kname));
+    msg68_error("registry68: key-path too long\n");
     goto error_out;
   }
   memcpy(kname, kname_cst, len+1);
@@ -269,10 +268,10 @@ int registry68_gets(registry68_key_t rootkey,
     *--name = '/';
   }
  error_out:
-
-  debugmsg68(-1,"} registry68_gets() => [%s,%s]\n",
-	     strok68(err),strnevernull68(kdata));
-
+  
+  msg68_trace("registry68: gets => [%s,%s]\n",
+	      strok68(err),strnevernull68(kdata));
+  
   return err;
 }
 
