@@ -91,8 +91,8 @@ static int opt_list = 0;
 static int opt_owav = 0;
 
 struct sc68_debug_data_s {
-  FILE * stdout;
-  FILE * stderr;
+  FILE * out;
+  FILE * err;
 };
 static struct sc68_debug_data_s sc68_debug_data;
 
@@ -104,8 +104,8 @@ sc68_debug_cb(const int bit, void *data, const char *fmt, va_list list)
 
   /* select output: always error output except for INFO messages */
   out = bit == msg68_INFO
-    ? debug_data->stdout
-    : debug_data->stderr
+    ? debug_data->out
+    : debug_data->err
     ;
 
   vfprintf(out,fmt,list);
@@ -135,7 +135,7 @@ void Print(const char * fmt, ...)
   if (opt_verb >= msg68_WARNING) {
     va_list list;
     va_start(list, fmt);
-    vfprintf(sc68_debug_data.stdout,fmt,list);
+    vfprintf(sc68_debug_data.out,fmt,list);
     va_end(list);
   }
 }
@@ -463,8 +463,8 @@ int main(int argc, char *argv[])
   shortopts[j++] = 0;
 
   /* Initialize sc68 api. */
-  sc68_debug_data.stdout = stdout;
-  sc68_debug_data.stderr = stderr;
+  sc68_debug_data.out = stdout;
+  sc68_debug_data.err = stderr;
   memset(&init68, 0, sizeof(init68));
   init68.argc = argc;
   init68.argv = argv;
@@ -580,10 +580,10 @@ int main(int argc, char *argv[])
   /* Output message to stdout except it is the output. */
   if (!strncasecmp(outname,"stdout://",8)) {
     /* output to stdout; divert stdout message to stderr */
-    sc68_debug_data.stdout = stderr;
+    sc68_debug_data.out = stderr;
   } else if (!strncasecmp(outname,"stderr://",8)) {
     /* output to stderr; divert stderr message to stdout */
-    sc68_debug_data.stderr = stdout;
+    sc68_debug_data.err = stdout;
   }
 
   Debug("sc68: input  '%s'\n",inname);
