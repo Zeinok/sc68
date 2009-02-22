@@ -511,4 +511,18 @@ istream68_t * istream68_ao_create(const char * fname, int mode)
   return 0;
 }
 
+int istream68_ao_init(void)
+{
+  return 0;
+}
+
+void istream68_ao_shutdown(void)
+{
+}
+
+unsigned int audio68_sampling_rate(const unsigned int rate)
+{
+  return rate;
+}
+
 #endif /* #ifdef USE_AO */
