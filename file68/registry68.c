@@ -90,9 +90,9 @@ registry68_key_t registry68_rootkey(enum registry68_key_e rootkey)
 static void SetSystemError(char * str, int max)
 {
   char registry68_errorstr[256];
-  int err = GetLastError();
+  int err = GetLastError(), l;
   registry68_errorstr[0] = 0;
-
+  
   if (!str) {
     str = registry68_errorstr;
     max = sizeof(registry68_errorstr);
@@ -103,7 +103,7 @@ static void SetSystemError(char * str, int max)
      FORMAT_MESSAGE_FROM_SYSTEM,
      /* pointer to message source */
      0,
-		/* requested message identifier */
+     /* requested message identifier */
      err,
      /* language identifier for requested message */
      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
@@ -115,6 +115,9 @@ static void SetSystemError(char * str, int max)
      0
      );
   str[max-1] = 0;
+  l = strlen(str);
+  while (--l>=0 && (str[l] == '\n' || str[l] == '\r' ||str[l] == ' '))
+    str[l] = 0;
   msg68_error("registry68: system error '%s'\n",str);
 }
 
