@@ -9,7 +9,6 @@ dnl#
 dnl# $Id$
 dnl#
 
-
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
@@ -18,10 +17,31 @@ AC_INIT([unice68],[20090117],[benjihan -4t- users.sourcefourge -d0t- net])
 AC_CONFIG_SRCDIR([unice68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
-SC68_PACKAGE([ice depacker program and library.])
-[LIBUNICE68_CPPFLAGS="-DUNICE68_EXPORT=1"]
-[LIBUNICE68_LDFLAGS="-version-info 3:0:1"]
 
+AC_USE_SYSTEM_EXTENSIONS
+LT_INIT([win32-dll])
+
+# ,----------------------------------------------------------------------.
+# | sc68                                                                 |
+# `----------------------------------------------------------------------'
+
+SC68_PACKAGE([ice depacker program and library.])
+SC68_SYSTEM
+SC68_OPTIONS
+SC68_TOOLS
+SC68_CHECKS
+
+# ,----------------------------------------------------------------------.
+# | Optionnal features                                                   |
+# `----------------------------------------------------------------------'
+
+# Command line depacker.
+AC_ARG_ENABLE(
+  [cli],
+  [AS_HELP_STRING([--enable-cli],
+      [enable command line depacker @<:@default=yes@:>@])],
+  [],[enable_cli="yes"])
+AM_CONDITIONAL([UNICE68_CLI],[test "x$enable_cli" = "xyes"])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
@@ -33,9 +53,7 @@ AC_CONFIG_FILES([
     unice68-${VERSION}.ebuild:unice68.ebuild.in
     unice68.1.tpl
     unice68.spec])
-
 AC_OUTPUT
-
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |
@@ -48,6 +66,7 @@ AC_MSG_NOTICE([|-----------------------])
 AC_MSG_NOTICE([|   debug-mode          : $enable_debug])
 AC_MSG_NOTICE([|   release-mode        : $enable_release])
 AC_MSG_NOTICE([|   all-static-mode     : $enable_all_static])
+AC_MSG_NOTICE([|   build cli depacker  : $enable_cli])
 AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])
 

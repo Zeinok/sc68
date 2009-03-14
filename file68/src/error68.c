@@ -1,7 +1,7 @@
 /*
- *		     file68 - endianess functions
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                 file68 - Error message handling
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -24,30 +24,35 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
-#include "file68_api.h"
-#include "endian68.h"
+#include "error68.h"
+#include "msg68.h"
 
-int endian68_byte_order(void)
+#include <string.h>
+
+#define error68_feature msg68_ERROR
+
+/* Process error message (printf like format). */
+int error68_va(const char * format, va_list list)
 {
-  static int endian = 0;
-
-  if (!endian) {
-    char * s;
-    int i;
-    for (i=0, s = (char *)&endian; i<sizeof(int); ++i) {
-      s[i] = i;
-    }
+  if (format) {
+    msg68_va(error68_feature,format,list);
   }
-  return endian;
+  return -1;
 }
 
-int endian68_is_little(void)
+/* Process error message (printf like format). */
+int error68(const char * format, ...)
 {
-  return !(endian68_byte_order() & 255);
-}
+  int err;
+  va_list list;
+  int len = strlen(format);
 
-int endian68_is_big(void)
-{
-  return !endian68_is_little();
-}
+  va_start(list, format);
+  err = error68_va(format, list);
+  if (len > 0 && format[len-1] != '\n') {
+    err = error68("\n");
+  }
+  va_end(list);
 
+  return err;
+}

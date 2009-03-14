@@ -55,14 +55,14 @@ static struct
   int  (*fct)(int,int);
 } optable[] =
 {
- { '+', ADD_LEVEL, add },
- { '-', SUB_LEVEL, sub },
- { '*', MUL_LEVEL, mul },
- { '/', DIV_LEVEL, div },
- { '&', AND_LEVEL, and },
- { '|', ORR_LEVEL, orr },
- { '^', EOR_LEVEL, eor },
- { 0 , 0 , 0 }
+  { '+', ADD_LEVEL, add },
+  { '-', SUB_LEVEL, sub },
+  { '*', MUL_LEVEL, mul },
+  { '/', DIV_LEVEL, div },
+  { '&', AND_LEVEL, and },
+  { '|', ORR_LEVEL, orr },
+  { '^', EOR_LEVEL, eor },
+  { 0 , 0 , 0 }
 };
 
 /* Retrieve unsigned decimal value
@@ -114,40 +114,40 @@ static int get_reg(emu68_t * emu68, char **ps, char **error)
 
   switch(toupper(s[0]))
   {
-    case 'D': regbase = 0; break; /* D0-D7 */
-    case 'A': regbase = 8; break; /* A0-A7 */
-    case 'P': /* PC */
-      if(toupper(s[1])=='C')
-      {
-        *ps = s+2;
-        return reg68->pc;
-      }
-      break;
-    case 'S':
-      switch(toupper(s[1]))
-      {
-        case 'R': /* SR */
-          *ps = s+2;
-          return reg68->sr;
-        case 'P': /* SP */
-          *ps = s+2;
-          return reg68->a[7];
-      }
-      break;
-    case 'U': /* USP */
-      if(toupper(s[1])=='S' && toupper(s[2])=='P')
-      {
-        *ps = s+3;
-        return reg68->usp;
-      }
-      break;
-    case 'C': /* CCR */
-      if(toupper(s[1])=='C' && toupper(s[2])=='R')
-      {
-        *ps = s+3;
-        return GET_CCR(reg68->sr);
-      }
-      break;
+  case 'D': regbase = 0; break; /* D0-D7 */
+  case 'A': regbase = 8; break; /* A0-A7 */
+  case 'P': /* PC */
+    if(toupper(s[1])=='C')
+    {
+      *ps = s+2;
+      return reg68->pc;
+    }
+    break;
+  case 'S':
+    switch(toupper(s[1]))
+    {
+    case 'R': /* SR */
+      *ps = s+2;
+      return reg68->sr;
+    case 'P': /* SP */
+      *ps = s+2;
+      return reg68->a[7];
+    }
+    break;
+  case 'U': /* USP */
+    if(toupper(s[1])=='S' && toupper(s[2])=='P')
+    {
+      *ps = s+3;
+      return reg68->usp;
+    }
+    break;
+  case 'C': /* CCR */
+    if(toupper(s[1])=='C' && toupper(s[2])=='R')
+    {
+      *ps = s+3;
+      return GET_CCR(reg68->sr);
+    }
+    break;
   }
   if(regbase>=0 && s[1]>='0' && s[1]<='7')
   {
@@ -183,59 +183,59 @@ static int r_eval(emu68_t * emu68, char **s, char **error, int oplvl)
   switch(c)
   {
     /* Open Bracket */
-    case '(':
-      level++;
-      v = r_eval(emu68, s, error, 0);
-      break;
+  case '(':
+    level++;
+    v = r_eval(emu68, s, error, 0);
+    break;
 
     /* Unaire */
-    case '+':
-      v =  r_eval(emu68, s, error, oplvl);
-      break;
-    case '-':
-      v = -r_eval(emu68, s, error, oplvl);
-      break;
-    case '~':
-      v = ~r_eval(emu68, s, error, oplvl);
-      break;
+  case '+':
+    v =  r_eval(emu68, s, error, oplvl);
+    break;
+  case '-':
+    v = -r_eval(emu68, s, error, oplvl);
+    break;
+  case '~':
+    v = ~r_eval(emu68, s, error, oplvl);
+    break;
 
     /* Indirect 68K memory */
-    case 'b': case 'w': case 'l':
-    {
-      u32 addr = r_eval(emu68, s, error, oplvl);
-      if(!emu68->mem) v=0;
-      else {
-        v = emu68->mem[ (addr++) & emu68->memmsk ];
-        if(c!='b')
-          v = (v<<8) | emu68->mem[ (addr++) & emu68->memmsk ];
-        if(c=='l')
-        {
-          v = (v<<8) | emu68->mem[ (addr++) & emu68->memmsk ];
-          v = (v<<8) | emu68->mem[ (addr++) & emu68->memmsk ];
-        }
+  case 'b': case 'w': case 'l':
+  {
+    u32 addr = r_eval(emu68, s, error, oplvl);
+    if(!emu68->mem) v=0;
+    else {
+      v = emu68->mem[ (addr++) & emu68->memmsk ];
+      if(c!='b')
+        v = (v<<8) | emu68->mem[ (addr++) & emu68->memmsk ];
+      if(c=='l')
+      {
+        v = (v<<8) | emu68->mem[ (addr++) & emu68->memmsk ];
+        v = (v<<8) | emu68->mem[ (addr++) & emu68->memmsk ];
       }
-      break;
     }
+    break;
+  }
 
-    /* Number */
-    case '0':
-      (*s)--;
-    case 'x':
-    case '$':
-      v = get_hexa(s,error);
-      break;
+  /* Number */
+  case '0':
+    (*s)--;
+  case 'x':
+  case '$':
+    v = get_hexa(s,error);
+    break;
 
-    case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
-      (*s)--;
-    case '\\':
-      v = get_decimal(s,error);
-      break;
+  case '1': case '2': case '3': case '4':
+  case '5': case '6': case '7': case '8': case '9':
+    (*s)--;
+  case '\\':
+    v = get_decimal(s,error);
+    break;
     /* Default is 68K register , else error is setted by get_reg() */
-    default:
-      (*s)--;
-      v = get_reg(emu68, s, error);
-      break;
+  default:
+    (*s)--;
+    v = get_reg(emu68, s, error);
+    break;
   }
   if(*error) goto Error;
 
@@ -272,7 +272,7 @@ static int r_eval(emu68_t * emu68, char **s, char **error, int oplvl)
           if(optable[i].level <= oplvl)
           {
             (*s)--; /* rewind operator */
-      //printf("return: v=%d lvl=%d s=%s\n",v,oplvl,*s);
+            //printf("return: v=%d lvl=%d s=%s\n",v,oplvl,*s);
             return v;
           }
 
@@ -295,7 +295,7 @@ static int r_eval(emu68_t * emu68, char **s, char **error, int oplvl)
     }
   }
 
-Error:
+  Error:
   if(!*error) *error = (*s)-1;
   level = 0;
   return v;
@@ -303,7 +303,8 @@ Error:
 
 /* Evaluate a string 0 or space terminated
  * s       : string to evaluate
- * err_loc : pointer to error location : *err_loc is a position to syntax error or NULL
+ * err_loc : pointer to error location
+ *           *err_loc is a position to syntax error or NULL
  */
 int debug68_eval(emu68_t * emu68, char *s, char **err_loc)
 {

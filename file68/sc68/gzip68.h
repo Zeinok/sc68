@@ -14,8 +14,8 @@
 #ifndef _FILE68_GZIP68_H_
 #define _FILE68_GZIP68_H_
 
-#ifdef __cplusplus
-extern "C" {
+#ifndef FILE68_API
+# include "file68_api.h"
 #endif
 
 /** @defgroup  file68_gzip  gzip file support.
@@ -26,6 +26,7 @@ extern "C" {
  *  @{
  */
 
+FILE68_EXTERN
 /** Test gzip file header magic header.
  *
  *  @param  buffer  Buffer containing at least 3 bytes from gzip header.
@@ -35,6 +36,7 @@ extern "C" {
  */
 int gzip68_is_magic(const void * buffer);
 
+FILE68_EXTERN
 /** Load an optionnally gzipped file.
  *
  *    The gzip68_load() function allocates memory and loads the totality of the
@@ -50,11 +52,7 @@ int gzip68_is_magic(const void * buffer);
 void *gzip68_load(const char *fname, int *ulen);
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_GZIP68_H_ */

@@ -1,44 +1,61 @@
 #! /bin/sh
 #
-# @PACKAGE_NAME@-config for @PACKAGE_STRING@
+# file68-config for @PACKAGE_STRING@
 #
-# Copyright (C) 2007-2009 Benjamin Gerard <@PACKAGE_BUGREPORT@>
+# Copyright (C) 2007-2009 Benjamin Gerard
+#
+# Report bugs to <@PACKAGE_BUGREPORT@>
 #
 # $Id$
 #
 
-me="@PACKAGE_NAME@-config"
-
+pkgname="@PACKAGE@"
+pkgdir="sc68"
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 libdir="@libdir@"
 includedir="@includedir@"
-pkgincludedir="${includedir}/sc68"
+pkgincludedir="${includedir}/${pkgdir}"
 datarootdir="@datarootdir@"
 datadir="@datadir@"
-pkgdatadir="${datadir}/sc68"
+pkgdatadir="${datadir}/${pkgdir}"
+cppflags="-I${includedir} @PACKAGE_EFLAGS@"
+cflags="${cppflags} @PACKAGE_CFLAGS@"
+ldflags="-L${libdir} @PACKAGE_LFLAGS@"
+me="${pkgname}-config"
 
-cflags=$(echo @PACKAGE_CFLAGS@)
-cppflags=$(echo @PACKAGE_CPPFLAGS@ -I${includedir})
-ldflags=$(echo @PACKAGE_LDFLAGS@)
+filter_only() {
+    local i what="" set_what=no
+    for i in : "$@"; do
+	if [ "x$set_what" = 'xyes' ]; then
+	    what="$i"
+	    set_what=no
+	else
+	    case "$i" in
+		':') set -- ;;
+		'--') set_what=yes;  ;;
+		$what*) set -- "$@" "$i" ;;
+	    esac
+	fi
+    done
+    echo "$@"
+}
 
 while test $# -ge 1; do
     case "$1" in
-	--help | --usage | -h)
+	--help | --usage | -?)
 	    cat <<EOF
 Usage: ${me} [OPTION...]
 
 Options:
+  --exists            check module existence (pkg-config compatibility)
   --help              output this message and exit
   --version           output version and exit
-  --exists            check module existence (pkg-config compatibility)
   --modversion        output version and exit (pkg-config compatibility)
-
   --datadir           output data directory
   --pkgdatadir        output data package directory
   --includedir        output include directory
   --pkgincludedir     output include package directory
-
   --libs              link flags (-L & -l)
   --libs-only-L       link flags (-L only)
   --libs-only-l       link flags (-l only)
@@ -49,10 +66,10 @@ EOF
 	    exit 1
 	    ;;
 	--exists)
-	    test "x$2" = "x@PACKAGE_NAME@"; exit $?;;
+	    test "x$2" = "x${pkgname}"; exit $?;;
 	--package)
-	    echo "@PACKAGE_NAME@";;
-	--version|--modversion)
+	    echo "${pkgname}";;
+	--version | --modversion)
 	    echo "@VERSION@";;
 	--datadir)
 	    echo "${datadir}";;
@@ -65,55 +82,26 @@ EOF
 
 	# Linker
 	--libs-only-L | --libs-only-other)
-	    for i in : ${ldflags}; do
-		case "${i:0:2}" in
-		    :);;
-		    -L) echo -n " $i";;
-		esac
-	    done
-	    echo ;;
-	
+	    filter_only -- '-L' ${ldflags} ;;
 	--libs-only-l)
-	    for i in : ${ldflags}; do
-		case "${i:0:2}" in
-		    :);;
-		    -l) echo -n " $i";;
-		esac
-	    done
-	    echo ;;
-
-	--libs | --ldflags)
-	    echo ${ldflags};;
+	    filter_only -- '-l' ${ldflags} ;;
+	--libs)
+	    echo ${ldflags} ;;
 
 	# compiler
 	--cflags-only-I)
-	    for i in : ${cppflags} ${cflags}; do
-		case "${i:0:2}" in 
-		    :);;
-		    -I) echo -n " $i" ;;
-		esac
-	    done
-	    echo ;;
-
+	    filter_only -- '-I' ${cflags} ;;
 	--cflags-only-other)
-	    for i in : ${cppflags} ${cflags}; do
-		case "${i:0:2}" in 
-		    :);;
-		    -D | -U) echo -n " $i" ;;
-		esac
-	    done
-	    echo ;;
-
+	    filter_only -- '-D' ${cflags} -- '-U' ${cflags} ;;
 	--cflags)
-	    echo ${cppflags} ${cflags};;
-
+	    echo ${cflags} ;;
 	--cppflags)
-	    echo ${cppflags};;
+	    filter_only -- '-D' ${cflags} -- '-U' ${cflags} -- '-I' ${cflags} ;;
 
 	# For pkg-config compatibility
 
 	--list-all)
-	    printf '%-27s %s\n' "@PACKAGE_NAME@" "@PACKAGE_DESC@"
+	    printf '%-27s %s\n' "${pkgname}" "@PACKAGE_DESC@"
 	    exit 0
 	    ;;
 

@@ -17,9 +17,9 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -30,7 +30,7 @@
 
 #include <string.h>
 
-extern linefunc68_t *line_func[1024];
+EMU68_EXTERN linefunc68_t *line_func[1024];
 
 /* ,-----------------------------------------------------------------.
  * |                           Historic                              |
@@ -51,7 +51,7 @@ static void * emu68_alloc(uint68_t size)
   return emu68_alloc_fct
     ? emu68_alloc_fct(size)
     : 0;
-} 
+}
 
 static emu68_free_t  emu68_free_fct;
 static void emu68_free(void * ptr)
@@ -59,7 +59,7 @@ static void emu68_free(void * ptr)
   if (emu68_free_fct) {
     emu68_free_fct(ptr);
   }
-} 
+}
 
 
 /* ,-----------------------------------------------------------------.
@@ -69,7 +69,7 @@ static void emu68_free(void * ptr)
 
 /*  Set new interrupt IO
  *  return previous pointer
-*/
+ */
 io68_t * emu68_set_interrupt_io(emu68_t * emu68, io68_t * io)
 {
   if (emu68) {
@@ -127,17 +127,17 @@ cycle68_t emu68_get_cycle(emu68_t * const emu68)
  */
 
 u8 * emu68_memptr(emu68_t * const emu68,
-		  addr68_t dst, uint68_t sz)
+                  addr68_t dst, uint68_t sz)
 {
   u8 * ptr = 0;
   if (emu68) {
     addr68_t end = (dst+sz)&MEMMSK68;
     if (sz > MEMMSK68+1) {
       emu68_error_add(emu68,
-		      "Not enough 68K memory ($%X>=$%X)",sz,emu68->memmsk);
+                      "Not enough 68K memory ($%X>=$%X)",sz,emu68->memmsk);
     } else if (end < dst) {
       emu68_error_add(emu68,
-		      "68K memory overflow :($%X-%X,$%X)",dst,dst+sz,sz);
+                      "68K memory overflow :($%X-%X,$%X)",dst,dst+sz,sz);
     } else {
       ptr = emu68->mem + dst;
     }
@@ -146,7 +146,7 @@ u8 * emu68_memptr(emu68_t * const emu68,
 }
 
 /* Peek & Poke
-*/
+ */
 int emu68_peek(emu68_t * const emu68, addr68_t addr)
 {
   return !emu68 ? -1 : emu68->mem[addr&MEMMSK68];
@@ -170,7 +170,7 @@ int emu68_memput(emu68_t * const emu68, addr68_t dst, u8 *src, uint68_t sz)
 }
 
 /*  Read memory block from 68K on board memory
-*/
+ */
 int emu68_memget(emu68_t * const emu68, u8 *dst, addr68_t src, uint68_t sz)
 {
   u8 * ptr = emu68_memptr(emu68,src,sz);
@@ -200,7 +200,7 @@ int emu68_memset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz)
  * 0000 0001 1111 1000 ( OP    )
  * 0000 0000 0000 0111 ( REG 0 )
  * 0000 1110 0000 0000 ( REG 9 )
-*/
+ */
 
 
 static void step68(emu68_t * const emu68)
@@ -221,7 +221,7 @@ static void step68(emu68_t * const emu68)
   opw  = (mem[0]<<8) | mem[1];
 #endif
   /*                       LINE RG9 OPCODE  RG0 */
-  /*                       -------------------- */ 
+  /*                       -------------------- */
   line = opw & 0170000; /* 1111 000 000-000 000 */
   opw -= line;          /* 0000 111 111-111 111 */
   reg9 = opw &   07000; /* 0000 111 000-000 000 */
@@ -234,7 +234,7 @@ static void step68(emu68_t * const emu68)
 }
 
 /* Emulator 68000 : Step 1 instruction
-*/
+ */
 void emu68_step(emu68_t * const emu68)
 {
   if (emu68) {
@@ -252,9 +252,9 @@ static void poll_rte(emu68_t * const emu68, const addr68_t stack)
 /* Run until RTS level0 occurs
  * and play Interruption for 1 pass.
  * ( Specific SC68 !!! )
-*/
+ */
 void emu68_level_and_interrupt(emu68_t * const emu68,
-			       cycle68_t cycleperpass)
+                               cycle68_t cycleperpass)
 {
   addr68_t stack, pc;
   cycle68_t cycle;
@@ -337,37 +337,37 @@ void emu68_level_and_interrupt(emu68_t * const emu68,
     /* $$$ TEMP: FOR DEBUGIN A MUSIC !! */
     if ( /*1 ||*/ 6 > ipl ) {
       do {
-	
-	/* Spool interrupt */
-	/* Execute mfp interrupt emulation */
-	t = emu68->interrupt_io->interrupt(emu68->interrupt_io, cycleperpass);
-	if (t) {
+
+        /* Spool interrupt */
+        /* Execute mfp interrupt emulation */
+        t = emu68->interrupt_io->interrupt(emu68->interrupt_io, cycleperpass);
+        if (t) {
 #ifdef DEBUG
-	  if (t->cycle >= cycleperpass) {
-	    *(int *)0 = 0xDEADBEEF;
-	  }
+          if (t->cycle >= cycleperpass) {
+            *(int *)0 = 0xDEADBEEF;
+          }
 #endif
 
 
-	  emu68->cycle=t->cycle;
-	  REG68.a[7] = stack; /* $$$ Safety net */
-	  REG68.pc = 0x12345678;
-	  EXCEPTION(t->vector,t->level);
-	  poll_rte(emu68, stack);
+          emu68->cycle=t->cycle;
+          REG68.a[7] = stack; /* $$$ Safety net */
+          REG68.pc = 0x12345678;
+          EXCEPTION(t->vector,t->level);
+          poll_rte(emu68, stack);
 #ifdef _DEBUG
-	  if (REG68.pc != 0x12345678) {
-	    BREAKPOINT68;
-	  }
-	  if (REG68.a[7] != stack) {
+          if (REG68.pc != 0x12345678) {
             BREAKPOINT68;
-	  }
-	  if (!(REG68.sr & 0x2000)) {
-	    BREAKPOINT68;
-	  }
+          }
+          if (REG68.a[7] != stack) {
+            BREAKPOINT68;
+          }
+          if (!(REG68.sr & 0x2000)) {
+            BREAKPOINT68;
+          }
 #endif
-	} else {
+        } else {
           //          BREAKPOINT68;
-	  break; //$$$ ???
+          break; //$$$ ???
         }
       } while (t);
     } else {
@@ -389,7 +389,7 @@ void emu68_level_and_interrupt(emu68_t * const emu68,
 /* Run like a JSR at pc, exec interrupt if cycleperpass > 0.
  */
 void emu68_run_rts(emu68_t * const emu68,
-		   addr68_t pc, cycle68_t cycleperpass)
+                   addr68_t pc, cycle68_t cycleperpass)
 {
   addr68_t stack;
 
@@ -427,11 +427,11 @@ void emu68_run_rts(emu68_t * const emu68,
 
     if (6 > ipl ) {
       cycle68_t fd;
-    
+
       /* Spool interrupt */
       while (fd =
-	     emu68->interrupt_io->next_interrupt(emu68->interrupt_io,cycle),
-	     fd != IO68_NO_INT) {
+             emu68->interrupt_io->next_interrupt(emu68->interrupt_io,cycle),
+             fd != IO68_NO_INT) {
         /* ... This must not happen ...  */
         if( (int)fd < 0 ) {
           fd = 0;
@@ -498,11 +498,11 @@ void emu68_cycle(emu68_t * const emu68, cycle68_t cycleperpass)
 
       /* $$$ HACK : mfp interupt at level 5 */
       if (6 > ipl) {
-	t = emu68->interrupt_io->interrupt(emu68->interrupt_io,cycle);
-	if (t) {
-	  EXCEPTION(t->vector,t->level);
-	  /* $$$ extra cycle should be added here for exception handle */
-	}
+        t = emu68->interrupt_io->interrupt(emu68->interrupt_io,cycle);
+        if (t) {
+          EXCEPTION(t->vector,t->level);
+          /* $$$ extra cycle should be added here for exception handle */
+        }
       }
     }
   } while(cycle < cycleperpass);
@@ -514,7 +514,7 @@ void emu68_cycle(emu68_t * const emu68, cycle68_t cycleperpass)
 
 
 /* Run until PC = breakpc
-*/
+ */
 void emu68_break (emu68_t * const emu68, addr68_t  breakpc)
 {
   if (emu68) {
@@ -541,14 +541,14 @@ static emu68_parms_t def_parms = {
   0,       /* name                        */
   19,      /* log2mem: 2^19 => 512Kb      */
   8000000, /* master clock for Atari520ST */
-  0        /* debug mode off              */ 
+  0        /* debug mode off              */
 };
 
 emu68_t * emu68_create(emu68_parms_t * const parms)
 {
   emu68_t * emu68 = 0;
   int memsize, membyte;
-  emu68_parms_t * const p = parms ? parms : &def_parms; 
+  emu68_parms_t * const p = parms ? parms : &def_parms;
 
   if (!p->log2mem) {
     p->log2mem = def_parms.log2mem;
@@ -585,7 +585,7 @@ emu68_t * emu68_create(emu68_parms_t * const parms)
   emu68_mem_init(emu68);
   emu68_reset(emu68);
 
- error:
+  error:
   return emu68;
 }
 
@@ -610,13 +610,13 @@ emu68_t * emu68_duplicate(emu68_t * emu68src, const char * dupname)
   emu68->reg      = emu68src->reg;
   emu68->cycle    = emu68src->cycle;
   emu68->framechk = emu68src->framechk;
-  
+
   /* Copy memory */
   memcpy(emu68->mem, emu68src->mem, 1<<emu68->log2mem);
   if (emu68->chk)
     memcpy(emu68->chk, emu68src->chk, 1<<emu68->log2mem);
 
- error:
+  error:
   return emu68;
 }
 
@@ -635,7 +635,7 @@ void emu68_destroy(emu68_t * const emu68)
  * - A7 = end of mem - 4
  * - All registers cleared
  * - All IO reseted
-*/
+ */
 void emu68_reset(emu68_t * const emu68)
 {
   if (emu68) {

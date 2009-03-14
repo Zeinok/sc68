@@ -1,7 +1,7 @@
 /*
- *		      file68 - stream operations
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                    file68 - stream operations
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -83,9 +83,9 @@ static int isseek(istream68_t *istream, int pos, int offset)
     if (offset) {
       istream68_seek_t seek = (offset > 0) ? istream->seekf : istream->seekb;
       if (seek && seek(istream, offset) != -1) {
-	pos += offset;
+        pos += offset;
       } else {
-	pos = -1;
+        pos = -1;
       }
     }
   }
@@ -123,7 +123,7 @@ int istream68_gets(istream68_t *istream, char * buffer, int max)
   if (!istream || !istream->read || !buffer || max <= 0) {
     return -1;
   }
-  
+
   for (i=0, --max; i<max; ) {
     char c;
     int err;

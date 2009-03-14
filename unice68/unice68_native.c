@@ -1,8 +1,8 @@
 /*
- *	   unice68 - ice depacker library (native version)
+ *         unice68 - ice depacker library (native version)
  *
- *	       Copyright (C) 2003-2009 Benjamin Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *             Copyright (C) 2003-2009 Benjamin Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License as
@@ -77,7 +77,7 @@ typedef struct {
 
 static const int direkt_tab[] = {
   0x7fff000e,0x00ff0007,0x00070002,0x00030001,0x00030001,
-  270-1,	15-1,	 8-1,	 5-1,	 2-1
+  270-1,        15-1,    8-1,    5-1,    2-1
 };
 
 static const u8 length_tab[] = {
@@ -123,7 +123,7 @@ static inline int check_drange(all_regs_t *R, const areg_t a, const areg_t b)
     R->overflow |= 1;
   }
   return R->overflow;
-} 
+}
 
 static inline int check_crange(all_regs_t *R, const areg_t a, const areg_t b)
 {
@@ -134,11 +134,11 @@ static inline int check_crange(all_regs_t *R, const areg_t a, const areg_t b)
 }
 
 
-/* getinfo:	moveq	#3,d1 */
-/* getbytes: lsl.l	#8,d0 */
-/* 	move.b	(a0)+,d0 */
-/* 	dbf	d1,getbytes */
-/* 	rts */
+/* getinfo:     moveq   #3,d1 */
+/* getbytes: lsl.l      #8,d0 */
+/*      move.b  (a0)+,d0 */
+/*      dbf     d1,getbytes */
+/*      rts */
 static inline int getinfo(all_regs_t *R)
 {
   const areg_t a0 = R->a0;
@@ -148,12 +148,12 @@ static inline int getinfo(all_regs_t *R)
 }
 
 /* get_1_bit: */
-/* 	add.b	d7,d7 */
-/* 	bne.s	bitfound */
-/* 	move.b	-(a5),d7 */
-/* 	addx.b	d7,d7 */
+/*      add.b   d7,d7 */
+/*      bne.s   bitfound */
+/*      move.b  -(a5),d7 */
+/*      addx.b  d7,d7 */
 /* bitfound: */
-/* 	rts */
+/*      rts */
 
 static inline int get_1_bit(all_regs_t *R)
 {
@@ -165,7 +165,7 @@ static inline int get_1_bit(all_regs_t *R)
   check_crange(R,R->a5-1,R->a5-1);
 
   r = (r>>8) + (*(--R->a5) << 1);
- bitfound:
+  bitfound:
   R->d7 = (R->d7 & ~0xFF) | (r & 0xFF);
   return r >> 8;
 }
@@ -188,20 +188,20 @@ static int ice_decrunch(all_regs_t *R)
   int csize;
   int dsize;
 
-/* 	movem.l	d0-a6,-(a7) */
-/* 	bsr.s	getinfo */
-/* 	cmpi.l	#'ICE!',d0 */
-/* 	bne	not_packed */
-/* 	bsr.s	getinfo	 */
-/* 	lea.l	-8(a0,d0.l),a5 */
-/* 	bsr.s	getinfo */
-/* 	move.l	d0,(a7) */
-/* 	move.l	a1,a4 */
-/* 	move.l	a1,a6 */
-/* 	adda.l	d0,a6 */
-/* 	move.l	a6,a3 */
-/* 	move.b	-(a5),d7 */
-/* 	bsr	normal_bytes */
+/*      movem.l d0-a6,-(a7) */
+/*      bsr.s   getinfo */
+/*      cmpi.l  #'ICE!',d0 */
+/*      bne     not_packed */
+/*      bsr.s   getinfo  */
+/*      lea.l   -8(a0,d0.l),a5 */
+/*      bsr.s   getinfo */
+/*      move.l  d0,(a7) */
+/*      move.l  a1,a4 */
+/*      move.l  a1,a6 */
+/*      adda.l  d0,a6 */
+/*      move.l  a6,a3 */
+/*      move.b  -(a5),d7 */
+/*      bsr     normal_bytes */
 
   R->ctop = R->a0;
   R->dtop = R->a1;
@@ -220,15 +220,15 @@ static int ice_decrunch(all_regs_t *R)
   R->d7 = *(--R->a5);
   normal_bytes(R);
 
-/* 	move.l	a3,a6 */
-/* 	bsr	get_1_bit */
-/* 	bcc.s	not_packed */
-/* 	move.w	#$0f9f,d7 */
-/* 	bsr	get_1_bit */
-/* 	bcc.s	ice_00 */
-/* 	moveq	#15,d0	 */
-/* 	bsr	get_d0_bits */
-/* 	move.w	d1,d7 */
+/*      move.l  a3,a6 */
+/*      bsr     get_1_bit */
+/*      bcc.s   not_packed */
+/*      move.w  #$0f9f,d7 */
+/*      bsr     get_1_bit */
+/*      bcc.s   ice_00 */
+/*      moveq   #15,d0   */
+/*      bsr     get_d0_bits */
+/*      move.w  d1,d7 */
 
   R->a6 = R->a3;
   GET_1_BIT_BCC(not_packed);
@@ -236,33 +236,33 @@ static int ice_decrunch(all_regs_t *R)
   GET_1_BIT_BCC(ice_00);
   R->d7 = R->d1 = get_d0_bits(R, 15);
 
-/* ice_00:	moveq	#3,d6 */
-/* ice_01:	move.w	-(a3),d4 */
-/* 	moveq	#3,d5 */
-/* ice_02:	add.w	d4,d4 */
-/* 	addx.w	d0,d0 */
-/* 	add.w	d4,d4 */
-/* 	addx.w	d1,d1 */
-/* 	add.w	d4,d4 */
-/* 	addx.w	d2,d2 */
-/* 	add.w	d4,d4 */
-/* 	addx.w	d3,d3 */
-/* 	dbra	d5,ice_02 */
-/* 	dbra	d6,ice_01 */
-/* 	movem.w	d0-d3,(a3) */
-/* 	dbra	d7,ice_00 */
+/* ice_00:      moveq   #3,d6 */
+/* ice_01:      move.w  -(a3),d4 */
+/*      moveq   #3,d5 */
+/* ice_02:      add.w   d4,d4 */
+/*      addx.w  d0,d0 */
+/*      add.w   d4,d4 */
+/*      addx.w  d1,d1 */
+/*      add.w   d4,d4 */
+/*      addx.w  d2,d2 */
+/*      add.w   d4,d4 */
+/*      addx.w  d3,d3 */
+/*      dbra    d5,ice_02 */
+/*      dbra    d6,ice_01 */
+/*      movem.w d0-d3,(a3) */
+/*      dbra    d7,ice_00 */
 
-ice_00:
+  ice_00:
   R->d6 = 3;
-ice_01:
+  ice_01:
   R->a3 -= 2;
   R->d4 = (R->a3[0]<<8) | R->a3[1];
   R->d5 = 3;
-ice_02:
+  ice_02:
   R->d4 += R->d4;
   R->d0 += R->d0 + (R->d4>>16);
   R->d4 &= 0xFFFF;
-  
+
   R->d4 += R->d4;
   R->d1 += R->d1 + (R->d4>>16);
   R->d4 &= 0xFFFF;
@@ -296,33 +296,33 @@ ice_02:
 
   DBF(R->d7,ice_00);
 
-not_packed:
+  not_packed:
   return -!!R->overflow;
 }
 
 static void normal_bytes(all_regs_t *R)
 {
-/* normal_bytes:	 */
-/* 	bsr.s	get_1_bit */
-/* 	bcc.s	test_if_end */
-/* 	moveq.l	#0,d1 */
-/* 	bsr.s	get_1_bit */
-/* 	bcc.s	copy_direkt */
-/* 	lea.l	direkt_tab+20(pc),a1 */
-/* 	moveq.l	#4,d3 */
-/* nextgb:	move.l	-(a1),d0 */
-/* 	bsr.s	get_d0bits */
-/* 	swap.w	d0 */
-/* 	cmp.w	d0,d1 */
-/* 	dbne	d3,nextgb */
-/* no_more:	add.l	20(a1),d1 */
-/* copy_direkt:	 */
-/* 	move.b	-(a5),-(a6) */
-/* 	dbf	d1,copy_direkt */
-/* test_if_end:	 */
-/* 	cmpa.l	a4,a6 */
-/* 	bgt.s	strings */
-/* 	rts	 */
+/* normal_bytes:         */
+/*      bsr.s   get_1_bit */
+/*      bcc.s   test_if_end */
+/*      moveq.l #0,d1 */
+/*      bsr.s   get_1_bit */
+/*      bcc.s   copy_direkt */
+/*      lea.l   direkt_tab+20(pc),a1 */
+/*      moveq.l #4,d3 */
+/* nextgb:      move.l  -(a1),d0 */
+/*      bsr.s   get_d0bits */
+/*      swap.w  d0 */
+/*      cmp.w   d0,d1 */
+/*      dbne    d3,nextgb */
+/* no_more:     add.l   20(a1),d1 */
+/* copy_direkt:  */
+/*      move.b  -(a5),-(a6) */
+/*      dbf     d1,copy_direkt */
+/* test_if_end:  */
+/*      cmpa.l  a4,a6 */
+/*      bgt.s   strings */
+/*      rts      */
 
 
   while (1) {
@@ -334,7 +334,7 @@ static void normal_bytes(all_regs_t *R)
 
     tab = direkt_tab + (20>>2);
     R->d3 = 4;
-  nextgb:
+    nextgb:
     R->d0 = * (--tab);
     R->d1 = get_d0_bits(R, R->d0);
     R->d0 = (R->d0 >> 16) | ~0xFFFF;
@@ -342,22 +342,22 @@ static void normal_bytes(all_regs_t *R)
 /*   no_more: */
     R->d1 += tab[(20>>2)];
 
-  copy_direkt:
+    copy_direkt:
     {
       const int cnt = DBF_COUNT(R->d1);
       if (check_drange(R, R->a6-cnt, R->a6-1) |
-	  check_crange(R, R->a5-cnt, R->a5-1)) {
-	break;
+          check_crange(R, R->a5-cnt, R->a5-1)) {
+        break;
       }
     }
-  lp_copy:
+    lp_copy:
     *(--R->a6) = *(--R->a5);
     DBF(R->d1,lp_copy);
 
-  test_if_end:
+    test_if_end:
     if (R->a6 <= R->a4) {
       if (R->a6 < R->a4) {
-	check_drange(R, R->a6, R->a6);
+        check_drange(R, R->a6, R->a6);
       }
       break;
     }
@@ -368,15 +368,15 @@ static void normal_bytes(all_regs_t *R)
 
 
 /* get_d0_bits: */
-/* 	moveq.l	#0,d1 */
-/* hole_bit_loop:	 */
-/* 	add.b	d7,d7 */
-/* 	bne.s	on_d0 */
-/* 	move.b	-(a5),d7 */
-/* 	addx.b	d7,d7 */
-/* on_d0:	addx.w	d1,d1 */
-/* 	dbf	d0,hole_bit_loop */
-/* 	rts	 */
+/*      moveq.l #0,d1 */
+/* hole_bit_loop:        */
+/*      add.b   d7,d7 */
+/*      bne.s   on_d0 */
+/*      move.b  -(a5),d7 */
+/*      addx.b  d7,d7 */
+/* on_d0:       addx.w  d1,d1 */
+/*      dbf     d0,hole_bit_loop */
+/*      rts      */
 
 static int get_d0_bits(all_regs_t *R, int r0)
 {
@@ -389,14 +389,14 @@ static int get_d0_bits(all_regs_t *R, int r0)
     return 0;
   }
 
- hole_bit_loop:	
+  hole_bit_loop:
   r7 = (r7 & 255) << 1;
   B_CC(r7 & 255, on_d0);
 
   check_crange(R,R->a5-1,R->a5-1);
 
   r7 = (*(--R->a5) << 1) + (r7>>8);
- on_d0:
+  on_d0:
   r1 += r1 + (r7>>8);
   DBF(r0,hole_bit_loop);
   R->d7 = (R->d7 &~0xFF) | (r7 & 0xFF);
@@ -404,58 +404,58 @@ static int get_d0_bits(all_regs_t *R, int r0)
   return r1;
 }
 
-static void strings(all_regs_t *R) 
+static void strings(all_regs_t *R)
 {
 /* strings: */
-/* 	lea.l	length_tab(pc),a1 */
-/* 	moveq.l	#3,d2 */
-/* get_length_bit:	 */
-/* 	bsr.s	get_1_bit */
-/* 	dbcc	d2,get_length_bit */
-/* no_length_bit:	 */
-/* 	moveq.l	#0,d4 */
-/* 	moveq.l	#0,d1 */
-/* 	move.b	1(a1,d2.w),d0 */
-/* 	ext.w	d0 */
-/* 	bmi.s	no_Ober */
-/* get_Ober: bsr.s	get_d0_bits */
-/* no_Ober:	move.b	6(a1,d2.w),d4 */
-/* 	add.w	d1,d4 */
-/* 	beq.s	get_offset_2 */
+/*      lea.l   length_tab(pc),a1 */
+/*      moveq.l #3,d2 */
+/* get_length_bit:       */
+/*      bsr.s   get_1_bit */
+/*      dbcc    d2,get_length_bit */
+/* no_length_bit:        */
+/*      moveq.l #0,d4 */
+/*      moveq.l #0,d1 */
+/*      move.b  1(a1,d2.w),d0 */
+/*      ext.w   d0 */
+/*      bmi.s   no_Ober */
+/* get_Ober: bsr.s      get_d0_bits */
+/* no_Ober:     move.b  6(a1,d2.w),d4 */
+/*      add.w   d1,d4 */
+/*      beq.s   get_offset_2 */
 
   R->a1 = (areg_t)length_tab;
   R->d2 = 3;
-get_length_bit:	
+  get_length_bit:
   DB_CC(get_1_bit(R)==0, R->d2, get_length_bit);
-/* no_length_bit:	 */
+/* no_length_bit:        */
   R->d4 = R->d1 = 0; /* $$$ d4 is not needed here. */
   R->d0 = (R->d0 & ~0xFFFF) | (0xFFFF & (s8)R->a1[ 1 + (s16)R->d2 ]);
   B_CC(R->d0&0x8000, no_Ober);
 /*  get_Ober: */
   R->d1 = get_d0_bits(R, R->d0);
   R->d0 |= 0xFFFF;
- no_Ober:
+  no_Ober:
   R->d4 = R->a1 [ 6 + (s16)R->d2 ];
   R->d4 += R->d1;
   B_CC(R->d4==0,get_offset_2);
-  
-/* 	lea.l	more_offset(pc),a1 */
-/* 	moveq.l	#1,d2 */
-/* getoffs:	bsr.s	get_1_bit */
-/* 	dbcc	d2,getoffs */
-/* 	moveq.l	#0,d1 */
-/* 	move.b	1(a1,d2.w),d0 */
-/* 	ext.w	d0 */
-/* 	bsr.s	get_d0_bits */
-/* 	add.w	d2,d2 */
-/* 	add.w	6(a1,d2.w),d1 */
-/* 	bpl.s	depack_bytes */
-/* 	sub.w	d4,d1 */
-/* 	bra.s	depack_bytes */
+
+/*      lea.l   more_offset(pc),a1 */
+/*      moveq.l #1,d2 */
+/* getoffs:     bsr.s   get_1_bit */
+/*      dbcc    d2,getoffs */
+/*      moveq.l #0,d1 */
+/*      move.b  1(a1,d2.w),d0 */
+/*      ext.w   d0 */
+/*      bsr.s   get_d0_bits */
+/*      add.w   d2,d2 */
+/*      add.w   6(a1,d2.w),d1 */
+/*      bpl.s   depack_bytes */
+/*      sub.w   d4,d1 */
+/*      bra.s   depack_bytes */
 
   R->a1 = (areg_t)more_offset;
   R->d2 = 1;
- getoffs:
+  getoffs:
   DB_CC(get_1_bit(R)==0,R->d2,getoffs);
 
   R->d1 = get_d0_bits(R,(int)(s8)more_offset[1+(s16)R->d2]);
@@ -465,44 +465,44 @@ get_length_bit:
     R->d1 -= R->d4;
   }
   goto depack_bytes;
-  
-  
-  /* get_offset_2:	 */
-  /* 	moveq.l	#0,d1 */
-  /* 	moveq.l	#5,d0 */
-  /* 	moveq.l	#-1,d2 */
-  /* 	bsr.s	get_1_bit */
-  /* 	bcc.s	less_40 */
-  /* 	moveq.l	#8,d0 */
-  /* 	moveq.l	#$3f,d2 */
-  /* less_40:	bsr.s	get_d0_bits */
-  /* 	add.w	d2,d1 */
-  
- get_offset_2:	
+
+
+  /* get_offset_2:       */
+  /*    moveq.l #0,d1 */
+  /*    moveq.l #5,d0 */
+  /*    moveq.l #-1,d2 */
+  /*    bsr.s   get_1_bit */
+  /*    bcc.s   less_40 */
+  /*    moveq.l #8,d0 */
+  /*    moveq.l #$3f,d2 */
+  /* less_40:   bsr.s   get_d0_bits */
+  /*    add.w   d2,d1 */
+
+  get_offset_2:
   R->d1 = 0;
   R->d0 = 5;
   R->d2 = -1;
   GET_1_BIT_BCC(less_40);
   R->d0 = 8;
   R->d2 = 0x3f;
- less_40:
+  less_40:
   R->d1 = get_d0_bits(R, R->d0);
   R->d0 |= 0xFFFF;
   R->d1 += R->d2;
-  
+
   /* depack_bytes: */
-  /* 	lea.l	2(a6,d4.w),a1 */
-  /* 	adda.w	d1,a1 */
-  /* 	move.b	-(a1),-(a6) */
-  /* dep_b:	move.b	-(a1),-(a6) */
-  /* 	dbf	d4,dep_b */
-  /* 	bra	normal_bytes */
-  
- depack_bytes:
+  /*    lea.l   2(a6,d4.w),a1 */
+  /*    adda.w  d1,a1 */
+  /*    move.b  -(a1),-(a6) */
+  /* dep_b:     move.b  -(a1),-(a6) */
+  /*    dbf     d4,dep_b */
+  /*    bra     normal_bytes */
+
+  depack_bytes:
   R->a1 = R->a6 + 2 + (s16)R->d4 + (s16)R->d1;
   check_drange(R, R->a6 - DBF_COUNT(R->d4) - 1, R->a6-1);
   if (R->a6>R->a4) *(--R->a6) = *(--R->a1);
- dep_b:
+  dep_b:
   if (R->a6>R->a4) *(--R->a6) = *(--R->a1);
   DBF(R->d4,dep_b);
 }

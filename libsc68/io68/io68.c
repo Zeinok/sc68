@@ -17,9 +17,9 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -44,28 +44,28 @@ int io68_init(io68_init_t * const parms)
   }
 
   if (!isinit_paula) {
-    isinit_paula = !paulaio_init(parms?&parms->paula:0); 
+    isinit_paula = !paulaio_init(parms?&parms->paula:0);
   }
   if (!isinit_ym) {
-    isinit_ym = !ymio_init(parms?&parms->ym:0); 
+    isinit_ym = !ymio_init(parms?&parms->ym:0);
   }
   if (!isinit_mw) {
-    isinit_mw = !mwio_init(parms?&parms->mw:0); 
+    isinit_mw = !mwio_init(parms?&parms->mw:0);
   }
   if (!isinit_mfp) {
-    isinit_mfp = !mfpio_init(); 
+    isinit_mfp = !mfpio_init();
   }
   if (!isinit_shifter) {
-    isinit_shifter = !shifterio_init(); 
+    isinit_shifter = !shifterio_init();
   }
 
   err = -!(1
-	   & isinit_paula
-	   & isinit_ym
-	   & isinit_mw
-	   & isinit_mfp
-	   & isinit_shifter
-	   );
+           & isinit_paula
+           & isinit_ym
+           & isinit_mw
+           & isinit_mfp
+           & isinit_shifter
+    );
 
   return err;
 }
@@ -80,24 +80,23 @@ void io68_destroy(io68_t * const io)
 void io68_shutdown(void)
 {
   if (isinit_paula) {
-    paulaio_shutdown(); 
+    paulaio_shutdown();
     isinit_paula = 0;
   }
   if (isinit_ym) {
-    ymio_shutdown(); 
+    ymio_shutdown();
     isinit_ym = 0;
   }
   if (isinit_mw) {
-    mwio_shutdown(); 
+    mwio_shutdown();
     isinit_mw = 0;
   }
   if (isinit_mfp) {
-     mfpio_shutdown(); 
-     isinit_mfp = 0;
+    mfpio_shutdown();
+    isinit_mfp = 0;
   }
   if (isinit_shifter) {
-     shifterio_shutdown(); 
-     isinit_shifter = 0;
+    shifterio_shutdown();
+    isinit_shifter = 0;
   }
 }
-

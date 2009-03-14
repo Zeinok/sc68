@@ -1,7 +1,7 @@
 /*
- *			 info68 - FILE stream
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                       info68 - FILE stream
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -71,8 +71,8 @@ static int isf_open(istream68_t * istream)
   }
 
 /*   SC68os_pdebug("istream68_file::open(%s,%c%c)\n",isf->name, */
-/* 		isf->mode.read?'R':'r', */
-/* 		isf->mode.write?'W':'w'); */
+/*              isf->mode.read?'R':'r', */
+/*              isf->mode.write?'W':'w'); */
 
   imode = 0;
   if (ISTREAM68_IS_OPEN_READ(isf->mode)) {
@@ -97,7 +97,7 @@ static int isf_open(istream68_t * istream)
     _setmode(_fileno(isf->f), _O_BINARY);
   }
 #endif
-  return isf->f ? 0 : -1; 
+  return isf->f ? 0 : -1;
 }
 
 static int isf_close(istream68_t * istream)
@@ -164,7 +164,7 @@ static int isf_tell(istream68_t * istream)
   istream68_file_t * isf = (istream68_file_t *)istream;
 
   return (!isf || !isf->f)
-    ? -1 
+    ? -1
     : ftell(isf->f);
 }
 
@@ -213,7 +213,7 @@ istream68_t * istream68_file_create(const char * fname, int mode)
   /* Clean file handle. */
   isf->f    = 0;
   isf->mode = mode & (ISTREAM68_OPEN_READ|ISTREAM68_OPEN_WRITE);
-  
+
   /* Copy filename. */
   /* $$$ May be later, we should add a check for relative path and add
    * CWD ... */
@@ -228,7 +228,7 @@ istream68_t * istream68_file_create(const char * fname, int mode)
  */
 
 istream68_t * istream68_file_create(context68_t * context,
-				    const char * fname, int mode)
+                                    const char * fname, int mode)
 {
   return 0;
 }

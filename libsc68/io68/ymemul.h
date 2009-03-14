@@ -5,19 +5,17 @@
  * @date      1998/06/24
  * @brief     YM-2149 emulator header.
  *
- * $Id$
  */
+
+/* $Id$ */
 
 /* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _IO68_YM_EMUL_H_
 #define _IO68_YM_EMUL_H_
 
+#include "io68_api.h"
 #include "emu68/emu68.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /* Need these defines in ymemul.c and ym_orig.c */
 #define YM_OUT_MSK_A   0x001F
@@ -49,10 +47,10 @@ extern "C" {
 #define YM_PERL(N) (YM_BASEPERL+(N)*2) /**< Canal #N LSB period.    */
 #define YM_PERH(N) (YM_BASEPERH+(N)*2) /**< Canal #N MSB period.    */
 #define YM_VOL(N)  (YM_BASEVOL+(N))    /**< Canal #N volume.        */
-/**@}*/
+/** @} */
 
 
-/** @name YM-2149 internal register access. 
+/** @name YM-2149 internal register access.
  *  @{
  */
 
@@ -62,7 +60,7 @@ struct ym_waccess_s
   struct ym_waccess_s * link; /**< Link to prev or next entry.   */
   cycle68_t ymcycle;          /**< CPU cycle this access occurs. */
   u8 reg;                     /**< YM register to write into.    */
-  u8 val;                     /**< Value to write.               */ 
+  u8 val;                     /**< Value to write.               */
 };
 
 /** YM write access type. */
@@ -76,7 +74,7 @@ typedef struct
   ym_waccess_t * tail;        /**< Last acces in list.   */
 } ym_waccess_list_t;
 
-/**@}*/
+/** @} */
 
 /** YM-2149 internal register mapping. */
 struct ym2149_reg_s {
@@ -100,14 +98,14 @@ struct ym2149_reg_s {
 
 /** Access YM-2149 internal register by name or by index. */
 typedef union ym_reg_u {
-  struct ym2149_reg_s name;	/* ym registers by name.  */
-  u8 index[16];			/* ym registers by index. */
+  struct ym2149_reg_s name;     /* ym registers by name.  */
+  u8 index[16];                 /* ym registers by index. */
 } ym_reg_t;
 
 /** Toggle table/calculated envelop emulation. */
 #ifndef YM_ENV_TABLE
 # define YM_ENV_TABLE 1
-#endif 
+#endif
 
 /** Available emulation modes. */
 enum ym_emul_e {
@@ -153,7 +151,7 @@ struct ym_s {
   int      (*cb_run)           (ym_t * const, s32 *, const cycle68_t);
   uint68_t (*cb_buffersize)    (const ym_t const *, const cycle68_t);
   uint68_t (*cb_sampling_rate) (ym_t * const, const uint68_t);
-  /**@}*/
+  /** @} */
 
   /** @name Internal YM registers
    *  @{
@@ -161,7 +159,7 @@ struct ym_s {
   u8 ctrl;                    /**< Control (working) register.           */
   ym_reg_t reg;               /**< YM registers.                         */
   ym_reg_t shadow;            /**< Shadow YM registers (for reading).    */
-  /**@}*/
+  /** @} */
 
   s16 * ymout5;               /**< DAC lookup table                      */
   unsigned int voice_mute;    /**< Mask muted voices.                    */
@@ -178,7 +176,7 @@ struct ym_s {
   int            waccess_max; /**< Maximum number of entry in waccess.   */
   ym_waccess_t * waccess_nxt; /**< Next available ym_waccess_t.          */
   ym_waccess_t * waccess;     /**< Static register entry list.           */
-  /**@}*/
+  /** @} */
 
   /* $$$ TEMP: should be allocated... */
   ym_waccess_t static_waccess[2048];
@@ -188,9 +186,9 @@ struct ym_s {
    */
   s32 * outbuf;             /**< output buffer given to ym_run()         */
   s32 * outptr;             /**< generated sample pointer (into outbuf)  */
-  /**@}*/
+  /** @} */
 
-  int type;			/**< engine type @see ym_emul_e */
+  int type;                     /**< engine type @see ym_emul_e */
 
   /** Data */
   union emu_u {
@@ -213,7 +211,7 @@ typedef struct
   int68_t  emul;     /**< @see ym_emul_e emulator mode.      */
   int68_t  voltable; /**< @see ym_vol_e volume table type.   */
   uint68_t hz;       /**< Sampling rate in Hz.               */
-  uint68_t clock;    /**< @see ym_clock_e frequency.         */ 
+  uint68_t clock;    /**< @see ym_clock_e frequency.         */
   uint68_t outlevel; /**< Output level [0..256] (disabled).  */
   int    * argc;     /**< Argument count (before and after). */
   char  ** argv;     /**< Arguments.                         */
@@ -224,6 +222,7 @@ typedef struct
  *  @{
  */
 
+IO68_EXTERN
 /** Set or get default Yamaha-2149 emulator engine.
  *
  *    @param  emul  YM_EMUL_DEFAULT:get current; others:set new
@@ -234,6 +233,7 @@ typedef struct
  */
 int ym_default_engine(int emul);
 
+IO68_EXTERN
 /** Create an Yamaha-2149 emulator instance.
  *
  *   @param  ym
@@ -247,12 +247,14 @@ int ym_default_engine(int emul);
  */
 int ym_setup(ym_t * const ym, ym_parms_t * const parms);
 
+IO68_EXTERN
 /** Destroy an Yamaha-2149 emulator instance.
  *
  *   @param  ym  ym emulator instance to destroy
  */
 void ym_cleanup(ym_t * const ym);
 
+IO68_EXTERN
 /** Perform an Yamaha-2149 hardware reset.
  *
  *    The ym_reset() reset function perform a YM-2149 reset. It
@@ -272,6 +274,7 @@ void ym_cleanup(ym_t * const ym);
  */
 int ym_reset(ym_t * const ym, const cycle68_t ymcycle);
 
+IO68_EXTERN
 /** Yamaha-2149 first one first initialization.
  *
  *    The ym_init() function must be call before any other ym_
@@ -288,6 +291,7 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle);
  */
 int ym_init(ym_parms_t * const parms);
 
+IO68_EXTERN
 /** Shutdown the ym-2149 library.
  *
  *    The ym_shutdown() function should be call after all created ym
@@ -296,23 +300,24 @@ int ym_init(ym_parms_t * const parms);
  */
 void ym_shutdown(void);
 
-/**@}*/
+/** @} */
 
 
 /** @name  Emulation functions
  *  @{
  */
 
+IO68_EXTERN
 /** Execute Yamaha-2149 emulation.
  *
  *    The ym_run() function execute Yamaha-2149 emulation for a given
- *    number of cycle. The output buffer 
+ *    number of cycle. The output buffer
  *
  *    @warning The requested output buffer size may seem larger than
  *    neccessary but it is not. Internally the emulator may need some
  *    extra place (for oversampling...). Always call ym_buffersize()
  *    to allocate this buffer large enougth.
- * 
+ *
  *  @param  ym        YM-2149 emulator instance.
  *  @param  output    Output sample buffer.
  *  @param  ymcycles  Number of cycle to mix.
@@ -325,6 +330,7 @@ void ym_shutdown(void);
 int ym_run(ym_t * const ym, s32 * output, const cycle68_t ymcycles);
 
 
+IO68_EXTERN
 /** Get required output buffer size.
  *
  *    The ym_buffersize() function returns the minimum size in
@@ -341,7 +347,7 @@ int ym_run(ym_t * const ym, s32 * output, const cycle68_t ymcycles);
  */
 uint68_t ym_buffersize(const ym_t const * ym, const cycle68_t ymcycles);
 
-
+IO68_EXTERN
 /** Change YM cycle counter base.
  *
  *   The ym_adjest() function allow to corrige the internal cycle
@@ -356,7 +362,7 @@ uint68_t ym_buffersize(const ym_t const * ym, const cycle68_t ymcycles);
  */
 void ym_adjust_cycle(ym_t * const ym, const cycle68_t ymcycles);
 
-/**@}*/
+/** @} */
 
 
 /** @name  YM-2149 register access functions
@@ -364,6 +370,7 @@ void ym_adjust_cycle(ym_t * const ym, const cycle68_t ymcycles);
  */
 
 
+IO68_EXTERN
 /** Write in YM-2149 register.
  *
  *   The ym_writereg() function performs a write access to an YM-2149
@@ -405,7 +412,7 @@ int ym_readreg(ym_t * const ym, const cycle68_t ymcycle)
     : 0;
 }
 
-
+IO68_EXTERN
 /** Get/Set active channels status.
  *
  *   The ym_active_channels() function allows to activate/desactivate
@@ -432,7 +439,7 @@ int ym_readreg(ym_t * const ym, const cycle68_t ymcycle)
  *  @param  off  Mute the channels for bit set to 1
  *  @param  on   Active the channels for bit set to 1
  *
- *  @return  new active-voices status     
+ *  @return  new active-voices status
  *  @retval  -1 Failure
  *  @retval   0 All voice muted
  *  @retval   1 Only channel A
@@ -441,6 +448,7 @@ int ym_readreg(ym_t * const ym, const cycle68_t ymcycle)
  */
 int ym_active_channels(ym_t * const ym, const int off, const int on);
 
+IO68_EXTERN
 /** Get/Set sampling rate.
  *
  *  @param  ym   YM-2149 emulator instance
@@ -450,16 +458,11 @@ int ym_active_channels(ym_t * const ym, const int off, const int on);
  *  @retval 0    Failure
  */
 uint68_t ym_sampling_rate(ym_t * const ym, const uint68_t hz);
-  
 
-/**@}*/
+/** @} */
 
 /**
- * @}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _IO68_YM_EMUL_H_ */

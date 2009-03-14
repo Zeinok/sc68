@@ -1,7 +1,7 @@
 /*
  *                     file68 - Resource access
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -45,11 +45,11 @@
 #ifndef DEBUG_RSC68_O
 #define DEBUG_RSC68_O 0
 #endif
-int rsc68_feature = msg68_DEFAULT; 
+int rsc68_feature = msg68_DEFAULT;
 
 static volatile int init = 0;
 
-/* The resource pathes are context independant consequently 
+/* The resource pathes are context independant consequently
  * each context use the same pathes.
  */
 static const char * share_path  = 0; /* Shared resource path. */
@@ -58,7 +58,7 @@ static const char * lmusic_path = 0; /* Local music path.     */
 static const char * rmusic_path = 0; /* Remote music path.    */
 
 static istream68_t * default_open(rsc68_t type, const char *name, int mode,
-				  rsc68_info_t * info);
+                                  rsc68_info_t * info);
 
 static rsc68_handler_t rsc68 = default_open;
 
@@ -161,9 +161,9 @@ const char * rsc68_set_remote_music(const char *path)
 }
 
 void rsc68_get_path(const char **share,
-		    const char **user,
-		    const char **local_music,
-		    const char **remote_music)
+                    const char **user,
+                    const char **local_music,
+                    const char **remote_music)
 {
   if (share)        *share        = share_path;
   if (user)         *user         = user_path;
@@ -216,8 +216,8 @@ static int cv_from_tables(int c, const char * acc, const char * con)
 static int cv_accent(int c)
 {
   return cv_from_tables(c,
-			"áâàãäëéêèïíîìöõóôòüúûùüç",
-			"aaaaaeeeeiiiiooooouuuuuc");
+                        "áâàãäëéêèïíîìöõóôòüúûùüç",
+                        "aaaaaeeeeiiiiooooouuuuuc");
 }
 
 /* Convert to minus */
@@ -278,10 +278,10 @@ static int cv_path_remote(int c)
 
 
 static int copy_path(char *d, int max,
-		     const char * s,
-		     char_cv_t cv1,
-		     char_cv_t cv2,
-		     int brk)
+                     const char * s,
+                     char_cv_t cv1,
+                     char_cv_t cv2,
+                     int brk)
 {
   int i;
 
@@ -305,7 +305,7 @@ static int copy_path(char *d, int max,
 /* formay is /:track:loop:time/ */
 const char * rsc68_get_music_params(rsc68_info_t *info, const char *name)
 {
-  int c = 1;			/* anything but 0 or ':' */
+  int c = 1;                    /* anything but 0 or ':' */
   if (info) {
     info->type = rsc68_last;
   }
@@ -313,23 +313,23 @@ const char * rsc68_get_music_params(rsc68_info_t *info, const char *name)
   if (name) c = *name;
   if (!c || c == ':') {
     int i, tinfo[3] = { -1, -1, -1 };
-    
+
     for (i=0; i<3 && c == ':'; ++i) {
       c = *++name;
       if (c >= '0' && c <= '9') {
-	int v = 0;
-	do {
-	  v = v*10 + c-'0';
-	  c = *++name;
-	} while (c >= '0' && c <= '9');
-	tinfo[i] = v;
+        int v = 0;
+        do {
+          v = v*10 + c-'0';
+          c = *++name;
+        } while (c >= '0' && c <= '9');
+        tinfo[i] = v;
       }
     }
     /* skip to eos or next '/' */
     while (c && c != '/') {
       c = *++name;
     }
-    
+
     if (info) {
       info->type = rsc68_music;
       info->data.music.track = tinfo[0];
@@ -337,7 +337,7 @@ const char * rsc68_get_music_params(rsc68_info_t *info, const char *name)
       info->data.music.time  = tinfo[2];
     }
   }
-  
+
   return name;
 }
 
@@ -345,8 +345,8 @@ const char * rsc68_get_music_params(rsc68_info_t *info, const char *name)
 
 /* author/hw/title[/:track:loop:time] */
 static char * convert_music_path(char * newname, int max,
-				 const char *name,
-				 rsc68_info_t * info)
+                                 const char *name,
+                                 rsc68_info_t * info)
 {
   int len, c;
   char * nname = newname;
@@ -389,13 +389,13 @@ static char * convert_music_path(char * newname, int max,
 
   return newname;
 
- error:
+  error:
   *newname = 0;
   return 0;
 }
 
 static istream68_t * default_open(rsc68_t type, const char *name,
-				  int mode, rsc68_info_t * info)
+                                  int mode, rsc68_info_t * info)
 {
   istream68_t * is = 0;
   int err = -1;
@@ -403,7 +403,6 @@ static istream68_t * default_open(rsc68_t type, const char *name,
   char tmp[1024], * apath = 0;
   char tmpname[512];
   int alen = 0;
-/*   void * (*mycpy)(void *, const void *, size_t) = memcpy; */
 
   char_cv_t cv_path=0, cv_extra=0;
 
@@ -450,8 +449,8 @@ static istream68_t * default_open(rsc68_t type, const char *name,
     name = "sc68";
   }
 
-  TRACE68(rsc68_feature,"rsc68: open %c [rsc68://%s/%s%s]\n",
-	  (mode==1)?'R':'W',rsc68_table[type].name, name, ext?ext:"");
+  TRACE68(rsc68_feature,"rsc68: open %c 'rsc68://%s/%s%s'\n",
+          (mode==1)?'R':'W',rsc68_table[type].name, name, ext?ext:"");
 
   /* Any specific stuff. */
   switch (type) {
@@ -488,8 +487,6 @@ static istream68_t * default_open(rsc68_t type, const char *name,
       + strlen(name)
       + (cext ? strlen(cext) : 0);
 
-    TRACE68(rsc68_feature,"default_open() : trying '%s'\n", cpath);
-
     if (len <= alen) {
       path = apath;
     } else if (len  <= sizeof(tmp)) {
@@ -500,7 +497,7 @@ static istream68_t * default_open(rsc68_t type, const char *name,
       alen = apath ? len : 0;
       path = apath;
     }
-    
+
     if (!path) {
       continue;
     }
@@ -523,28 +520,26 @@ static istream68_t * default_open(rsc68_t type, const char *name,
       l = copy_path(p, pe-p, cext, 0, 0 ,0);
       p += l;
     }
-    TRACE68(rsc68_feature, "default_open() : path '%s'\n", path);
 
     if (pathes[ipath].curl) {
-      TRACE68(rsc68_feature, "default_open() : create curl stream\n");
+      TRACE68(rsc68_feature,"rsc68: try open '%s' with curl\n", path);
       is = istream68_curl_create(path, mode);
     } else {
-      TRACE68(rsc68_feature, "default_open() : create file stream\n");
+      TRACE68(rsc68_feature,"rsc68: try open '%s' with file\n", path);
       is = istream68_file_create(path, mode);
       if (!is) {
-	TRACE68(rsc68_feature, "default_open() : create fd stream\n");
-	is = istream68_fd_create(path, -1, mode);
+        TRACE68(rsc68_feature,"rsc68: try open '%s' with FD\n", path);
+        is = istream68_fd_create(path, -1, mode);
       }
     }
     err = istream68_open(is);
+    TRACE68(rsc68_feature, "rsc68: try [%s]\n", strok68(err));
     if (!err) {
-      TRACE68(rsc68_feature, "default_open() : ok for [%s]\n", path);
       break;
-    } else {
-      TRACE68(rsc68_feature, "default_open() : failed [%s]\n", path);
-      istream68_destroy(is);
-      is = 0;
     }
+
+    istream68_destroy(is);
+    is = 0;
   }
 
   if (apath != tmp) {
@@ -559,8 +554,8 @@ static istream68_t * default_open(rsc68_t type, const char *name,
     info->type = type;
   }
 
-  TRACE68(rsc68_feature, "} default_open() => [%s,%s]\n",
-	  strok68(!is), istream68_filename(is));
+  TRACE68(rsc68_feature, "rsc68: open '%s' => [%s,%s]\n",
+          strok68(!is), istream68_filename(is));
   return is;
 }
 
@@ -583,7 +578,7 @@ istream68_t * rsc68_create_url(const char *url, int mode, rsc68_info_t * info)
   /* $$$ Ugly haXXX we need to close since created stream are not
      supposed to be open but that's the only function we have
      for now. */
-  is = rsc68_open_url(url,mode, info);
+  is = rsc68_open_url(url, mode, info);
   istream68_close(is);
   return is;
 }
@@ -595,23 +590,27 @@ istream68_t * rsc68_open_url(const char *url, int mode, rsc68_info_t * info)
   char protocol[16];
   istream68_t * is = 0;
 
-  TRACE68(rsc68_feature,"rsc68_open_url(url=%s,mode=%c%c,info=%p) {\n",
-	  strnevernull68(url),(mode&1)?'R':'.',(mode&2)?'W':'.',info);
+  TRACE68(rsc68_feature,"rsc68: open url='%s' mode=%c%c%s)\n",
+          strnevernull68(url),
+          (mode&1) ? 'R' : '.',
+          (mode&2) ? 'W' : '.',
+          info ? " with info" : "");
 
   if (info) {
     info->type = rsc68_last;
   }
-  if (!rsc68 || mode < 1 || mode > 2) {
-    TRACE68(rsc68_feature,"rsc68_open_url: bad parameters\n");
+  if (!rsc68) {
+    msg68_critical("rsc68: no handler defined\n");
+    goto error;
+  }
+  if (mode < 1 || mode > 2) {
+    msg68_critical("rsc68: invalid open mode %d\n",mode);
     goto error;
   }
 
-  if (url68_get_protocol(protocol, sizeof(protocol), url)) {
-    TRACE68(rsc68_feature,"rsc68_open_url: no protocol\n");
-    goto error;
-  }
-  if (strcmp68(protocol,"RSC68")) {
-    TRACE68(rsc68_feature,"rsc68_open_url: bad protocol [%s]\n",protocol);
+  if (url68_get_protocol(protocol, sizeof(protocol), url) ||
+      strcmp68(protocol,"RSC68")) {
+    msg68_error("rsc68: missing or invalid protocol");
     goto error;
   }
   url += 5+3; /* Skip "RSC68://" */
@@ -626,28 +625,31 @@ istream68_t * rsc68_open_url(const char *url, int mode, rsc68_info_t * info)
     }
     protocol[i] = c;
     if (i >= sizeof(protocol)-1) {
-      TRACE68(rsc68_feature,
-	      "rsc68_open_url: resource type string too long [%s]\n", url);
+      msg68_critical("rsc68: invalid RSC68 url; resource type too long '%s'",
+                     url);
       goto error;
     }
   }
-  TRACE68(rsc68_feature,"rsc68_open_url: resource type string [%s]\n",protocol);
 
   rsc68_init_table();
   for (i=0; i<rsc68_last && strcmp68(rsc68_table[i].name, protocol); ++i)
     ;
-
-  TRACE68(rsc68_feature,"rsc68_open_url: resource type num [%d]\n",i);
+  if (i >= rsc68_last) {
+    msg68_critical("rsc68: invalid RSC68 url; invalid resource type '%s'",
+                   protocol);
+    goto error;
+  }
+  TRACE68(rsc68_feature,"rsc68: resource type #%d '%s'\n", i, protocol);
   is =  rsc68(i, url, mode, info);
 
- error:
-  TRACE68(rsc68_feature,"} rsc68_open_url => [%s,%s]\n",
-	  strok68(!is),istream68_filename(is));
+  error:
+  TRACE68(rsc68_feature,"rsc68: open => [%s,'%s']\n",
+          strok68(!is),istream68_filename(is));
   return is;
 }
 
 istream68_t * rsc68_open(rsc68_t type, const char *name, int mode,
-			 rsc68_info_t * info)
+                         rsc68_info_t * info)
 {
   if (info) {
     info->type = rsc68_last;
@@ -663,27 +665,25 @@ int rsc68_init(void)
   int err = -1;
 
   if (init) {
-    TRACE68(rsc68_feature,"rsc68_init: already initialized\n");
+    msg68_critical("rsc68: already initialized\n");
   } else {
     rsc68_feature =
       msg68_feature("rsc","resource access protocol",DEBUG_RSC68_O);
 
-    TRACE68(rsc68_feature,"rsc68_init() {\n");
     rsc68 = default_open;
     rsc68_init_table();
     rsc68_set_share(FILE68_SHARED_PATH);
     rsc68_set_user(FILE68_USER_PATH);
     rsc68_set_music(FILE68_MUSIC_PATH);
     rsc68_set_remote_music(FILE68_RMUSIC_PATH);
-    
-    TRACE68(rsc68_feature,"rsc68_init: shared-data = [%s]\n",share_path);
-    TRACE68(rsc68_feature,"rsc68_init: user_path   = [%s]\n",user_path);
-    TRACE68(rsc68_feature,"rsc68_init: lmusic_path = [%s]\n",lmusic_path);
-    TRACE68(rsc68_feature,"rsc68_init: rmusic_path = [%s]\n",rmusic_path);
-    
+
+    TRACE68(rsc68_feature,"rsc68: shared-data = '%s'\n",share_path);
+    TRACE68(rsc68_feature,"rsc68: user_path   = '%s'\n",user_path);
+    TRACE68(rsc68_feature,"rsc68: lmusic_path = '%s'\n",lmusic_path);
+    TRACE68(rsc68_feature,"rsc68: rmusic_path = '%s'\n",rmusic_path);
+
     err = 0;
   }
-  TRACE68(rsc68_feature,"rsc68: init [%s]\n", strok68(err));
   return err;
 }
 

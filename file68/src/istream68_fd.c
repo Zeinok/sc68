@@ -1,7 +1,7 @@
 /*
- *		   file68 - file descriptor stream
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                 file68 - file descriptor stream
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -49,17 +49,15 @@
 
 /** istream file structure. */
 typedef struct {
-  istream68_t istream; /**< istream function.            */
-  int fd;            /**< File descriptor (-1:closed). */
-  int org_fd;        /**< Original file descriptor.    */
-
-  /** Open modes. */
-  int mode;
+  istream68_t istream;            /**< istream function.            */
+  int fd;                         /**< File descriptor (-1:closed). */
+  int org_fd;                     /**< Original file descriptor.    */
+  int mode;                       /**< Open modes.                  */
 
   /* MUST BE at the end of the structure because supplemental bytes will
    * be allocated to store filename.
    */
-  char name[1];       /**< filename. */
+  char name[1];                   /**< filename.                    */
 
 } istream68_fd_t;
 
@@ -167,7 +165,7 @@ static int ifdtell(istream68_t * istream)
   istream68_fd_t * isf = (istream68_fd_t *)istream;
 
   return (!isf || isf->fd == -1)
-    ? -1 
+    ? -1
     : lseek(isf->fd,0,SEEK_CUR);
 }
 
@@ -218,7 +216,7 @@ istream68_t * istream68_fd_create(const char * fname, int fd, int mode)
   isf->fd     = -1;
   isf->org_fd = fd;
   isf->mode   = mode & (ISTREAM68_OPEN_READ|ISTREAM68_OPEN_WRITE);
-  
+
   /* Copy filename. */
   /* $$$ May be later, we should add a check for relative path and add
    * CWD ... or make it URL compatible */
@@ -233,7 +231,7 @@ istream68_t * istream68_fd_create(const char * fname, int fd, int mode)
  */
 
 istream68_t * istream68_fd_create(context68_t * context,
-				  const char * fname, int fd, int mode)
+                                  const char * fname, int fd, int mode)
 {
   return 0;
 }

@@ -5,18 +5,16 @@
  * @date      1999/03/20
  * @brief     MFP-68901 emulator header.
  *
- * $Id$
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _IO68_MFPEMUL_H_
 #define _IO68_MFPEMUL_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#include "io68_api.h"
 #include "emu68/struct68.h"
 
 /** @defgroup  io68_mfp_devel  MFP-68901 emulator
@@ -70,7 +68,7 @@ extern "C" {
  *     - ierb bit#7 : bit 5 of I/O port
  *     - ierb bit#6 : bit 4 of I/O port
  *     - ierb bit#5 : Timer C
- *     - ierb bit#4 : Timer D 
+ *     - ierb bit#4 : Timer D
  *     - ierb bit#3 : bit 3 of I/O port
  *     - ierb bit#2 : bit 2 of I/O port
  *     - ierb bit#1 : bit 1 of I/O port
@@ -97,7 +95,7 @@ extern "C" {
  *         cleared (vector has been produced) a similar interrupt may
  *         occur. Anyway this interruption and the one less prioritary
  *         can be process only if ISR is disabled.
- *   
+ *
  * - 09 @b IMRA (Interrupt Mask Register A)
  * - 0A @b IMRB (Interrupt Mask Register B)
  *
@@ -106,7 +104,7 @@ extern "C" {
  *         clear.
  *
  * - 0B @b VR (Vector Register)
- * 
+ *
  *         - bit#0-2 : unknown ?
  *         - bit#3   : 0:AEI 1:SEI (automatic/software end of interrupt)
  *         - bit#4-7 : 4 MSB of interrupt vector
@@ -118,7 +116,7 @@ extern "C" {
  * - 10 @b TBDR  (Timer B Data Register)
  * - 11 @b TCDR  (Timer C Data Register)
  * - 12 @b TDDR  (Timer D Data Register)
- * 
+ *
  *         @see Programming MFP Timers
  *
  * - 13 @b SCR (Synchronous Character Register)
@@ -128,7 +126,7 @@ extern "C" {
  *         recieved.
  *
  * - 14 UCR,USART (Control Register)
- * 
+ *
  *         USART is Universal Synchronous/Asynchronous Receiver/Transmitter.
  *         -bit#0   : unused
  *         -bit#1   : 0:odd 1:even
@@ -152,7 +150,7 @@ extern "C" {
  *      -bit#5 : Parity Error
  *      -bit#6 : Overrun Error
  *      -bit#7 : Buffer Full
- *     
+ *
  * - 16 TSR (Tranmitter Status Register)
  *
  *      -bit#0 : Transmitter Enable
@@ -221,10 +219,10 @@ typedef struct
   uint68_t int_mask;   /**< Interrupts ignored (masked or whatever)    */
   uint68_t int_fall;   /**< Interrupts counter.                        */
 
-  interrupt68_t interrupt; /**< Interruption info.                       */ 
+  interrupt68_t interrupt; /**< Interruption info.                       */
 } mfp_timer_t;
 
-/**@}*/
+/** @} */
 
 /** MFP-68901 emulator. */
 typedef struct {
@@ -237,6 +235,7 @@ typedef struct {
  *  @{
  */
 
+IO68_EXTERN
 /** MFP-68901 emulator library initialization.
  *
  *     The mfp_init() function intialize MFP emulator library.  It
@@ -248,18 +247,18 @@ typedef struct {
  */
 int mfp_init(void);
 
+IO68_EXTERN
 /** MFP-68901 emulator library shutdown.
- *
- *
  */
 void mfp_shutdown(void);
 
-/**@}*/
+/** @} */
 
 /** @name MFP-68901 emulator functions.
  *  @{
  */
 
+IO68_EXTERN
 /** Setup mfp instance.
  *
  *  @param  mfp    mfp emulator instance.
@@ -270,6 +269,7 @@ void mfp_shutdown(void);
  */
 int mfp_setup(mfp_t * const mfp);
 
+IO68_EXTERN
 /** Cleanup mfp instance.
  *
  *  @param  mfp    mfp emulator instance.
@@ -278,6 +278,7 @@ int mfp_setup(mfp_t * const mfp);
 void mfp_cleanup(mfp_t * const mfp);
 
 
+IO68_EXTERN
 /** Reset mfp instance.
  *
  *  @param  mfp    mfp emulator instance.
@@ -288,14 +289,16 @@ void mfp_cleanup(mfp_t * const mfp);
  */
 int mfp_reset(mfp_t * const mfp, bogoc68_t bogoc);
 
+IO68_EXTERN
 /** Destroy mfp instance.
  *
  *  @param  mfp    mfp emulator instance.
  */
 void mfp_destroy(mfp_t * const mfp);
 
-/**@}*/
+/** @} */
 
+IO68_EXTERN
 /** MFP get Timer Data register.
  *
  *  @param  mfp    mfp emulator instance.
@@ -305,8 +308,9 @@ void mfp_destroy(mfp_t * const mfp);
  *  @return timer data register (TDR) value
  */
 int68_t mfp_get_tdr(mfp_t * const mfp,
-		    const int timer, const bogoc68_t bogoc);
+                    const int timer, const bogoc68_t bogoc);
 
+IO68_EXTERN
 /** MFP write Timer data register.
  *
  *  @param  mfp    mfp emulator instance.
@@ -316,8 +320,9 @@ int68_t mfp_get_tdr(mfp_t * const mfp,
  *
  */
 void mfp_put_tdr(mfp_t * const mfp,
-		 const int timer, const int68_t v, const bogoc68_t bogoc);
+                 const int timer, const int68_t v, const bogoc68_t bogoc);
 
+IO68_EXTERN
 /** MFP write Timer control register.
  *
  *  @param  mfp    mfp emulator instance.
@@ -327,8 +332,9 @@ void mfp_put_tdr(mfp_t * const mfp,
  *
  */
 void mfp_put_tcr(mfp_t * const mfp,
-		 const int timer, const int68_t v, const bogoc68_t bogoc);
+                 const int timer, const int68_t v, const bogoc68_t bogoc);
 
+IO68_EXTERN
 /** Get MFP pending interruption.
  *
  *  @param  mfp    mfp emulator instance.
@@ -340,6 +346,7 @@ void mfp_put_tcr(mfp_t * const mfp,
  */
 interrupt68_t * mfp_interrupt(mfp_t * const mfp, bogoc68_t bogoc);
 
+IO68_EXTERN
 /** Get cycle for the next MFP interruption.
  *
  *  @param  mfp  mfp emulator instance.
@@ -349,6 +356,7 @@ interrupt68_t * mfp_interrupt(mfp_t * const mfp, bogoc68_t bogoc);
  */
 bogoc68_t mfp_nextinterrupt(const mfp_t * const mfp);
 
+IO68_EXTERN
 /** Change cycle count base.
  *
  *  @param  mfp    mfp emulator instance.
@@ -357,11 +365,7 @@ bogoc68_t mfp_nextinterrupt(const mfp_t * const mfp);
 void mfp_adjust_bogoc(mfp_t * const mfp, const bogoc68_t bogoc);
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _IO68_MFPEMUL_H_ */

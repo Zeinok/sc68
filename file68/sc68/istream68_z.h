@@ -16,10 +16,6 @@
 
 #include "istream68.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /** @name     Z stream
  *  @ingroup  file68_istream
  *
@@ -42,8 +38,10 @@ typedef struct {
 } istream68_z_option_t;
 
 /** Default gzip option. */
-extern const istream68_z_option_t istream68_z_default_option;
+FILE68_EXTERN
+const istream68_z_option_t istream68_z_default_option;
 
+FILE68_EXTERN
 /** Create a @ref zlib "Z" stream.
  *
  *  @param  is     Stream to compress/decompress.
@@ -54,12 +52,8 @@ extern const istream68_z_option_t istream68_z_default_option;
  *  @retval 0 on error
  */
 istream68_t * istream68_z_create(istream68_t * is, int mode,
-				 const istream68_z_option_t opt);
+                                 const istream68_z_option_t opt);
 
-/**@}*/
-
-#ifdef __cplusplus
-}
-#endif
+/** @} */
 
 #endif /* #define _FILE68_ISTREAM68_Z_H_ */

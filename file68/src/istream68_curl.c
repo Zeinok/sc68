@@ -1,7 +1,7 @@
 /*
- *			 file68 - cURL stream
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                       file68 - cURL stream
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -26,13 +26,18 @@
 #endif
 #include "file68_api.h"
 #include "istream68_curl.h"
+#include "msg68.h"
 
 /* Define this if you want CURL support. */
 #ifdef USE_CURL
 
+#ifndef DEBUG_CURL_O
+# define DEBUG_CURL_O 0
+#endif
+static int curl_feature = msg68_DEFAULT;
+
 #include "istream68_def.h"
 #include "alloc68.h"
-#include "msg68.h"
 
 #include <curl/curl.h>
 #include <string.h>
@@ -68,29 +73,25 @@ typedef struct {
 
 /** istream curl structure. */
 typedef struct {
-  istream68_t istream; /**< istream function. */
+  istream68_t istream;       /**< istream function.                 */
 
-  CURLM * curm;       /**< CURL "multi" handle       */
-  CURL  * curl;       /**< CURL "easy" handle.       */
+  CURLM * curm;              /**< CURL "multi" handle               */
+  CURL  * curl;              /**< CURL "easy" handle.               */
 
-  CURLcode code;      /**< CURL last "easy" operation code.  */
-  CURLMcode mcode;    /**< CURL last "multi" operation code. */
+  CURLcode code;             /**< CURL last "easy" operation code.  */
+  CURLMcode mcode;           /**< CURL last "multi" operation code. */
 
-  /*
-  struct {
-    fd_set r,w,e;
-  } sets;
-  */
+  /* struct { fd_set r,w,e; } sets; */
 
-  unsigned int mode         : 2; /**< Open modes.                  */
-  unsigned int has_hd_read  : 1; /**< 1: read header has started.  */
-  unsigned int has_hd_write : 1; /**< 1: write header has started. */
-  unsigned int has_read     : 1; /**< 1: read data has started.    */
-  unsigned int has_write    : 1; /**< 1: write data has started.   */
+  unsigned int mode         : 2;  /**< Open modes.                  */
+  unsigned int has_hd_read  : 1;  /**< 1: read header has started.  */
+  unsigned int has_hd_write : 1;  /**< 1: write header has started. */
+  unsigned int has_read     : 1;  /**< 1: read data has started.    */
+  unsigned int has_write    : 1;  /**< 1: write data has started.   */
 
-  int pos;            /**< Current R/W position.        */
-  int curl_pos;       /**< CURL current R/W position.   */
-  int length;         /**< Known length (-1:unknown).   */
+  int pos;                        /**< Current R/W position.        */
+  int curl_pos;                   /**< CURL current R/W position.   */
+  int length;                     /**< Known length (-1:unknown).   */
 
   /** Cached data. */
   istream68_cache_t cache[IS68_CACHE_BLKS];
@@ -101,7 +102,7 @@ typedef struct {
   /* MUST BE at the end of the structure because supplemental bytes will
    * be allocated to store curlname.
    */
-  char name[1];       /**< url. */
+  char name[1];                   /**< url.                         */
 
 } istream68_curl_t;
 
@@ -175,8 +176,8 @@ static size_t isf_write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
   bytes = org_bytes = (int)(size * nmemb);
   pos = isf->curl_pos;
 
-  msg68(-1,"istream68_curl::write_cb(%s:%p,%d) pos=%x\n",
-	     isf->name, isf->curm, bytes, pos);
+/*   TRACE68(curl_feature,"curl68::write_cb(%s:%p,%d) pos=%x\n", */
+/*           isf->name, isf->curm, bytes, pos); */
   isf->has_write = 1;
   if (!bytes) {
     return 0; /* Avoid 0 divide at ending return */
@@ -218,7 +219,7 @@ static size_t isf_write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 
 #if 0
 static int isf_passwd_cb(void *clientp,
-			 const char *prompt, char *buffer, int buflen)
+                         const char *prompt, char *buffer, int buflen)
 {
   /* Produce a CURLE_BAD_PASSWORD_ENTERED error. */
   return -1;
@@ -226,17 +227,17 @@ static int isf_passwd_cb(void *clientp,
 #endif
 
 static int isf_prog_cb(void *clientp,
-		       double dltotal,double dlnow,
-		       double ultotal,double ulnow)
+                       double dltotal,double dlnow,
+                       double ultotal,double ulnow)
 {
   return 0;
 }
 
 static int isf_debug_cb(CURL *handle, curl_infotype type,
-			char *data, size_t size,
-			void *userp)
+                        char *data, size_t size,
+                        void *userp)
 {
-#if 0  
+#if 0
 
   istream68_curl_t * isf = (istream68_curl_t *)userp;
   const char * typestr;
@@ -269,7 +270,7 @@ static int isf_debug_cb(CURL *handle, curl_infotype type,
     break;
   }
 
-  msg68(-1,"%s:%p:%p >%s\n", isf->name, isf->curm, handle, typestr);
+  TRACE68(curl_feature,"%s:%p:%p >%s\n", isf->name, isf->curm, handle, typestr);
   if (data) {
     int i;
     char tmp[256];
@@ -282,7 +283,7 @@ static int isf_debug_cb(CURL *handle, curl_infotype type,
     }
     tmp[i] = 0;
     if (i>0) {
-      msg68(-1,"[%s]\n", tmp);
+      TRACE68(curl_feature,"[%s]\n", tmp);
     }
   }
 #endif
@@ -291,8 +292,8 @@ static int isf_debug_cb(CURL *handle, curl_infotype type,
 }
 
 static int match_header(int *v,
-			char * ptr, const int bytes,
-			const char *header, const int hdsize)
+                        char * ptr, const int bytes,
+                        const char *header, const int hdsize)
 {
   if (bytes > hdsize+1 &&
       !memcmp(ptr,header,hdsize-1)) {
@@ -305,10 +306,10 @@ static int match_header(int *v,
     if (c>='0' || c<='9') {
       int len = c - '0';
       for (++i; i<bytes && (c=ptr[i], (c>='0' && c<='9')); ++i) {
-	len = len * 10 + c - '0';
+        len = len * 10 + c - '0';
       }
       *v = len;
-/*       msg68(-1,"Match header %s-> %d\n", header, len); */
+/*       TRACE68(curl_feature,"Match header %s-> %d\n", header, len); */
       return 1;
     }
   }
@@ -316,7 +317,7 @@ static int match_header(int *v,
 }
 
 static size_t isf_header_cb(void  *ptr, size_t  size,
-			    size_t  nmemb,  void  *stream)
+                            size_t  nmemb,  void  *stream)
 {
   istream68_curl_t * isf = (istream68_curl_t *)stream;
 
@@ -331,13 +332,13 @@ static size_t isf_header_cb(void  *ptr, size_t  size,
 
   isf->has_hd_write = 1;
 
-/*   msg68(-1,"istream68_curl::header_cb(%s:%p, %d)\n", */
-/*  	     isf->name, isf->curm, size*nmemb); */
+/*   TRACE68(curl_feature,"curl68::header_cb(%s:%p, %d)\n", */
+/*           isf->name, isf->curm, size*nmemb); */
 
   if (match_header(&len, ptr, bytes, content_length, sizeof(content_length))
       || match_header(&len, ptr, bytes, ftp_size, sizeof(ftp_size))) {
     isf->length = len;
-/*     msg68(-1,"%s::Set length to %d\n", isf->name, len); */
+/*     TRACE68(curl_feature,"%s::Set length to %d\n", isf->name, len); */
   }
 
   /* $$$ TODO : Add transfert complete checks */
@@ -357,9 +358,9 @@ static int isf_open(istream68_t * istream)
     return -1;
   }
 
-/*   SC68os_pdebug("istream68_curl::open(%s,%c%c)\n",isf->name, */
-/* 		(isf->mode & ISTREAM68_OPEN_READ)?'R':'r', */
-/* 		(isf->mode & ISTREAM68_OPEN_WRITE)?'W':'w'); */
+/*   SC68os_pdebug("curl68::open(%s,%c%c)\n",isf->name, */
+/*              (isf->mode & ISTREAM68_OPEN_READ)?'R':'r', */
+/*              (isf->mode & ISTREAM68_OPEN_WRITE)?'W':'w'); */
 
   /* Reset info. */
   isf->has_read = isf->has_write = isf->has_hd_read = isf->has_hd_write = 0;
@@ -370,9 +371,9 @@ static int isf_open(istream68_t * istream)
   isf->mcode    = 0;
 
   /*
-  FD_ZERO(&isf->sets.r);
-  FD_ZERO(&isf->sets.w);
-  FD_ZERO(&isf->sets.e);
+    FD_ZERO(&isf->sets.r);
+    FD_ZERO(&isf->sets.w);
+    FD_ZERO(&isf->sets.e);
   */
 
   /* Currently accapts only read only open mode. */
@@ -384,7 +385,7 @@ static int isf_open(istream68_t * istream)
   /* Create curl handle */
   isf->curl = curl_easy_init();
   isf->curm = curl_multi_init();
-/*   msg68(-1,"%s:%p:%p:open()\n",isf->name, isf->curm, isf->curl); */
+/*   TRACE68(curl_feature,"%s:%p:%p:open()\n",isf->name, isf->curm, isf->curl); */
   if (!isf->curl || !isf->curm) {
     goto error;
   }
@@ -393,30 +394,30 @@ static int isf_open(istream68_t * istream)
   err = 0;
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_URL,isf->name)));
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_ERRORBUFFER,isf->error)));
-     /* Set curl internal buffer (just an hint) */
+  /* Set curl internal buffer (just an hint) */
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_BUFFERSIZE,1024)));
-     
-     /* Debug options. */
+
+  /* Debug options. */
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_VERBOSE,verbose)));
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_DEBUGFUNCTION,isf_debug_cb)));
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_DEBUGDATA,isf)));
-     /* Our read/write/progress callback. */
+  /* Our read/write/progress callback. */
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_WRITEFUNCTION,isf_write_cb)));
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_WRITEDATA,isf)));
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_READFUNCTION,isf_read_cb)));
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_READDATA,isf)));
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_PROGRESSFUNCTION,isf_prog_cb)));
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_PROGRESSDATA,isf)));
-     
+
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_HEADERFUNCTION,isf_header_cb)));
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_HEADERDATA,isf)));
-     
-     /* Password callback (currently raises an error) */
+
+  /* Password callback (currently raises an error) */
   /* $$$ OBSOLETE */
   /*
-  err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_PASSWDFUNCTION,isf_passwd_cb)));
-  err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_PASSWDDATA,isf)));
-  */ 
+    err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_PASSWDFUNCTION,isf_passwd_cb)));
+    err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_PASSWDDATA,isf)));
+  */
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_NETRC,CURL_NETRC_OPTIONAL)));
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_FOLLOWLOCATION,1)));
 /* MAC-OSX (7.10.2) version does not have it ?? */
@@ -424,8 +425,8 @@ static int isf_open(istream68_t * istream)
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_UNRESTRICTED_AUTH,0)));
 #endif
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_TRANSFERTEXT,0)));
-     
-     // $$$ FIXME
+
+  // $$$ FIXME
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_INFILESIZE,0)));
   err = err || (CURLE_OK != (code=curl_easy_setopt(isf->curl,CURLOPT_UPLOAD,0)));
 
@@ -444,21 +445,21 @@ static int isf_open(istream68_t * istream)
     do {
       int n;
       mcode = curl_multi_perform(isf->curm, &n);
-/*       msg68(-1,"READ_HEADER: MCODE=[%s]\n", */
-/* 		 mcode == CURLM_OK ? "OK" : */
-/* 		 (mcode == CURLM_CALL_MULTI_PERFORM) ? "MULTI" : "OTHER"); */
+/*       TRACE68(curl_feature,"READ_HEADER: MCODE=[%s]\n", */
+/*               mcode == CURLM_OK ? "OK" : */
+/*               (mcode == CURLM_CALL_MULTI_PERFORM) ? "MULTI" : "OTHER"); */
 
       if (mcode == CURLM_OK) {
-	msg68(-1,"OK, timeleft:%d\n",timeout);
-	timeout -= mysleep(200);
-	if (timeout < 0) {
-	  msg68(-1,"READ_HEADER: TIME-OUT\n");
-	  break;
-	}
+/*         TRACE68(curl_feature,"OK, timeleft:%d\n",timeout); */
+        timeout -= mysleep(200);
+        if (timeout < 0) {
+          TRACE68(curl_feature,"istream_curl: READ_HEADER: TIME-OUT\n");
+          break;
+        }
       } else if (mcode != CURLM_CALL_MULTI_PERFORM) {
-	goto error;
+        goto error;
       } else {
-	timeout = re_timeout;
+        timeout = re_timeout;
       }
     } while (!(isf->has_read | isf->has_write));
     if ( ! (isf->has_hd_write | isf->has_read | isf->has_write) ) {
@@ -468,8 +469,8 @@ static int isf_open(istream68_t * istream)
   isf->code = code;
   isf->mcode = mcode;
   return 0;
-  
- error:
+
+  error:
   isf->code  = code;
   isf->mcode = mcode;
   if (isf->curm) {
@@ -483,7 +484,7 @@ static int isf_open(istream68_t * istream)
     curl_easy_cleanup(isf->curl);
     isf->curl = 0;
   }
-  
+
   return -1;
 }
 
@@ -493,14 +494,14 @@ static int isf_close(istream68_t * istream)
   int err = -1;
 
   if (isf) {
-/*     msg68(-1,"istream68_curl::%s:%p:%p:close()\n", */
-/* 	       isf->name, isf->curm, isf->curl); */
+/*     TRACE68(curl_feature,"curl68::%s:%p:%p:close()\n", */
+/*             isf->name, isf->curm, isf->curl); */
     if (isf->curm) {
       err = 0;
       if (isf->curl) {
-	err = -!!curl_multi_remove_handle(isf->curm, isf->curl);
-	curl_easy_cleanup(isf->curl);
-	isf->curl = 0;
+        err = -!!curl_multi_remove_handle(isf->curm, isf->curl);
+        curl_easy_cleanup(isf->curl);
+        isf->curl = 0;
       }
       err |= -!!curl_multi_cleanup(isf->curm);
       isf->curm = 0;
@@ -517,20 +518,20 @@ static int isf_need_more(istream68_curl_t * isf)
   isf->mcode = curl_multi_perform(isf->curm, &n);
   n = isf->curl_pos - pos;
   if (n) {
-/*     msg68(-1,"%s:%p:GETS MORE\n" */
-/* 	       "-> %d (code=%d)\n", */
-/* 	       isf->name, isf->curm, */
-/* 	       n, isf->mcode); */
+/*     TRACE68(curl_feature,"%s:%p:GETS MORE\n" */
+/*             "-> %d (code=%d)\n", */
+/*             isf->name, isf->curm, */
+/*             n, isf->mcode); */
   } else {
     switch (isf->mcode) {
     case CURLM_OK:
       break;
     case CURLM_CALL_MULTI_PERFORM:
     default:
-/*       msg68(-1,"%s:%p:GETS MORE DETECTS EOF\n" */
-/* 		 "-> pos:%d length:%d (code=%d)\n", */
-/* 		 isf->name, isf->curm, */
-/* 		 isf->curl_pos, isf->length, isf->mcode); */
+/*       TRACE68(curl_feature,"%s:%p:GETS MORE DETECTS EOF\n" */
+/*               "-> pos:%d length:%d (code=%d)\n", */
+/*               isf->name, isf->curm, */
+/*               isf->curl_pos, isf->length, isf->mcode); */
       n = -1;
       break;
     }
@@ -547,7 +548,7 @@ static int isf_read(istream68_t * istream, void * data, int n)
   int timeout = re_timeout;
 
 /*   SC68os_pdebug("%s:%p::read: %d bytes -> %p\n", */
-/* 		isf->name, isf->curm, n, data); */
+/*              isf->name, isf->curm, n, data); */
 
   if (!isf || !isf->curl) {
     return -1;
@@ -563,16 +564,16 @@ static int isf_read(istream68_t * istream, void * data, int n)
     int n = -1;
 
     if (isf->length != -1 && pos >= isf->length) {
-/*       msg68(-1,"%s:%p, EOF:\n" */
-/* 		 "->pos:%p/%p\n", */
-/* 		 isf->name, isf->curm, */
-/* 		 pos, isf->length); */
+/*       TRACE68(curl_feature,"%s:%p, EOF:\n" */
+/*               "->pos:%p/%p\n", */
+/*               isf->name, isf->curm, */
+/*               pos, isf->length); */
       break;
     } else if (timeout < 0) {
-      msg68(-1,"%s:%p, TIME-OUT :\n"
-		 "->pos:%d/%d (%d ms)\n",
-		 isf->name, isf->curm,
-		   pos, isf->length, re_timeout);
+/*       TRACE68(curl_feature,"%s:%p, TIME-OUT :\n" */
+/*             "->pos:%d/%d (%d ms)\n", */
+/*             isf->name, isf->curm, */
+/*             pos, isf->length, re_timeout); */
       break;
     }
 
@@ -582,36 +583,36 @@ static int isf_read(istream68_t * istream, void * data, int n)
 
     if (top == isf->cache[blk].top) {
 
-/*       msg68(-1,"%s:%p, read block:\n" */
-/* 		 "->pos:%x top:%x blk:%x off:%x bytes:%d cache:[%x:%d]\n", */
-/* 	       isf->name, isf->curm, */
-/* 	       pos, top, blk, off, bytes, */
-/* 	       isf->cache[blk].top, isf->cache[blk].bytes); */
+/*       TRACE68(curl_feature,"%s:%p, read block:\n" */
+/*               "->pos:%x top:%x blk:%x off:%x bytes:%d cache:[%x:%d]\n", */
+/*             isf->name, isf->curm, */
+/*             pos, top, blk, off, bytes, */
+/*             isf->cache[blk].top, isf->cache[blk].bytes); */
 
       src = isf->cache[blk].buffer + off;
       n = isf->cache[blk].bytes - off;
       if (n > bytes) {
-	n = bytes;
+        n = bytes;
       }
     } else {
-/*       msg68(-1,"NOT MY TOP\n"); */
+/*       TRACE68(curl_feature,"NOT MY TOP\n"); */
     }
 
     if (n <= 0) {
       if (pos < isf->curl_pos) {
-	msg68(-1,"%s:%p: Can not seek backward from %d to %d\n",
-		   isf->name, isf->curm, isf->curl_pos, pos);
-	break;
+        TRACE68(curl_feature,"%s:%p: Can not seek backward from %d to %d\n",
+                isf->name, isf->curm, isf->curl_pos, pos);
+        break;
       }
 
       n=isf_need_more(isf);
       if (!n) {
-	/* $$$ FIXME : should use fd_set here ! */
-	timeout -= mysleep(100);
+        /* $$$ FIXME : should use fd_set here ! */
+        timeout -= mysleep(100);
       } else if (n == -1) {
-	break;
+        break;
       } else {
-	timeout = re_timeout;
+        timeout = re_timeout;
       }
     } else {
       memcpy(data, src, n);
@@ -623,11 +624,9 @@ static int isf_read(istream68_t * istream, void * data, int n)
   isf->pos = pos;
 
   if (isf->mcode != CURLM_OK && isf->mcode != CURLM_CALL_MULTI_PERFORM) {
-    msg68(-1,"%s:%p:read-error:[%s]\n",
-	       isf->name, isf->curm, isf->error);
     return -1;
   }
-/*   msg68(-1,"%s:%p:read -> %d\n", isf->name, isf->curm, n-bytes); */
+/*   TRACE68(curl_feature,"%s:%p:read -> %d\n", isf->name, isf->curm, n-bytes); */
   return n - bytes;
 }
 
@@ -697,9 +696,12 @@ static const istream68_t istream68_curl = {
 
 int istream68_curl_init(void)
 {
+  if (curl_feature == msg68_DEFAULT) {
+    curl_feature = msg68_feature("curl","cURL stream message",DEBUG_CURL_O);
+    curl_feature = curl_feature != -1 ? curl_feature : msg68_DEFAULT;
+  }
   if (!init) {
     CURLcode code;
-
     code = curl_global_init(CURL_GLOBAL_ALL);
     init = code ? -1 : 1;
   }
@@ -712,11 +714,15 @@ void istream68_curl_shutdown(void)
     curl_global_cleanup();
     init = 0;
   }
+  if (curl_feature != msg68_DEFAULT) {
+    msg68_feature_free(curl_feature);
+    curl_feature = msg68_DEFAULT;
+  }
 }
 
 istream68_t * istream68_curl_create(const char * fname, int mode)
 {
-  
+
   istream68_curl_t *isf;
   int len;
 
@@ -728,7 +734,7 @@ istream68_t * istream68_curl_create(const char * fname, int mode)
     return 0;
   }
 
-  /* Don't need 0, because 1 byte already allocated in the
+  /* Don't need +1 because 1 byte already allocated in the
    * istream68_curl_t::fname.
    */
   len = strlen(fname);
@@ -741,7 +747,7 @@ istream68_t * istream68_curl_create(const char * fname, int mode)
   memcpy(&isf->istream, &istream68_curl, sizeof(istream68_curl));
   /* Clean curl handle. */
   isf->mode = mode & (ISTREAM68_OPEN_READ|ISTREAM68_OPEN_WRITE);
-  
+
   strcpy(isf->name, fname);
   return &isf->istream;
 }
@@ -757,6 +763,7 @@ istream68_t * istream68_curl_create(const char * fname, int mode)
 
 istream68_t * istream68_curl_create(const char * fname, int mode)
 {
+  msg68_error("curl68: not supported\n");
   return 0;
 }
 
@@ -770,4 +777,3 @@ void istream68_curl_shutdown(void)
 }
 
 #endif /* #ifdef USE_CURL */
-

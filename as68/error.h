@@ -1,7 +1,7 @@
 /*
- *		     as68 - 68000 macro assembler
- *		   Copyright (C) 1993 Vincent Penne
- *	       Copyright (C) 1999-2009 Benjamin Gerard
+ *                   as68 - 68000 macro assembler
+ *                 Copyright (C) 1993 Vincent Penne
+ *             Copyright (C) 1999-2009 Benjamin Gerard
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as

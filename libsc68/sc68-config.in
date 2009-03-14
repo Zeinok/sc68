@@ -2,7 +2,9 @@
 #
 # sc68-config for @PACKAGE_STRING@
 #
-# Copyright (C) 2007-2009 Benjamin Gerard <@PACKAGE_BUGREPORT@>
+# Copyright (C) 2007-2009 Benjamin Gerard
+#
+# Report bugs to <@PACKAGE_BUGREPORT@>
 #
 # $Id$
 #
@@ -16,15 +18,27 @@ pkgincludedir="${includedir}/sc68"
 datarootdir="@datarootdir@"
 datadir="@datadir@"
 pkgdatadir="${datadir}/sc68"
-
-defs="@PACKAGE_DEFS@"
-incs="-I${includedir}"
-cflags="@PACKAGE_CFLAGS@"
-cppflags="$defs $incs"
-ldflags="@PACKAGE_LDFLAGS@"
-libs="@PACKAGE_LIBS@"
-
+cppflags="-I${includedir} @PACKAGE_EFLAGS@"
+cflags="${cppflags} @PACKAGE_CFLAGS@"
+ldflags="@PACKAGE_LFLAGS@"
 me="${pkgname}-config"
+
+filter_only() {
+    local i what="" set_what=no
+    for i in : "$@"; do
+	if [ "x$set_what" = 'xyes' ]; then
+	    what="$i"
+	    set_what=no
+	else
+	    case "$i" in
+		':') set -- ;;
+		'--') set_what=yes;  ;;
+		$what*) set -- "$@" "$i" ;;
+	    esac
+	fi
+    done
+    echo "$@"
+}
 
 while test $# -ge 1; do
     case "$1" in
@@ -67,21 +81,21 @@ EOF
 
 	# Linker
 	--libs-only-L|--libs-only-other)
-	    echo ${ldflags};;
+	    filter_only -- '-L' ${ldflags} ;;
 	--libs-only-l)
-	    echo ${libs};;
+	    filter_only -- '-l' ${ldflags} ;;
 	--libs)
-	    echo ${ldflags} ${libs};;
+	    echo ${ldflags} ;;
 
 	# compiler
 	--cflags-only-I)
-	    echo ${incs};;
+	    filter_only -- '-I' ${cflags} ;;
 	--cflags-only-other)
-	    echo ${defs};;
+	    filter_only -- '-D' ${cflags} -- '-U' ${cflags} ;;
 	--cflags)
-	    echo ${defs} ${incs} ${cflags};;
+	    echo ${cflags} ;;
 	--cppflags)
-	    echo ${cppflags};;
+	    filter_only -- '-D' ${cflags} -- '-U' ${cflags} -- '-I' ${cflags} ;;
 
 	# For pkg-config compatibility
 

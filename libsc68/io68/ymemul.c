@@ -17,9 +17,9 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -58,8 +58,8 @@ int ym_default_chans = 7;
 static s16 ymout5[32*32*32];
 static inline
 void access_list_reset(ym_waccess_list_t * const access_list,
-		       const char * name,
-		       const cycle68_t ymcycle)
+                       const char * name,
+                       const cycle68_t ymcycle)
 {
   if (!name) name = "und";
   access_list->name[0] = name[0];
@@ -70,18 +70,18 @@ void access_list_reset(ym_waccess_list_t * const access_list,
 }
 
 static void access_list_add(ym_t * const ym,
-			    ym_waccess_list_t * const access_list,
-			    const int reg, const int val,
-			    const cycle68_t ymcycle)
+                            ym_waccess_list_t * const access_list,
+                            const int reg, const int val,
+                            const cycle68_t ymcycle)
 {
   ym_waccess_t * free_access = ym->waccess_nxt;
-  
+
   if (free_access >= ym->waccess+ym->waccess_max) {
     /* No more free entries. */
 
     /* $$$ TODO: realloc buffer, reloc all lists ... */
     TRACE68(ym_feature,"access_list_add(%s,%d,%02X) OVERFLOW",
-	    access_list->name,reg,val);
+            access_list->name,reg,val);
     return;
   }
   ym->waccess_nxt = free_access+1;
@@ -97,13 +97,13 @@ static void access_list_add(ym_t * const ym,
     access_list->head = free_access;
   }
   access_list->tail = free_access;
-  
+
 /*   TRACE68(ym_feature,"WriteBack %s #%X <= %02X (%u)\n", */
-/* 	  access_list->name,reg,val,ymcycle); */
+/*        access_list->name,reg,val,ymcycle); */
 }
 
 static void access_adjust_cycle(ym_waccess_list_t * const access_list,
-				const cycle68_t ymcycles)
+                                const cycle68_t ymcycles)
 {
   ym_waccess_t * access;
   /* access_list->last_cycle -= ymcycles; */
@@ -114,8 +114,8 @@ static void access_adjust_cycle(ym_waccess_list_t * const access_list,
 
 
 /******************************************************
-*                  Yamaha reset                       *
-******************************************************/
+ *                  Yamaha reset                       *
+ ******************************************************/
 
 int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 {
@@ -144,9 +144,9 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
     ym->reg.name.env_shape = 0x0A;
 
     /* Reset access lists */
-    access_list_reset(&ym->ton_regs, "Ton", ymcycle); 
-    access_list_reset(&ym->noi_regs, "Noi", ymcycle); 
-    access_list_reset(&ym->env_regs, "Env", ymcycle); 
+    access_list_reset(&ym->ton_regs, "Ton", ymcycle);
+    access_list_reset(&ym->noi_regs, "Noi", ymcycle);
+    access_list_reset(&ym->env_regs, "Env", ymcycle);
 
     /* Copy registers to shadow */
     for (i=0; i<sizeof(ym->reg.index)/sizeof(*ym->reg.index); ++i) {
@@ -160,8 +160,8 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 }
 
 /******************************************************
-*                  Yamaha init                        *
-******************************************************/
+ *                  Yamaha init                        *
+ ******************************************************/
 
 /* -DYM_EMUL=YM_EMUL_BLEP choose BLEP as default engine */
 #ifndef YM_EMUL
@@ -184,18 +184,18 @@ static ym_parms_t default_parms =  {
 int ym_default_engine(int emul)
 {
   switch (emul) {
-  case YM_EMUL_DEFAULT:		/* Get current value. */
+  case YM_EMUL_DEFAULT:         /* Get current value. */
     emul = default_parms.emul;
     break;
 
-  default:			/* Invalid values */
+  default:                      /* Invalid values */
     msg68_error("ym-2149: unknown ym-engine (%d)\n",emul);
     emul = default_parms.emul;
   case YM_EMUL_ORIG:
   case YM_EMUL_BLEP:
     default_parms.emul = emul;
     msg68_info("ym-2149: switch default engine to *%s*\n",
-		    emul==YM_EMUL_ORIG ? "SC68 ORIGINAL":"BLEP SYSNTHESIS");
+               emul==YM_EMUL_ORIG ? "SC68 ORIGINAL":"BLEP SYSNTHESIS");
     break;
   }
 
@@ -319,7 +319,7 @@ int ym_run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
   if ( (ymcycles&31) || !output)  {
     return -1;
   }
-  
+
   return ym->cb_run(ym,output,ymcycles);
 }
 
@@ -331,7 +331,7 @@ int ym_run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
  */
 
 void ym_writereg(ym_t * const ym,
-		 const int val, const cycle68_t ymcycle)
+                 const int val, const cycle68_t ymcycle)
 {
   const int reg = ym->ctrl;
 
@@ -340,7 +340,7 @@ void ym_writereg(ym_t * const ym,
     /*TRACE68(ym_feature,"write #%X = %02X (%u)\n",reg,(int)(u8)val,ymcycle); */
 
     ym->shadow.index[reg] = val;
-    
+
     switch(reg) {
       /* Tone generator related registers. */
     case YM_PERL(0): case YM_PERH(0):
@@ -349,12 +349,12 @@ void ym_writereg(ym_t * const ym,
     case YM_VOL(0): case YM_VOL(1): case YM_VOL(2):
       access_list_add(ym, &ym->ton_regs, reg, val, ymcycle);
       break;
-      
+
       /* Envelop generator related registers. */
     case YM_ENVL: case YM_ENVH: case YM_ENVTYPE:
       access_list_add(ym, &ym->env_regs, reg, val, ymcycle);
       break;
-      
+
       /* Reg 7 modifies both noise &ym-> tone generators */
     case YM_MIXER:
       access_list_add(ym, &ym->ton_regs, reg, val, ymcycle);
@@ -362,7 +362,7 @@ void ym_writereg(ym_t * const ym,
     case YM_NOISE:
       access_list_add(ym, &ym->noi_regs, reg, val, ymcycle);
       break;
-      
+
     default:
       break;
     }
@@ -387,7 +387,7 @@ void ym_adjust_cycle(ym_t * const ym, const cycle68_t ymcycles)
  * `-----------------------------------------------------------------'
  */
 
-extern const int ym_smsk_table[]; 	/* declared in ym_orig.c */
+extern const int ym_smsk_table[];       /* declared in ym_orig.c */
 int ym_active_channels(ym_t * const ym, const int off, const int on)
 {
   int v = 0;
@@ -397,7 +397,7 @@ int ym_active_channels(ym_t * const ym, const int off, const int on)
     v = ((v&~off)|on)&7;
     ym->voice_mute = ym_smsk_table[v];
     TRACE68(ym_feature,"ym-2149: active channels -- %c%c%c\n",
-		     (v&1)?'A':'.', (v&1)?'B':'.', (v&1)?'B':'.');
+            (v&1)?'A':'.', (v&1)?'B':'.', (v&1)?'B':'.');
   }
   return v;
 }
@@ -420,14 +420,14 @@ uint68_t ym_sampling_rate(ym_t * const ym, const uint68_t hz)
       if (ret < SAMPLING_RATE_MIN) ret = SAMPLING_RATE_MIN;
       if (ret > SAMPLING_RATE_MAX) ret = SAMPLING_RATE_MAX;
       if (ym->cb_sampling_rate) {
-	/* engine sampling rate callback */
-	ret = ym->cb_sampling_rate(ym,ret);
+        /* engine sampling rate callback */
+        ret = ym->cb_sampling_rate(ym,ret);
       }
       ym->hz = ret;
       TRACE68(ym_feature,"ym-2149: rate -- %d -> %d\n", hz, ret);
     }
   }
-  
+
   return ret;
 }
 
@@ -471,7 +471,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
   }
 
   TRACE68(ym_feature,"ym-2149: setup -- engine:%d rate:%d clock:%d level:%d\n",
-	      p->emul,p->hz,p->clock,p->outlevel);
+          p->emul,p->hz,p->clock,p->outlevel);
 
   if (ym) {
     ym->ymout5      = ymout5;
@@ -496,7 +496,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
       msg68_info("ym-2149: select *BLEP SYSNTHESIS* engine\n");
       err = ym_blep_setup(ym);
       break;
-      
+
     default:
       msg68_critical("ym-2149: invalid ym engine (%d)\n", p->emul);
       err = -1;

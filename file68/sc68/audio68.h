@@ -14,14 +14,7 @@
 #ifndef _FILE68_AUDIO68_H_
 #define _FILE68_AUDIO68_H_
 
-#ifndef FILE68_API
 #include "file68_api.h"
-#endif
-#include "istream68.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @defgroup  file68_audio  Audio backend
  *  @ingroup   file68_lib
@@ -37,13 +30,8 @@ FILE68_API
  */
 unsigned int audio68_sampling_rate(const unsigned int hz);
 
-
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_AUDIO68_H_ */

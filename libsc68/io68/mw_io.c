@@ -17,9 +17,11 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -29,8 +31,8 @@
 #include "mwemul.h"
 #include "emu68/struct68.h"
 
-#define TOINTERNAL(N) \
-((mwio->mw.map[N]<<16)+(mwio->mw.map[(N)+2]<<8)+(mwio->mw.map[(N)+4]))
+#define TOINTERNAL(N)                                                   \
+  ((mwio->mw.map[N]<<16)+(mwio->mw.map[(N)+2]<<8)+(mwio->mw.map[(N)+4]))
 
 typedef struct {
   io68_t io;
@@ -56,7 +58,7 @@ static int68_t _mw_readB(mw_io68_t * const mwio, addr68_t const addr)
       i += mwio->mw.ct_fix;
       return (u8)(mwio->mw.ct>>i);
     }
-  } 
+  }
 
   /* Micro-Wire Ctrl/Data */
   return mwio->mw.map[i];
@@ -171,7 +173,7 @@ static void _mw_writeB(mw_io68_t * const mwio, addr68_t addr, int68_t v)
     }
 
     for (ctrl<<=2, data<<=2; ctrl && (ctrl&0xFF80) != 0xFF80;
-	 ctrl<<=1, data<<=1)
+         ctrl<<=1, data<<=1)
       ;
     if (ctrl) {
       mw_command(mwio, (data>>7) & 0x1ff);
@@ -186,27 +188,27 @@ static void _mw_writeB(mw_io68_t * const mwio, addr68_t addr, int68_t v)
 static void mwio_writeB(io68_t * const io)
 {
   _mw_writeB((mw_io68_t *)io,
-	     io->emu68->bus_addr, io->emu68->bus_data);
+             io->emu68->bus_addr, io->emu68->bus_data);
 }
 
 static void mwio_writeW(io68_t * const io)
 {
   _mw_writeB((mw_io68_t *)io,
-	     io->emu68->bus_addr+0, io->emu68->bus_data>>8);
+             io->emu68->bus_addr+0, io->emu68->bus_data>>8);
   _mw_writeB((mw_io68_t *)io,
-	     io->emu68->bus_addr+1, io->emu68->bus_data   );
+             io->emu68->bus_addr+1, io->emu68->bus_data   );
 }
 
 static void mwio_writeL(io68_t * const io)
 {
   _mw_writeB((mw_io68_t *)io,
-	     io->emu68->bus_addr+0, io->emu68->bus_data>>24);
+             io->emu68->bus_addr+0, io->emu68->bus_data>>24);
   _mw_writeB((mw_io68_t *)io,
-	     io->emu68->bus_addr+1, io->emu68->bus_data>>16);
+             io->emu68->bus_addr+1, io->emu68->bus_data>>16);
   _mw_writeB((mw_io68_t *)io,
-	     io->emu68->bus_addr+2, io->emu68->bus_data>> 8);
+             io->emu68->bus_addr+2, io->emu68->bus_data>> 8);
   _mw_writeB((mw_io68_t *)io,
-	     io->emu68->bus_addr+3, io->emu68->bus_data    );
+             io->emu68->bus_addr+3, io->emu68->bus_data    );
 }
 
 static interrupt68_t * mwio_interrupt(io68_t * const io, cycle68_t cycle)
@@ -266,10 +268,10 @@ io68_t * mwio_create(emu68_t * const emu68, mw_parms_t * const parms)
     if (mwio) {
       mw_setup_t setup;
       if (parms) {
-	setup.parms = *parms;
+        setup.parms = *parms;
       } else {
-	setup.parms.emul  = MW_EMUL_DEFAULT;
-	setup.parms.hz    = 0;
+        setup.parms.emul  = MW_EMUL_DEFAULT;
+        setup.parms.hz    = 0;
       }
       setup.mem     = emu68->mem;
       setup.log2mem = emu68->log2mem;

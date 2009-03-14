@@ -1,25 +1,21 @@
 /**
  * @ingroup   emu68_error_devel
  * @file      emu68/error68.h
- * @author    Benjamin Gerard <ben@sashipa.com>
+ * @author    Benjamin Gerard
  * @date      1999/03/13
  * @brief     Error message header.
  *
- * $Id$
- *
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _EMU68_ERROR68_H_
 #define _EMU68_ERROR68_H_
 
 #include "emu68_api.h"
 #include "struct68.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @defgroup  emu68_error_devel  Error message stack
  *  @ingroup   emu68_devel
@@ -68,9 +64,5 @@ const char * emu68_error_empty;
 /**
  * @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _EMU68_ERROR68_H_ */

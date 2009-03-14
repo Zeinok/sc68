@@ -1,11 +1,28 @@
-/**
- * @ingroup   debug68_devel
- * @file      SC68debug_breakpoint.c
- * @author    Ben(jamin) Gerard <ben@sashipa.com>
- * @date      1999/07/14
- * @brief     debug68 breakpoints
- * @version   $Id: SC68debug_breakpoint.c,v 2.0 2003/08/21 04:58:35 benjihan Exp $
+/*
+ *                        debug68 - breakpoints
+ *
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
+ *
+ * This  program is  free  software: you  can  redistribute it  and/or
+ * modify  it under the  terms of  the GNU  General Public  License as
+ * published by the Free Software  Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
+ * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * General Public License for more details.
+ *
+ * You should have  received a copy of the  GNU General Public License
+ * along with this program.
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ * $Id: sc68.c 57 2009-01-31 18:24:54Z benjihan $
  */
+
+
+/* $Id: SC68debug_breakpoint.c,v 2.0 2003/08/21 04:58:35 benjihan Exp $ */
 
 #include <stdio.h>
 #include "debug68_breakpoint.h"
@@ -14,12 +31,12 @@
 #define ALL_BP ((unsigned)~0)
 
 typedef struct {
-  u32 addr;			/* Breakpoint address (~0 is free) */
-  int count;			/*  0 : free,
-				 * >0 : # pass before activation
-				 * <0:  Deactivated
-				 */
-  int reset;			/* count value after a break */
+  addr68_t addr;                /* Breakpoint address (~0 is free) */
+  int count;                    /*  0 : free,
+                                 * >0 : # pass before activation
+                                 * <0:  Deactivated
+                                 */
+  int reset;                    /* count value after a break */
 } breakpoint_t;
 
 static breakpoint_t bp[SC68MAXBREAKP];
@@ -70,7 +87,7 @@ static int find_bp(addr68_t addr)
   for (i = 0; i < SC68MAXBREAKP; i++)
     if (bp[i].count) {
       if (bp[i].addr == addr)
-	return i;
+        return i;
     } else if (addr == ALL_BP)
       return i;
   return -1;
@@ -108,8 +125,8 @@ int debug68_breakp_display(addr68_t addr)
     int nb = 0;
     for (i = 0; i < SC68MAXBREAKP; i++)
       if (bp[i].count) {
-	nb++;
-	display_bp(i, bp + i);
+        nb++;
+        display_bp(i, bp + i);
       }
     return nb;
   }

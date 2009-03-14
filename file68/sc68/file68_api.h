@@ -14,24 +14,32 @@
 #ifndef _FILE68_FILE68_API_H_
 #define _FILE68_FILE68_API_H_
 
-/* Building DSO or library */
-#if defined(FILE68_EXPORT)
+#ifndef FILE68_EXTERN
+# ifdef __cplusplus
+#   define FILE68_EXTERN extern "C"
+# else
+#   define FILE68_EXTERN extern
+# endif
+#endif
 
-# if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC) && HAVE_DECLSPEC
+#ifndef FILE68_API
+/* Building */
+# ifdef FILE68_EXPORT
+#  if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
 #   define FILE68_API __declspec(dllexport)
-# elif defined(HAVE_VISIBILITY) && HAVE_VISIBILITY
-#  define FILE68_API extern __attribute__ ((visibility("default")))
-# endif
-
+#  elif defined(HAVE_VISIBILITY)
+#   define FILE68_API FILE68_EXTERN __attribute__ ((visibility("default")))
+#  else
+#   define FILE68_API FILE68_EXTERN
+#  endif
 /* Using */
-#else /* elif ! defined(FILE68_EXPORT) */
-
-# if defined(FILE68_DLL) && defined(HAVE_DECLSPEC) && HAVE_DECLSPEC
-#  define FILE68_API __declspec(dllimport)
-# elif defined(HAVE_VISIBILITY)
-#  define FILE68_API extern
+# else
+#  if defined(FILE68_DLL)
+#   define FILE68_API __declspec(dllimport)
+#  else
+#   define FILE68_API FILE68_EXTERN
+#  endif
 # endif
-
 #endif
 
 /** @addtogroup file68_lib
@@ -42,16 +50,12 @@
  */
 
 #ifndef FILE68_API
-/** file68 exported symbol.
+/** file68 symbols specification.
  *
- *  Define special atribut for exported symbol.
- *
- *  - empty: static or classic .so library
- *  - __attribute__ (visibility("default"))): gcc support visibility.
- *  - __declspec(dllexport): creating a win32 DLL.
- *  - __declspec(dllimport): using a win32 DLL.
+ *  Define special atributs for importing/exporting file68 symbols.
  */
-#define FILE68_API extern
+#define FILE68_API FILE68_EXTERN
+#error "FILE68_API should be defined"
 #endif
 
 /**

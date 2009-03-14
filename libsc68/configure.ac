@@ -19,9 +19,20 @@ AC_CONFIG_SRCDIR([api68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
 AC_CONFIG_HEADERS([config.h])
+
+AC_USE_SYSTEM_EXTENSIONS
+LT_INIT([win32-dll])
+
+# ,----------------------------------------------------------------------.
+# | sc68                                                                 |
+# `----------------------------------------------------------------------'
+
 SC68_PACKAGE([sc68 engine library.])
-[LIBSC68_CPPFLAGS="-DSC68_EXPORT=1"]
-[LIBSC68_LDFLAGS="-version-info 3:0:0"]
+SC68_SYSTEM
+SC68_OPTIONS
+SC68_TOOLS
+SC68_CHECKS
+SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
 
 # ,----------------------------------------------------------------------.
 # | Optional features                                                    |
@@ -33,17 +44,30 @@ AC_ARG_WITH(
       [set default YM-2149 engine (orig or blep) @<:@default=auto-select@:>@])],
   [],[with_ym_engine='x'])
 
-AS_CASE([x-${with_ym_engine}],
-  [x-blep],[YM_EMUL='YM_EMUL_BLEP';with_ym_engine='BLEP synthesis'],
-  [x-orig],[YM_EMUL='YM_EMUL_ORIG';with_ym_engine='sc68 original'],
-  [x-x | x-yes | x-no],[YM_EMUL='x'],[
+case X${with_ym_engine} in
+  Xblep)
+    YM_EMUL='YM_EMUL_BLEP'
+    with_ym_engine='BLEP synthesis'
+    ;;
+  Xorig)
+    YM_EMUL='YM_EMUL_ORIG'
+    with_ym_engine='sc68 original'
+    ;;
+  Xx | Xyes | Xno)
+    YM_EMUL='x'
+    ;;
+  *)
     YM_EMUL="YM_EMUL_"[]AS_TR_CPP($with_ym_engine)
     with_ym_engine="unknown (3rd party?) $with_ym_engine engine"
-    AC_MSG_WARN([Using unknown YM engine may break compilation.])])
+    AC_MSG_WARN([Using unknown YM engine may break compilation.])
+    ;;
+esac
 
-AS_IF([test "x-$YM_EMUL" != "x-x"],
-  [AC_DEFINE_UNQUOTED([YM_EMUL],[$YM_EMUL],[set default YM engine])],
-  [with_ym_engine='auto-select (should be sc68 original)'])
+if test "x-$YM_EMUL" != "x-x"; then
+  AC_DEFINE_UNQUOTED([YM_EMUL],[$YM_EMUL],[set default YM engine])
+else
+  with_ym_engine='auto-select (should be sc68 original)'
+fi
 
 # ,----------------------------------------------------------------------.
 # | Sized size integers                                                  |
@@ -62,20 +86,14 @@ AC_TYPE_UINT64_T
 AC_TYPE_UINTMAX_T
 AC_TYPE_UNSIGNED_LONG_LONG_INT
 
-
 # ,----------------------------------------------------------------------.
 # | Standard functions                                                   |
 # `----------------------------------------------------------------------'
 
 AC_CHECK_FUNCS([malloc free vsprintf vsnprintf getenv strtol])
 
-
-# ,----------------------------------------------------------------------.
-# | Required  libraries                                                  |
-# `----------------------------------------------------------------------'
-
-AC_WITH_PACKAGE([file68],[yes],[],[sc68/file68.h])
-
+SC68_ADD_FLAGS([PACKAGE_LFLAGS],[$]file68_lib)
+SC68_ADD_FLAGS([PACKAGE_LFLAGS],[$LDFLAGS $LIBS])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |

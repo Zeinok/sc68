@@ -16,10 +16,6 @@
 
 #include "istream68.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /** @name     Null stream
  *  @ingroup  file68_istream
  *
@@ -35,6 +31,7 @@ extern "C" {
  *  @{
  */
 
+FILE68_EXTERN
 /** Creates a null stream.
  *
  *  @param  name     Optionnal name *  @return stream
@@ -44,13 +41,7 @@ extern "C" {
  */
 istream68_t * istream68_null_create(const char * name);
 
-/**
- *@}
- */
-
-#ifdef __cplusplus
-}
-#endif
+/** @} */
 
 
 #endif /* #define _FILE68_ISTREAM68_NULL_H_ */

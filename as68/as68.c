@@ -1,7 +1,7 @@
 /*
- *		     as68 - 68000 macro assembler
- *		   Copyright (C) 1993 Vincent Penne
- *	       Copyright (C) 1999-2009 Benjamin Gerard
+ *                   as68 - 68000 macro assembler
+ *                 Copyright (C) 1993 Vincent Penne
+ *             Copyright (C) 1999-2009 Benjamin Gerard
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -49,7 +49,7 @@ uchar symbol_type;
 position curpos, lastpos;
 int cur_pass, n_errors, n_warnings, total_line, max_total_line,
 
-    last_error_line;
+last_error_line;
 char *end_line = "";
 char *macro_args[MAX_MACRO_ARGS];
 int n_macro_args;
@@ -127,13 +127,13 @@ void putlong(FILE * fd, long n)
 #endif
 
 #ifndef COPYRIGHT
-#define COPYRIGHT \
-"Copyright (C) 1993 Penne Vincent, 1999-2009 Benjamin Gerard"
+#define COPYRIGHT                                               \
+  "Copyright (C) 1993 Penne Vincent, 1999-2009 Benjamin Gerard"
 #endif
 
 #ifndef LICENCE
-#define LICENCE \
-"License GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"
+#define LICENCE                                                         \
+  "License GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>"
 #endif
 
 static int print_version(void)
@@ -142,48 +142,48 @@ static int print_version(void)
     (PACKAGE_STRING "\n"
      COPYRIGHT      "\n"
      LICENCE        "\n"
-                    "\n"
+     "\n"
      "Mostly written by Vincent Penne, minor modification by Benjamin Gerard"
-     );
+      );
   return 0;
 }
 
 static int print_usage(void)
 {
   puts(
-       "Usage: as68 [OPTIONS] <input> ...\n"
-       "\n"
-       "  A fast MC68000 macro assembler (build " PACKAGE_VERSION ").\n"
-       );
+    "Usage: as68 [OPTIONS] <input> ...\n"
+    "\n"
+    "  A fast MC68000 macro assembler (build " PACKAGE_VERSION ").\n"
+    );
 
   puts(
-       "Options:\n"
-       "\n"
-       "  Use `--no-' prefix or `+' to reverse option behavior.\n"
-       "\n"
-       "  -h --help       Print help message and exit\n"
-       "  -V --version    Print version and copyright and exit\n"
-       "  -r --reloc      Produce relocation table (def:no)\n"
-       "  -p --pic-check  Warning position dependant addressing mode (def:no)\n"
-       "  -v --verbose    Be verbose\n"
-       "  -t --strip-bss  Strip BSS (def:no)");
+    "Options:\n"
+    "\n"
+    "  Use `--no-' prefix or `+' to reverse option behavior.\n"
+    "\n"
+    "  -h --help       Print help message and exit\n"
+    "  -V --version    Print version and copyright and exit\n"
+    "  -r --reloc      Produce relocation table (def:no)\n"
+    "  -p --pic-check  Warning position dependant addressing mode (def:no)\n"
+    "  -v --verbose    Be verbose\n"
+    "  -t --strip-bss  Strip BSS (def:no)");
   puts(
-       "  --buffer-size <Kb>\n"
-       "  -b Kb           Code buffer size in KByte\n"
-       "  --reloc-output <filename>\n"
-       "  -s <filename>   Relocation table filename (def:input.rel)\n"
-       "  --output <filename>\n"
-       "  -o <filename>   Output filename (def:input.bin)\n"
-       "\n"
-       "Visit <" PACKAGE_URL ">\n"
-       "Report bugs to <benjihan -4t- users.sourceforge -d0t- net>"
-       );
+    "  --buffer-size <Kb>\n"
+    "  -b Kb           Code buffer size in KByte\n"
+    "  --reloc-output <filename>\n"
+    "  -s <filename>   Relocation table filename (def:input.rel)\n"
+    "  --output <filename>\n"
+    "  -o <filename>   Output filename (def:input.bin)\n"
+    "\n"
+    "Visit <" PACKAGE_URL ">\n"
+    "Report bugs to <benjihan -4t- users.sourceforge -d0t- net>"
+    );
   return 0;
 }
 
 /* if  <fname>!=NULL : Open <fname> in 'wb' mode
-* else              : Open from created from <fin> with changed extension <ext>
-*/
+ * else              : Open from created from <fin> with changed extension <ext>
+ */
 FILE *fopen_out(char **fname, char *ext, char *fin)
 {
   static char tmp[1024];
@@ -208,54 +208,54 @@ int main(int argc, char * argv[])
     return print_usage();
   }
 
-  ferr = stderr;		/* set stderr for error messages  */
+  ferr = stderr;                /* set stderr for error messages  */
   init_opcodes();
- 
+
   argv[0] = "as68";
   fout = fin = frel = NULL;     /* set no output,input,reloc file */
   for (i=n=1; i<argc; ++i) {
     int c,v;
     char * arg = argv[i];
-    
+
     v = arg[0] == '-';
     if ((!v && arg[0] != '+') || !(c = arg[1])) {
       /* not an option */
-      argv[n++] = arg; continue; 
+      argv[n++] = arg; continue;
     }
     arg += 2;
     if (c == '-') {
-      if (!*arg) {		/* `--' breaks parsing */
-	++i; break;
+      if (!*arg) {              /* `--' breaks parsing */
+        ++i; break;
       }
 
       /* Long options */
       v = 1;
       if (strstr(arg,"no-") == arg) {
-	v = 0;
-	arg += 3;
+        v = 0;
+        arg += 3;
       }
 
       if (!strcmp(arg,"help")) {
-	c = 'h';
+        c = 'h';
       } else if (!strcmp(arg,"version")) {
-	c = 'V';
+        c = 'V';
       } else if (!strcmp(arg,"verbose")) {
-	c = 'v';
+        c = 'v';
       } else if (!strcmp(arg,"output")) {
-	c = 'o';
+        c = 'o';
       } else if (!strcmp(arg,"reloc-output")) {
-	c = 's';
-      }	else if (!strcmp(arg,"strip-bss")) {
-	c = 't';
-      }	else if (!strcmp(arg,"reloc")) {
-	c = 'r';
-      }	else if (!strcmp(arg,"pic-check")) {
-	c = 'p';
-      }	else if (!strcmp(arg,"buffer-size")) {
-	c = 'b';
+        c = 's';
+      } else if (!strcmp(arg,"strip-bss")) {
+        c = 't';
+      } else if (!strcmp(arg,"reloc")) {
+        c = 'r';
+      } else if (!strcmp(arg,"pic-check")) {
+        c = 'p';
+      } else if (!strcmp(arg,"buffer-size")) {
+        c = 'b';
       } else {
-	fprintf(stderr,"%s: Invalid option `--%s'.\n", argv[0], arg);
-	return 255;
+        fprintf(stderr,"%s: Invalid option `--%s'.\n", argv[0], arg);
+        return 255;
       }
       arg += strlen(arg);
     }
@@ -269,36 +269,36 @@ int main(int argc, char * argv[])
       case 'r': opt_relocatable = v; break;
       case 'p': opt_relwarn = v; break;
       case 't': opt_strip_bss = v; break;
-	/* options with an argument */
+        /* options with an argument */
       case 'b': case 'o': case 's':
-	if (i < argc) {
-	  if (c == 'o') {
-	    /* -o */
-	    fout = argv[++i];
-	  } else if (c == 's') {
-	    /* -s */
-	    frel = argv[++i];
-	  } else {
-	    /* -b */
-	    int n;
-	    arg = argv[++i];
-	    if (!isdigit(*arg)) {
-	      n = DEFAULT_CODE_BUFFER_SIZE;
-	    } else {
-	      for (n=0; isdigit(*arg); arg++)
-		n = n * 10 + *arg - '0';
-	    }
-	    buffer_size = n;
-	  }
-	} else {
-	  fprintf(stderr,"%s: Missing argumentfor  option `-%c'.\n",
-		  argv[0], c);
-	  return 255;
-	}
-	break;
+        if (i < argc) {
+          if (c == 'o') {
+            /* -o */
+            fout = argv[++i];
+          } else if (c == 's') {
+            /* -s */
+            frel = argv[++i];
+          } else {
+            /* -b */
+            int n;
+            arg = argv[++i];
+            if (!isdigit(*arg)) {
+              n = DEFAULT_CODE_BUFFER_SIZE;
+            } else {
+              for (n=0; isdigit(*arg); arg++)
+                n = n * 10 + *arg - '0';
+            }
+            buffer_size = n;
+          }
+        } else {
+          fprintf(stderr,"%s: Missing argumentfor  option `-%c'.\n",
+                  argv[0], c);
+          return 255;
+        }
+        break;
       default:
-	fprintf(stderr,"%s: Invalid option `-%c'.\n", argv[0], c);
-	return 255;
+        fprintf(stderr,"%s: Invalid option `-%c'.\n", argv[0], c);
+        return 255;
       }
       c = *arg++;
     } while (c);
@@ -319,14 +319,14 @@ int main(int argc, char * argv[])
     debug_printf("%c%s", i==1?' ':',', argv[i]);
   }
   debug_printf("\n");
-  
+
   if (argc < 2) {
     fprintf(stderr, "%s: Missing input file\n", argv[0]);
     return 255;
   } else if (argc > 2 && (fout || frel)) {
     fprintf(stderr,
-	    "%s: Can't specify output or relocation with multiple input\n",
-	    argv[0]);
+            "%s: Can't specify output or relocation with multiple input\n",
+            argv[0]);
     return 255;
   }
   for (i = 1, err = 0; i < argc; ++i) {
@@ -378,7 +378,7 @@ static int assemble(char *fin, char *fout, char *frel)
          opt_relocatable ? "relocatable" : "absolute");
 
   for (cur_pass = 1; (cur_pass <= 2 || (cur_pass == 3 && opt_relocatable))
-       && !n_errors; cur_pass++) {
+         && !n_errors; cur_pass++) {
 
     if (opt_relocatable && cur_pass == 3)
       org = 0x12345678;         /* ??? */
@@ -443,17 +443,17 @@ static int assemble(char *fin, char *fout, char *frel)
       fd = fopen_out(&fout, ".bin", fin); /* Can't return NULL !!! */
 
       if (opt_strip_bss) {
-	int save_max; 
-	for (save_max=max_pc; max_pc>0 && !code[max_pc-1]; --max_pc);
-	save_max = save_max - max_pc;
-	printf("Strip BSS: %d byte%s removed\n",
-	       save_max, save_max>1 ? "s" : "");
+        int save_max;
+        for (save_max=max_pc; max_pc>0 && !code[max_pc-1]; --max_pc);
+        save_max = save_max - max_pc;
+        printf("Strip BSS: %d byte%s removed\n",
+               save_max, save_max>1 ? "s" : "");
       }
 
       printf("Writing binary output : %s , %d byte%s\n",
              fout, max_pc, max_pc > 1 ? "s" : "");
       if (fwrite(code, 1, max_pc, fd) != max_pc) {
-	
+
       };
       fclose(fd);
     }
@@ -514,7 +514,7 @@ void error(char *format, ...)
   va_start(list, format);
   if (last_error_line != lastpos.line) {
     fprintf(f, "%s(%d) : error pass:%d : ",
-	    lastpos.f->filename, lastpos.line, cur_pass);
+            lastpos.f->filename, lastpos.line, cur_pass);
     vfprintf(f, format, list);
     fprintf(f, "\n");
     n_errors++;
@@ -530,7 +530,7 @@ void warning(char *format, ...)
 
   va_start(list, format);
   fprintf(f, "%s(%d) : warning pass:%d : ",
-	  lastpos.f->filename, lastpos.line, cur_pass);
+          lastpos.f->filename, lastpos.line, cur_pass);
   vfprintf(f, format, list);
   fprintf(f, "\"\n");
   n_warnings++;

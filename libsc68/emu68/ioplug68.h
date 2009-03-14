@@ -5,11 +5,11 @@
  * @brief     68k IO plugger header.
  * @author    Benjamin Gerard
  *
- * $Id$
- *
  */
- 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _EMU68_IOPLUG68_H_
 #define _EMU68_IOPLUG68_H_
@@ -17,19 +17,14 @@
 #include "emu68_api.h"
 #include "struct68.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * @defgroup  emu68_ioplug_devel  68k IO plugger
  * @ingroup   emu68_devel
  * @brief     IO plugging and mapping facilities.
  *
  *   Provide functions for warm plugging/unplugging of IO
- *   chipset. Limitations are explained in 
- *   @ref emu68_mem68_devel "68k memory and IO manager"
- *   detailed description.
+ *   chipset. Limitations are explained in @ref emu68_mem68_devel "68k
+ *   memory and IO manager" detailed description.
  *
  * @{
  */
@@ -76,11 +71,7 @@ EMU68_API
 void emu68_ioplug(emu68_t * const emu68, io68_t * const io);
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _EMU68_IOPLUG68_H_ */

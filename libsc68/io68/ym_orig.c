@@ -17,9 +17,11 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -36,18 +38,18 @@
 #include <sc68/string68.h>
 #include <sc68/option68.h>
 
-extern int ym_feature;		/* defined in ymemul.c */
+extern int ym_feature;          /* defined in ymemul.c */
 
 #ifndef INTMSB
 # define INTMSB (sizeof(int)*8-1)
 #endif
 
-#define YM_ORIG_FILTER 1	/* 0:none 1:fast 2:slow */
+#define YM_ORIG_FILTER 1        /* 0:none 1:fast 2:slow */
 
-#define YM_OUT_MSK(C,B,A) \
- (((((C)&0x1F)<<10))\
- |((((B)&0x1F)<< 5))\
- |((((A)&0x1F)    )))
+#define YM_OUT_MSK(C,B,A)                       \
+  (((((C)&0x1F)<<10))                           \
+   |((((B)&0x1F)<< 5))                          \
+   |((((A)&0x1F)    )))
 
 const int ym_smsk_table[8] = {
   /* 000 */ YM_OUT_MSK(00,00,00),
@@ -74,7 +76,7 @@ static struct {
   const char * name;
   ym_orig_filter_t filter;
 } filters[] = {
-  { "2-pole", filter_2pole },	/* first is default */
+  { "2-pole", filter_2pole },   /* first is default */
   { "none",   filter_none  },
   { "boxcar", filter_boxcar},
   { "1-pole", filter_1pole },
@@ -90,7 +92,7 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
   /* Reset envelop generator */
   orig->env_bit            = 0;
   orig->env_ct             = 0;
-  
+
   /* Reset noise generator */
   orig->noise_gen          = 1;
   orig->noise_ct           = 0;
@@ -100,7 +102,7 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
   orig->voice_ctB          = 0;
   orig->voice_ctC          = 0;
   orig->levels             = 0;
-  
+
   /* Reset filters */
   orig->hipass_inp1 = 0;
   orig->hipass_out1 = 0;
@@ -111,7 +113,7 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
   orig->btw.y[0] = orig->btw.y[1] = 0;
 
   /* Butterworth low-pass cutoff=15.625khz sampling=250khz */
-  orig->btw.a[0] =  0x01eac69f;	/* fix 30 */
+  orig->btw.a[0] =  0x01eac69f; /* fix 30 */
   orig->btw.a[1] =  0x03d58d3f;
   orig->btw.a[2] =  0x01eac69f;
   orig->btw.b[0] = -0x5d1253b0;
@@ -147,11 +149,11 @@ static int noise_generator(ym_t * const ym, int ymcycles)
   ct        = orig->noise_ct;
   noise_gen = orig->noise_gen;
   per       = ym->reg.name.per_noise & 0x1F;
-    
+
   per     <<= 1;    /* because the noise generator base frequency is
-		       master/16 but we have to match the envelop
-		       generator frequency which is master/8.
-		    */
+                       master/16 but we have to match the envelop
+                       generator frequency which is master/8.
+                    */
 
   msk       = ym_smsk_table[7 & (ym->reg.name.ctl_mixer >> 3)];
   v         = (u16)(-(noise_gen & 1) | msk);
@@ -180,7 +182,7 @@ static int noise_generator(ym_t * const ym, int ymcycles)
   orig->noise_gen = noise_gen;
   orig->noise_ct  = ct;
 
- finish:
+  finish:
   /* return not mixed cycle */
   return rem_cycles;
 }
@@ -206,8 +208,8 @@ static void do_noise(ym_t * const ym, cycle68_t ymcycle)
 
     if (access->ymcycle > ymcycle) {
       TRACE68(ym_feature,"%s access reg %X out of frame!! (%u>%u %u)\n",
-	      regs->name, access->reg, access->ymcycle, ymcycle,
-	      access->ymcycle/ymcycle);
+              regs->name, access->reg, access->ymcycle, ymcycle,
+              access->ymcycle/ymcycle);
       break;
     }
 
@@ -386,7 +388,7 @@ static int envelop_generator(ym_t * const ym, int ymcycles)
       bit &= 63;
       *b++ |= waveform[bit]<<16;
     } while (--ymcycles);
- 
+
     /* Save value for next pass */
     orig->envptr     = b;
     orig->env_ct     = ct;
@@ -514,8 +516,8 @@ static void do_envelop(ym_t * const ym, cycle68_t ymcycle)
 
     if (access->ymcycle > ymcycle) {
       TRACE68(ym_feature,"%s access reg %X out of frame!! (%u>%u %u)\n",
-	      regs->name, access->reg, access->ymcycle, ymcycle,
-	      access->ymcycle/ymcycle);
+              regs->name, access->reg, access->ymcycle, ymcycle,
+              access->ymcycle/ymcycle);
       break;
     }
 
@@ -623,9 +625,9 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
     sq &= mute;
 
     sq = (int) ym->ymout5[sq];
-   
+
     *b++ = sq;
-  
+
   } while (--ymcycles);
 
   /* Save value for next pass */
@@ -634,7 +636,7 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
   orig->voice_ctB = ctB;
   orig->voice_ctC = ctC;
   orig->levels    = levels;
- finish:
+  finish:
   return rem_cycles;
 }
 
@@ -661,8 +663,8 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
 
     if (access->ymcycle > ymcycle) {
       TRACE68(ym_feature,"%s access reg %X out of frame!! (%u>%u %u)\n",
-	      regs->name, access->reg, access->ymcycle, ymcycle,
-	      access->ymcycle/ymcycle);
+              regs->name, access->reg, access->ymcycle, ymcycle,
+              access->ymcycle/ymcycle);
       break;
     }
 
@@ -738,24 +740,23 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
 
 
 #if 0
-/* What it should be */
+/* What it should be ... */
 # define REVOL(V) ((V) * _vol >> 6)
 # define CLIP3(V,A,B) ( V < A ? A : ( V > B ? B : V ) )
 #else
-  /* What it really is (BLEP does not honnor it anyway) */
-# define REVOL(V) ((V) >> 1)	  
-# define CLIP3(V,A,B) ( V )
+/* What it really is (BLEP does not honnor it anyway) */
+# define REVOL(V) ((V) >> 1)
+# define CLIP3(V,A,B) ( V < A ? A : ( V > B ? B : V ) )
 #endif
 #define CLIP(V) CLIP3(V,-32768,32767)
-
 
 /* Resample ``n'' input samples from ``irate'' to ``orate''
  * With volume adjustement [0..64]
  * @warning irate <= 262143 or 32bit overflow
  */
 static s32 * resampling(s32 * dst, const int n,
-			const int _vol,
-			const uint68_t irate, const uint68_t orate)
+                        const int _vol,
+                        const uint68_t irate, const uint68_t orate)
 {
   s32   * const src = dst;
   const int68_t stp = (irate << 14) / orate; /* step into source */
@@ -776,8 +777,8 @@ static s32 * resampling(s32 * dst, const int n,
     if (stp >= 1<<14) {
       /* forward */
       do {
-	int o = REVOL(src[(int)(idx>>14)]);
-	*dst++ = CLIP(o);
+        int o = REVOL(src[(int)(idx>>14)]);
+        *dst++ = CLIP(o);
       } while ((idx += stp) < end);
     } else {
       /* backward */
@@ -785,8 +786,8 @@ static s32 * resampling(s32 * dst, const int n,
       dst  = src + m - 1;
       idx  = end;
       do {
-	int o = REVOL(src[(int)((idx -= stp)>>14)]);
-	*dst = CLIP(o);
+        int o = REVOL(src[(int)((idx -= stp)>>14)]);
+        *dst = CLIP(o);
       } while (--dst != src);
       dst = src+m;
     }
@@ -818,7 +819,7 @@ static void filter_boxcar2(ym_t * const ym)
       *dst++ = ( src[0] + src[1] ) >> 1;
       src += 2;
     } while (--m);
-    
+
     ym->outptr =
       resampling(ym->outbuf, n, ym->outlevel, ym->clock>>(3+1), ym->hz);
   }
@@ -875,41 +876,41 @@ static void filter_mixed(ym_t * const ym)
 
       /***********************************************************/
       /* 4-tap boxcar filter; lower sampling rate from 250Khz to */
-      /* 62.5Khz; emulates half level buzz sounds.		 */
+      /* 62.5Khz; emulates half level buzz sounds.               */
       /***********************************************************/
       i0  = ( src[0] + src[1] + src[2] + src[3] ) >> 2;
       src += 4;
 
       /*****************************************/
       /* Recursive single pole low-pass filter */
-      /* - cutoff   : 15.625 Khz	       */
-      /* - sampling : 62.5 Khz		       */
+      /* - cutoff   : 15.625 Khz               */
+      /* - sampling : 62.5 Khz                 */
       /*****************************************/
       if (1) {
-	const int68_t B = 0x1a9c; /* 15 bit */
-	const int68_t A = (1<<15)-B;
-	l_o1 = ( (i0 * A) + l_o1 * B ) >> 15;
+        const int68_t B = 0x1a9c; /* 15 bit */
+        const int68_t A = (1<<15)-B;
+        l_o1 = ( (i0 * A) + l_o1 * B ) >> 15;
       } else {
-	l_o1 = i0;
+        l_o1 = i0;
       }
-      
+
       /******************************************/
       /* Recursive single pole high-pass filter */
-      /* - cutoff   : 25 hz		        */
-      /* - sampling : 62.5 Khz		        */
+      /* - cutoff   : 25 hz                     */
+      /* - sampling : 62.5 Khz                  */
       /******************************************/
       if (1) {
-	const int A0 = 0x7FD7; /* 15 bit */
-	const int B1 = 0x7FAE; /* 15 bit */
-	o0 = h_o1 = ( (l_o1 - h_i1) * A0 + (h_o1 * B1) ) >> 15;
-	h_i1 = l_o1;
+        const int A0 = 0x7FD7; /* 15 bit */
+        const int B1 = 0x7FAE; /* 15 bit */
+        o0 = h_o1 = ( (l_o1 - h_i1) * A0 + (h_o1 * B1) ) >> 15;
+        h_i1 = l_o1;
       } else {
-	o0 = i0;
+        o0 = i0;
       }
 
       /* store */
       *dst++ = o0;
-      
+
     } while (--m);
 
     orig->hipass_inp1 = h_i1;
@@ -941,30 +942,30 @@ static void filter_1pole(ym_t * const ym)
 
       /*****************************************/
       /* Recursive single pole low-pass filter */
-      /* - cutoff   : 15.625 Khz	       */
-      /* - sampling : 250 Khz		       */
+      /* - cutoff   : 15.625 Khz               */
+      /* - sampling : 250 Khz                  */
       /*****************************************/
       {
-	const int68_t B = 0x7408; /* 15 bit */
-	const int68_t A = (1<<15)-B;
-	l_o1 = ( (i0 * A) + l_o1 * B ) >> 15;
+        const int68_t B = 0x7408; /* 15 bit */
+        const int68_t A = (1<<15)-B;
+        l_o1 = ( (i0 * A) + l_o1 * B ) >> 15;
       }
 
       /******************************************/
       /* Recursive single pole high-pass filter */
-      /* - cutoff   : 25 hz		        */
-      /* - sampling : 250 Khz		        */
+      /* - cutoff   : 25 hz                     */
+      /* - sampling : 250 Khz                   */
       /******************************************/
       {
-	const int68_t A0 = 0x7FF6; /* 15 bit */
-	const int68_t B1 = 0x7FEB; /* 15 bit */
-	o0 = h_o1 = ( (l_o1 - h_i1) * A0 + (h_o1 * B1) ) >> 15;
-	h_i1 = l_o1;
+        const int68_t A0 = 0x7FF6; /* 15 bit */
+        const int68_t B1 = 0x7FEB; /* 15 bit */
+        o0 = h_o1 = ( (l_o1 - h_i1) * A0 + (h_o1 * B1) ) >> 15;
+        h_i1 = l_o1;
       }
 
       /* store */
       *dst++ = o0;
-      
+
     } while (--m);
 
     orig->hipass_inp1 = h_i1;
@@ -1012,26 +1013,26 @@ static void filter_2pole(ym_t * const ym)
 
       /******************************************/
       /* Recursive single pole high-pass filter */
-      /* - cutoff   : 25 hz		        */
-      /* - sampling : 250 Khz		        */
+      /* - cutoff   : 25 hz                     */
+      /* - sampling : 250 Khz                   */
       /******************************************/
       {
-	const int68_t A0 = 0x7FF6; /* 15 bit */
-	const int68_t B1 = 0x7FEB; /* 15 bit */
-	h_o1 = (((i0 - h_i1) * A0) + (h_o1 * B1)) >> 15;
-	h_i1 = i0;
-	i0   = h_o1;
+        const int68_t A0 = 0x7FF6; /* 15 bit */
+        const int68_t B1 = 0x7FEB; /* 15 bit */
+        h_o1 = (((i0 - h_i1) * A0) + (h_o1 * B1)) >> 15;
+        h_i1 = i0;
+        i0   = h_o1;
       }
 
       /* Butterworth low-pass  */
       {
-	o0 = (
-	       a0 * i0 + a1 * x0 + a2 * x1 -
-	       b0 * y0 - b1 * y1 ) >> 15;
-	x1 = x0; x0 = i0;
-	y1 = y0; y0 = o0;
+        o0 = (
+          a0 * i0 + a1 * x0 + a2 * x1 -
+          b0 * y0 - b1 * y1 ) >> 15;
+        x1 = x0; x0 = i0;
+        y1 = y0; y0 = o0;
       }
-    
+
       *dst++ = o0;
 
     } while (--m);
@@ -1047,7 +1048,7 @@ static void filter_2pole(ym_t * const ym)
     ym->outptr =
       resampling(ym->outbuf, n, ym->outlevel, ym->clock>>3, ym->hz);
   }
-}  
+}
 
 static
 int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
@@ -1093,7 +1094,7 @@ int ym_orig_setup(ym_t * const ym)
   /* use default filter */
   orig->ifilter        = default_filter;
   msg68_info("ym-2149: select *%s* filter\n",
-		  filters[orig->ifilter].name);
+             filters[orig->ifilter].name);
 
   return err;
 }
@@ -1123,18 +1124,18 @@ int ym_orig_options(int argc, char ** argv)
     int i;
     for (i=0; i<n_filters; ++i) {
       if (!strcmp68(opt->val.str, filters[i].name)) {
-	default_filter = i;
-	break;
+        default_filter = i;
+        break;
       }
     }
     if (i == n_filters) {
       msg68_warning("ym-2149: bad filter (%s)\n"
-		    "       : %s\n",
-		    opt->val.str, opt->desc);
+                    "       : %s\n",
+                    opt->val.str, opt->desc);
     }
   }
   msg68_info("ym-2149: set default filter *%s* \n",
-	     filters[default_filter].name);
+             filters[default_filter].name);
 
   return argc;
 }

@@ -1,7 +1,7 @@
 /*
- *		     as68 - 68000 macro assembler
- *		   Copyright (C) 1993 Vincent Penne
- *	       Copyright (C) 1999-2009 Benjamin Gerard
+ *                   as68 - 68000 macro assembler
+ *                 Copyright (C) 1993 Vincent Penne
+ *             Copyright (C) 1999-2009 Benjamin Gerard
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -22,49 +22,49 @@
 /*$Id$*/
 
 char *error_list[] = {
-/*0*/	"",
-/*1*/	"syntax error",
-/*2*/	"unknown symbol",
-/*3*/	"')' expected",
-/*4*/	"divide by zero",
-/*5*/	"undefined word",
-/*6*/	"',' expected",
-/*7*/	"unknown mnemonic",
-/*8*/	"'.S', '.B', '.W'  '.L' expected",
-/*9*/	"invalid value",
-/*10*/	"address register expected",
-/*11*/	"invalid '.B'",
-/*12*/	"unexecpected addressing mode",
-/*13*/	"invalid operand size",
-/*14*/	"data register expected",
-/*15*/	"'.W' expected",
-/*16*/	"expression must be evaluate in 1st pass",
-/*17*/	"register  expected",
-/*18*/	"unexpected end of file",
-/*19*/	"unexpected in BSS section",
-/*20*/	"can't open file",
-/*21*/	"no macro of this name",
-/*22*/	"internal error",
-/*23*/	"odd address",
-/*24*/	"'[' expected",
-/*25*/	"'{' expected",
-/*26*/	"invalid size",
-/*27*/	"invalid addressing mode",
-/*28*/	"already defined",
-/*29*/	"value out of range",
-/*30*/	"expected",
-/*31*/	"can't modify symbol",
-/*32*/	"macro too many argument",
-/*33*/	"numeric type expected",
-/*34*/	"could not incbin",
-/*35*/	"undefined",
-/*36*/
+  /*00*/ "",
+  /*01*/ "syntax error",
+  /*02*/ "unknown symbol",
+  /*03*/ "')' expected",
+  /*04*/ "divide by zero",
+  /*05*/ "undefined word",
+  /*06*/ "',' expected",
+  /*07*/ "unknown mnemonic",
+  /*08*/ "'.S', '.B', '.W'  '.L' expected",
+  /*09*/ "invalid value",
+  /*10*/ "address register expected",
+  /*11*/ "invalid '.B'",
+  /*12*/ "unexecpected addressing mode",
+  /*13*/ "invalid operand size",
+  /*14*/ "data register expected",
+  /*15*/ "'.W' expected",
+  /*16*/ "expression must be evaluate in 1st pass",
+  /*17*/ "register  expected",
+  /*18*/ "unexpected end of file",
+  /*19*/ "unexpected in BSS section",
+  /*20*/ "can't open file",
+  /*21*/ "no macro of this name",
+  /*22*/ "internal error",
+  /*23*/ "odd address",
+  /*24*/ "'[' expected",
+  /*25*/ "'{' expected",
+  /*26*/ "invalid size",
+  /*27*/ "invalid addressing mode",
+  /*28*/ "already defined",
+  /*29*/ "value out of range",
+  /*30*/ "expected",
+  /*31*/ "can't modify symbol",
+  /*32*/ "macro too many argument",
+  /*33*/ "numeric type expected",
+  /*34*/ "could not incbin",
+  /*35*/ "undefined",
+  /*36*/
 };
 
 char *warn_list[] = {
-/*0*/	"",
-/*1*/	"word too long : truncated",
-/*2*/	"non integer value : truncated",
-/*3*/	"position dependant code",
-/*4*/	"ORG may bug -P option ... sorry",
+  /*0*/ "",
+  /*1*/ "word too long : truncated",
+  /*2*/ "non integer value : truncated",
+  /*3*/ "position dependant code",
+  /*4*/ "ORG may bug -P option ... sorry",
 };

@@ -16,9 +16,6 @@
 
 #include "istream68.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @name     FILE stream
  *  @ingroup  file68_istream
@@ -28,6 +25,7 @@ extern "C" {
  *  @{
  */
 
+FILE68_EXTERN
 /** Creates a stream for "C" FILE.
  *
  *  @param  fname    path of file.
@@ -41,11 +39,7 @@ extern "C" {
 istream68_t * istream68_file_create(const char * fname, int mode);
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #define _FILE68_ISTREAM68_FILE_H_ */

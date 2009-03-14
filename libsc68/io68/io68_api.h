@@ -5,8 +5,9 @@
  * @date      2009/02/10
  * @brief     io68 export header.
  *
- * $Id: io68.h 75 2009-02-04 19:12:14Z benjihan $
  */
+
+/* $Id: io68.h 75 2009-02-04 19:12:14Z benjihan $ */
 
 /* Copyright (C) 1998-2009 Benjamin Gerard */
 
@@ -16,9 +17,14 @@
 #ifndef IO68_API
 # ifdef IO68_EXPORT
 #  include "sc68/sc68.h"
-#  define IO68_API SC68_API
+#  define IO68_EXTERN SC68_EXTERN
+#  define IO68_API    SC68_API
+# elif defined (__cplusplus)
+#  define IO68_EXTERN extern "C"
+#  define IO68_API    IO68_EXTERN
 # else
-#  define IO68_API extern
+#  define IO68_EXTERN extern
+#  define IO68_API    IO68_EXTERN
 # endif
 #endif
 

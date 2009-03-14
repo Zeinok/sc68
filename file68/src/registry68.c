@@ -1,7 +1,7 @@
 /*
- *		  sc68 - M$-Windows registry access
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                sc68 - M$-Windows registry access
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -57,7 +57,9 @@ static struct reg68_keytable_s {
 static const char * keyhdlname(const registry68_key_t key)
 {
   int i;
-  for (i=0; i<REGISTRY68_LST && (HKEY)key!=keys[i].hkey; ++i);
+
+  for (i=0; i < REGISTRY68_LST && (HKEY)key != keys[i].hkey; ++i)
+    ;
   return keys[i].name;
 }
 
@@ -67,7 +69,7 @@ static const char * keyname(const enum registry68_key_e const key)
     [(unsigned int)key >= (unsigned int)REGISTRY68_LST
      ? REGISTRY68_LST
      : key
-     ] . name;
+      ] . name;
 }
 
 static HKEY keyhandle(const enum registry68_key_e const key)
@@ -76,14 +78,14 @@ static HKEY keyhandle(const enum registry68_key_e const key)
     [(unsigned int)key >= (unsigned int)REGISTRY68_LST
      ? REGISTRY68_LST
      : key
-     ] . hkey;
+      ] . hkey;
 }
 
 registry68_key_t registry68_rootkey(enum registry68_key_e rootkey)
 {
   registry68_key_t key = (registry68_key_t) keyhandle(rootkey);
   msg68_trace("registry68: rootkey %d '%s' => %p '%s'\n",
-	      rootkey, keyname(rootkey), (void*)key, keyhdlname(key));
+              rootkey, keyname(rootkey), (void*)key, keyhdlname(key));
   return key;
 }
 
@@ -92,33 +94,34 @@ static void SetSystemError(char * str, int max)
   char registry68_errorstr[256];
   int err = GetLastError(), l;
   registry68_errorstr[0] = 0;
-  
+
+  if ( err == ERROR_SUCCESS) return;
+
   if (!str) {
+    msg68_critical("registry68: race condition may occur\n");
     str = registry68_errorstr;
     max = sizeof(registry68_errorstr);
   }
-  FormatMessage
-    (
-     /* source and processing options */
-     FORMAT_MESSAGE_FROM_SYSTEM,
-     /* pointer to message source */
-     0,
-     /* requested message identifier */
-     err,
-     /* language identifier for requested message */
-     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-     /* pointer to message buffer */
-     str,
-     /* maximum size of message buffer */
-     max,
-     /* pointer to array of message inserts */
-     0
-     );
+  FormatMessage(
+    /* source and processing options */
+    FORMAT_MESSAGE_FROM_SYSTEM,
+    /* pointer to message source */
+    0,
+    /* requested message identifier */
+    err,
+    /* language identifier for requested message */
+    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+    /* pointer to message buffer */
+    str,
+    /* maximum size of message buffer */
+    max,
+    /* pointer to array of message inserts */
+    0);
   str[max-1] = 0;
   l = strlen(str);
   while (--l>=0 && (str[l] == '\n' || str[l] == '\r' ||str[l] == ' '))
     str[l] = 0;
-  msg68_error("registry68: system error '%s'\n",str);
+  msg68_error("registry68: system error '%s'\n", str);
 }
 
 static int GetOneLevelKey(HKEY hkey, char **kname, HKEY *hkeyres)
@@ -135,11 +138,11 @@ static int GetOneLevelKey(HKEY hkey, char **kname, HKEY *hkeyres)
   /* Open this sub-key */
   hres =
     RegOpenKeyEx(hkey,     // handle to open key
-		 *kname,   // address of name of subkey to open
-		 0,        // reserved
-		 KEY_READ, // security access mask
-		 hkeyres   // address of handle to open key
-		 );
+                 *kname,   // address of name of subkey to open
+                 0,        // reserved
+                 KEY_READ, // security access mask
+                 hkeyres   // address of handle to open key
+      );
 
   /* If next sub-key exist, advance pointer to beginning of key-name */
   if (s) {
@@ -179,44 +182,47 @@ registry68_key_t registry68_open(registry68_key_t hkey, const char *kname_cst)
 {
   HKEY hdl = HKEY_INVALID;
   int len;
-  char kname[1024];
+  char kname[1024], error[256];
 
-  msg68_trace("registry68: open '%s' '%s'\n",
-	      keyhdlname(hkey), strnevernull68(kname_cst));
-  
-  if (!kname_cst || (len=strlen(kname_cst))>=sizeof(kname)) {
-    msg68_error("registry68: key name too long\n", kname_cst);
+  if (!kname_cst) {
+    msg68_critical("registry68: open '%s::<null> null pointer\n",
+                   keyhdlname(hkey));
+    goto error;
+  }
+
+  if ( (len = strlen(kname_cst)) >= sizeof(kname) ) {
+    msg68_critical("registry68: key name too long '%s::%s'\n",
+                   keyhdlname(hkey), kname_cst);
     goto error;
   }
   memcpy(kname, kname_cst, len+1);
-  
+
   if (rGetRegistryKey((HKEY)hkey, kname, (HKEY *)&hdl)) {
-    SetSystemError(0,0);
+    SetSystemError(error,sizeof(error)-1);
     hdl = HKEY_INVALID;
   }
- error:
-  
-  msg68_trace("registry68: open => [%s]\n",
-	      keyhdlname(hdl), strok68(hdl==HKEY_INVALID));
-  
+
+  error:
+  msg68_trace("registry68: open '%s::%s' => [%s]\n",
+              keyhdlname(hdl), kname_cst, strok68(hdl==HKEY_INVALID));
+
   return (registry68_key_t) hdl;
 }
 
-/** Get a string value from register path
+/* Get a string value from register path
  */
 int registry68_gets(registry68_key_t rootkey,
-		    const char * kname_cst, char *kdata, int kdatasz)
+                    const char * kname_cst, char *kdata, int kdatasz)
 {
   DWORD vtype;
   HKEY hkey;
-  int err=-1, len;
+  int len;
   LONG hres;
-  char * name;
-  char kname[1024];
+  char * name, kname[1024], error[256];
+  const char * kname_save = kname_cst;
 
-  msg68_trace("registry68: gets '%s'%s\n", keyhdlname(rootkey), kname_cst);
-
-  if (!kname_cst|| !kdata || kdatasz < 0) {
+  if (!kname_cst|| !kdata || kdatasz <= 0) {
+    msg68_critical("registry68: gets -- invalid parameters\n");
     goto error_out;
   }
   kdata[0]=0;
@@ -228,21 +234,21 @@ int registry68_gets(registry68_key_t rootkey,
 
     kname_cst += 4; len -= 4;
     for (i=0; i<REGISTRY68_LST
-	   && keys[i].name[0]!=kname_cst[0]
-	   && keys[i].name[1]!=kname_cst[1]; ++i)
+           && keys[i].name[0]!=kname_cst[0]
+           && keys[i].name[1]!=kname_cst[1]; ++i)
       ;
     rootkey = keys[i].hkey;
-    msg68_trace("registry68: get root key from name: %s\n",
-		keys[i].name);
   }
 
   if (rootkey == HKEY_INVALID) {
-    msg68_error("registry68: INVALID rootkey\n");
+    msg68_critical("registry68: gets '%s' -- invalid rootkey\n", kname_save);
+    kdata = 0;
     goto error_out;
   }
 
   if (len >= sizeof(kname)) {
-    msg68_error("registry68: key-path too long\n");
+    msg68_critical("registry68: gets '%s' -- key-path too long\n", kname_save);
+    kdata = 0;
     goto error_out;
   }
   memcpy(kname, kname_cst, len+1);
@@ -250,32 +256,38 @@ int registry68_gets(registry68_key_t rootkey,
   if (name) {
     *name++ = 0;
   }
-  
-  err = rGetRegistryKey((HKEY)rootkey, kname, &hkey);
-  if (!err) {
+
+  if (rGetRegistryKey((HKEY)rootkey, kname, &hkey)) {
+    SetSystemError(error, sizeof(error)-1);
+  } else {
     hres =
       RegQueryValueEx(hkey,             /* handle to key to query            */
-		      name,             /* address of name of value to query */
-		      NULL,             /* reserved                          */
-		      &vtype,           /* address of buffer for value type  */
-		      (LPBYTE)kdata,    /* address of data buffer            */
-		      (LPDWORD)&kdatasz /* address of data buffer size       */
-		      );
-    err = ((hres==ERROR_SUCCESS)  && (vtype == REG_SZ)) ? 0 : -1;
+                      name,             /* address of name of value to query */
+                      NULL,             /* reserved                          */
+                      &vtype,           /* address of buffer for value type  */
+                      (LPBYTE)kdata,    /* address of data buffer            */
+                      (LPDWORD)&kdatasz /* address of data buffer size       */
+        );
+    if (hres != ERROR_SUCCESS) {
+      SetSystemError(error, sizeof(error)-1);
+      kdata = 0;
+    } else if (vtype != REG_SZ) {
+      msg68_error("registry68: gets '%s' -- not zero terminated string\n",
+                  kname_save);
+      kdata = 0;
+    }
     RegCloseKey(hkey);
-  }
-  if (err) {
-    SetSystemError(0,0);
   }
   if (name) {
     *--name = '/';
   }
- error_out:
-  
-  msg68_trace("registry68: gets => [%s,%s]\n",
-	      strok68(err),strnevernull68(kdata));
-  
-  return err;
+  error_out:
+
+  msg68_trace("registry68: gets '%s' => [%s,'%s']\n",
+              strnevernull68(kname_save),
+              strok68(!kdata),
+              strnevernull68(kdata));
+  return -!kdata;
 }
 
 #else
@@ -291,7 +303,7 @@ registry68_key_t registry68_open(registry68_key_t hkey, const char *kname)
 }
 
 int registry68_gets(registry68_key_t rootkey, const char * kname_cst,
-		    char *kdata, int kdatasz)
+                    char *kdata, int kdatasz)
 {
   return -1;
 }

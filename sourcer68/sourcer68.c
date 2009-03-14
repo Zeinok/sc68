@@ -51,7 +51,7 @@ static void debugmsg(const char * fmt, ...)
     sourcer68_feature =
       msg68_feature("src","sourcer68 specific message",1);
   }
-    va_start(list,fmt);
+  va_start(list,fmt);
   if (sourcer68_feature != -1) {
     msg68_va(sourcer68_feature,fmt,list);
   } else {
@@ -67,7 +67,7 @@ static void debugmsg(const char * fmt, ...)
   va_list list;
   vfprintf(stderr,fmt,list);
   va_end(list);
-} 
+}
 
 #endif
 
@@ -240,7 +240,7 @@ static void PrintLabel(unsigned int addr)
 static void PrintRelLabel(unsigned addr, unsigned int base)
 {
 /*   if (base == pc) { */
-    printf("L%06X: = *+%d \n", addr, addr-base);
+  printf("L%06X: = *+%d \n", addr, addr-base);
 /*   } else { */
 /*     printf("L%06X: = L%06X+%d \n", addr, base, addr-base); */
 /*   } */
@@ -254,14 +254,14 @@ static int CheckSection(unsigned int pc, int newline)
   for (i=0; i<sections; ++i) {
     if (pc == section[i].addr) {
       if (!found) {
-	found = 1;
-	printf("\n\n"+!(newline));
-	printf("%s; ------------------------------------\n",tabs);
+        found = 1;
+        printf("\n\n"+!(newline));
+        printf("%s; ------------------------------------\n",tabs);
       }
       printf("%s; SECTION %4s ;%06x-%06x (%6d)\n",
-	     tabs,
-	     section[i].name, section[i].addr,
-	     section[i].addr+section[i].size, section[i].size);
+             tabs,
+             section[i].name, section[i].addr,
+             section[i].addr+section[i].size, section[i].size);
     }
   }
   if (found) {
@@ -310,11 +310,11 @@ static void PrintDCW(unsigned int from, unsigned int to)
     if (wanted_size > n) {
       wanted_size = n;
       if (reloc) {
-	if (current_size) {
-	  current_size = 0;
-	  printf("\n");
-	}
-	Warning(from,"Missing data for relocation");
+        if (current_size) {
+          current_size = 0;
+          printf("\n");
+        }
+        Warning(from,"Missing data for relocation");
       }
     }
 
@@ -337,12 +337,12 @@ static void PrintDCW(unsigned int from, unsigned int to)
     if (label) {
       block_size = 0;
       if (label&1) {
-	PrintLabel(from);
+        PrintLabel(from);
       }
       for (j = 1, label >>= 1; label; ++j, label >>= 1) {
-	if (label & 1) {
-	  PrintRelLabel(from+j, from);
-	}
+        if (label & 1) {
+          PrintRelLabel(from+j, from);
+        }
       }
     }
 
@@ -359,22 +359,22 @@ static void PrintDCW(unsigned int from, unsigned int to)
     } else {
       unsigned int v = ReadL(mem_data+from);
       if (no_symbol || !reloc) {
-	printf("$%08x", v);
+        printf("$%08x", v);
       } else {
-	printf("L%06X", v);
-	if (!(chk_data[v]&SRC68_ENTRY)) {
-	  if (v < from) {
-	    printf("\n");
-	    i = collect; /* Force newline */
-	    Warning(from, "Adding backward label L%06X", v);
-	    PrintRelLabel(v, from);
-	  } else {
-	    printf("\n");
-	    i = collect; /* Force newline */
-/* 	    Warning(from, "Adding forward label L%06X", v); */
-	    chk_data[v] |= SRC68_ENTRY;
-	  }
-	}
+        printf("L%06X", v);
+        if (!(chk_data[v]&SRC68_ENTRY)) {
+          if (v < from) {
+            printf("\n");
+            i = collect; /* Force newline */
+            Warning(from, "Adding backward label L%06X", v);
+            PrintRelLabel(v, from);
+          } else {
+            printf("\n");
+            i = collect; /* Force newline */
+/*          Warning(from, "Adding forward label L%06X", v); */
+            chk_data[v] |= SRC68_ENTRY;
+          }
+        }
       }
     }
     i += current_size;
@@ -418,29 +418,29 @@ static void ExeSectionDesa(section_t * section)
 
       /* Check memory access entry point (added by symbolic disassembly) */
       if (desa.ea_src <= desa.memmsk) {
-	if (!(chk_data[desa.ea_src]&SRC68_ENTRY)) {
-	  if (desa.ea_src < pc) {
-	    Warning(pc, "Adding backward label L%06X", desa.ea_src);
-	    PrintRelLabel(desa.ea_src, pc);
-	  } else {
-	    chk_data[desa.ea_src] |= SRC68_ENTRY;
-	  }
-	}
+        if (!(chk_data[desa.ea_src]&SRC68_ENTRY)) {
+          if (desa.ea_src < pc) {
+            Warning(pc, "Adding backward label L%06X", desa.ea_src);
+            PrintRelLabel(desa.ea_src, pc);
+          } else {
+            chk_data[desa.ea_src] |= SRC68_ENTRY;
+          }
+        }
       }
 
       if (desa.ea_dst <= desa.memmsk) {
-	if (!(chk_data[desa.ea_dst]&SRC68_ENTRY)) {
-	  if (desa.ea_dst<pc) {
-	    Warning(pc, "Adding backward label L%06X", desa.ea_dst);
-	    PrintRelLabel(desa.ea_dst, pc);
-	  } else {
-	    chk_data[desa.ea_dst] |= SRC68_ENTRY;
-	  }
-	}
+        if (!(chk_data[desa.ea_dst]&SRC68_ENTRY)) {
+          if (desa.ea_dst<pc) {
+            Warning(pc, "Adding backward label L%06X", desa.ea_dst);
+            PrintRelLabel(desa.ea_dst, pc);
+          } else {
+            chk_data[desa.ea_dst] |= SRC68_ENTRY;
+          }
+        }
       }
 
       if (chk_data[pc] & SRC68_RELOC) {
-	Warning(pc, "Disassembly a relocated position");
+        Warning(pc, "Disassembly a relocated position");
       }
 
       if (chk_data[pc] & SRC68_ENTRY) {
@@ -451,24 +451,24 @@ static void ExeSectionDesa(section_t * section)
       /* Set force symbol for disassembly */
       opc = 0 ;
       if (!no_symbol) {
-	unsigned int sz = chk_data[pc] & 7;
-	for (; opc < sz; ++opc) {
-	  if (chk_data[pc + (opc<<1)] & SRC68_RELOC) {
-	    desa.flags |= (DESA68_FORCESYMB_FLAG<<opc);
-	  } else {
-	    desa.flags &= ~(DESA68_FORCESYMB_FLAG<<opc);
-	  }
-	}
+        unsigned int sz = chk_data[pc] & 7;
+        for (; opc < sz; ++opc) {
+          if (chk_data[pc + (opc<<1)] & SRC68_RELOC) {
+            desa.flags |= (DESA68_FORCESYMB_FLAG<<opc);
+          } else {
+            desa.flags &= ~(DESA68_FORCESYMB_FLAG<<opc);
+          }
+        }
       }
       for (;opc < 5; ++opc) {
-	desa.flags &= ~(DESA68_FORCESYMB_FLAG<<opc);
+        desa.flags &= ~(DESA68_FORCESYMB_FLAG<<opc);
       }
 
       desa68(&desa);
       if (((desa.pc-pc)>>1) != (chk_data[pc]&7)) {
-	Warning(pc, "opcode size has changed between pass (%d != %d)",
-		(desa.pc-pc)>>1,chk_data[pc]&7);
-      } 
+        Warning(pc, "opcode size has changed between pass (%d != %d)",
+                (desa.pc-pc)>>1,chk_data[pc]&7);
+      }
 
       /* Check ENTRY inside instruction */
       for (opc = pc+1; opc<desa.pc; opc++) {
@@ -480,15 +480,15 @@ static void ExeSectionDesa(section_t * section)
       /* Print disassembly */
       printf("%s%s", tabs, desa.str);
       if (opcode) {
-	/* Print opcodes */
-	int l=strlen(tabs) + strlen(desa.str);
-	while (++l < 32) fputc(' ',stdout);
-	printf(";");
-	for (opc=pc; opc<desa.pc; ++opc) {
-	  printf("%c%02X",
-		 chk_data[opc]&SRC68_RELOC?'.':' ',
-		 mem_data[opc]&255);
-	}
+        /* Print opcodes */
+        int l=strlen(tabs) + strlen(desa.str);
+        while (++l < 32) fputc(' ',stdout);
+        printf(";");
+        for (opc=pc; opc<desa.pc; ++opc) {
+          printf("%c%02X",
+                 chk_data[opc]&SRC68_RELOC?'.':' ',
+                 mem_data[opc]&255);
+        }
       }
       printf("\n");
       /* Supplemental newline for RTS makes things prettier */
@@ -514,8 +514,8 @@ static void SectionDesa(section_t * section, section_t * next_section)
   printf("\n");
   printf("%s; ------------------------------------\n",tabs);
   printf("%s; SECTION %4s ;%06x-%06x (%6d)\n", tabs,
-	 section->name, section->addr,
-	 section->addr+section->size, section->size);
+         section->name, section->addr,
+         section->addr+section->size, section->size);
   printf("%s; ------------------------------------\n\n",tabs);
 
   from = section->addr;
@@ -525,7 +525,7 @@ static void SectionDesa(section_t * section, section_t * next_section)
 /*     PrintLabel(from); */
     for (; ++from < to;) {
       if (chk_data[from]&SRC68_ENTRY) {
-	PrintRelLabel(from,section->addr);
+        PrintRelLabel(from,section->addr);
       }
     }
     if (section->size) {
@@ -543,7 +543,7 @@ static void SectionDesa(section_t * section, section_t * next_section)
     unsigned int next_addr = next_section->addr;
     if (next_addr > to) {
       printf("%sDS.B %d ; Pad to section %s\n", tabs,
-	     next_addr-to, next_section->name);
+             next_addr-to, next_section->name);
       next_addr = to;
     }
     if (next_addr != to) {
@@ -563,15 +563,15 @@ static void FileHeader(char *fname, int *entries)
   printf("; sections : %d\n", sections);
   for (i=0; i <sections; ++i) {
     printf("; - %6s : $%06X-$%06X (%6d)\n", section[i].name,
-	   section[i].addr, section[i].addr+section[i].size, section[i].size);
+           section[i].addr, section[i].addr+section[i].size, section[i].size);
   }
   if (entries && *entries!=-1) {
     printf("; entries  :");
     for (i=0, e=entries; *e != -1; ++e,++i) {
       int v = *e, range=(v>>24)&1;
       if (i >= 7 && !range) {
-	i=0;
-	printf("\n;           ");
+        i=0;
+        printf("\n;           ");
       }
       printf("%c$%06X"," -"[range], v&0xFFFFFF);
     }
@@ -582,8 +582,8 @@ static void FileHeader(char *fname, int *entries)
     "; sourcer68 - Copyright (C) 2001-2003 Benjamin Gerard\n"
     ";\n");
 }
-  
-  
+
+
 
 static int FinalDesa(char *fname, int *entries)
 {
@@ -648,7 +648,7 @@ static int rPreSource(void)
 
     /* If just testing jump table, exit if not BRA or RTS or nop */
     if (test_jmp_table &&
-	(!( desa.status & (DESA68_BRA|DESA68_BSR|DESA68_RTS|DESA68_NOP)))) {
+        (!( desa.status & (DESA68_BRA|DESA68_BSR|DESA68_RTS|DESA68_NOP)))) {
       return 0;
     }
 
@@ -673,7 +673,7 @@ static int rPreSource(void)
           rPreSource();
         }
         desa.pc = pc;
-	/* Set jump table if BRA, remove other */
+        /* Set jump table if BRA, remove other */
         test_jmp_table = ! (status & DESA68_BSR);
       } else if (desa.status & DESA68_RTS) {
         if (!test_jmp_table) {
@@ -711,18 +711,18 @@ static int PreSource(unsigned int from, unsigned int to, int *entries)
       range &= 0xFFFFFF;
       ++entries;
       do {
-	/* Skip instruction already disassembled */
-	while (pc < range && (chk_data[pc] & SRC68_DONE)) {
-	  int bytes = (chk_data[pc]&7) << 1;
-	  if (!bytes) {
-	    bytes = 2;
-	  }
-	  pc += bytes;
-	}
-	if (pc < range) {
-	  desa.pc = pc;
-	  rPreSource();
-	}
+        /* Skip instruction already disassembled */
+        while (pc < range && (chk_data[pc] & SRC68_DONE)) {
+          int bytes = (chk_data[pc]&7) << 1;
+          if (!bytes) {
+            bytes = 2;
+          }
+          pc += bytes;
+        }
+        if (pc < range) {
+          desa.pc = pc;
+          rPreSource();
+        }
       } while (pc < range);
     }
   }
@@ -769,7 +769,7 @@ static int Init68k(unsigned int size)
  */
 
 static int TOSreloc(unsigned char *b, int b_sz, int addr, int n,
-		    int clear_bss, int check_only)
+                    int clear_bss, int check_only)
 {
   int const header_size = 0x1c;
   int symbol, symbol_sz;
@@ -788,7 +788,7 @@ static int TOSreloc(unsigned char *b, int b_sz, int addr, int n,
   magic = ReadW(b+addr);
   if (magic != 0x601a) {
     return error_add(0,"Invalid TOS executable header. "
-		     "Expected 0x601a, found %02X.", magic);
+                     "Expected 0x601a, found %02X.", magic);
   }
 
   text_sz   = ReadL(b+addr+2);
@@ -800,7 +800,7 @@ static int TOSreloc(unsigned char *b, int b_sz, int addr, int n,
 
   if (reloc_sz < 0) {
     return error_add(0,"Sections size greater than file size (%d>%d).",
-		     size, n-header_size);
+                     size, n-header_size);
   }
 
   text    = addr+header_size; /* TEXT section begins just after the header. */
@@ -811,7 +811,7 @@ static int TOSreloc(unsigned char *b, int b_sz, int addr, int n,
   end       = text+text_sz+data_sz+bss_sz;
   if (end > b_sz) {
     return error_add(0,"Not emougth space in 68K memory reloc this program. "
-			 "Missing %d bytes.", end-b_sz);
+                     "Missing %d bytes.", end-b_sz);
   }
 
   if (!check_only) {
@@ -827,7 +827,7 @@ static int TOSreloc(unsigned char *b, int b_sz, int addr, int n,
     int reloc_ptr, d5;
     if (reloc_sz < 4) {
       return error_add(0,"RELOCATION section size (%d) must > than 4. (%d).",
-		       reloc_sz);
+                       reloc_sz);
     }
 
     reloc_ptr = text;
@@ -838,7 +838,7 @@ static int TOSreloc(unsigned char *b, int b_sz, int addr, int n,
         reloc_ptr += 253;
       } else if (d5&1) {
         return error_add(0,"RELOCATION table corrupt: "
-			 "unexpected odd value (%d).", d5);
+                         "unexpected odd value (%d).", d5);
       } else {
         int v;
         if (reloc_ptr >= end) {
@@ -848,7 +848,7 @@ static int TOSreloc(unsigned char *b, int b_sz, int addr, int n,
         v += text;
         if (!check_only) {
           WriteL(b+reloc_ptr, v);
-	  chk_data[reloc_ptr] |= SRC68_RELOC;
+          chk_data[reloc_ptr] |= SRC68_RELOC;
         }
         d5 = 0;
       }
@@ -898,7 +898,7 @@ static char * LoadBinary(char * fname, int * fsize)
   istream68_destroy(is);
   return b;
 
-error:
+  error:
   istream68_destroy(is);
   free68(b);
   return 0;
@@ -934,7 +934,7 @@ error:
   fclose(in);
   return b;
 
-error:
+  error:
   if (in) fclose(in);
   free(b);
   return 0;
@@ -957,74 +957,74 @@ static int print_version(void)
      "There is NO WARRANTY, to the extent permitted by law.\n"
      "\n"
      "Written by Benjamin Gerard <" PACKAGE_BUGREPORT ">"
-     );
+      );
   return 0;
 }
 
 static void print_option(void * data,
-			 const char * option,
-			 const char * envvar,
-			 const char * desc)
+                         const char * option,
+                         const char * envvar,
+                         const char * desc)
 {
-  fprintf(data, 
-	  "  %s or `$%s'\n"
-	  "                      %c%s\n",
-	  option, envvar, 
-	  (desc[0]>='a' && desc[0]<='z') ? desc[0]-'a'+'A' : desc[0],
-	  desc+1);
-}	 
+  fprintf(data,
+          "  %s or `$%s'\n"
+          "                      %c%s\n",
+          option, envvar,
+          (desc[0]>='a' && desc[0]<='z') ? desc[0]-'a'+'A' : desc[0],
+          desc+1);
+}
 
 static int print_usage(void)
 {
   puts
     (
-     "Usage: source68 [OPTIONS] <input>\n"
-     ""
-     "  A 68000 disassembler/sourcer\n"
-     "\n"
+      "Usage: source68 [OPTIONS] <input>\n"
+      ""
+      "  A 68000 disassembler/sourcer\n"
+      "\n"
 #ifndef USE_FILE68
-     "Input: binary or TOS file\n"
+      "Input: binary or TOS file\n"
 #else
-     "Input: sc68 or binary or TOS file\n"
+      "Input: sc68 or binary or TOS file\n"
 #endif
-     "\n"
-     "Options:\n"
-     "  --help                 This message and exit\n"
-     "  --version              Display version and exit\n"
-     "  --reloc=[yes|no|auto]  TOS relocation (default:auto).\n"
-     "  --entry=[ENTRY-LIST]   Set disassembly entry points (default:+0)\n"
-     "  --tab=[STRING]         Set tabulation string\n"
-     "  --org=[ADDR]           Load address (default:0x8000)\n"
-     "  --opcode               Print opcodes\n"
-     "  --ascii                Convert immediat to ASCII\n"
-     "  --no-symbol            Disable symbol in disassembly output\n");
+      "\n"
+      "Options:\n"
+      "  --help                 This message and exit\n"
+      "  --version              Display version and exit\n"
+      "  --reloc=[yes|no|auto]  TOS relocation (default:auto).\n"
+      "  --entry=[ENTRY-LIST]   Set disassembly entry points (default:+0)\n"
+      "  --tab=[STRING]         Set tabulation string\n"
+      "  --org=[ADDR]           Load address (default:0x8000)\n"
+      "  --opcode               Print opcodes\n"
+      "  --ascii                Convert immediat to ASCII\n"
+      "  --no-symbol            Disable symbol in disassembly output\n");
 
 #ifdef USE_FILE68
   option68_help(stdout,print_option);
 #endif
   puts
     (
-     "  ENTRY-LIST := ENTRY|RANGE(,ENTRY|RANGE ...)\n"
-     "\n"
-     "  It consist on a coma ',' separated list of ENTRY or RANGE.\n"
-     "\n"
-     "  Basically an ENTRY is a number corresponding to an address\n"
-     "  where to start a disassemble pass.\n"
-     "\n"
-     "  RANGE := [ENTRY,ENTRY]\n"
-     "\n"
-     "  A range starts as many passes needed to disassemble the range.\n"
-     "  Using one or more indirection 'l' before a range will use the range\n"
-     "  as an indirect table of entry. And using a '+' before a range adds\n"
-     "  origin to each value of the range (for all indirections too).\n"
-     "  Expression can be used mixing \"C\" like numbers, operators,\n"
-     "  and parenthesis '()'. Operators are '+-/*&|^<>' with '<' and '>' for\n"
-     "  shifting. Warning: NO PRECEDENCE !!!.\n"
-     "\n"
-     "Copyright (C) 2001-2009 Benjamin Gerard\n"
-     "\n"
-     "Report bugs to <benjihan -4t- users.sourceforge -d0t- net>"
-     );
+      "  ENTRY-LIST := ENTRY|RANGE(,ENTRY|RANGE ...)\n"
+      "\n"
+      "  It consist on a coma ',' separated list of ENTRY or RANGE.\n"
+      "\n"
+      "  Basically an ENTRY is a number corresponding to an address\n"
+      "  where to start a disassemble pass.\n"
+      "\n"
+      "  RANGE := [ENTRY,ENTRY]\n"
+      "\n"
+      "  A range starts as many passes needed to disassemble the range.\n"
+      "  Using one or more indirection 'l' before a range will use the range\n"
+      "  as an indirect table of entry. And using a '+' before a range adds\n"
+      "  origin to each value of the range (for all indirections too).\n"
+      "  Expression can be used mixing \"C\" like numbers, operators,\n"
+      "  and parenthesis '()'. Operators are '+-/*&|^<>' with '<' and '>' for\n"
+      "  shifting. Warning: NO PRECEDENCE !!!.\n"
+      "\n"
+      "Copyright (C) 2001-2009 Benjamin Gerard\n"
+      "\n"
+      "Report bugs to <benjihan -4t- users.sourceforge -d0t- net>"
+      );
   return 1;
 }
 
@@ -1072,7 +1072,7 @@ int main(int argc, char **argv)
       int v = strtol(s, &err, 0);
       if (err == s || *err || v<0 || v>0xFFFFFF) {
         fprintf(stderr, "--org bad value. Try --help.\n");
-	return 2;
+        return 2;
       }
       org = v;
     } else if (s = IsOption(argv[i],"--reloc="), s) {
@@ -1087,9 +1087,9 @@ int main(int argc, char **argv)
         return 2;
       }
     } else if (s = IsOption(argv[i],"--entry="), s) {
-        entry = s;
+      entry = s;
     } else if (s = IsOption(argv[i],"--tab="), s) {
-        tabs = s;
+      tabs = s;
     } else if (!fname) {
       fname = argv[i];
     } else {
@@ -1122,15 +1122,15 @@ int main(int argc, char **argv)
     }
     m = d->mus+(d->default_six%(unsigned)d->nb_six);
     debugmsg("sourcer68: sc68 using default music %d/%d\n",
-	     d->default_six,d->nb_six);
-    
+             d->default_six,d->nb_six);
+
 
     if (m->replay) {
       debugmsg("sourcer68: sc68 use external replay '%s'\n",
-	       m->replay);
+               m->replay);
 
       error_add(0, "Music with external replay (%s) not yet supported",
-		m->replay);
+                m->replay);
       return SpoolError(4);
     }
 
@@ -1155,7 +1155,7 @@ int main(int argc, char **argv)
 
     if (addr+fsize > mem_datasz) {
       error_add(0,"Data out range [%x-%x] > %x\n",
-		addr,addr+fsize-1,mem_datasz);
+                addr,addr+fsize-1,mem_datasz);
       return SpoolError(6);
     } else {
       memcpy(mem_data+addr,buf,fsize);
@@ -1187,9 +1187,9 @@ int main(int argc, char **argv)
       entries = parse_entry(entry, mem_data, start, end);
       SpoolError(0);
       for (i=0; i<sections; ++i) {
-	if (section[i].flags.exe) {
-	  PreSource(section[i].addr, section[i].addr+section[i].size, entries);
-	}
+        if (section[i].flags.exe) {
+          PreSource(section[i].addr, section[i].addr+section[i].size, entries);
+        }
       }
     }
     FinalDesa(Basename(fname), entries);
@@ -1235,10 +1235,10 @@ static int * AllocEntries(int * e, int n, int * max)
 typedef struct {
   unsigned char *mem; /* Memory buffer */
   int from, to;       /* Memory range allowed */
-  
+
   char *s;            /* String to parse. */
   int brk;            /* Break char */
- 
+
   int * e;            /* entries */
   int i;              /* current entry */
   int max;            /* max entry */
@@ -1306,15 +1306,15 @@ static int r_parse_number(parser_t * p)
       err = r_parse_number(&p2);
       n = res_parser(p,&p2);
       if (err) {
-	break;
+        break;
       }
       w = p->e[--p->i];
     } else {
       w = strtol(p->s, &p->s, 0);
       if (errno) {
-	err = error_add(0,"entry syntax error: can't get number (%s)",
-			strerror(errno));
-	break;
+        err = error_add(0,"entry syntax error: can't get number (%s)",
+                        strerror(errno));
+        break;
       }
       err = 0; /* Valid first operand */
     }
@@ -1323,9 +1323,9 @@ static int r_parse_number(parser_t * p)
     while (ind--) {
       int a = w & 0xFFFFFF;
       if (a<p->from || a>=p->to) {
-	err = error_add(0,"entry out of range $%X [$%06X-$%06X]",
-			    a, p->from, p->to-1);
-	break;
+        err = error_add(0,"entry out of range $%X [$%06X-$%06X]",
+                        a, p->from, p->to-1);
+        break;
       }
       w = ReadL(p->mem+a);
     }
@@ -1350,9 +1350,9 @@ static int r_parse_number(parser_t * p)
       v *= w; break;
     case '/':
       if (w == 0) {
-	err = error_add(0,"entry zero divide error");
+        err = error_add(0,"entry zero divide error");
       } else {
-	v /= w;
+        v /= w;
       }
       break;
     case '<':
@@ -1427,48 +1427,48 @@ static int * parse_entry(char *entries, unsigned char *mem, int from, int to)
       p.s += ind+1+rel;
       err = r_parse_number(&p);
       if (*p.s != ',') {
-	err = error_add(0,"entry syntax error: missing ',' in range");
+        err = error_add(0,"entry syntax error: missing ',' in range");
       } else {
-	++p.s;
-	p.brk = ']';
-	err = r_parse_number(&p);
-	p.brk = 0;
+        ++p.s;
+        p.brk = ']';
+        err = r_parse_number(&p);
+        p.brk = 0;
       }
       if (!err) {
-	rel = rel ? p.from : 0;
-	if (!ind) {
-	  p.e[p.i-2] += rel;
-	  p.e[p.i-1] = (p.e[p.i-1]+rel)|(1<<24);
-	} else {
-	  int rs, re;
-	  rs = p.e[p.i-2];
-	  re = p.e[p.i-1];
-	  p.i -= 2;
-	  while (!err && rs < re) {
-	    int i, v;
-	    for (v=rs, i=ind; i; --i) {
-	      int a = v & 0xFFFFFF;
-	      if (a&1) {
-		err = error_add(0,"entry odd address $%X",a);
-		break;
-	      } else if (a < p.from || a >= p.to) {
-		err = error_add(0,"entry out of range $%0X [$%06X-$%06X]",
-				    a, p.from, p.to-1);
-		break;
-	      }
-	      v = ReadL(p.mem+a)+rel;
-	    }
-	    rs += 4;
-	    if (!err) {
-	      p.e = AllocEntries(p.e, p.i+1, &p.max);
-	      if (!p.e) {
-		err = -1;
-	      } else {
-		p.e[p.i++] = v;
-	      }
-	    }
-	  }
-	}
+        rel = rel ? p.from : 0;
+        if (!ind) {
+          p.e[p.i-2] += rel;
+          p.e[p.i-1] = (p.e[p.i-1]+rel)|(1<<24);
+        } else {
+          int rs, re;
+          rs = p.e[p.i-2];
+          re = p.e[p.i-1];
+          p.i -= 2;
+          while (!err && rs < re) {
+            int i, v;
+            for (v=rs, i=ind; i; --i) {
+              int a = v & 0xFFFFFF;
+              if (a&1) {
+                err = error_add(0,"entry odd address $%X",a);
+                break;
+              } else if (a < p.from || a >= p.to) {
+                err = error_add(0,"entry out of range $%0X [$%06X-$%06X]",
+                                a, p.from, p.to-1);
+                break;
+              }
+              v = ReadL(p.mem+a)+rel;
+            }
+            rs += 4;
+            if (!err) {
+              p.e = AllocEntries(p.e, p.i+1, &p.max);
+              if (!p.e) {
+                err = -1;
+              } else {
+                p.e[p.i++] = v;
+              }
+            }
+          }
+        }
       }
     }
 

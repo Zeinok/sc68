@@ -9,7 +9,6 @@ dnl#
 dnl# $Id: configure.ac 19 2009-01-26 01:57:11Z benjihan $
 dnl#
 
-
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
@@ -19,19 +18,21 @@ AC_CONFIG_SRCDIR([debug68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
 
-SC68_PACKAGE([
-    Command line tool for creating/testing/debugging sc68 files.
-    This is part of the sc68 project.
-  ])
+AC_USE_SYSTEM_EXTENSIONS
+LT_INIT([win32-dll])
 
 # ,----------------------------------------------------------------------.
-# | External libraries                                                   |
+# | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
-AC_WITH_PACKAGE([desa68],[yes])
-AC_WITH_PACKAGE([sc68],[yes],[sc68_version],[sc68/sc68.h],[libsc68])
-AC_WITH_PACKAGE_HEADER([file68],[yes],[sc68/file68.h])
-
+SC68_PACKAGE([Command line toolbox for sc68 files.])
+SC68_SYSTEM
+SC68_OPTIONS
+SC68_TOOLS
+SC68_CHECKS
+SC68_WITH([desa68],[yes])
+SC68_WITH([sc68],[yes],[sc68_version],[sc68/sc68.h],[libsc68])
+SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
@@ -43,9 +44,7 @@ AC_CONFIG_FILES([
     debug68.1.tpl
     debug68.spec
     package.texi])
-
 AC_OUTPUT
-
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |

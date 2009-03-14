@@ -1,5 +1,5 @@
 /*
- *                     debug68 - error messages                      
+ *                     debug68 - error messages
  *
  *            Copyright (C) 2001-2009 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>

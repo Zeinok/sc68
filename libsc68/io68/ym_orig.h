@@ -1,3 +1,13 @@
+/**
+ * @ingroup   emu68_devel
+ * @file      emu68/ym_orig.h
+ * @author    Benjamin Gerard
+ * @date      2009/02/10
+ * @brief     sc68 original YM-2149 emulator header.
+ *
+ */
+
+IO68_EXTERN
 /** Setup function for sc68 original ym engine.
  *
  *    The ym_orig_setup() function sets ym original engine for this ym
@@ -9,6 +19,7 @@
  */
 int ym_orig_setup(ym_t * const ym);
 
+IO68_EXTERN
 /** Creates and parse ym original engine options
  *
  *  @params  argc  argument count
@@ -16,7 +27,6 @@ int ym_orig_setup(ym_t * const ym);
  *  @retval  remaining argument count
  */
 int ym_orig_options(int argc, char ** argv);
-
 
 typedef void (*ym_orig_filter_t)(ym_t * const);
 
@@ -34,11 +44,11 @@ struct ym2149_orig_s
   unsigned int env_ct;      /**< Envelop period counter                  */
   unsigned int env_bit;     /**< Envelop level : 5 LSB are envelop level */
   unsigned int env_cont;    /**< Continue mask [0 or 0x1f]               */
-  unsigned int env_alt;     /**< Alternate mask [0 or 0x1f]              */  
+  unsigned int env_alt;     /**< Alternate mask [0 or 0x1f]              */
   unsigned int env_bitstp;  /**< Envelop level step : [0 or 1]           */
 #endif
   s32 * envptr;             /**< generated envelop pointer               */
-  /**@}*/
+  /** @} */
 
   /** @name  Noise generator
    *  @{
@@ -46,7 +56,7 @@ struct ym2149_orig_s
   unsigned int noise_gen;   /**< Noise generator 17-bit shift register   */
   unsigned int noise_ct;    /**< Noise generator period counter          */
   s32 * noiptr;             /**< generated noise pointer                 */
-  /**@}*/
+  /** @} */
 
   /** @name  Tone generator
    *  @{
@@ -56,7 +66,7 @@ struct ym2149_orig_s
   int voice_ctC;            /**< Canal C sound period counter            */
   unsigned int levels;      /**< Square level 0xCBA                      */
   s32 * tonptr;             /**< generated tone pointer                  */
-  /**@}*/
+  /** @} */
 
   /** @name  Filter
    *  @{
@@ -72,13 +82,11 @@ struct ym2149_orig_s
     int68_t a[3];
     int68_t b[2];
   } btw;
-  /**@}*/
+  /** @} */
 
-
-  int ifilter;	            /**< filter function to use                  */
+  int ifilter;              /**< filter function to use                  */
 
 };
 
 /** YM-2149 emulator instance type */
 typedef struct ym2149_orig_s ym_orig_t;
-

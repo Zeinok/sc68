@@ -77,14 +77,14 @@ static int opt_set_strtol(option68_t * opt, const char * val)
 
   if (!val) {
     ok = 0;
-  } else if (!strcmp68(val,"yes")  || 
-	     !strcmp68(val,"true") ||
-	     !strcmp68(val,"on")) {
+  } else if (!strcmp68(val,"yes")  ||
+             !strcmp68(val,"true") ||
+             !strcmp68(val,"on")) {
     ok  = 1;
     res = -1;
-  } else if (!strcmp68(val,"no")    || 
-	     !strcmp68(val,"false") ||
-	     !strcmp68(val,"off")) {
+  } else if (!strcmp68(val,"no")    ||
+             !strcmp68(val,"false") ||
+             !strcmp68(val,"off")) {
     ok  = 1;
     res = 0;
   } else {
@@ -154,7 +154,7 @@ int option68_set(option68_t * opt, const char * str)
   return err;
 }
 
-int option68_iset(option68_t * opt, int val) 
+int option68_iset(option68_t * opt, int val)
 {
   int err = -1;
   if (opt) {
@@ -166,7 +166,7 @@ int option68_iset(option68_t * opt, int val)
       opt_set_int(opt,val); break;
     case option68_STR:
       /* Can't set string without allocating */
-     default:
+    default:
       err = -1;
     }
   }
@@ -183,7 +183,7 @@ int option68_parse(int argc, char ** argv, int reset)
   if (reset) {
     option68_unset_all();
   }
-  
+
   /* Parse arguments */
   for (i=n=1; i<argc; ++i) {
     int negate = 0;
@@ -191,7 +191,7 @@ int option68_parse(int argc, char ** argv, int reset)
 
     /* Check for `--' prefix */
     if (arg[0] != '-' || arg[1] != '-') {
-      goto keep_it;		/* Not an option; keep it */
+      goto keep_it;             /* Not an option; keep it */
     }
 
     /* '--' breaks options parsing */
@@ -211,43 +211,43 @@ int option68_parse(int argc, char ** argv, int reset)
     FOREACH_OPT(opt) {
       const int opttype = opt_type(opt);
       arg = rearg;
-      
+
       if (opt->prefix) {
-	if (strncmp(arg,opt->prefix,opt->prefix_len)) {
-	  continue;		/* prefix does not match */
-	}
-	arg += opt->prefix_len;
+        if (strncmp(arg,opt->prefix,opt->prefix_len)) {
+          continue;             /* prefix does not match */
+        }
+        arg += opt->prefix_len;
       }
 
       if (strncmp(arg,opt->name,opt->name_len)) {
-	continue;		/* name does not match */
+        continue;               /* name does not match */
       }
-      
+
       arg += opt->name_len;
       if (*arg != 0 && *arg != '=') {
-	continue;		/* name does not match (incomplet) */
+        continue;               /* name does not match (incomplet) */
       }
 
 
       if (0 == *arg) {
-	if (opttype == option68_BOL) {
-	  opt_set_bool(opt,!negate); /* No arg required, set the option */
-	  break;
-	}
-	if (i+1 >= argc) {
-	  break;		/* $$$ should trigger an error */
-	}
-	arg = argv[++i];	/* Get next arg */
+        if (opttype == option68_BOL) {
+          opt_set_bool(opt,!negate); /* No arg required, set the option */
+          break;
+        }
+        if (i+1 >= argc) {
+          break;                /* $$$ should trigger an error */
+        }
+        arg = argv[++i];        /* Get next arg */
       } else {
-	++arg;
+        ++arg;
       }
 
       if (opttype == option68_STR) {
-	/* string option; ``negate'' does not have much meaning. */
-	opt_set_str(opt, arg);
+        /* string option; ``negate'' does not have much meaning. */
+        opt_set_str(opt, arg);
       } else {
-	opt_set_strtol(opt, arg);
-	if (negate) opt_set_int(opt, ~opt->val.num);
+        opt_set_strtol(opt, arg);
+        if (negate) opt_set_int(opt, ~opt->val.num);
       }
       break;
     }
@@ -255,9 +255,9 @@ int option68_parse(int argc, char ** argv, int reset)
     if (opt) continue;
 
     /* Not our option; keep it */
-  keep_it:
+    keep_it:
     argv[n++] = argv[i];
-  
+
   }
 
   /* Keep remaining arguments */
@@ -265,12 +265,12 @@ int option68_parse(int argc, char ** argv, int reset)
     argv[n++] = argv[i];
   }
   argc = n;
-  
+
   /* Get enviromment variables */
   FOREACH_OPT(opt) {
-    option68_getenv(opt, 1); 
+    option68_getenv(opt, 1);
   }
-  
+
   return argc;
 }
 
@@ -296,8 +296,8 @@ int option68_append(option68_t * options, int n)
     }
     if (options[i].next) {
       msg68_warning("option68: --%s%s already in used\n",
-			 options[i].prefix ? options[i].prefix : "",
-			 options[i].name);
+                    options[i].prefix ? options[i].prefix : "",
+                    options[i].name);
       continue;
     }
     options[i].prefix_len = options[i].prefix ? strlen(options[i].prefix) : 0;
@@ -307,14 +307,14 @@ int option68_append(option68_t * options, int n)
   }
   return 0;
 }
-    
+
 option68_t * option68_get(const char * key, const int onlyset)
 {
   option68_t * opt = 0;
   if (key && (opt = opt_of(key)) && onlyset && !opt_isset(opt)) {
     opt = 0;
   }
-  return opt; 
+  return opt;
 }
 
 int option68_isset(const option68_t * option)

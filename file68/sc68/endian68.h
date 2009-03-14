@@ -14,8 +14,8 @@
 #ifndef _FILE68_ENDIAN68_H_
 #define _FILE68_ENDIAN68_H_
 
-#ifdef __cplusplus
-extern "C" {
+#ifndef FILE68_API
+# include "file68_api.h"
 #endif
 
 /** @defgroup  file68_endian  Byte ordering
@@ -47,7 +47,7 @@ FILE68_API
  *    little endian.
  *
  *  @return little endian test.
- *  @retval  1  byte order is little endian. 
+ *  @retval  1  byte order is little endian.
  *  @retval  0  byte order is not little endian.
  *
  * @warning The function only test if the less signifiant byte is
@@ -64,7 +64,7 @@ FILE68_API
  *     endian. By the way it returns !endian68_is_little().
  *
  *  @return big endian test.
- *  @retval  1  byte order is big endian. 
+ *  @retval  1  byte order is big endian.
  *  @retval  0  byte order is not big endian.
  *
  * @see endian68_is_little();
@@ -72,11 +72,7 @@ FILE68_API
 int endian68_is_big(void);
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_ENDIAN68_H_ */

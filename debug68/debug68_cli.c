@@ -36,7 +36,7 @@
 # include <readline/readline.h>
 #else
 # undef HAVE_READLINE_HISTORY_H
-/* A very simple readline() replacement :) */
+/* A very simple readline() replacement */
 static char *readline (const char *prompt)
 {
   char tmp[1024], *s;
@@ -55,7 +55,7 @@ static char *readline (const char *prompt)
 #ifdef HAVE_READLINE_HISTORY_H
 # include <readline/history.h>
 #else
-/* ... and an even more simple add_history() replacement :) */
+/* ... an even more simple add_history() replacement */
 static void add_history(const char *s) {}
 #endif
 
@@ -68,7 +68,7 @@ static char * killspace(char *s)
   return s;
 }
 
-/* Get word start & end. Could be inside quote. 
+/* Get word start & end. Could be inside quote.
  * Returns wordend or 0 is no word.
  */
 static char * word(char * word, char ** wordstart)
@@ -103,9 +103,7 @@ static int dispatch_word(char ** here, int max_args, char *str)
 void debug68_cli_free(debug68_cli_t * cli)
 {
   if (cli) {
-    if (cli->cli) {
-      free(cli->cli);
-    }
+    free(cli->cli);
     memset(cli,0,sizeof(*cli));
   }
 }
@@ -113,7 +111,7 @@ void debug68_cli_free(debug68_cli_t * cli)
 int debug68_cli_read(const char * prompt, debug68_cli_t * cli)
 {
   const int max_coms = sizeof(cli->coms)/sizeof(*cli->coms)-1;
-  char * enter;
+  char * e;
 
   if (!cli) {
     return 0;
@@ -126,24 +124,24 @@ int debug68_cli_read(const char * prompt, debug68_cli_t * cli)
     return 0;
   }
 
-  /* Remove trailing '/n' */
-  if (enter = strchr(cli->cli,'\n'), enter) {
-    *enter = 0;
-  }
+  /* Remove trailing space */
+  for (e = cli->cli+strlen(cli->cli); --e >= cli->cli && !isgraph(*e); )
+    ;
+  e[1] = 0;
 
-  enter = killspace(cli->cli);
+  e = killspace(cli->cli);
   /* No command line */
-  if (!*enter) {
+  if (!*e) {
     debug68_cli_free(cli);
     return 0;
   }
 
   /* Add to history before word parsing. */
-  add_history(enter);
+  add_history(e);
 
   /* Process */
   cli->argc =
-    dispatch_word(cli->coms, max_coms, enter);
+    dispatch_word(cli->coms, max_coms, e);
 
   if (cli->argc <= 0) {
     debug68_cli_free(cli);

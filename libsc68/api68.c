@@ -59,6 +59,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define TIME_DEF    (3 * 60)          /* default music time in seconds  */
+#define TIMEMS_DEF  (TIME_DEF * 1000) /* default music time in millisec */
+
 #define TRAP_14_ADDR 0x600
 /* ST xbios function emulator.
  *  Just 4 SUPEREXEC in LOGICAL & some other music files
@@ -96,7 +99,7 @@ struct _sc68_estack_s {
   /** Error cookie. */
   void * cookie;
 };
-typedef struct _sc68_estack_s sc68_estack_t; 
+typedef struct _sc68_estack_s sc68_estack_t;
 
 
 struct _sc68_s {
@@ -112,9 +115,9 @@ struct _sc68_s {
    */
   io68_t *ymio,*mwio,*shifterio,*paulaio,*mfpio;
 
-  ym_t         * ym;          /**< YM emulator.                          */ 
-  mw_t         * mw;	      /**< MicroWire emulator.                   */
-  paula_t      * paula;	      /**< Amiga emulator.                       */
+  ym_t         * ym;          /**< YM emulator.                          */
+  mw_t         * mw;          /**< MicroWire emulator.                   */
+  paula_t      * paula;       /**< Amiga emulator.                       */
 
   disk68_t     * disk;        /**< Current loaded disk.                  */
   music68_t    * mus;         /**< Current playing music.                */
@@ -159,12 +162,12 @@ struct _sc68_s {
     int            max_stp;      /**< max pitch frq (0:no seek).         */
   } mix;
 
-  sc68_estack_t estack;	         /**< error messages storage.            */
+  sc68_estack_t estack;          /**< error messages storage.            */
 
 };
 
 #ifndef DEBUG_SC68_O
-# ifndef DEBUG 
+# ifndef DEBUG
 #  define DEBUG_SC68_O 0
 # else
 #  define DEBUG_SC68_O 1
@@ -172,7 +175,7 @@ struct _sc68_s {
 #endif
 
 static int           sc68_feature = msg68_NEVER;
-static int           sc68_id;	     /* counter for auto generated name. */
+static int           sc68_id;        /* counter for auto generated name. */
 static volatile int  sc68_init_flag; /* Library init flag     */
 static sc68_estack_t sc68_estack;    /* Library error message */
 static unsigned int  sc68_sampling_rate_def = SAMPLING_RATE_DEF;
@@ -190,13 +193,13 @@ static inline const char * ok_ptr(const void * const err) {
 #endif
 
 static int stream_read_68k(sc68_t * sc68, unsigned int dest,
-			   istream68_t * is, unsigned int sz)
+                           istream68_t * is, unsigned int sz)
 {
   u8 * mem68 = emu68_memptr(sc68->emu68, dest, sz);
 
   if (!mem68) {
     return sc68_error_add(sc68, "68Kread_stream() : %s",
-			  emu68_error_get(sc68->emu68));
+                          emu68_error_get(sc68->emu68));
   }
   return (istream68_read(is, mem68, sz) == sz) ? 0 : -1;
 }
@@ -251,7 +254,7 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
   int err = -1;
   emu68_parms_t * const parms = &sc68->emu68_parms;
 
-  
+
   if (sc68->emu68) {
     sc68_debug(sc68,"init_68k: found previous emu68\n");
     safe_emu68_destroy(&sc68->emu68);
@@ -265,10 +268,10 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
   parms->debug   = emu68_debug;
 
   sc68_debug(sc68,
-	     "init_68k: '%s' mem:%d-bit(%dkB) clock:%uhz debug:%s\n",
-	     parms->name,
-	     parms->log2mem,parms->log2mem>10?1<<(parms->log2mem-10):0,
-	     parms->clock,parms->debug?"On":"Off");
+             "init_68k: '%s' mem:%d-bit(%dkB) clock:%uhz debug:%s\n",
+             parms->name,
+             parms->log2mem,parms->log2mem>10?1<<(parms->log2mem-10):0,
+             parms->clock,parms->debug?"On":"Off");
 
   /* Do initialization. */
   sc68_debug(sc68,"init_68k: Creating emulators ...\n");
@@ -279,7 +282,7 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
     goto error;
   }
   sc68_debug(sc68,"init_68k: - CPU emlator created\n");
-  
+
   sc68->emu68->reg.sr   = 0x2000;
   sc68->emu68->reg.a[7] = sc68->emu68->memmsk+1-4;
 
@@ -293,7 +296,7 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
     goto error;
   }
   sc68_debug(sc68,"init_68k:   - YM-2149\n");
-  
+
   sc68->mwio = mwio_create(sc68->emu68,0);
   sc68->mw   = mwio_emulator(sc68->mwio);
   if (!sc68->mwio) {
@@ -341,8 +344,8 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
 }
 
 static int myconfig_get_int(config68_t * c,
-			    const char * name,
-			    int def)
+                            const char * name,
+                            int def)
 {
   config68_type_t type;
   int v = def;
@@ -357,7 +360,7 @@ static int myconfig_get_int(config68_t * c,
     sc68_debug(0,"getconfig: from cli name='%s' val=%d\n", name, v);
   } else if (c) {
     v = -1;
-    type = config68_get(c, &v, &name);  
+    type = config68_get(c, &v, &name);
     if (type != CONFIG68_INT) {
       v = def;
       sc68_debug(0,"getconfig: from cfg name='%s' val=%d\n", name, v);
@@ -367,8 +370,8 @@ static int myconfig_get_int(config68_t * c,
 }
 
 static const char * myconfig_get_str(config68_t * c,
-				     const char * name,
-				     const char * def)
+                                     const char * name,
+                                     const char * def)
 {
   config68_type_t type;
   const char * r = def;
@@ -392,15 +395,15 @@ static void set_config(sc68_t * sc68)
   sc68->remote        = myconfig_get_int(c, "allow-remote",  1);
   sc68->mix.aga_blend = myconfig_get_int(c, "amiga-blend",   0x4000);
   sc68->track_here    = myconfig_get_int(c, "force-track",   0);
-  sc68->time.def_ms   = myconfig_get_int(c, "default-time",  3*60) * 1000;
+  sc68->time.def_ms   = myconfig_get_int(c, "default-time",  TIME_DEF) * 1000;
   sc68->mix.rate      = myconfig_get_int(c, "sampling-rate", SAMPLING_RATE_DEF);
   sc68->force_loop    = myconfig_get_int(c, "force-loop",    -1);
   sc68->mix.max_stp   = myconfig_get_int(c, "seek-speed",    0xF00);
   sc68->time.total    = myconfig_get_int(c, "total-time",    0);
   sc68->time.total_ms = myconfig_get_int(c, "total-ms",      0);
 
-  if (sc68->time.def_ms<=0) {
-    sc68->time.def_ms = 3*60*1000;
+  if (sc68->time.def_ms < 1000) {
+    sc68->time.def_ms = TIMEMS_DEF;
   }
 
   rsc68_get_path(0,0,&lmusic, &rmusic);
@@ -416,8 +419,8 @@ static void set_config(sc68_t * sc68)
 }
 
 static void myconfig_set_int(config68_t * c,
-			     const char * name,
-			     int v)
+                             const char * name,
+                             int v)
 {
   if (c) {
     config68_set(c, -1, name, v, 0);
@@ -430,13 +433,13 @@ static void get_config(sc68_t * sc68)
 
   myconfig_set_int(c, "version",       PACKAGE_VERNUM);
   /* Do not change user config ! */
-/*   myconfig_set_int(c, "aga_blend",   sc68->mix.aga_blend); */
-/*   myconfig_set_int(c, "force_track",   sc68->track_here); */
-/*   myconfig_set_int(c, "default_time",  (sc68->time.def_ms+999)/1000u); */
-/*   myconfig_set_int(c, "sampling_rate", sc68->mix.rate); */
-/*   myconfig_set_int(c, "force_loop",    sc68->force_loop); */
-/*   myconfig_set_int(c, "seek_speed",    sc68->mix.max_stp); */
-/*   myconfig_set_int(c, "allow_remote",  sc68->remote); */
+  /*   myconfig_set_int(c, "aga_blend",   sc68->mix.aga_blend); */
+  /*   myconfig_set_int(c, "force_track",   sc68->track_here); */
+  /*   myconfig_set_int(c, "default_time",  (sc68->time.def_ms+999)/1000u); */
+  /*   myconfig_set_int(c, "sampling_rate", sc68->mix.rate); */
+  /*   myconfig_set_int(c, "force_loop",    sc68->force_loop); */
+  /*   myconfig_set_int(c, "seek_speed",    sc68->mix.max_stp); */
+  /*   myconfig_set_int(c, "allow_remote",  sc68->remote); */
   myconfig_set_int(c, "total_time",    sc68->time.total);
   myconfig_set_int(c, "total_ms",      sc68->time.total_ms);
 }
@@ -444,7 +447,7 @@ static void get_config(sc68_t * sc68)
 int sc68_config_load(sc68_t * sc68)
 {
   int err = -1;
-  
+
   sc68_debug(sc68,"sc68_config_load() {\n");
   if (sc68) {
     if (!sc68->config) {
@@ -475,13 +478,13 @@ int sc68_config_idx(sc68_t * sc68, const char * name)
 }
 
 config68_type_t sc68_config_range(sc68_t * sc68, int idx,
-                                     int * min, int * max, int * def)
+                                  int * min, int * max, int * def)
 {
   return config68_range(sc68 ? sc68->config : 0, idx, min, max, def);
 }
 
 config68_type_t sc68_config_get(sc68_t * sc68,
-				   int * idx, const char ** name)
+                                int * idx, const char ** name)
 {
   return sc68
     ? config68_get(sc68->config, idx, name)
@@ -489,10 +492,10 @@ config68_type_t sc68_config_get(sc68_t * sc68,
 }
 
 config68_type_t sc68_config_set(sc68_t * sc68,
-				int idx,
-				const char * name,
-				int v,
-				const char * s)
+                                int idx,
+                                const char * name,
+                                int v,
+                                const char * s)
 {
   return sc68
     ? config68_set(sc68->config,idx,name,v,s)
@@ -534,8 +537,7 @@ int sc68_init(sc68_init_t * init)
   msg68_set_handler((msg68_t)init->msg_handler);
   msg68_set_cookie(init->msg_cookie);
 
-  msg68_mask &= ~init->debug_clr_mask;
-  msg68_mask |=  init->debug_set_mask;
+  msg68_mask(init->debug_clr_mask,init->debug_set_mask);
 
   sc68_debug(0,"sc68_init() {\n");
 
@@ -557,7 +559,7 @@ int sc68_init(sc68_init_t * init)
 
   /* Intialize file68. */
   init->argc = file68_init(init->argc, init->argv);
-  
+
   if (config68_options) {
     option68_append(config68_options,config68_option_count);
     init->argc = option68_parse(init->argc, init->argv, 0);
@@ -565,27 +567,28 @@ int sc68_init(sc68_init_t * init)
 
   err = init_emu68(0, &init->argc, init->argv);
 
+  /* $$$: No good */
   opt = option68_get("debug", 1);
   if (opt) {
-    msg68_mask = opt->val.num;
+    msg68_mask(~0,opt->val.num);
   }
-  
+
   sc68_init_flag = !err;
 
-  error:
-    if (err) {
-      sc68_shutdown();
-    }
-  error_no_shutdown:
-    sc68_debug(0,"} sc68_init() -> [%s]\n", ok_int(err));
-    return err;
+ error:
+  if (err) {
+    sc68_shutdown();
   }
+ error_no_shutdown:
+  sc68_debug(0,"} sc68_init() -> [%s]\n", ok_int(err));
+  return err;
+}
 
 
 void sc68_shutdown(void)
 {
   sc68_debug(0,"sc68_shutdown() {\n");
-  
+
   if (sc68_init_flag) {
     sc68_init_flag = 0;
     sc68_estack.cookie = 0;
@@ -606,7 +609,7 @@ sc68_t * sc68_create(sc68_create_t * create)
   if (!sc68) {
     goto error;
   }
-  
+
   /* Pick a short name */
   if (create->name) {
     strncpy(sc68->name, create->name, sizeof(sc68->name));
@@ -639,20 +642,20 @@ sc68_t * sc68_create(sc68_create_t * create)
   sc68_debug(sc68," sampling rate = %d\n", create->sampling_rate);
 
   /* Finally gets all pathes. */
-/*   rsc68_get_path(&init->shared_path, */
-/* 		 &init->user_path, */
-/* 		 &init->lmusic_path, */
-/* 		 &init->rmusic_path); */
+  /*   rsc68_get_path(&init->shared_path, */
+  /*               &init->user_path, */
+  /*               &init->lmusic_path, */
+  /*               &init->rmusic_path); */
 
-/*   debugmsg68(-1,"sc68_create: shared-path=[%s]\n",init->shared_path); */
-/*   debugmsg68(-1,"sc68_create: user-path=[%s]\n",init->user_path); */
-/*   debugmsg68(-1,"sc68_create: music-path=[%s]\n",init->lmusic_path); */
-/*   debugmsg68(-1,"sc68_create: music-rpath=[%s]\n",init->rmusic_path); */
+  /*   debugmsg68(-1,"sc68_create: shared-path=[%s]\n",init->shared_path); */
+  /*   debugmsg68(-1,"sc68_create: user-path=[%s]\n",init->user_path); */
+  /*   debugmsg68(-1,"sc68_create: music-path=[%s]\n",init->lmusic_path); */
+  /*   debugmsg68(-1,"sc68_create: music-rpath=[%s]\n",init->rmusic_path); */
 
-/*   sc68_unic = sc68; */
+  /*   sc68_unic = sc68; */
   sc68_debug(sc68,"} sc68_create() => [%s]\n", ok_int(0));
   return sc68;
-  
+
  error:
   sc68_destroy(sc68);
   sc68_debug(sc68,"} sc68_create() => [%s]\n", ok_int(-1));
@@ -788,7 +791,7 @@ static int apply_change_track(sc68_t * sc68)
   d = sc68->disk;
   if (track < 1 || track > d->nb_six) {
     sc68_error_add(sc68,
-		   "track [%d] out of range [%d]", track, d->nb_six);
+                   "track [%d] out of range [%d]", track, d->nb_six);
     return SC68_MIX_ERROR;
   }
   m = d->mus + track - 1;
@@ -848,7 +851,7 @@ static int apply_change_track(sc68_t * sc68)
     char rname[256];
 
     sc68_debug(sc68, " -> external replay '%s'\n", m->replay);
-/*     is = rsc68_open(rsc68_replay, m->replay, 1, 0); */
+    /*     is = rsc68_open(rsc68_replay, m->replay, 1, 0); */
 
     strcpy(rname,"RSC68://replay/");
     strcat68(rname, m->replay, sizeof(rname)-1);
@@ -917,11 +920,11 @@ static int apply_change_track(sc68_t * sc68)
     cycles = ymio_cycle_cpu2ym(sc68->ymio,sc68->mix.cycleperpass);
     cycles = (cycles+31) & ~31;
     sc68->mix.cycleperpass = ymio_cycle_ym2cpu(sc68->ymio,cycles);
-    
+
     /* verify */
     cycles = ymio_cycle_cpu2ym(sc68->ymio,sc68->mix.cycleperpass);
     sc68_debug(sc68," -> round cycleperpass to %u => %u ym-cycle [%s]\n",
-	       sc68->mix.cycleperpass,cycles, strok68(cycles&31));
+               sc68->mix.cycleperpass,cycles, strok68(cycles&31));
   }
 
   sc68->mix.cycleperpass = (sc68->mix.cycleperpass+31) & ~31;
@@ -954,11 +957,11 @@ static int apply_change_track(sc68_t * sc68)
       u32 * oldbuf = sc68->mix.buffer;
 
       sc68_debug(sc68," -> Alloc new PCM buffer of %u pcm, %u bytes\n",
-		 sc68->mix.bufreq, sc68->mix.bufreq << 2);
+                 sc68->mix.bufreq, sc68->mix.bufreq << 2);
       sc68->mix.buffer = sc68_alloc(sc68->mix.bufreq << 2);
       if (!sc68->mix.buffer) {
-	sc68_error_add(sc68,"failed to allocate new sample buffer");
-	return SC68_MIX_ERROR;
+        sc68_error_add(sc68,"failed to allocate new sample buffer");
+        return SC68_MIX_ERROR;
       }
 
       sc68->mix.bufmax = sc68->mix.bufreq;
@@ -970,7 +973,7 @@ static int apply_change_track(sc68_t * sc68)
     }
   }
   sc68_debug(sc68," -> buffer length   : %u pcm, %d bytes\n",
-	     sc68->mix.bufreq, sc68->mix.bufreq << 2);
+             sc68->mix.bufreq, sc68->mix.bufreq << 2);
 
   /* Set 68K register value for INIT */
   sc68_debug(sc68," -> Running music init code...\n");
@@ -1064,30 +1067,30 @@ int sc68_process(sc68_t * sc68, void * buf16st, int n)
       sc68->mix.buflen = sc68->mix.bufreq;
 
       if (sc68->mus->hwflags.bit.amiga) {
-	/* Amiga - Paula */
+        /* Amiga - Paula */
         paula_mix(sc68->paula,(s32*)sc68->mix.bufptr,sc68->mix.buflen);
         mixer68_blend_LR(sc68->mix.bufptr, sc68->mix.bufptr, sc68->mix.buflen,
-			 sc68->mix.aga_blend, 0, 0);
+                         sc68->mix.aga_blend, 0, 0);
       } else {
-	if (sc68->mus->hwflags.bit.ym) {
-	  int err = 
-	    ymio_run(sc68->ymio, (s32*)sc68->mix.bufptr,
-		     sc68->mix.cycleperpass);
-	  if (err < 0) {
-	    ret = SC68_MIX_ERROR;
-	    sc68->mix.buflen = 0;
-	    break;
-	  }
-	  sc68->mix.buflen = err;
-	}
-	if (sc68->mus->hwflags.bit.ste) {
-	  /* STE - MicroWire */
-	  mw_mix(sc68->mw, (s32 *)sc68->mix.bufptr, sc68->mix.buflen);
-	} else {
-	  /* No STE, process channel duplication. */
-	  mixer68_dup_L_to_R(sc68->mix.bufptr, sc68->mix.bufptr,
-			     sc68->mix.buflen, 0);
-	}
+        if (sc68->mus->hwflags.bit.ym) {
+          int err =
+            ymio_run(sc68->ymio, (s32*)sc68->mix.bufptr,
+                     sc68->mix.cycleperpass);
+          if (err < 0) {
+            ret = SC68_MIX_ERROR;
+            sc68->mix.buflen = 0;
+            break;
+          }
+          sc68->mix.buflen = err;
+        }
+        if (sc68->mus->hwflags.bit.ste) {
+          /* STE - MicroWire */
+          mw_mix(sc68->mw, (s32 *)sc68->mix.bufptr, sc68->mix.buflen);
+        } else {
+          /* No STE, process channel duplication. */
+          mixer68_dup_L_to_R(sc68->mix.bufptr, sc68->mix.bufptr,
+                             sc68->mix.buflen, 0);
+        }
       }
 
       /* Advance time */
@@ -1097,16 +1100,16 @@ int sc68_process(sc68_t * sc68, void * buf16st, int n)
 
       /* Reach end of track */
       if (sc68->mix.pass_total && sc68->mix.pass_cnt >= sc68->mix.pass_total) {
-	int next_track;
-	sc68->mix.pass_cnt = 0;
-	ret |= SC68_LOOP;
-	++sc68->mix.loop_cnt;
-	if (sc68->mix.loop_total &&
-	    sc68->mix.loop_cnt >= sc68->mix.loop_total) {
-	  next_track = sc68->track+1;
-	  sc68->track_to = (next_track > sc68->disk->nb_six) ? -1 : next_track;
-	  sc68->seek_to = -1;
-	}
+        int next_track;
+        sc68->mix.pass_cnt = 0;
+        ret |= SC68_LOOP;
+        ++sc68->mix.loop_cnt;
+        if (sc68->mix.loop_total &&
+            sc68->mix.loop_cnt >= sc68->mix.loop_total) {
+          next_track = sc68->track+1;
+          sc68->track_to = (next_track > sc68->disk->nb_six) ? -1 : next_track;
+          sc68->seek_to = -1;
+        }
       }
     }
 
@@ -1118,66 +1121,66 @@ int sc68_process(sc68_t * sc68, void * buf16st, int n)
 
       /* Do speed up */
       if (seek_to != -1) {
-	unsigned int ms = sc68->time.elapsed_ms;
-	if (ms >= (unsigned int)seek_to) {
-	  sc68->seek_to = -1;
-	} else {
-	  const int minstp = 0x010;
-	  const int maxstp = sc68->mix.max_stp;
-	  int newstp;
+        unsigned int ms = sc68->time.elapsed_ms;
+        if (ms >= (unsigned int)seek_to) {
+          sc68->seek_to = -1;
+        } else {
+          const int minstp = 0x010;
+          const int maxstp = sc68->mix.max_stp;
+          int newstp;
 
-	  if (maxstp < minstp) {
-	    /* no max stp : just discard this buffer */
-	    sc68->mix.buflen = 0;
-	    continue;
-	  }
+          if (maxstp < minstp) {
+            /* no max stp : just discard this buffer */
+            sc68->mix.buflen = 0;
+            continue;
+          }
 
-	  stp = sc68->mix.stp;  /* Current stp */
-	  
-	  /* Got number of ms to seek */
-	  ms = seek_to - ms;
-	  newstp = (ms >> 4);
-	  if (stp < newstp) {
-	    stp += 2;
-	  } if (stp > newstp) {
-	    stp -= 2;
-	  }
-	  if (stp < minstp) {
-	    stp = minstp;
-	  } else if (stp > maxstp) {
-	    stp = maxstp;
-	  }
+          stp = sc68->mix.stp;  /* Current stp */
 
-	}
+          /* Got number of ms to seek */
+          ms = seek_to - ms;
+          newstp = (ms >> 4);
+          if (stp < newstp) {
+            stp += 2;
+          } if (stp > newstp) {
+            stp -= 2;
+          }
+          if (stp < minstp) {
+            stp = minstp;
+          } else if (stp > maxstp) {
+            stp = maxstp;
+          }
+
+        }
       }
 
       sc68->mix.stp = stp;
       stp += 0x100;
 
       if (stp == 0x100) {
-	/* Speed copy */
-	int len = sc68->mix.buflen <= n ? sc68->mix.buflen : n;
-	mixer68_copy((u32 *)buf16st,sc68->mix.bufptr,len);
-	buf16st = (u32 *)buf16st + len;
-	sc68->mix.bufptr += len;
-	sc68->mix.buflen -= len;
-	n -= len;
+        /* Speed copy */
+        int len = sc68->mix.buflen <= n ? sc68->mix.buflen : n;
+        mixer68_copy((u32 *)buf16st,sc68->mix.bufptr,len);
+        buf16st = (u32 *)buf16st + len;
+        sc68->mix.bufptr += len;
+        sc68->mix.buflen -= len;
+        n -= len;
       } else {
-	/* Slow copy */
-	u32 *b = (u32 *)buf16st, *bufptr = sc68->mix.bufptr;
-	int len = (sc68->mix.buflen <= n ? sc68->mix.buflen : n) << 8;
-	int j = 0;
-	do {
-	  *b++ = bufptr[j>>8];
-	  j += stp;
-	} while (--n && j < len );
-	buf16st = b;
-	j >>= 8;
-	sc68->mix.bufptr += j;
-	sc68->mix.buflen -= j;
-	if (sc68->mix.buflen < 0) {
-	  sc68->mix.buflen = 0;
-	}
+        /* Slow copy */
+        u32 *b = (u32 *)buf16st, *bufptr = sc68->mix.bufptr;
+        int len = (sc68->mix.buflen <= n ? sc68->mix.buflen : n) << 8;
+        int j = 0;
+        do {
+          *b++ = bufptr[j>>8];
+          j += stp;
+        } while (--n && j < len );
+        buf16st = b;
+        j >>= 8;
+        sc68->mix.bufptr += j;
+        sc68->mix.buflen -= j;
+        if (sc68->mix.buflen < 0) {
+          sc68->mix.buflen = 0;
+        }
       }
     }
   }
@@ -1310,7 +1313,7 @@ int sc68_play(sc68_t * sc68, int track, int loop)
   disk68_t * d;
 
   sc68_debug(sc68,"sc68_play(sc68:%s track:%d, loop:%d) : enter\n",
-	     sc68?sc68->name:"<NUL>", track, loop);
+             sc68?sc68->name:"<NUL>", track, loop);
 
   if (!sc68) {
     return -1;
@@ -1322,7 +1325,7 @@ int sc68_play(sc68_t * sc68, int track, int loop)
 
   /* track == -1 : read current track or current loop. */
   if (track == -1) {
-    return loop 
+    return loop
       ? sc68->mix.loop_cnt
       : sc68->track;
   }
@@ -1341,7 +1344,7 @@ int sc68_play(sc68_t * sc68, int track, int loop)
   /* Check track range. */
   if (track <= 0 || track > d->nb_six) {
     return sc68_error_add(sc68,"track [%d] out of range [%d]",
-			  track, d->nb_six);
+                          track, d->nb_six);
   }
 
   /* Set change track. Real track loading occurs during process thread to
@@ -1380,8 +1383,8 @@ int sc68_seek(sc68_t * sc68, int time_ms, int * is_seeking)
     if (!sc68->mus) {
       return -1;
     } else {
-      int loop = 
-	calc_loop_total(sc68->force_loop, sc68->loop_to, sc68->mus->loop);
+      int loop =
+        calc_loop_total(sc68->force_loop, sc68->loop_to, sc68->mus->loop);
       return (sc68->mus->start_ms * loop) + sc68->time.elapsed_ms;
     }
   } else {
@@ -1391,37 +1394,37 @@ int sc68_seek(sc68_t * sc68, int time_ms, int * is_seeking)
 
     for (i=0, n=d->nb_six ; i<n; ++i) {
       unsigned int ms = (unsigned int) time_ms;
-      int loop = 
-	calc_loop_total(sc68->force_loop, sc68->loop_to, d->mus[i].loop);
+      int loop =
+        calc_loop_total(sc68->force_loop, sc68->loop_to, d->mus[i].loop);
 
       start_ms = end_ms;
       end_ms   = start_ms
-	+ ((d->mus+i == sc68->mus)
-	   ? sc68->time.length_ms :
-	   d->mus[i].time_ms) * loop;
+        + ((d->mus+i == sc68->mus)
+           ? sc68->time.length_ms :
+           d->mus[i].time_ms) * loop;
 
       if (ms >= start_ms && ms < end_ms) {
-	unsigned int cur_ms  = start_ms;
-	sc68_debug(sc68,"Find track #%d [%u - %u]\n", i+1, start_ms, end_ms);
-	if (i+1 == sc68->track) {
-	  /* Same track : return current time */
-	  cur_ms += sc68->time.elapsed_ms;
-	} else {
-	  /* Change track : current time is start of new track */
-	  sc68->track_to = i+1;
-	}
+        unsigned int cur_ms  = start_ms;
+        sc68_debug(sc68,"Find track #%d [%u - %u]\n", i+1, start_ms, end_ms);
+        if (i+1 == sc68->track) {
+          /* Same track : return current time */
+          cur_ms += sc68->time.elapsed_ms;
+        } else {
+          /* Change track : current time is start of new track */
+          sc68->track_to = i+1;
+        }
 
-	if (ms > cur_ms) {
-	  /* real seek forward */
-	  if (is_seeking) *is_seeking = 1;
-	  sc68->seek_to = ms - start_ms;
-	  sc68_debug(sc68,"SEEK-TO %d, cur:%d\n", sc68->seek_to, cur_ms);
-	} else {
-	  if (is_seeking) *is_seeking = 0;
-	  sc68->seek_to = -1;
-	  sc68_debug(sc68,"NO-SEEK-TO cur:%d\n", cur_ms);
-	}
-	return (int) cur_ms;
+        if (ms > cur_ms) {
+          /* real seek forward */
+          if (is_seeking) *is_seeking = 1;
+          sc68->seek_to = ms - start_ms;
+          sc68_debug(sc68,"SEEK-TO %d, cur:%d\n", sc68->seek_to, cur_ms);
+        } else {
+          if (is_seeking) *is_seeking = 0;
+          sc68->seek_to = -1;
+          sc68_debug(sc68,"NO-SEEK-TO cur:%d\n", cur_ms);
+        }
+        return (int) cur_ms;
       }
     }
     sc68_debug(sc68,"-> Not in disk range !!! [%d>%d]\n",time_ms, d->time_ms);
@@ -1430,7 +1433,7 @@ int sc68_seek(sc68_t * sc68, int time_ms, int * is_seeking)
 }
 
 int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
-		    sc68_disk_t disk)
+                    sc68_disk_t disk)
 {
   disk68_t * d;
   music68_t * m = 0;
@@ -1464,8 +1467,8 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
   }
 
   if (track < 0 || track > d->nb_six) {
-    return sc68_error_add(sc68,
-			  "track [%d] out of range [%d]", track, d->nb_six);
+    return sc68_error_add
+      (sc68,"track [%d] out of range [%d]", track, d->nb_six);
   }
 
   m = d->mus + ((!track) ? d->default_six : (track - 1));
@@ -1487,13 +1490,14 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
     /* track info */
     info->title    = m->name;
     info->replay   = m->replay;
-    info->time_ms  = (sc68 && m==sc68->mus) ? sc68->time.length_ms : m->time_ms;
+    info->time_ms  = (sc68 && m==sc68->mus)
+      ? sc68->time.length_ms : (m->time_ms ? m->time_ms : TIMEMS_DEF);
     info->start_ms = m->start_ms;
     hwf.all        = m->hwflags.all;
   }
   loop = calc_loop_total(force_loop,
-			 (sc68 && m==sc68->mus) ? loop_to : 1,
-			 m->loop);
+                         (sc68 && m==sc68->mus) ? loop_to : 1,
+                         m->loop);
   info->time_ms  *= loop;
   info->start_ms *= loop;
 
@@ -1510,11 +1514,11 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
 
   hw = 7 &
     (  (hwf.bit.ym    ? SC68_YM    : 0)
-     | (hwf.bit.ste   ? SC68_STE   : 0)
-     | (hwf.bit.amiga ? SC68_AMIGA : 0)
+       | (hwf.bit.ste   ? SC68_STE   : 0)
+       | (hwf.bit.amiga ? SC68_AMIGA : 0)
        )
     ;
-  
+
   info->hw.ym    = hwf.bit.ym;
   info->hw.ste   = hwf.bit.ste;
   info->hw.amiga = hwf.bit.amiga;
@@ -1522,7 +1526,7 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
   info->addr     = m->a0;
   info->hwname   = hwtable[hw];
   strtime68(info->time, track, (info->time_ms+999u)/1000u);
-  
+
   return 0;
 }
 
@@ -1564,7 +1568,7 @@ int sc68_error_add(sc68_t * sc68, const char * fmt, ...)
   vsnprintf(tmp,sizeof(tmp),fmt,list);
   tmp[sizeof(tmp)-1] = 0;
   va_end(list);
-  
+
   if (estack->cnt < 0) {
     estack->cnt = 0;
   }
@@ -1605,9 +1609,9 @@ void sc68_debug(sc68_t * sc68, const char * fmt, ...)
  * as it needs.
  */
 SC68_API
-void sc68_emulators(sc68_t    * sc68, 
-		    emu68_t  ** p_emu68,
-		    io68_t  *** p_ios68)
+void sc68_emulators(sc68_t    * sc68,
+                    emu68_t  ** p_emu68,
+                    io68_t  *** p_ios68)
 {
   if (sc68) {
     if (p_emu68) * p_emu68 =  sc68->emu68;

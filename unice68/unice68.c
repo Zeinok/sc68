@@ -44,10 +44,10 @@ static int verbose = 0;
 
 /* Message levels */
 enum {
-  D = 2,			/* Message level Debug   */
-  V = 1,			/* Message level verbose */
-  N = 0,			/* Message level normal  */
-  Q = -1			/* Message level quiet   */
+  D = 2,                        /* Message level Debug   */
+  V = 1,                        /* Message level verbose */
+  N = 0,                        /* Message level normal  */
+  Q = -1                        /* Message level quiet   */
 };
 
 static void message(const int level, const char *format, ...)
@@ -68,25 +68,25 @@ static int print_usage(void)
   int ice_version = unice68_ice_version();
   printf
     (
-     "Usage: " PACKAGE_NAME " [OPTION] [--] [[<input>] <output>]\n"
-     "\n"
-     "ICE! depacker %d.%02d\n"
-     "\n"
-     " `-' as input/output uses respectively stdin/stdout.\n"
-     "\n"
-     "Options:\n"
-     "\n"
-     "  -v --verbose   Be more verbose (multiple use possible)\n"
-     "  -q --quiet     Be less verbose (multiple use possible)\n"
-     "  -h --help      Print this message and exit\n"
-     "  -V --version   Print version and copyright and exit\n"
-     "\n"
-     "Copyright (C) 2003-2009 Benjamin Gerard\n"
-     "\n"
-     "Visit <" PACKAGE_URL ">\n"
-     "Report bugs to <" PACKAGE_BUGREPORT ">\n",
-     ice_version/100, ice_version%100
-     );
+      "Usage: " PACKAGE_NAME " [OPTION] [--] [[<input>] <output>]\n"
+      "\n"
+      "ICE! depacker %d.%02d\n"
+      "\n"
+      " `-' as input/output uses respectively stdin/stdout.\n"
+      "\n"
+      "Options:\n"
+      "\n"
+      "  -v --verbose   Be more verbose (multiple use possible)\n"
+      "  -q --quiet     Be less verbose (multiple use possible)\n"
+      "  -h --help      Print this message and exit\n"
+      "  -V --version   Print version and copyright and exit\n"
+      "\n"
+      "Copyright (C) 2003-2009 Benjamin Gerard\n"
+      "\n"
+      "Visit <" PACKAGE_URL ">\n"
+      "Report bugs to <" PACKAGE_BUGREPORT ">\n",
+      ice_version/100, ice_version%100
+      );
   return 1;
 }
 
@@ -95,14 +95,14 @@ static int print_version(void)
   puts(unice68_versionstr());
   puts
     (
-     "\n"
-     "Copyright (C) 2001-2009 Benjamin Gerard.\n"
-     "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
-     "This is free software: you are free to change and redistribute it.\n"
-     "There is NO WARRANTY, to the extent permitted by law.\n"
-     "\n"
-     "Written by Benjamin Gerard"
-     );
+      "\n"
+      "Copyright (C) 2001-2009 Benjamin Gerard.\n"
+      "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
+      "This is free software: you are free to change and redistribute it.\n"
+      "There is NO WARRANTY, to the extent permitted by law.\n"
+      "\n"
+      "Written by Benjamin Gerard"
+      );
   return 0;
 }
 
@@ -125,21 +125,21 @@ int main(int argc, char *argv[])
     }
     arg += 2;
     if (c == '-') {
-      if (!*arg) {		/* `--' breaks parsing */
-	++i; break;
+      if (!*arg) {              /* `--' breaks parsing */
+        ++i; break;
       }
       /* Long options */
       if (!strcmp(arg,"help")) {
-	c = 'h';
+        c = 'h';
       } else if (!strcmp(arg,"version")) {
-	c ='V';
+        c ='V';
       } else if (!strcmp(arg,"verbose")) {
-	c = 'v';
+        c = 'v';
       } else if (!strcmp(arg,"quiet")) {
-	c = 'q';
+        c = 'q';
       } else {
-	fprintf(stderr,"unice68: Invalid option `--%s'.\n", arg);
-	return 255;
+        fprintf(stderr,"unice68: Invalid option `--%s'.\n", arg);
+        return 255;
       }
       arg += strlen(arg);
     }
@@ -152,12 +152,12 @@ int main(int argc, char *argv[])
       case 'v': ++verbose; break;
       case 'q': --verbose; break;
       default:
-	fprintf(stderr,"unice68: Invalid option `-%c'.\n", c);
-	return 255;
+        fprintf(stderr,"unice68: Invalid option `-%c'.\n", c);
+        return 255;
       }
       c = *arg++;
     } while (c);
-    
+
   }
   message(D,"Debug messages activated\n");
   while (i<argc) {
@@ -176,7 +176,7 @@ int main(int argc, char *argv[])
     fprintf(stderr,"unice68: Unexcepted argument `%s'\n", argv[3]);
     return 255;
   }
-  
+
   if (!fin || !strcmp(fin,"-")) {
     fin = "<stdin>";
     in = stdin;
@@ -188,13 +188,13 @@ int main(int argc, char *argv[])
     perror(argv[0]);
     goto error;
   }
-  
+
   err = (int)fread (header, 1, sizeof(header), in);
   if (err == -1) {
     perror(argv[0]);
     goto error;
   }
-  
+
   if (err < sizeof(header)) {
     fprintf(stderr, "unice68: Not enought byte to be a valid ice file.\n");
     goto error;
@@ -209,10 +209,10 @@ int main(int argc, char *argv[])
     fprintf(stderr, "weird sizes: %d/%d.\n", csize,dsize);
     goto error;
   }
-  
+
   message(N,"ICE! compressed:%d uncompressed:%d ratio:%d%%\n",
-	  csize,dsize,(csize+50)*100/dsize);
-  
+          csize,dsize,(csize+50)*100/dsize);
+
   buffer = malloc(csize+sizeof(header));
   if (!buffer) {
     perror(argv[0]);
@@ -230,7 +230,7 @@ int main(int argc, char *argv[])
       goto error;
     } else {
       fprintf(stderr, "unice68: Read error get %d bytes on %d requested\n",
-	      err, csize);
+              err, csize);
       err = 2;
       goto error;
     }
@@ -270,7 +270,7 @@ int main(int argc, char *argv[])
     err = 0;
   }
 
- error:
+  error:
   if (in && in != stdin) {
     fclose(in);
   }

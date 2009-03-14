@@ -17,9 +17,9 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -34,7 +34,7 @@ typedef struct {
 } shifter_io68_t;
 
 static int68_t _shifter_readB(shifter_io68_t * const shifterio,
-			      addr68_t addr)
+                              addr68_t addr)
 {
   switch ((u8)addr) {
   case 0x0A:
@@ -46,7 +46,7 @@ static int68_t _shifter_readB(shifter_io68_t * const shifterio,
 }
 
 static void _shifter_writeB(shifter_io68_t * const shifterio,
-			    addr68_t addr, int68_t v)
+                            addr68_t addr, int68_t v)
 {
   switch ((u8)addr) {
   case 0x0A:
@@ -70,7 +70,7 @@ static void shifter_readB(io68_t * const io68)
 static void shifter_readW(io68_t * const io68)
 {
   emu68_t * const emu68 = io68->emu68;
-  io68->emu68->bus_data = 
+  io68->emu68->bus_data =
     0
     | (_shifter_readB((shifter_io68_t*)io68, emu68->bus_addr+0)<<8)
     | (_shifter_readB((shifter_io68_t*)io68, emu68->bus_addr+1)   );
@@ -79,7 +79,7 @@ static void shifter_readW(io68_t * const io68)
 static void shifter_readL(io68_t * const io68)
 {
   emu68_t * const emu68 = io68->emu68;
-  emu68->bus_data = 
+  emu68->bus_data =
     0
     | (_shifter_readB((shifter_io68_t*)io68, emu68->bus_addr+0)<<24)
     | (_shifter_readB((shifter_io68_t*)io68, emu68->bus_addr+1)<<16)
@@ -91,39 +91,39 @@ static void shifter_writeB(io68_t * const io68)
 {
   emu68_t * const emu68 = io68->emu68;
   _shifter_writeB((shifter_io68_t*)io68,
-		  emu68->bus_addr, emu68->bus_data);
+                  emu68->bus_addr, emu68->bus_data);
 }
 
 static void shifter_writeW(io68_t * const io68)
 {
   emu68_t * const emu68 = io68->emu68;
   _shifter_writeB((shifter_io68_t*)io68,
-		  emu68->bus_addr+0, emu68->bus_data>>8);
+                  emu68->bus_addr+0, emu68->bus_data>>8);
   _shifter_writeB((shifter_io68_t*)io68,
-		  emu68->bus_addr+1, emu68->bus_data   );
+                  emu68->bus_addr+1, emu68->bus_data   );
 }
 
 static void shifter_writeL(io68_t * const io68)
 {
   emu68_t * const emu68 = io68->emu68;
   _shifter_writeB((shifter_io68_t*)io68,
-		  emu68->bus_addr+0, emu68->bus_data>>24);
+                  emu68->bus_addr+0, emu68->bus_data>>24);
   _shifter_writeB((shifter_io68_t*)io68,
-		  emu68->bus_addr+1, emu68->bus_data>>16);
+                  emu68->bus_addr+1, emu68->bus_data>>16);
   _shifter_writeB((shifter_io68_t*)io68,
-		  emu68->bus_addr+2, emu68->bus_data>> 8);
+                  emu68->bus_addr+2, emu68->bus_data>> 8);
   _shifter_writeB((shifter_io68_t*)io68,
-		  emu68->bus_addr+3, emu68->bus_data    );
+                  emu68->bus_addr+3, emu68->bus_data    );
 }
 
 static interrupt68_t *shifter_interrupt(io68_t * const io,
-					const cycle68_t cycle)
+                                        const cycle68_t cycle)
 {
   return 0;
 }
 
 static cycle68_t shifter_next_interrupt(io68_t * const io,
-					const cycle68_t cycle)
+                                        const cycle68_t cycle)
 {
   return IO68_NO_INT;
 }

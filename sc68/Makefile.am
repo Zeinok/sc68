@@ -9,14 +9,13 @@
 # $Id$
 # @configure_input@
 
-SUBDIRS              = @subdirs@
+SUBDIRS              = $(subdirs)
 ACLOCAL_AMFLAGS      = -I m4 --install
 
-AM_CFLAGS            = @SC68_CFLAGS@ @BINSC68_CFLAGS@
-AM_CPPFLAGS          = @SC68_CPPFLAGS@ @BINSC68_CPPFLAGS@ $(SINC)
-AM_LDFLAGS           = @SC68_LDFLAGS@ @BINSC68_LDFLAGS@
-SINC                 = $(sc68_inc) $(file68_inc)
-
+AM_CFLAGS            = $(ALL_CFLAGS) $(BIN_CFLAGS)
+AM_CPPFLAGS          = $(ALL_EFLAGS) $(BIN_EFLAGS) $(EFLAGS)
+AM_LDFLAGS           = $(ALL_LFLAGS) $(BIN_LFLAGS)
+EFLAGS               = $(sc68_inc) $(file68_inc)
 
 # ,----------------------------------------------------------------------.
 # | Libtool program                                                      |
@@ -43,21 +42,10 @@ sc68_LDADD           = $(SC68_LA)
 
 dist_man_MANS        = sc68.1
 info_TEXINFOS        = sc68.texi
-#sc68_TEXINFOS        = package.texi
 MAINTAINERCLEANFILES = $(srcdir)/sc68.1
-# $(srcdir)/sc68.info $(srcdir)/package.texi
 
-#if MAINTAINER_MODE
-TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
+TEXINFO2MAN          = $(texinfo2man)
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
 $(srcdir)/sc68.1: sc68.1.tpl.in $(srcdir)/sc68.texi
 	$(TEXINFO2MAN) sc68.1.tpl $(srcdir)/sc68.texi >$@ || $(fail)
-#endif
-
-
-# ,----------------------------------------------------------------------.
-# | Extra distrib                                                        |
-# `----------------------------------------------------------------------'
-
-#EXTRA_DIST = sc68.1 sc68.info package.texi

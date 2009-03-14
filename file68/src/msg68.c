@@ -1,7 +1,7 @@
 /*
  *                      file68 - debug message
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -32,16 +32,26 @@
 #include "msg68.h"
 #include "string68.h"
 
-static msg68_t debug  = 0;	          /* Debug function.            */
+static msg68_t debug  = 0;                /* Debug function.            */
 static void * debug_cookie = 0;           /* Debug function user param. */
 static int current_feature = msg68_DEBUG; /* Default current feature.   */
 
+/** Filter debug messages.
+ *
+ *  Bit have to be clear to mask/filter a debug feature. The default
+ *  value depend on compilation. If debug feature was enabled (DEBUG
+ *  defined) msg68_bitmsk value is set to ~0, allowing all
+ *  messages. On the contrary its msg68_bitmsk is set to 0,
+ *  filtering out all messages (except
+ *  enum_msg68_bit::msg68_unmaskable).
+ */
+static
 #if defined(DEBUGMSG_MASK)
-unsigned int msg68_mask = DEBUGMSG_MASK;  /* User defined mask.         */
+unsigned int msg68_bitmsk = DEBUGMSG_MASK; /* User defined mask.         */
 #elif defined(DEBUG)
-unsigned int msg68_mask = ~0;	          /* Filter none.               */
+unsigned int msg68_bitmsk = ~0;            /* Filter none.               */
 #else
-unsigned int msg68_mask =	          /* Filter almost all.         */
+unsigned int msg68_bitmsk =                /* Filter almost all.         */
   (1<<msg68_CRITICAL)|(1<<msg68_ERROR)|(1<<msg68_WARNING);
 #endif
 
@@ -84,16 +94,16 @@ void msg68_va(int bit, const char * fmt, va_list list)
       ? current_feature
       : bit
       ;
-    
+
     switch (feature) {
     case msg68_NEVER:
       break;
     default:
-      if ( ! (msg68_mask&(1<<feature)) )
-	break;
+      if ( ! (msg68_bitmsk&(1<<feature)) )
+        break;
       if (feature>msg68_TRACE &&
-	  ! (msg68_mask&(1<<msg68_TRACE)))
-	break;
+          ! (msg68_bitmsk&(1<<msg68_TRACE)))
+        break;
     case msg68_ALWAYS:
       debug(feature, debug_cookie, fmt, list);
     }
@@ -221,9 +231,9 @@ int msg68_feature(const char * name, const char * desc, const int masked)
       debug_bits[i].name = name;
       debug_bits[i].desc = desc;
       if (masked) {
-	msg68_mask |= 1<<i;
+        msg68_bitmsk |= 1<<i;
       } else {
-	msg68_mask &= ~(1<<i);
+        msg68_bitmsk &= ~(1<<i);
       }
     }
   }
@@ -236,7 +246,7 @@ void msg68_feature_free(const int feature)
 {
   if (is_valid_feature(feature) && feature>msg68_TRACE) {
     debug_bits[feature].bit = -1;
-    msg68_mask |= 1<<feature;
+    msg68_bitmsk |= 1<<feature;
   }
 }
 
@@ -248,7 +258,7 @@ int msg68_feature_current(const int feature)
   /* Allow always or never or any other existing feature */
   if (feature == msg68_ALWAYS || feature == msg68_NEVER ||
       (is_valid_feature(feature) && !is_free_feature(feature))) {
-      current_feature = feature;
+    current_feature = feature;
   }
   return old;
 }
@@ -258,22 +268,22 @@ int msg68_feature_level(const int feature)
 {
   int ret = -(feature < msg68_CRITICAL || feature > msg68_TRACE);
   if (!ret) {
-    unsigned int v = msg68_mask & ~((1<<(msg68_TRACE+1))-1);
+    unsigned int v = msg68_bitmsk & ~((1<<(msg68_TRACE+1))-1);
     v |= (1<<(feature+1))-1;
-    msg68_mask = v;
+    msg68_bitmsk = v;
   }
   return ret;
 }
 
 /* Get info on feature */
 int msg68_feature_info(const int feature, const char **pname,
-			    const char **pdesc, int *pnext)
+                       const char **pdesc, int *pnext)
 {
   int ret = -1, next = feature;
   if (is_valid_feature(feature)) {
     if (pname) *pname = debug_bits[feature].name;
     if (pdesc) *pdesc = debug_bits[feature].desc;
-    ret = 1 & (msg68_mask>>feature);
+    ret = 1 & (msg68_bitmsk>>feature);
   } else {
     next = -1;
   }
@@ -294,7 +304,14 @@ void msg68_feature_help(void * cookie, msg68_help_t fct)
     for (i=0; i<MAX_FEATURES; ++i) {
       const int isfree = is_free_feature(i);
       if (!isfree)
-	fct (cookie, i, debug_bits[i].name, debug_bits[i].desc);
+        fct (cookie, i, debug_bits[i].name, debug_bits[i].desc);
     }
   }
+}
+
+unsigned int msg68_mask(unsigned int clr, unsigned int set)
+{
+  msg68_bitmsk &= ~clr;
+  msg68_bitmsk |=  set;
+  return msg68_bitmsk;
 }

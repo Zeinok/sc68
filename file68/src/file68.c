@@ -1,6 +1,6 @@
 /*
  *                  file68 - "sc68" file functions
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
@@ -63,7 +63,6 @@
 #include <ctype.h>
 #include <stdio.h>
 
-
 /* Current identifier string used to save file */
 #define SC68_SAVE_IDSTR file68_idstr
 
@@ -75,13 +74,13 @@
 
 /* SC68 file identifier string
  */
-const char file68_idstr[]    = SC68_IDSTR;
-const char file68_idstr_v2[] = SC68_IDSTR_V2;
+const char file68_idstr[56]   = SC68_IDSTR;
+const char file68_idstr_v2[8] = SC68_IDSTR_V2;
 
 #ifndef DEBUG_FILE68_O
 # define DEBUG_FILE68_O 0
 #endif
-int file68_feature = msg68_DEFAULT; 
+int file68_feature = msg68_DEFAULT;
 
 int file68_o_init(void)
 {
@@ -144,7 +143,7 @@ static int sndh_is_magic(const char *buffer, int max)
   int i=0, v = 0;
   if (max >= start) {
     for (i=start, v = LPeekBE(buffer); i < max && v != sndh_cc;
-	 v = ((v<<8)| (buffer[i++]&255)) & 0xFFFFFFFF)
+         v = ((v<<8)| (buffer[i++]&255)) & 0xFFFFFFFF)
       ;
   }
   i = (v == sndh_cc) ? i-4: 0;
@@ -193,7 +192,7 @@ static int read_header(istream68_t * const is)
   if(have = ensure_header(is, id, have, idv2_req), !have) {
     return -1;
   }
-  
+
   if (!memcmp(id, file68_idstr, idv2_req)) {
     /* looks like idv1; need more bytes to confirm */
     if (have = ensure_header(is, id, have, idv1_req), !have) {
@@ -221,8 +220,8 @@ static int read_header(istream68_t * const is)
        */
       TRACE68(file68_feature,"try SNDH\n");
       if (sndh_is_magic(id,sndh_req)) {
-	TRACE68(file68_feature,"found SNDH signature\n");
-	return -sndh_cc;
+        TRACE68(file68_feature,"found SNDH signature\n");
+        return -sndh_cc;
       }
     }
     return error68(missing_id);
@@ -322,11 +321,11 @@ static int valid(disk68_t * mb)
       m->frq = 50;
     }
 
-    /* Compute ms from frames prior to frames from ms. */ 
+    /* Compute ms from frames prior to frames from ms. */
     if (m->frames) {
       m->time_ms = frames_to_ms(m->frames, m->frq);
     } else {
-      m->frames = ms_to_frames(m->time_ms,m->frq);
+      m->frames = ms_to_frames(m->time_ms, m->frq);
     }
 
     /* Set start time in the disk. */
@@ -347,22 +346,22 @@ static int valid(disk68_t * mb)
     author = m->author = (m->author == 0) ? author : m->author;
     /* default composer is author */
     composer = m->composer = (m->composer == 0) ?
-	((composer == 0) ? m->author : composer) : m->composer;
+      ((composer == 0) ? m->author : composer) : m->composer;
     /* default converter is the empty string */
     converter = m->converter = (m->converter == 0) ?
-        ((converter == 0) ? m->converter : converter) : m->converter;
+      ((converter == 0) ? m->converter : converter) : m->converter;
     /* default copier is the empty string */
     ripper = m->ripper = (m->ripper == 0) ?
-        ((ripper == 0) ? m->ripper : ripper) : m->ripper;
+      ((ripper == 0) ? m->ripper : ripper) : m->ripper;
     /* use data from previuous music */
     if (m->data == 0) {
-      m->data = (char *) previousdata;
+      m->data   = (char *) previousdata;
       m->datasz = previousdatasz;
     }
     if (m->data == 0) {
       return error68("music #%d as no data", i);
     }
-    previousdata = m->data;
+    previousdata   = m->data;
     previousdatasz = m->datasz;
   }
 
@@ -398,7 +397,7 @@ int file68_is_our_url(const char * url, const char * exts, int * is_remote)
 
     if (is_our)  {
       /* $$$ Not really sure; may be remote or not. The only way to
-	 know is to check for the corresponding local file.
+         know is to check for the corresponding local file.
       */
       remote = 0;
       goto exit;
@@ -419,13 +418,13 @@ int file68_is_our_url(const char * url, const char * exts, int * is_remote)
     *--p = c;
     if (c == '.') {
       if (!strcmp68(p,".GZ")) {
-	p = protocol+sizeof(protocol)-1;
+        p = protocol+sizeof(protocol)-1;
       } else {
-	break;
+        break;
       }
     }
   }
-  
+
   while (*exts) {
     is_our = !strcmp68(p,exts);
     if (is_our) {
@@ -434,7 +433,7 @@ int file68_is_our_url(const char * url, const char * exts, int * is_remote)
     exts += strlen(exts)+1;
   }
 
- exit:
+  exit:
   if (is_remote) *is_remote = remote;
   TRACE68(file68_feature,"} file68_is_our_url => [%s]\n",ok_int(!is_our));
   return is_our;
@@ -461,23 +460,23 @@ int file68_verify(istream68_t * is)
   if (res < 0) {
     void * buffer = 0;
     int len;
-    
+
     switch (res) {
     case -gzip_cc:
       if (istream68_seek_to(is,0) == 0) {
-	istream68_t * zis;
-	zis = istream68_z_create(is,ISTREAM68_OPEN_READ,
-				 istream68_z_default_option);
-	res = -1;
-	if (!istream68_open(zis)) {
-	  res = file68_verify(zis);
-	}
-	istream68_destroy(zis);
+        istream68_t * zis;
+        zis = istream68_z_create(is,ISTREAM68_OPEN_READ,
+                                 istream68_z_default_option);
+        res = -1;
+        if (!istream68_open(zis)) {
+          res = file68_verify(zis);
+        }
+        istream68_destroy(zis);
       }
       break;
     case -ice_cc:
       if (istream68_seek_to(is,0) == 0) {
-	buffer = ice68_load(is, &len);
+        buffer = ice68_load(is, &len);
       }
       break;
     case -sndh_cc:
@@ -491,13 +490,13 @@ int file68_verify(istream68_t * is)
     }
   }
 
- error:
+  error:
   TRACE68(file68_feature,"} file68_verify => [%s]\n",ok_int(res));
   return -(res < 0);
 }
 
 static istream68_t * url_or_file_create(const char * url, int mode,
-					rsc68_info_t * info)
+                                        rsc68_info_t * info)
 {
   char protocol[16], tmp[512];
   const int max = sizeof(tmp)-1;
@@ -507,7 +506,7 @@ static istream68_t * url_or_file_create(const char * url, int mode,
 
 /*   CONTEXT68_CHECK(context); */
   TRACE68(file68_feature,"url_or_file_create([url:[%s],mode:%d,info:%p) {\n",
-	     strnull(url),mode,info);
+          strnull(url),mode,info);
 
   if (info) {
     info->type = rsc68_last;
@@ -542,8 +541,8 @@ static istream68_t * url_or_file_create(const char * url, int mode,
 
   free68(newname);
   TRACE68(file68_feature,"} url_or_file_create() => [%s,%s]\n",
-	     ok_int(!isf),
-	     strnull(istream68_filename(isf)));
+          ok_int(!isf),
+          strnull(istream68_filename(isf)));
   return isf;
 }
 
@@ -580,7 +579,7 @@ int file68_verify_mem(const void * buffer, int len)
  */
 int file68_diskname(istream68_t * is, char *dest, int max)
 {
-  error68(0,"file68: file68_diskname function is deprecated\n"); 
+  error68(0,"file68: file68_diskname function is deprecated\n");
   return -1;
 }
 
@@ -595,15 +594,15 @@ disk68_t * file68_load_url(const char * fname)
   is = url_or_file_create(fname, 1, &info);
   d = file68_load(is);
   istream68_destroy(is);
-  
+
   if (d && info.type == rsc68_music) {
     int i;
 
     TRACE68(file68_feature,
-	    "file68: on the fly path: #%d/%d/%d\n",
-	    info.data.music.track,
-	    info.data.music.loop,
-	    info.data.music.time);
+            "file68: on the fly path: #%d/%d/%d\n",
+            info.data.music.track,
+            info.data.music.loop,
+            info.data.music.time);
 
     if (info.data.music.track > 0 && info.data.music.track <= d->nb_six) {
       d->mus[0] = d->mus[info.data.music.track-1];
@@ -616,17 +615,17 @@ disk68_t * file68_load_url(const char * fname)
     }
     if (info.data.music.loop != -1) {
       for (i=0; i<d->nb_six; ++i) {
-	d->mus[i].loop = info.data.music.loop;
+        d->mus[i].loop = info.data.music.loop;
       }
     }
     if (info.data.music.time != -1) {
       unsigned int ms = info.data.music.time * 1000u;
       d->time_ms = 0;
       for (i=0; i<d->nb_six; ++i) {
-	d->mus[i].frames   = ms_to_frames(ms, d->mus[i].frq);
-	d->mus[i].time_ms  = ms;
-	d->mus[i].start_ms = d->time_ms;
-	d->time_ms += ms;
+        d->mus[i].frames   = ms_to_frames(ms, d->mus[i].frq);
+        d->mus[i].time_ms  = ms;
+        d->mus[i].start_ms = d->time_ms;
+        d->time_ms += ms;
       }
     }
   }
@@ -706,13 +705,13 @@ static int sndh_info(disk68_t * mb, int len)
     } else if (!memcmp(b+i,"MuMo",4)) {
       /* Music Mon ???  */
       TRACE68(file68_feature,
-	      "file68: sndh 'MuMo';don't know what to do with that\n");
+              "file68: sndh 'MuMo';don't know what to do with that\n");
       musicmon = 1;
       i += 4;
     } else if (!memcmp(b+i,"TIME",4)) {
       /* Time in second */
       time = (((unsigned char)*(b + i + 4)) << 8) |
-             ((unsigned char)*(b + i + 5));
+        ((unsigned char)*(b + i + 5));
       i += 6;
     } else if (!memcmp(b+i,"##",2)) {
       /* +'xx' number of track  */
@@ -726,7 +725,7 @@ static int sndh_info(disk68_t * mb, int len)
     } else if (!memcmp(b+i,"!V",2)) {
       /* +string VBL frq */
       if (!frq) {
-	i = myatoi(b, i+2, len, &frq);
+        i = myatoi(b, i+2, len, &frq);
       }
     } else if (!memcmp(b+i,"**",2)) {
       /* FX +string 2 char ??? */
@@ -748,7 +747,7 @@ static int sndh_info(disk68_t * mb, int len)
     else if( memcmp( b + i, empty_tag, 4 ) == 0 ||
              memcmp( b + i, "HDNS", 4 ) == 0 ) {
       i = len;
-    } else { 
+    } else {
       /* skip until next 0 byte, as long as it's inside the tag area */
 
       i += 4;
@@ -758,9 +757,9 @@ static int sndh_info(disk68_t * mb, int len)
 
       unknown = 1;
 /*
-      if( i >= len ) {
-        fail = 1;
-      }
+  if( i >= len ) {
+  fail = 1;
+  }
 */
     }
 
@@ -768,23 +767,23 @@ static int sndh_info(disk68_t * mb, int len)
       ++unknowns;
       /* Unkwown tag, finish here. */
       TRACE68(file68_feature,
-	      "UNKNOWN TAG #%02d [%c%c%c%c] at %d\n",unknowns,
-	      b[i],b[i+1],b[i+2],b[i+3], i);
+              "UNKNOWN TAG #%02d [%c%c%c%c] at %d\n",unknowns,
+              b[i],b[i+1],b[i+2],b[i+3], i);
       ++i;
       if (fail || unknowns >= unknowns_max) {
-	i = len;
+        i = len;
       }
       unknown = 0;
     } else {
       unknowns = 0; /* Reset successive unkwown. */
       if (s) {
-	int j,k,c;
-	for (j=k=0; c=(s[j]&255), c; ++j) {
-	  if (c <= 32) s[j] = 32;
-	  else k=j+1;
-	}
-	s[k] = 0; /* Strip triling space */
-	i += j + 5;
+        int j,k,c;
+        for (j=k=0; c=(s[j]&255), c; ++j) {
+          if (c <= 32) s[j] = 32;
+          else k=j+1;
+        }
+        s[k] = 0; /* Strip triling space */
+        i += j + 5;
 
         /* skip the trailing null chars */
         while( i < len && *(b + i) == 0 ) {
@@ -792,7 +791,7 @@ static int sndh_info(disk68_t * mb, int len)
         }
       }
     }
-    
+
   }
   if (mb->nb_six > SC68_MAX_TRACK) {
     mb->nb_six = SC68_MAX_TRACK;
@@ -831,54 +830,54 @@ disk68_t * file68_load(istream68_t * is)
       int l;
       switch (len) {
       case -gzip_cc:
-	/* gzipped */
-	if (istream68_seek_to(is,0) == 0) {
-	  istream68_t * zis;
-	  zis=istream68_z_create(is,ISTREAM68_OPEN_READ,
-				 istream68_z_default_option);
-	  if (!istream68_open(zis)) {
-	    mb = file68_load(zis);
-	  }
-	  istream68_destroy(zis);
-	  if (mb) {
-	    goto already_valid;
-	  }
-	}
-	break;
+        /* gzipped */
+        if (istream68_seek_to(is,0) == 0) {
+          istream68_t * zis;
+          zis=istream68_z_create(is,ISTREAM68_OPEN_READ,
+                                 istream68_z_default_option);
+          if (!istream68_open(zis)) {
+            mb = file68_load(zis);
+          }
+          istream68_destroy(zis);
+          if (mb) {
+            goto already_valid;
+          }
+        }
+        break;
 
       case -ice_cc:
-	if (istream68_seek_to(is,0) == 0) {
-	  buffer = ice68_load(is, &l);
-	}
-	break;
+        if (istream68_seek_to(is,0) == 0) {
+          buffer = ice68_load(is, &l);
+        }
+        break;
       case -sndh_cc:
-	if (istream68_seek_to(is,0) != 0) {
-	  break;
-	}
-	len = istream68_length(is);
-	if (len <= 32) {
-	  break;
-	}
-	mb = alloc68(sizeof(*mb) + len);
-	if (!mb) {
-	  break;
-	}
-	memset(mb,0,sizeof(*mb));
-	if (istream68_read(is, mb->data, len) != len) {
-	  break;
-	}
-	if (sndh_info(mb, len)) {
-	  break;
-	}
-	goto validate;
+        if (istream68_seek_to(is,0) != 0) {
+          break;
+        }
+        len = istream68_length(is);
+        if (len <= 32) {
+          break;
+        }
+        mb = alloc68(sizeof(*mb) + len);
+        if (!mb) {
+          break;
+        }
+        memset(mb,0,sizeof(*mb));
+        if (istream68_read(is, mb->data, len) != len) {
+          break;
+        }
+        if (sndh_info(mb, len)) {
+          break;
+        }
+        goto validate;
       }
 
       if (buffer) {
-	mb = file68_load_mem(buffer, l);
-	free68(buffer);
-	if (mb) {
-	  return mb;
-	}
+        mb = file68_load_mem(buffer, l);
+        free68(buffer);
+        if (mb) {
+          return mb;
+        }
       }
     }
     errorstr = "read header";
@@ -925,8 +924,8 @@ disk68_t * file68_load(istream68_t * is)
     else if (!strcmp(chk, CH68_MUSIC)) {
       /* More than 256 musix !!! : Prematured end */
       if (mb->nb_six >= 256) {
-	len = 0;
-	break;
+        len = 0;
+        break;
       }
       cursix = mb->mus + mb->nb_six;
       cursix->loop = 1; /* default loop */
@@ -935,56 +934,56 @@ disk68_t * file68_load(istream68_t * is)
     /* Music name */
     else if (!strcmp(chk, CH68_MNAME)) {
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       cursix->name = b;
     }
     /* Author name */
     else if (!strcmp(chk, CH68_ANAME)) {
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       cursix->author = b;
     }
     /* Composer name */
     else if (!strcmp(chk, CH68_CNAME)) {
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       cursix->composer = b;
     }
     /* External replay */
     else if (!strcmp(chk, CH68_REPLAY)) {
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       cursix->replay = b;
     }
     /* 68000 D0 init value */
     else if (!strcmp(chk, CH68_D0)) {
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       cursix->d0 = LPeek(b);
     }
     /* 68000 memory load address */
     else if (!strcmp(chk, CH68_AT)) {
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       cursix->a0 = LPeek(b);
     }
     /* Playing time */
     else if (!strcmp(chk, CH68_TIME)) {
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       cursix->time_ms = LPeek(b) * 1000u;
     }
@@ -992,8 +991,8 @@ disk68_t * file68_load(istream68_t * is)
     /* Playing time */
     else if (!strcmp(chk, CH68_FRAME)) {
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       cursix->frames = LPeek(b);
     }
@@ -1001,8 +1000,8 @@ disk68_t * file68_load(istream68_t * is)
     /* Replay frequency */
     else if (!strcmp(chk, CH68_FRQ)) {
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       cursix->frq = LPeek(b);
     }
@@ -1010,8 +1009,8 @@ disk68_t * file68_load(istream68_t * is)
     /* Loop */
     else if (!strcmp(chk, CH68_LOOP)) {
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       cursix->loop = LPeek(b);
     }
@@ -1020,8 +1019,8 @@ disk68_t * file68_load(istream68_t * is)
     else if (!strcmp(chk, CH68_TYP)) {
       int f;
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       f = LPeek(b);
       cursix->hwflags.all = 0;
@@ -1033,8 +1032,8 @@ disk68_t * file68_load(istream68_t * is)
     /* music data */
     else if (!strcmp(chk, CH68_MDATA)) {
       if (cursix == 0) {
-	errorstr = chk;
-	goto error;
+        errorstr = chk;
+        goto error;
       }
       cursix->data = b;
       cursix->datasz = chk_size;
@@ -1052,19 +1051,19 @@ disk68_t * file68_load(istream68_t * is)
     goto error;
   }
 
- validate:
+  validate:
   if (valid(mb)) {
     errorstr = "validation test";
     goto error;
   }
 
- already_valid:
+  already_valid:
   if (opened) {
     istream68_close(is);
   }
   return mb;
 
-error:
+  error:
   if (opened) {
     istream68_close(is);
   }
@@ -1079,7 +1078,7 @@ error:
 /* save CHUNK and data */
 /* $$$ NEW: Add auto 16-bit alignement. */
 static int save_chunk(istream68_t * os,
-		      const char * chunk, const void * data, int size)
+                      const char * chunk, const void * data, int size)
 {
   static char zero[4] = {0,0,0,0};
   chunk68_t chk;
@@ -1105,13 +1104,13 @@ static int save_chunk(istream68_t * os,
   }
   return 0;
 
- error:
+  error:
   return -1;
 }
 
 /* save CHUNK and string (only if non-0 & lenght>0) */
 static int save_string(istream68_t * os,
-		       const char * chunk, const char * str)
+                       const char * chunk, const char * str)
 {
   int len;
 
@@ -1123,7 +1122,7 @@ static int save_string(istream68_t * os,
 
 /* save CHUNK & string str ( only if oldstr!=str & lenght>0 ) */
 static int save_differstr(istream68_t * os,
-			  const char *chunk, char *str, char *oldstr)
+                          const char *chunk, char *str, char *oldstr)
 {
   int len;
 
@@ -1152,7 +1151,7 @@ static int save_nonzero(istream68_t * os, const char * chunk, int n)
 }
 
 int file68_save_url(const char * fname, const disk68_t * mb,
-		    int gzip)
+                    int gzip)
 {
   int feature = msg68_feature_current(file68_feature);
   istream68_t * os;
@@ -1167,7 +1166,7 @@ int file68_save_url(const char * fname, const disk68_t * mb,
 }
 
 int file68_save_mem(const char * buffer, int len, const disk68_t * mb,
-		    int gzip)
+                    int gzip)
 {
   int feature =  msg68_feature_current(file68_feature);
   istream68_t * os;
@@ -1234,7 +1233,7 @@ int file68_save(istream68_t * os, const disk68_t * mb, int gzip)
 
   errstr = save_sc68(os, mb, len);
 
- error:
+  error:
   if (org_os) {
     /* Was gzipped: clean-up */
     istream68_destroy(os);
@@ -1276,7 +1275,7 @@ static const char * save_sc68(istream68_t * os, const disk68_t * mb, int len)
   if (save_chunk(os, CH68_BASE, 0, len)
       || save_string(os, CH68_FNAME, mb->name)
       || save_nonzero(os, CH68_DEFAULT, mb->default_six)
-      ) {
+    ) {
     errstr = "chunk write error";
     goto error;
   }
@@ -1295,11 +1294,11 @@ static const char * save_sc68(istream68_t * os, const disk68_t * mb, int len)
 
     /* Save track-name, author, composer, replay */
     if (save_chunk(os, CH68_MUSIC, 0, 0) == -1
-	|| save_differstr(os, CH68_MNAME, mus->name, mname)
-	|| save_differstr(os, CH68_ANAME, mus->author, aname)
-	|| save_differstr(os, CH68_CNAME, mus->composer, cname)
-	|| save_string(os, CH68_REPLAY, mus->replay)
-	) {
+        || save_differstr(os, CH68_MNAME, mus->name, mname)
+        || save_differstr(os, CH68_ANAME, mus->author, aname)
+        || save_differstr(os, CH68_CNAME, mus->composer, cname)
+        || save_string(os, CH68_REPLAY, mus->replay)
+      ) {
       errstr = "chunk write error";
       goto error;
     }
@@ -1315,13 +1314,13 @@ static const char * save_sc68(istream68_t * os, const disk68_t * mb, int len)
 
     /* Save play parms */
     if (save_nonzero(os, CH68_D0, mus->d0)
-	|| save_nonzero(os, CH68_AT, (mus->a0 == SC68_LOADADDR) ? 0 : mus->a0)
-	|| save_nonzero(os, CH68_FRAME, mus->frames)
-	|| save_nonzero(os, CH68_TIME, (mus->time_ms+999u) / 1000u)
-	|| save_nonzero(os, CH68_FRQ, (mus->frq == 50) ? 0 : mus->frq)
-	|| save_nonzero(os, CH68_LOOP, mus->loop)
-	|| save_number(os, CH68_TYP, flags)
-	) {
+        || save_nonzero(os, CH68_AT, (mus->a0 == SC68_LOADADDR) ? 0 : mus->a0)
+        || save_nonzero(os, CH68_FRAME, mus->frames)
+        || save_nonzero(os, CH68_TIME, (mus->time_ms+999u) / 1000u)
+        || save_nonzero(os, CH68_FRQ, (mus->frq == 50) ? 0 : mus->frq)
+        || save_nonzero(os, CH68_LOOP, mus->loop)
+        || save_number(os, CH68_TYP, flags)
+      ) {
       errstr = "chunk write error";
       goto error;
     }
@@ -1329,8 +1328,8 @@ static const char * save_sc68(istream68_t * os, const disk68_t * mb, int len)
     /* Save music data */
     if (mus->data && mus->data != data) {
       if (save_chunk(os, CH68_MDATA, mus->data, mus->datasz)) {
-	errstr = "chunk write error";
-	goto error;
+        errstr = "chunk write error";
+        goto error;
       }
       data = mus->data;
     }
@@ -1342,7 +1341,7 @@ static const char * save_sc68(istream68_t * os, const disk68_t * mb, int len)
     goto error;
   }
 
- error:
+  error:
   if (opened) {
     istream68_close(os);
   }

@@ -17,9 +17,11 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -35,7 +37,7 @@ typedef struct {
 static void reload(paulav_t * const v, const u8 * const p, const int fix);
 
 static inline unsigned int clearset(const unsigned int v,
-				    const unsigned int clrset)
+                                    const unsigned int clrset)
 {
   if (clrset & 0x8000) {
     return (v | clrset) & 0x7FFF;
@@ -57,12 +59,12 @@ static inline int INTENA(const int intena) {
 }
 
 /* $$$ I am not sure what really happen in case of byte access on the
-       Amiga hardware Word registers. Currently I assume a ``normal''
-       behavior.
+   Amiga hardware Word registers. Currently I assume a ``normal''
+   behavior.
 */
 
 static int68_t _paula_readB(paula_io68_t * const paulaio,
-			    addr68_t const addr)
+                            addr68_t const addr)
 {
   const int i = (u8)addr;
   paula_t * const paula = &paulaio->paula;
@@ -109,7 +111,7 @@ static int68_t _paula_readB(paula_io68_t * const paulaio,
 }
 
 static int68_t _paula_readW(paula_io68_t * const paulaio,
-			    addr68_t const addr)
+                            addr68_t const addr)
 {
   const int i = (u8)addr;
   paula_t * const paula = &paulaio->paula;
@@ -219,7 +221,7 @@ static void write_intreq(paula_t * const paula, const int intreq)
     /* Reload for each denied channel */
 
     /* $$$ May be should not reload if DMA is OFF $$$ */
-    
+
     if(intdenied & (1<< 7))
       reload(paula->voice+0, paula->map+PAULA_VOICEA, paula->ct_fix);
     if(intdenied & (1<< 8))
@@ -228,36 +230,36 @@ static void write_intreq(paula_t * const paula, const int intreq)
       reload(paula->voice+2, paula->map+PAULA_VOICEC, paula->ct_fix);
     if(intdenied & (1<<10))
       reload(paula->voice+3, paula->map+PAULA_VOICED, paula->ct_fix);
-    
+
     paula->intreq |= intreq;
   }
 }
 
 static void _paula_writeB(paula_io68_t * const paulaio,
-			   addr68_t const addr, const int68_t data)
+                          addr68_t const addr, const int68_t data)
 {
   const int i = (u8)addr;
   paula_t * const paula = &paulaio->paula;
-  
+
   paula->map[i] = data;
   switch (i) {
 
   case PAULA_INTREQL:
     write_intreq(paula,
-		 (paula->map[PAULA_INTREQH]<<8)|paula->map[PAULA_INTREQL]);
+                 (paula->map[PAULA_INTREQH]<<8)|paula->map[PAULA_INTREQL]);
     break;
 
   }
 }
 
 static void _paula_writeW(paula_io68_t * const paulaio,
-			 addr68_t const addr, const int68_t data)
+                          addr68_t const addr, const int68_t data)
 {
   const int i = (u8) addr;
   paula_t * const paula = &paulaio->paula;
   const int v = (u16) data;
 
-  /* Copy into hw-reg */ 
+  /* Copy into hw-reg */
   paula->map[i] = v >> 8;
   paula->map[(u8)(i+1)] = v;
 
@@ -275,17 +277,17 @@ static void _paula_writeW(paula_io68_t * const paulaio,
     int old_dmaena = DMACON(old_dmacon);
     int new_dmaena;
     int start;
-    
+
     paula->dmacon = clearset(old_dmacon, v);
     new_dmaena = DMACON(paula->dmacon);
-    
+
     start = new_dmaena & ~old_dmaena;
-    
+
     if(start&1) reload(paula->voice+0,paula->map+PAULA_VOICEA,paula->ct_fix);
     if(start&2) reload(paula->voice+1,paula->map+PAULA_VOICEB,paula->ct_fix);
     if(start&4) reload(paula->voice+2,paula->map+PAULA_VOICEC,paula->ct_fix);
     if(start&8) reload(paula->voice+3,paula->map+PAULA_VOICED,paula->ct_fix);
-    
+
   } break;
 
   case PAULA_INTENA: {
@@ -293,16 +295,16 @@ static void _paula_writeW(paula_io68_t * const paulaio,
     old_intena=old_intena;
     paula->intena = clearset(paula->intena, v);
     new_intena = INTENA(paula->intena);
-    
+
     if ( new_intena & ~old_intena ) {
       /*Amiga Audio IRQ enabled */
     }
   } break;
-  
+
   case PAULA_INTREQ:
     write_intreq(paula, v);
     break;
-    
+
   default:
     break;
   }
@@ -311,21 +313,21 @@ static void _paula_writeW(paula_io68_t * const paulaio,
 static void paulaio_writeB(io68_t * const io)
 {
   _paula_writeB((paula_io68_t *)io,
-		io->emu68->bus_addr, io->emu68->bus_data);
+                io->emu68->bus_addr, io->emu68->bus_data);
 }
 
 static void paulaio_writeW(io68_t * const io)
 {
   _paula_writeW((paula_io68_t *)io,
-		io->emu68->bus_addr, io->emu68->bus_data);
+                io->emu68->bus_addr, io->emu68->bus_data);
 }
 
 static void paulaio_writeL(io68_t * const io)
 {
   _paula_writeW((paula_io68_t *)io,
-		io->emu68->bus_addr+0, io->emu68->bus_data>>16);
+                io->emu68->bus_addr+0, io->emu68->bus_data>>16);
   _paula_writeW((paula_io68_t *)io,
-		io->emu68->bus_addr+2, io->emu68->bus_data);
+                io->emu68->bus_addr+2, io->emu68->bus_data);
 }
 
 static interrupt68_t * paulaio_interrupt(io68_t * const io, cycle68_t cycle)
@@ -376,11 +378,11 @@ io68_t * paulaio_create(emu68_t * const emu68, paula_parms_t * const parms)
     if (paulaio) {
       paula_setup_t setup;
       if (parms) {
-	setup.parms = *parms;
+        setup.parms = *parms;
       } else {
-	setup.parms.emul  = PAULA_EMUL_DEFAULT;
-	setup.parms.hz    = 0;
-	setup.parms.clock = PAULA_CLOCK_DEFAULT;
+        setup.parms.emul  = PAULA_EMUL_DEFAULT;
+        setup.parms.hz    = 0;
+        setup.parms.clock = PAULA_CLOCK_DEFAULT;
       }
       setup.mem     = emu68->mem;
       setup.log2mem = emu68->log2mem;

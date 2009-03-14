@@ -17,14 +17,14 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
- 
+
 #include "struct68.h"
 #include "srdef68.h"
 #include "cc68.h"

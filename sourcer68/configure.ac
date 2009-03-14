@@ -9,7 +9,6 @@ dnl#
 dnl# $Id$
 dnl#
 
-
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
@@ -19,19 +18,23 @@ AC_CONFIG_SRCDIR([sourcer68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
 
+AC_USE_SYSTEM_EXTENSIONS
+LT_INIT([win32-dll])
+
+# ,----------------------------------------------------------------------.
+# | sc68                                                                 |
+# `----------------------------------------------------------------------'
+
 SC68_PACKAGE([
     68000 disassembler/sourcer.
     Support for TOS, sc68 and binary files.
-    This is part of the sc68 project.
   ])
-
-# ,----------------------------------------------------------------------.
-# | External libraries                                                   |
-# `----------------------------------------------------------------------'
-
-AC_WITH_PACKAGE([desa68],[yes])
-AC_WITH_PACKAGE([file68],[no],[],[sc68/file68.h])
-
+SC68_SYSTEM
+SC68_OPTIONS
+SC68_TOOLS
+SC68_CHECKS
+SC68_WITH([desa68],[yes])
+SC68_WITH([file68],[no],[],[sc68/file68.h])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
@@ -43,9 +46,7 @@ AC_CONFIG_FILES([
     sourcer68-${VERSION}.ebuild:sourcer68.ebuild.in
     sourcer68.1.tpl
     sourcer68.spec])
-
 AC_OUTPUT
-
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |

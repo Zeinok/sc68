@@ -15,13 +15,9 @@
 #define _FILE68_URL68_H_
 
 #ifndef FILE68_API
-#include "file68_api.h"
+# include "file68_api.h"
 #endif
 #include "istream68.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @defgroup  file68_url  URL manipulation
  *  @ingroup   file68_lib
@@ -49,7 +45,7 @@ FILE68_API
  *
  *  @note Currently the url68_local_protocol() function tests if
  *        protocol is local and seekable.
- *    
+ *
  *  @param  protocol  protocol to test
  *
  *  @return  1  protocol is local (0,"","FILE","LOCAL","NULL")
@@ -79,11 +75,7 @@ FILE68_API
 istream68_t * url68_stream_create(const char * url, int mode);
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_URL68_H_ */

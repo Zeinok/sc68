@@ -5,14 +5,16 @@
  * @date      1999/03/20
  * @brief     YM-2149 emulator plugin header.
  *
- * $Id$
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _IO68_YM_IO_H_
 #define _IO68_YM_IO_H_
 
+#include "io68_api.h"
 #include "emu68/struct68.h"
 #include "ymemul.h"
 
@@ -24,12 +26,15 @@
  *  @{
  */
 
+IO68_EXTERN
 /** Initialize YM-2149 library. */
 int ymio_init(ym_parms_t * const parms);
 
+IO68_EXTERN
 /** Shutdown YM-2149 library. */
 void ymio_shutdown(void);
 
+IO68_EXTERN
 /** Create Yamaha-2149 IO plugin instance.
  *
  *   @param  emu68  68K emulator instance
@@ -40,6 +45,7 @@ void ymio_shutdown(void);
  */
 io68_t * ymio_create(emu68_t * const emu68, ym_parms_t * const parms);
 
+IO68_EXTERN
 /** Get/Set sampling rate.
  *
  * @param  io  YM IO instance
@@ -47,33 +53,38 @@ io68_t * ymio_create(emu68_t * const emu68, ym_parms_t * const parms);
  *
  * @return actual sampling rate
  *
- */ 
+ */
 uint68_t ymio_sampling_rate(io68_t * const io, uint68_t sampling_rate);
 
+IO68_EXTERN
 /** Get ym-2149 emulator instance. */
 ym_t * ymio_emulator(io68_t * const io);
 
+IO68_EXTERN
 /** Run ym emulator.
  *  @see ym_run()
  */
 int ymio_run(const io68_t * const io, s32 * output, const cycle68_t cycles);
 
+IO68_EXTERN
 /** Get required sample buffer size.
  *  @see ym_buffersize()
  */
 uint68_t ymio_buffersize(const io68_t * const io, const cycle68_t cycles);
 
+IO68_EXTERN
 /** Convert a cpu-cycle to ym-cycle. */
 cycle68_t ymio_cycle_cpu2ym(const io68_t * const io, const cycle68_t cycles);
 
+IO68_EXTERN
 /** Convert a ym-cycle to cpu-cycle. */
 cycle68_t ymio_cycle_ym2cpu(const io68_t * const io, const cycle68_t cycles);
 
 
-/**@}*/
+/** @} */
 
 /**
- *@}
+ *  @}
  */
 
 #endif /* #ifndef _IO68_YM_IO_H_ */

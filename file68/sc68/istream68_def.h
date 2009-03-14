@@ -16,10 +16,6 @@
 
 #include "istream68.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /** @name     Open modes
  *  @ingroup  file68_istream
  *  @{
@@ -49,7 +45,7 @@ extern "C" {
 /** Test if WRITE open flags is set (returns 0 or 1). */
 #define ISTREAM68_IS_OPEN_WRITE(V) (((V)>>ISTREAM68_OPEN_WRITE_BIT)&1)
 
-/**@}*/
+/** @} */
 
 /** @name     Stream function prototypes.
  *  @ingroup  file68_istream
@@ -64,7 +60,7 @@ typedef int (* istream68_seek_t) (istream68_t *, int);
 typedef int (* istream68_read_t) (istream68_t *, void *, int);
 typedef int (* istream68_write_t) (istream68_t *, const void *, int);
 typedef void (* istream68_destroy_t) (istream68_t *);
-/**@}*/
+/** @} */
 
 /** Generic stream structure.
  *
@@ -84,9 +80,5 @@ struct _istream68_t {
   istream68_seek_t seekb;      /**< Seek backward.          */
   istream68_destroy_t destroy; /**< Destructor.             */
 };
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_ISTREAM68_DEF_H_ */

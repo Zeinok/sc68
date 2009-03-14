@@ -1,7 +1,7 @@
 /*
- *		  info68 - get sc68 file information
- *	       Copyright (C) 2001-2009 Benjamin Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                info68 - get sc68 file information
+ *             Copyright (C) 2001-2009 Benjamin Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free software:  you can  redistribute  it and/or
  * modify it  under the  terms of the  GNU General Public  License as
@@ -67,17 +67,17 @@ static int tracklist_error(const char *command)
 }
 
 static void print_option(void * data,
-			 const char * option,
-			 const char * envvar,
-			 const char * desc)
+                         const char * option,
+                         const char * envvar,
+                         const char * desc)
 {
-  fprintf(data, 
-	  "  %s or `$%s'\n"
-	  "                      %c%s\n",
-	  option, envvar, 
-	  (desc[0]>='a' && desc[0]<='z') ? desc[0]-'a'+'A' : desc[0],
-	  desc+1);
-}	 
+  fprintf(data,
+          "  %s or `$%s'\n"
+          "                      %c%s\n",
+          option, envvar,
+          (desc[0]>='a' && desc[0]<='z') ? desc[0]-'a'+'A' : desc[0],
+          desc+1);
+}
 
 static int display_help(void)
 {
@@ -93,9 +93,9 @@ static int display_help(void)
      "  -h --help           Display this message and exit\n"
      "  -V --version        Display version and exit\n"
      "  -o --output=<URI>   Change output to file (- is stdout)\n");
-   
+
   option68_help(stdout,print_option);
-   
+
   puts
     ("\n"
      "Track-list:\n"
@@ -178,7 +178,7 @@ static int display_help(void)
   puts
     ("Visit <" PACKAGE_URL ">\n"
      "Report bugs to <" PACKAGE_BUGREPORT ">");
-   
+
   return 1;
 }
 
@@ -194,7 +194,7 @@ static int display_version(void)
      "There is NO WARRANTY, to the extent permitted by law.\n"
      "\n"
      "Written by Benjamin Gerard"
-     );
+      );
   return 0;
 }
 
@@ -256,7 +256,7 @@ static int ReadTrackList(char **trackList, int max, int *from, int *to)
 {
   int fromTrack, toTrack;
   char *t = *trackList;
-  
+
   if (t) {
     /* Skip comma ',' */
     while(*t == ',') {
@@ -321,7 +321,7 @@ int main(int argc, char ** argv)
     error("info68: missing argument. Try --help.\n");
     return 1;
   }
-     
+
   /* Scan options ...  */
   for (i=1; i<argc; ++i) {
     if (!strcmp(argv[i],"--")) {
@@ -333,8 +333,8 @@ int main(int argc, char ** argv)
       return display_version();
     } else if ((!strcmp(argv[i], "-o") || !strcmp(argv[i],"--output"))) {
       if (++i >= argc) {
-	error("info69: option `%s' missing argument.\n", argv[i-1]);
-	return 2;
+        error("info69: option `%s' missing argument.\n", argv[i-1]);
+        return 2;
       }
       outname = argv[i];
     } else if (argv[i] == strstr(argv[i],"--output=")) {
@@ -353,10 +353,10 @@ int main(int argc, char ** argv)
   out = url68_stream_create(outname, 2);
   if (istream68_open(out)) {
     error ("info68: error opening output (%s).\n",
-	   out ? istream68_filename(out) : outname);
+           out ? istream68_filename(out) : outname);
     return 2;
   }
-  
+
   /* Load input file */
   d = file68_load_url(inname);
   if (!d) {
@@ -374,16 +374,16 @@ int main(int argc, char ** argv)
       trackList = argv[i]+1;
       res = ReadTrackList(&trackList, d->nb_six, &curTrack , &toTrack);
       if (res < 0) {
-	return tracklist_error(trackList);
+        return tracklist_error(trackList);
       } else if (!res) {
-	/* This can't be coz we check that almost one digit was there above */
-	error("info68: %s(%d) : Internal bug error;"
-	      " program should not reach this point\n", __FILE__, __LINE__);
-	return 0x666;
+        /* This can't be coz we check that almost one digit was there above */
+        error("info68: %s(%d) : Internal bug error;"
+              " program should not reach this point\n", __FILE__, __LINE__);
+        return 0x666;
       }
       continue;
     }
-       
+
     while (curTrack <= toTrack) {
       int esc = 0, c;
       char * s;
@@ -391,116 +391,116 @@ int main(int argc, char ** argv)
 
       /* Parse format string for this track */
       for (s=argv[i], esc=0; (c = *s, c); ++s) {
-	if (!esc) {
-	  /* Not escaped */
-	  if(esc = (c=='%'), !esc) {
-	    Putc(out,c);
-	  }
-	} else {
-	  /* Escaped */
-	  esc = 0;
-	  switch (c) {
+        if (!esc) {
+          /* Not escaped */
+          if(esc = (c=='%'), !esc) {
+            Putc(out,c);
+          }
+        } else {
+          /* Escaped */
+          esc = 0;
+          switch (c) {
 
-	    /* SPECIAL commands */
-	  case 'L':
-	    Putc(out,'\n');
-	    break;
-	  case '%':
-	    Putc(out,'%');
-	    break;
-	    
-	    /* DISK commands */
-	  case '#':
-	    PutI(out,d->nb_six);
-	    break;
-	  case '?':
-	    PutI(out,d->default_six+1);
-	    break;
-	  case 'N':
-	    Puts(out,d->name);
-	    break;
-	  case 'A':
-	    Puts(out,d->mus[d->default_six].author);
-	    break;
-	  case 'C':
-	    Puts(out,d->mus[d->default_six].composer);
-	    break;
-	  case 'P':
-	    Puts(out,d->mus[d->default_six].ripper);
-	    break;
-	  case 'V':
-	    Puts(out,d->mus[d->default_six].converter);
-	    break;
-	  case 'T':
-	    PutI(out,d->time_ms/1000u);
-	    break;
-	  case 'Y':
-	    Puts(out,strtime68(0, d->nb_six, d->time_ms/1000u));
-	    break;
-	  case 'H':
-	    Puts(out,HWflags(d->hwflags));
-	    break;
+            /* SPECIAL commands */
+          case 'L':
+            Putc(out,'\n');
+            break;
+          case '%':
+            Putc(out,'%');
+            break;
 
-	    /* TRACK Commands */
-	  case '&':
-	    PutI(out,curTrack+1);
-	    break;
-	  case 'n':
-	    Puts(out,m->name);
-	    break;
-	  case 'a':
-	    Puts(out,m->author);
-	    break;
-	  case 'c':
-	    Puts(out,m->composer);
-	    break;
-	  case 'p':
-	    Puts(out,m->ripper);
-	    break;
-	  case 'v':
-	    Puts(out,m->converter);
-	    break;
-	  case 'r':
-	    Puts(out,m->replay ? m->replay : "built-in");
-	    break;
-	  case 't':
-	    PutI(out,m->time_ms/1000u);
-	    break;
-	  case 'y':
-	    Puts(out,strtime68(0, curTrack+1, m->time_ms/1000u));
-	    break;
-	  case 'h':
-	    Puts(out, HWflags(m->hwflags));
-	    break;
-	  case 'f':
-	    PutI(out,m->frq);
-	    break;
-	  case '@':
-	    PutX(out,m->a0);
-	    break;
+            /* DISK commands */
+          case '#':
+            PutI(out,d->nb_six);
+            break;
+          case '?':
+            PutI(out,d->default_six+1);
+            break;
+          case 'N':
+            Puts(out,d->name);
+            break;
+          case 'A':
+            Puts(out,d->mus[d->default_six].author);
+            break;
+          case 'C':
+            Puts(out,d->mus[d->default_six].composer);
+            break;
+          case 'P':
+            Puts(out,d->mus[d->default_six].ripper);
+            break;
+          case 'V':
+            Puts(out,d->mus[d->default_six].converter);
+            break;
+          case 'T':
+            PutI(out,d->time_ms/1000u);
+            break;
+          case 'Y':
+            Puts(out,strtime68(0, d->nb_six, d->time_ms/1000u));
+            break;
+          case 'H':
+            Puts(out,HWflags(d->hwflags));
+            break;
 
-	  default:
-	    Putc(out,'%');
-	    Putc(out,c);
-	  } /* switch */
-	} /* if else */
+            /* TRACK Commands */
+          case '&':
+            PutI(out,curTrack+1);
+            break;
+          case 'n':
+            Puts(out,m->name);
+            break;
+          case 'a':
+            Puts(out,m->author);
+            break;
+          case 'c':
+            Puts(out,m->composer);
+            break;
+          case 'p':
+            Puts(out,m->ripper);
+            break;
+          case 'v':
+            Puts(out,m->converter);
+            break;
+          case 'r':
+            Puts(out,m->replay ? m->replay : "built-in");
+            break;
+          case 't':
+            PutI(out,m->time_ms/1000u);
+            break;
+          case 'y':
+            Puts(out,strtime68(0, curTrack+1, m->time_ms/1000u));
+            break;
+          case 'h':
+            Puts(out, HWflags(m->hwflags));
+            break;
+          case 'f':
+            PutI(out,m->frq);
+            break;
+          case '@':
+            PutX(out,m->a0);
+            break;
+
+          default:
+            Putc(out,'%');
+            Putc(out,c);
+          } /* switch */
+        } /* if else */
       } /* for */
 
-	/* Get next track. */
+        /* Get next track. */
       if (++curTrack > toTrack) {
-	int res = ReadTrackList(&trackList, d->nb_six, &curTrack , &toTrack);
-	if (res < 0) {
-	  return tracklist_error(trackList);
-	} else if (!res) {
-	  toTrack = curTrack = d->default_six;
-	  break;
-	}
+        int res = ReadTrackList(&trackList, d->nb_six, &curTrack , &toTrack);
+        if (res < 0) {
+          return tracklist_error(trackList);
+        } else if (!res) {
+          toTrack = curTrack = d->default_six;
+          break;
+        }
       }
     } /* while track */
   } /* while arg */
-    
+
   istream68_destroy(out);
   free68(d);
-  
+
   return 0;
 }

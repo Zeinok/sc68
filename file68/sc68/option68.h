@@ -15,11 +15,7 @@
 #define _FILE68_OPTION68_H_
 
 #ifndef FILE68_API
-#include "file68_api.h"
-#endif
-
-#ifdef __cplusplus
-extern "C" {
+# include "file68_api.h"
 #endif
 
 /** @defgroup  file68_option  Options manipulation
@@ -32,9 +28,9 @@ extern "C" {
 
 /** option argument types. */
 enum option68_e {
-  option68_BOL = 0,		/**< Boolean (set or unset). */
-  option68_STR = 1,		/**< String value.           */
-  option68_INT = 2		/**< Intrger value.          */
+  option68_BOL = 0,             /**< Boolean (set or unset). */
+  option68_STR = 1,             /**< String value.           */
+  option68_INT = 2              /**< Intrger value.          */
 };
 
 /** Options help display function.
@@ -48,23 +44,23 @@ typedef void (*option68_help_t)(void *, const char*, const char*, const char*);
 
 typedef struct option68_s option68_t;
 
-/** Command line option description and parsing info. */ 
+/** Command line option description and parsing info. */
 struct option68_s {
   int            has_arg; /**< @see option68_e. 1st complement => setted */
   const char   * prefix;  /**< Key prefix.                               */
-  const char   * name;	  /**< Key name (bare).                          */
-  const char   * cat;	  /**< Category name.                            */
-  const char   * desc;	  /**< Short description.                        */
+  const char   * name;    /**< Key name (bare).                          */
+  const char   * cat;     /**< Category name.                            */
+  const char   * desc;    /**< Short description.                        */
   union {
-    const char * str;	   /**< Value for string argument.               */
-    int          num;	   /**< Value for integer argument.              */
-  }              val;	   /**< Melted value.                            */
+    const char * str;      /**< Value for string argument.               */
+    int          num;      /**< Value for integer argument.              */
+  }              val;      /**< Melted value.                            */
 
   /** @name internals
    *  @{
    */
   int prefix_len;      /**< length of option68_t::prefix */
-  int name_len;	       /**< length of option68_t::name   */
+  int name_len;        /**< length of option68_t::name   */
   option68_t   * next; /**< Chain to next option.        */
   /**@}*/
 };
@@ -147,15 +143,11 @@ FILE68_API
  * @param   set  enable option set at the same time
  * @retval  0    on error (or envvar does not exist)
  */
-const char * option68_getenv(option68_t * opt, const int set); 
+const char * option68_getenv(option68_t * opt, const int set);
 
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_OPTION68_H_ */

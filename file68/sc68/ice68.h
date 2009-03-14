@@ -16,10 +16,6 @@
 
 #include "istream68.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /** @defgroup  file68_ice  ICE loader support.
  *  @ingroup   file68_lib
  *
@@ -28,6 +24,7 @@ extern "C" {
  *  @{
  */
 
+FILE68_EXTERN
 /** Get ICE! depacker version.
  *
  *  @retval   1  ICE! is supported but unknown version
@@ -38,6 +35,7 @@ extern "C" {
  */
 int ice68_version(void);
 
+FILE68_EXTERN
 /** Test ice file header magic header.
  *
  *  @param  buffer  Buffer containing at least 12 bytes from ice header.
@@ -47,6 +45,7 @@ int ice68_version(void);
  */
 int ice68_is_magic(const void * buffer);
 
+FILE68_EXTERN
 /** Load an iced stream.
  *
  *    The ice68_load() function loads and depack an ice packed file from a
@@ -60,6 +59,7 @@ int ice68_is_magic(const void * buffer);
  */
 void * ice68_load(istream68_t * is, int * ulen);
 
+FILE68_EXTERN
 /** Load an iced file.
  *
  * @param  fname    File to load.
@@ -73,11 +73,7 @@ void * ice68_load(istream68_t * is, int * ulen);
 void * ice68_load_file(const char * fname, int * ulen);
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_ICE68_H_ */

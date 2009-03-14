@@ -5,18 +5,14 @@
  * @date      1999/13/03
  * @brief     Status Register (SR) definition header.
  *
- * $Id$
- *
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _SRDEF68_H_
 #define _SRDEF68_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @defgroup  emu68_srdef_devel  Status Register (SR) definitions
  *  @ingroup   emu68_devel
@@ -26,7 +22,7 @@ extern "C" {
  *   the LSB and privileged processor status in MSB. EMU68 does not
  *   currently handle supervisor and trace mode. Internal processor level is
  *   partially managed. Each SR bit is defined by its bit number (SR_x_BIT)
- *   and the corresponding value (SR_x) where x is one of C,V,Z,N,X,S or T. 
+ *   and the corresponding value (SR_x) where x is one of C,V,Z,N,X,S or T.
  *   SR_IPL_BIT is used to locate the less significant bit position of the 3
  *   IPL bits. Macros are available to help with SR bit manipulations.
  *
@@ -55,7 +51,7 @@ extern "C" {
 #define SR_S (1<<SR_S_BIT)  /**< Superuser value.      */
 #define SR_T (1<<SR_T_BIT)  /**< Trace value.          */
 
-/**@}*/
+/** @} */
 
 
 /** @name  Condition tests.
@@ -88,7 +84,7 @@ extern "C" {
 #define IS_T(sr)  1
 #define IS_F(sr)  0
 
-/**@}*/
+/** @} */
 
 
 /** @name  SR manipulations.
@@ -99,9 +95,9 @@ extern "C" {
  */
 
 /** Set SR Z and N bit for SRC value. */
-#define MOVESR(SR,SRC) (SR) = \
-	( ((SR)&~(SR_Z|SR_N|SR_V|SR_C)) | \
-	(((SRC)==0)<<SR_Z_BIT ) | (( (SRC)<0)<<SR_N_BIT ) )
+#define MOVESR(SR,SRC) (SR) =                                   \
+    ( ((SR)&~(SR_Z|SR_N|SR_V|SR_C)) |                           \
+      (((SRC)==0)<<SR_Z_BIT ) | (( (SRC)<0)<<SR_N_BIT ) )
 
 /** Get CCR value. */
 #define GET_CCR(SR) ((u8)(SR))
@@ -115,14 +111,10 @@ extern "C" {
 /** Change IPL for SR value. */
 #define SET_IPL(sr,n) (sr) = (((sr)&(7<<SR_IPL_BIT)) | ((n)<<SR_IPL_BIT)))
 
-/**@}*/
+/** @} */
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _SRDEF68_H_ */

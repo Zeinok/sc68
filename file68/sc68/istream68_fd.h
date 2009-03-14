@@ -16,10 +16,6 @@
 
 #include "istream68.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /** @name     File descriptor stream
  *  @ingroup  file68_istream
  *
@@ -28,6 +24,7 @@ extern "C" {
  *  @{
  */
 
+FILE68_EXTERN
 /** Creates a stream for "UNIX" file descriptor.
  *
  *  If fd parameters is not -1, it is used to as file descriptor for
@@ -51,11 +48,7 @@ extern "C" {
 istream68_t * istream68_fd_create(const char * fname, int fd, int mode);
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #define _FILE68_ISTREAM68_FD_H_ */

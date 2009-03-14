@@ -5,35 +5,39 @@
  * @date     2003/08/06
  * @brief    ICE! depacker header
  *
- * $Id$
  */
+
+/* $Id$ */
 
 #ifndef _UNICE68_H_
 #define _UNICE68_H_
 
-/* Building DSO or library */
-#if defined(UNICE68_EXPORT)
-
-# if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
-#   define UNICE68_API __declspec(dllexport)
-# elif defined(HAVE_VISIBILITY)
-#  define UNICE68_API extern __attribute__ ((visibility("default")))
+#ifndef UNICE68_EXTERN
+# ifdef __cplusplus
+#   define UNICE68_EXTERN extern "C"
+# else
+#   define UNICE68_EXTERN extern
 # endif
-
-/* Using */
-#else
-
-# if defined(UNICE68_DLL) && defined(HAVE_DECLSPEC)
-#  define UNICE68_API __declspec(dllimport)
-# elif defined(HAVE_VISIBILITY)
-#  define UNICE68_API extern
-# endif
-
 #endif
 
-
-#ifdef __cplusplus
-extern "C" {
+#ifndef UNICE68_API
+/* Building */
+# ifdef UNICE68_EXPORT
+#  if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
+#   define UNICE68_API __declspec(dllexport)
+#  elif defined(HAVE_VISIBILITY)
+#   define UNICE68_API UNICE68_EXTERN __attribute__ ((visibility("default")))
+#  else
+#   define UNICE68_API UNICE68_EXTERN
+#  endif
+/* Using */
+# else
+#  if defined(UNICE68_DLL)
+#   define UNICE68_API __declspec(dllimport)
+#  else
+#   define UNICE68_API UNICE68_EXTERN
+#  endif
+# endif
 #endif
 
 /** @defgroup  unice68_lib  unice68 library
@@ -55,19 +59,13 @@ extern "C" {
  */
 
 #ifndef UNICE68_API
-/** unice68 exported symbol.
+/** unice68 symbols specification.
  *
- *  Define special atribut for exported symbol.
- *
- *  - extern: static or classic .so library
- *  - __attribute__ (visibility("default"))): gcc with visibility support.
- *  - __declspec(dllexport): creating a win32 DLL.
- *  - __declspec(dllimport): using a win32 DLL.
+ *  Define special atributs for importing/exporting unice68 symbols.
  */
-# define UNICE68_API extern
+#define UNICE68_API UNICE68_EXTERN
+#error "UNICE68_API should be defined"
 #endif
-
-  /* */
 
 UNICE68_API
 /** Get unice68 version.
@@ -96,7 +94,7 @@ UNICE68_API
  *    The unice68_depacked_size() function returns the uncompressed
  *    size of a ICE compressed buffer. If p_size is not 0 it is fill with
  *    the size of the compressed data found in header (useful for stream
- *    operation). 
+ *    operation).
  *    If the value pointed by p_csize is not 0 the function assumes that it is
  *    an expected compressed size and compares it to header one. If it differs
  *    the function returns the bitwise NOT value of uncompressed data. This
@@ -142,11 +140,7 @@ UNICE68_API
 int unice68_depacker(void * dst, const void * src);
 
 /**
- * @}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _UNICE68_H_ */

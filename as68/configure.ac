@@ -9,7 +9,6 @@ dnl#
 dnl# $Id$
 dnl#
 
-
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
@@ -18,8 +17,19 @@ AC_INIT([as68],[20090117],[benjihan -4t- users.sourceforge -d0t- net])
 AC_CONFIG_SRCDIR([as68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
-SC68_PACKAGE([Motoral MC68000 macro assembler.])
 
+AC_USE_SYSTEM_EXTENSIONS
+LT_INIT([win32-dll])
+
+# ,----------------------------------------------------------------------.
+# | sc68                                                                 |
+# `----------------------------------------------------------------------'
+
+SC68_PACKAGE([Motoral MC68000 macro assembler.])
+SC68_SYSTEM
+SC68_OPTIONS
+SC68_TOOLS
+SC68_CHECKS
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
@@ -32,7 +42,6 @@ AC_CONFIG_FILES([
   as68.spec
   package.texi])
 AC_OUTPUT
-
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |

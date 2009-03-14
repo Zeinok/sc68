@@ -1,4 +1,5 @@
-/*                     debug68 - sc68 debugger
+/*
+ *                     debug68 - sc68 debugger
  *
  *            Copyright (C) 1998-2009 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
@@ -87,9 +88,9 @@ typedef int (command_fct_t)(int,char**);
 typedef struct
 {
   char *com,  /* command name */
-    *altcom,  /* alternate command name ( shortcut ) */
-    *use,     /* usage strng */
-    *help;    /* help command string */
+  *altcom,  /* alternate command name ( shortcut ) */
+  *use,     /* usage strng */
+  *help;    /* help command string */
   command_fct_t *fnct;
 } command_t;
 
@@ -100,10 +101,10 @@ static int setreplay(char *newname);
 
 /* Command fonctions declarations  */
 static command_fct_t loaddisk_com, mergedisk_com, savedisk_com,
-  diskinfo_com, settrack_com, trackinfo_com, exit_com,
-  help_com, settime_com, findtime_com, debug_com, capitalize_com,
-  replay_com, author_com, composer_com, name_com, deltrack_com,
-  frq_com, loaddata_com, savedata_com, dup_com, address_com;
+diskinfo_com, settrack_com, trackinfo_com, exit_com,
+help_com, settime_com, findtime_com, debug_com, capitalize_com,
+replay_com, author_com, composer_com, name_com, deltrack_com,
+frq_com, loaddata_com, savedata_com, dup_com, address_com;
 
 static command_t commands[] = {
   {
@@ -178,7 +179,7 @@ static command_t commands[] = {
   },
   {
     "del","-","track-nmber",
-   "Remove track from disk",deltrack_com
+    "Remove track from disk",deltrack_com
   },
   {
     "frq","f=","[track-list] replay-frq(hz)",
@@ -284,7 +285,7 @@ static int print_version(void)
      "There is NO WARRANTY, to the extent permitted by law.\n"
      "\n"
      "Written by Benjamin Gerard <" PACKAGE_BUGREPORT ">"
-     );
+      );
   return 0;
 }
 
@@ -414,7 +415,7 @@ static u8 * load_external_replay(istream68_t * is, int *psize)
   *psize = size;
   return buf;
 
- error:
+  error:
   free68(buf);
   return 0;
 }
@@ -459,8 +460,8 @@ static char *check_a_name(char *name)
   if (name) {
     for(i=0; list[i][0]; i++) {
       if(!strcmp68(name,list[i][0])) {
-	name = list[i][1];
-	break;
+        name = list[i][1];
+        break;
       }
     }
   }
@@ -498,8 +499,8 @@ static int checktrack(int track)
   }
   if(track<0 || track>=disk->nb_six) {
     return debug68_error_add("File Corrupted : track #%d "
-			 "Out of range [0..%d]",
-			 track, disk->nb_six-1);
+                             "Out of range [0..%d]",
+                             track, disk->nb_six-1);
   }
   if(disk->default_six < 0) {
     disk->default_six = 0;
@@ -536,9 +537,9 @@ static int trackinfo(int trk, int infolevel)
   /* level 1 : time, music name */
   if (infolevel&1) {
     printf("%c%-8s %-40s",
-	   (trk==track) ? '*' : ' ',
-	   strtime68(0, trk+1, mus->time_ms/1000),
-	   mus->name);
+           (trk==track) ? '*' : ' ',
+           strtime68(0, trk+1, mus->time_ms/1000),
+           mus->name);
   }
 
   /* level 2 : authors, composer */
@@ -557,7 +558,7 @@ static int trackinfo(int trk, int infolevel)
   /* level 4 : IO-chip, replay rate , cycles/pass */
   if (infolevel&4) {
     if(mus->hwflags.bit.ym) {
-	printf("  YM-2149 (Atari STF/E sound chip) required\n");
+      printf("  YM-2149 (Atari STF/E sound chip) required\n");
     }
     if(mus->hwflags.bit.ste) {
       printf("  MicroWire (Atari STE sound chip) required\n");
@@ -566,28 +567,28 @@ static int trackinfo(int trk, int infolevel)
       printf("  Paula (Amiga 1000/500/1200... sound chip) required\n");
     }
     printf("  replay rate: %d Hz (%u cpf)\n",
-	   mus->frq, cycle_per_frame(mus->frq));
+           mus->frq, cycle_per_frame(mus->frq));
   }
 
   /* level 8 : Load address, External replay */
   if (infolevel&8) {
     if (!mus->replay) {
       if(mus->a0 != SC68_LOADADDR) {
-	printf("  Absolute position built-in replay @ $%X-%X (%d bytes)\n",
-	       mus->a0,mus->a0+mus->datasz-1,mus->datasz);
+        printf("  Absolute position built-in replay @ $%X-%X (%d bytes)\n",
+               mus->a0,mus->a0+mus->datasz-1,mus->datasz);
       } else {
-	printf("  Relocatable built-in replay (%d bytes)\n",
-	       mus->datasz);
+        printf("  Relocatable built-in replay (%d bytes)\n",
+               mus->datasz);
       }
     } else {
       if (mus->a0 != SC68_LOADADDR) {
-	printf("  Absolute external replay <%s> @ $%X-%X (%d bytes)\n",
-	       mus->replay,
-	       mus->a0,mus->a0+mus->datasz-1,mus->datasz);
+        printf("  Absolute external replay <%s> @ $%X-%X (%d bytes)\n",
+               mus->replay,
+               mus->a0,mus->a0+mus->datasz-1,mus->datasz);
       } else {
-	printf("  Relocatable external replay <%s> (%d bytes)\n",
-	       mus->replay,
-	       mus->datasz);
+        printf("  Relocatable external replay <%s> (%d bytes)\n",
+               mus->replay,
+               mus->datasz);
       }
     }
   }
@@ -613,7 +614,7 @@ static int diskinfo(void)
     }
   }
   printf(" -- -----\n %s\n",
-	 strtime68(0,disk->nb_six,ms_to_sec(disk->time_ms)));
+         strtime68(0,disk->nb_six,ms_to_sec(disk->time_ms)));
   return 0;
 }
 
@@ -718,12 +719,12 @@ static int loaddisk(char *fname, int mergemode)
     return debug68_error_add("File corrupted : Default track out of disk bound.");
   }
   totaltime();
-  
+
   return 0;
 }
 
 static int loaddata(char *fname, int d0, int a0, int frq, int flags,
-		    char *mname, char *aname, char *rname)
+                    char *mname, char *aname, char *rname)
 {
   disk68_t * newdisk;
   istream68_t * is;
@@ -748,12 +749,12 @@ static int loaddata(char *fname, int d0, int a0, int frq, int flags,
   }
 
   printf("Load data file : %s (%d bytes)\n"
-	 " d0=%d a0=$%x frq=%d flags=%c%c%c (%x)\n",
-	 fname, flen, d0, a0, frq,
-	 'y'-((!!(flags&SC68_YM))<<5),
-	 's'-((!!(flags&SC68_STE))<<5),
-	 'a'-((!!(flags&SC68_AMIGA))<<5),
-	 flags);
+         " d0=%d a0=$%x frq=%d flags=%c%c%c (%x)\n",
+         fname, flen, d0, a0, frq,
+         'y'-((!!(flags&SC68_YM))<<5),
+         's'-((!!(flags&SC68_STE))<<5),
+         'a'-((!!(flags&SC68_AMIGA))<<5),
+         flags);
 
   size = flen + sizeof(*newdisk);
   if(newdisk=(disk68_t *)alloc68(size), !newdisk) {
@@ -833,7 +834,7 @@ static int setreplay(char *newname)
   free68(replay);
   replay = 0;
   replaysz = 0;
-  
+
   if (!newname) {
     return 0;
   }
@@ -881,7 +882,7 @@ static int settrack(int newtrack)
   thisreplay = (forced_replay) ? forced_replay : mus->replay ;
   if(err=setreplay(thisreplay), err<0) {
     return debug68_error_add("Failed loading track %d external replay <%s>\n",
-			 track,thisreplay);
+                             track,thisreplay);
   }
   return 0;
 }
@@ -917,7 +918,7 @@ static int init68K(int size)
 /*   err = io68_init(&io68_parms); */
 /*   sc68_debug(sc68,"init_emu68() : io68 library init %s\n", ok_int(err)); */
 
- error:
+  error:
   sc68_debug(sc68,"} init_emu68() => [%s]\n", ok_int(err));
   return err;
 }
@@ -935,7 +936,7 @@ static int settime(int newtrack, unsigned newtime_ms, unsigned newframe)
 
   newtime = ms_to_sec(newtime_ms);
   printf("Set track #%02d time to %02d:%02d (%d frames)\n",
-	 newtrack+1,newtime/60,newtime%60, newframe);
+         newtrack+1,newtime/60,newtime%60, newframe);
   disk->mus[newtrack].frames  = newframe;
   disk->mus[newtrack].time_ms = newtime_ms;
 
@@ -956,13 +957,13 @@ static int prepare_reg68(void)
     return err;
   }
   printf("Prepare 68000:\n"
-	 " - Disk [%s]\n"
-	 " - Track #%02d [%s]\n"
-	 " - Replay [%s]\n"
-	 " - Frq:%uHz Cpf:%u\n"
-	 , disk->name, track+1, mus->name,
-	 replayname ? replayname : "built-in",
-	 mus->frq, cycleperpass);
+         " - Disk [%s]\n"
+         " - Track #%02d [%s]\n"
+         " - Replay [%s]\n"
+         " - Frq:%uHz Cpf:%u\n"
+         , disk->name, track+1, mus->name,
+         replayname ? replayname : "built-in",
+         mus->frq, cycleperpass);
 
   /* Must be call because of some _DEBUG test */
   emu68_reset(emu68);
@@ -989,7 +990,7 @@ static int prepare_reg68(void)
   /* Display IO list */
 /*   for(i=0, io=REG68.iohead; io; io=io->next, i++) { */
 /*     printf(" - io #%d/%d : '%s' %x-%x\n", */
-/* 	   i+1,REG68.nio,io->name,io->addr_low,io->addr_high); */
+/*         i+1,REG68.nio,io->name,io->addr_low,io->addr_high); */
 /*   } */
 
   if (setreplay(mus->replay) < 0) {
@@ -1001,18 +1002,18 @@ static int prepare_reg68(void)
     if(emu68_memput(emu68,A0,replay,replaysz)<0) {
       debug68_error_add(emu68_error_get());
       return
-	debug68_error_add("Failed copying external replay into 68K memory");
+        debug68_error_add("Failed copying external replay into 68K memory");
     }
     printf(" - External replay <%s> loaded @$%X-%X\n",
-	   replayname, A0, A0+replaysz-1);
+           replayname, A0, A0+replaysz-1);
     data = A0 + ((replaysz+1)&-2);
     /* Check memory overflow */
-    
+
     if(EMU68_memvalid(data,mus->datasz+1024)) {
       EMU68error_get(); /* Pop error message !!! */
       data = A0 - ((mus->datasz+1025)&-2);
       if (data<0x1000) {
-	return debug68_error_add("No room for copying data into 68K memory");
+        return debug68_error_add("No room for copying data into 68K memory");
       }
     }
     A0 = data;
@@ -1025,9 +1026,9 @@ static int prepare_reg68(void)
 
   /* $$$ NOTE: Absolute/Indepenadnt test is broken */
   printf(" - %s position %s loaded @$%X-%X\n",
-	 (a0 == SC68_LOADADDR) ? "Independant" : "Absolute",
-	 replay ? "music data" : " music replay and data",
-	 A0,A0+mus->datasz-1);
+         (a0 == SC68_LOADADDR) ? "Independant" : "Absolute",
+         replay ? "music data" : " music replay and data",
+         A0,A0+mus->datasz-1);
 
   /* 68K registers init */
   REG68.pc   = playaddr;
@@ -1048,10 +1049,10 @@ static int prepare_reg68(void)
 /* Memory & Time checker
  */
 static int find_time(u32 nbsec,
-		     u32 *pt_frm,
-		     u32 *pt_sec,
-		     u32 *pt_memmin,
-		     u32 *pt_memmax)
+                     u32 *pt_frm,
+                     u32 *pt_sec,
+                     u32 *pt_memmin,
+                     u32 *pt_memmax)
 {
   int err;
   u32 lastframe, nbframe;
@@ -1097,15 +1098,15 @@ static int find_time(u32 nbsec,
       break;
     }
     printf("Pass #%d: [%s] (%7u frames, %u cpf). Processing ... ", pass,
-	   strtime68(0,track+1, nbsec), nbframe-i, cycleperpass);
+           strtime68(0,track+1, nbsec), nbframe-i, cycleperpass);
     fflush(stdout);
     /* Run emulation code for given time */
     emu68->framechk = 0;
     for(lf=0; i<nbframe; i++) {
       emu68_level_and_interrupt(emu68,cycleperpass);
       if(emu68->framechk) {
-	lastframe = i;
-	lf++;
+        lastframe = i;
+        lf++;
       }
     }
     printf("[%7d], %u\n", lf, lastframe);
@@ -1115,7 +1116,7 @@ static int find_time(u32 nbsec,
     nb_ms = frames_to_ms(lastframe,cycleperpass);
     nbsec = ms_to_sec(nb_ms);
     printf("Last frame: %u [%s]\n", lastframe,
-	   strtime68(0, -1, nbsec));
+           strtime68(0, -1, nbsec));
     nbframe *= 2;
   } while(1);
 
@@ -1140,22 +1141,22 @@ static int find_time(u32 nbsec,
   printf("Last frame       : %u [%s]\n", lastframe, strtime68(0,-1, nbsec));
   printf("Memory hit       : [$%x-$%x] (%d bytes)\n", min,max,max-min);
   printf("Paula access     : %c%c\n",
-	 (pl_dio->access & 1) ? 'R' : '-',
-	 (pl_dio->access & 2) ? 'W' : '-');
+         (pl_dio->access & 1) ? 'R' : '-',
+         (pl_dio->access & 2) ? 'W' : '-');
   printf("YM-2149 access   : %c%c\n",
-	 (ym_dio->access & 1) ? 'R' : '-',
-	 (ym_dio->access & 2) ? 'W' : '-');
+         (ym_dio->access & 1) ? 'R' : '-',
+         (ym_dio->access & 2) ? 'W' : '-');
   printf("MicroWire access : %c%c\n",
-	 (mw_dio->access & 1) ? 'R' : '-',
-	 (mw_dio->access & 2) ? 'W' : '-');
+         (mw_dio->access & 1) ? 'R' : '-',
+         (mw_dio->access & 2) ? 'W' : '-');
   printf("shifter access   : %c%c\n",
-	 (sh_dio->access & 1) ? 'R' : '-',
-	 (sh_dio->access & 2) ? 'W' : '-');
+         (sh_dio->access & 1) ? 'R' : '-',
+         (sh_dio->access & 2) ? 'W' : '-');
 
   if (!(pl_dio->access|ym_dio->access|mw_dio->access|sh_dio->access)) {
     printf("No hardware access detected !!!\n");
   } else if (pl_dio->access &&
-	     (ym_dio->access|mw_dio->access|sh_dio->access)) {
+             (ym_dio->access|mw_dio->access|sh_dio->access)) {
     printf("Both Atari and Amiga hardware detected !!!\n");
   } else {
     int old;
@@ -1178,7 +1179,7 @@ static int find_time(u32 nbsec,
     }
 
   }
-  
+
   return 0;
 }
 
@@ -1188,14 +1189,14 @@ static char * prompt(void)
 
   if (!debugmode) {
     if (!disk) {
-	return "No Disk>";
+      return "No Disk>";
     } else {
       sprintf(tmp, "%s (#%d)>",disk->name,track+1);
       return tmp;
     }
   }  else {
     if (!disk) {
-	return "Nothing to debug ('x' to exit debug mode)>";
+      return "Nothing to debug ('x' to exit debug mode)>";
     } else {
       return debug68_prompt(disk->name,track+1);
     }
@@ -1214,7 +1215,7 @@ static int interractif(void)
   int err,i;
   debug68_cli_t cli;
   memset(&cli,0,sizeof(cli));
-  
+
   while (!quit) {
     int hascom = debug68_cli_read(prompt(), &cli) > 0;
     int testmode;
@@ -1228,9 +1229,9 @@ static int interractif(void)
     /* Debugger mode */
     if(debugmode) {
       if(err=debug68_newcom(na,a), err<0) {
-	spoolerror();
+        spoolerror();
       } else if (err > 0) {
-	debugmode = 0;
+        debugmode = 0;
       }
       continue;
     }
@@ -1248,41 +1249,41 @@ static int interractif(void)
       int not = 0, res = 0, err = 0, c;
 
       for (s=a[0]; !err && ((c=*s++),c); ) {
-	switch (c) {
-	case '!': not = !not; break;
-	case '=': res = res || (quit_code == 0); break;
-	case '>': res = quit_code > 0; break;
-	case '<': res = quit_code < 0; break;
-	default:
-	  debug68_error_add("Invalid test char '%c'", c);
-	  err = 1;
-	  break;
-	}
+        switch (c) {
+        case '!': not = !not; break;
+        case '=': res = res || (quit_code == 0); break;
+        case '>': res = quit_code > 0; break;
+        case '<': res = quit_code < 0; break;
+        default:
+          debug68_error_add("Invalid test char '%c'", c);
+          err = 1;
+          break;
+        }
       }
 
       if (err) {
-	debug68_error_add("Prefix test syntax error");
-	spoolerror();
-	continue;
+        debug68_error_add("Prefix test syntax error");
+        spoolerror();
+        continue;
       }
       if (!(res ^ not)) {
-	continue;
+        continue;
       }
       /* Start after test. */
       if (--na <= 0) {
-	continue;
+        continue;
       }
       a++;
     }
 
     for(i=0; commands[i].com; i++) {
       if( ! strcmp68(commands[i].com,    a[0]) ||
-	  ! strcmp68(commands[i].altcom, a[0])) {
-	quit_code = (*commands[i].fnct)(na,a);
-	if(quit_code < 0) {
-	  spoolerror();
-	}
-	break;
+          ! strcmp68(commands[i].altcom, a[0])) {
+        quit_code = (*commands[i].fnct)(na,a);
+        if(quit_code < 0) {
+          spoolerror();
+        }
+        break;
       }
     }
     if (!commands[i].com) {
@@ -1294,15 +1295,15 @@ static int interractif(void)
   return quit_code;
 }
 
-void sc68_emulators(sc68_t    * sc68, 
-		    emu68_t  ** p_emu68,
-		    io68_t  *** p_ios68);
+void sc68_emulators(sc68_t    * sc68,
+                    emu68_t  ** p_emu68,
+                    io68_t  *** p_ios68);
 
-static int opt_vers, opt_help; 
+static int opt_vers, opt_help;
 
 int main(int argc, char *argv[])
 {
-  int err, i, j;
+  int err = -1, i, j;
   sc68_init_t   init68;
   sc68_create_t create68;
   const my_option_t longopts[] = {
@@ -1343,10 +1344,10 @@ int main(int argc, char *argv[])
       getopt_long(argc, argv, shortopts, longopts, &longindex);
 
     switch (val) {
-    case  -1: break;		    /* Scan finish */
+    case  -1: break;                /* Scan finish */
     case 'h': opt_help = 1; break;  /* --help      */
     case 'V': opt_vers = 1; break;  /* --version   */
-    case '?':			    /* Unknown or missing parameter */
+    case '?':                       /* Unknown or missing parameter */
       goto error;
     default:
       fprintf(stderr,"%s: unexpected getopt return value (%d)\n", argv[0], val);
@@ -1381,7 +1382,7 @@ int main(int argc, char *argv[])
   diskinfo();
   err = interractif();
 
- error:
+  error:
   sc68_destroy(sc68);
   sc68_shutdown();
   return err;
@@ -1423,7 +1424,7 @@ static int help_com(int na, char **a)
   } else {
     for(j=1; j<na;j++) {
       if(help_on(a[j]) < 0) {
-	printf("Unknown command `%s'\n",a[j]);
+        printf("Unknown command `%s'\n",a[j]);
       }
     }
   }
@@ -1468,7 +1469,7 @@ static int savedisk_com(int na, char **a)
       return debug68_error_add("sd: bad compression parameter. Must be [0..9]");
     }
   }
-      
+
   if (na<2) {
     if(!lastload_fname || !lastload_fname[0]) {
       return help_on("sd");
@@ -1569,39 +1570,39 @@ static int settime_com(int na, char **a)
   /* settime ALL|* mm:sec */
   all = !strcmp68(a[1],"ALL") || !strcmp68(a[1],"*");
   if(all)
-    {
-      if(na!=3)
-	return debug68_error_add("bad parmeters : settime ALL|* mm:sec");
-      if(newtime=read_time_format(a[2]), newtime<0)
-	return debug68_error_add("found %s, expected time format mm:sec",a[2]);
-      for(newtrack=0; newtrack>=0 && checktrack(newtrack)==newtrack; newtrack++)
-	if(err=settime(newtrack,newtime,-1), err<0)
-	  return err;
-      return 0;
-    }
+  {
+    if(na!=3)
+      return debug68_error_add("bad parmeters : settime ALL|* mm:sec");
+    if(newtime=read_time_format(a[2]), newtime<0)
+      return debug68_error_add("found %s, expected time format mm:sec",a[2]);
+    for(newtrack=0; newtrack>=0 && checktrack(newtrack)==newtrack; newtrack++)
+      if(err=settime(newtrack,newtime,-1), err<0)
+        return err;
+    return 0;
+  }
 
   /* settime [mm:sec] [ [track mm:sec] ... ] */
   for(i=1; i<na; i++)
-    {
-      int gettime,gettrack;
-      gettrack = read_unsigned(a[i]);
-      gettime  = read_time_format(a[i]);
-      if(gettrack>0)
-	newtrack = gettrack-1;
-      else if(gettime>=0)
-	newtime = gettime;
-      else
-	return debug68_error_add("Found %s, expected track number or time mm:sec format\n",a[i]);
+  {
+    int gettime,gettrack;
+    gettrack = read_unsigned(a[i]);
+    gettime  = read_time_format(a[i]);
+    if(gettrack>0)
+      newtrack = gettrack-1;
+    else if(gettime>=0)
+      newtime = gettime;
+    else
+      return debug68_error_add("Found %s, expected track number or time mm:sec format\n",a[i]);
 
-      if(newtime>=0)
-	{
-	  if(newtrack<0)
-	    return debug68_error_add("Found %s, expected track number\n",a[i]);
-	  else if(err=settime(newtrack,newtime,-1), err<0)
-	    return err;
-	  newtrack = newtime = -1;
-	}
+    if(newtime>=0)
+    {
+      if(newtrack<0)
+        return debug68_error_add("Found %s, expected track number\n",a[i]);
+      else if(err=settime(newtrack,newtime,-1), err<0)
+        return err;
+      newtrack = newtime = -1;
     }
+  }
 
   if(newtrack>=0)
     return debug68_error_add("Missing time for track #%02d\n",newtrack+1);
@@ -1628,18 +1629,18 @@ static int findtime_com(int na, char **a)
   if (all) {
     if(na==3) {
       if (newtime=read_time_format(a[2]), newtime<0) {
-	return debug68_error_add("bad parmeters : findtime ALL|* [mm:sec]");
+        return debug68_error_add("bad parmeters : findtime ALL|* [mm:sec]");
       }
     } else if(na!=2) {
       return debug68_error_add("too many parmeters : findtime ALL|* [mm:sec]");
     }
     for(newtrack=0;
-	newtrack>=0 && checktrack(newtrack)==newtrack; newtrack++) {
+        newtrack>=0 && checktrack(newtrack)==newtrack; newtrack++) {
       if(err=settrack(newtrack), err<0) {
-	break;
+        break;
       }
       if(err=find_time(newtime, &frames, &time_ms, &memlow, &memhi), err<0) {
-	break;
+        break;
       }
       settime(newtrack, time_ms, frames);
     }
@@ -1653,27 +1654,27 @@ static int findtime_com(int na, char **a)
       gettime  = read_time_format(a[i]);
 
       if (gettrack > 0) {
-	newtrack = gettrack-1;
+        newtrack = gettrack-1;
       } else if (gettime>=0) {
-	newtime = gettime;
+        newtime = gettime;
       } else {
-	err=debug68_error_add("Found %s, expected track number or"
-			  " time mm:sec format\n",a[i]);
-	break;
+        err=debug68_error_add("Found %s, expected track number or"
+                              " time mm:sec format\n",a[i]);
+        break;
       }
 
       if (newtrack<0) {
-	err=debug68_error_add("Found %s, expected track number\n",a[i]);
-	break;
-      }	else if(err=settrack(newtrack), err<0) {
-	  break;
-      }	else {
-	err=find_time(newtime, &frames, &time_ms, &memlow, &memhi);
-	if (err < 0) {
-	  break;
-	}
-	settime(newtrack, time_ms, frames);
-	newtrack = -1;
+        err=debug68_error_add("Found %s, expected track number\n",a[i]);
+        break;
+      } else if(err=settrack(newtrack), err<0) {
+        break;
+      } else {
+        err=find_time(newtime, &frames, &time_ms, &memlow, &memhi);
+        if (err < 0) {
+          break;
+        }
+        settime(newtrack, time_ms, frames);
+        newtrack = -1;
       }
     }
   }
@@ -1714,10 +1715,10 @@ static char *nextword(char *s)
   int prev;
   if(!*s) return s;
   for(prev=*s++; *s; prev=*s++)
-    {
-      if(myisspace(prev) && !myisspace(*s))
-	return s;
-    }
+  {
+    if(myisspace(prev) && !myisspace(*s))
+      return s;
+  }
   return s;
 }
 
@@ -1730,10 +1731,10 @@ static void cap_word(char *s)
   for(; *s; s++) if(*s=='_') *s=' ';
   s=killspace(saves);
   for(c=*s; c; s=nextword(s), c=*s)
-    {
-      int c2=toupper(c); /* Do not remove becoz of     */
-      if(c2 != c) *s = c2; /* static in checknames() !!! */
-    }
+  {
+    int c2=toupper(c); /* Do not remove becoz of     */
+    if(c2 != c) *s = c2; /* static in checknames() !!! */
+  }
   printf("%s\n",saves);
 }
 
@@ -1750,16 +1751,16 @@ static int capitalize_com(int na, char **a)
 
   /* capitilize <ALL|*> */
   if(!strcmp68(a[1],"ALL") || !strcmp68(a[1],"*"))
+  {
+    cap_word(disk->name);
+    for(i=0; i<disk->nb_six;i++)
     {
-      cap_word(disk->name);
-      for(i=0; i<disk->nb_six;i++)
-	{
-	  cap_word(disk->mus[i].name);
-	  cap_word(disk->mus[i].author);
-	  cap_word(disk->mus[i].composer);
-	}
-      return 0;
+      cap_word(disk->mus[i].name);
+      cap_word(disk->mus[i].author);
+      cap_word(disk->mus[i].composer);
     }
+    return 0;
+  }
   return debug68_error_add
     ("This command is implemented in mode ALL only !! sorry :-)");
 }
@@ -1784,37 +1785,37 @@ static int replay_com(int na, char **a)
 
   /* replay NAME|NONE */
   if(na==2)
-    {
-      if(err=checktrack(track), err<0)
-	return err;
-      mus->replay = r;
-      return trackinfo(track,11);
-    }
+  {
+    if(err=checktrack(track), err<0)
+      return err;
+    mus->replay = r;
+    return trackinfo(track,11);
+  }
 
   if(!strcmp68(a[1],"ALL") || !strcmp68(a[1],"*"))
+  {
+    if(err=checkdisk(), err<0)
+      return err;
+    for(i=0; i<disk->nb_six; i++)
     {
-      if(err=checkdisk(), err<0)
-	return err;
-      for(i=0; i<disk->nb_six; i++)
-	{
-	  disk->mus[i].replay = r;
-	  trackinfo(i,11);
-	}
-      return 0;
+      disk->mus[i].replay = r;
+      trackinfo(i,11);
     }
+    return 0;
+  }
 
   for(i=1; i<na-1; i++)
-    {
-      int t;
-      if(!isdigit(a[i][0]))
-	return debug68_error_add("<%s> is not a track number",a[i]);
-      t=atoi(a[i])-1;
-      if(err=checktrack(t), err<0)
-	return err;
-      if(err==t)
-	disk->mus[t].replay = r;
-      trackinfo(t,11);
-    }
+  {
+    int t;
+    if(!isdigit(a[i][0]))
+      return debug68_error_add("<%s> is not a track number",a[i]);
+    t=atoi(a[i])-1;
+    if(err=checktrack(t), err<0)
+      return err;
+    if(err==t)
+      disk->mus[t].replay = r;
+    trackinfo(t,11);
+  }
   return 0;
 }
 
@@ -1836,40 +1837,40 @@ static int name_com(int na, char **a)
 
   /* replay NAME|NONE : disk name */
   if(na==2)
-    {
-      if(err=checkdisk(), err<0)
-	return err;
-      if(r==NULL)
-	return debug68_error_add("Can't set disk name to NONE");
-      disk->name = r;
-      return diskinfo();
-    }
+  {
+    if(err=checkdisk(), err<0)
+      return err;
+    if(r==NULL)
+      return debug68_error_add("Can't set disk name to NONE");
+    disk->name = r;
+    return diskinfo();
+  }
 
   if(!strcmp68(a[1],"ALL"))
+  {
+    if(err=checkdisk(), err<0)
+      return err;
+    if(r!=NULL) disk->name = r;
+    for(i=0; i<disk->nb_six; i++)
     {
-      if(err=checkdisk(), err<0)
-	return err;
-      if(r!=NULL) disk->name = r;
-      for(i=0; i<disk->nb_six; i++)
-	{
-	  disk->mus[i].name = r==NULL ? disk->name : r;
-	}
-      diskinfo();
-      return 0;
+      disk->mus[i].name = r==NULL ? disk->name : r;
     }
+    diskinfo();
+    return 0;
+  }
 
   for(i=1; i<na-1; i++)
-    {
-      int t;
-      if(!isdigit(a[i][0]))
-	return debug68_error_add("<%s> is not a track number",a[i]);
-      t=atoi(a[i])-1;
-      if(err=checktrack(t), err<0)
-	return err;
-      if(err==t)
-	disk->mus[t].name = (r==NULL) ? disk->name : r;
-      trackinfo(t,3);
-    }
+  {
+    int t;
+    if(!isdigit(a[i][0]))
+      return debug68_error_add("<%s> is not a track number",a[i]);
+    t=atoi(a[i])-1;
+    if(err=checktrack(t), err<0)
+      return err;
+    if(err==t)
+      disk->mus[t].name = (r==NULL) ? disk->name : r;
+    trackinfo(t,3);
+  }
   return 0;
 }
 
@@ -1890,29 +1891,29 @@ static int author_com(int na, char **a)
   else strcpy(r,a[na-1]);
 
   if(na==2)
+  {
+    if(err=checkdisk(), err<0)
+      return err;
+    for(i=0; i<disk->nb_six; i++)
     {
-      if(err=checkdisk(), err<0)
-	return err;
-      for(i=0; i<disk->nb_six; i++)
-	{
-	  disk->mus[i].author = r;
-	}
-      diskinfo();
-      return 0;
+      disk->mus[i].author = r;
     }
+    diskinfo();
+    return 0;
+  }
 
   for(i=1; i<na-1; i++)
-    {
-      int t;
-      if(!isdigit(a[i][0]))
-	return debug68_error_add("<%s> is not a track number",a[i]);
-      t=atoi(a[i])-1;
-      if(err=checktrack(t), err<0)
-	return err;
-      if(err==t)
-	disk->mus[t].author = r;
-      trackinfo(t,3);
-    }
+  {
+    int t;
+    if(!isdigit(a[i][0]))
+      return debug68_error_add("<%s> is not a track number",a[i]);
+    t=atoi(a[i])-1;
+    if(err=checktrack(t), err<0)
+      return err;
+    if(err==t)
+      disk->mus[t].author = r;
+    trackinfo(t,3);
+  }
 
   return 0;
 }
@@ -1934,29 +1935,29 @@ static int composer_com(int na, char **a)
   else strcpy(r,a[na-1]);
 
   if(na==2)
+  {
+    if(err=checkdisk(), err<0)
+      return err;
+    for(i=0; i<disk->nb_six; i++)
     {
-      if(err=checkdisk(), err<0)
-	return err;
-      for(i=0; i<disk->nb_six; i++)
-	{
-	  disk->mus[i].composer = r;
-	}
-      diskinfo();
-      return 0;
+      disk->mus[i].composer = r;
     }
+    diskinfo();
+    return 0;
+  }
 
   for(i=1; i<na-1; i++)
-    {
-      int t;
-      if(!isdigit(a[i][0]))
-	return debug68_error_add("<%s> is not a track number",a[i]);
-      t=atoi(a[i])-1;
-      if(err=checktrack(t), err<0)
-	return err;
-      if(err==t)
-	disk->mus[t].composer = r;
-      trackinfo(t,3);
-    }
+  {
+    int t;
+    if(!isdigit(a[i][0]))
+      return debug68_error_add("<%s> is not a track number",a[i]);
+    t=atoi(a[i])-1;
+    if(err=checktrack(t), err<0)
+      return err;
+    if(err==t)
+      disk->mus[t].composer = r;
+    trackinfo(t,3);
+  }
 
   return 0;
 }
@@ -1975,12 +1976,12 @@ static int deltrack_com(int na, char **a)
   if(err=checktrack(t), err<0)
     return err;
   if(err==t)
-    {
-      int i;
-      for(i=t; i<disk->nb_six-1; i++)
-	disk->mus[i] = disk->mus[i+1];
-      disk->nb_six--;
-    }
+  {
+    int i;
+    for(i=t; i<disk->nb_six-1; i++)
+      disk->mus[i] = disk->mus[i+1];
+    disk->nb_six--;
+  }
   totaltime();
   return diskinfo();
 }
@@ -2018,15 +2019,15 @@ static int frq_com(int na, char **a)
     for(i=1; i<na-1; i++) {
       int t;
       if (!isdigit(a[i][0])) {
-	err =  debug68_error_add("<%s> is not a track number",a[i]);
-	break;
+        err =  debug68_error_add("<%s> is not a track number",a[i]);
+        break;
       }
       t=atoi(a[i])-1;
       if(err=checktrack(t), err<0) {
-	break;
+        break;
       }
       if(err==t) {
-	disk->mus[t].frq = rate;
+        disk->mus[t].frq = rate;
       }
       trackinfo(t,7);
     }
@@ -2048,10 +2049,10 @@ static int savedata_com(int na, char **a)
   if(err=checkdisk(), err<0)
     return err;
   if(na>2)
-    {
-      t = atoi(a[1]) - 1;
-      namei = 2;
-    }
+  {
+    t = atoi(a[1]) - 1;
+    namei = 2;
+  }
   if(err=checktrack(t), err<0)
     return err;
   os = istream68_file_create(a[namei],2);
@@ -2061,7 +2062,7 @@ static int savedata_com(int na, char **a)
     return -1;
   }
   printf("saving track #%d data (%p,%d)\n",
-	 t+1,disk->mus[t].data,disk->mus[t].datasz);
+         t+1,disk->mus[t].data,disk->mus[t].datasz);
   if(disk->mus[t].data!=NULL && disk->mus[t].datasz > 0)
     err =
       istream68_write(os, disk->mus[t].data, disk->mus[t].datasz)
@@ -2091,7 +2092,7 @@ static int check_ext_list(replay_parm_t *rparm)
     *rparm->flags = SC68_AMIGA;
     return 1;
   } else if(!strcmp68(rparm->mname,  "PUMA") ||
-	    !strcmp68(rparm->mname,  "PUM") ) {
+            !strcmp68(rparm->mname,  "PUM") ) {
     *rparm->rname = "puma";
     *rparm->flags = SC68_AMIGA;
     return 2;
@@ -2106,7 +2107,7 @@ static int check_ext_list(replay_parm_t *rparm)
     *rparm->aname = "David Whittaker";
     return 4;
   } else if (!strcmp68(rparm->mname,  "BP") ||
-	     !strcmp68(rparm->mname,  "BP3") ) {
+             !strcmp68(rparm->mname,  "BP3") ) {
     *rparm->rname = "bs22";
     *rparm->flags = SC68_AMIGA;
     return 5;
@@ -2174,9 +2175,9 @@ static int loaddata_com(int na, char **a)
   for(i=1, fname=NULL; i<na; i++) {
     if(a[i][0] != '-') {
       if(!fname) {
-	fname = a[i];
+        fname = a[i];
       } else {
-	return debug68_error_add("Invalid argument [%s] :Only one file name",a[i]);
+        return debug68_error_add("Invalid argument [%s] :Only one file name",a[i]);
       }
     }
   }
@@ -2205,25 +2206,25 @@ static int loaddata_com(int na, char **a)
 
   /* Kill prefix extension (Amigaaaaa) */
   if(s=strchr(mname,'.'), (s!=NULL && (s-mname)<=4))
-    {
-      *s = 0;
-      if(check_ext_list(&rparm))
-	mname = s+1;
-      else
-	*s = '.';
-    }
+  {
+    *s = 0;
+    if(check_ext_list(&rparm))
+      mname = s+1;
+    else
+      *s = '.';
+  }
 
   /* Kill ext */
   if(s=strrchr(mname,'.'), s!=NULL)
-    {
-      rparm.mname = s+1;
-      if(check_ext_list(&rparm))
-	*s = 0;
-      /* Assume ext for len<=4 & no digit in first lettter
-	 (avoid to remove hydra.0.1) */
-      else if(!isdigit(s[1]) && strlen(s+1)<=4)
-	*s = 0;
-    }
+  {
+    rparm.mname = s+1;
+    if(check_ext_list(&rparm))
+      *s = 0;
+    /* Assume ext for len<=4 & no digit in first lettter
+       (avoid to remove hydra.0.1) */
+    else if(!isdigit(s[1]) && strlen(s+1)<=4)
+      *s = 0;
+  }
 
   /* Remove _ by white space */
   for(s=strchr(mname,'_'); s!=NULL; s=strchr(s,'_')) *s= ' ';
@@ -2233,25 +2234,25 @@ static int loaddata_com(int na, char **a)
     rparm.mname = a[i]+1;
     if(a[i][0]=='-' && !check_ext_list(&rparm)) {
       if(toupper(a[i][1])=='D' && a[i][2]=='0'  && a[i][3]=='=')
-	d0 = atoi(a[i]+4);
+        d0 = atoi(a[i]+4);
       else if(toupper(a[i][1])=='A' && a[i][2]=='0'  && a[i][3]=='=')
-	a0 = atox(a[i]+4);
+        a0 = atox(a[i]+4);
       else if(toupper(a[i][1])=='F' && a[i][2]=='=')
-	frq = atoi(a[i]+3);
+        frq = atoi(a[i]+3);
       else {
-	int j;
-	for(j=1; a[i][j]; j++) {
-	  if(a[i][j]=='y') flags &= ~SC68_YM;
-	  else if(a[i][j]=='Y') flags |= SC68_YM;
-	  else if(a[i][j]=='a') flags &= ~SC68_AMIGA;
-	  else if(a[i][j]=='A') flags |= SC68_AMIGA;
-	  else if(a[i][j]=='s') flags &= ~SC68_STE;
-	  else if(a[i][j]=='S') flags |= SC68_STE;
-	}
+        int j;
+        for(j=1; a[i][j]; j++) {
+          if(a[i][j]=='y') flags &= ~SC68_YM;
+          else if(a[i][j]=='Y') flags |= SC68_YM;
+          else if(a[i][j]=='a') flags &= ~SC68_AMIGA;
+          else if(a[i][j]=='A') flags |= SC68_AMIGA;
+          else if(a[i][j]=='s') flags &= ~SC68_STE;
+          else if(a[i][j]=='S') flags |= SC68_STE;
+        }
       }
     }
   }
-  
+
   if(loaddata(fname,d0,a0,frq,flags,mname,aname,rname))
     return debug68_error_add("loaddata : Failed");
   return diskinfo();
@@ -2321,7 +2322,7 @@ static int address_com(int na, char **a)
     --track;
     if (track<0 || track>=disk->nb_six) {
       return debug68_error_add("Track #%d out of disk bound [%d, %d]",
-			   track+1,1,disk->nb_six);
+                               track+1,1,disk->nb_six);
     }
     disk->mus[track].a0 = a0;
     trackinfo(track, -1);

@@ -1,7 +1,7 @@
 /*
  *                      file - gzip file loader
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -71,7 +71,7 @@ static int is_gz(int fd, int len)
 {
   char magic[sizeof(gz_magic)];
   int inflate_len = -1;
-  
+
   /* header + inflate len */
   if (len < 10+4) {
     goto error;
@@ -101,7 +101,7 @@ static int is_gz(int fd, int len)
       inflate_len = -1;
     }
   }
- error:
+  error:
 
   /* Rewind */
   lseek(fd, 0, SEEK_SET);
@@ -129,18 +129,18 @@ void *gzip68_load(const char *fname, int *ptr_ulen)
 
   fd = open(fname, omode);
   if (fd == -1) {
-    error68("gzip68: load '%s' (%s)", fname, strerror(errno));
+    error68("gzip68: load '%s' -- %s", fname, strerror(errno));
     goto error;
   }
 
   len = lseek(fd, 0, SEEK_END);
   if (len == (off_t) -1) {
-    error68("gzip68: load '%s' (%s)", fname, strerror(errno));
+    error68("gzip68: load '%s' -- %s", fname, strerror(errno));
     goto error;
   }
 
   if (lseek(fd, 0, SEEK_SET) != 0) {
-    error68("gzip68: load '%s' (%s)", fname, strerror(errno));
+    error68("gzip68: load '%s' -- %s", fname, strerror(errno));
     goto error;
   }
 
@@ -151,32 +151,32 @@ void *gzip68_load(const char *fname, int *ptr_ulen)
 
   f = gzdopen(fd, "rb");
   if (!f) {
-    error68("gzip68: load '%s' (%s)", fname, gzerror(f, &err));
+    error68("gzip68: load '%s' -- %s", fname, gzerror(f, &err));
     goto error;
   }
   fd = 0; /* $$$ Closed by gzclose(). Verify fdopen() rules. */
 
   uncompr = alloc68(ulen);
   if (!uncompr) {
-    error68("gzip68: load '%s' alloc (%d) failed", fname, ulen);
+    error68("gzip68: load '%s' -- alloc error", fname);
     goto error;
   }
   len = gzread(f, uncompr, ulen);
 
   if (len != ulen) {
-    error68("gzip68: load '%s' read error (%s)",fname, gzerror(f, &err));
+    error68("gzip68: load '%s' -- read error (%s)",fname, gzerror(f, &err));
     goto error;
   }
   goto end;
-  
- error:
+
+  error:
   if (uncompr) {
     free68(uncompr);
     uncompr = 0;
     ulen = 0;
   }
 
- end:
+  end:
   if (fd) {
     close(fd);
   }
@@ -186,7 +186,7 @@ void *gzip68_load(const char *fname, int *ptr_ulen)
   if (ptr_ulen) {
     *ptr_ulen = ulen;
   }
-     
+
   return uncompr;
 }
 
@@ -197,7 +197,7 @@ void *gzip68_load(const char *fname, int *ptr_ulen)
 void *gzip68_load(const char *fname, int *ptr_ulen)
 {
   if (ptr_ulen) *ptr_ulen=0;
-  error68("gzip68: load '%s' no zlib support", fname);
+  error68("gzip68: load '%s' -- zlib not supported", fname);
   return 0;
 }
 

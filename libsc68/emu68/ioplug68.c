@@ -17,9 +17,9 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -68,7 +68,7 @@ void emu68_ioplug_destroy_all(emu68_t * const emu68)
  *  - remove memory access handler
  *
  *  return 0 if IO successfully unplugged
-*/
+ */
 int emu68_ioplug_unplug(emu68_t * const emu68, io68_t *this_io)
 {
   io68_t *io,**pio;

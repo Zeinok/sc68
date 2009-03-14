@@ -5,18 +5,16 @@
  * @date      1998/07/18
  * @brief     Paula emulator header.
  *
- * $Id$
- *
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _IO68_PAULA_EMUL_H_
 #define _IO68_PAULA_EMUL_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "io68_api.h"
 
 #include "emu68/struct68.h"
 
@@ -39,7 +37,8 @@ extern "C" {
  * - If S is SET then all others setted bits are setted (bitwise OR).
  * - If S is CLEAR then all others setted bits are cleared (bitwise NAND).
  *
- * @{ */
+ * @{
+ */
 
 /*
  *
@@ -47,7 +46,7 @@ extern "C" {
  *
  * @code {
  *
- * // NAME SZ  ADDR    
+ * // NAME SZ  ADDR
  *
  * VHPOSR  (B) DFF006 [xxxxxxxx] Vertical/Horizontal electron bean position.
  *
@@ -81,7 +80,7 @@ extern "C" {
  *  @{
  *
  *  All hardware registers involved with interruption handling use the
- *  same bit organisation : 
+ *  same bit organisation :
  *   - bit 7   Audio channel A
  *   - bit 8   Audio channel B
  *   - bit 9   Audio channel C
@@ -128,7 +127,7 @@ extern "C" {
 #define PAULA_DMACONH   0x96  /**< DMA control write MSB */
 #define PAULA_DMACONL   0x97  /**< DMA control write LSB */
 
-/**@}*/
+/** @} */
 
 
 /** @name The Audio & Disk Control Registers.
@@ -154,7 +153,7 @@ extern "C" {
 #define PAULA_ADKCONRH  0x10
 #define PAULA_ADKCONRL  0x11
 
-/**@}*/
+/** @} */
 
 /** @name  Amiga Paula registers.
  *  @{
@@ -164,7 +163,7 @@ extern "C" {
 #define PAULA_VOICEB   0xB0           /**< Paula channel B register base. */
 #define PAULA_VOICEC   0xC0           /**< Paula channel C register base. */
 #define PAULA_VOICED   0xD0           /**< Paula channel D register base. */
-/**@}*/
+/** @} */
 
 
 /** @name  Amiga Paula Clock's frequency.
@@ -172,7 +171,7 @@ extern "C" {
  */
 #define PAULA_PAL_FRQ  3546897u      /**< Paula PAL frequency.  */
 #define PAULA_NTSC_FRQ 3579545u      /**< Paula NTSC frequency. */
-  /**@}*/
+/** @} */
 
 /** @name  Internal Paula emulation data.
  *  @{
@@ -208,7 +207,7 @@ typedef struct
 
 } paula_t;
 
-/**@}*/
+/** @} */
 
 
 
@@ -246,6 +245,7 @@ typedef struct {
   int log2mem;         /**< 68K memory buffer size (2^log2mem). */
 } paula_setup_t;
 
+IO68_EXTERN
 /** Init paula library.
  *
  *    The paula_init() must be call prior to all other paula functions.
@@ -259,13 +259,14 @@ typedef struct {
  */
 int paula_init(paula_parms_t * const parms);
 
+IO68_EXTERN
 /** Shutdown paula library.
  *
  *  @see paula_init()
  */
 void paula_shutdown(void);
 
-
+IO68_EXTERN
 /** Paula hardware reset.
  *
  *    The paula_reset() reset function perform a Paula reset.
@@ -282,6 +283,7 @@ void paula_shutdown(void);
  */
 int paula_reset(paula_t * const paula);
 
+IO68_EXTERN
 /** Paula emulator instance setup.
  *
  *    @return error-code (always success)
@@ -291,33 +293,39 @@ int paula_reset(paula_t * const paula);
  */
 int paula_setup(paula_t * const paula, paula_setup_t * const setup);
 
+IO68_EXTERN
 /** Paula emulator instance cleanup.
  */
 void paula_cleanup(paula_t * const paula);
 
+IO68_EXTERN
 /** Change paula emulator parameters.
  */
 int paula_configure(paula_t * const paula, paula_parms_t * const parms);
 
+IO68_EXTERN
 /** Set/Get paula emulator sampling rate.
  */
 uint68_t paula_sampling_rate(paula_t * const paula, uint68_t hz);
 
-/** Set paula emulator type. */
+IO68_EXTERN
+/** Set paula emulator type.
+ */
 int paula_set_emulation(paula_t * const paula, int emul);
 
+IO68_EXTERN
 /** Set/Get paula clock type.
  */
 int paula_clock(paula_t * const paula, int clock);
 
-
-/**@}*/
+/** @} */
 
 
 /** @name  Emulation functions
  *  @{
  */
 
+IO68_EXTERN
 /** Execute Paula emulation.
  *
  *    The paula_mix() function processes sample mixing with current internal
@@ -334,15 +342,10 @@ int paula_clock(paula_t * const paula, int clock);
  */
 void paula_mix(paula_t * const paula, s32 * splbuf, int n);
 
-/**@}*/
+/** @} */
 
 /**
- *@}
+ *  @}
  */
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _IO68_PAULA_EMUL_H_ */

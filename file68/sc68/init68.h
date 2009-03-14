@@ -15,11 +15,7 @@
 #define _FILE68_INIT68_H_
 
 #ifndef FILE68_API
-#include "file68_api.h"
-#endif
-
-#ifdef __cplusplus
-extern "C" {
+# include "file68_api.h"
 #endif
 
 /** @addtogroup  file68_lib
@@ -40,13 +36,8 @@ FILE68_API
  */
 void file68_shutdown(void);
 
-
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_INIT68_H_ */

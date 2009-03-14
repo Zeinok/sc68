@@ -9,7 +9,6 @@ dnl#
 dnl# $Id$
 dnl#
 
-
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
@@ -18,15 +17,22 @@ AC_INIT([desa68],[20090117],[benjihan -4t- users.sourceforge -d0t- net])
 AC_CONFIG_SRCDIR([desa68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
-SC68_PACKAGE([Motoral MC68000 disassembler library.])
-[LIBDESA68_LDFLAGS="-version-info 2:0:0"]
-[LIBDESA68_CPPFLAGS="-DDESA68_EXPORT=1"]
 
-# Check for -Wno-multichar C flags
-# --------------------------------
-AX_CHECK_COMPILER_FLAGS(
-  [-Wno-multichar],
-  [DESA68_CFLAGS="$DESA68_CFLAGS -Wno-multichar"])
+AC_USE_SYSTEM_EXTENSIONS
+LT_INIT([win32-dll])
+
+# ,----------------------------------------------------------------------.
+# | sc68                                                                 |
+# `----------------------------------------------------------------------'
+
+SC68_PACKAGE([Motoral MC68000 disassembler library.])
+SC68_SYSTEM
+SC68_OPTIONS
+SC68_TOOLS
+SC68_CHECKS
+
+AX_CHECK_COMPILER_FLAGS([-Wno-multichar],
+  SC68_ADD_FLAG(PKG_ALL_CFLAGS,[-Wno-multichar]))
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |

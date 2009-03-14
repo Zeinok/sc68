@@ -1,7 +1,7 @@
 /*
  *                init68 - initialization functions
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -43,13 +43,13 @@
 static volatile int init;
 
 void istream68_ao_shutdown(void); /* defined in istream68_ao.c */
-int istream68_z_init(void);	  /* defined in istream68_z.c  */
+int istream68_z_init(void);       /* defined in istream68_z.c  */
 void istream68_z_shutdown(void);  /* defined in istream68_z.c  */
-int option68_init(void);	  /* defined int option68.c    */
-void option68_shutdown(void);	  /* defined void option68.c   */
-int file68_o_init(void);	  /* defined in file68.c       */
-void file68_o_shutdown(void);	  /* defined in file68.c       */
-int istream68_ao_init(void);	  /* defined in istream68_ao.c */
+int option68_init(void);          /* defined int option68.c    */
+void option68_shutdown(void);     /* defined void option68.c   */
+int file68_o_init(void);          /* defined in file68.c       */
+void file68_o_shutdown(void);     /* defined in file68.c       */
+int istream68_ao_init(void);      /* defined in istream68_ao.c */
 
 static char * mygetenv(const char *name)
 {
@@ -66,12 +66,14 @@ static char * mygetenv(const char *name)
  * @retval 0 error
  */
 static char * get_reg_path(registry68_key_t key, char * kname,
-			   char * buffer, int buflen)
+                           char * buffer, int buflen)
 {
   int i = registry68_gets(key,kname,buffer,buflen);
+
   buffer[buflen-1] = 0;
   if (i < 0) {
     buffer[0] = 0;
+    msg68_trace("[%s]: not found\n");
     return 0;
   } else {
     char *e;
@@ -82,6 +84,8 @@ static char * get_reg_path(registry68_key_t key, char * kname,
       *e++ = '/';
       *e = 0;
     }
+    msg68_trace("[%s]='%s'\n", kname, buffer);
+
     return e;
   }
 }
@@ -171,11 +175,11 @@ int file68_init(int argc, char **argv)
       char * e;
       const char path[] = "Resources";
       e = get_reg_path(registry68_rootkey(REGISTRY68_LMK),
-		       "SOFTWARE/sashipa/sc68/Install_Dir",
-		       tmp, sizeof(tmp));
+                       "SOFTWARE/sashipa/sc68/Install_Dir",
+                       tmp, sizeof(tmp));
       if (e && (e+sizeof(path) < tmp+sizeof(tmp))) {
-	memcpy(e, path, sizeof(path));
-	option68_set(opt,tmp);
+        memcpy(e, path, sizeof(path));
+        option68_set(opt,tmp);
       }
     }
 
@@ -183,7 +187,7 @@ int file68_init(int argc, char **argv)
     if (option68_isset(opt)) {
       rsc68_set_share(opt->val.str);
       if (opt->val.str == tmp)
-	option68_unset(opt);	/* Must release tmp ! */
+        option68_unset(opt);    /* Must release tmp ! */
     }
 
   }
@@ -197,23 +201,23 @@ int file68_init(int argc, char **argv)
       char * e;
       const char path[] = "sc68";
       e = get_reg_path(registry68_rootkey(REGISTRY68_CUK),
-		       "Volatile Environment/APPDATA",
-		       tmp, sizeof(tmp));
+                       "Volatile Environment/APPDATA",
+                       tmp, sizeof(tmp));
       if (e && (e+sizeof(path) < tmp+sizeof(tmp))) {
-	memcpy(e, path, sizeof(path));
-	option68_set(opt,tmp);
+        memcpy(e, path, sizeof(path));
+        option68_set(opt,tmp);
       }
     }
-    
+
     /* Get user path from HOME */
     if (!option68_isset(opt)) {
       const char path[] = "/.sc68";
       const char * env = mygetenv("HOME");
       if(env && strlen(env)+sizeof(path) < sizeof(tmp)) {
-	strncpy(tmp,env,sizeof(tmp));
-	strcat68(tmp,path,sizeof(tmp));
-	/* $$$ We should test if this directory actually exists */
-	option68_set(opt,tmp);
+        strncpy(tmp,env,sizeof(tmp));
+        strcat68(tmp,path,sizeof(tmp));
+        /* $$$ We should test if this directory actually exists */
+        option68_set(opt,tmp);
       }
     }
 
@@ -221,7 +225,7 @@ int file68_init(int argc, char **argv)
     if (option68_isset(opt)) {
       rsc68_set_user(opt->val.str);
       if (opt->val.str == tmp)
-	option68_unset(opt);	/* Must release tmp ! */
+        option68_unset(opt);    /* Must release tmp ! */
     }
 
   }
@@ -239,7 +243,7 @@ int file68_init(int argc, char **argv)
   }
 
   init = 1;
- out_no_init:
+  out_no_init:
   return argc;
 }
 
@@ -253,19 +257,19 @@ void file68_shutdown(void)
 
     /* Loader */
     file68_o_shutdown();
-    
+
     /* Shutdown resource */
     rsc68_shutdown();
-    
+
     /* Xiph AO */
     istream68_ao_shutdown();
-      
+
     /* Curl */
     istream68_curl_shutdown();
-    
+
     /* Zlib */
     istream68_z_shutdown();
-    
+
     init = 0;
   }
 }

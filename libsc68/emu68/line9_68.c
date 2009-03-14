@@ -6,5 +6,3 @@
 
 #include "emu68.h"
 #include "lines/line9.c"
-
-

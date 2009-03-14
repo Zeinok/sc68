@@ -17,9 +17,11 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -48,7 +50,7 @@ static int68_t mfpr_03(mfp_t * const mfp, const bogoc68_t bogoc) {
 /* 2  DDR    Data direction register */
 static int68_t mfpr_05(mfp_t * const mfp, const bogoc68_t bogoc) {
   return mfp->map[0x05];
-}      
+}
 /* 3  IERA   Interrupt enable register A */
 static int68_t mfpr_07(mfp_t * const mfp, const bogoc68_t bogoc) {
   return mfp->map[0x07];
@@ -98,11 +100,11 @@ static int68_t mfpr_1D(mfp_t * const mfp, const bogoc68_t bogoc) {
   return mfp->map[0x1D];
 }
 /* F  TADR   Timer A data register */
-static int68_t mfpr_1F(mfp_t * const mfp, const bogoc68_t bogoc) { 
+static int68_t mfpr_1F(mfp_t * const mfp, const bogoc68_t bogoc) {
   return mfp_get_tdr(mfp, TIMER_A, bogoc);
 }
 /* 10 TBDR   Timer B data register */
-static int68_t mfpr_21(mfp_t * const mfp, const bogoc68_t bogoc) { 
+static int68_t mfpr_21(mfp_t * const mfp, const bogoc68_t bogoc) {
   return mfp_get_tdr(mfp, TIMER_B, bogoc);
 }
 /* 11 TCDR   Timer C data register */
@@ -118,7 +120,7 @@ static int68_t mfpr_27(mfp_t * const mfp, const bogoc68_t bogoc) {
   return mfp->map[0x27];
 }
 /* 14 UCR    USART control register */
-static int68_t mfpr_29(mfp_t * const mfp, const bogoc68_t bogoc) { 
+static int68_t mfpr_29(mfp_t * const mfp, const bogoc68_t bogoc) {
   return mfp->map[0x29];
 }
 /* 15 RSR    Receiver status register */
@@ -226,7 +228,7 @@ static void mfpw_3F(mfp_t * const mfp, const int68_t v, const bogoc68_t bogoc)
 
 /* MFP read jump table */
 static int68_t (* const mfpr_func[32])
-     (mfp_t * const, const bogoc68_t) =
+(mfp_t * const, const bogoc68_t) =
 {
   mfpr_01,mfpr_03,mfpr_05,mfpr_07,
   mfpr_09,mfpr_0B,mfpr_0D,mfpr_0F,
@@ -240,7 +242,7 @@ static int68_t (* const mfpr_func[32])
 
 /* MFP write jump table */
 static void (* const mfpw_func[32])
-     (mfp_t * const, const int68_t, const bogoc68_t) =
+(mfp_t * const, const int68_t, const bogoc68_t) =
 {
   mfpw_01,mfpw_03,mfpw_05,mfpw_07,
   mfpw_09,mfpw_0B,mfpw_0D,mfpw_0F,
@@ -253,7 +255,7 @@ static void (* const mfpw_func[32])
 };
 
 static int68_t _mfp_readB(mfp_io68_t * const mfpio, const int addr,
-			  const bogoc68_t bogoc)
+                          const bogoc68_t bogoc)
 {
   return !(addr&1)
     ? 0
@@ -266,7 +268,7 @@ static void mfpio_readB(io68_t * const io)
   const bogoc68_t bogoc = cpu2bogo(io,io->emu68->cycle);
   io->emu68->bus_data =
     _mfp_readB((mfp_io68_t *)io,
-	       io->emu68->bus_addr, bogoc);
+               io->emu68->bus_addr, bogoc);
 }
 
 static void mfpio_readW(io68_t * const io)
@@ -275,7 +277,7 @@ static void mfpio_readW(io68_t * const io)
   /* Expected EVEN addr for 16 bit access */
   io->emu68->bus_data =
     _mfp_readB((mfp_io68_t *)io,
-	       io->emu68->bus_addr+1, bogoc);
+               io->emu68->bus_addr+1, bogoc);
 }
 
 static void mfpio_readL(io68_t * const io)
@@ -290,7 +292,7 @@ static void mfpio_readL(io68_t * const io)
 }
 
 static inline void _mfp_writeB(mfp_io68_t * const mfpio, const int addr,
-			const int68_t v, const bogoc68_t bogoc)
+                               const int68_t v, const bogoc68_t bogoc)
 {
   if (!(addr&1)) return;
   mfpw_func[(addr>>1)&0x1f](&mfpio->mfp, (u8)v, bogoc);
@@ -317,9 +319,9 @@ static void mfpio_writeL(io68_t * const io)
   mfp_io68_t * const mfpio = (mfp_io68_t * const)io;
   const bogoc68_t bogoc = cpu2bogo(io,io->emu68->cycle);
   _mfp_writeB(mfpio,
-	      io->emu68->bus_addr+1, io->emu68->bus_data>>16, bogoc);
+              io->emu68->bus_addr+1, io->emu68->bus_data>>16, bogoc);
   _mfp_writeB((mfp_io68_t *)io,
-	      io->emu68->bus_addr+3, io->emu68->bus_data    ,bogoc);
+              io->emu68->bus_addr+3, io->emu68->bus_data    ,bogoc);
 }
 
 static int mfpio_reset(io68_t * const io)
@@ -331,7 +333,7 @@ static int mfpio_reset(io68_t * const io)
 }
 
 static interrupt68_t * mfpio_interrupt(io68_t * const io,
-				       const cycle68_t cycle)
+                                       const cycle68_t cycle)
 {
   mfp_io68_t * const mfpio = (mfp_io68_t * const)io;
   const bogoc68_t bogoc = cpu2bogo(io,cycle);
@@ -353,40 +355,40 @@ static interrupt68_t * mfpio_interrupt(io68_t * const io,
 
     /* Happen in 'Wave is my Passion.sc68' with the version +191u
 
-Register dump:
- CS:0073 SS:007b DS:007b ES:007b FS:0033 GS:003b
- EIP:0040b38c ESP:008dfd70 EBP:008dfd88 EFLAGS:00010246(   - 00      -RIZP1)
- EAX:deadbeef EBX:01d58000 ECX:00164c88 EDX:00027200
- ESI:00027200 EDI:0007fff0
+       Register dump:
+       CS:0073 SS:007b DS:007b ES:007b FS:0033 GS:003b
+       EIP:0040b38c ESP:008dfd70 EBP:008dfd88 EFLAGS:00010246(   - 00      -RIZP1)
+       EAX:deadbeef EBX:01d58000 ECX:00164c88 EDX:00027200
+       ESI:00027200 EDI:0007fff0
 
-Stack dump:
-0x008dfd70:  00164bec 01d58000 00000005 004071a1
-0x008dfd80:  00164c54 00166618 008dfda8 004078f5
-0x008dfd90:  00164b90 00027200 00008008 00164408
-0x008dfda0:  00164408 00000000 008dfe08 004042cb
-0x008dfdb0:  00166618 00027200 00000095 64703380
-0x008dfdc0:  00008000 001fcec8 00000020 00000001
+       Stack dump:
+       0x008dfd70:  00164bec 01d58000 00000005 004071a1
+       0x008dfd80:  00164c54 00166618 008dfda8 004078f5
+       0x008dfd90:  00164b90 00027200 00008008 00164408
+       0x008dfda0:  00164408 00000000 008dfe08 004042cb
+       0x008dfdb0:  00166618 00027200 00000095 64703380
+       0x008dfdc0:  00008000 001fcec8 00000020 00000001
 
-Backtrace:
-=>1 0x0040b38c mfpio_interrupt+0x4c(io=0x164b90, cycle=0x27200)
-[/home/ben/Development/sc68-CVS/build/i686-pc-mingw32/libsc68/io68/../../../../libsc68/io68/mfp_io.c:348]
-in sc68 (0x008dfd88)
+       Backtrace:
+       =>1 0x0040b38c mfpio_interrupt+0x4c(io=0x164b90, cycle=0x27200)
+       [/home/ben/Development/sc68-CVS/build/i686-pc-mingw32/libsc68/io68/../../../../libsc68/io68/mfp_io.c:348]
+       in sc68 (0x008dfd88)
 
-  2 0x004078f5 emu68_level_and_interrupt+0x165(emu68=0x166618, cycleperpass=0x27200) [/home/ben/Development/sc68-CVS/build/i686-pc-mingw32/libsc68/emu68/../../../../libsc68/emu68/emu68.c:341] in sc68 (0x008dfda8)
+       2 0x004078f5 emu68_level_and_interrupt+0x165(emu68=0x166618, cycleperpass=0x27200) [/home/ben/Development/sc68-CVS/build/i686-pc-mingw32/libsc68/emu68/../../../../libsc68/emu68/emu68.c:341] in sc68 (0x008dfda8)
 
-0x0040b38c mfpio_interrupt+0x4c [/home/ben/Development/sc68-CVS/build/i686-pc-mingw32/libsc68/io68/../../../../libsc68/io68/mfp_io.c:348] in sc68: movl %eax,0x00000000
-348           *(int *)0 = 0xDEADBEEF;
-Modules:
+       0x0040b38c mfpio_interrupt+0x4c [/home/ben/Development/sc68-CVS/build/i686-pc-mingw32/libsc68/io68/../../../../libsc68/io68/mfp_io.c:348] in sc68: movl %eax,0x00000000
+       348           *(int *)0 = 0xDEADBEEF;
+       Modules:
     */
 
 #endif
 
   }
-  return inter; 
+  return inter;
 }
 
 /* static cycle68_t mfpio_nextinterrupt(io68_t * const io, */
-/* 				     const cycle68_t cycle) */
+/*                                   const cycle68_t cycle) */
 /* { */
 /*   mfp_io68_t * const mfpio = (mfp_io68_t * const)io; */
 /*   cycle68_t const ret = mfp_nextinterrupt(&mfpio->mfp); */
@@ -396,7 +398,7 @@ Modules:
 /* } */
 
 static void mfpio_adjust_cycle(io68_t * const io,
-			       const cycle68_t cycle)
+                               const cycle68_t cycle)
 {
   mfp_io68_t * const mfpio = (mfp_io68_t * const)io;
   const bogoc68_t bogoc = cpu2bogo(io, cycle);

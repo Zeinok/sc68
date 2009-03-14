@@ -16,10 +16,6 @@
 
 #include "istream68.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /** @name     cURL stream
  *  @ingroup  file68_istream
  *
@@ -31,6 +27,7 @@ extern "C" {
  *  @{
  */
 
+FILE68_EXTERN
 /** Initialize curl engine.
  *
  *    The istream68_curl_init() function initializes curl library.  It
@@ -43,6 +40,7 @@ extern "C" {
  */
 int istream68_curl_init(void);
 
+FILE68_EXTERN
 /** Shutdown curl engine.
  *
  *    The istream68_curl_shutdoen() function shutdown curl library. It
@@ -50,6 +48,7 @@ int istream68_curl_init(void);
  */
 void istream68_curl_shutdown(void);
 
+FILE68_EXTERN
 /** Creates an URL based stream using @ref cURL.
  *
  *  @param  url     URL
@@ -63,10 +62,6 @@ void istream68_curl_shutdown(void);
  */
 istream68_t * istream68_curl_create(const char * url, int mode);
 
-/**@}*/
-
-#ifdef __cplusplus
-}
-#endif
+/** @} */
 
 #endif /* #define _FILE68_ISTREAM68_CURL_H_ */

@@ -1,7 +1,7 @@
 /*
- *			file68 - Memory stream
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                      file68 - Memory stream
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -38,19 +38,19 @@
 
 /** istream file structure. */
 typedef struct {
-  istream68_t istream; /**< istream function.   */
-  char * buffer;     /**< memory buffer.      */
-  int size;          /**< memory buffer size. */
-  int pos;           /**< current position.   */
+  istream68_t istream;                  /**< istream function.   */
+  char * buffer;                        /**< memory buffer.      */
+  int size;                             /**< memory buffer size. */
+  int pos;                              /**< current position.   */
 
   /** Open modes. */
-  int mode;          /**< Allowed open mode bit-0:read bit-1:write.   */
-  int open;          /**< Currently open mode bit-0:read bit-1:write. */
+  int mode;        /**< Allowed open mode bit-0:read bit-1:write.   */
+  int open;        /**< Currently open mode bit-0:read bit-1:write. */
 
   /* MUST BE at the end of the structure because supplemental bytes will
    * be allocated to store filename.
    */
-  char name[64];     /**< filename (mem://start:end). */
+  char name[16 + 2 * 2 * sizeof(void*)]; /**< filename (mem://start:end). */
 
 } istream68_mem_t;
 
@@ -141,7 +141,7 @@ static int ism_tell(istream68_t * istream)
   istream68_mem_t * ism = (istream68_mem_t *)istream;
 
   return (!ism || !ism->open)
-    ? -1 
+    ? -1
     : ism->pos;
 }
 
@@ -188,7 +188,6 @@ istream68_t * istream68_mem_create(const void * addr, int len, int mode)
   }
 
   ism->istream = istream68_mem;
-/*   ism->istream.context = context; */
   ism->buffer = (char *)addr;
   ism->size   = len;
   ism->mode   = mode & (ISTREAM68_OPEN_READ|ISTREAM68_OPEN_WRITE);
@@ -209,7 +208,7 @@ istream68_t * istream68_mem_create(const void * addr, int len, int mode)
 
 istream68_t * istream68_mem_create(const void * addr, int len, int mode)
 {
-  error68_add("istream68_mem_create(%p,%d) : not supported", addr, len);
+  msg68_error("istream68_mem: not supported");
   return 0;
 }
 

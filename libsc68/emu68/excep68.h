@@ -5,11 +5,11 @@
  * @date      1999/13/03
  * @brief     68k exception and interruption definition header.
  *
- * $Id$
- *
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _EXCEP68_H_
 #define _EXCEP68_H_
@@ -59,10 +59,10 @@
 #define TRAP_VECTOR(N)   (0x80+(4*(N))) /**< TRAP #N vector address */
 #define TRAP_LVL         7              /**< TRAP #N interruption level */
 
-/**@}*/
+/** @} */
 
 /**
- *@}
+ *  @}
  */
 
 #endif /* #ifndef _EXCEP68_H_ */

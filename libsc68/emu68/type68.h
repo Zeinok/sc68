@@ -5,11 +5,11 @@
  * @date      1999/03/13
  * @author    Benjamin Gerard
  *
- * $Id$
- *
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _TYPE68_H_
 #define _TYPE68_H_
@@ -20,10 +20,6 @@
 
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
-#endif
-
-#ifdef __cplusplus
-extern "C" {
 #endif
 
 /** @defgroup  emu68_type68_devel  Type definitions
@@ -54,13 +50,13 @@ typedef int32_t  s32;      /**< Must be an   signed 32 bit integer. */
 typedef uint64_t u64;      /**< Must be at an unsigned 64 bit integer. */
 typedef int64_t  s64;      /**< Must be an   signed 64 bit integer. */
 
-/**@}*/
+/** @} */
 
 
 /** Commonly used int (should be fastest at least 32 bit type). */
-typedef  int_least32_t  int68_t;
-typedef        int68_t sint68_t;
-typedef uint_least32_t uint68_t;
+typedef  int_fast32_t int68_t;
+typedef       int68_t sint68_t;
+typedef uint_fast32_t uint68_t;
 
 /** Used by cycle counters. */
 typedef uint68_t cycle68_t;
@@ -78,7 +74,7 @@ typedef struct emu68_s emu68_t;
 typedef void (*memfunc68_t)(emu68_t * const);
 
 /**
- *@}
+ * @}
  */
 
 #define BYTE_MASK ~0xFF
@@ -88,9 +84,5 @@ typedef void (*memfunc68_t)(emu68_t * const);
 #define BYTE_SHIFT ((sizeof(int68_t)-1)<<3)
 #define WORD_SHIFT ((sizeof(int68_t)-2)<<3)
 #define LONG_SHIFT ((sizeof(int68_t)-4)<<3)
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _TYPE68_H_ */

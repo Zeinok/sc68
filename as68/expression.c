@@ -1,7 +1,7 @@
 /*
- *		     as68 - 68000 macro assembler
- *		   Copyright (C) 1993 Vincent Penne
- *	       Copyright (C) 1999-2009 Benjamin Gerard
+ *                   as68 - 68000 macro assembler
+ *                 Copyright (C) 1993 Vincent Penne
+ *             Copyright (C) 1999-2009 Benjamin Gerard
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -38,97 +38,97 @@ int primaire()
   char ond;
 
   switch (symbol_type)
+  {
+  case STRING_TYPE:
+    m = 0;
+    s = cur_string;
+    while(*s)
+      m = (m * 256) + *s++;
+    get_symbol();
+    return m;
+
+  case NUM_TYPE:
+    m = cur_num;
+    get_symbol();
+    return m;
+
+  case '.':
+    if(get_symbol() != WORD_TYPE)
     {
-    case STRING_TYPE:
-      m = 0;
-      s = cur_string;
-      while(*s)
-	m = (m * 256) + *s++;
-      get_symbol();
-      return m;
-
-    case NUM_TYPE:
-      m = cur_num;
-      get_symbol();
-      return m;
-
-    case '.':
-      if(get_symbol() != WORD_TYPE)
-	{
-	  syntax_error();
-	  return 1;
-	}
-      else
-	{
-	  char a[128];
-	  strcpy(a, cur_string);
-	  sprintf(cur_string, "_%xL%s", n_local, a);
-	}
-
-    case WORD_TYPE:
-      w = search(cur_string);
-      if(!w)
-	{
-	  if(cur_pass == 1)
-	    {
-	      get_symbol();
-	      notdef = TRUE;
-	      last_pass = FALSE;
-	      return 0;
-	    }
-	  else
-	    {
-	      error_undefined(cur_string);
-	      get_symbol();
-	      return 1;
-	    }
-	}
-      get_symbol();
-      if(w->type != LABEL && w->type != VARIABLE)
-	{
-	  error(error_list[33]);
-	  return(1);
-	}
-      if(opt_relocatable && cur_pass == 3)
-	return w->dd.value2;
-      else
-	return w->pd.value;
-
-    case '-':
-      get_symbol();
-      return -primaire();
-
-    case '+':
-      get_symbol();
-      return primaire();
-
-    case '(':
-      get_symbol();
-      ond = notdef;
-      m = expression();
-      notdef = (notdef || ond);
-      if(symbol_type != ')')
-	error_expected(")");
-      else
-	get_symbol();
-      return m;
-
-    case '~':
-      get_symbol();
-      return ~primaire();
-
-    case '!':
-      get_symbol();
-      return !primaire();
-
-    case '*':
-      get_symbol();
-      return CurPC+org;
-
-    default:
       syntax_error();
       return 1;
     }
+    else
+    {
+      char a[128];
+      strcpy(a, cur_string);
+      sprintf(cur_string, "_%xL%s", n_local, a);
+    }
+
+  case WORD_TYPE:
+    w = search(cur_string);
+    if(!w)
+    {
+      if(cur_pass == 1)
+      {
+        get_symbol();
+        notdef = TRUE;
+        last_pass = FALSE;
+        return 0;
+      }
+      else
+      {
+        error_undefined(cur_string);
+        get_symbol();
+        return 1;
+      }
+    }
+    get_symbol();
+    if(w->type != LABEL && w->type != VARIABLE)
+    {
+      error(error_list[33]);
+      return(1);
+    }
+    if(opt_relocatable && cur_pass == 3)
+      return w->dd.value2;
+    else
+      return w->pd.value;
+
+  case '-':
+    get_symbol();
+    return -primaire();
+
+  case '+':
+    get_symbol();
+    return primaire();
+
+  case '(':
+    get_symbol();
+    ond = notdef;
+    m = expression();
+    notdef = (notdef || ond);
+    if(symbol_type != ')')
+      error_expected(")");
+    else
+      get_symbol();
+    return m;
+
+  case '~':
+    get_symbol();
+    return ~primaire();
+
+  case '!':
+    get_symbol();
+    return !primaire();
+
+  case '*':
+    get_symbol();
+    return CurPC+org;
+
+  default:
+    syntax_error();
+    return 1;
+  }
   return 1;
 }
 
@@ -140,31 +140,31 @@ int terme()
 
   for(;;)
     switch (symbol_type)
+    {
+    case '*':
+      get_symbol();
+      m *= primaire();
+      break;
+
+    case '/':
+      get_symbol();
+      n = primaire();
+      if(!notdef)
       {
-      case '*':
-	get_symbol();
-	m *= primaire();
-	break;
-
-      case '/':
-	get_symbol();
-	n = primaire();
-	if(!notdef)
-	  {
-	    if (n == 0)
-	      {
-		error(error_list[4]);
-		m = 1;
-	      }
-	    else
-	      m /= n;
-	  }
-	break;
-
-      default:
-
-	return m;
+        if (n == 0)
+        {
+          error(error_list[4]);
+          m = 1;
+        }
+        else
+          m /= n;
       }
+      break;
+
+    default:
+
+      return m;
+    }
 }
 
 /* Evaluate integer expression which priority is lower than termes ( '+' '-' ... )
@@ -175,80 +175,80 @@ int sous_expression()
 
   for(;;)
     switch (symbol_type)
+    {
+    case '+':
+      get_symbol();
+      m += terme();
+      break;
+
+    case '-':
+      get_symbol();
+      m -= terme();
+      break;
+
+    case '=':
+      get_symbol();
+      m = (m == sous_expression());
+      break;
+
+    case '<':
+      if(get_symbol() == '<')
       {
-      case '+':
-	get_symbol();
-	m += terme();
-	break;
-
-      case '-':
-	get_symbol();
-	m -= terme();
-	break;
-
-      case '=':
-	get_symbol();
-	m = (m == sous_expression());
-	break;
-
-      case '<':
-	if(get_symbol() == '<')
-	  {
-	    get_symbol();
-	    m = m << sous_expression();
-	  }
-	else
-	  if(symbol_type == '=')
-	    {
-	      get_symbol();
-	      m = (m <= sous_expression());
-	    }
-	  else
-	    m = (m < sous_expression());
-	break;
-
-      case '>':
-	if(get_symbol() == '>')
-	  {
-	    get_symbol();
-	    m = m >> sous_expression();
-	  }
-	else
-	  if(symbol_type == '=')
-	    {
-	      get_symbol();
-	      m = m >= sous_expression();
-	    }
-	  else
-	    m = m > sous_expression();
-	break;
-
-      case '^':
-	get_symbol();
-	m = m ^ sous_expression();
-	break;
-
-      case '&':
-	get_symbol();
-	m = m & sous_expression();
-	break;
-
-      case '|':
-	get_symbol();
-	m = m | sous_expression();
-	break;
-
-      case '!':
-	if(get_symbol() != '=')
-	  error_expected("=");
-	else
-	  get_symbol();
-	m = m != sous_expression();
-	break;
-
-      default:
-	return m;
+        get_symbol();
+        m = m << sous_expression();
       }
+      else
+        if(symbol_type == '=')
+        {
+          get_symbol();
+          m = (m <= sous_expression());
+        }
+        else
+          m = (m < sous_expression());
+      break;
+
+    case '>':
+      if(get_symbol() == '>')
+      {
+        get_symbol();
+        m = m >> sous_expression();
+      }
+      else
+        if(symbol_type == '=')
+        {
+          get_symbol();
+          m = m >= sous_expression();
+        }
+        else
+          m = m > sous_expression();
+      break;
+
+    case '^':
+      get_symbol();
+      m = m ^ sous_expression();
+      break;
+
+    case '&':
+      get_symbol();
+      m = m & sous_expression();
+      break;
+
+    case '|':
+      get_symbol();
+      m = m | sous_expression();
+      break;
+
+    case '!':
+      if(get_symbol() != '=')
+        error_expected("=");
+      else
+        get_symbol();
+      m = m != sous_expression();
+      break;
+
+    default:
+      return m;
+    }
 }
 
 /* Evaluate an integer expression
@@ -260,18 +260,18 @@ int expression()
 
   m = sous_expression();
   while(symbol_type == WORD_TYPE)
+  {
+    if(!strcmp(cur_string, "and"))
     {
-      if(!strcmp(cur_string, "and"))
-	{
-	  get_symbol();
-	  m = m && sous_expression();
-	}
-      else if(!strcmp(cur_string, "or"))
-	{
-	  get_symbol();
-	  m = m || sous_expression();
-	}
-      else break;
+      get_symbol();
+      m = m && sous_expression();
     }
+    else if(!strcmp(cur_string, "or"))
+    {
+      get_symbol();
+      m = m || sous_expression();
+    }
+    else break;
+  }
   return m;
 }

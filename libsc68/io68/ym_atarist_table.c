@@ -1,5 +1,7 @@
 /*
- *          sc68 - YM-2149 emulator - Atari ST Volume Table
+ *           sc68 - YM-2149 emulator - Atari ST Volume Table
+ *             Copyright (C) 2001-2009 Benjamin Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -15,14 +17,14 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
 
 /* Table of 4 bit D/A output level for 1 channel.*/
 static const u16 volumetable_original[16 * 16 * 16] =
 #include "ym_fixed_vol.h"
-
+  ;
 static int
 volumetable_get(int i, int j, int k)
 {
@@ -38,12 +40,12 @@ volumetable_get(int i, int j, int k)
 /*   assert(i >= 0 && i <= 15); */
 /*   assert(j >= 0 && j <= 15); */
 /*   assert(k >= 0 && k <= 15); */
-    
-    /* Close your eyes now... */
+
+  /* Close your eyes now... */
 /*   i = 15 - i; */
 /*   j = 15 - j; */
 /*   k = 15 - k; */
-  
+
   v = volumetable_original[i + 16 * j + 16 * 16 * k];
   v2 = (v*12)>>4;
   /*   TRACE68(ym_feature,"v[%x %x %x] = %d->%d\n",k,j,i,v,v2); */
@@ -57,13 +59,13 @@ volumetable_set(s16 * const volumetable, int i, int j, int k, int val)
 /*   assert(i >= 0 && i <= 31); */
 /*   assert(j >= 0 && j <= 31); */
 /*   assert(k >= 0 && k <= 31); */
-  
-    /* Close your eyes now... Volumetable needs to be reversed for me
-     * compared to the tabulated data I stole from someone else. */
+
+  /* Close your eyes now... Volumetable needs to be reversed for me
+   * compared to the tabulated data I stole from someone else. */
 /*   i = 31 - i; */
 /*   j = 31 - j; */
 /*   k = 31 - k; */
-    
+
   val -= 32768;
   if (val < -32768) {
 /*     TRACE68(ym_feature,"set [%02x %02x %02x] sature:%d\n",k,j,i,val); */
@@ -128,37 +130,37 @@ interpolate_volumetable(s16 * const out)
   for (i = 0; i < 16; i += 1) {
     for (j = 0; j < 16; j += 1) {
       for (k = 0; k < 16; k += 1) {
-	i1 = volumetable_get(i, j, k);
-	/* copy value unchanged to new position */
-	volumetable_set(out,i*2, j*2, k*2, i1);
-                
-	/* interpolate in i direction */
-	i2 = volumetable_get(i + 1, j, k);
-	volumetable_set(out,i*2 + 1, j*2, k*2, volumetable_interpolate(i1, i2));
-                
-	/* interpolate in j direction */
-	i2 = volumetable_get(i, j+1, k);
-	volumetable_set(out,i*2, j*2 + 1, k*2, volumetable_interpolate(i1, i2));
-                
-	/* interpolate in k direction */
-	i2 = volumetable_get(i, j, k+1);
-	volumetable_set(out,i*2, j*2, k*2+1, volumetable_interpolate(i1, i2));
+        i1 = volumetable_get(i, j, k);
+        /* copy value unchanged to new position */
+        volumetable_set(out,i*2, j*2, k*2, i1);
 
-	/* interpolate in i + j direction */
-	i2 = volumetable_get(i + 1, j + 1, k);
-	volumetable_set(out,i*2 + 1, j*2 + 1, k*2, volumetable_interpolate(i1, i2));
-                
-	/* interpolate in i + k direction */
-	i2 = volumetable_get(i + 1, j, k + 1);
-	volumetable_set(out,i*2 + 1, j*2, k*2 + 1, volumetable_interpolate(i1, i2));
-                
-	/* interpolate in j + k direction */
-	i2 = volumetable_get(i, j + 1, k + 1);
-	volumetable_set(out,i*2, j*2 + 1, k*2 + 1, volumetable_interpolate(i1, i2));
+        /* interpolate in i direction */
+        i2 = volumetable_get(i + 1, j, k);
+        volumetable_set(out,i*2 + 1, j*2, k*2, volumetable_interpolate(i1, i2));
 
-	/* interpolate in i + j + k direction */
-	i2 = volumetable_get(i + 1, j + 1, k + 1);
-	volumetable_set(out,i*2 + 1, j*2 + 1, k*2 + 1, volumetable_interpolate(i1, i2));
+        /* interpolate in j direction */
+        i2 = volumetable_get(i, j+1, k);
+        volumetable_set(out,i*2, j*2 + 1, k*2, volumetable_interpolate(i1, i2));
+
+        /* interpolate in k direction */
+        i2 = volumetable_get(i, j, k+1);
+        volumetable_set(out,i*2, j*2, k*2+1, volumetable_interpolate(i1, i2));
+
+        /* interpolate in i + j direction */
+        i2 = volumetable_get(i + 1, j + 1, k);
+        volumetable_set(out,i*2 + 1, j*2 + 1, k*2, volumetable_interpolate(i1, i2));
+
+        /* interpolate in i + k direction */
+        i2 = volumetable_get(i + 1, j, k + 1);
+        volumetable_set(out,i*2 + 1, j*2, k*2 + 1, volumetable_interpolate(i1, i2));
+
+        /* interpolate in j + k direction */
+        i2 = volumetable_get(i, j + 1, k + 1);
+        volumetable_set(out,i*2, j*2 + 1, k*2 + 1, volumetable_interpolate(i1, i2));
+
+        /* interpolate in i + j + k direction */
+        i2 = volumetable_get(i + 1, j + 1, k + 1);
+        volumetable_set(out,i*2 + 1, j*2 + 1, k*2 + 1, volumetable_interpolate(i1, i2));
       }
     }
   }
@@ -177,17 +179,16 @@ void ym_create_5bit_atarist_table(s16 * out, unsigned int level)
     const int center = (level+1)>>1;
     for (h=0; h<32*32*32; ++h) {
       int tmp = out[h], res;
-      
-      if (tmp < min || tmp > max) 
-	msg68_critical
-	  ("ym-2149: *ATARI-ST* volumes value %d out of range [%d..%d]\n",
-	   tmp,min,max);
-      
+
+      if (tmp < min || tmp > max)
+        msg68_critical
+          ("ym-2149: *ATARI-ST* volumes value %d out of range [%d..%d]\n",
+           tmp,min,max);
+
       res = (tmp-min) * level / div - center;
       out[h] = res;
     }
   }
   msg68_info("ym-2149: using *ATARI-ST* volumes %d [%d..%d]\n",
-		  level, out[0],out[0x7FFF]);
-  
+             level, out[0],out[0x7FFF]);
 }

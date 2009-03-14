@@ -1,7 +1,7 @@
 /*
- *		     desa68 - 68000 disassembler
- *	       Copyright (C) 1999-2009 Benjamin Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                   desa68 - 68000 disassembler
+ *             Copyright (C) 1999-2009 Benjamin Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -51,12 +51,12 @@ typedef short          s16;
 typedef int            s32;
 typedef unsigned int   u32;
 
-#define REG0(W)		(((W))&7)
-#define REG9(W)		(((W)>>9)&7)
-#define OPSZ(W)		(((W)>>6)&3)
-#define LINE(W)		(((W)>>12)&15)
-#define MODE3(W)	(((W)>>3)&7)
-#define MODE6(W)	(((W)>>6)&7)
+#define REG0(W)         (((W))&7)
+#define REG9(W)         (((W)>>9)&7)
+#define OPSZ(W)         (((W)>>6)&3)
+#define LINE(W)         (((W)>>12)&15)
+#define MODE3(W)        (((W)>>3)&7)
+#define MODE6(W)        (((W)>>6)&7)
 
 /******************************
  * Disassembler string tables *
@@ -143,7 +143,7 @@ static void desa_ascii(desa68_parm_t * d, unsigned int n)
 /* Add a N-digit unsigned hexa number with header char
    to disassembly string */
 static void desa_uhexacat(desa68_parm_t * d, unsigned int n,
-			  int ndigit, int header_char)
+                          int ndigit, int header_char)
 {
   int shf;
   desa_char(d,header_char);
@@ -178,7 +178,7 @@ static void desa_signifiant(desa68_parm_t * d, int n)
 
 static int my_isascii(u8 c)
 {
-  return 
+  return
     c=='_' || c==' ' || c == '!' || c == '.' || c == '#'
     || (c>='a' && c<='z')
     || (c>='A' && c<='Z')
@@ -263,12 +263,12 @@ static void desa_label(desa68_parm_t * d, unsigned int v)
 
 static int desa_is_symbol(desa68_parm_t * d, unsigned int v2, unsigned int bit)
 {
-  int r = 
+  int r =
     ((d->flags & DESA68_SYMBOL_FLAG)
      &&
      ( (bit < 5u && (d->flags & (DESA68_FORCESYMB_FLAG<<bit)))
        || (v2>=d->immsym_min && v2<d->immsym_max))
-     );
+      );
   return r;
 }
 
@@ -284,10 +284,10 @@ static void desa_immL(desa68_parm_t * d, int v, int pc)
     update_ea(d,v2);
   } else {
     if ((d->flags & DESA68_ASCII_FLAG)
-       && my_isascii(v2)
-       && my_isascii(v2>>8)
-       && my_isascii(v2>>16)
-       && my_isascii(v2>>24)) {
+        && my_isascii(v2)
+        && my_isascii(v2>>8)
+        && my_isascii(v2>>16)
+        && my_isascii(v2>>24)) {
       desa_char (d,'\'');
       desa_ascii(d,(u32)v2);
       desa_char (d,'\'');
@@ -387,28 +387,28 @@ static void get_ea_2(desa68_parm_t * d, u32 mode, u32 reg, u8 sz)
     break;
   case MODE_IMM:
     switch(sz )
-      {
-      case 1:
-      case 'B':
-	v = (s8)immB(d);
-	desa_char(d,'#');
-	desa_signifiant(d,v);
-	break;
-      case 2:
-      case 'W':
-	v = /* (s16) */immW(d); /* should not be ok without cast */
-	desa_char(d,'#');
-	desa_signifiant(d,v);
-	break;
-      case 4:
-      case 'L':
-	v = (u32)immL(d);
-	desa_immL(d,v,(d->pc-4)&0xFFFFFF);
-	return;
-      default:
-	desa_ascii(d,'#?');
-	break;
-      }
+    {
+    case 1:
+    case 'B':
+      v = (s8)immB(d);
+      desa_char(d,'#');
+      desa_signifiant(d,v);
+      break;
+    case 2:
+    case 'W':
+      v = /* (s16) */immW(d); /* should not be ok without cast */
+      desa_char(d,'#');
+      desa_signifiant(d,v);
+      break;
+    case 4:
+    case 'L':
+      v = (u32)immL(d);
+      desa_immL(d,v,(d->pc-4)&0xFFFFFF);
+      return;
+    default:
+      desa_ascii(d,'#?');
+      break;
+    }
     break;
 
   default:
@@ -444,11 +444,11 @@ static void desa_ry_rx(desa68_parm_t * d, int inst, int size)
   desa_ascii(d,inst);
   desa_ascii(d,size);
   desa_char(d,' ');
-  if (d->mode3&1) {		/* -(Ay),-(Ax) */
+  if (d->mode3&1) {             /* -(Ay),-(Ax) */
     desa_ascii(d,'-(A0'+d->reg0);
     desa_ascii(d,'),-(');
     desa_ascii(d,'A0)' + (d->reg9<<8));
-  } else {			/* Dy,Dx */
+  } else {                      /* Dy,Dx */
     desa_reg(d, d->reg0);
     desa_char(d,',');
     desa_reg(d, d->reg9);
@@ -567,7 +567,7 @@ static int check_desa_imm_op(desa68_parm_t * d)
     '???I', 'EORI', 'CMPI', '???I'
   };
   int modemsk=0x6F;
-  
+
   if ((d->w&0x100) || !(modemsk&(1<<d->reg9)) || d->opsz==3)
     return 0;
 
@@ -581,10 +581,10 @@ static int check_desa_imm_op(desa68_parm_t * d)
 
 static void desa_line0(desa68_parm_t * d)
 {
-  if (check_desa_movep(d) ) 	return;
-  if (check_desa_bitop(d) ) 	return;
-  if (check_desa_IMM_SR(d) ) 	return;
-  if (check_desa_imm_op(d) )	return;
+  if (check_desa_movep(d) )     return;
+  if (check_desa_bitop(d) )     return;
+  if (check_desa_IMM_SR(d) )    return;
+  if (check_desa_imm_op(d) )    return;
   else desa_dcw(d);
 }
 
@@ -596,7 +596,7 @@ static void desa_move(desa68_parm_t * d)
   int movsz  = (u8)('WLB?' >> ((w&(3<<12))>>(12-3)));
   desa_ascii(d,'MOVE');
   desa_ascii(d,((d->adrmode6==MODE_AN)? ('A'<<24) : 0)
-	     + ('.'<<16) + ' ' + (movsz<<8) );
+             + ('.'<<16) + ' ' + (movsz<<8) );
   get_ea_move(d,0,w,movsz);
   desa_char(d,',');
   get_ea_move(d,6,w,movsz);
@@ -645,7 +645,7 @@ static void desa_li123(desa68_parm_t * d)
  ***************/
 
 static void get_movemsub(desa68_parm_t * d,
-			 s32 i, s32 j)
+                         s32 i, s32 j)
 {
   desa_reg(d, i);
   if (i!=j) {
@@ -655,7 +655,7 @@ static void get_movemsub(desa68_parm_t * d,
 }
 
 static void get_movemreg(desa68_parm_t * d,
-			 u32 v, u32 rev)
+                         u32 v, u32 rev)
 {
   s32 i,j,p=0;
   for (i=0 ; i<16; i++) {
@@ -670,7 +670,7 @@ static void get_movemreg(desa68_parm_t * d,
 }
 
 static int desa_check_imp(desa68_parm_t * d,
-			  unsigned int name, int mskmode)
+                          unsigned int name, int mskmode)
 {
   if ((d->w&0400) || !(mskmode&(1<<d->adrmode0)))
     return 0;
@@ -784,7 +784,7 @@ static int check_desa_line4_mode3(desa68_parm_t * d)
 
   switch(d->reg9) {
 
-  case 0: {			/* MOVE FROM SR */
+  case 0: {                     /* MOVE FROM SR */
     int modemsk = 00775;
     if (!(modemsk&(1<<d->adrmode0)))
       break;
@@ -797,7 +797,7 @@ static int check_desa_line4_mode3(desa68_parm_t * d)
   case 1:
     break;
 
-  case 2: {			/* MOVE TO CCR */
+  case 2: {                     /* MOVE TO CCR */
     int modemsk = 07775;
     if (!(modemsk&(1<<d->adrmode0)))
       break;
@@ -808,7 +808,7 @@ static int check_desa_line4_mode3(desa68_parm_t * d)
     return 1;
   }
 
-  case 3: {			/* MOVE TO SR */
+  case 3: {                     /* MOVE TO SR */
     int modemsk = 07775;
     if (!(modemsk&(1<<d->adrmode0)))
       break;
@@ -822,7 +822,7 @@ static int check_desa_line4_mode3(desa68_parm_t * d)
   case 4:
     break;
 
-  case 5: {			/* TAS */
+  case 5: {                     /* TAS */
     d->szchar = 0;
     if (desa_check_imp(d, 'TAS', 00775)) {
       return 1;
@@ -866,50 +866,50 @@ static void desa_line4(desa68_parm_t * d)
   default:
 
     switch(d->reg9) {
-    case 0:				/* NEGX */
+    case 0:                             /* NEGX */
       if (desa_check_imp(d, 'NEGX', 00775))
-	return;
+        return;
       break;
 
-    case 1:				/* CLR */
+    case 1:                             /* CLR */
       if (desa_check_imp(d, 'CLR', 00775))
-	return;
+        return;
       break;
 
-    case 2:				/* NEG */
+    case 2:                             /* NEG */
       if (desa_check_imp(d, 'NEG', 00775))
-	return;
+        return;
       break;
 
-    case 3:				/* NOT */
+    case 3:                             /* NOT */
       if (desa_check_imp(d, 'NOT', 00775))
-	return;
+        return;
       break;
 
     case 4:
       if (d->mode6==0) {
-	/* NBCD */
-	d->szchar = 0;
-	if (desa_check_imp(d, 'NBCD', 00775))
-	  return;
+        /* NBCD */
+        d->szchar = 0;
+        if (desa_check_imp(d, 'NBCD', 00775))
+          return;
       } else if (d->mode6==1) {
-	if (d->mode3 == MODE_DN) {
-	  /* SWAP */
-	  desa_ascii(d,'SWAP');
-	  desa_ascii(d,' D0'+d->reg0);
-	  return;
-	} else {
-	  /* PEA */
-	  d->szchar = 0;
-	  if (desa_check_imp(d, 'PEA', 0x7E4))
-	    return;
-	}
+        if (d->mode3 == MODE_DN) {
+          /* SWAP */
+          desa_ascii(d,'SWAP');
+          desa_ascii(d,' D0'+d->reg0);
+          return;
+        } else {
+          /* PEA */
+          d->szchar = 0;
+          if (desa_check_imp(d, 'PEA', 0x7E4))
+            return;
+        }
       }
       break;
 
-    case 5:				/* TST */
+    case 5:                             /* TST */
       if (desa_check_imp(d, 'TST', 00775))
-	return;
+        return;
       break;
 
     case 6:
@@ -917,59 +917,59 @@ static void desa_line4(desa68_parm_t * d)
 
     case 7:
       if (d->mode6 == 1) {
-	/* FUNKY LINE 4 */
-	switch(d->mode3) {
-	case 0:
-	case 1: {
-	  int num = d->w&0xF;
-	  desa_ascii(d,'TRAP');
-	  desa_ascii(d,' #$');
-	  desa_char (d, Thex[num]);
-	  d->status = DESA68_INST | DESA68_INT;
-	  d->branch = 0x80 + (num<<2);
-	} return;
-	case 2:
-	  desa_ascii(d,'LINK');
-	  desa_ascii(d,' A0,'+(d->reg0<<8));
-	  get_ea_2(d, MODE_ABSW, MODE_IMM-MODE_ABSW, 'W');
-	  return;
-	case 3:
-	  desa_ascii(d,'UNLK');
-	  desa_ascii(d,' A0'+d->reg0);
-	  return;
-	case 4:
-	  desa_ascii(d,'MOVE');
-	  desa_ascii(d,' A0'+d->reg0);
-	  desa_ascii(d,',USP');
-	  return;
-	case 5:
-	  desa_ascii(d,'MOVE');
-	  desa_ascii(d,' USP');
-	  desa_ascii(d,',A0'+d->reg0);
-	  return;
-	case 6: {
-	  /* FUNKY LINE 4 MODE 6 (4E */
-	  static char *str[8] =	{ /* $4E70 - $4E77 */
-	    /* 0      1      2      3     4    5      6      7 */
-	    "RESET","NOP","STOP ","RTE", "?","RTS","TRAPV","RTR"
-	  };
+        /* FUNKY LINE 4 */
+        switch(d->mode3) {
+        case 0:
+        case 1: {
+          int num = d->w&0xF;
+          desa_ascii(d,'TRAP');
+          desa_ascii(d,' #$');
+          desa_char (d, Thex[num]);
+          d->status = DESA68_INST | DESA68_INT;
+          d->branch = 0x80 + (num<<2);
+        } return;
+        case 2:
+          desa_ascii(d,'LINK');
+          desa_ascii(d,' A0,'+(d->reg0<<8));
+          get_ea_2(d, MODE_ABSW, MODE_IMM-MODE_ABSW, 'W');
+          return;
+        case 3:
+          desa_ascii(d,'UNLK');
+          desa_ascii(d,' A0'+d->reg0);
+          return;
+        case 4:
+          desa_ascii(d,'MOVE');
+          desa_ascii(d,' A0'+d->reg0);
+          desa_ascii(d,',USP');
+          return;
+        case 5:
+          desa_ascii(d,'MOVE');
+          desa_ascii(d,' USP');
+          desa_ascii(d,',A0'+d->reg0);
+          return;
+        case 6: {
+          /* FUNKY LINE 4 MODE 6 (4E */
+          static char *str[8] = { /* $4E70 - $4E77 */
+            /* 0      1      2      3     4    5      6      7 */
+            "RESET","NOP","STOP ","RTE", "?","RTS","TRAPV","RTR"
+          };
 
-	  if (d->reg0 == 4) {
-	    break;
-	  }
-	  if ((d->reg0 & 1)){
-	    d->status = DESA68_INST
-	      | ( (d->reg0 == 1)
-		  ? DESA68_NOP
-		  : DESA68_RTS);
-	  }
+          if (d->reg0 == 4) {
+            break;
+          }
+          if ((d->reg0 & 1)){
+            d->status = DESA68_INST
+              | ( (d->reg0 == 1)
+                  ? DESA68_NOP
+                  : DESA68_RTS);
+          }
 
-	  desa_str(d, str[d->reg0]);
-	  if (d->reg0 == 2) {
-	    get_ea_2(d, MODE_IMM,0,'W');
-	  }
-	} return;
-	}
+          desa_str(d, str[d->reg0]);
+          if (d->reg0 == 2) {
+            get_ea_2(d, MODE_IMM,0,'W');
+          }
+        } return;
+        }
       }
     }
   }
@@ -1032,7 +1032,7 @@ static void desa_line5(desa68_parm_t * d)
  *   LINE 6 :
  *   -Bcc
  *
- * Format 0110 COND OFFSET08 [OFFSET16 if OFFSET08==0]  
+ * Format 0110 COND OFFSET08 [OFFSET16 if OFFSET08==0]
  * !!! COND=0001(false) => BSR
  ***************/
 
@@ -1043,7 +1043,7 @@ static void desa_line6(desa68_parm_t * d)
   int cond = (d->w>>8) & 0xF;
 
   desa_ascii(d,('B'<<16) + bcc_ascii[cond]);
-  
+
   /* Bcc.S */
   if (d->w & 255) {
     desa_ascii(d,'.S');
@@ -1284,8 +1284,8 @@ static int check_desa_add_sub(desa68_parm_t * d)
 static void desa_lin9D(desa68_parm_t * d)
 {
   if (check_desa_adda_suba(d))           return;
-  else if (check_desa_addx_subx(d))	return;
-  else if (check_desa_add_sub(d))	return;
+  else if (check_desa_addx_subx(d))     return;
+  else if (check_desa_add_sub(d))       return;
   else desa_dcw(d);
   return;
 }

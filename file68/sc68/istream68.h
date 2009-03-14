@@ -15,12 +15,9 @@
 #define _FILE68_ISTREAM68_H_
 
 #ifndef FILE68_API
-#include "file68_api.h"
+# include "file68_api.h"
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @defgroup  file68_istream  I/O streams.
  *  @ingroup   file68_lib
@@ -108,7 +105,7 @@ FILE68_API
  *
  * @param  istream  stream
  *
- * @return stream position 
+ * @return stream position
  * @retval -1 Failure.
  */
 int istream68_tell(istream68_t *istream);
@@ -192,14 +189,10 @@ FILE68_API
  */
 int istream68_putc(istream68_t *istream, const int c);
 
-/**@}*/
+/** @} */
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_ISTREAM68_H_ */

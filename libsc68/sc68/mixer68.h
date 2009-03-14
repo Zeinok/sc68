@@ -5,17 +5,23 @@
  * @date      1999/05/17
  * @brief     audio mixer header.
  *
- * $Id$
  */
 
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _MIXER68_H_
 #define _MIXER68_H_
 
 #include "emu68/type68.h"
 
-#ifdef __cplusplus
-extern "C" {
+#ifndef SC68_EXTERN
+# ifdef __cplusplus
+#  define SC68_EXTERN extern "C"
+# else
+#  define SC68_EXTERN
+# endif
 #endif
 
 /** @defgroup  sc68_mixer  audio mixer
@@ -46,6 +52,7 @@ extern "C" {
 #define MIXER68_CHANGE_SIGN               0x80008000 /**< Both channels. */
 /**@}*/
 
+SC68_EXTERN
 /** Copy 16-bit-stereo PCM with optionnal sign change.
  *
  * @param  dst  dstination PCM buffer
@@ -54,8 +61,9 @@ extern "C" {
  * @param  sign  Sign transformation.
  */
 void mixer68_stereo_16_LR(u32 * dst, u32 * src, int nb,
-			  const u32 sign);
+                          const u32 sign);
 
+SC68_EXTERN
 /** Copy 16-bit-stereo PCM with channel swapping and optionnal sign change.
  *
  * @note  Sign change occurs after channel swapping.
@@ -66,8 +74,9 @@ void mixer68_stereo_16_LR(u32 * dst, u32 * src, int nb,
  * @param  sign  Sign transformation.
  */
 void mixer68_stereo_16_RL(u32 * dst, u32 * src, int nb,
-			  const u32 sign);
+                          const u32 sign);
 
+SC68_EXTERN
 /** Copy 16-bit-stereo PCM into normalized float-stereo (-norm..+norm).
  *
  * @note     Sign change occurs before float transformation.
@@ -82,8 +91,9 @@ void mixer68_stereo_16_RL(u32 * dst, u32 * src, int nb,
  * @note   Minus norm causes a sign/phase inversion.
  */
 void mixer68_stereo_FL_LR(float * dst, u32 * src, int nb,
-			  const u32 sign, const float norm);
+                          const u32 sign, const float norm);
 
+SC68_EXTERN
 /** Copy left channel of 16-bit stereo PCM into L/R channels
  *  with optionnal sign change.
  *
@@ -94,6 +104,7 @@ void mixer68_stereo_FL_LR(float * dst, u32 * src, int nb,
  */
 void mixer68_dup_L_to_R(u32 * dst, u32 * src, int nb, const u32 sign);
 
+SC68_EXTERN
 /** Copy right channel of 16-bit stereo PCM into L/R channels
  *  with optionnal sign change.
  *
@@ -104,6 +115,7 @@ void mixer68_dup_L_to_R(u32 * dst, u32 * src, int nb, const u32 sign);
  */
 void mixer68_dup_R_to_L(u32 * dst, u32 * src, int nb, const u32 sign);
 
+SC68_EXTERN
 /** Copy 16-bit-stereo PCM with L/R blending and optionnal sign change.
  *
  *  This function performs following transformations in this order :
@@ -127,9 +139,10 @@ void mixer68_dup_R_to_L(u32 * dst, u32 * src, int nb, const u32 sign);
  * @param  sign_w  sign transform for output PCM.
  */
 void mixer68_blend_LR(u32 * dst, u32 * src, int nb,
-		      int factor,
-		      const u32 sign_r, const u32 sign_w);
+                      int factor,
+                      const u32 sign_r, const u32 sign_w);
 
+SC68_EXTERN
 /** Copy 16-bit-stereo PCM with L/R amplitude factor and
  *  optionnal sign change.
  *
@@ -154,9 +167,10 @@ void mixer68_blend_LR(u32 * dst, u32 * src, int nb,
  * @param  sign_w  sign transform for output PCM.
  */
 void mixer68_mult_LR(u32 * dst, u32 * src, int nb,
-		     const int ml, const int mr,
-		     const u32 sign_r, const u32 sign_w);
+                     const int ml, const int mr,
+                     const u32 sign_r, const u32 sign_w);
 
+SC68_EXTERN
 /** Fill 16-bit-stereo buffer with sign value (RRRRLLLL).
  *
  * @param  dst     Destination PCM buffer
@@ -164,8 +178,9 @@ void mixer68_mult_LR(u32 * dst, u32 * src, int nb,
  * @param  sign    PCM value written (right channel is MSW).
  */
 void mixer68_fill(u32 * dst, int nb,
-		  const u32 sign);
+                  const u32 sign);
 
+SC68_EXTERN
 /** Copy 16-bit-stereo buffer.
  *
  * @param  dst  Destination PCM buffer
@@ -174,12 +189,8 @@ void mixer68_fill(u32 * dst, int nb,
  */
 void mixer68_copy(u32 * dst, u32 * src, int nb);
 
-/** 
+/**
  *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _MIXER68_H_ */

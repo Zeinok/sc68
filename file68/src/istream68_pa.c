@@ -1,7 +1,7 @@
 /*
- *		     file68 - libportaudio stream
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                   file68 - libportaudio stream
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -28,7 +28,8 @@
 #include "istream68_pa.h"
 
 /* Define this if you want portaudio support. */
-#if 0 && defined(USE_PORTAUDIO) 
+/* At least when and if I implement it someday */
+#if 0 && defined(USE_PORTAUDIO)
 
 #include "istream68_def.h"
 #include "alloc68.h"
@@ -42,7 +43,7 @@
 
 #include <string.h>
 
-struct pa68_info_s { 
+struct pa68_info_s {
 /*   int                default_id; */
 /*   ao_device        * default_device; */
 /*   int                driver_id; */
@@ -135,7 +136,7 @@ static int ispa_open(istream68_t * istream)
     is->open  = 1;
   }
 
- error_out:
+  error_out:
   debugmsg68(-1,"} ispa_open() => [%s]\n", !err?"success":"error");
   return -!!err;
 }
@@ -151,20 +152,20 @@ static int ispa_close(istream68_t * istream)
   }
 
 
- || !is->pa.stream || !is->open ) {
-    return -1;
-  }
+  || !is->pa.stream || !is->open ) {
+  return -1;
+}
 
-  err = Pa_StopStream(is->pa.stream);
-  is->pa.
+err = Pa_StopStream(is->pa.stream);
+is->pa.
 
-  is->open = 0;
-  is->ao.device = 0;
-  istream68_pa_shutdown();
+is->open = 0;
+is->ao.device = 0;
+istream68_pa_shutdown();
 
- error_out:
-  debugmsg68(-1,"} ispa_close() => [%s]\n", !err?"success":"error");
-  return -!!err;
+error_out:
+debugmsg68(-1,"} ispa_close() => [%s]\n", !err?"success":"error");
+return -!!err;
 }
 
 static int ispa_read(istream68_t * istream, void * data, int n)
@@ -205,7 +206,7 @@ static int ispa_tell(istream68_t * istream)
 {
   istream68_pa_t * isao = (istream68_pa_t *)istream;
   return (!isao || !isao->ao.device)
-    ? -1 
+    ? -1
     : isao->count;
 }
 
@@ -219,7 +220,7 @@ static void ispa_destroy(istream68_t * istream)
   istream68_pa_shutdown();
   free68(istream);
 }
-	
+
 static const istream68_t istream68_pa = {
   ispa_name,
   ispa_open, ispa_close,
@@ -239,7 +240,7 @@ static const istream68_t istream68_pa = {
  *        - sign     := [s|u]
  *        - channels := [m|s]
  *        - format   := [w|b|f]
- *          
+ *
  * other keys mostly depends on ao driver.
  *
  */
@@ -293,5 +294,4 @@ istream68_t * istream68_pa_create(const char * fname, int mode)
   return 0;
 }
 
-#endif /* #ifdef USE_AO */
-
+#endif /* #ifdef USE_PORTAUDIO */

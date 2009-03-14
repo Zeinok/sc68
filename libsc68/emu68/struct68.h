@@ -4,22 +4,17 @@
  * @author    Benjamin Gerard
  * @date      13/03/1999
  * @brief     Struture definitions.
- * 
- * $Id$
  *
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _EMU68_STRUCT68_H_
 #define _EMU68_STRUCT68_H_
 
 #include "type68.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 
 /** @addtogroup emu68_type68_devel
  *  @{
@@ -47,12 +42,7 @@ extern "C" {
 typedef void (*memwfunc68_t)(emu68_t * const);
 typedef void (*iomemfunc68_t)(io68_t * const);
 
-/*
-typedef void (*iomemRfunc68_t)(io68_t * const, addr68_t, cycle68_t);
-typedef void (*iomemWfunc68_t)(io68_t * const, addr68_t, int68_t, cycle68_t);
-*/
-
-/**@}*/
+/** @} */
 
 /** First level (16 lines) decoder function. */
 typedef void (linefunc68_t)(emu68_t * const/*emu68*/,int/*reg9*/,int/*reg0*/);
@@ -75,8 +65,8 @@ typedef struct
 
 /** IO emulator plugin structure.
  *
- *      All 68K IO must have a filled io68_t structure to be warm plug
- *      or unplug with ioplug interface.
+ *    All 68K IO must have a filled io68_t structure to be warm plug
+ *    or unplug with ioplug interface.
  *
  */
 struct io68_s
@@ -147,46 +137,41 @@ typedef struct
 
 /** 68K Emulator struct. */
 struct emu68_s {
-  char name[32];               /**< Identifier.               */
-  
+  char name[32];                        /**< Identifier.            */
+
   /* Error. */
-  char err[128][4];            /**< Error message stack.      */
-  int  nerr;                   /**< Error counter.            */
+  char err[128][4];                     /**< Error message stack.   */
+  int  nerr;                            /**< Error counter.         */
 
   /* Dynamic memory handlers. */
-  emu68_alloc_t alloc;         /**< Alloc fonction.           */
-  emu68_free_t  free;          /**< Free function.            */
+  emu68_alloc_t alloc;                  /**< Alloc fonction.        */
+  emu68_free_t  free;                   /**< Free function.         */
 
-  reg68_t reg;                 /**< 68000 internal registers. */
-  cycle68_t cycle;             /**< Internal cycle counter.   */
-  uint68_t clock;              /**< Master clock frequency.   */
+  reg68_t reg;                       /**< 68000 internal registers. */
+  cycle68_t cycle;                   /**< Internal cycle counter.   */
+  uint68_t clock;                    /**< Master clock frequency.   */
 
   /* IO chips. */
-  int nio;                     /**< # IO plug in IO-list.  */
-  io68_t *iohead;              /**< Head of IO-list.       */
-  io68_t *interrupt_io;        /**< Current interptible io */
+  int nio;                            /**< # IO plug in IO-list.    */
+  io68_t *iohead;                     /**< Head of IO-list.         */
+  io68_t *interrupt_io;               /**< Current interuptible IO. */
   io68_t *mapped_io[256];
 
   /* Memory access. */
-  addr68_t bus_addr;           /**< bus address for memory access.     */
-  int68_t  bus_data;           /**< bus data for memory access.        */
-  int framechk;                /**< ORed chk change for current frame. */
-  u8  *chk;                    /**< Access-Control-Memory buffer.      */
-  
+  addr68_t bus_addr;        /**< bus address for memory access.     */
+  int68_t  bus_data;        /**< bus data for memory access.        */
+  int framechk;             /**< ORed chk change for current frame. */
+  u8  *chk;                 /**< Access-Control-Memory buffer.      */
+
   /* Onboard memory. */
-  addr68_t memmsk; /**< Onboard memory mask (2^log2mem-1).              */
-  int log2mem;     /**< Onboard memory buffer size (2^log2mem).         */
-  u8 mem[16];      /**< Onboard memory buffer.
-		        @notice Must be last in struct.                 */
+  addr68_t memmsk;     /**< Onboard memory mask (2^log2mem-1).      */
+  int log2mem;         /**< Onboard memory buffer size (2^log2mem). */
+  u8 mem[16];          /**< Onboard memory buffer.
+                            @notice Must be last in struct.         */
 };
 
 /**
- *@}
+ *  @}
  */
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _EMU68_STRUCT68_H_ */

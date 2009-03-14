@@ -3,7 +3,7 @@
  * @file     sc68/registry68.h
  * @author   Benjamin Gerard
  * @date     2003-08-11
- * @brief    Registry header.
+ * @brief    Windows registry header.
  *
  */
 
@@ -15,11 +15,7 @@
 #define _FILE68_REGISTRY68_H_
 
 #ifndef FILE68_API
-#include "file68_api.h"
-#endif
-
-#ifdef __cplusplus
-extern "C" {
+# include "file68_api.h"
 #endif
 
 /** @defgroup  file68_registry  Registry access
@@ -85,16 +81,12 @@ FILE68_API
  *  @retval <0 Error
  */
 int registry68_gets(registry68_key_t hkey,
-		    const char *kname,
-		    char *kdata,
-		    int kdatasz);
+                    const char *kname,
+                    char *kdata,
+                    int kdatasz);
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_REGISTRY68_H_ */

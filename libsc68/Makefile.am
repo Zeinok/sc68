@@ -9,20 +9,20 @@
 # @configure_input@
 # $Id$
 
-SUBDIRS            = io68 emu68 @subdirs@
-ACLOCAL_AMFLAGS    = -I m4 --install
+SUBDIRS         = io68 emu68 $(subdirs)
+ACLOCAL_AMFLAGS = -I m4 --install
 
-AM_CFLAGS          = @LIBSC68_CFLAGS@ @LIBLIBSC68_CFLAGS@
-AM_CPPFLAGS        = @LIBSC68_CPPFLAGS@ @LIBLIBSC68_CPPFLAGS@ $(SINC)
-AM_LDFLAGS         = @LIBSC68_LDFLAGS@ @LIBLIBSC68_LDFLAGS@
-SINC               = -I$(srcdir)/sc68 $(file68_inc)
+AM_CFLAGS       = $(ALL_CFLAGS) $(LIB_CFLAGS)
+AM_CPPFLAGS     = $(ALL_EFLAGS) $(LIB_EFLAGS) $(EFLAGS)
+AM_LDFLAGS      = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
+EFLAGS          = -DSC68_EXPORT=1 -I$(srcdir)/sc68 $(file68_inc)
+LFLAGS          = -version-info 3:0:0
 
 # ,----------------------------------------------------------------------.
 # | script binary                                                        |
 # `----------------------------------------------------------------------'
 
 bin_SCRIPTS        = sc68-config
-
 
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |
@@ -40,7 +40,6 @@ endif
 lib_LTLIBRARIES    = libsc68.la
 libsc68_la_SOURCES = api68.c conf68.c mixer68.c libsc68.c
 libsc68_la_LIBADD  = io68/libio68.la emu68/libemu68.la $(FILE68_LA)
-
 
 # ,----------------------------------------------------------------------.
 # | Installed headers                                                    |

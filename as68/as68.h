@@ -1,7 +1,7 @@
 /*
- *		     as68 - 68000 macro assembler
- *		   Copyright (C) 1993 Vincent Penne
- *	       Copyright (C) 1999-2009 Benjamin Gerard
+ *                   as68 - 68000 macro assembler
+ *                 Copyright (C) 1993 Vincent Penne
+ *             Copyright (C) 1999-2009 Benjamin Gerard
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -24,32 +24,32 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
- 
-#define FAST_LETTERS 27 
 
-#define	TRUE	1
-#define	FALSE	0
+#define FAST_LETTERS 27
 
-#define	MAX_MACRO_ARGS	10
-#define	MAX_REL		(4096*3)
+#define TRUE    1
+#define FALSE   0
 
-#define	WORD_TYPE	(128)
-#define	NUM_TYPE	(129)
-#define	STRING_TYPE     (130)
-#define	END_OF_LINE	(0)
+#define MAX_MACRO_ARGS  10
+#define MAX_REL         (4096*3)
 
-#define	BS      0
-#define	Byte    BS
-#define	WS      1
-#define	Word    WS
-#define	LS      2
-#define	Long    LS
-#define	VS      3
+#define WORD_TYPE       (128)
+#define NUM_TYPE        (129)
+#define STRING_TYPE     (130)
+#define END_OF_LINE     (0)
 
-#define	Alterable 00100
-#define	Control   00200
-#define	Memory    00400
-#define	Data      01000
+#define BS      0
+#define Byte    BS
+#define WS      1
+#define Word    WS
+#define LS      2
+#define Long    LS
+#define VS      3
+
+#define Alterable 00100
+#define Control   00200
+#define Memory    00400
+#define Data      01000
 
 typedef struct file {
   char filename[512];
@@ -70,12 +70,12 @@ typedef struct position {
 } position;
 
 /*
-typedef enum wordtype {
-	LABEL,
-	VARIABLE,
-	MACRO,
-	STRING
-} wordtype;
+  typedef enum wordtype {
+  LABEL,
+  VARIABLE,
+  MACRO,
+  STRING
+  } wordtype;
 */
 
 #define wordtype char
@@ -193,20 +193,20 @@ void init_opcodes( void );
 
 /* ----------------------------- */
 extern position     curpos, lastpos;
-extern filelist	   *file_list;
+extern filelist    *file_list;
 extern int          cur_pass, n_local, n_macro, cur_n_macro, n_label;
 extern uchar        symbol_type;
-extern char	    line_buffer[512], *plb;
-extern char	    cur_string[512];
-extern int	    cur_num;
+extern char         line_buffer[512], *plb;
+extern char         cur_string[512];
+extern int          cur_num;
 extern word        *word_table[256];
-extern char	    notdef, last_pass;
-extern uchar	   *code;
-extern int	    pc, CurPC, buffer_size, max_pc, cur_rs;
+extern char         notdef, last_pass;
+extern uchar       *code;
+extern int          pc, CurPC, buffer_size, max_pc, cur_rs;
 extern volatile int org;
 extern int          default_size;
-extern int	    size_table[];
-extern int	    load_adr, run_adr;
-extern int	    relocation_table[MAX_REL], nb_rel;
+extern int          size_table[];
+extern int          load_adr, run_adr;
+extern int          relocation_table[MAX_REL], nb_rel;
 extern volatile int opt_relocatable;
 extern char         cur_dir[];

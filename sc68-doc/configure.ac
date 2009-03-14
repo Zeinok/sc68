@@ -11,7 +11,7 @@ dnl#
 
 
 # ,----------------------------------------------------------------------.
-# | Autotools                                                            |
+# | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
 AC_INIT([sc68-doc],[20090110],[benjihan -4t- users.sourceforge -d0t- net])
@@ -19,7 +19,6 @@ AC_CONFIG_SRCDIR([sc68_doc.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
 AM_MAINTAINER_MODE
-
 
 # ,----------------------------------------------------------------------.
 # | Package                                                              |

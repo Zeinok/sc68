@@ -1,7 +1,7 @@
 /*
- *			file68 - url functions
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                      file68 - url functions
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -86,54 +86,51 @@ istream68_t * url68_stream_create(const char * url, int mode)
   char tmp[512];
   const int max = sizeof(tmp)-1;
   istream68_t * isf = 0;
-  int has_protocol;		/* in fact protocol:// length */
-
-  msg68(-1,"url68_stream_create(url:[%s],mode:[%d,%c%c]) {\n",
-	     url?url:"<nul>", mode, (mode&1)?'R':'.',(mode&2)?'W':'.');
+  int has_protocol;             /* in fact protocol:// length */
 
   has_protocol = parse_protocol(protocol, sizeof(protocol), url);
   if (has_protocol) {
     if (!strcmp68(protocol, "PASS")) {
       /* This is special pass thru protocol. It allows to send any
-	 other protocol:// or whatever to the default file handler.
-	 On some OS with some libC it may be useful.
+         other protocol:// or whatever to the default file handler.
+         On some OS with some libC it may be useful.
       */
-      url += has_protocol;	/* Skip protocol:// part */
-      has_protocol = 0;		/* Allow fallback open   */
+      url += has_protocol;      /* Skip protocol:// part */
+      has_protocol = 0;         /* Allow fallback open   */
     } else if (!strcmp68(protocol, "RSC68")) {
       isf = rsc68_create_url(url, mode, 0);
     } else if (!strcmp68(protocol, "SC68")) {
       /* sc68://author/hw/title/track:loop */
-      url += has_protocol;	/* Skip protocol:// part */
+      url += has_protocol;      /* Skip protocol:// part */
       strncpy(tmp, "rsc68://music/",max);
       strncpy(tmp+14, url, max-14);
       tmp[max] = 0;
       msg68(-1,"url is now [%s]\n",tmp);
       isf = rsc68_create_url(tmp, mode, 0);
     } else if (!strcmp68(protocol, "FILE") ||
-	       !strcmp68(protocol, "LOCAL")) {
-      url += has_protocol;	/* Skip protocol:// part */
-      has_protocol = 0;		/* Allow fallback open */
+               !strcmp68(protocol, "LOCAL")) {
+      url += has_protocol;      /* Skip protocol:// part */
+      has_protocol = 0;         /* Allow fallback open */
     } else if (!strcmp68(protocol, "NULL")) {
-      return istream68_null_create(url);
+      isf = istream68_null_create(url);
     } else if (!strcmp68(protocol, "AUDIO")) {
       url += 5+3;
       isf  = istream68_ao_create(url,mode);
     } else if (!strcmp68(protocol, "STDIN")) {
-      if (mode != 1) return 0;	/* stdin is READ_ONLY */
+      if (mode != 1) return 0;  /* stdin is READ_ONLY */
       isf = istream68_fd_create("stdin://",0,1);
-      url = "/dev/stdin";	/* fallback */
-      has_protocol = 0;		/* Allow fallback open */
+      url = "/dev/stdin";       /* fallback */
+      has_protocol = 0;         /* Allow fallback open */
     } else if (!strcmp68(protocol, "STDOUT")) {
-      if (mode != 2) return 0;	/* stdout is WRITE_ONLY */
+      if (mode != 2) return 0;  /* stdout is WRITE_ONLY */
       isf = istream68_fd_create("stdout://",1,2);
-      url = "/dev/stdout";	/* fallback */
-      has_protocol = 0;		/* Allow fallback open */
+      url = "/dev/stdout";      /* fallback */
+      has_protocol = 0;         /* Allow fallback open */
     } else if (!strcmp68(protocol, "STDERR")) {
-      if (mode != 2) return 0;	/* stderr is WRITE_ONLY */
+      if (mode != 2) return 0;  /* stderr is WRITE_ONLY */
       isf = istream68_fd_create("stderr://",2,2);
-      url = "/dev/stderr";	/* fallback */
-      has_protocol = 0;		/* Allow fallback open */
+      url = "/dev/stderr";      /* fallback */
+      has_protocol = 0;         /* Allow fallback open */
     } else {
       /* Try cURL for all unknown protocol */
       isf = istream68_curl_create(url,mode);
@@ -142,16 +139,20 @@ istream68_t * url68_stream_create(const char * url, int mode)
 
   /* Fallback open only if no protocol (or explicitly allowed) */
   if (!has_protocol) {
-    if (!isf) {			/* Default open as FILE */
+    if (!isf) {                 /* Default open as FILE */
       isf = istream68_file_create(url,mode);
     }
-    if (!isf) {			/* Fallback to file descriptor */
+    if (!isf) {                 /* Fallback to file descriptor */
       isf = istream68_fd_create(url,-1,mode);
     }
   }
-  
-  msg68(-1,"} url68_stream_create() => [%s,%s]\n",
-	     strok68(!isf),istream68_filename(isf));
+
+  msg68_trace("url68: create url='%s' %c%c => [%s,'%s']\n",
+              strnevernull68(url),
+              (mode&1) ? 'R' : '.',
+              (mode&2) ? 'W' : '.',
+              strok68(!isf),
+              istream68_filename(isf));
 
   return isf;
 }

@@ -193,14 +193,14 @@ print_feature(void * data,
 	      const int bit, const char * name, const char * desc)
 {
   const char * fmt = "%02d | %-10s | %-40s | %-3s\n";
-  const int mask = (msg68_mask >> bit) & 1;
+  const int mask = (msg68_mask(0,0) >> bit) & 1;
   fprintf(data,fmt, bit, name, desc, mask?"ON":"OFF");
-} 
+}
 
 /* Print debug features. */
 static int print_features(void)
 {
-  printf("debug features: current mask is %08X\n",msg68_mask);
+  printf("debug features: current mask is %08X\n",msg68_mask(0,0));
   msg68_feature_help(stdout,print_feature);
   return 0;
 }

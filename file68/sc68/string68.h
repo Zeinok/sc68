@@ -15,11 +15,7 @@
 #define _FILE68_STRING68_H_
 
 #ifndef FILE68_API
-#include "file68_api.h"
-#endif
-
-#ifdef __cplusplus
-extern "C" {
+# include "file68_api.h"
 #endif
 
 /** @defgroup  file68_string  String manipulation
@@ -181,11 +177,7 @@ const char * strok68(const int v);
 #endif
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_STRING68_H_ */

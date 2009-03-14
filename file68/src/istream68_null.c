@@ -1,7 +1,7 @@
 /*
  *                        file68 - Null stream
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -116,7 +116,7 @@ static int ism_tell(istream68_t * istream)
   istream68_null_t * ism = (istream68_null_t *)istream;
 
   return (!ism || !ism->open)
-    ? -1 
+    ? -1
     : ism->pos;
 }
 

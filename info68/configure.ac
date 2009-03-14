@@ -9,7 +9,6 @@ dnl#
 dnl# $Id$
 dnl#
 
-
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
@@ -19,17 +18,19 @@ AC_CONFIG_SRCDIR([info68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
 
-SC68_PACKAGE([
-    Get tag info from sc68 music files.
-    This is part of the sc68 project.
-  ])
+AC_USE_SYSTEM_EXTENSIONS
+LT_INIT([win32-dll])
 
 # ,----------------------------------------------------------------------.
-# | External libraries                                                   |
+# | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
-AC_WITH_PACKAGE([file68],[yes],[],[sc68/file68.h])
-
+SC68_PACKAGE([Get tag info from sc68 music files.])
+SC68_SYSTEM
+SC68_OPTIONS
+SC68_TOOLS
+SC68_CHECKS
+SC68_WITH([file68],[yes],[],[sc68/file68.h])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
@@ -41,16 +42,13 @@ AC_CONFIG_FILES([
     info68.1.tpl
     info68.spec
     package.texi])
-
 AC_OUTPUT
-
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |
 # `----------------------------------------------------------------------'
 
 AC_MSG_NOTICE([])
-
 AC_MSG_NOTICE([,----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|----------------------])

@@ -5,11 +5,11 @@
  * @date      1999/13/03
  * @brief     68K instruction emulation macro definitions.
  *
- * $Id$
- *
  */
- 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _EMU68_MACRO68_H_
 #define _EMU68_MACRO68_H_
@@ -38,35 +38,35 @@
 # define ADDCYCLE(N) emu68->cycle += (N) /**< Intermal cycle counter. */
 # define SETCYCLE(N) emu68->cycle  = (N) /**< internal cycle counter. */
 #endif
-/**@}*/
+/** @} */
 
 /** @name  Exception handling
  *  @{
  */
 
 /** General exception or interruption. */
-#define EXCEPTION(VECTOR,LVL) \
-do { \
-  pushl(REG68.pc); pushw(REG68.sr); \
-  REG68.sr &= 0x70FF; \
-  REG68.sr |= (0x2000+(((LVL)&7)<<SR_I_BIT)); \
-  REG68.pc  = read_L(VECTOR); \
-} while(0)
+#define EXCEPTION(VECTOR,LVL)                   \
+  do {                                          \
+    pushl(REG68.pc); pushw(REG68.sr);           \
+    REG68.sr &= 0x70FF;                         \
+    REG68.sr |= (0x2000+(((LVL)&7)<<SR_I_BIT)); \
+    REG68.pc  = read_L(VECTOR);                 \
+  } while(0)
 
 /** Illegal instruction. */
-#define ILLEGAL \
-do {\
-  emu68_error_add(emu68,"Illegal pc:%06x",REG68.pc); \
-  EXCEPTION(ILLEGAL_VECTOR,ILLEGAL_LVL); \
-} while (0)
+#define ILLEGAL                                         \
+  do {                                                  \
+    emu68_error_add(emu68,"Illegal pc:%06x",REG68.pc);  \
+    EXCEPTION(ILLEGAL_VECTOR,ILLEGAL_LVL);              \
+  } while (0)
 
 /** Bus error exception. */
-#define BUSERROR(ADDR,MODE) \
-do {\
-  emu68_error_add(emu68,"bus error pc:%06x addr:%06x (%c)",\
-  REG68.pc,ADDR,MODE?'W':'R');\
-  EXCEPTION(BUSERROR_VECTOR,BUSERROR_LVL) \
-} while(0)
+#define BUSERROR(ADDR,MODE)                                     \
+  do {                                                          \
+    emu68_error_add(emu68,"bus error pc:%06x addr:%06x (%c)",   \
+                    REG68.pc,ADDR,MODE?'W':'R');                \
+    EXCEPTION(BUSERROR_VECTOR,BUSERROR_LVL)                     \
+      } while(0)
 
 /** Line A exception. */
 #define LINEA EXCEPTION(LINEA_VECTOR,LINEA_LVL)
@@ -76,7 +76,7 @@ do {\
 
 /** TRAPV exception. */
 #define TRAPV \
-do { if (REG68.sr&SR_V) EXCEPTION(TRAPV_VECTOR,TRAPV_LVL); } while(0)
+  do { if (REG68.sr&SR_V) EXCEPTION(TRAPV_VECTOR,TRAPV_LVL); } while(0)
 
 /** TRAP exception. */
 #define TRAP(TRAP_N) EXCEPTION(TRAP_VECTOR(TRAP_N),TRAP_LVL)
@@ -86,9 +86,9 @@ do { if (REG68.sr&SR_V) EXCEPTION(TRAPV_VECTOR,TRAPV_LVL); } while(0)
 
 /** CHKW exception. */
 #define CHKW(CHK_A,CHK_B) \
-do { if ((CHK_B)<0 || (CHK_B)>(CHK_A)) { CHK; } } while(0)
+  do { if ((CHK_B)<0 || (CHK_B)>(CHK_A)) { CHK; } } while(0)
 
-/**@}*/
+/** @} */
 
 
 /** @name  Program control instructions
@@ -114,13 +114,13 @@ do { if ((CHK_B)<0 || (CHK_B)>(CHK_A)) { CHK; } } while(0)
 #define RTE  REG68.sr = popw(); RTS
 
 /** Return from exception restore CCR only. */
-#define RTR \
-do {\
- REG68.sr = (REG68.sr&0xFF00) | (u8)popw();\
- RTS;\
-} while(0)
+#define RTR                                     \
+  do {                                          \
+    REG68.sr = (REG68.sr&0xFF00) | (u8)popw();  \
+    RTS;                                        \
+  } while(0)
 
-/**@}*/
+/** @} */
 
 
 /** @name  Miscellaneous instructions
@@ -143,12 +143,12 @@ do {\
 #define TAS(TAS_A) do { TSTB(TAS_A,TAS_A); (TAS_A) |= 0x80000000; } while(0)
 
 /** Generic clear memory or register. */
-#define CLR(CLR_S,CLR_A) \
-do {\
-  (CLR_A) = (CLR_A);\
-  REG68.sr =(REG68.sr&~(SR_N|SR_V|SR_C)) | SR_Z;\
-  CLR_S = 0;\
-} while (0)
+#define CLR(CLR_S,CLR_A)                                \
+  do {                                                  \
+    (CLR_A) = (CLR_A);                                  \
+    REG68.sr =(REG68.sr&~(SR_N|SR_V|SR_C)) | SR_Z;      \
+    CLR_S = 0;                                          \
+  } while (0)
 
 /** Byte memory or register clear. */
 #define CLRB(A,B) CLR(A,B)
@@ -160,30 +160,30 @@ do {\
 #define CLRL(A,B) CLR(A,B)
 
 /** Link (frame pointer). */
-#define LINK(R_LNK) \
-do {\
-  pushl(REG68.a[R_LNK]); \
-  REG68.a[R_LNK] = REG68.a[7]; \
-  REG68.a[7] += get_nextw(); \
-} while(0)
+#define LINK(R_LNK)                             \
+  do {                                          \
+    pushl(REG68.a[R_LNK]);                      \
+    REG68.a[R_LNK] = REG68.a[7];                \
+    REG68.a[7] += get_nextw();                  \
+  } while(0)
 
 /** UNLK (frame pointer). */
-#define UNLK(R_LNK) \
-do {\
-  REG68.a[7]=REG68.a[R_LNK]; \
-  REG68.a[R_LNK]=popl(); \
-} while(0)
+#define UNLK(R_LNK)                             \
+  do {                                          \
+    REG68.a[7]=REG68.a[R_LNK];                  \
+    REG68.a[R_LNK]=popl();                      \
+  } while(0)
 
 /** Register value swapping. */
-#define SWAP(SWP_A) \
-do { \
-  (SWP_A) = ((u32)(SWP_A)>>16) | ((SWP_A)<<16); \
-  REG68.sr = (REG68.sr&~(SR_V|SR_C|SR_Z|SR_N)) | \
-             ((!(SWP_A))<<SR_Z_BIT) | \
-             (((s32)(SWP_A)>>31)&SR_N); \
-} while (0)
+#define SWAP(SWP_A)                                     \
+  do {                                                  \
+    (SWP_A) = ((u32)(SWP_A)>>16) | ((SWP_A)<<16);       \
+    REG68.sr = (REG68.sr&~(SR_V|SR_C|SR_Z|SR_N)) |      \
+      ((!(SWP_A))<<SR_Z_BIT) |                          \
+      (((s32)(SWP_A)>>31)&SR_N);                        \
+  } while (0)
 
-/**@}*/
+/** @} */
 
 
 /** @name  Bit instructions
@@ -193,7 +193,7 @@ do { \
 #if 0
 /** Bit test and set. */
 #define BTST(V,BIT) \
-        REG68.sr = (REG68.sr&(~SR_Z)) | ((((V)&(1<<(BIT)))==0)<<SR_Z_BIT)
+  REG68.sr = (REG68.sr&(~SR_Z)) | ((((V)&(1<<(BIT)))==0)<<SR_Z_BIT)
 
 /** Bit set. */
 #define BSET(V,BIT) BTST(V,BIT); (V) |= (1<<(BIT));
@@ -208,41 +208,41 @@ do { \
 
 /** Bit test and set. */
 #define BTST(V,BIT) \
-REG68.sr = (REG68.sr&(~SR_Z)) | (((((V)>>(BIT))&1)^1)<<SR_Z_BIT)
+  REG68.sr = (REG68.sr&(~SR_Z)) | (((((V)>>(BIT))&1)^1)<<SR_Z_BIT)
 
 /** Bit set. */
-#define BSET(V,BIT) \
-if( (V)&(1<<(BIT)) ) { REG68.sr &= ~SR_Z; }\
-else do { (V) |= 1<<(BIT); REG68.sr |= SR_Z; } while(0)
+#define BSET(V,BIT)                                             \
+  if( (V)&(1<<(BIT)) ) { REG68.sr &= ~SR_Z; }                   \
+  else do { (V) |= 1<<(BIT); REG68.sr |= SR_Z; } while(0)
 
 /** Bit clear. */
-#define BCLR(V,BIT) \
-if( (V)&(1<<(BIT)) ) { (V) &= ~(1<<(BIT)); REG68.sr &= ~SR_Z; }\
-else REG68.sr |= SR_Z
+#define BCLR(V,BIT)                                                     \
+  if( (V)&(1<<(BIT)) ) { (V) &= ~(1<<(BIT)); REG68.sr &= ~SR_Z; }       \
+  else REG68.sr |= SR_Z
 
 /** Bit change. */
-#define BCHG(V,BIT) \
-if( (V)&(1<<(BIT)) ) { (V) &= ~(1<<(BIT)); REG68.sr &= ~SR_Z; }\
-else do { (V) |= 1<<(BIT); REG68.sr |= SR_Z; } while(0)
+#define BCHG(V,BIT)                                                     \
+  if( (V)&(1<<(BIT)) ) { (V) &= ~(1<<(BIT)); REG68.sr &= ~SR_Z; }       \
+  else do { (V) |= 1<<(BIT); REG68.sr |= SR_Z; } while(0)
 
-/**@}*/
+/** @} */
 
 
 /** @name  Move & test instructions
  *  @{
  */
 
-#define MOVE(MOV_A) REG68.sr \
-= (REG68.sr&(0xFF00|SR_X))\
-|(((MOV_A)==0)<<SR_Z_BIT)\
-|(((int68_t)(MOV_A)>>(sizeof(int68_t)*8-1))&SR_N)
+#define MOVE(MOV_A) REG68.sr                            \
+  = (REG68.sr&(0xFF00|SR_X))                            \
+    |(((MOV_A)==0)<<SR_Z_BIT)                           \
+    |(((int68_t)(MOV_A)>>(sizeof(int68_t)*8-1))&SR_N)
 
 #define TST(TST_V) MOVE(TST_V)
 #define TSTB(TST_S,TST_A) do { TST_S=TST_A; TST(TST_S); } while (0)
 #define TSTW(TST_S,TST_A) do { TST_S=TST_A; TST(TST_S); } while (0)
 #define TSTL(TST_S,TST_A) do { TST_S=TST_A; TST(TST_S); } while (0)
 
-/**@}*/
+/** @} */
 
 
 /** @name  Multiply & Divide instructions
@@ -261,7 +261,7 @@ else do { (V) |= 1<<(BIT); REG68.sr |= SR_Z; } while(0)
 /** Unsigned divide. */
 #define DIVUW(DIV_S, DIV_A, DIV_B) DIV_S = divu68(emu68, DIV_A, DIV_B)
 
-/**@}*/
+/** @} */
 
 
 /** @name  Logical instructions
@@ -364,11 +364,11 @@ do {\
 #define CMPW(CMP_A, CMP_B) CMP(CMP_A, CMP_B)
 #define CMPL(CMP_A, CMP_B) CMP(CMP_A, CMP_B)
 #define CMPA(CMP_A, CMP_B) CMP(CMP_A, CMP_B)
-#define CMPAW(CMP_A, CMP_B) \
-do {\
-  int68_t ZOB = (CMP_A)>>16;\
-  CMPA( ZOB, CMP_B);\
-} while(0)
+#define CMPAW(CMP_A, CMP_B)                     \
+  do {                                          \
+    int68_t ZOB = (CMP_A)>>16;                  \
+    CMPA( ZOB, CMP_B);                          \
+  } while(0)
 #define CMPAL(CMP_A, CMP_B) CMP(CMP_A, CMP_B)
 
 #define NEGB(NEG_S,NEG_A) SUBB(NEG_S,NEG_A,0)
@@ -379,7 +379,7 @@ do {\
 #define NEGXW(NEG_S,NEG_A) SUBXW(NEG_S,NEG_A,0)
 #define NEGXL(NEG_S,NEG_A) SUBXL(NEG_S,NEG_A,0)
 
-/**@}*/
+/** @} */
 
 
 /** @name   Logical & Arithmetic bit shifting instructions
@@ -387,18 +387,18 @@ do {\
  */
 
 /** generic right shift. */
-#define LSR(LSR_A,LSR_D,LSR_MSK,LSR_C) \
-do {\
-  REG68.sr &= 0xFF00;\
-  if((LSR_D)!=0) {\
-    ADDCYCLE(2*(LSR_D));\
-    (LSR_A) >>= (LSR_D)-1;\
-    if((LSR_A)&(LSR_C)) REG68.sr |= SR_X | SR_C;\
-    (LSR_A)>>=1;\
-  }\
-  (LSR_A) &= (LSR_MSK);\
-  REG68.sr |= (((LSR_A)==0)<<SR_Z_BIT) | (((s32)(LSR_A)<0)<<SR_N_BIT);\
-} while(0)
+#define LSR(LSR_A,LSR_D,LSR_MSK,LSR_C)                                  \
+  do {                                                                  \
+    REG68.sr &= 0xFF00;                                                 \
+    if((LSR_D)!=0) {                                                    \
+      ADDCYCLE(2*(LSR_D));                                              \
+      (LSR_A) >>= (LSR_D)-1;                                            \
+      if((LSR_A)&(LSR_C)) REG68.sr |= SR_X | SR_C;                      \
+      (LSR_A)>>=1;                                                      \
+    }                                                                   \
+    (LSR_A) &= (LSR_MSK);                                               \
+    REG68.sr |= (((LSR_A)==0)<<SR_Z_BIT) | (((s32)(LSR_A)<0)<<SR_N_BIT); \
+  } while(0)
 
 /** Byte logical right shift. */
 #define LSRB(LSR_A,LSR_B) LSR(LSR_A,LSR_B,0xFF000000,(1<<24))
@@ -419,18 +419,18 @@ do {\
 #define ASRL(LSR_A,LSR_B) LSR(LSR_A,LSR_B,0xFFFFFFFF,(1<<0))
 
 /** Generic left shift. */
-#define LSL(LSL_A,LSL_D,LSL_MSK) \
-do {\
-  REG68.sr &= 0xFF00;\
-  if((LSL_D)!=0) {\
-    ADDCYCLE(2*(LSL_D));\
-    (LSL_A) <<= (LSL_D)-1;\
-    if((LSL_A)&0x80000000) REG68.sr |= SR_X | SR_C;\
-    (LSL_A)<<=1;\
-  }\
-  (LSL_A) &= (LSL_MSK);\
-  REG68.sr |= (((LSL_A)==0)<<SR_Z_BIT) | (((s32)(LSL_A)<0)<<SR_N_BIT);\
-} while(0)
+#define LSL(LSL_A,LSL_D,LSL_MSK)                                        \
+  do {                                                                  \
+    REG68.sr &= 0xFF00;                                                 \
+    if((LSL_D)!=0) {                                                    \
+      ADDCYCLE(2*(LSL_D));                                              \
+      (LSL_A) <<= (LSL_D)-1;                                            \
+      if((LSL_A)&0x80000000) REG68.sr |= SR_X | SR_C;                   \
+      (LSL_A)<<=1;                                                      \
+    }                                                                   \
+    (LSL_A) &= (LSL_MSK);                                               \
+    REG68.sr |= (((LSL_A)==0)<<SR_Z_BIT) | (((s32)(LSL_A)<0)<<SR_N_BIT); \
+  } while(0)
 
 /** Byte logical left shift. */
 #define LSLB(LSL_A,LSL_B) LSL(LSL_A,LSL_B,0xFF000000)
@@ -451,34 +451,34 @@ do {\
 #define ASLL(LSL_A,LSL_B) LSL(LSL_A,LSL_B,0xFFFFFFFF)
 
 /** Generic right rotation. */
-#define ROR(ROR_A,ROR_D,ROR_MSK,ROR_SZ) \
-do {\
-  REG68.sr &= 0xFF00 | SR_X;\
-  if((ROR_D)!=0) {\
-    ADDCYCLE(2*(ROR_D));\
-    ROR_D &= (ROR_SZ)-1;\
-    if((ROR_A)&(1<<((ROR_D)-1+32-(ROR_SZ)))) REG68.sr |= SR_C;\
-    (ROR_A) &= (ROR_MSK);\
-    (ROR_A) = ((ROR_A)>>(ROR_D)) + ((ROR_A)<<((ROR_SZ)-(ROR_D)));\
-  }\
-  (ROR_A) &= (ROR_MSK);\
-  REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT);\
-} while(0)
+#define ROR(ROR_A,ROR_D,ROR_MSK,ROR_SZ)                                 \
+  do {                                                                  \
+    REG68.sr &= 0xFF00 | SR_X;                                          \
+    if((ROR_D)!=0) {                                                    \
+      ADDCYCLE(2*(ROR_D));                                              \
+      ROR_D &= (ROR_SZ)-1;                                              \
+      if((ROR_A)&(1<<((ROR_D)-1+32-(ROR_SZ)))) REG68.sr |= SR_C;        \
+      (ROR_A) &= (ROR_MSK);                                             \
+      (ROR_A) = ((ROR_A)>>(ROR_D)) + ((ROR_A)<<((ROR_SZ)-(ROR_D)));     \
+    }                                                                   \
+    (ROR_A) &= (ROR_MSK);                                               \
+    REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT); \
+  } while(0)
 
 /** Generic left rotation. */
-#define ROL(ROR_A,ROR_D,ROR_MSK,ROR_SZ) \
-do {\
-  REG68.sr &= 0xFF00 | SR_X;\
-  if((ROR_D)!=0) {\
-    ADDCYCLE(2*(ROR_D));\
-    ROR_D &= (ROR_SZ)-1;\
-    if ((ROR_A)&(1<<(32-(ROR_D)))) REG68.sr |= SR_C;\
-    (ROR_A) &= (ROR_MSK);\
-    (ROR_A) = ((ROR_A)<<(ROR_D)) + ((ROR_A)>>((ROR_SZ)-(ROR_D)));\
-  }\
-  (ROR_A) &= (ROR_MSK);\
-  REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT);\
-} while(0)
+#define ROL(ROR_A,ROR_D,ROR_MSK,ROR_SZ)                                 \
+  do {                                                                  \
+    REG68.sr &= 0xFF00 | SR_X;                                          \
+    if((ROR_D)!=0) {                                                    \
+      ADDCYCLE(2*(ROR_D));                                              \
+      ROR_D &= (ROR_SZ)-1;                                              \
+      if ((ROR_A)&(1<<(32-(ROR_D)))) REG68.sr |= SR_C;                  \
+      (ROR_A) &= (ROR_MSK);                                             \
+      (ROR_A) = ((ROR_A)<<(ROR_D)) + ((ROR_A)>>((ROR_SZ)-(ROR_D)));     \
+    }                                                                   \
+    (ROR_A) &= (ROR_MSK);                                               \
+    REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT); \
+  } while(0)
 
 /* $$$ verifiy: this works only with exact 32bit types */
 #define RORB(ROR_A,ROR_B) ROR(ROR_A,ROR_B,0xFF000000,8)
@@ -489,38 +489,38 @@ do {\
 #define ROLL(ROR_A,ROR_B) ROL(ROR_A,ROR_B,0xFFFFFFFF,32)
 
 /** Generic right extend-bit rotation. */
-#define ROXR(ROR_A,ROR_D,ROR_MSK,ROR_SZ) \
-do {\
-  uint68_t ROR_X = (REG68.sr>>SR_X_BIT)&1;\
-  REG68.sr &= 0xFF00;\
-  if((ROR_D)!=0) {\
-    ADDCYCLE(2*(ROR_D));\
-    ROR_D &= (ROR_SZ)-1;\
-    if((ROR_A)&(1<<((ROR_D)-1+32-(ROR_SZ)))) REG68.sr |= SR_C | SR_X;\
-    (ROR_A) &= (ROR_MSK);\
-    (ROR_A) = ((ROR_A)>>(ROR_D)) + ((ROR_A)<<((ROR_SZ)-(ROR_D)+1));\
-    (ROR_A) |= (ROR_X)<<(32-(ROR_D));\
-  }\
-  (ROR_A) &= (ROR_MSK);\
-  REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT);\
-} while(0)
+#define ROXR(ROR_A,ROR_D,ROR_MSK,ROR_SZ)                                \
+  do {                                                                  \
+    uint68_t ROR_X = (REG68.sr>>SR_X_BIT)&1;                            \
+    REG68.sr &= 0xFF00;                                                 \
+    if((ROR_D)!=0) {                                                    \
+      ADDCYCLE(2*(ROR_D));                                              \
+      ROR_D &= (ROR_SZ)-1;                                              \
+      if((ROR_A)&(1<<((ROR_D)-1+32-(ROR_SZ)))) REG68.sr |= SR_C | SR_X; \
+      (ROR_A) &= (ROR_MSK);                                             \
+      (ROR_A) = ((ROR_A)>>(ROR_D)) + ((ROR_A)<<((ROR_SZ)-(ROR_D)+1));   \
+      (ROR_A) |= (ROR_X)<<(32-(ROR_D));                                 \
+    }                                                                   \
+    (ROR_A) &= (ROR_MSK);                                               \
+    REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT); \
+  } while(0)
 
 /** Generic left extend-bit rotation. */
-#define ROXL(ROR_A,ROR_D,ROR_MSK,ROR_SZ) \
-do {\
-  uint68_t ROR_X = (REG68.sr>>SR_X_BIT)&1;\
-  REG68.sr &= 0xFF00;\
-  if((ROR_D)!=0) {\
-    ADDCYCLE(2*(ROR_D));\
-    ROR_D &= (ROR_SZ)-1;\
-    if((ROR_A)&(1<<(32-(ROR_D)))) REG68.sr |= SR_C | SR_X ;\
-    (ROR_A) &= (ROR_MSK);\
-    (ROR_A) = ((ROR_A)<<(ROR_D)) + ((ROR_A)>>((ROR_SZ)-(ROR_D)+1));\
-    (ROR_A) |= (ROR_X)<<((ROR_D)-1+(32-(ROR_SZ)));\
-  }\
-  (ROR_A) &= (ROR_MSK);\
-  REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT);\
-} while(0)
+#define ROXL(ROR_A,ROR_D,ROR_MSK,ROR_SZ)                                \
+  do {                                                                  \
+    uint68_t ROR_X = (REG68.sr>>SR_X_BIT)&1;                            \
+    REG68.sr &= 0xFF00;                                                 \
+    if((ROR_D)!=0) {                                                    \
+      ADDCYCLE(2*(ROR_D));                                              \
+      ROR_D &= (ROR_SZ)-1;                                              \
+      if((ROR_A)&(1<<(32-(ROR_D)))) REG68.sr |= SR_C | SR_X ;           \
+      (ROR_A) &= (ROR_MSK);                                             \
+      (ROR_A) = ((ROR_A)<<(ROR_D)) + ((ROR_A)>>((ROR_SZ)-(ROR_D)+1));   \
+      (ROR_A) |= (ROR_X)<<((ROR_D)-1+(32-(ROR_SZ)));                    \
+    }                                                                   \
+    (ROR_A) &= (ROR_MSK);                                               \
+    REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT); \
+  } while(0)
 
 
 #define ROXRB(ROR_A,ROR_B) ROXR(ROR_A,ROR_B,0xFF000000,8)
@@ -530,10 +530,10 @@ do {\
 #define ROXLW(ROR_A,ROR_B) ROXL(ROR_A,ROR_B,0xFFFF0000,16)
 #define ROXLL(ROR_A,ROR_B) ROXL(ROR_A,ROR_B,0xFFFFFFFF,32)
 
-/**@}*/
+/** @} */
 
 /**
- *@}
+ * @}
  */
 
 #endif /* #ifndef _EMU68_MACRO68_H_ */

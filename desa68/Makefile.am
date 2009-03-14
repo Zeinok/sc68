@@ -1,18 +1,19 @@
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# |  desa68 -- Makefile.am -- Use with automake to produce configure.in  | 
+# |  desa68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |		    (C) 2006-2009 Benjamin Gerard                        |
-# |	     <benjihan -4t- users.sourceforge -d0t- net>                 |
+# |                 (C) 2006-2009 Benjamin Gerard                        |
+# |          <benjihan -4t- users.sourceforge -d0t- net>                 |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
 # $Id$
 
-ACLOCAL_AMFLAGS = -I m4 --install
-AM_CPPFLAGS     = @DESA68_CPPFLAGS@ @LIBDESA68_CPPFLAGS@
-AM_CFLAGS       = @DESA68_CFLAGS@ @LIBDESA68_CFLAGS@ 
-AM_LDFLAGS      = @DESA68_LDFLAGS@ @LIBDESA68_LDFLAGS@
+ACLOCAL_AMFLAGS       = -I m4 --install
+AM_CPPFLAGS           = $(ALL_EFLAGS) $(LIB_EFLAGS) -DDESA68_EXPORT=1
+AM_CFLAGS             = $(ALL_CFLAGS) $(LIB_CFLAGS)
+AM_LDFLAGS            = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
+LFLAGS                = -avoid-version $(NOINSTALL)
 
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |

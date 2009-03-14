@@ -27,7 +27,7 @@
  * - Check overflow in mix routine.
  * - Verify STE / YM volume ratio
  * - Special case for not mixing in Db_alone.
- * - And in the YM emul, skip emulation !!! 
+ * - And in the YM emul, skip emulation !!!
  *
  */
 
@@ -119,15 +119,15 @@ static int Db_mix12[MW_N_DECIBEL];
 
 /*
 
- A,B signal intensity
- 1.Db = 10*LOG( A/B ) = 10*LN(A/B)/LN(10)
- => A = B * EXP( Decibel*LN(10)/10 )
- => A = B * R
-    with R=EXP( Decibel*LN(10)/10 )
+  A,B signal intensity
+  1.Db = 10*LOG( A/B ) = 10*LN(A/B)/LN(10)
+  => A = B * EXP( Decibel*LN(10)/10 )
+  => A = B * R
+  with R=EXP( Decibel*LN(10)/10 )
 
- R1,R2 rate of 2 signal for D1,D2 in decibel
- A = B*R1*R2  <=> B*R3
- with R3 = rate for (D1+D2) decibel
+  R1,R2 rate of 2 signal for D1,D2 in decibel
+  A = B*R1*R2  <=> B*R3
+  with R3 = rate for (D1+D2) decibel
 
 */
 
@@ -265,13 +265,13 @@ int mw_reset(mw_t * const mw)
 void mw_cleanup(mw_t * const mw) {}
 
 int mw_setup(mw_t * const mw,
-	     mw_setup_t * const setup)
+             mw_setup_t * const setup)
 {
-  
+
   if (!mw || !setup || !setup->mem) {
     return -1;
   }
-  
+
   /* Default emulation mode */
   if (setup->parms.emul == MW_EMUL_DEFAULT) {
     setup->parms.emul = default_parms.emul;
@@ -289,8 +289,8 @@ int mw_setup(mw_t * const mw,
   mw_reset(mw);
 
   msg68_info("micro-wire: select *%s* %dhz %d-bit memory\n",
-		  setup->parms.emul == MW_EMUL_SIMPLE ? "SIMPLE":"LINEAR",
-		  setup->parms.hz, setup->log2mem);
+             setup->parms.emul == MW_EMUL_SIMPLE ? "SIMPLE":"LINEAR",
+             setup->parms.hz, setup->log2mem);
 
   return 0;
 }
@@ -359,7 +359,7 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
   const s8 * spl = (const s8 *)mw->mem;
 
   /* Get internal register for sample base and sample end
-   * $$$ ??? what if base > end2 ??? 
+   * $$$ ??? what if base > end2 ???
    */
   base = TOINTERNAL(MW_BASH) << ct_fix;
   end2 = TOINTERNAL(MW_ENDH) << ct_fix;
@@ -376,7 +376,7 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
       uint68_t length   = end-base;
       ct  = base;
       if (length) {
-	ct += overflow>length ? overflow%length : overflow;
+        ct += overflow>length ? overflow%length : overflow;
       }
       end = end2;
     }
@@ -394,26 +394,26 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
       ym = (*b) * ym_mult;
       v = spl[(int)(ct>>ct_fix)];
       *b++ =
-	(
-	 (u16)((v*vl + ym) >> MW_MIX_FIX)
-	 +
-	 (((v*vr + ym)>>MW_MIX_FIX)<<16)
-	 );
+        (
+          (u16)((v*vl + ym) >> MW_MIX_FIX)
+          +
+          (((v*vr + ym)>>MW_MIX_FIX)<<16)
+          );
 
       ct += stp;
       if (ct >= end) {
-	if (!loop) {
-	  --n;
-	  break;
-	} else {
-	  uint68_t overflow = ct-end;
-	  uint68_t length   = end-base;
-	  ct  = base;
-	  if (length) {
-	    ct += overflow>length ? overflow%length : overflow;
-	  }
-	  end = end2;
-	}
+        if (!loop) {
+          --n;
+          break;
+        } else {
+          uint68_t overflow = ct-end;
+          uint68_t length   = end-base;
+          ct  = base;
+          if (length) {
+            ct += overflow>length ? overflow%length : overflow;
+          }
+          end = end2;
+        }
       }
     } while(--n);
 
@@ -428,31 +428,31 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
       l = spl[addr+0];
       r = spl[addr+1];
       *b++ =
-	(
-	 (u16)((l*vl + ym)>>MW_MIX_FIX)
-	 +
-	 (((r*vr + ym)>>MW_MIX_FIX)<<16)
-	 );
+        (
+          (u16)((l*vl + ym)>>MW_MIX_FIX)
+          +
+          (((r*vr + ym)>>MW_MIX_FIX)<<16)
+          );
 
       ct += stp;
       if (ct >= end) {
-	if (!loop) {
-	  --n;
-	  break;
-	} else {
-	  uint68_t overflow = ct-end;
-	  uint68_t length   = end-base;
-	  ct  = base;
-	  if (length) {
-	    ct += overflow>length ? overflow%length : overflow;
-	  }
-	  end = end2;
-	}
+        if (!loop) {
+          --n;
+          break;
+        } else {
+          uint68_t overflow = ct-end;
+          uint68_t length   = end-base;
+          ct  = base;
+          if (length) {
+            ct += overflow>length ? overflow%length : overflow;
+          }
+          end = end2;
+        }
       }
     } while(--n);
   }
 
- out:
+  out:
   if (!loop && ct >= end) {
     mw->map[MW_ACTI] = 0;
     ct  = base;

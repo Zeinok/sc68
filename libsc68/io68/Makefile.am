@@ -8,47 +8,21 @@
 # $Id$
 
 ACLOCAL_AMFLAGS    = -I ../m4 --install
-AM_CFLAGS          = @LIBSC68_CFLAGS@ @LIBLIBSC68_CFLAGS@
-AM_CPPFLAGS        = @LIBSC68_CPPFLAGS@ @LIBLIBSC68_CPPFLAGS@ $(SINC)
-SINC               = -I$(top_srcdir) $(file68_inc) -DIO68_EXPORT
+AM_CFLAGS          = $(ALL_CFLAGS) $(LIB_CFLAGS)
+AM_CPPFLAGS        = $(ALL_EFLAGS) $(LIB_EFLAGS) $(EFLAGS)
+EFLAGS             = -I$(top_srcdir) $(file68_inc) -DIO68_EXPORT
+
 mysources=\
- io68.c\
- mfp_io.c\
- mfpemul.c\
- mw_io.c\
- mwemul.c\
- paula_io.c\
- paulaemul.c\
- shifter_io.c\
- ym_blep.c\
- ym_io.c\
- ym_orig.c\
- ymemul.c
+ io68.c mfp_io.c mfpemul.c mw_io.c mwemul.c paula_io.c paulaemul.c	\
+ shifter_io.c ym_blep.c ym_io.c ym_orig.c ymemul.c
 
 myheaders=\
- default_option68.h\
- io68.h\
- io68_api.h\
- mfp_io.h\
- mfpemul.h\
- mw_io.h\
- mwemul.h\
- paula_io.h\
- paulaemul.h\
- shifter_io.h\
- ym_blep.h\
- ym_fixed_vol.h\
- ym_io.h\
- ym_orig.h\
- ymemul.h\
- ymout1c5bit.h\
- ymoutorg.h
+ default_option68.h io68.h io68_api.h mfp_io.h mfpemul.h mw_io.h	\
+ mwemul.h paula_io.h paulaemul.h shifter_io.h ym_blep.h ym_fixed_vol.h	\
+ ym_io.h ym_orig.h ymemul.h ymout1c5bit.h ymoutorg.h
 
 srcextra=\
- ym_atarist_table.c\
- ym_linear_table.c
-myextra=$(srcextra)
-
+ ym_atarist_table.c ym_linear_table.c
 
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |
@@ -57,4 +31,4 @@ myextra=$(srcextra)
 noinst_LTLIBRARIES  = libio68.la
 libio68_la_SOURCES  = $(mysources) $(myheaders)
 libio68_la_LDFLAGS  = -avoid-version -no-install
-noinst_HEADERS      = $(myextra)
+noinst_HEADERS      = $(srcextra)

@@ -15,8 +15,8 @@
 #ifndef _FILE68_ALLOC68_H_
 #define _FILE68_ALLOC68_H_
 
-#ifdef __cplusplus
-extern "C" {
+#ifndef FILE68_API
+# include "file68_api.h"
 #endif
 
 /** @defgroup  file68_alloc  Dynamic memory management
@@ -35,8 +35,8 @@ extern "C" {
  *
  *    @warning  Use these functions with care in multi-thread context.
  *              Basically the function should be set once before the
- *              application goes multi-thread. 
- *            
+ *              application goes multi-thread.
+ *
  *  @{
  */
 
@@ -50,7 +50,7 @@ FILE68_API
 /** Allocate dynamic memory.
  *
  *   The alloc68() function calls user defined dynamic memory
- *   allocation handler. 
+ *   allocation handler.
  *
  * @param  n        Size of buffer to allocate.
  *
@@ -67,7 +67,7 @@ FILE68_API
 /** Allocate and clean dynamic memory.
  *
  *   The calloc68() function calls user defined dynamic memory
- *   allocation handler and fills memory buffer with 0. 
+ *   allocation handler and fills memory buffer with 0.
  *
  * @param  n        Size of buffer to allocate.
  *
@@ -84,7 +84,7 @@ FILE68_API
 /** Free dynamic memory.
  *
  *   The free68() function calls user defined dynamic memory
- *   free handler. 
+ *   free handler.
  *
  * @param  context  Context instance (0:default)
  * @param  data     Previously allocated memory buffer.
@@ -123,11 +123,7 @@ FILE68_API
 free68_t free68_set(free68_t free);
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #define _FILE68_ALLOC68_H_ */

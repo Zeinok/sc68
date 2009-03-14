@@ -5,17 +5,16 @@
  * @date      1999/06/10
  * @brief     shifter IO plugin header.
  *
- * $Id$
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _IO68_SHIFTER_IO_H_
 #define _IO68_SHIFTER_IO_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "io68_api.h"
 
 /** @defgroup  io68_shifter_devel  Atari-ST shifter emulator
  *  @ingroup   io68_devel
@@ -33,62 +32,62 @@ extern "C" {
  *    Video counter (read only)
  *
  *    - 8205 : Hi  byte of video counter
- *    - 8207 : Mid byte of video counter 
+ *    - 8207 : Mid byte of video counter
  *    - 8209 : Low byte of video counter
  *
  *    Syncro mode
  *
- *    - 820A : 
+ *    - 820A :
  *      - bit-0  0:interne(*) 1:externe
  *      - bit-1  0:60hz 1:50hz
- *    
- *    Color table (16 word entries) 
  *
- *    - 8240-825E : 
+ *    Color table (16 word entries)
+ *
+ *    - 8240-825E :
  *      - STF 3 bit per componant 0x777
  *      - STE 4 bit per componant 0xFFF but msb is lsb
  *             (for backward compatibility)
  *
- *    Resolution 
+ *    Resolution
  *
  *    - 8260 (bit-1 bit-0)
  *      -  0 0 : 320x200x16
  *      -  0 1 : 640x200x2
- *      -  1 0 : 640x400x1 (70hz) 
+ *      -  1 0 : 640x400x1 (70hz)
  *      -  1 1 : reserved
- *@{
+ *  @{
  */
 
-/** Init shifter io library. 
+IO68_EXTERN
+/** Init shifter io library.
  *  @return error-code
  */
 int shifterio_init(void);
 
-/** Shurdown shifter io library.
+IO68_EXTERN
+/** Shutdown shifter io library.
  */
 void shifterio_shutdown(void);
 
+IO68_EXTERN
 /** Create shifter io instance.
  *
  *   @param   emu68  68000 emulator instance
  *   @param   hz     Initial frequency (50,60 or 70), default 50
  *
  *   @return  Created shifter instance
- *   @retval  0  
+ *   @retval  0
  */
 io68_t * shifterio_create(emu68_t * const emu68, int hz);
 
+IO68_EXTERN
 /** Reset shifter and set new vertical refresh rate. */
 int shifterio_reset(io68_t * const io, int hz);
 
-/**@}*/
+/** @} */
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _IO68_SHIFTER_IO_H_ */

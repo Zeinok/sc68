@@ -15,13 +15,10 @@
 #define _FILE68_ERROR68_H_
 
 #ifndef FILE68_API
-#include "file68_api.h"
+# include "file68_api.h"
 #endif
 #include <stdarg.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @defgroup  file68_error  Error message
  *  @ingroup   file68_lib
@@ -35,13 +32,8 @@ FILE68_API
 /** Print a formatted error message.
  *
  *    The error68() function prints an error message via
- *    the error68_t handler function previously set with 
- *    error68_set_handler() function. If cookie is non nul
- *    it is used as first parameter for the error68_t handler.
- *    If it is nul the default cookie set with error68_set_cookie()
- *    function is used instead.
+ *    the msg68_error() function.
  *
- *  @param  cookie   Fisrt parameter for the error68_t handler
  *  @param  format   printf() like format string
  *
  *  @return error-code
@@ -59,9 +51,5 @@ int error68_va(const char * format, va_list list);
 /**
  *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_ERROR68_H_ */

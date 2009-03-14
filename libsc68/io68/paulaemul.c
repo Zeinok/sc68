@@ -106,7 +106,7 @@ static paula_parms_t default_parms = {
 static int msw_first = 0; /* big/little endian compliance */
 
 /* ,-----------------------------------------------------------------.
- * |			     Paula init                             |
+ * |                         Paula init                             |
  * `-----------------------------------------------------------------'
  */
 
@@ -205,7 +205,7 @@ int paula_clock(paula_t * const paula, int clock)
 }
 
 /* ,-----------------------------------------------------------------.
- * |			     paula reset                             |
+ * |                         paula reset                             |
  * `-----------------------------------------------------------------'
  */
 
@@ -239,9 +239,9 @@ int paula_reset(paula_t * const paula)
 void paula_cleanup(paula_t * const paula) {}
 
 int paula_setup(paula_t * const paula,
-		paula_setup_t * const setup)
+                paula_setup_t * const setup)
 {
-  
+
   if (!paula || !setup || !setup->mem) {
     return -1;
   }
@@ -280,10 +280,10 @@ static void poll_irq(paula_t * const paula, unsigned int N)
 
   /* Reload internal when interrupt is DENIED */
   if (
-      (paula->intreq
-       |
-       ~((paula->intena << (8*sizeof(int)-1-14) >> (8*sizeof(int)-1))
-         & paula->intena)) & (1 << (N + 7))) {
+    (paula->intreq
+     |
+     ~((paula->intena << (8*sizeof(int)-1-14) >> (8*sizeof(int)-1))
+       & paula->intena)) & (1 << (N + 7))) {
     unsigned int a,l;
 
     /* Get sample pointer. */
@@ -301,9 +301,9 @@ static void poll_irq(paula_t * const paula, unsigned int N)
 
 /* Mix with laudio channel data (1 char instead of 2) */
 
-static void mix_one(paula_t * const paula, 
-		    int N, const int shift,
-		    s32 * b, int n)
+static void mix_one(paula_t * const paula,
+                    int N, const int shift,
+                    s32 * b, int n)
 {
   paulav_t * const w = paula->voice+N;
   u8 * const p = paula->map+PAULA_VOICE(N);
@@ -418,7 +418,7 @@ static void mix_one(paula_t * const paula,
 }
 
 /* ,-----------------------------------------------------------------.
- * |			    Paula process                            |
+ * |                        Paula process                            |
  * `-----------------------------------------------------------------'
  */
 
@@ -429,7 +429,7 @@ static void clear_buffer(s32 * b, int n)
   if (n & 2) { *b++ = v; *b++ = v; }
   if (n >>= 2, n) do {
       *b++ = v; *b++ = v; *b++ = v; *b++ = v;
-  } while (--n);
+    } while (--n);
 }
 
 void paula_mix(paula_t * const paula, s32 * splbuf, int n)
@@ -441,11 +441,11 @@ void paula_mix(paula_t * const paula, s32 * splbuf, int n)
     for (i=0; i<4; i++) {
       const int right = (i^msw_first)&1;
       if ((paula->dmacon >> 9) & (paula->dmacon >> i) & 1) {
-	mix_one(paula, i, right, splbuf, n);
+        mix_one(paula, i, right, splbuf, n);
       }
     }
   }
-    
+
   /* HaxXx: assuming next mix is next frame reset beam V/H position. */
   paula->vhpos = 0;
 }
@@ -456,16 +456,16 @@ int paula_configure(paula_t * const paula, paula_parms_t * const parms)
   if (paula) {
     err = 0;
     if (parms) {
-      uint68_t newclock = parms->clock ? parms->clock : paula->clock; 
+      uint68_t newclock = parms->clock ? parms->clock : paula->clock;
       uint68_t  newhz   = parms->hz    ? parms->hz    : paula->hz;
 
       if (newclock != paula->clock || newhz != paula->hz) {
-	set_clock(paula, newclock, newhz);
+        set_clock(paula, newclock, newhz);
       }
 
       if (parms->emul != PAULA_EMUL_DEFAULT &&
-	  parms->emul != paula->emul) {
-	paula_set_emulation(paula,parms->emul);
+          parms->emul != paula->emul) {
+        paula_set_emulation(paula,parms->emul);
       }
     }
   }

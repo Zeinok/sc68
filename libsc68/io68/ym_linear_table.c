@@ -17,17 +17,17 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
 
 /* Table of 5 bit D/A output level for 1 channel.*/
 static const u16 ymout1c5bit[32] =
 {
   310,  369,  438,  521,  619,  735,  874, 1039,
- 1234, 1467, 1744, 2072, 2463, 2927, 3479, 4135,
- 4914, 5841, 6942, 8250, 9806,11654,13851,16462,
-19565,23253,27636,32845,39037,46395,55141,65535
+  1234, 1467, 1744, 2072, 2463, 2927, 3479, 4135,
+  4914, 5841, 6942, 8250, 9806,11654,13851,16462,
+  19565,23253,27636,32845,39037,46395,55141,65535
 };
 
 /* Create a linear 3 channels 5 bit per channels DAC table.
@@ -42,11 +42,11 @@ void ym_create_5bit_linear_table(s16 * out, unsigned int level)
   for (i=0; i<32*32*32; ++i) {
     int tmp =
       (  (unsigned int) ymout1c5bit[0x1F & (i>>10)] +
-	 (unsigned int) ymout1c5bit[0x1F & (i>> 5)] +
-	 (unsigned int) ymout1c5bit[0x1F & (i>> 0)] -
-	 3u * min ) / 3u * level / div;
+         (unsigned int) ymout1c5bit[0x1F & (i>> 5)] +
+         (unsigned int) ymout1c5bit[0x1F & (i>> 0)] -
+         3u * min ) / 3u * level / div;
     out[i] = tmp - center;
   }
   msg68_info("ym-2149: using *LINEAR* volumes %d [%d..%d])\n",
-	     level,out[0],out[0x7FFF]);
+             level,out[0],out[0x7FFF]);
 }

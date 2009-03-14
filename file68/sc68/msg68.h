@@ -15,14 +15,10 @@
 #define _FILE68_MSG68_H_
 
 #ifndef FILE68_API
-#include "file68_api.h"
+# include "file68_api.h"
 #endif
-
 #include <stdarg.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @defgroup  file68_debug  Debug messages
  *  @ingroup   file68_lib
@@ -50,19 +46,6 @@ typedef void (*msg68_t)(const int, void*, const char*, va_list);
  */
 typedef void (*msg68_help_t)(void*, const int, const char*, const char*);
 
-
-FILE68_API
-/** Filter debug messages.
- *
- *  Bit have to be clear to mask/filter a debug feature. The default
- *  value depend on compilation. If debug feature was enabled (DEBUG
- *  defined) msg68_mask value is set to ~0, allowing all
- *  messages. On the contrary its msg68_mask is set to 0,
- *  filtering out all messages (except
- *  enum_msg68_bit::msg68_unmaskable).
- */
-unsigned int msg68_mask;
-
 /** Predefined features. */
 enum enum_msg68_bit
 {
@@ -77,6 +60,11 @@ enum enum_msg68_bit
   msg68_DEBUG    = 4,  /**< Debug message.          */
   msg68_TRACE    = 5,  /**< Trace message.          */
 };
+
+FILE68_API
+/** Get/Set current message mask.
+ */
+unsigned int msg68_mask(unsigned int clr, unsigned int set);
 
 FILE68_API
 /** Get named features. */
@@ -101,7 +89,7 @@ int msg68_feature_level(const int feature);
 FILE68_API
 /** Get info on a feature. */
 int msg68_feature_info(const int feature, const char **name,
-			    const char **desc, int * next);
+                       const char **desc, int * next);
 
 FILE68_API
 /** Print defined features. */
@@ -129,7 +117,7 @@ void * msg68_set_cookie(void * cookie);
 FILE68_API
 /** Print debug message (variable argument).
  *
- *  @param  feature  message type (feature). 
+ *  @param  feature  message type (feature).
  *  @param  fmt      printf() like format string.
  *  @param  list     variable argument list (stdarg.h)
  *
@@ -200,8 +188,8 @@ void msg68_dummy(const int feature, const char * fmt, ...) {}
 static inline
 void vmsg68_dummy(const int feature, const char * fmt, va_list list) {}
 #else
-# define TRACE68  msg68		/**< Trace only in DEBUG mode  */
-# define VTRACE68 vmsg68        /**< Trace only in DEBUG mode  */
+# define TRACE68  msg68         /**< Trace only in non-release mode  */
+# define VTRACE68 vmsg68        /**< Trace only in non-release mode  */
 #endif
 
 /** Define msg68_DEFAULT macros */
@@ -214,11 +202,7 @@ void vmsg68_dummy(const int feature, const char * fmt, va_list list) {}
 #endif
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_MSG68_H_ */

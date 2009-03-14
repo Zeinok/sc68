@@ -5,17 +5,14 @@
  * @date      1998/06/18
  * @brief     Paula IO plugin header.
  *
- * $Id$
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _IO68_PAULA_IO_H_
 #define _IO68_PAULA_IO_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "emu68/struct68.h"
 #include "paulaemul.h"
@@ -28,43 +25,44 @@ extern "C" {
  *  @{
  */
 
+IO68_EXTERN
 /** Initialize paula library. */
 int paulaio_init(paula_parms_t * const parms);
 
+IO68_EXTERN
 /** Shutdown paula library. */
 void paulaio_shutdown(void);
 
+IO68_EXTERN
 /** Create paula io instance.
  *
- *   @param   emu68  68000 emulator instance
- *   @param   parms  Paula parameters
+ *  @param   emu68  68000 emulator instance
+ *  @param   parms  Paula parameters
  *
- *   @return  Created shifter instance
- *   @retval  0  
+ *  @return  Created shifter instance
+ *  @retval  0
  */
 io68_t * paulaio_create(emu68_t * const emu68, paula_parms_t * const parms);
 
+IO68_EXTERN
 /** Get/Set sampling rate.
  *
- * @param  io  Paula IO instance
- * @param  hz  0:read current sampling rate, >0:new requested sampling rate
+ *  @param  io  Paula IO instance
+ *  @param  hz  0:read current sampling rate, >0:new requested sampling rate
  *
- * @return actual sampling rate
+ *  @return actual sampling rate
  *
- */ 
+ */
 uint68_t paulaio_sampling_rate(io68_t * const io, uint68_t sampling_rate);
 
+IO68_EXTERN
 /** Get paula emulator instance. */
 paula_t * paulaio_emulator(io68_t * const io);
 
-/**@}*/
+/** @} */
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _IO68_PAULA_IO_H_ */

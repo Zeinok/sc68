@@ -35,7 +35,7 @@
  *
  *  PCM' = PCM ^ sign
  *
- *  sign=0          : Keep input sign, 
+ *  sign=0          : Keep input sign,
  *  sign=0x00008000 : Change left channel sign
  *  sign=0x80000000 : Change right channel sign
  *  sign=0x80008000 : Change both channel
@@ -75,9 +75,9 @@ void mixer68_stereo_16_RL(u32 * dst, u32 * src, int nb, const u32 sign)
   u32 *end;
 
 #undef  MIX_ONE
-#define MIX_ONE \
- v = (*src++);\
- *dst++ = SWAP_16BITWORD(v) ^ sign
+#define MIX_ONE                                 \
+  v = (*src++);                                 \
+  *dst++ = SWAP_16BITWORD(v) ^ sign
 
   end = dst+nb;
   if (nb&1) {
@@ -104,7 +104,7 @@ void mixer68_stereo_16_RL(u32 * dst, u32 * src, int nb, const u32 sign)
 /*  Mix 16-bit-stereo PCM into 32-bit-stereo-float (-norm..norm)
  */
 void mixer68_stereo_FL_LR (float * dst, u32 * src, int nb,
-			   const u32 sign, const float norm)
+                           const u32 sign, const float norm)
 {
   const float mult = norm / 32768.0f;
   int v;
@@ -122,7 +122,7 @@ void mixer68_stereo_FL_LR (float * dst, u32 * src, int nb,
  *  PCM' = ( PCM-L | (PCM-L<<16) ) ^ sign
  */
 void mixer68_dup_L_to_R(u32 *dst, u32 *src, int nb,
-			const u32 sign)
+                        const u32 sign)
 {
   u32 * const end = dst+nb;
   if (nb&1) {
@@ -178,8 +178,8 @@ void mixer68_dup_R_to_L(u32 *dst, u32 *src, int nb, const u32 sign)
  *  factor [0..65536], 0:blend nothing, 65536:swap L/R
  */
 void mixer68_blend_LR(u32 * dst, u32 * src, int nb,
-		      int factor,
-		      const u32 sign_r, const u32 sign_w)
+                      int factor,
+                      const u32 sign_r, const u32 sign_w)
 {
   u32 *end;
   int oof;
@@ -191,15 +191,15 @@ void mixer68_blend_LR(u32 * dst, u32 * src, int nb,
   }
 
 #undef  MIX_ONE
-#define MIX_ONE \
- r = (int)(s32)(*src++ ^ sign_r);\
- l = r >> 16;\
- r = (int)(s16)r;\
- *dst++ = (\
-  ((l*oof+r*factor)&0xFFFF0000)\
-  |\
-  ((u32)(r*oof+l*factor) >> 16)\
- ) ^ sign_w
+#define MIX_ONE                                                         \
+  r = (int)(s32)(*src++ ^ sign_r);                                      \
+  l = r >> 16;                                                          \
+  r = (int)(s16)r;                                                      \
+  *dst++ = (                                                            \
+            ((l*oof+r*factor)&0xFFFF0000)                               \
+            |                                                           \
+            ((u32)(r*oof+l*factor) >> 16)                               \
+                                                                ) ^ sign_w
 
   oof = 65536-factor;
   end = dst+nb;
@@ -228,8 +228,8 @@ void mixer68_blend_LR(u32 * dst, u32 * src, int nb,
 /*  Multiply left/right (signed) channel by ml/mr factor [-65536..65536]
  */
 void mixer68_mult_LR(u32 *dst, u32 *src, int nb,
-		     const int ml, const int mr,
-		     const u32 sign_r, const u32 sign_w)
+                     const int ml, const int mr,
+                     const u32 sign_r, const u32 sign_w)
 {
   u32 * end;
 
@@ -246,11 +246,11 @@ void mixer68_mult_LR(u32 *dst, u32 *src, int nb,
   }
 
 #undef  MIX_ONE
-#define MIX_ONE \
- r = (int)(s32)(*src++ ^ sign_r);\
- l = (int)(s16)r;\
- r = r >> 16;\
- *dst++ = ((((u32)(l*ml))>>16) | ((r*mr)&0xFFFF0000)) ^ sign_w
+#define MIX_ONE                                                 \
+  r = (int)(s32)(*src++ ^ sign_r);                              \
+  l = (int)(s16)r;                                              \
+  r = r >> 16;                                                  \
+  *dst++ = ((((u32)(l*ml))>>16) | ((r*mr)&0xFFFF0000)) ^ sign_w
 
   end = dst+nb;
 
@@ -258,7 +258,7 @@ void mixer68_mult_LR(u32 *dst, u32 *src, int nb,
     int l,r;
     MIX_ONE;
   }
- 
+
   if (nb&2) {
     int l,r;
     MIX_ONE;
@@ -267,7 +267,7 @@ void mixer68_mult_LR(u32 *dst, u32 *src, int nb,
 
   if (dst < end) {
     do {
-    int l,r;
+      int l,r;
       MIX_ONE;
       MIX_ONE;
       MIX_ONE;
@@ -317,10 +317,10 @@ void mixer68_copy(u32 * dst, u32 * src, int nb)
     }
     if (dst<end) {
       do {
-	*dst++ = *src++;
-	*dst++ = *src++;
-	*dst++ = *src++;
-	*dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = *src++;
+        *dst++ = *src++;
       } while (dst < end);
     }
   }

@@ -1,7 +1,7 @@
 /*
- *		      file68 - ICE! file loader
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *                    file68 - ICE! file loader
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -93,13 +93,13 @@ void * ice68_load(istream68_t *is, int *ulen)
   if (!unice68_depacker(outbuf, inbuf)) {
     goto success;
   }
-  
- error:
+
+  error:
 
   free68(outbuf);
   outbuf = 0;
   dsize = 0;
- success:
+  success:
   free68(inbuf);
   if (ulen) {
     *ulen = dsize;

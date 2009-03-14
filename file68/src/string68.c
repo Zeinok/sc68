@@ -1,7 +1,7 @@
 /*
  *                 file68 - String utility functions
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -27,7 +27,7 @@
 #include "file68_api.h"
 #include "string68.h"
 #include "alloc68.h"
- 
+
 #include <stdio.h>
 #include <string.h>
 
@@ -91,7 +91,7 @@ char * strdup68(const char * s)
     if (d) {
       int i;
       for (i=0; i<len; ++i) {
-	d[i] = s[i];
+        d[i] = s[i];
       }
     }
   }
@@ -111,10 +111,10 @@ char * strcatdup68(const char * a, const char * b)
     if (d) {
       int i = 0;
       while (lena--) {
-	d[i++] = *a++;
+        d[i++] = *a++;
       }
       while (lenb--) {
-	d[i++] = *b++;
+        d[i++] = *b++;
       }
       d[i] = 0;
     }
@@ -190,7 +190,7 @@ char * strlongtime68(char * buffer, int time)
 
   if (day) {
     sprintf(s, "%d day%s, %2dh, %02d' %02d\"", day, day > 1 ? "s" : "", hr,
-	    min, sec);
+            min, sec);
   } else if (hr) {
     sprintf(s, "%2dh, %02d' %02d\"", hr, min, sec);
   } else {

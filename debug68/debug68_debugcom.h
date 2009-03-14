@@ -1,46 +1,34 @@
 /**
- * @ingroup   debug68_devel
- * @file      debug68/SC68debug_debugcom.h
- * @author    Benjamin Gerard <ben@sashipa.com>
+ * @ingroup   debug68_prg
+ * @file      debug68_debugcom.h
+ * @author    Benjamin Gerard
  * @date      1999/07/11
- * @brief     debug68 debugger
- *
- * $Id: SC68debug_debugcom.h,v 2.0 2003/08/21 04:58:35 benjihan Exp $
+ * @brief     debug68 debugger header.
  */
 
-/*
- *                          sc68 - debug68 debugger
- *         Copyright (C) 2001 Benjamin Gerard <ben@sashipa.com>
- *
- *  This program is free software; you can redistribute it and/or modify it
- *  under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
- *  option) any later version.
- *
- *  This program is distributed in the hope that it will be useful, but
- *  WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
+/* $Id: SC68debug_debugcom.h,v 2.0 2003/08/21 04:58:35 benjihan Exp $ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _SC68DEBUG_DEBUGCOM_H_
 #define _SC68DEBUG_DEBUGCOM_H_
 
 #include "emu68/struct68.h"
 
-#ifdef __cplusplus
-extern "C" {
+#ifndef DEBUG68_EXTERN
+# ifdef __cplusplus
+#  define DEBUG68_EXTERN extern "C"
+#else
+#  define DEBUG68_EXTERN extern
+# endif
 #endif
 
+DEBUG68_EXTERN
 /** Enter debugger mode.
  */
-  int debug68_entering(emu68_t *);
+int debug68_entering(emu68_t *);
 
+DEBUG68_EXTERN
 /** Run a new debugger command.
  *
  * @param   na  number of argument, 0:previous command
@@ -49,6 +37,7 @@ extern "C" {
  */
 int debug68_newcom(int na, char **a);
 
+DEBUG68_EXTERN
 /** Display debugger shell prompt as "diskname track desa>".
  *
  *  @param  diskname  Used to build prompt.
@@ -59,9 +48,5 @@ int debug68_newcom(int na, char **a);
  * @warning Return pointer to a static buffer.
  */
 char * debug68_prompt(char *diskname, int track_num);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _SC68DEBUG_DEBUGCOM_H_ */

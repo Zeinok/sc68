@@ -16,9 +16,6 @@
 
 #include "istream68.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @defgroup  file68_rsc  Resource access
  *  @ingroup   file68_lib
@@ -54,11 +51,11 @@ typedef struct {
   } data;
 } rsc68_info_t;
 
-/** Resource handle function type. */ 
+/** Resource handle function type. */
 typedef istream68_t * (*rsc68_handler_t)(rsc68_t type,
-					 const char * name,
-					 int mode,
-					 rsc68_info_t * info);
+                                         const char * name,
+                                         int mode,
+                                         rsc68_info_t * info);
 
 FILE68_API
 /** Initialize resource.
@@ -145,9 +142,9 @@ FILE68_API
  *  @param  rmusic  Get the remote music database path (0 to ignore).
  */
 void rsc68_get_path(const char ** share,
-		    const char ** user,
-		    const char ** lmusic,
-		    const char ** rmusic);
+                    const char ** user,
+                    const char ** lmusic,
+                    const char ** rmusic);
 
 FILE68_API
 /** Set/Get resource handler.
@@ -195,7 +192,7 @@ FILE68_API
  * @see rsc68_set_handler() for more info on resource handler.
  */
 istream68_t * rsc68_open(rsc68_t type, const char *name, int mode,
-			 rsc68_info_t * info);
+ rsc68_info_t * info);
 
 FILE68_API
 /** Open a resource URL in given mode.
@@ -210,7 +207,7 @@ FILE68_API
  * @see rsc68_open()
  */
 istream68_t * rsc68_open_url(const char *url, int mode,
-			     rsc68_info_t * info);
+                             rsc68_info_t * info);
 
 FILE68_API
 /** Create a resource from URL in given mode.
@@ -225,7 +222,7 @@ FILE68_API
  * @see rsc68_open_url()
  */
 istream68_t * rsc68_create_url(const char *url, int mode,
-			       rsc68_info_t * info);
+                               rsc68_info_t * info);
 
 
 FILE68_API
@@ -243,14 +240,10 @@ FILE68_API
  *   @retval  >str  next '/' or end of string
  */
 const char * rsc68_get_music_params(rsc68_info_t *info,
-				    const char * str);
+                                    const char * str);
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _FILE68_RSC68_H_ */

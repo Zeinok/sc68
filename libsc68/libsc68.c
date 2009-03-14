@@ -17,9 +17,9 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -31,10 +31,8 @@
 # define PACKAGE_STRING "libsc68 n/a"
 #endif
 
-/*$$$ to be replaced by SC68API */
-#ifdef __cplusplus
-extern "C"
-{
+#ifndef PACKAGE_VERNUM
+# define PACKAGE_VERNUM 0
 #endif
 
 const char * sc68_versionstr(void)
@@ -46,8 +44,3 @@ int sc68_version(void)
 {
   return PACKAGE_VERNUM;
 }
-
-#ifdef __cplusplus
-}
-#endif
-

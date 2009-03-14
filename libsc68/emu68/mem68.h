@@ -5,21 +5,17 @@
  * @date      1999/03/13
  * @brief     68k memory and IO manager header.
  *
- * $Id$
- *
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _EMU68_MEM68_H_
 #define _EMU68_MEM68_H_
 
+#include "emu68_api.h"
 #include "struct68.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 
 /** @defgroup  emu68_mem68_devel  68k memory and IO manager
  *  @ingroup   emu68_devel
@@ -73,7 +69,7 @@ extern "C" {
 #define EXECUTED_68  4  /**< Memory location has been executed       */
 #define BREAKED_68   8  /**< Memory location has emulator-breakpoint */
 
-/*@}*/
+/** @} */
 
 
 /** @name  Memory/IO quick access tables.
@@ -83,25 +79,34 @@ extern "C" {
 /** Test for direct memory access or IO quick table access */
 #define ISIO68(ADDR) ((ADDR)&0x800000)
 
-
-/*@}*/
+/** @} */
 
 
 /** @name  68K onboard memory access.
  *  @{
  */
 
- /** Read memory byte */
+EMU68_EXTERN
+/** Read memory byte */
 void mem68_read_b(emu68_t * const emu68);
- /** Read memory word */
+
+EMU68_EXTERN
+/** Read memory word */
 void mem68_read_w(emu68_t * const emu68);
- /** Read memory long */
+
+EMU68_EXTERN
+/** Read memory long */
 void mem68_read_l(emu68_t * const emu68);
 
+EMU68_EXTERN
 /** Write memory byte */
 void mem68_write_b(emu68_t * const emu68);
+
+EMU68_EXTERN
 /** Write memory word */
 void mem68_write_w(emu68_t * const emu68);
+
+EMU68_EXTERN
 /** Write memory long */
 void mem68_write_l(emu68_t * const emu68);
 
@@ -166,13 +171,15 @@ static inline void _write_L(emu68_t * const emu68, addr68_t addr, int68_t v)
 #define write_L(ADDR,V) _write_L(emu68,(ADDR),(V))
 
 
-/*@}*/
+/** @} */
 
 
 /** @name Instruction read.
  *  @{
  */
+EMU68_EXTERN
 int68_t mem68_nextw(emu68_t * emu68);  /**< Decode word and update PC */
+EMU68_EXTERN
 int68_t mem68_nextl(emu68_t * emu68);  /**< Decode long and update PC */
 
 /** mem68_nextw() convenience macro */
@@ -180,16 +187,16 @@ int68_t mem68_nextl(emu68_t * emu68);  /**< Decode long and update PC */
 /** mem68_nextl() convenience macro */
 #define get_nextl() mem68_nextl(emu68)
 
-/*@}*/
+/** @} */
 
 
 /** @name Stack access.
  *  @{
  */
-void mem68_pushl(emu68_t * emu68, int68_t v);  /**< Push long */
-void mem68_pushw(emu68_t * emu68, int68_t v);  /**< Push word */
-int68_t mem68_popl(emu68_t * emu68);           /**< Pop long  */
-int68_t mem68_popw(emu68_t * emu68);           /**< Pop word  */
+EMU68_EXTERN void mem68_pushl(emu68_t * emu68, int68_t v);  /**< Push long */
+EMU68_EXTERN void mem68_pushw(emu68_t * emu68, int68_t v);  /**< Push word */
+EMU68_EXTERN int68_t mem68_popl(emu68_t * emu68);           /**< Pop long  */
+EMU68_EXTERN int68_t mem68_popw(emu68_t * emu68);           /**< Pop word  */
 
 /** mem68_pushl() convenience macro */
 #define pushl(V) mem68_pushl(emu68,(V));
@@ -200,8 +207,9 @@ int68_t mem68_popw(emu68_t * emu68);           /**< Pop word  */
 /** mem68_popw() convenience macro */
 #define popw() mem68_popw(emu68);
 
-/*@}*/
+/** @} */
 
+EMU68_EXTERN
 /** Init memory quick access table.
  *
  *    The emu68_mem_init() function must be call at init time.
@@ -212,6 +220,7 @@ int68_t mem68_popw(emu68_t * emu68);           /**< Pop word  */
  */
 void emu68_mem_init(emu68_t * const emu68);
 
+EMU68_EXTERN
 /** Reset memory quick access table.
  *
  *    The emu68_mem_reset() function restores all memory access to
@@ -220,6 +229,7 @@ void emu68_mem_init(emu68_t * const emu68);
  */
 void emu68_mem_reset(emu68_t * const emu68);
 
+EMU68_EXTERN
 /** Add a new memory access control area (for new IO).
  *
  *  @param  area      Which area (bit 16 to 23 of address) to change.
@@ -229,9 +239,10 @@ void emu68_mem_reset(emu68_t * const emu68);
  * @see emu68_mem_reset_area()
  */
 void emu68_mem_new_area(emu68_t * const emu68, u8 area,
-			memfunc68_t *read_bwl,
-			memfunc68_t *write_bwl);
+                        memfunc68_t *read_bwl,
+                        memfunc68_t *write_bwl);
 
+EMU68_EXTERN
 /** Reset memory access control area to default state.
  *
  * @see emu68_mem_new_area()
@@ -239,12 +250,7 @@ void emu68_mem_new_area(emu68_t * const emu68, u8 area,
 void emu68_mem_reset_area(emu68_t * const emu68, u8 area);
 
 /**
- *@}
+ *  @}
  */
 
-#ifdef __cplusplus
-}
-#endif
-
 #endif /* #ifndef _EMU68_MEM68_H_ */
-

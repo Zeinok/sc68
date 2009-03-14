@@ -17,9 +17,9 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -28,8 +28,6 @@
 #include "getea68.h"
 #include "error68.h"
 #include "mem68.h"
-
-/* extern reg68_t reg68; */
 
 static addr68_t ea_error(emu68_t * const emu68, const int reg)
 {
@@ -149,10 +147,10 @@ static addr68_t ea_inIMMl(emu68_t * const emu68, const int reg)
 }
 
 /***************************
-*                          *
-* Opmode tables for Get EA *
-*                          *
-***************************/
+ *                          *
+ * Opmode tables for Get EA *
+ *                          *
+ ***************************/
 
 /* Mode 7 tables */
 

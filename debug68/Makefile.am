@@ -9,14 +9,13 @@
 # $Id: Makefile.am 26 2009-01-28 08:11:43Z benjihan $
 # @configure_input@
 
-SUBDIRS              = @subdirs@
+SUBDIRS              = $(subdirs)
 ACLOCAL_AMFLAGS      = -I m4 --install
 
-AM_CFLAGS            = @DEBUG68_CFLAGS@ @BINDEBUG68_CFLAGS@
-AM_CPPFLAGS          = @DEBUG68_CPPFLAGS@ @BINDEBUG68_CPPFLAGS@ $(SINC)
-AM_LDFLAGS           = @DEBUG68_LDFLAGS@ @BINDEBUG68_LDFLAGS@
-SINC                 = $(sc68_inc) $(file68_inc) $(desa68_inc)
-
+AM_CFLAGS            = $(ALL_CFLAGS) $(BIN_CFLAGS)
+AM_CPPFLAGS          = $(ALL_EFLAGS) $(BIN_EFLAGS) $(EFLAGS)
+AM_LDFLAGS           = $(ALL_LFLAGS) $(BIN_LFLAGS)
+EFLAGS               = $(sc68_inc) $(file68_inc) $(desa68_inc)
 
 # ,----------------------------------------------------------------------.
 # | Libtool program                                                      |
@@ -63,27 +62,16 @@ debug68_SOURCES      = $(sources) $(headers)
 debug68_LDADD        = $(SC68_LA) $(DESA68_LA)
 noinst_HEADERS       = debug68_doc.h 
 
-
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
 dist_man_MANS        = debug68.1
 info_TEXINFOS        = debug68.texi
-#debug68_TEXINFOS     = package.texi
 MAINTAINERCLEANFILES = $(srcdir)/debug68.1
 
-#if MAINTAINER_MODE
 TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
 fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
 $(srcdir)/debug68.1: debug68.1.tpl.in $(srcdir)/debug68.texi
 	$(TEXINFO2MAN) debug68.1.tpl $(srcdir)/debug68.texi >$@ || $(fail)
-#endif
-
-
-# ,----------------------------------------------------------------------.
-# | Extra distrib                                                        |
-# `----------------------------------------------------------------------'
-
-#EXTRA_DIST = debug68.1 debug68.info package.texi

@@ -5,24 +5,22 @@
  * @date      1999/03/20
  * @brief     STE sound emulator header.
  *
- * $Id$
  */
 
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _MWEMUL_H_
 #define _MWEMUL_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
+#include "io68_api.h"
 #include "emu68/type68.h"
 
 /** @defgroup  io68_mw_devel  STE sound emulator
  *  @ingroup   io68_devel
  *  @brief     STE (MicroWire/LMC/DMA) emulator.
- *  
+ *
  *  @{
  */
 
@@ -49,7 +47,7 @@ extern "C" {
 #define MW_DATA 0x22        /**< Microwire data register    */
 #define MW_CTRL 0x24        /**< Microwire control register */
 
-/**@}*/
+/** @} */
 
 
 /** @name  Micro-Wire internal data
@@ -106,13 +104,14 @@ typedef struct {
 } mw_t;
 
 
-/**@}*/
+/** @} */
 
 
 /** @name  Library initialization functions
  *  @{
  */
 
+IO68_EXTERN
 /** Micro-Wire emulator initialization.
  *
  *    The mw_init() function must be call before all other MW
@@ -125,6 +124,7 @@ typedef struct {
  */
 int mw_init(mw_parms_t * const parms);
 
+IO68_EXTERN
 /** Micro-Wire emulator shutdown.
  *
  *  @see mw_init()
@@ -137,18 +137,14 @@ void mw_shutdown(void);
  *  @{
  */
 
+IO68_EXTERN
 int mw_setup(mw_t * const mw,
-	     mw_setup_t * const setup);
+             mw_setup_t * const setup);
 
+IO68_EXTERN
 void mw_cleanup(mw_t * const mw);
 
-// *  @see mw_reset()
-/*  *    It performs following operations. */
-/*  *    - Init output level (volume) table. */
-/*  *    - Hardware reset */
-/*  *    - Set replay frequency to default (44100 Hz) */
-
-
+IO68_EXTERN
 /** Set/Get sampling rate.
  *
  *    The mw_sampling_rate() function set Micro-Wire emulator sampling
@@ -161,6 +157,7 @@ void mw_cleanup(mw_t * const mw);
  */
 uint68_t mw_sampling_rate(mw_t * const mw, uint68_t f);
 
+IO68_EXTERN
 /** Micro-Wire hardware reset.
  *
  *    The mw_reset() reset function perform a Micro-Wire reset. It performs
@@ -179,11 +176,13 @@ uint68_t mw_sampling_rate(mw_t * const mw, uint68_t f);
 int mw_reset(mw_t * const mw);
 
 
-/**@}*/
+/** @} */
+
 /** @name  Emulation functions
  *  @{
  */
 
+IO68_EXTERN
 /** Execute Micro-Wire emulation.
  *
  *    The mw_mix() function processes sample mixing with current internal
@@ -203,15 +202,16 @@ int mw_reset(mw_t * const mw);
  *    @see YM_mix()  @see YM_get_buffer()
  */
 void mw_mix(mw_t * const mw,
-	    s32 *b, int n);
+            s32 *b, int n);
 
-/**@}*/
+/** @} */
 
 
 /** @name  Micro-Wire LMC control functions
  *  @{
  */
 
+IO68_EXTERN
 /** Set LMC mixer type.
  *
  *   The mw_set_lmc_mixer() function choose the mixer mode :
@@ -224,6 +224,7 @@ void mw_mix(mw_t * const mw,
  */
 void mw_set_lmc_mixer(mw_t * const mw, int n);
 
+IO68_EXTERN
 /** Set LMC master volume.
  *
  *  @param  n  New volume in range [0..40]=>[-80Db..0Db]
@@ -233,6 +234,7 @@ void mw_set_lmc_mixer(mw_t * const mw, int n);
  */
 void mw_set_lmc_master(mw_t * const mw, int n);
 
+IO68_EXTERN
 /** Set LMC left channel volume.
  *
  *    Set LMC left channel volume in decibel.
@@ -244,6 +246,7 @@ void mw_set_lmc_master(mw_t * const mw, int n);
  */
 void mw_set_lmc_left(mw_t * const mw, int n);
 
+IO68_EXTERN
 /** Set LMC right channel volume.
  *
  *    @param  n  New volume in range [0..20]=>[-40Db..0Db]
@@ -253,6 +256,7 @@ void mw_set_lmc_left(mw_t * const mw, int n);
  */
 void mw_set_lmc_right(mw_t * const mw, int n);
 
+IO68_EXTERN
 /** Set high pass filter.
  *
  *  @param  n  New high pass filter [0..12]=>[-12Db..0Db]
@@ -263,6 +267,7 @@ void mw_set_lmc_right(mw_t * const mw, int n);
  */
 void mw_set_lmc_high(mw_t * const mw, int n);
 
+IO68_EXTERN
 /** Set low pass filter.
  *
  *  @param  n  New low pass filter [0..12]=>[-12Db..0Db]
@@ -273,14 +278,10 @@ void mw_set_lmc_high(mw_t * const mw, int n);
  */
 void mw_set_lmc_low(mw_t * const mw,int n);
 
-/**@}*/
+/** @} */
 
 /**
- *@}
+ *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _MWEMUL_H_*/

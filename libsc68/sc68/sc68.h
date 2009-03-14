@@ -5,36 +5,42 @@
  * @date      2003/08/07
  * @brief     sc68 API header.
  *
- * $Id$
  */
+
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifndef _SC68_SC68_H_
 #define _SC68_SC68_H_
 
-/* Building DSO or library */
-#if defined(SC68_EXPORT)
+#ifndef SC68_EXTERN
+# ifdef __cplusplus
+#  define SC68_EXTERN extern "C"
+# else
+#  define SC68_EXTERN extern
+# endif
+#endif
 
-# if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
+#ifndef SC68_API
+/* Building */
+# ifdef SC68_EXPORT
+#  if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
 #   define SC68_API __declspec(dllexport)
-# elif defined(HAVE_VISIBILITY)
-#  define SC68_API extern __attribute__ ((visibility("default")))
-# endif
-
+#  elif defined(HAVE_VISIBILITY)
+#   define SC68_API SC68_EXTERN __attribute__ ((visibility("default")))
+#  else
+#   define SC68_API SC68_EXTERN
+#  endif
 /* Using */
-#else
-
-# if defined(SC68_DLL) && defined(HAVE_DECLSPEC)
-#  define SC68_API __declspec(dllimport)
-# elif defined(HAVE_VISIBILITY)
-#  define SC68_API extern
+# else
+#  if defined(SC68_DLL)
+#   define SC68_API __declspec(dllimport)
+#  else
+#   define SC68_API SC68_EXTERN
+#  endif
 # endif
-
 #endif
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 
 /** @defgroup  sc68_lib  sc68 library
  *  @ingroup   api68
@@ -117,8 +123,8 @@ typedef void (*sc68_msg_t)();
 /** API initialization parameters.
  *
  *    The sc68_init_t must be properly filled before calling the
- *    sc68_init() function. 
- *    
+ *    sc68_init() function.
+ *
  * @code
  * // Minimum code zeroes init structure.
  * sc68_init_t init;
@@ -131,7 +137,7 @@ typedef struct {
   /** dynamic memory allocation handler (malloc).
    *  @see alloc68_set().
    */
-  void * (*alloc)(unsigned int); 
+  void * (*alloc)(unsigned int);
 
   /** dynamic memory free handler (free).
    *  @see free68_set().
@@ -229,7 +235,7 @@ typedef void * sc68_disk_t;
 #define SC68_MIX_OK     0  /**< Not really used. */
 #define SC68_MIX_ERROR  -1 /**< Error.           */
 
-/**@}*/
+/** @} */
 
 /** @name API control functions.
  *  @{
@@ -355,7 +361,7 @@ SC68_API
  */
 void sc68_debug(sc68_t * sc68, const char * fmt, ...);
 
-/**@}*/
+/** @} */
 
 
 /** @name Music control functions.
@@ -397,7 +403,7 @@ SC68_API
  *   changed directly but a change-track event is posted. This event
  *   will be processed at the next call to the sc68_process()
  *   function. If loop is -1 the default music loop is used. If loop
- *   is 0 does an infinite loop. 
+ *   is 0 does an infinite loop.
  *
  * @param  sc68    sc68 instance.
  * @param  track  track number [-1:read current, 0:set disk default]
@@ -405,7 +411,7 @@ SC68_API
  *
  * @return error code or track number.
  * @retval 0  Success or no current track
- * @retval >0 Current track 
+ * @retval >0 Current track
  * @retval -1 Failure.
  *
  */
@@ -443,7 +449,7 @@ SC68_API
  *
  *    The returned time is always the current position in millisecond
  *    (not the goal position).
- *    
+ *
  * @param  sc68        sc68 instance.
  * @param  time_ms     new time position in ms (-1:read current time).
  * @param  is_seeking  Fill with current seek status (0:not seeking 1:seeking)
@@ -473,12 +479,12 @@ SC68_API
  *          must not be used after api_load() or api_close() function call.
  *          If disk was given the information are valid until the disk is
  *          freed.
- *          
+ *
  */
 int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
-		    sc68_disk_t disk);
+                    sc68_disk_t disk);
 
-/**@}*/
+/** @} */
 
 
 /** @name File functions.
@@ -503,7 +509,7 @@ SC68_API
 int sc68_verify_mem(const void * buffer, int len);
 SC68_API
 int sc68_is_our_url(const char * url,
-		    const char *exts, int * is_remote);
+                    const char *exts, int * is_remote);
 
 /** Load an sc68 disk for playing. */
 #ifdef _FILE68_ISTREAM68_H_
@@ -564,7 +570,7 @@ SC68_API
  */
 int sc68_tracks(sc68_t * sc68);
 
-/**@}*/
+/** @} */
 
 
 /** @name Configuration functions
@@ -604,8 +610,8 @@ SC68_API
  * @see config68_get()
  */
 config68_type_t sc68_config_get(sc68_t * sc68,
-				int * idx,
-				const char ** name);
+                                int * idx,
+                                const char ** name);
 
 SC68_API
 /** Get type and range of a config entry.
@@ -615,7 +621,7 @@ SC68_API
  * @see config68_range()
  */
 config68_type_t sc68_config_range(sc68_t * sc68, int idx,
-				  int * min, int * max, int * def);
+                                  int * min, int * max, int * def);
 
 SC68_API
 /** Set config variable value.
@@ -624,10 +630,10 @@ SC68_API
  * @see config68_set()
  */
 config68_type_t sc68_config_set(sc68_t * sc68,
-				int idx,
-				const char * name,
-				int v,
-				const char * s);
+                                int idx,
+                                const char * name,
+                                int v,
+                                const char * s);
 #endif
 
 SC68_API
@@ -637,7 +643,7 @@ SC68_API
  */
 void sc68_config_apply(sc68_t * sc68);
 
-/**@}*/
+/** @} */
 
 
 /** @name Dynamic memory access.
@@ -669,15 +675,10 @@ SC68_API
  */
 void sc68_free(/* sc68_t * api,  */void * data);
 
-/**@}*/
+/** @} */
 
-/** 
+/**
  *  @}
  */
-
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _SC68_SC68_H_ */

@@ -3,38 +3,43 @@
  * @file      desa68.h
  * @author    Benjamin Gerard
  * @date      1999-03-17
- * @brief     Motorola 68K disassembler header
+ * @brief     Motorola 68K disassembler header.
  *
  */
 
 /* $Id$ */
 
+/* Copyright (C) 1998-2009 Benjamin Gerard */
+
 #ifndef _DESA68_H_
 #define _DESA68_H_
 
-/* Building DSO or library */
-#if defined(DESA68_EXPORT)
-
-# if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
-#   define DESA68_API __declspec(dllexport)
-# elif defined(HAVE_VISIBILITY)
-#  define DESA68_API extern __attribute__ ((visibility("default")))
+#ifndef DESA68_EXTERN
+# ifdef __cplusplus
+#   define DESA68_EXTERN extern "C"
+# else
+#   define DESA68_EXTERN extern
 # endif
-
-/* Using */
-#else
-
-# if defined(DESA68_DLL) && defined(HAVE_DECLSPEC)
-#  define DESA68_API __declspec(dllimport)
-# elif defined(HAVE_VISIBILITY)
-#  define DESA68_API extern
-# endif
-
 #endif
 
-
-#ifdef __cplusplus
-extern "C" {
+#ifndef DESA68_API
+/* Building */
+# ifdef DESA68_EXPORT
+#  if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
+#   define DESA68_API __declspec(dllexport)
+#  elif defined(HAVE_VISIBILITY)
+#   define DESA68_API DESA68_EXTERN __attribute__ ((visibility("default")))
+#  else
+#   define DESA68_API DESA68_EXTERN
+#  endif
+/* Using */
+# else
+#  if defined(DESA68_DLL)
+#   define DESA68_API __declspec(dllimport)
+#  else
+#   define DESA68_API DESA68_EXTERN
+#  endif
+# endif
 #endif
 
 /** @defgroup desa68_lib desa68 library
@@ -46,7 +51,7 @@ extern "C" {
  *  it determines possible program branch. Together with it helps to
  *  source machine code.
  *
- *  Optionnally the disassembler may disassemble with symbol instead of 
+ *  Optionnally the disassembler may disassemble with symbol instead of
  *  absolute address or long immediat. A supplemental control is available
  *  to choose the range of address that must be disassembled as symbol.
  *
@@ -60,85 +65,77 @@ extern "C" {
  */
 
 #ifndef DESA68_API
-/** desa68 exported symbol.
+/** desa68 symbols specification.
  *
- *  Define special atribut for exported symbol.
- *
- *  - extern: static or classic .so library
- *  - __attribute__ (visibility("default"))): gcc support visibility.
- *  - __declspec(dllexport): creating a win32 DLL.
- *  - __declspec(dllimport): using a win32 DLL.
+ *  Define special atributs for importing/exporting desa68 symbols.
  */
-#define DESA68_API extern
+# define DESA68_API DESA68_EXTERN
+# error "DESA68_API should be defined"
 #endif
 
-/** @name Disassembly option flags.
+/** Disassembly option flags.
  *  @anchor desa68_opt_flags
  *
  *  Use bitwise OR operation with these values to set the
  *  the desa68_parm_t::flags in order to configure the disassembler.
  *
- *  @{
  */
+enum {
+  /** Disassemble with symbol.
+   *
+   *   If the DESA68_SYMBOL_FLAG is set in the desa68_parm_t::flags
+   *   and the value of absolute long addressing mode or an immediat long
+   *   is in greater or equal to desa68_parm_t::immsym_min and less than
+   *   desa68_parm_t::immsym_max
+   *   then the disassembler replaces the value by a named symbol.
+   *   The named symbol constist on the value transformed to an 6 hexadecimal
+   *   digit number with a prefixed 'L'.
+   */
+  DESA68_SYMBOL_FLAG = (1<<0),
 
-/** Disassemble with symbol.
- *
- *   If the DESA68_SYMBOL_FLAG is set in the desa68_parm_t::flags 
- *   and the value of absolute long addressing mode or an immediat long
- *   is in greater or equal to desa68_parm_t::immsym_min and less than
- *   desa68_parm_t::immsym_max
- *   then the disassembler replaces the value by a named symbol.
- *   The named symbol constist on the value transformed to an 6 hexadecimal
- *   digit number with a prefixed 'L'.
- */
-#define DESA68_SYMBOL_FLAG    (1<<0)
+  /** Disassemble with ascii char.
+   *
+   *   If the DESA68_ASCII_FLAG is set in the desa68_parm_t::flags
+   *   immediat values are converted to ASCII string (if possible).
+   */
+  DESA68_ASCII_FLAG = (1<<1),
 
-/** Disassemble with ascii char.
- *
- *   If the DESA68_ASCII_FLAG is set in the desa68_parm_t::flags 
- *   immediat values are converted to ASCII string (if possible).
- */
-#define DESA68_ASCII_FLAG     (1<<1)
+  /** Force symbol disassemble.
+   *
+   *    The DESA68_FORCESYMB_FLAG is a set of 5 bits. If the Nth bit if set it
+   *    forces a symbolic dissassembly for a long starting at the Nth word.
+   *    Since 68000 instructions are not more than 10 bytes long 5 bit is just
+   *    enough.
+   */
+  DESA68_FORCESYMB_FLAG = (1<<8),
+};
 
-/** Force symbol disassemble.
- *
- *    The DESA68_FORCESYMB_FLAG is a set of 5 bits. If the Nth bit if set it 
- *    forces a symbolic dissassembly for a long starting at the Nth word.
- *    Since 68000 instructions are not more than 10 bytes long 5 bit is just
- *    enough.
- */
-#define DESA68_FORCESYMB_FLAG (1<<8)
-
-/**@}*/
-
-/** @name Instruction type flags.
+/** Instruction type flags.
  *  @anchor desa68_inst_flags
  *
  *  These flags are setted in the desa68_parm_t::status field by desa68()
  *  function. It allow to determine the type of the dissassembled instruction.
  *
- *  @{
  */
+enum {
+  /** Valid instruction. */
+  DESA68_INST = (1<<0),
 
-/** Valid instruction. */
-#define DESA68_INST (1<<0)
+  /** Branch always instruction (bra/jmp). */
+  DESA68_BRA  = (1<<1),
 
-/** Branch always instruction (bra/jmp). */
-#define DESA68_BRA  (1<<1)
+  /** Subroutine (bsr/jsr) or Conditionnal branch instruction (bcc/dbcc). */
+  DESA68_BSR  = (1<<2),
 
-/** Subroutine (bsr/jsr) or Conditionnal branch instruction (bcc/dbcc). */
-#define DESA68_BSR  (1<<2)
+  /** Return from subroutine/Interruption instruction (rts/rte). */
+  DESA68_RTS  = (1<<3),
 
-/** Return from subroutine/Interruption instruction (rts/rte). */
-#define DESA68_RTS  (1<<3)
+  /** Software interrupt instruction (trap/chk). */
+  DESA68_INT  = (1<<4),
 
-/** Software interrupt instruction (trap/chk). */ 
-#define DESA68_INT  (1<<4)
-
-/** nop instruction. */ 
-#define DESA68_NOP  (1<<5) 
-
-/**@}*/
+  /** nop instruction. */
+  DESA68_NOP  = (1<<5)
+};
 
 /* Type for the 68K disassemble pass parameters structure. */
 typedef struct desa68_parm_s desa68_parm_t;
@@ -177,7 +174,7 @@ struct desa68_parm_s
   int            flags;  /**< @ref desa68_opt_flags "Disassemble options" */
   char          *str;    /**< Destination string.                         */
   int            strmax; /**< Destination string buffer size.
-			      @warning Unused                             */
+                            @warning Unused                             */
   /** Minimum value to interpret long immediat or absolute long as symbol.
    * @see DESA68_SYMBOL_FLAG for more details
    * @see immsym_max
@@ -189,7 +186,7 @@ struct desa68_parm_s
    */
   unsigned int   immsym_max;
 
-  /**@}*/
+  /** @} */
 
 
   /** @name Output parameters.
@@ -220,11 +217,11 @@ struct desa68_parm_s
    */
   unsigned int branch;
   /** Last decoded word (16 bit sign extended). */
-  int w;                  
+  int w;
   /** Pointer to current destination char. */
   char *s;
 
-  /**@}*/
+  /** @} */
 
 
   /** @name Miscellaneous internal variables.
@@ -234,18 +231,18 @@ struct desa68_parm_s
 
   /** Intermediat opcode decoding. */
   unsigned int pc_org;
-  int	reg0;
-  int	reg9;
-  int	mode3;
-  int	mode6;
-  int	opsz;
-  int	line;
-  int	adrmode0;
-  int	adrmode6;
-  int	szchar;
+  int   reg0;
+  int   reg9;
+  int   mode3;
+  int   mode6;
+  int   opsz;
+  int   line;
+  int   adrmode0;
+  int   adrmode6;
+  int   szchar;
   unsigned int ea;
 
-  /**@}*/
+  /** @} */
 
 };
 
@@ -275,9 +272,5 @@ const char * desa68_versionstr(void);
 /**
  *  @}
  */
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* #ifndef _DESA68_H_ */

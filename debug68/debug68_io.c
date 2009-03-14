@@ -1,5 +1,5 @@
 /*
- *                   debug68 - fake IO emulation                      
+ *                   debug68 - fake IO emulation
  *
  *            Copyright (C) 2001-2009 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
@@ -24,17 +24,17 @@
 #include "debug68_io.h"
 #include "emu68/ioplug68.h"
 
-#define DIO(NAME,DESC,LO,HI)					\
-  {								\
-    {								\
-      0,DESC,LO,HI,						\
-	any_readB,any_readW,any_readL,				\
-	any_writeB,any_writeW,any_writeL,			\
-	any_int,any_nextint,any_adjust,any_reset,any_destroy,	\
-	0							\
-	},							\
-      0,NAME##_read, NAME##_write, NAME##_reset			\
-	}
+#define DIO(NAME,DESC,LO,HI)                                    \
+  {                                                             \
+    {                                                           \
+      0,DESC,LO,HI,                                             \
+        any_readB,any_readW,any_readL,                          \
+        any_writeB,any_writeW,any_writeL,                       \
+        any_int,any_nextint,any_adjust,any_reset,any_destroy,   \
+        0                                                       \
+        },                                                      \
+      0,NAME##_read, NAME##_write, NAME##_reset                 \
+        }
 
 
 /***********************/
@@ -177,7 +177,6 @@ static int68_t ym_read(debug68_io_t * dio, addr68_t addr);
 static void ym_writeB(debug68_io_t * dio, addr68_t addr, int68_t v);
 static int ym_reset(debug68_io_t * dio);
 
-
 struct ym_io_t {
   debug68_io_t io;
   int cur;
@@ -197,7 +196,7 @@ static void ym_writeB(debug68_io_t * dio, addr68_t addr, int68_t v)
 {
   struct ym_io_t * ym = (struct ym_io_t *) dio;
   addr &= 2;
-  if(!addr) ym->cur = v&255;	 /* control register          */
+  if(!addr) ym->cur = v&255;     /* control register          */
   else ym->reg[ym->cur&255] = v; /* data register [ control ] */
 }
 
@@ -270,7 +269,7 @@ static void sh_write(debug68_io_t * dio, addr68_t addr, int68_t data)
   case 0x60: sh->data_60 = data; break;
   }
 }
-  
+
 
 
 int debug68_io_plug(emu68_t * emu68) {

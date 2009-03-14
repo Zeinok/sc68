@@ -16,9 +16,6 @@
 
 #include "istream68.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /** @name     Memory stream
  *  @ingroup  file68_istream
@@ -28,6 +25,7 @@ extern "C" {
  *  @{
  */
 
+FILE68_EXTERN
 /** Creates a stream for memory buffer.
  *
  *  @param  addr     Buffer base address.
@@ -41,11 +39,7 @@ extern "C" {
  */
 istream68_t * istream68_mem_create(const void * addr, int len, int mode);
 
-/**@}*/
-
-#ifdef __cplusplus
-}
-#endif
+/** @} */
 
 
 #endif /* #define _FILE68_ISTREAM68_MEM_H_ */

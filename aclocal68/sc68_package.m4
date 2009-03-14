@@ -9,196 +9,30 @@ dnl#
 dnl# $Id$
 dnl#
 
-# serial 20090116
+# serial 20090304
 
 # SC68_PACKAGE([DESC])
 # --------------------
-# Does common inits for all sc68 related packages.
-AC_DEFUN([SC68_PACKAGE],[
-
-# ,----------------------------------------------------------------------.
-# | Package info                                                         |
-# `----------------------------------------------------------------------'
-
+# Common package info for sc68 related packages.
+AC_DEFUN_ONCE([SC68_PACKAGE],[
     AC_PACKAGE_INFO(
       [$1 It is part of the sc68 project.],
       [http://sc68.atari.org])
     [PACKAGE_INFOCAT='sc68 - /|\ Atari ST and C= Amiga music player']
     AC_SUBST([PACKAGE_INFOCAT])
-    m4_define([PUP],AS_TR_CPP(AC_PACKAGE_NAME))
-
-
-# ,----------------------------------------------------------------------.
-# | Build and host system                                                |
-# `----------------------------------------------------------------------'
-
-    AC_USE_SYSTEM_EXTENSIONS
-    AC_CANONICAL_BUILD
-    AC_CANONICAL_HOST
-
-
-# ,----------------------------------------------------------------------.
-# | Guess win32 platform                                                 |
-# `----------------------------------------------------------------------'
-
-    AC_SYS_PLATFORM_WIN32
-    AC_SYS_NATIVE_WIN32
-
-# ,----------------------------------------------------------------------.
-# | Compiler and companions                                              |
-# `----------------------------------------------------------------------'
-
-    # libtool
-    LT_INIT([win32-dll])
-    AC_SUBST([LIBTOOL_DEPS])
-
-    # compiler
-    AC_LANG([C])
-    AC_PROG_CC
-    AM_PROG_CC_STDC
-    AM_PROG_CC_C_O
-    AC_PROG_CC_DECLSPEC
-    AC_C_CONST
-    AC_C_INLINE
-    AC_C_VOLATILE
-    AC_C_VISIBILITY_ATTRIBUT([has_visibility])
-
-    # others
-    AC_PROG_INSTALL
-
-    AC_ARG_WITH(
-      [src-includes],
-      [AS_HELP_STRING([--with-src-includes],
-          [include paths for source packages])],
-      [],[with_src_includes=""])
-
-    
-    [set -- $(echo $with_src_includes | sed 's/:/ /g')]
-    while test [$][#] -gt 0; do
-      idir="[$]1"
-      if test "x[$]{idir:0:1}x" != "x/x"; then
-        idir=$(test -d "$srcdir/[$]1" && cd "[$]srcdir/[$]1" && pwd)
-      fi
-      if test -n "[$]{idir}" && test -d "${idir}"; then
-        CPPFLAGS="[$]CPPFLAGS -I[$]{idir}"
-      else
-        AC_MSG_WARN([$idir is not a valid include dir])
-      fi
-      shift
-    done
-    
-
-# ,----------------------------------------------------------------------.
-# | Maintainer mode                                                      |
-# `----------------------------------------------------------------------'
-
-#     AM_MAINTAINER_MODE
-#     AS_IF([test "x${enable_maintainer_mode}" != "xyes"],
-#       [
-#         texinfo2man=false; help2man=false;
-#         AS_IF([test -e "$srcdir/texinfo.tex"],[
-#             test -e "$srcdir/package.texi.in" || test -e "$srcdir/package.texi"
-#             AS_IF([test [$][?] -ne 0],
-#               [AC_MSG_ERROR([
-# Missing file srcdir/package.texi.in
-# Did you forget --enable-maintainer-mode ?])
-#               ])])
-#         ],
-#       [
-#         AC_PATH_PROG([texinfo2man],[texinfo2man],[false])
-#         AS_IF([test "x${texinfo2man}" = "xfalse"],[
-#             AC_MSG_NOTICE([texinfo2man is part of GNU/indent package])])
-#         AC_PATH_PROG([help2man],[help2man],[false])
-#         AS_IF([test "x${help2man}" = "xfalse"],[
-#             AC_MSG_NOTICE([help2man is part of GNU/help2man package])])
-#         AC_MSG_CHECKING([whether package.texi is required])
-#         # $$$ This test does the tick but it is far from clean
-#         AS_IF([test ! -e "$srcdir/texinfo.tex"],[AC_MSG_RESULT([no])],
-#           [
-#             AC_MSG_RESULT([yes])
-#             AC_MSG_CHECKING([for package.texi.in i][n srcdir])
-#             AS_IF([test -e "$srcdir/package.texi.in"],[AC_MSG_RESULT([yes])],
-#               [
-#                 AC_MSG_RESULT([no])
-#                 AC_MSG_NOTICE([create missing file $srcdir/package.texi.in])
-#                 cat <<EOF >$srcdir/package.texi.in
-# @set PACKAGE     @PACKAGE_NAME@
-# @set WEBSITE     @PACKAGE_URL@
-# @set BUGREPORT   @PACKAGE_BUGREPORT@
-# @set DESCRIPTION @PACKAGE_SHORTDESC@
-# @set INFOCAT     @PACKAGE_INFOCAT@
-# EOF
-#               ])])])
-
-# ,----------------------------------------------------------------------.
-# | Compiler and companions                                              |
-# `----------------------------------------------------------------------'
-
-# win32 specific ... $$$ Is this really neccessary ?
-# ------------------------------------------------
-    AS_IF([test "x$ac_platform_win32" = "xyes"],
-      [LIB[]PUP[]_LDFLAGS=$(echo $LIB[]PUP[]_LDFLAGS -no-undefined)])
-
-# Check for __dllspec
-# -------------------
-    AS_IF([test "x$ac_cc_declspec" = "xyes"],
-      [AC_DEFINE([HAVE_DECLSPEC],[1],[Support __declspec()])])
-
-
-# visibility attribut
-# -------------------
-    AS_IF([test "x$has_visibility" = "xyes"],
-      [
-        AC_DEFINE([HAVE_VISIBILITY],[1],[Support visibility __attribute__])
-        AX_CHECK_COMPILER_FLAGS(
-          [-fvisibility=hidden],
-          [fvisibility=yes],
-          [fvisibility=no])
-        AS_IF(
-          [test "x$fvisibility" = "xyes"],
-          [PUP[]_CFLAGS="$PUP[]_CFLAGS -fvisibility=hidden"])
-      ])
-
-# Check some more (mostly GCC) switch
-# -----------------------------------
-    AC_FOREACH([FLAG],
-      [-std=c99 -pedantic -Wall],
-      [AX_CHECK_COMPILER_FLAGS(FLAG,
-          [PUP[]_CFLAGS=$(echo ${PUP[]_CFLAGS} FLAG)])])
-
-
-# ,----------------------------------------------------------------------.
-# | Optional Features                                                    |
-# `----------------------------------------------------------------------'
-
-    AC_ARG_ENABLE_DEBUG([
-        AX_CHECK_COMPILER_FLAGS([-g],
-          [PUP[]_CFLAGS=$(echo ${PUP[]_CFLAGS} -g)])])
-
-    # $$$ for program only ? 
-    AC_ARG_ENABLE_ALLSTATIC(
-      [PUP[]_LDFLAGS=$(echo -all-static ${PUP[]_LDFLAGS})])
-
-    # PUP_FLAGS : common for both libraries and programms
-    AC_SUBST(PUP[_CFLAGS])
-    AC_SUBST(PUP[_CPPFLAGS])
-    AC_SUBST(PUP[_LDFLAGS])
-
-    # LIBPUP_FLAGS : for building libraries
-    AC_SUBST([LIB]PUP[_CFLAGS])
-    AC_SUBST([LIB]PUP[_CPPFLAGS])
-    AC_SUBST([LIB]PUP[_LDFLAGS])
-
-    # BINPUP_FLAGS : for building programms
-    AC_SUBST([BIN]PUP[_CFLAGS])
-    AC_SUBST([BIN]PUP[_CPPFLAGS])
-    AC_SUBST([BIN]PUP[_LDFLAGS])
-
-    # PACKAGE_FLAGS : for others to compile/link against us
-    AC_SUBST([PACKAGE_CFLAGS])
-    AC_SUBST([PACKAGE_CPPFLAGS])
-    AC_SUBST([PACKAGE_LDFLAGS])
-    
+    m4_define([PKG],AS_TR_CPP(AC_PACKAGE_NAME))
+    m4_define([PKG_ALL_CFLAGS],[ALL_CFLAGS])
+    m4_define([PKG_LIB_CFLAGS],[LIB_CFLAGS])
+    m4_define([PKG_BIN_CFLAGS],[BIN_CFLAGS])
+    m4_define([PKG_ALL_EFLAGS],[ALL_EFLAGS])
+    m4_define([PKG_LIB_EFLAGS],[LIB_EFLAGS])
+    m4_define([PKG_BIN_EFLAGS],[BIN_EFLAGS])
+    m4_define([PKG_ALL_LFLAGS],[ALL_LFLAGS])
+    m4_define([PKG_LIB_LFLAGS],[LIB_LFLAGS])
+    m4_define([PKG_BIN_LFLAGS],[BIN_LFLAGS])
+    PKG_ALL_CFLAGS=''; PKG_BIN_CFLAGS=''; PKG_LIB_CFLAGS=''; PACKAGE_CFLAGS=''
+    PKG_ALL_EFLAGS=''; PKG_BIN_EFLAGS=''; PKG_LIB_EFLAGS=''; PACKAGE_EFLAGS=''
+    PKG_ALL_LFLAGS=''; PKG_BIN_LFLAGS=''; PKG_LIB_LFLAGS=''; PACKAGE_LFLAGS=''
   ])
 
 dnl# ----------------------------------------------------------------------

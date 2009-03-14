@@ -9,7 +9,6 @@ dnl#
 dnl# $Id: configure.ac,v 1.3 2007/01/12 09:43:07 benjihan Exp $
 dnl#
 
-
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
@@ -18,9 +17,18 @@ AC_INIT([sc68-ng],[20090117],[benjihan -4t- users.sourceforge -d0t- net])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
 
-SC68_PACKAGE([
-    Atari ST and Amiga music player.
-  ])
+AC_USE_SYSTEM_EXTENSIONS
+LT_INIT([win32-dll])
+
+# ,----------------------------------------------------------------------.
+# | sc68                                                                 |
+# `----------------------------------------------------------------------'
+
+SC68_PACKAGE([Atari ST and Amiga music player.])
+SC68_SYSTEM
+SC68_OPTIONS
+SC68_TOOLS
+SC68_CHECKS
 
 # ,----------------------------------------------------------------------.
 # | Optional Packages                                                    |
@@ -29,15 +37,15 @@ SC68_PACKAGE([
 AC_ARG_ENABLE(
   [devtools],
   [AS_HELP_STRING(
-    [--enable-devtools],
-    [optionnal developer tools @<:@default=no@:>@])],
+      [--enable-devtools],
+      [optionnal developer tools @<:@default=no@:>@])],
   [],[enable_devtools=no])
 
 AC_ARG_ENABLE(
   [all],
   [AS_HELP_STRING(
-    [--enable-all],
-    [enable all sub-packages @<:@default=no@:>@])],
+      [--enable-all],
+      [enable all sub-packages @<:@default=no@:>@])],
   [],[enable_all="check"])
 
 AS_CASE(["x$enable_all"],
@@ -45,22 +53,22 @@ AS_CASE(["x$enable_all"],
   [enable_all="check"])
 
 # Dev Tools
-AC_ARG_ENABLE_PACKAGE([as68],[68k macro assembler],[[$]enable_devtools])
-AC_ARG_ENABLE_PACKAGE([sourcer68],[68k sourcer],[[$]enable_devtools])
-AC_ARG_ENABLE_PACKAGE([debug68],[68k debugger],[[$]enable_devtools])
-AC_ARG_ENABLE_PACKAGE([desa68],[68k disassembler library],[[$]enable_devtools])
+SC68_ENABLE_PACKAGE([as68],[68k macro assembler],[[$]enable_devtools])
+SC68_ENABLE_PACKAGE([sourcer68],[68k sourcer],[[$]enable_devtools])
+SC68_ENABLE_PACKAGE([debug68],[68k debugger],[[$]enable_devtools])
+SC68_ENABLE_PACKAGE([desa68],[68k disassembler library],[[$]enable_devtools])
 
 # API Libraries
-AC_ARG_ENABLE_PACKAGE([unice68],[ice depacker support],[[$]enable_all])
-AC_ARG_ENABLE_PACKAGE([file68],[file68 library],[[$]enable_all])
-AC_ARG_ENABLE_PACKAGE([libsc68],[sc68 engine],[[$]enable_all])
+SC68_ENABLE_PACKAGE([unice68],[ice depacker support],[[$]enable_all])
+SC68_ENABLE_PACKAGE([file68],[file68 library],[[$]enable_all])
+SC68_ENABLE_PACKAGE([libsc68],[sc68 engine],[[$]enable_all])
 
 # CLI programs
-AC_ARG_ENABLE_PACKAGE([info68],[sc68 files info program],[[$]enable_all])
-AC_ARG_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_all])
+SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[[$]enable_all])
+SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_all])
 
 # DOC
-AC_ARG_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[[$]enable_all])
+SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[[$]enable_all])
 
 # ,----------------------------------------------------------------------.
 # | Package Dependencies                                                 |
@@ -79,65 +87,45 @@ AC_ARG_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[[$]enable_all])
 # | Subdirs                                                              |
 # `----------------------------------------------------------------------'
 
-# # Absolute source
-# src_adir=$(cd $srcdir; pwd || echo $PWD)
-# AS_IF([test -z "$src_adir" || test ! -d "$src_adir"],
-#   [AC_MSG_ERROR([unable to guess absolute source dir])])
-# AC_MSG_NOTICE([absolute source dir $src_adir])
+if test "x${enable_as68}"      = "xyes"; then
+  AC_CONFIG_SUBDIRS([as68])
+fi
 
-# # Absolute built
-# blt_adir=$(pwd || echo $PWD)
-# AS_IF([test -z "$blt_adir" || test ! -d "$blt_adir"],
-#   [AC_MSG_ERROR([unable to guess absolute built dir])])
-# AC_MSG_NOTICE([absolute built dir $blt_adir])
+if test "x${enable_desa68}"    = "xyes"; then
+  AC_CONFIG_SUBDIRS([desa68])
+fi
 
-AS_IF([test "x${enable_as68}"      = "xyes"],
-  [
-    AC_CONFIG_SUBDIRS([as68])
-  ])
+if test "x${enable_unice68}"   = "xyes"; then
+  AC_CONFIG_SUBDIRS([unice68])
+fi
 
-AS_IF([test "x${enable_desa68}"    = "xyes"],
-  [
-    AC_CONFIG_SUBDIRS([desa68])
-  ])
+if test "x${enable_file68}"    = "xyes"; then
+  AC_CONFIG_SUBDIRS([file68])
+fi
 
-AS_IF([test "x${enable_unice68}"   = "xyes"],
-  [
-    AC_CONFIG_SUBDIRS([unice68])
-  ])
+if test "x${enable_info68}"    = "xyes"; then
+  AC_CONFIG_SUBDIRS([info68])
+fi
 
-AS_IF([test "x${enable_file68}"    = "xyes"],
-  [
-    AC_CONFIG_SUBDIRS([file68])
-  ])
+if test "x${enable_sourcer68}" = "xyes"; then
+  AC_CONFIG_SUBDIRS([sourcer68])
+fi
 
-AS_IF([test "x${enable_info68}"    = "xyes"],
-  [
-    AC_CONFIG_SUBDIRS([info68])
-  ])
+if test "x${enable_libsc68}"   = "xyes"; then
+  AC_CONFIG_SUBDIRS([libsc68])
+fi
 
-AS_IF([test "x${enable_sourcer68}" = "xyes"],
-  [
-    AC_CONFIG_SUBDIRS([sourcer68])
-  ])
+if test "x${enable_sc68}"      = "xyes"; then
+  AC_CONFIG_SUBDIRS([sc68])
+fi
 
-AS_IF([test "x${enable_libsc68}"   = "xyes"],
-  [
-    AC_CONFIG_SUBDIRS([libsc68])
-  ])
+if test "x${enable_debug68}"   = "xyes"; then
+  AC_CONFIG_SUBDIRS([debug68])
+fi
 
-AS_IF([test "x${enable_sc68}"      = "xyes"],
-  [
-    AC_CONFIG_SUBDIRS([sc68])
-  ])
-
-AS_IF([test "x${enable_debug68}"   = "xyes"],[
-    AC_CONFIG_SUBDIRS([debug68])
-  ])
-
-AS_IF([test "x${enable_sc68_doc}"   = "xyes"],[
-    AC_CONFIG_SUBDIRS([sc68-doc])
-  ])
+if test "x${enable_sc68_doc}"   = "xyes"; then
+  AC_CONFIG_SUBDIRS([sc68-doc])
+fi
 
 AC_SUBST([subdirs])
 
@@ -147,7 +135,6 @@ AC_SUBST([subdirs])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
-
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |

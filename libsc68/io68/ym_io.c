@@ -17,9 +17,11 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
+
+/* $Id$ */
+
+/* Copyright (C) 1998-2009 Benjamin Gerard */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -35,7 +37,7 @@ typedef struct
     int68_t  mul;
     uint68_t div;
   } clock;
-  
+
   ym_t ym;
 } ym_io68_t;
 
@@ -76,7 +78,7 @@ cycle68_t cycle_ymtocpu(const ym_io68_t * const ymio, const cycle68_t cycle)
 
 static inline
 int _readB(ym_io68_t * const ymio,
-	   const addr68_t addr, const cycle68_t ymcycle)
+           const addr68_t addr, const cycle68_t ymcycle)
 {
   return (addr&3)
     ? 0
@@ -96,7 +98,7 @@ static void ymio_readB(io68_t * const io)
 
 static inline
 int _readW(ym_io68_t * const ymio,
-	   const addr68_t addr, const cycle68_t ymcycle)
+           const addr68_t addr, const cycle68_t ymcycle)
 {
   return (addr&3)
     ? 0
@@ -115,7 +117,7 @@ static void ymio_readW(io68_t * const io)
 
 static inline
 int68_t _readL(ym_io68_t * const ymio,
-	       const addr68_t addr, const cycle68_t ymcycle)
+               const addr68_t addr, const cycle68_t ymcycle)
 {
   return (_readW(ymio,addr,ymcycle) << 16) | _readW(ymio,addr+2,ymcycle);
 }
@@ -131,7 +133,7 @@ static void ymio_readL(io68_t * const io)
 
 static inline
 void _writeB(ym_io68_t * const ymio,
-	     const addr68_t  addr, const int68_t v, const cycle68_t ymcycle)
+             const addr68_t  addr, const int68_t v, const cycle68_t ymcycle)
 {
   if (!(addr&2)) {
     /* CTRL register */
@@ -152,7 +154,7 @@ static void ymio_writeB(io68_t * const io)
 
 static inline
 void _writeW(ym_io68_t * const ymio,
-	     const addr68_t  addr, const int68_t v, const cycle68_t ymcycle)
+             const addr68_t  addr, const int68_t v, const cycle68_t ymcycle)
 {
   _writeB(ymio,addr,v>>8,ymcycle);
   /* that's the way it is ! */
@@ -204,13 +206,13 @@ static void ymio_adjust_cycle(io68_t * const io, const cycle68_t cycle)
   const cycle68_t ymcycle = cycle_cputoym(ymio,io->emu68->cycle);
   ym_adjust_cycle(&ymio->ym, ymcycle);
 }
-  
+
 
 static void ymio_destroy(io68_t * const io)
 {
   if (io) {
     ym_io68_t * const ymio = (ym_io68_t *)io;
-    
+
     ym_cleanup(&ymio->ym);
     if (io->emu68 && io->emu68->free) {
       io->emu68->free(io);
@@ -264,23 +266,23 @@ io68_t * ymio_create(emu68_t * const emu68, ym_parms_t * const parms)
       ym_setup(&ymio->ym, parms);
 
       if (emu68->clock > ymio->ym.clock) {
-	numerator = emu68->clock;
-	denominator = ymio->ym.clock;
-	s = -1;
+        numerator = emu68->clock;
+        denominator = ymio->ym.clock;
+        s = -1;
       } else {
-	numerator = ymio->ym.clock;
-	denominator = emu68->clock;
-	s = 1;
+        numerator = ymio->ym.clock;
+        denominator = emu68->clock;
+        s = 1;
       }
       quotient = numerator / denominator;
-      
+
       if (quotient * denominator == numerator &&
-	  (p = get_power_of_2(quotient), p >= 0)) {
-	ymio->clock.div = 0;
-	ymio->clock.mul = s*p;
+          (p = get_power_of_2(quotient), p >= 0)) {
+        ymio->clock.div = 0;
+        ymio->clock.mul = s*p;
       } else {
-	ymio->clock.div = emu68->clock;
-	ymio->clock.mul = ymio->ym.clock;
+        ymio->clock.div = emu68->clock;
+        ymio->clock.mul = ymio->ym.clock;
       }
     }
   }
@@ -306,8 +308,8 @@ ym_t * ymio_emulator(io68_t * const io)
 uint68_t ymio_buffersize(const io68_t * const io, const cycle68_t cycles)
 {
   if (io) {
-    const ym_io68_t * const ymio = (const ym_io68_t *)io; 
-    return ym_buffersize(&ymio->ym,cycle_cputoym(ymio,cycles)); 
+    const ym_io68_t * const ymio = (const ym_io68_t *)io;
+    return ym_buffersize(&ymio->ym,cycle_cputoym(ymio,cycles));
   }
   return 0;
 }
@@ -315,8 +317,8 @@ uint68_t ymio_buffersize(const io68_t * const io, const cycle68_t cycles)
 int ymio_run(const io68_t * const io, s32 * output, const cycle68_t cycles)
 {
   if (io) {
-    ym_io68_t * const ymio = (ym_io68_t *)io; 
-    return ym_run(&ymio->ym,output,cycle_cputoym(ymio,cycles)); 
+    ym_io68_t * const ymio = (ym_io68_t *)io;
+    return ym_run(&ymio->ym,output,cycle_cputoym(ymio,cycles));
   }
   return 0;
 }
@@ -324,13 +326,13 @@ int ymio_run(const io68_t * const io, s32 * output, const cycle68_t cycles)
 /** Convert a cpu-cycle to ym-cycle. */
 cycle68_t ymio_cycle_cpu2ym(const io68_t * const io, const cycle68_t cycles)
 {
-  ym_io68_t * const ymio = (ym_io68_t *)io; 
-  return cycle_cputoym(ymio,cycles); 
+  ym_io68_t * const ymio = (ym_io68_t *)io;
+  return cycle_cputoym(ymio,cycles);
 }
 
 /** Convert a ym-cycle to cpu-cycle. */
 cycle68_t ymio_cycle_ym2cpu(const io68_t * const io, const cycle68_t cycles)
 {
-  ym_io68_t * const ymio = (ym_io68_t *)io; 
-  return cycle_ymtocpu(ymio,cycles); 
+  ym_io68_t * const ymio = (ym_io68_t *)io;
+  return cycle_ymtocpu(ymio,cycles);
 }
