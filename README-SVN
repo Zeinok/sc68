@@ -2,7 +2,7 @@
                    --------------------------------
 
 INTRODUCTION
-           
+
   This  file aims  to help  developers to  use sc68  version  from SVN
   repository. Basically  SVN repository only host files  which are not
   generated  by   any  mean.  It  excludes  all   files  generated  by
@@ -17,7 +17,7 @@ QUICK-START
       $ mkdir -p sc68-svn/_build && cd sc68-svn
 
   -2- Get sc68 source tree
- 
+
       $ svn co https://sc68.svn.sourceforge.net/svnroot/sc68 sc68
 
   -3- Prepare source tree (bootstapping)
@@ -51,6 +51,25 @@ QUICK-START
       $ make                    # Build
 
       See INSTALL file for more information on configure.
+
+
+HACKING
+
+  Having a  look to the  current code should  give you a good  idea of
+  sc68 code  conventions. Basically strict rules are  not required but
+  it is a  nice thing to try to  stick with it. If you  have to follow
+  only a fews rules you  should consider using:
+
+   - space as tab
+   - indent width of 2
+   - line width of 78
+
+  Emacs  users  may  use  the  sc68.el file  located  in  the  topmost
+  directory. This piece of emacs lisp code adds a *sc68* C-code-style.
+  One way (not the smartest) to use this style is to do this in emacs:
+
+  M-x load-file (select sc68.el file)
+  M-x c-set-style (select sc68 style)
 
 
 LINKS

@@ -15,4 +15,4 @@ ACLOCAL_AMFLAGS = -I m4 --install
 ALL_SUBDIRS  = as68 desa68 unice68 file68 info68 sourcer68 libsc68 debug68 sc68
 DIST_SUBDIRS = $(SUBDIRS)
 SUBDIRS      = $(subdirs)
-EXTRA_DIST   = sc68.el
+EXTRA_DIST   = sc68.el README-SVN
