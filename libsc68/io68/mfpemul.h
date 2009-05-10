@@ -320,7 +320,7 @@ IO68_EXTERN
  *
  */
 void mfp_put_tdr(mfp_t * const mfp,
-                 const int timer, const int68_t v, const bogoc68_t bogoc);
+                 int timer, int68_t v, const bogoc68_t bogoc);
 
 IO68_EXTERN
 /** MFP write Timer control register.
@@ -332,7 +332,7 @@ IO68_EXTERN
  *
  */
 void mfp_put_tcr(mfp_t * const mfp,
-                 const int timer, const int68_t v, const bogoc68_t bogoc);
+                 int timer, int68_t v, const bogoc68_t bogoc);
 
 IO68_EXTERN
 /** Get MFP pending interruption.

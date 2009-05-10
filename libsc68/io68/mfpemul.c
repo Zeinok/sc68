@@ -310,7 +310,7 @@ int68_t mfp_get_tdr(mfp_t * const mfp, const int timer, const bogoc68_t bogoc)
    *INDETERMINATE* value is loaded into the main counter.
 
    */
-void mfp_put_tdr(mfp_t * const mfp, int timer, int v, bogoc68_t bogoc)
+void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, bogoc68_t bogoc)
 {
   mfp_timer_t * const ptimer = &mfp->timers[timer&3];
   const uint68_t old_tdr = ptimer->tdr_res;
@@ -363,7 +363,7 @@ static void mfp_put_tcr_bogo(mfp_timer_t * const ptimer,
 }
 
 
-void mfp_put_tcr(mfp_t * const mfp, int timer, int v, const bogoc68_t bogoc)
+void mfp_put_tcr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
 {
   timer &= 3;
 
