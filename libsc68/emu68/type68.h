@@ -54,9 +54,18 @@ typedef int64_t  s64;      /**< Must be an   signed 64 bit integer. */
 
 
 /** Commonly used int (should be fastest at least 32 bit type). */
-typedef  int_fast32_t int68_t;
-typedef       int68_t sint68_t;
-typedef uint_fast32_t uint68_t;
+
+/* typedef  int_fast32_t int68_t; */
+/* typedef       int68_t sint68_t; */
+/* typedef uint_fast32_t uint68_t; */
+
+/* $$$ Switch back to int_fast as soon as it is safe to have int68_t
+ * width > 32bit. Most problems about it probably are in the macro68.h
+ * file. */
+typedef  int32_t int68_t;
+typedef  int68_t sint68_t;
+typedef uint32_t uint68_t;
+
 
 /** Used by cycle counters. */
 typedef uint68_t cycle68_t;

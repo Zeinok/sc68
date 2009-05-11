@@ -1051,8 +1051,8 @@ int main(int argc, char **argv)
   int org = 0x8000;
 
 #ifdef USE_FILE68
-  alloc68_set(malloc);
-  free68_set(free);
+/*   alloc68_set(malloc); */
+/*   free68_set(free); */
   argc = file68_init(argc, argv);
 #endif
 

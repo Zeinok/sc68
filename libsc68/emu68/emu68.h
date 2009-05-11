@@ -202,11 +202,21 @@ EMU68_API
  *
  *  @param  emu68  emulator instance
  *
- *  @return Pointer to onboard memory block
+ *  @return  Pointer to onboard memory block
  *  @retval  0  Failure
  */
-u8 * emu68_memptr(emu68_t * const emu68,
-                  addr68_t dest, uint68_t sz);
+u8 * emu68_memptr(emu68_t * const emu68, addr68_t dest, uint68_t sz);
+
+EMU68_API
+/** Check for a memory access status block.
+ *
+ *  @param  emu68  emulator instance
+ *
+ *  @return  Pointer to onboard memory block
+ *  @retval  0  Failure
+ */
+u8 * emu68_chkptr(emu68_t * const emu68, addr68_t dst, uint68_t sz);
+
 
 EMU68_API
 /** Get byte in 68K onboard memory.
@@ -216,8 +226,18 @@ EMU68_API
  *
  *  @see emu68_poke()
  */
-int emu68_peek(emu68_t * const emu68,
-               addr68_t addr);
+int emu68_peek(emu68_t * const emu68, addr68_t addr);
+
+EMU68_API
+/** Get byte in 68K access control memory.
+ *
+ *  @param  emu68  emulator instance
+ *  @param  emu68  emulator instance
+ *
+ *  @see emu68_poke()
+ */
+int emu68_chkpeek(emu68_t * const emu68, addr68_t addr);
+
 
 EMU68_API
 /** Put a byte in 68K onboard memory.
@@ -226,8 +246,16 @@ EMU68_API
  *
  *  @see emu68_peek()
  */
-int emu68_poke(emu68_t * const emu68,
-               addr68_t addr, int68_t v);
+int emu68_poke(emu68_t * const emu68, addr68_t addr, int68_t v);
+
+EMU68_API
+/** Put a byte in 68K access control memory.
+ *
+ *  @param  emu68  emulator instance
+ *
+ *  @see emu68_peek()
+ */
+int emu68_chkpoke(emu68_t * const emu68, addr68_t addr, int68_t v);
 
 EMU68_API
 /** Put a memory block to 68K on-board memory.
@@ -264,6 +292,14 @@ EMU68_API
  *
  */
 int emu68_memset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz);
+
+EMU68_API
+/* Fill a 68k access control memory block with a value.
+ *
+ *  @param  emu68  emulator instance
+ *
+ */
+int emu68_chkset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz);
 
 /** @} */
 

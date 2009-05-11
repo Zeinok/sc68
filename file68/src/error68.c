@@ -29,13 +29,15 @@
 
 #include <string.h>
 
-#define error68_feature msg68_ERROR
-
 /* Process error message (printf like format). */
 int error68_va(const char * format, va_list list)
 {
   if (format) {
-    msg68_va(error68_feature,format,list);
+    int len = strlen(format);
+    msg68_va(msg68_ERROR, format, list);
+    if (len > 0 && format[len-1] != '\n') {
+      msg68(msg68_ERROR,"\n");
+    }
   }
   return -1;
 }
@@ -45,13 +47,9 @@ int error68(const char * format, ...)
 {
   int err;
   va_list list;
-  int len = strlen(format);
 
   va_start(list, format);
   err = error68_va(format, list);
-  if (len > 0 && format[len-1] != '\n') {
-    err = error68("\n");
-  }
   va_end(list);
 
   return err;

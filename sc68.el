@@ -15,7 +15,9 @@
 			(statement-case-intro . +)
 			(statement-case-open  . 0)
 			(case-label           . 0)
+			(label                . /)
 			))
+    ;; (c-doc-comment-style . ((c-mode . (gtkdoc javadoc))))
     )
   "sc68 C Programming Style")
 
@@ -47,4 +49,4 @@
 
 ;; Set this is in your .emacs if you want to use the c-mode-hook as
 ;; defined here right out of the box.
-(add-hook 'c-mode-common-hook 'sc68-c-mode-common-hook)
+;(add-hook 'c-mode-common-hook 'sc68-c-mode-common-hook)

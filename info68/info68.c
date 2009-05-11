@@ -309,8 +309,6 @@ int main(int argc, char ** argv)
   const char * outname = "stdout://";
 
   argv[0] = "info68";
-  alloc68_set(malloc);
-  free68_set(free);
   argc = file68_init(argc, argv);
   if (argc < 0) {
     error("info68: file68 initialisation failed.\n");

@@ -126,8 +126,7 @@ cycle68_t emu68_get_cycle(emu68_t * const emu68)
  * `-----------------------------------------------------------------'
  */
 
-u8 * emu68_memptr(emu68_t * const emu68,
-                  addr68_t dst, uint68_t sz)
+u8 * emu68_memptr(emu68_t * const emu68, addr68_t dst, uint68_t sz)
 {
   u8 * ptr = 0;
   if (emu68) {
@@ -145,16 +144,46 @@ u8 * emu68_memptr(emu68_t * const emu68,
   return ptr;
 }
 
-/* Peek & Poke
- */
+u8 * emu68_chkptr(emu68_t * const emu68, addr68_t dst, uint68_t sz)
+{
+  u8 * ptr = emu68_memptr(emu68,dst,sz);
+  if (ptr && emu68->chk) {
+    ptr = emu68->chk + (ptr - emu68->mem);
+  }
+  return ptr;
+}
+
+/* Peek & Poke */
 int emu68_peek(emu68_t * const emu68, addr68_t addr)
 {
-  return !emu68 ? -1 : emu68->mem[addr&MEMMSK68];
+  return emu68
+    ? emu68->mem[addr&MEMMSK68]
+    : -1
+    ;
+}
+
+int emu68_chkpeek(emu68_t * const emu68, addr68_t addr)
+{
+  return (emu68 && emu68->chk)
+    ? emu68->chk[addr&MEMMSK68]
+    : -1
+    ; 
 }
 
 int emu68_poke(emu68_t * const emu68, addr68_t addr, int68_t v)
 {
-  return !emu68 ? -1 : (emu68->mem[addr&MEMMSK68] = v);
+  return emu68
+    ? (emu68->mem[addr & MEMMSK68] = v)
+    : -1
+    ;
+}
+
+int emu68_chkpoke(emu68_t * const emu68, addr68_t addr, int68_t v)
+{
+  return (emu68 && emu68->chk)
+    ? (emu68->chk[addr & MEMMSK68] = v)
+    : -1
+    ;
 }
 
 /*  Write memory block to 68K on board memory
@@ -185,15 +214,39 @@ int emu68_memget(emu68_t * const emu68, u8 *dst, addr68_t src, uint68_t sz)
 int emu68_memset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz)
 {
   u8 * ptr;
-  if (!sz) {
-    sz = emu68->memmsk+1-dst;
-  }
-  ptr = emu68_memptr(emu68,dst,sz);
-  if (ptr) {
-    while (sz--) *ptr++ = val;
+
+  if (!emu68) {
+    ptr = 0;
+  } else {
+    if (!sz) {
+      sz = emu68->memmsk + 1 - dst;
+    }
+    ptr = emu68_memptr(emu68, dst, sz);
+    if (ptr) {
+      while (sz--) *ptr++ = val;
+    }
   }
   return -!ptr;
 }
+
+int emu68_chkset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz)
+{
+  u8 * ptr;
+
+  if (!emu68) {
+    ptr = 0;
+  } else {
+    if (!sz) {
+      sz = emu68->memmsk+1-dst;
+    }
+    ptr = emu68_chkptr(emu68, dst, sz);
+    if (ptr) {
+      while (sz--) *ptr++ = val;
+    }
+  }
+  return -!ptr;
+}
+
 
 /* 68000 OP-WORD format :
  * 1111 0000 0000 0000 ( LINE  )

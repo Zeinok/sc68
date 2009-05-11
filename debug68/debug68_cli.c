@@ -99,7 +99,7 @@ static int dispatch_word(char ** here, int max_args, char *str)
   return i - 1;
 }
 
-/** Free command line. */
+/* Free command line. */
 void debug68_cli_free(debug68_cli_t * cli)
 {
   if (cli) {
@@ -125,7 +125,7 @@ int debug68_cli_read(const char * prompt, debug68_cli_t * cli)
   }
 
   /* Remove trailing space */
-  for (e = cli->cli+strlen(cli->cli); --e >= cli->cli && !isgraph(*e); )
+  for ( e = cli->cli+strlen(cli->cli); --e >= cli->cli && !isgraph(*e); )
     ;
   e[1] = 0;
 

@@ -38,7 +38,7 @@
  * SC68 file identification string definition V2.
  * @see file68_idstr_v2
  */
-#define SC68_IDSTR_V2 {'S','C','6','8', 0, 0x5C, 0x68, 0 }
+#define SC68_IDSTR_V2 "SC68-V2"
 
 #define SC68_NOFILENAME "N/A"  /**< SC68 unknown filename or author.        */
 #define SC68_LOADADDR   0x8000 /**< Default load address in 68K memory.     */
@@ -98,6 +98,9 @@ typedef struct
  * @}
  */
 
+/**
+ * Hardware and features flags.
+ */
 typedef union {
 
   struct {
@@ -107,7 +110,7 @@ typedef union {
     unsigned stechoice:1; /**< Music allow STF/STE choices.      */
   } bit;                  /**< Flags bit field.                  */
   unsigned all;           /**< All flags in one.                 */
-} hwflags68_t;            /**< Hardware and features flags.      */
+} hwflags68_t;
 
 /**
  * SC68 music (track) structure.
@@ -282,6 +285,8 @@ FILE68_API
  * @deprecated This function needs to be rewritten.
  */
 int file68_diskname(istream68_t * is, char * dest, int max);
+
+
 
 FILE68_API
 /**

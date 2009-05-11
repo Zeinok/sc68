@@ -527,10 +527,6 @@ int sc68_init(sc68_init_t * init)
     init = &dummy_init;
   }
 
-  /* Use malloc() and free() as default dynamic memory handler */
-  if (!init->alloc) init->alloc = malloc;
-  if (!init->free)  init->free  = free;
-
   sc68_feature = msg68_feature("sc68","sc68 library",DEBUG_SC68_O);
 
   /* 1st thing to do : set debug handler. */
