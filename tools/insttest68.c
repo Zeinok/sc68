@@ -27,14 +27,32 @@
 #include <string.h>
 #include <stdint.h>
 
-typedef  int64_t  int_t;
-typedef uint64_t uint_t;
+#ifndef WORDSZ
+# define WORDSZ 32
+#endif
+
+#if WORDSZ == 64
+# define WORD   int64_t
+# define UWORD  uint64_t
+#elif WORDSZ == 32
+# define WORD   int32_t
+# define UWORD  uint32_t
+#elif WORDSZ == 16
+# define WORD   int16_t
+# define UWORD  uint16_t
+#else
+# define WORD   int8_t
+# define UWORD  uint8_t
+#endif
+
+typedef  WORD  int_t;
+typedef UWORD uint_t;
 
 #define SIGN_BIT ( (sizeof(int_t)*8-1) )
 #define NORM_FIX ( (sizeof(int_t)-1)*8 )
-#define SIGN_MSK ( (int_t) 0x80 << NORM_FIX )
-#define NORM_MSK ( (int_t) 0xFF << NORM_FIX )
-#define NORM_ONE ( (int_t)    1 << NORM_FIX )
+#define SIGN_MSK ( (int_t)( (int_t) 0x80 << NORM_FIX ) )
+#define NORM_MSK ( (int_t)((int_t)1 << SIGN_BIT) >> 7 )
+#define NORM_ONE ( (int_t)*((int_t) 0xFF << NORM_FIX ) )
 
 static int verbose = 1;
 
@@ -123,19 +141,13 @@ void add_sr_opt(int_t S, int_t D, int_t R, sr_def_t * sr)
 {
   int_t Re = R;
 
-  S  = ( S >> SIGN_BIT ) & ( SR_V | SR_C | SR_X ); /* 2 */
-  D  = ( D >> SIGN_BIT ) & ( SR_V | SR_C | SR_X ); /* 2 */
-  R  = ( ( R >> SIGN_BIT ) & ( SR_V | SR_C | SR_X | SR_N ) ) ^ SR_V; /* 3 */
-  S ^= R;                             /* 1 */
-  D ^= R;                             /* 1 */
-
-  R |= SR_V;                           /* 1 */
-  R &= ~SR_N;                          /* 1 */
-  R ^= S | D | ( !Re << SR_Z_BIT );  /* 5 */
-
+  R  = ( ( R >> SIGN_BIT ) & ( SR_V | SR_C | SR_X | SR_N ) ) ^ SR_V;
+  S  = ( ( S >> SIGN_BIT ) & ( SR_V | SR_C | SR_X ) ) ^ R;
+  D  = ( ( D >> SIGN_BIT ) & ( SR_V | SR_C | SR_X ) ) ^ R;
+  R &= ~SR_N;
+  R |= SR_V | ( !Re << SR_Z_BIT );
+  R ^= S | D;
   sr->bits = R;
-
-  /* 16 opts */
 }
 
 static
@@ -328,7 +340,10 @@ int_t mlu_ref(int_t S, int_t D, sr_def_t * sr, const int l)
 static
 void mul_sr_opt(int_t S, int_t D, int_t R, sr_def_t * sr)
 {
-  sr->bits = (sr->bits & SR_X) | (!R << SR_Z_BIT) | ((R >> SIGN_BIT) & SR_N);
+  sr->bits = (sr->bits & SR_X)
+    | (!R << SR_Z_BIT)
+    | ((R >> (SIGN_BIT - SR_N_BIT)) & SR_N)
+    ;
 }
 
 static
@@ -490,11 +505,12 @@ int_t lsr_opt(int_t S, int_t D, sr_def_t * sr, const int l)
 
   if (--S < 0) {
     ccr = sr->bits & SR_X;             /* no shift: X is unaffected */
-  } else if (S > SIGN_BIT) {
+  } else if (S > l) {
     R   = 0;
     ccr = 0;
   } else {
-    const uint_t m = ~( ( (uint_t)1 << NORM_FIX ) - 1 );
+    const uint_t m = NORM_MSK;
+
     R >>= S;
     ccr = -( ( R >> ( SIGN_BIT - l ) ) & 1 ) & ( SR_X | SR_C );
     R = ( R >> 1 ) & m;
@@ -536,7 +552,7 @@ int_t asr_opt(int_t S, int_t D, sr_def_t * sr, const int l)
     R >>= SIGN_BIT;
     ccr = R & ( SR_C | SR_X );
   } else {
-    const uint_t m = ~( ( (uint_t)1 << NORM_FIX ) - 1 );
+    const uint_t m = NORM_MSK;
     R >>= S;
     ccr = -( ( R >> ( SIGN_BIT - l ) ) & 1 ) & ( SR_X | SR_C );
     R = ( R >> 1 ) & m;
@@ -617,9 +633,6 @@ int_t asl_opt(int_t S, int_t D, sr_def_t * sr, const int l)
     ccr = sr->bits & SR_X;             /* no shift: X is unaffected */
   } else if (S > l) {
     ccr  = -!!R & SR_V;         /* unless no bit set overflow occurs */
-/*     if (S == l) { */
-/*       ccr |= - ( (R >> NORM_FIX) & 1) & (SR_X | SR_C) ; */
-/*     } */
     R  = 0;
   } else {
     R <<= S;
@@ -660,7 +673,7 @@ int_t ror_opt(int_t S, int_t D, sr_def_t * sr, const int l)
 
   S = (S >> NORM_FIX) & 63;
   if (S) {
-    const uint_t m = ~( ( (uint_t)1 << NORM_FIX ) - 1 );
+    const uint_t m = NORM_MSK;
     R = ( ( R >> ( S & l ) ) | ( R << ( -S & l ) ) ) & m;
     ccr |= ( R >> ( SIGN_BIT - SR_C_BIT ) ) & SR_C; /* carry is sign bit */
   }
@@ -697,7 +710,7 @@ int_t rol_opt(int_t S, int_t D, sr_def_t * sr, const int l)
 
   S = (S >> NORM_FIX) & 63;
   if (S) {
-    const uint_t m = ~( ( (uint_t)1 << NORM_FIX ) - 1 );
+    const uint_t m = NORM_MSK;
     R = ( ( R << ( S & l ) ) | ( R >> ( -S & l ) ) ) & m;
     ccr |= -( ( R >> ( NORM_FIX ) ) & 1 ) & SR_C; /* carry is sign bit */
   }
@@ -752,25 +765,25 @@ int_t rrx_opt(int_t S, int_t D, sr_def_t * sr, const int l)
 
   cnt = (S >> NORM_FIX) & 63;
   if (cnt) {
-    const uint_t m = ~( ( (uint_t)1 << NORM_FIX ) - 1 );
+    const uint_t m = NORM_MSK;
     cnt %= (l+2);                       /* cnt := [0 .. l+1] */
 
     if (--cnt >= 0) {                   /* S := [0 .. l] */
       uint_t x, c;
 
-      D   = (uint_t) D >> cnt;
+      R >>= cnt;
       c   = (ccr >> SR_X_BIT) & 1;            /* old X */
-      x   = ((uint_t) D >> (SIGN_BIT-l)) & 1; /* new X */
+      x   = (R >> (SIGN_BIT-l)) & 1; /* new X */
       ccr = -(int)x & SR_X;
-      D  = ( (uint_t)D >> 1 );
-      D |= ( c << (SIGN_BIT-cnt) );
-      R <<= 1;
-      R <<= l-cnt;
+      R >>= 1;
+      R |= c << (SIGN_BIT-cnt);
+      D <<= 1;
+      D <<= l-cnt;
       R = ( R | D ) & m;
 
     }
   }
-      
+
   ccr |= (ccr & SR_X) >> (SR_X_BIT - SR_C_BIT); /* C is X whatever shift */
   ccr |= -!R & SR_Z;
   ccr |= ( R >> ( SIGN_BIT - SR_N_BIT ) ) & SR_N;
@@ -826,24 +839,24 @@ int_t rlx_opt(int_t S, int_t D, sr_def_t * sr, const int l)
 
   cnt = (S >> NORM_FIX) & 63;
   if (cnt) {
-    const uint_t m = ~( ( (uint_t)1 << NORM_FIX ) - 1 );
+    const uint_t m = NORM_MSK;
     cnt %= (l+2);                       /* cnt := [0 .. l+1] */
 
     if (--cnt >= 0) {                   /* S := [0 .. l] */
       uint_t x, c;
 
-      D   = (uint_t) D << cnt;
+      D <<= cnt;
       c   = (ccr >> SR_X_BIT) & 1;            /* old X */
       x   = (uint_t) D >> SIGN_BIT;           /* new X */
       ccr = -(int)x & SR_X;
-      D  = ( (uint_t)D << 1 );
-      D |= ( c << (NORM_FIX+cnt) );
+      D <<= 1;
+      D |= c << (NORM_FIX+cnt);
       R >>= 1;
       R >>= l-cnt;
       R = ( R | D ) & m;
     }
   }
-      
+
   ccr |= (ccr & SR_X) >> (SR_X_BIT - SR_C_BIT); /* C is X whatever shift */
   ccr |= -!R & SR_Z;
   ccr |= ( R >> ( SIGN_BIT - SR_N_BIT ) ) & SR_N;
