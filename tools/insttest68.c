@@ -52,7 +52,7 @@ typedef UWORD uint_t;
 #define NORM_FIX ( (sizeof(int_t)-1)*8 )
 #define SIGN_MSK ( (int_t)( (int_t) 0x80 << NORM_FIX ) )
 #define NORM_MSK ( (int_t)((int_t)1 << SIGN_BIT) >> 7 )
-#define NORM_ONE ( (int_t)*((int_t) 0xFF << NORM_FIX ) )
+/* #define NORM_ONE ( (int_t)*((int_t) 0xFF << NORM_FIX ) ) */
 
 static int verbose = 1;
 
@@ -712,7 +712,7 @@ int_t rol_opt(int_t S, int_t D, sr_def_t * sr, const int l)
   if (S) {
     const uint_t m = NORM_MSK;
     R = ( ( R << ( S & l ) ) | ( R >> ( -S & l ) ) ) & m;
-    ccr |= -( ( R >> ( NORM_FIX ) ) & 1 ) & SR_C; /* carry is sign bit */
+    ccr |= -( ( R >> ( SIGN_BIT - l ) ) & 1 ) & SR_C; /* carry is sign bit */
   }
   ccr |= ( -!R & SR_Z ) | ( ( R >> ( SIGN_BIT - SR_N_BIT ) ) & SR_N );
   sr->bits = ccr;
@@ -850,7 +850,7 @@ int_t rlx_opt(int_t S, int_t D, sr_def_t * sr, const int l)
       x   = (uint_t) D >> SIGN_BIT;           /* new X */
       ccr = -(int)x & SR_X;
       D <<= 1;
-      D |= c << (NORM_FIX+cnt);
+      D |= c << (SIGN_BIT-l+cnt);
       R >>= 1;
       R >>= l-cnt;
       R = ( R | D ) & m;
