@@ -42,34 +42,21 @@
 # include <sc68/url68.h>
 # include <sc68/msg68.h>
 # include <sc68/option68.h>
-
-static void debugmsg(const char * fmt, ...)
-{
-  static int sourcer68_feature = -1;
-  va_list list;
-  if (sourcer68_feature == -1) {
-    sourcer68_feature =
-      msg68_feature("src","sourcer68 specific message",1);
-  }
-  va_start(list,fmt);
-  if (sourcer68_feature != -1) {
-    msg68_va(sourcer68_feature,fmt,list);
-  } else {
-    vfprintf(stderr,fmt,list);
-  }
-  va_end(list);
-}
-
-#else
-
-static void debugmsg(const char * fmt, ...)
-{
-  va_list list;
-  vfprintf(stderr,fmt,list);
-  va_end(list);
-}
-
+static int sourcer68_feature = -1;
 #endif
+
+static void debugmsg_va(const char * fmt, va_list list)
+{
+  vfprintf(stderr,fmt,list);
+}
+
+static void debugmsg(const char * fmt, ...)
+{
+  va_list list;
+  va_start(list,fmt);
+  debugmsg_va(fmt,list);
+  va_end(list);
+}
 
 #define TOS_RELOC_NEVER   0
 #define TOS_RELOC_AUTO    1
@@ -80,7 +67,7 @@ static void debugmsg(const char * fmt, ...)
 #define SRC68_ENTRY (1<<5) /**< Color entry points (need Label def) */
 #define SRC68_RTS   (1<<4) /**< Color rts instructions              */
 #define SRC68_DONE  (1<<3) /**< Color processed memory              */
-/* bits 0-2 are reserved for opcode size (in word) */
+#define SRC68_SIZE  (7<<0) /**< Color opcode size (in word)         */
 
 static desa68_parm_t desa;
 static char desastr[512];
@@ -97,7 +84,8 @@ static unsigned char * mem_data = 0;
 static unsigned char * chk_data = 0;
 static int mem_datasz;
 
-static char error_str[4][256];
+#define ERROR_MAX 8
+static char error_str[ERROR_MAX][256];
 static int  error_cnt = 0;
 
 static const char * error_get(void * dummy)
@@ -108,16 +96,44 @@ static const char * error_get(void * dummy)
     return 0;
 }
 
-static int error_add(void * dummy, const char * s, ...)
+static int error_add_va(void * dummy, const char * s, va_list list)
 {
-  if (error_cnt < 4) {
-    va_list list;
-    va_start(list,s);
+  if (error_cnt < ERROR_MAX) {
     vsnprintf(error_str[error_cnt++],255,s,list);
-    va_end(list);
   }
   return -1;
 }
+
+static int error_add(void * dummy, const char * s, ...)
+{
+  int ret;
+  va_list list;
+  va_start(list,s);
+  ret = error_add_va(dummy,s,list);
+  va_end(list);
+  return ret;
+}
+
+#ifdef USE_FILE68
+static
+void msg_handler(const int b, void * data, const char * fmt, va_list list)
+{
+  switch (b) {
+  case msg68_CRITICAL:
+  case msg68_ERROR:
+    error_add_va(data, fmt, list);
+    break;
+
+  case msg68_WARNING:
+  case msg68_INFO:
+
+  case msg68_DEBUG:
+  case msg68_TRACE:
+    debugmsg_va(fmt,list);
+    break;
+  }
+}
+#endif
 
 typedef struct {
   const char * name;
@@ -128,8 +144,6 @@ typedef struct {
     int clr:1;
   } flags;
 } section_t;
-
-
 
 static int sections;
 static section_t section[8];
@@ -163,32 +177,35 @@ static void Warning(int addr, const char * fmt, ...)
   va_list list;
 
   va_start(list,fmt);
-  fprintf(stderr, "warning:$%06X: ", addr);
+  if (addr != -1)
+    fprintf(stderr, "warning:$%06X: ", addr);
+  else
+    fprintf(stderr, "warning: ");
   vfprintf(stderr, fmt, list);
   fputs("\n",stderr);
   va_end(list);
 
   va_start(list,fmt);
-  fprintf(stdout, "; ** WARNING ** $%06X: ", addr);
+  if (addr != -1)
+    fprintf(stdout, "; ** WARNING ** $%06X: ", addr);
+  else
+    fprintf(stdout, "; ** WARNING ** : ");
   vfprintf(stdout, fmt, list);
   fputs("\n", stdout);
 
   va_end(list);
 }
 
-
 static int SpoolError(int code)
 {
-  const char * s = error_get(0);
-  if (!s) {
+  const char * s;
+  if (s = error_get(0), !s) {
     return 0;
-  } else {
-    do {
-      fprintf(stderr, "%s\n",s);
-    } while (s = error_get(0), s);
-    return code;
   }
-  return 0;
+  do {
+    fprintf(stderr, "%s\n",s);
+  } while (s = error_get(0), s);
+  return code;
 }
 
 static void CleanErrorStack(void)
@@ -411,9 +428,14 @@ static void ExeSectionDesa(section_t * section)
     if (chk_data[pc] & SRC68_INST) {
       /* Got a valid instruction: Need to flush data. */
       if (opc != pc) {
-        chk_data[opc] |= SRC68_ENTRY;
-        PrintDCW(opc,pc);
-        printf("\n");
+        /* If it is a  jump table (colored RTS,!INST) no label no CR/LF) */
+        if ( (chk_data[opc] & (SRC68_RTS|SRC68_INST) ) == SRC68_RTS)
+          PrintDCW(opc,pc);
+        else {
+          chk_data[opc] |= SRC68_ENTRY;
+          PrintDCW(opc,pc);
+          printf("\n");
+        }
       }
 
       /* Check memory access entry point (added by symbolic disassembly) */
@@ -613,10 +635,19 @@ static void Color(unsigned int from, unsigned int to, int color)
   }
 }
 
+static void Color2(unsigned int from, unsigned int to, int uncolor, int color)
+{
+  for (; from<to; ++from) {
+    chk_data[from] &= ~uncolor;
+    chk_data[from] |=  color;
+  }
+}
+
+
 static int rPreSource(void)
 {
   unsigned int pc;
-  int test_jmp_table=0;
+  int test_jmp_table=0, inst_size;
   int status;
 
   pc = desa.pc;
@@ -642,18 +673,38 @@ static int rPreSource(void)
     /* Disassemble */
     desa68(&desa);
     status = desa.status;
+    inst_size = desa.pc - pc;
+    if (inst_size < 2) {
+      fprintf(stderr,"; ERROR: instruction size (%d) < 2 @ %06X\n",
+              inst_size, pc);
+      return -1;
+    }
 
     /* Set instruction length. */
-    chk_data[pc] = (chk_data[pc]&0xF8) | ((desa.pc-pc)>>1);
+    chk_data[pc] = (chk_data[pc] & ~SRC68_SIZE) | (inst_size >> 1);
 
-    /* If just testing jump table, exit if not BRA or RTS or nop */
-    if (test_jmp_table &&
-        (!( desa.status & (DESA68_BRA|DESA68_BSR|DESA68_RTS|DESA68_NOP)))) {
-      return 0;
+    /* If just testing jump table */
+    if (test_jmp_table) {
+      /* instruction size greater than jump table row OR
+         not BRA or RTS or nop : end of jump table */
+      if (inst_size > test_jmp_table ||
+          ! ( desa.status & (DESA68_BRA|DESA68_BSR|DESA68_RTS|DESA68_NOP))) {
+        return 0;
+      }
     }
 
     /* Color this cels */
     Color(pc, desa.pc, SRC68_DONE | ((status&DESA68_INST) ? SRC68_INST : 0));
+
+    if (test_jmp_table) {
+      int i;
+      for (i=desa.pc; i<pc+test_jmp_table; i+=2) {
+        /* set RTS and !INST to flag as DATA inside jump table */
+        Color2(i,i+2, SRC68_INST|SRC68_ENTRY|SRC68_SIZE, SRC68_DONE|SRC68_RTS);
+        chk_data[i] |= 1;               /* set size */
+      }
+      desa.pc = i;    /* skip to next row of table */
+    }
 
     if (status & DESA68_INST) {
 
@@ -671,16 +722,27 @@ static int rPreSource(void)
         /* Do not follow JMP (An) ... */
         if (desa.branch != -1) {
           rPreSource();
+        } else {
+          /* in case of a JMP XXX(PC,Xi) ... we should try to disable
+             XXX as a jump table ... But it is a tricky case since it
+             can't be for sure as Xi may include an offset
+
+             in case of JMP XXX(AN,Xi) it is more tricky since we need
+             to know An value (it is not always possible and never easy).
+          */
         }
+
         desa.pc = pc;
         /* Set jump table if BRA, remove other */
-        test_jmp_table = ! (status & DESA68_BSR);
+        test_jmp_table = ( !(status & DESA68_BSR) ) * inst_size;
       } else if (desa.status & DESA68_RTS) {
         if (!test_jmp_table) {
           chk_data[pc] |= SRC68_RTS;
           return 0;
         }
       }
+
+
     } else {
       return 0;
     }
@@ -1051,9 +1113,11 @@ int main(int argc, char **argv)
   int org = 0x8000;
 
 #ifdef USE_FILE68
-/*   alloc68_set(malloc); */
-/*   free68_set(free); */
   argc = file68_init(argc, argv);
+  sourcer68_feature =
+    msg68_feature("src","sourcer68 specific message",1);
+  msg68_set_cookie(stderr);
+  msg68_set_handler(msg_handler);
 #endif
 
   for (i=1; i<argc; ++i) {
@@ -1115,6 +1179,7 @@ int main(int argc, char **argv)
   if (!file68_verify_url(fname)) {
     music68_t * m;
     debugmsg("sourcer68: sc68 file detected\n");
+    tosreloc = TOS_RELOC_NEVER;
 
     d = file68_load_url(fname);
     if (!d) {
@@ -1137,10 +1202,10 @@ int main(int argc, char **argv)
     buf = m->data;
     org = m->a0;
     fsize = m->datasz;
-
+    CleanErrorStack();
   }
 #else
-  if (0) {}
+  if (0) { }
 #endif
   else {
     CleanErrorStack();
@@ -1148,10 +1213,13 @@ int main(int argc, char **argv)
     if (!buf) {
       return SpoolError(5);
     }
+    CleanErrorStack();
   }
 
   if (buf) {
     int addr = org;
+
+    debugmsg("sourcer68: binary file loaded: %06X %d bytes\n", org, fsize);
 
     if (addr+fsize > mem_datasz) {
       error_add(0,"Data out range [%x-%x] > %x\n",
@@ -1165,7 +1233,7 @@ int main(int argc, char **argv)
       int err = TOSreloc(mem_data, mem_datasz, addr, fsize, 0, 1);
       if (err < 0) {
         const char *s = error_get(0);
-        fprintf(stderr, "; Not a TOS file: %s\n", s ? s : "no error !");
+/*         Warning(-1, "Not a TOS file: %s\n", s ? s : "no error !"); */
         tosreloc = TOS_RELOC_NEVER;
       }
     }
@@ -1175,23 +1243,45 @@ int main(int argc, char **argv)
         return SpoolError(6);
       }
     } else {
-      add_section("TEXT",addr, fsize, 1, 0);
+      debugmsg("Add a default 'TEXT SECTION' %06x (%d)\n",addr,fsize);
+      add_section("TEXT", addr, fsize, 1, 0);
     }
 
     start = end = 0;
     if (sections < 1) {
       error_add(0,"No section found");
     } else {
+      int n_entry;
       start = section[0].addr;
       end   = section[sections-1].addr + section[sections-1].size;
       entries = parse_entry(entry, mem_data, start, end);
-      SpoolError(0);
+
+      for (n_entry=0; entries && entries[n_entry] != -1; ++n_entry)
+        ;
+
+      debugmsg("Start address: %06x\n", start);
+      debugmsg("End   address: %06x\n", end);
+      debugmsg("Sections     : %d\n", sections);
+      debugmsg("Entries      : %d\n", n_entry);
+
+      if (error_cnt) {
+        debugmsg("error_cnt=%d\n",error_cnt);
+        return SpoolError(8);
+      }
+
       for (i=0; i<sections; ++i) {
+        debugmsg("Section %02d/%02d %6s %06X-%06X %c%c\n",
+                 i+1, sections,
+                 section[i].name,
+                 section[i].addr,section[i].addr+section[i].size,
+                 section[i].flags.exe ? 'X' : '.',
+                 section[i].flags.clr ? 'C' : '.');
         if (section[i].flags.exe) {
           PreSource(section[i].addr, section[i].addr+section[i].size, entries);
         }
       }
     }
+    debugmsg("Finally output disassembly\n");
     FinalDesa(Basename(fname), entries);
   }
 
@@ -1310,6 +1400,7 @@ static int r_parse_number(parser_t * p)
       }
       w = p->e[--p->i];
     } else {
+      errno = 0;
       w = strtol(p->s, &p->s, 0);
       if (errno) {
         err = error_add(0,"entry syntax error: can't get number (%s)",
@@ -1398,6 +1489,9 @@ static int * parse_entry(char *entries, unsigned char *mem, int from, int to)
 
   if (!entries) {
     entries = "+0";
+    debugmsg("parse-entry: set default entries to '%s'\n",entries);
+  } else {
+    debugmsg("parse-entry: start entries '%s'\n",entries);
   }
 
   p.mem  = mem;
@@ -1484,9 +1578,11 @@ static int * parse_entry(char *entries, unsigned char *mem, int from, int to)
   }
 
   if (!err) {
+    CleanErrorStack();
     p.e = AllocEntries(p.e, p.i+1, &p.max);
     if (p.e) {
       p.e[p.i++] = -1;
+      debugmsg("parse-entry: return %d entrie(s)'\n", p.i - 1);
       return p.e;
     }
   }
@@ -1494,6 +1590,7 @@ static int * parse_entry(char *entries, unsigned char *mem, int from, int to)
   if (p.e) {
     free(p.e);
   }
+
   return 0;
 }
 
