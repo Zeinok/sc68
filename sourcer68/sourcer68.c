@@ -43,6 +43,7 @@
 # include <sc68/msg68.h>
 # include <sc68/option68.h>
 static int sourcer68_feature = -1;
+static int no_sc68 = 0;
 #endif
 
 static void debugmsg_va(const char * fmt, va_list list)
@@ -1059,9 +1060,14 @@ static int print_usage(void)
       "  --org=[ADDR]           Load address (default:0x8000)\n"
       "  --opcode               Print opcodes\n"
       "  --ascii                Convert immediat to ASCII\n"
-      "  --no-symbol            Disable symbol in disassembly output\n");
+      "  --no-symbol            Disable symbol in disassembly output\n"
+      );
 
 #ifdef USE_FILE68
+  puts
+    (
+      "  --no-sc68              Disable sc68 mode\n"
+      );
   option68_help(stdout,print_option);
 #endif
   puts
@@ -1131,6 +1137,8 @@ int main(int argc, char **argv)
       ascii = 1;
     } else if (!strcmp(argv[i], "--no-symbol")) {
       no_symbol = 1;
+    } else if (!strcmp(argv[i], "--no-sc68")) {
+      no_sc68 = 1;
     } else if (s = IsOption(argv[i],"--org="), s) {
       char * err = 0;
       int v = strtol(s, &err, 0);
@@ -1176,7 +1184,7 @@ int main(int argc, char **argv)
 
   /* Verify if input is an sc68 file */
 #ifdef USE_FILE68
-  if (!file68_verify_url(fname)) {
+  if (!no_sc68 && !file68_verify_url(fname)) {
     music68_t * m;
     debugmsg("sourcer68: sc68 file detected\n");
     tosreloc = TOS_RELOC_NEVER;
