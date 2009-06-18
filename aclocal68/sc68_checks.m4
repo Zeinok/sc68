@@ -66,6 +66,14 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
       AC_MSG_RESULT([no])
     fi
 
+    # How to handle assert and add --enable-assert
+    AC_CHECK_HEADERS([limits.h])
+    AC_CHECK_HEADERS([assert.h])
+    if test X[$]enable_release == Xyes; then
+      enable_assert=no
+    fi
+    AC_HEADER_ASSERT
+
     # PUP_FLAGS : common for all (both libraries and programms)
     AC_SUBST(PKG_ALL_CFLAGS)
     AC_SUBST(PKG_ALL_EFLAGS)

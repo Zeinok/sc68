@@ -46,9 +46,10 @@ AC_DEFUN_ONCE([SC68_ENABLE_DEBUG],[
     fi
     SC68_ENABLE_THIS([enable_release])
     if test X"[$]enable_release" = X"yes"; then
-      AC_DEFINE([NDEBUG],[1],[supress all debug facilities])
+      # $$$ NDEBUG is handled by --enable-assert
+      #AC_DEFINE([NDEBUG],[1],[suppress all debug facilities])
       AC_DEFINE([NDEBUG_]AS_TR_CPP(AC_PACKAGE_NAME),[1],
- 	[supress all debug facilities for ]AC_PACKAGE_NAME)
+ 	[suppress all debug facilities for ]AC_PACKAGE_NAME)
       [$3]
     else
       enable_release=no
