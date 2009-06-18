@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_core_devel
+ * @ingroup   emu68_lib
  * @file      emu68/macro68.h
  * @author    Benjamin Gerard
  * @date      1999/13/03
@@ -14,526 +14,348 @@
 #ifndef _EMU68_MACRO68_H_
 #define _EMU68_MACRO68_H_
 
-#include "srdef68.h"
-#include "excep68.h"
-
-/** @addtogroup  emu68_core_devel
- *  @brief       68K instruction emulation macro definitions.
+/* Determine what instruction to inline.
  *
- *   A important part of EMU68 instruction emulation is done using
- *   macro in order to :
- *   - generate decent optimized compiled code.
- *   - simplify compilation process and to avoid "C" code generation.
- *
- * @{
+ * EMU68_INLINE_LVL
  */
 
-/** @name  Cycle counter
- *  @{
+#define EMU68_INLINE_MAX 1000           /**< Inlines all,                */
+#define EMU68_INLINE_RAR 999            /**< Inlines almost all          */
+#define EMU68_INLINE_MID 50             /**< Inlines balanced            */
+#define EMU68_INLINE_NON 0              /**< Inlines not forced          */
+#define EMU68_INLINE_YES 1              /**< Inline almost all */
+
+#ifndef EMU68_INLINE_LVL
+# if defined(EMU68_INLINE_ALL)
+#  define EMU68_INLINE_LVL EMU68_INLINE_MAX /* All would be inlined      */
+# elif defined(EMU68_MONOLITIC)
+#  define EMU68_INLINE_LVL EMU68_INLINE_MAX /* Monolitic; compiler rules */
+# elif defined(DEBUG)
+#  define EMU68_INLINE_LVL EMU68_INLINE_NON /* Debug; do not force       */
+# elif defined(LIBSC68_NDEBUG)
+#  define EMU68_INLINE_LVL EMU68_INLINE_YES /* Release; almost all       */
+# else
+#  define EMU68_INLINE_LVL EMU68_INLINE_MID /* Standard; balanced        */
+# endif
+#endif
+
+
+/*                                           Instruction family   (cnt)
+                                             ------------------    ---  */
+#define EMU68_INLINE_ARI 278              /* Arithmetic           (278) */
+#define EMU68_INLINE_BCD EMU68_INLINE_RAR /* Binary coded decimal (  6) */
+#define EMU68_INLINE_BIT 36               /* Bit Operation        ( 36) */
+#define EMU68_INLINE_LOG 171              /* Logic                (171) */
+#define EMU68_INLINE_SHT 56               /* Shifting             ( 56) */
+#define EMU68_INLINE_TST 240              /* Test and move        (240) */
+#define EMU68_INLINE_BSR EMU68_INLINE_YES /* Branch               (   ) */
+
+
+#define ADDCYCLE(N) inl_addcycle68(emu68,N)
+#define SETCYCLE(N) inl_setcycle68(emu68,N)
+#define EXCEPTION(VECTOR,LEVEL)  inl_exception68(emu68,VECTOR,LEVEL)
+
+
+/* ,---------------------------------------------------------------------.
+ * |                              BRANCH                                 |
+ * `---------------------------------------------------------------------'
  */
-#ifndef EMU68CYCLE
-# define ADDCYCLE(N)  /**< Dummy internal cycle counter. */
-# define SETCYCLE(N)  /**< Dummy internal cycle counter. */
+
+#if EMU68_INLINE_BSR < EMU68_INLINE_LVL
+# define JSR(PC)      inl_jsr68(emu68,PC)
+# define JMP(PC)      inl_jmp68(emu68,PC)
 #else
-# define ADDCYCLE(N) emu68->cycle += (N) /**< Intermal cycle counter. */
-# define SETCYCLE(N) emu68->cycle  = (N) /**< internal cycle counter. */
-#endif
-/** @} */
-
-/** @name  Exception handling
- *  @{
- */
-
-/** General exception or interruption. */
-#define EXCEPTION(VECTOR,LVL)                   \
-  do {                                          \
-    pushl(REG68.pc); pushw(REG68.sr);           \
-    REG68.sr &= 0x70FF;                         \
-    REG68.sr |= (0x2000+(((LVL)&7)<<SR_I_BIT)); \
-    REG68.pc  = read_L(VECTOR);                 \
-  } while(0)
-
-/** Illegal instruction. */
-#define ILLEGAL                                         \
-  do {                                                  \
-    emu68_error_add(emu68,"Illegal pc:%06x",REG68.pc);  \
-    EXCEPTION(ILLEGAL_VECTOR,ILLEGAL_LVL);              \
-  } while (0)
-
-/** Bus error exception. */
-#define BUSERROR(ADDR,MODE)                                     \
-  do {                                                          \
-    emu68_error_add(emu68,"bus error pc:%06x addr:%06x (%c)",   \
-                    REG68.pc,ADDR,MODE?'W':'R');                \
-    EXCEPTION(BUSERROR_VECTOR,BUSERROR_LVL)                     \
-      } while(0)
-
-/** Line A exception. */
-#define LINEA EXCEPTION(LINEA_VECTOR,LINEA_LVL)
-
-/** Line F exception. */
-#define LINEF EXCEPTION(LINEF_VECTOR,LINEF_LVL)
-
-/** TRAPV exception. */
-#define TRAPV \
-  do { if (REG68.sr&SR_V) EXCEPTION(TRAPV_VECTOR,TRAPV_LVL); } while(0)
-
-/** TRAP exception. */
-#define TRAP(TRAP_N) EXCEPTION(TRAP_VECTOR(TRAP_N),TRAP_LVL)
-
-/** CHK exception. */
-#define CHK EXCEPTION(CHK_VECTOR,CHK_LVL)
-
-/** CHKW exception. */
-#define CHKW(CHK_A,CHK_B) \
-  do { if ((CHK_B)<0 || (CHK_B)>(CHK_A)) { CHK; } } while(0)
-
-/** @} */
-
-
-/** @name  Program control instructions
- *  @{
- */
-
-/** No Operation. */
-#define NOP while(0)
-
-/** Soft reset. */
-#define RESET emu68_reset(emu68)
-
-/** STOP
- *
- *  @warning : Partially handled : only move value to SR
- */
-#define STOP REG68.sr = (u16)get_nextw()/* ; emu68->status = 1; */
-
-/** Return from subroutine. */
-#define RTS  REG68.pc = popl()
-
-/** Return from exception. */
-#define RTE  REG68.sr = popw(); RTS
-
-/** Return from exception restore CCR only. */
-#define RTR                                     \
-  do {                                          \
-    REG68.sr = (REG68.sr&0xFF00) | (u8)popw();  \
-    RTS;                                        \
-  } while(0)
-
-/** @} */
-
-
-/** @name  Miscellaneous instructions
- *  @{
- */
-
-/** @todo Binary coded decimal sign change. */
-#define NBCDB(NBCD_S,NBCD_A) (NBCD_S)=(NBCD_A)
-
-/** Register MSW/LSW exchange. */
-#define EXG(A,B) do { (A)^=(B); (B)^=(A); (A)^=(B); } while(0)
-
-/** Byte to word sign extension. */
-#define EXTW(D)  (D) = ((D)&0xFFFF0000) | ((u16)(s32)(s8)(D))
-
-/** Word to long sign extension. */
-#define EXTL(D) (D) = (s32)(s16)(D)
-
-/** Test and set (mutual exclusion). */
-#define TAS(TAS_A) do { TSTB(TAS_A,TAS_A); (TAS_A) |= 0x80000000; } while(0)
-
-/** Generic clear memory or register. */
-#define CLR(CLR_S,CLR_A)                                \
-  do {                                                  \
-    (CLR_A) = (CLR_A);                                  \
-    REG68.sr =(REG68.sr&~(SR_N|SR_V|SR_C)) | SR_Z;      \
-    CLR_S = 0;                                          \
-  } while (0)
-
-/** Byte memory or register clear. */
-#define CLRB(A,B) CLR(A,B)
-
-/** Word memory or register clear. */
-#define CLRW(A,B) CLR(A,B)
-
-/** Long memory or register clear. */
-#define CLRL(A,B) CLR(A,B)
-
-/** Link (frame pointer). */
-#define LINK(R_LNK)                             \
-  do {                                          \
-    pushl(REG68.a[R_LNK]);                      \
-    REG68.a[R_LNK] = REG68.a[7];                \
-    REG68.a[7] += get_nextw();                  \
-  } while(0)
-
-/** UNLK (frame pointer). */
-#define UNLK(R_LNK)                             \
-  do {                                          \
-    REG68.a[7]=REG68.a[R_LNK];                  \
-    REG68.a[R_LNK]=popl();                      \
-  } while(0)
-
-/** Register value swapping. */
-#define SWAP(SWP_A)                                     \
-  do {                                                  \
-    (SWP_A) = ((u32)(SWP_A)>>16) | ((SWP_A)<<16);       \
-    REG68.sr = (REG68.sr&~(SR_V|SR_C|SR_Z|SR_N)) |      \
-      ((!(SWP_A))<<SR_Z_BIT) |                          \
-      (((s32)(SWP_A)>>31)&SR_N);                        \
-  } while (0)
-
-/** @} */
-
-
-/** @name  Bit instructions
- *  @{
- */
-
-#if 0
-/** Bit test and set. */
-#define BTST(V,BIT) \
-  REG68.sr = (REG68.sr&(~SR_Z)) | ((((V)&(1<<(BIT)))==0)<<SR_Z_BIT)
-
-/** Bit set. */
-#define BSET(V,BIT) BTST(V,BIT); (V) |= (1<<(BIT));
-
-/** Bit clear. */
-#define BCLR(V,BIT) BTST(V,BIT); (V) &= ~(1<<(BIT));
-
-/** Bit change. */
-#define BCHG(V,BIT) BTST(V,BIT); (V) ^= (1<<(BIT));
-*/
+# define JSR(PC)          jsr68(emu68,PC)
+# define JMP(PC)          jmp68(emu68,PC)
 #endif
 
-/** Bit test and set. */
-#define BTST(V,BIT) \
-  REG68.sr = (REG68.sr&(~SR_Z)) | (((((V)>>(BIT))&1)^1)<<SR_Z_BIT)
-
-/** Bit set. */
-#define BSET(V,BIT)                                             \
-  if( (V)&(1<<(BIT)) ) { REG68.sr &= ~SR_Z; }                   \
-  else do { (V) |= 1<<(BIT); REG68.sr |= SR_Z; } while(0)
-
-/** Bit clear. */
-#define BCLR(V,BIT)                                                     \
-  if( (V)&(1<<(BIT)) ) { (V) &= ~(1<<(BIT)); REG68.sr &= ~SR_Z; }       \
-  else REG68.sr |= SR_Z
-
-/** Bit change. */
-#define BCHG(V,BIT)                                                     \
-  if( (V)&(1<<(BIT)) ) { (V) &= ~(1<<(BIT)); REG68.sr &= ~SR_Z; }       \
-  else do { (V) |= 1<<(BIT); REG68.sr |= SR_Z; } while(0)
-
-/** @} */
-
-
-/** @name  Move & test instructions
- *  @{
+/* ,---------------------------------------------------------------------.
+ * |                          BIT MANIPULATION                           |
+ * `---------------------------------------------------------------------'
  */
 
-#define MOVE(MOV_A) REG68.sr                            \
-  = (REG68.sr&(0xFF00|SR_X))                            \
-    |(((MOV_A)==0)<<SR_Z_BIT)                           \
-    |(((int68_t)(MOV_A)>>(sizeof(int68_t)*8-1))&SR_N)
+#if EMU68_INLINE_LOG < EMU68_INLINE_LVL
+# define _BTST(V,BIT)  inl_btst68(emu68, V, BIT)
+# define _BCHG(V,BIT)  inl_bchg68(emu68, V, BIT)
+# define _BCLR(V,BIT)  inl_bclr68(emu68, V, BIT)
+# define _BSET(V,BIT)  inl_bset68(emu68, V, BIT)
+#else
+# define _BTST(V,BIT)      btst68(emu68, V, BIT)
+# define _BCHG(V,BIT)      bchg68(emu68, V, BIT)
+# define _BCLR(V,BIT)      bclr68(emu68, V, BIT)
+# define _BSET(V,BIT)      bset68(emu68, V, BIT)
+#endif
+#define BTSTB(R, V, BIT)     _BTST(V, BIT & 7)
+#define BTSTL(R, V, BIT)     _BTST(V, BIT & 31)
+#define BCHGB(R, V, BIT) R = _BCHG(V, BIT & 7)
+#define BCHGL(R, V, BIT) R = _BCHG(V, BIT & 31)
+#define BSETB(R, V, BIT) R = _BSET(V, BIT & 7)
+#define BSETL(R, V, BIT) R = _BSET(V, BIT & 31)
+#define BCLRB(R, V, BIT) R = _BCLR(V, BIT & 7)
+#define BCLRL(R, V, BIT) R = _BCLR(V, BIT & 31)
 
-#define TST(TST_V) MOVE(TST_V)
-#define TSTB(TST_S,TST_A) do { TST_S=TST_A; TST(TST_S); } while (0)
-#define TSTW(TST_S,TST_A) do { TST_S=TST_A; TST(TST_S); } while (0)
-#define TSTL(TST_S,TST_A) do { TST_S=TST_A; TST(TST_S); } while (0)
-
-/** @} */
-
-
-/** @name  Multiply & Divide instructions
- *  @{
+/* ,---------------------------------------------------------------------.
+ * |                            MOVE AND TEST                            |
+ * `---------------------------------------------------------------------'
  */
 
-/** Signed multiplication. */
-#define MULSW(MUL_S, MUL_A, MUL_B) MUL_S = muls68(emu68, MUL_A, MUL_B)
+#if EMU68_INLINE_TST < EMU68_INLINE_LVL
+# define _TST(A)  inl_tst68(emu68, A)
+# define _TAS(A)  inl_tas68(emu68, A)
+#else
+# define _TST(A)      tst68(emu68, A)
+# define _TAS(A)      tas68(emu68, A)
+#endif
+#define TSTB(R, A)      _TST(A)
+#define TSTW(R, A)      _TST(A)
+#define TSTL(R, A)      _TST(A)
+#define TASB(R, A)  R = _TAS(A)
 
-/** Unsigned multiplication. */
-#define MULUW(MUL_S, MUL_A, MUL_B) MUL_S = mulu68(emu68, MUL_A, MUL_B)
+#define MOVEB(A)        _TST(A)
+#define MOVEW(A)        _TST(A)
+#define MOVEL(A)        _TST(A)
 
-/** Signed divide. */
-#define DIVSW(DIV_S, DIV_A, DIV_B) DIV_S = divs68(emu68, DIV_A, DIV_B)
-
-/** Unsigned divide. */
-#define DIVUW(DIV_S, DIV_A, DIV_B) DIV_S = divu68(emu68, DIV_A, DIV_B)
-
-/** @} */
+#define EXTW(A)         _TST(A)
+#define EXTL(A)         _TST(A)
 
 
-/** @name  Logical instructions
- *  @{
+/* ,---------------------------------------------------------------------.
+ * |                                LOGIC                                |
+ * `---------------------------------------------------------------------'
  */
 
-/** Generic bitwise AND. */
-#define AND(AND_S, AND_A, AND_B) AND_S = and68(emu68, AND_A, AND_B)
+#if EMU68_INLINE_LOG < EMU68_INLINE_LVL
+# define _AND68(A,B) inl_and68(emu68, A, B)
+# define _ORR68(A,B) inl_orr68(emu68, A, B)
+# define _EOR68(A,B) inl_eor68(emu68, A, B)
+# define _NOT68(A)   inl_not68(emu68, A)
+#else
+# define _AND68(A,B)     and68(emu68, A, B)
+# define _ORR68(A,B)     orr68(emu68, A, B)
+# define _EOR68(A,B)     eor68(emu68, A, B)
+# define _NOT68(A)       not68(emu68, A)
+#endif
 
-/** Byte bitwise AND. */
-#define ANDB(AND_S, AND_A, AND_B) AND(AND_S, AND_A, AND_B)
-
-/** Word bitwise AND. */
-#define ANDW(AND_S, AND_A, AND_B) AND(AND_S, AND_A, AND_B)
-
-/** Long bitwise AND. */
-#define ANDL(AND_S, AND_A, AND_B) AND(AND_S, AND_A, AND_B)
-
-
-/** Generic bitwise OR. */
-#define ORR(ORR_S, ORR_A, ORR_B) ORR_S = orr68(emu68, ORR_A, ORR_B)
-
-/** Byte bitwise OR. */
-#define ORB(ORR_S, ORR_A, ORR_B) ORR(ORR_S, ORR_A, ORR_B)
-
-/** Word bitwise OR. */
-#define ORW(ORR_S, ORR_A, ORR_B) ORR(ORR_S, ORR_A, ORR_B)
-
-/** Long bitwise OR. */
-#define ORL(ORR_S, ORR_A, ORR_B) ORR(ORR_S, ORR_A, ORR_B)
-
-
-/** Generic bitwise EOR (exclusive OR). */
-#define EOR(EOR_S, EOR_A, EOR_B) EOR_S = eor68(emu68, EOR_A, EOR_B)
-
-/** Byte bitwise EOR (exclusif OR). */
-#define EORB(EOR_S, EOR_A, EOR_B) EOR(EOR_S, EOR_A, EOR_B)
-
-/** Word bitwise EOR (exclusif OR). */
-#define EORW(EOR_S, EOR_A, EOR_B) EOR(EOR_S, EOR_A, EOR_B)
-
-/** Long bitwise EOR (exclusif OR). */
-#define EORL(EOR_S, EOR_A, EOR_B) EOR(EOR_S, EOR_A, EOR_B)
+#define ANDB(S, A, B)  S = _AND68(A, B)
+#define ANDW(S, A, B)  S = _AND68(A, B)
+#define ANDL(S, A, B)  S = _AND68(A, B)
+#define ORRB(S, A, B)  S = _ORR68(A, B)
+#define ORRW(S, A, B)  S = _ORR68(A, B)
+#define ORRL(S, A, B)  S = _ORR68(A, B)
+#define EORB(S, A, B)  S = _EOR68(A, B)
+#define EORW(S, A, B)  S = _EOR68(A, B)
+#define EORL(S, A, B)  S = _EOR68(A, B)
+#define NOTB(S, A)     S = _NOT68(A)
+#define NOTW(S, A)     S = _NOT68(A)
+#define NOTL(S, A)     S = _NOT68(A)
 
 
-/** Generic first complement. */
-#define NOT(NOT_S,NOT_A) NOT_S = not68(emu68, NOT_A)
+#define BYTE_SR_X ( (int68_t)(REG68.sr&SR_X) << (BYTE_FIX-SR_X_BIT) )
+#define WORD_SR_X ( (int68_t)(REG68.sr&SR_X) << (WORD_FIX-SR_X_BIT) )
+#define LONG_SR_X ( (int68_t)((REG68.sr>>SR_X_BIT) & 1) << LONG_FIX )
 
-/** Byte first complement. */
-#define NOTB(A,B) NOT(A,B)
 
-/** Word first complement. */
-#define NOTW(A,B) NOT(A,B)
-
-/** Long first complement. */
-#define NOTL(A,B) NOT(A,B)
-
-/** @name  Arithmetic instructions
- *  @{
+/* ,---------------------------------------------------------------------.
+ * |                              ARITHMETIC                             |
+ * `---------------------------------------------------------------------'
  */
 
-#define ADD(ADD_S,ADD_A,ADD_B,ADD_X) ADD_S=add68(emu68,ADD_A,ADD_B,ADD_X)
-#define SUB(SUB_S,SUB_A,SUB_B,SUB_X) SUB_S=sub68(emu68,SUB_B,SUB_A,SUB_X)
-#define CMP(SUB_A,SUB_B)                   sub68(emu68,SUB_B,SUB_A,0)
+#if EMU68_INLINE_ARI < EMU68_INLINE_LVL
+# define _ADD68(A, B, X)  inl_add68(emu68, A, B, X)
+# define _SUB68(A, B, X)  inl_sub68(emu68, A, B, X)
+# define _CMP68(A, B)     inl_cmp68(emu68, A, B   )
+# define _NEG68(B, X)     inl_neg68(emu68,    B, X)
+# define _CLR68()         inl_clr68(emu68)
+# define _MULS(A, B)      inl_muls68(emu68, A, B)
+# define _MULU(A, B)      inl_mulu68(emu68, A, B)
+# define _DIVS(A, B)      inl_divs68(emu68, A, B)
+# define _DIVU(A, B)      inl_divu68(emu68, A, B)
+#else
+# define _ADD68(A, B, X)      add68(emu68, A, B, X)
+# define _SUB68(A, B, X)      sub68(emu68, A, B, X)
+# define _CMP68(A, B)         cmp68(emu68, A, B   )
+# define _NEG68(B, X)         neg68(emu68,    B, X)
+# define _CLR68()             clr68(emu68)
+# define _MULS(A, B)          muls68(emu68, A, B)
+# define _MULU(A, B)          mulu68(emu68, A, B)
+# define _DIVS(A, B)          divs68(emu68, A, B)
+# define _DIVU(A, B)          divu68(emu68, A, B)
+#endif
+#define  _ADDA(A, B)  (B) + (A)
+#define  _SUBA(A, B)  (B) - (A)
+#define  _CMPA(A, B)  _CMP68(A, B)
 
-#define ADDB(ADD_S, ADD_A, ADD_B) ADD(ADD_S, ADD_A, ADD_B,0)
-#define ADDW(ADD_S, ADD_A, ADD_B) ADD(ADD_S, ADD_A, ADD_B,0)
-#define ADDL(ADD_S, ADD_A, ADD_B) ADD(ADD_S, ADD_A, ADD_B,0)
-#define ADDXB(ADD_S, ADD_A, ADD_B) \
-        ADD(ADD_S, ADD_A, ADD_B, (REG68.sr&SR_X)<<(24-SR_X_BIT))
-#define ADDXW(ADD_S, ADD_A, ADD_B) \
-        ADD(ADD_S, ADD_A, ADD_B, (REG68.sr&SR_X)<<(16-SR_X_BIT))
-#define ADDXL(ADD_S, ADD_A, ADD_B) \
-        ADD(ADD_S, ADD_A, ADD_B, (REG68.sr&SR_X)>>SR_X_BIT )
+#define ADDB(S, A, B)   S = _ADD68(A, B, 0)
+#define ADDW(S, A, B)   S = _ADD68(A, B, 0)
+#define ADDL(S, A, B)   S = _ADD68(A, B, 0)
+#define SUBB(S, A, B)   S = _SUB68(A, B, 0)
+#define SUBW(S, A, B)   S = _SUB68(A, B, 0)
+#define SUBL(S, A, B)   S = _SUB68(A, B, 0)
+#define CMPB(A, B)          _CMP68(A, B   )
+#define CMPW(A, B)          _CMP68(A, B   )
+#define CMPL(A, B)          _CMP68(A, B   )
+#define NEGB(S, B)      S = _NEG68(   B, 0)
+#define NEGW(S, B)      S = _NEG68(   B, 0)
+#define NEGL(S, B)      S = _NEG68(   B, 0)
+#define CLRB(S, B)      S = _CLR68()
+#define CLRW(S, B)      S = _CLR68()
+#define CLRL(S, B)      S = _CLR68()
 
-#define ADDA(ADD_S, ADD_A, ADD_B) (ADD_S) = (ADD_A) + (ADD_B)
-#define ADDAW(ADD_S, ADD_A, ADD_B) ADDA(ADD_S, ADD_A>>16, ADD_B)
-#define ADDAL(ADD_S, ADD_A, ADD_B) ADDA(ADD_S, ADD_A, ADD_B)
+#define ADDXB(S, A, B)  S = _ADD68(A, B, BYTE_SR_X)
+#define ADDXW(S, A, B)  S = _ADD68(A, B, WORD_SR_X)
+#define ADDXL(S, A, B)  S = _ADD68(A, B, LONG_SR_X)
+#define SUBXB(S, A, B)  S = _SUB68(A, B, BYTE_SR_X)
+#define SUBXW(S, A, B)  S = _SUB68(A, B, WORD_SR_X)
+#define SUBXL(S, A, B)  S = _SUB68(A, B, LONG_SR_X)
+#define NEGXB(S, B)     S = _NEG68(   B, BYTE_SR_X)
+#define NEGXW(S, B)     S = _NEG68(   B, WORD_SR_X)
+#define NEGXL(S, B)     S = _NEG68(   B, LONG_SR_X)
 
-#define SUBB(SUB_S, SUB_A, SUB_B) SUB(SUB_S, SUB_A, SUB_B,0)
-#define SUBW(SUB_S, SUB_A, SUB_B) SUB(SUB_S, SUB_A, SUB_B,0)
-#define SUBL(SUB_S, SUB_A, SUB_B) SUB(SUB_S, SUB_A, SUB_B,0)
+#define ADDAW(S, A, B)  S = _ADDA(A, B)
+#define ADDAL(S, A, B)  S = _ADDA(A, B)
+#define SUBAW(S, A, B)  S = _SUBA(A, B)
+#define SUBAL(S, A, B)  S = _SUBA(A, B)
+#define CMPAW(S, A, B)      _CMPA(A, B)
+#define CMPAL(S, A, B)      _CMPA(A, B)
 
-#define SUBXB(SUB_S, SUB_A, SUB_B) \
-        SUB(SUB_S, SUB_A, SUB_B, (REG68.sr&SR_X)<<(24-SR_X_BIT))
-#define SUBXW(SUB_S, SUB_A, SUB_B) \
-        SUB(SUB_S, SUB_A, SUB_B, (REG68.sr&SR_X)<<(16-SR_X_BIT))
-#define SUBXL(SUB_S, SUB_A, SUB_B) \
-        SUB(SUB_S, SUB_A, SUB_B, (REG68.sr&SR_X)>>SR_X_BIT)
-
-#define SUBA(SUB_S, SUB_A, SUB_B) (SUB_S) = (SUB_B) - (SUB_A)
-#define SUBAW(SUB_S, SUB_A, SUB_B) \
-do {\
-  int68_t ZOB = (SUB_A)>>16;\
-  SUBA(SUB_S, ZOB, SUB_B);\
-} while(0)
-#define SUBAL(SUB_S, SUB_A, SUB_B) SUBA(SUB_S, SUB_A, SUB_B)
-
-#define CMPB(CMP_A, CMP_B) CMP(CMP_A, CMP_B)
-#define CMPW(CMP_A, CMP_B) CMP(CMP_A, CMP_B)
-#define CMPL(CMP_A, CMP_B) CMP(CMP_A, CMP_B)
-#define CMPA(CMP_A, CMP_B) CMP(CMP_A, CMP_B)
-#define CMPAW(CMP_A, CMP_B)                     \
-  do {                                          \
-    int68_t ZOB = (CMP_A)>>16;                  \
-    CMPA( ZOB, CMP_B);                          \
-  } while(0)
-#define CMPAL(CMP_A, CMP_B) CMP(CMP_A, CMP_B)
-
-#define NEGB(NEG_S,NEG_A) SUBB(NEG_S,NEG_A,0)
-#define NEGW(NEG_S,NEG_A) SUBW(NEG_S,NEG_A,0)
-#define NEGL(NEG_S,NEG_A) SUBL(NEG_S,NEG_A,0)
-
-#define NEGXB(NEG_S,NEG_A) SUBXB(NEG_S,NEG_A,0)
-#define NEGXW(NEG_S,NEG_A) SUBXW(NEG_S,NEG_A,0)
-#define NEGXL(NEG_S,NEG_A) SUBXL(NEG_S,NEG_A,0)
-
-/** @} */
+#define MULSW(S, A, B)  S = _MULS(A, B)
+#define MULUW(S, A, B)  S = _MULU(A, B)
+#define DIVSW(S, A, B)  S = _DIVS(A, B)
+#define DIVUW(S, A, B)  S = _DIVU(A, B)
 
 
-/** @name   Logical & Arithmetic bit shifting instructions
- *  @{
+/* ,---------------------------------------------------------------------.
+ * |                               SHIFTING                              |
+ * `---------------------------------------------------------------------'
  */
 
-/** generic right shift. */
-#define LSR(LSR_A,LSR_D,LSR_MSK,LSR_C)                                  \
-  do {                                                                  \
-    REG68.sr &= 0xFF00;                                                 \
-    if((LSR_D)!=0) {                                                    \
-      ADDCYCLE(2*(LSR_D));                                              \
-      (LSR_A) >>= (LSR_D)-1;                                            \
-      if((LSR_A)&(LSR_C)) REG68.sr |= SR_X | SR_C;                      \
-      (LSR_A)>>=1;                                                      \
-    }                                                                   \
-    (LSR_A) &= (LSR_MSK);                                               \
-    REG68.sr |= (((LSR_A)==0)<<SR_Z_BIT) | (((s32)(LSR_A)<0)<<SR_N_BIT); \
-  } while(0)
-
-/** Byte logical right shift. */
-#define LSRB(LSR_A,LSR_B) LSR(LSR_A,LSR_B,0xFF000000,(1<<24))
-
-/** Word logical right shift. */
-#define LSRW(LSR_A,LSR_B) LSR(LSR_A,LSR_B,0xFFFF0000,(1<<16))
-
-/** Long logical right shift. */
-#define LSRL(LSR_A,LSR_B) LSR(LSR_A,LSR_B,0xFFFFFFFF,(1<<0))
-
-/** Byte arithmetic right shift. */
-#define ASRB(LSR_A,LSR_B) LSR(LSR_A,LSR_B,0xFF000000,(1<<24))
-
-/** Word arithmetic right shift. */
-#define ASRW(LSR_A,LSR_B) LSR(LSR_A,LSR_B,0xFFFF0000,(1<<16))
-
-/** Long arithmetic right shift. */
-#define ASRL(LSR_A,LSR_B) LSR(LSR_A,LSR_B,0xFFFFFFFF,(1<<0))
-
-/** Generic left shift. */
-#define LSL(LSL_A,LSL_D,LSL_MSK)                                        \
-  do {                                                                  \
-    REG68.sr &= 0xFF00;                                                 \
-    if((LSL_D)!=0) {                                                    \
-      ADDCYCLE(2*(LSL_D));                                              \
-      (LSL_A) <<= (LSL_D)-1;                                            \
-      if((LSL_A)&0x80000000) REG68.sr |= SR_X | SR_C;                   \
-      (LSL_A)<<=1;                                                      \
-    }                                                                   \
-    (LSL_A) &= (LSL_MSK);                                               \
-    REG68.sr |= (((LSL_A)==0)<<SR_Z_BIT) | (((s32)(LSL_A)<0)<<SR_N_BIT); \
-  } while(0)
-
-/** Byte logical left shift. */
-#define LSLB(LSL_A,LSL_B) LSL(LSL_A,LSL_B,0xFF000000)
-
-/** Word logical left shift. */
-#define LSLW(LSL_A,LSL_B) LSL(LSL_A,LSL_B,0xFFFF0000)
-
-/** Long logical left shift. */
-#define LSLL(LSL_A,LSL_B) LSL(LSL_A,LSL_B,0xFFFFFFFF)
-
-/** Byte arithmetic left shift. */
-#define ASLB(LSL_A,LSL_B) LSL(LSL_A,LSL_B,0xFF000000)
-
-/** Word arithmetic left shift. */
-#define ASLW(LSL_A,LSL_B) LSL(LSL_A,LSL_B,0xFFFF0000)
-
-/** Long arithmetic left shift. */
-#define ASLL(LSL_A,LSL_B) LSL(LSL_A,LSL_B,0xFFFFFFFF)
-
-/** Generic right rotation. */
-#define ROR(ROR_A,ROR_D,ROR_MSK,ROR_SZ)                                 \
-  do {                                                                  \
-    REG68.sr &= 0xFF00 | SR_X;                                          \
-    if((ROR_D)!=0) {                                                    \
-      ADDCYCLE(2*(ROR_D));                                              \
-      ROR_D &= (ROR_SZ)-1;                                              \
-      if((ROR_A)&(1<<((ROR_D)-1+32-(ROR_SZ)))) REG68.sr |= SR_C;        \
-      (ROR_A) &= (ROR_MSK);                                             \
-      (ROR_A) = ((ROR_A)>>(ROR_D)) + ((ROR_A)<<((ROR_SZ)-(ROR_D)));     \
-    }                                                                   \
-    (ROR_A) &= (ROR_MSK);                                               \
-    REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT); \
-  } while(0)
-
-/** Generic left rotation. */
-#define ROL(ROR_A,ROR_D,ROR_MSK,ROR_SZ)                                 \
-  do {                                                                  \
-    REG68.sr &= 0xFF00 | SR_X;                                          \
-    if((ROR_D)!=0) {                                                    \
-      ADDCYCLE(2*(ROR_D));                                              \
-      ROR_D &= (ROR_SZ)-1;                                              \
-      if ((ROR_A)&(1<<(32-(ROR_D)))) REG68.sr |= SR_C;                  \
-      (ROR_A) &= (ROR_MSK);                                             \
-      (ROR_A) = ((ROR_A)<<(ROR_D)) + ((ROR_A)>>((ROR_SZ)-(ROR_D)));     \
-    }                                                                   \
-    (ROR_A) &= (ROR_MSK);                                               \
-    REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT); \
-  } while(0)
-
-/* $$$ verifiy: this works only with exact 32bit types */
-#define RORB(ROR_A,ROR_B) ROR(ROR_A,ROR_B,0xFF000000,8)
-#define RORW(ROR_A,ROR_B) ROR(ROR_A,ROR_B,0xFFFF0000,16)
-#define RORL(ROR_A,ROR_B) ROR(ROR_A,ROR_B,0xFFFFFFFF,32)
-#define ROLB(ROR_A,ROR_B) ROL(ROR_A,ROR_B,0xFF000000,8)
-#define ROLW(ROR_A,ROR_B) ROL(ROR_A,ROR_B,0xFFFF0000,16)
-#define ROLL(ROR_A,ROR_B) ROL(ROR_A,ROR_B,0xFFFFFFFF,32)
-
-/** Generic right extend-bit rotation. */
-#define ROXR(ROR_A,ROR_D,ROR_MSK,ROR_SZ)                                \
-  do {                                                                  \
-    uint68_t ROR_X = (REG68.sr>>SR_X_BIT)&1;                            \
-    REG68.sr &= 0xFF00;                                                 \
-    if((ROR_D)!=0) {                                                    \
-      ADDCYCLE(2*(ROR_D));                                              \
-      ROR_D &= (ROR_SZ)-1;                                              \
-      if((ROR_A)&(1<<((ROR_D)-1+32-(ROR_SZ)))) REG68.sr |= SR_C | SR_X; \
-      (ROR_A) &= (ROR_MSK);                                             \
-      (ROR_A) = ((ROR_A)>>(ROR_D)) + ((ROR_A)<<((ROR_SZ)-(ROR_D)+1));   \
-      (ROR_A) |= (ROR_X)<<(32-(ROR_D));                                 \
-    }                                                                   \
-    (ROR_A) &= (ROR_MSK);                                               \
-    REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT); \
-  } while(0)
-
-/** Generic left extend-bit rotation. */
-#define ROXL(ROR_A,ROR_D,ROR_MSK,ROR_SZ)                                \
-  do {                                                                  \
-    uint68_t ROR_X = (REG68.sr>>SR_X_BIT)&1;                            \
-    REG68.sr &= 0xFF00;                                                 \
-    if((ROR_D)!=0) {                                                    \
-      ADDCYCLE(2*(ROR_D));                                              \
-      ROR_D &= (ROR_SZ)-1;                                              \
-      if((ROR_A)&(1<<(32-(ROR_D)))) REG68.sr |= SR_C | SR_X ;           \
-      (ROR_A) &= (ROR_MSK);                                             \
-      (ROR_A) = ((ROR_A)<<(ROR_D)) + ((ROR_A)>>((ROR_SZ)-(ROR_D)+1));   \
-      (ROR_A) |= (ROR_X)<<((ROR_D)-1+(32-(ROR_SZ)));                    \
-    }                                                                   \
-    (ROR_A) &= (ROR_MSK);                                               \
-    REG68.sr |= (((ROR_A)==0)<<SR_Z_BIT) | (((s32)(ROR_A)<0)<<SR_N_BIT); \
-  } while(0)
+#if EMU68_INLINE_SHT < EMU68_INLINE_LVL
+# define _LSL(D,CNT,SZ)   inl_lsl68(emu68,D,CNT,SZ)
+# define _LSR(D,CNT,SZ)   inl_lsr68(emu68,D,CNT,SZ)
+# define _ASL(D,CNT,SZ)   inl_asl68(emu68,D,CNT,SZ)
+# define _ASR(D,CNT,SZ)   inl_asr68(emu68,D,CNT,SZ)
+# define _ROL(D,CNT,SZ)   inl_rol68(emu68,D,CNT,SZ)
+# define _ROR(D,CNT,SZ)   inl_ror68(emu68,D,CNT,SZ)
+# define _ROXL(D,CNT,SZ)  inl_roxl68(emu68,D,CNT,SZ)
+# define _ROXR(D,CNT,SZ)  inl_roxr68(emu68,D,CNT,SZ)
+#else
+# define _LSL(D,CNT,SZ)       lsl68(emu68,D,CNT,SZ)
+# define _LSR(D,CNT,SZ)       lsr68(emu68,D,CNT,SZ)
+# define _ASL(D,CNT,SZ)       asl68(emu68,D,CNT,SZ)
+# define _ASR(D,CNT,SZ)       asr68(emu68,D,CNT,SZ)
+# define _ROL(D,CNT,SZ)       rol68(emu68,D,CNT,SZ)
+# define _ROR(D,CNT,SZ)       ror68(emu68,D,CNT,SZ)
+# define _ROXL(D,CNT,SZ)      roxl68(emu68,D,CNT,SZ)
+# define _ROXR(D,CNT,SZ)      roxr68(emu68,D,CNT,SZ)
+#endif
 
 
-#define ROXRB(ROR_A,ROR_B) ROXR(ROR_A,ROR_B,0xFF000000,8)
-#define ROXRW(ROR_A,ROR_B) ROXR(ROR_A,ROR_B,0xFFFF0000,16)
-#define ROXRL(ROR_A,ROR_B) ROXR(ROR_A,ROR_B,0xFFFFFFFF,32)
-#define ROXLB(ROR_A,ROR_B) ROXL(ROR_A,ROR_B,0xFF000000,8)
-#define ROXLW(ROR_A,ROR_B) ROXL(ROR_A,ROR_B,0xFFFF0000,16)
-#define ROXLL(ROR_A,ROR_B) ROXL(ROR_A,ROR_B,0xFFFFFFFF,32)
+#define LSRB(R, A, B)   R = _LSR(A, B,  8-1)
+#define LSRW(R, A, B)   R = _LSR(A, B, 16-1)
+#define LSRL(R, A, B)   R = _LSR(A, B, 32-1)
+#define LSLB(R, A, B)   R = _LSL(A, B,  8-1)
+#define LSLW(R, A, B)   R = _LSL(A, B, 16-1)
+#define LSLL(R, A, B)   R = _LSL(A, B, 32-1)
 
-/** @} */
+#define ASRB(R, A, B)   R = _ASR(A, B,  8-1)
+#define ASRW(R, A, B)   R = _ASR(A, B, 16-1)
+#define ASRL(R, A, B)   R = _ASR(A, B, 32-1)
+#define ASLB(R, A, B)   R = _ASL(A, B,  8-1)
+#define ASLW(R, A, B)   R = _ASL(A, B, 16-1)
+#define ASLL(R, A, B)   R = _ASL(A, B, 32-1)
 
-/**
- * @}
+#define RORB(R, A, B)   R = _ROR(A, B,  8-1)
+#define RORW(R, A, B)   R = _ROR(A, B, 16-1)
+#define RORL(R, A, B)   R = _ROR(A, B, 32-1)
+#define ROLB(R, A, B)   R = _ROL(A, B,  8-1)
+#define ROLW(R, A, B)   R = _ROL(A, B, 16-1)
+#define ROLL(R, A, B)   R = _ROL(A, B, 32-1)
+
+#define ROXRB(R, A, B)  R = _ROXR(A ,B,  8-1)
+#define ROXRW(R, A, B)  R = _ROXR(A ,B, 16-1)
+#define ROXRL(R, A, B)  R = _ROXR(A ,B, 32-1)
+#define ROXLB(R, A, B)  R = _ROXL(A ,B,  8-1)
+#define ROXLW(R, A, B)  R = _ROXL(A ,B, 16-1)
+#define ROXLL(R, A, B)  R = _ROXL(A ,B, 32-1)
+
+
+
+/* ,---------------------------------------------------------------------.
+ * |                         BINARY CODED DECIMAL                        |
+ * `---------------------------------------------------------------------'
  */
 
-#endif /* #ifndef _EMU68_MACRO68_H_ */
+#if EMU68_INLINE_BCD < EMU68_INLINE_LVL
+# define _ABCD(A,B)  inl_abcd68(emu68, A, B)
+# define _SBCD(A,B)  inl_sbcd68(emu68, A, B)
+# define _NBCD(A)    inl_nbcd68(emu68, A)
+#else
+# define _ABCD(A,B)      abcd68(emu68, A, B)
+# define _SBCD(A,B)      sbcd68(emu68, A, B)
+# define _NBCD(A)        nbcd68(emu68, A)
+#endif
+#define ABCDB(S, A, B)  S = _ABCD(A, B)
+#define SBCDB(S, A, B)  S = _SBCD(A, B)
+#define NBCDB(S, A)     S = _NBCD(A)
+
+
+/* ,---------------------------------------------------------------------.
+ * |                  INSTRUCTIONS ALMOST NEVER INLINED                  |
+ * `---------------------------------------------------------------------'
+ */
+
+#if EMU68_INLINE_RAR < EMU68_INLINE_LVL
+# define CHKW(A,B)        inl_chk68(emu68, A, B)
+#else
+# define CHKW(A,B)            chk68(emu68, A, B)
+#endif
+
+/* ,---------------------------------------------------------------------.
+ * |                 INSTRUCTIONS ALMOST ALWAYS INLINED                  |
+ * `---------------------------------------------------------------------'
+ */
+
+#if EMU68_INLINE_ONE < EMU68_INLINE_LVL
+# define SWAP(R)          inl_swap68(emu68,R)
+# define RTS              inl_rts68(emu68)
+# define RTE              inl_rte68(emu68)
+# define RTR              inl_rtr68(emu68)
+# define ILLEGAL          inl_illegal68(emu68)
+# define TRAP(N)          inl_trap68(emu68,N)
+# define TRAPV            inl_trapv68(emu68)
+# define NOP              inl_nop68(emu68)
+# define RESET            emu68_reset(emu68)
+# define STOP             inl_stop68(emu68)
+# define LINK(R)          inl_link68(emu68,R)
+# define UNLK(R)          inl_unlk68(emu68,R)
+# define LINEA            inl_linea68(emu68)
+# define LINEF            inl_linef68(emu68)
+# define EXG(RX,RY)       inl_exg68(emu68,RX,RY)
+#else
+# define SWAP(R)              swap68(emu68,R)
+# define RTS                  rts68(emu68)
+# define RTE                  rte68(emu68)
+# define RTR                  rtr68(emu68)
+# define ILLEGAL              illegal68(emu68)
+# define TRAP(N)              trap68(emu68,N)
+# define TRAPV                trapv68(emu68)
+# define NOP                  nop68(emu68)
+# define RESET                reset68(emu68)
+# define STOP                 stop68(emu68)
+# define LINK(R)              link68(emu68,R)
+# define UNLK(R)              unlk68(emu68,R)
+# define LINEA                linea68(emu68)
+# define LINEF                linef68(emu68)
+# define EXG(RX,RY)           exg68(emu68,RX,RY)
+#endif
+
+/* ,---------------------------------------------------------------------.
+ * |                        CODE CONDITIONS TABLE                        |
+ * `---------------------------------------------------------------------'
+ */
+
+#define SCC(CC)      scc68[CC](emu68)
+#define BCC(PC,CC)   bcc68[CC](emu68,PC)
+#define DBCC(DN,CC)  dbcc68[CC](emu68,DN)
+
+#endif /* #ifdefndef _EMU68_MACRO68_H_ */

@@ -21,6 +21,8 @@
 
 /* $Id$ */
 
+#error "deprecated: should not be compiled"
+
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -33,16 +35,24 @@
  * | Condition code functions |
  * `--------------------------' */
 
-static int is_fa(const int sr) { return 0;           }
-static int is_ls(const int sr) { return !!IS_LS(sr); }
-static int is_cs(const int sr) { return !!IS_CS(sr); }
-static int is_eq(const int sr) { return !!IS_EQ(sr); }
-static int is_vs(const int sr) { return !!IS_VS(sr); }
-static int is_mi(const int sr) { return !!IS_MI(sr); }
-static int is_lt(const int sr) { return !!IS_LT(sr); }
-static int is_le(const int sr) { return !!IS_LE(sr); }
+static int is_cc0(const int sr) { return inl_is_cc0(sr); } /* 0000 TR */
+static int is_cc1(const int sr) { return inl_is_cc1(sr); } /* 0001 FA */
+static int is_cc2(const int sr) { return inl_is_cc2(sr); } /* 0010 HI */
+static int is_cc3(const int sr) { return inl_is_cc3(sr); } /* 0011 LS */
+static int is_cc4(const int sr) { return inl_is_cc4(sr); } /* 0100 CC */
+static int is_cc5(const int sr) { return inl_is_cc5(sr); } /* 0101 CS */
+static int is_cc6(const int sr) { return inl_is_cc6(sr); } /* 0110 NE */
+static int is_cc7(const int sr) { return inl_is_cc7(sr); } /* 0111 EQ */
+static int is_cc8(const int sr) { return inl_is_cc8(sr); } /* 1000 VC */
+static int is_cc9(const int sr) { return inl_is_cc9(sr); } /* 1001 VS */
+static int is_ccA(const int sr) { return inl_is_ccA(sr); } /* 1010 PL */
+static int is_ccB(const int sr) { return inl_is_ccB(sr); } /* 1011 MI */
+static int is_ccC(const int sr) { return inl_is_ccC(sr); } /* 1100 GE */
+static int is_ccD(const int sr) { return inl_is_ccD(sr); } /* 1101 LT */
+static int is_ccE(const int sr) { return inl_is_ccE(sr); } /* 1110 GT */
+static int is_ccF(const int sr) { return inl_is_ccF(sr); } /* 1111 LE */
 
-int (* const is_cc68[8])(const int) = {
-  is_fa, is_ls, is_cs, is_eq,
-  is_vs, is_mi, is_lt, is_le,
+int (* const is_cc68[16])(const int) = {
+  is_cc0, is_cc1, is_cc2, is_cc3, is_cc4, is_cc5, is_cc6, is_cc7,
+  is_cc8, is_cc9, is_ccA, is_ccB, is_ccC, is_ccD, is_ccE, is_ccF
 };

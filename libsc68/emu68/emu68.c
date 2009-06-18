@@ -25,8 +25,17 @@
 # include "config.h"
 #endif
 
+#include "struct68.h"
+#include "srdef68.h"
+#include "excep68.h"
+
 #include "emu68.h"
 #include "ioplug68.h"
+
+#include "macro68.h"
+
+/* #include "inst68.h" */
+#include "inl68_exception.h"
 
 #include <string.h>
 
@@ -167,7 +176,7 @@ int emu68_chkpeek(emu68_t * const emu68, addr68_t addr)
   return (emu68 && emu68->chk)
     ? emu68->chk[addr&MEMMSK68]
     : -1
-    ; 
+    ;
 }
 
 int emu68_poke(emu68_t * const emu68, addr68_t addr, int68_t v)
@@ -405,7 +414,7 @@ void emu68_level_and_interrupt(emu68_t * const emu68,
           emu68->cycle=t->cycle;
           REG68.a[7] = stack; /* $$$ Safety net */
           REG68.pc = 0x12345678;
-          EXCEPTION(t->vector,t->level);
+          inl_exception68(emu68,t->vector,t->level);
           poll_rte(emu68, stack);
 #ifdef _DEBUG
           if (REG68.pc != 0x12345678) {
@@ -505,7 +514,7 @@ void emu68_run_rts(emu68_t * const emu68,
         if (t) {
           emu68->cycle=cycle;
           REG68.a[7] = stack; /* $$$ Safety net */
-          EXCEPTION(t->vector,t->level);
+          inl_exception68(emu68,t->vector,t->level);
           poll_rte(emu68,stack);
         }
       }
@@ -553,7 +562,7 @@ void emu68_cycle(emu68_t * const emu68, cycle68_t cycleperpass)
       if (6 > ipl) {
         t = emu68->interrupt_io->interrupt(emu68->interrupt_io,cycle);
         if (t) {
-          EXCEPTION(t->vector,t->level);
+          inl_exception68(emu68,t->vector,t->level);
           /* $$$ extra cycle should be added here for exception handle */
         }
       }

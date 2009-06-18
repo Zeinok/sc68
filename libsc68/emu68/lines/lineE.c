@@ -1,88 +1,80 @@
-/* lineE.c : EMU68 generated code by
- * gen68 Wed May  2 21:50:31 CEST 2007
- * (C) 1998-2007 Benjamin Gerard
+/* lineE.c - EMU68 generated code by
+ * gen68 2009-06-12 07:20:25
+ * Copyright (C) 1998-2009 Benjamin Gerard
  *
  * $Id$
  */
 
 static void ASR_mem(emu68_t * const emu68, int reg, int mode)
 {
-  sint68_t a;
-  const addr68_t addr = get_eaw68[mode](emu68,reg);
-  int dec=1;
-  a = read_W(addr)<<WORD_SHIFT;
-  ASRW(a,dec);
-  write_W(addr,a>>WORD_SHIFT);
+  /* ASR.W <Ae> */
+  const addr68_t l = get_EAW(mode,reg);
+         int68_t a = read_W(l)<<WORD_FIX;
+  ASRW(a,a,1);
+  write_W(l,a>>WORD_FIX);
 }
 
 static void LSR_mem(emu68_t * const emu68, int reg, int mode)
 {
-  uint68_t a;
-  const addr68_t addr = get_eaw68[mode](emu68,reg);
-  int dec=1;
-  a = read_W(addr)<<WORD_SHIFT;
-  LSRW(a,dec);
-  write_W(addr,a>>WORD_SHIFT);
+  /* LSR.W <Ae> */
+  const addr68_t l = get_EAW(mode,reg);
+         int68_t a = read_W(l)<<WORD_FIX;
+  LSRW(a,a,1);
+  write_W(l,a>>WORD_FIX);
 }
 
 static void ROXR_mem(emu68_t * const emu68, int reg, int mode)
 {
-  uint68_t a;
-  const addr68_t addr = get_eaw68[mode](emu68,reg);
-  int dec=1;
-  a = read_W(addr)<<WORD_SHIFT;
-  ROXRW(a,dec);
-  write_W(addr,a>>WORD_SHIFT);
+  /* ROXR.W <Ae> */
+  const addr68_t l = get_EAW(mode,reg);
+         int68_t a = read_W(l)<<WORD_FIX;
+  ROXRW(a,a,1);
+  write_W(l,a>>WORD_FIX);
 }
 
 static void ROR_mem(emu68_t * const emu68, int reg, int mode)
 {
-  uint68_t a;
-  const addr68_t addr = get_eaw68[mode](emu68,reg);
-  int dec=1;
-  a = read_W(addr)<<WORD_SHIFT;
-  RORW(a,dec);
-  write_W(addr,a>>WORD_SHIFT);
+  /* ROR.W <Ae> */
+  const addr68_t l = get_EAW(mode,reg);
+         int68_t a = read_W(l)<<WORD_FIX;
+  RORW(a,a,1);
+  write_W(l,a>>WORD_FIX);
 }
 
 static void ASL_mem(emu68_t * const emu68, int reg, int mode)
 {
-  sint68_t a;
-  const addr68_t addr = get_eaw68[mode](emu68,reg);
-  int dec=1;
-  a = read_W(addr)<<WORD_SHIFT;
-  ASLW(a,dec);
-  write_W(addr,a>>WORD_SHIFT);
+  /* ASL.W <Ae> */
+  const addr68_t l = get_EAW(mode,reg);
+         int68_t a = read_W(l)<<WORD_FIX;
+  ASLW(a,a,1);
+  write_W(l,a>>WORD_FIX);
 }
 
 static void LSL_mem(emu68_t * const emu68, int reg, int mode)
 {
-  uint68_t a;
-  const addr68_t addr = get_eaw68[mode](emu68,reg);
-  int dec=1;
-  a = read_W(addr)<<WORD_SHIFT;
-  LSLW(a,dec);
-  write_W(addr,a>>WORD_SHIFT);
+  /* LSL.W <Ae> */
+  const addr68_t l = get_EAW(mode,reg);
+         int68_t a = read_W(l)<<WORD_FIX;
+  LSLW(a,a,1);
+  write_W(l,a>>WORD_FIX);
 }
 
 static void ROXL_mem(emu68_t * const emu68, int reg, int mode)
 {
-  uint68_t a;
-  const addr68_t addr = get_eaw68[mode](emu68,reg);
-  int dec=1;
-  a = read_W(addr)<<WORD_SHIFT;
-  ROXLW(a,dec);
-  write_W(addr,a>>WORD_SHIFT);
+  /* ROXL.W <Ae> */
+  const addr68_t l = get_EAW(mode,reg);
+         int68_t a = read_W(l)<<WORD_FIX;
+  ROXLW(a,a,1);
+  write_W(l,a>>WORD_FIX);
 }
 
 static void ROL_mem(emu68_t * const emu68, int reg, int mode)
 {
-  uint68_t a;
-  const addr68_t addr = get_eaw68[mode](emu68,reg);
-  int dec=1;
-  a = read_W(addr)<<WORD_SHIFT;
-  ROLW(a,dec);
-  write_W(addr,a>>WORD_SHIFT);
+  /* ROL.W <Ae> */
+  const addr68_t l = get_EAW(mode,reg);
+         int68_t a = read_W(l)<<WORD_FIX;
+  ROLW(a,a,1);
+  write_W(l,a>>WORD_FIX);
 }
 
 static void (*const lslmemR_fc[4])(emu68_t *const,int,int)=
@@ -97,266 +89,218 @@ static void (*const lslmemL_fc[4])(emu68_t *const,int,int)=
 
 DECL_LINE68(lineE00)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = ((dec-1)&7)+1;
-  ASRB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ASR.B #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  ASRB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE01)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = ((dec-1)&7)+1;
-  LSRB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* LSR.B #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  LSRB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE02)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = ((dec-1)&7)+1;
-  ROXRB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ROXR.B #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  ROXRB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE03)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = ((dec-1)&7)+1;
-  RORB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ROR.B #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  RORB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE04)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = REG68.d[dec]&63;
-  ASRB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ASR.B Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  ASRB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE05)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = REG68.d[dec]&63;
-  LSRB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* LSR.B Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  LSRB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE06)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = REG68.d[dec]&63;
-  ROXRB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ROXR.B Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  ROXRB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE07)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = REG68.d[dec]&63;
-  RORB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ROR.B Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  RORB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE08)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = ((dec-1)&7)+1;
-  ASRW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ASR.W #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  ASRW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE09)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = ((dec-1)&7)+1;
-  LSRW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* LSR.W #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  LSRW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE0A)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = ((dec-1)&7)+1;
-  ROXRW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ROXR.W #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  ROXRW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE0B)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = ((dec-1)&7)+1;
-  RORW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ROR.W #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  RORW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE0C)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = REG68.d[dec]&63;
-  ASRW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ASR.W Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  ASRW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE0D)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = REG68.d[dec]&63;
-  LSRW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* LSR.W Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  LSRW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE0E)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = REG68.d[dec]&63;
-  ROXRW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ROXR.W Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  ROXRW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE0F)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = REG68.d[dec]&63;
-  RORW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ROR.W Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  RORW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE10)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = ((dec-1)&7)+1;
-  ASRL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ASR.L #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  ASRL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE11)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = ((dec-1)&7)+1;
-  LSRL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* LSR.L #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  LSRL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE12)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = ((dec-1)&7)+1;
-  ROXRL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ROXR.L #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  ROXRL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE13)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = ((dec-1)&7)+1;
-  RORL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ROR.L #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  RORL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE14)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = REG68.d[dec]&63;
-  ASRL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ASR.L Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  ASRL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE15)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = REG68.d[dec]&63;
-  LSRL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* LSR.L Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  LSRL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE16)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = REG68.d[dec]&63;
-  ROXRL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ROXR.L Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  ROXRL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE17)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = REG68.d[dec]&63;
-  RORL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ROR.L Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  RORL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE18)
@@ -401,266 +345,218 @@ DECL_LINE68(lineE1F)
 
 DECL_LINE68(lineE20)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = ((dec-1)&7)+1;
-  ASLB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ASL.B #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  ASLB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE21)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = ((dec-1)&7)+1;
-  LSLB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* LSL.B #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  LSLB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE22)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = ((dec-1)&7)+1;
-  ROXLB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ROXL.B #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  ROXLB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE23)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = ((dec-1)&7)+1;
-  ROLB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ROL.B #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  ROLB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE24)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = REG68.d[dec]&63;
-  ASLB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ASL.B Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  ASLB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE25)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = REG68.d[dec]&63;
-  LSLB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* LSL.B Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  LSLB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE26)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = REG68.d[dec]&63;
-  ROXLB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ROXL.B Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  ROXLB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE27)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<BYTE_SHIFT;
-  d = REG68.d[dec]&63;
-  ROLB(a,d);
-  REG68.d[reg] = (REG68.d[reg]&BYTE_MASK) + ((uint68_t)a>>BYTE_SHIFT);
+  /* ROL.B Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<BYTE_FIX;
+  ROLB(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & BYTE_MSK) + (a>>BYTE_FIX);
 }
 
 DECL_LINE68(lineE28)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = ((dec-1)&7)+1;
-  ASLW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ASL.W #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  ASLW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE29)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = ((dec-1)&7)+1;
-  LSLW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* LSL.W #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  LSLW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE2A)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = ((dec-1)&7)+1;
-  ROXLW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ROXL.W #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  ROXLW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE2B)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = ((dec-1)&7)+1;
-  ROLW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ROL.W #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  ROLW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE2C)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = REG68.d[dec]&63;
-  ASLW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ASL.W Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  ASLW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE2D)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = REG68.d[dec]&63;
-  LSLW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* LSL.W Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  LSLW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE2E)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = REG68.d[dec]&63;
-  ROXLW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ROXL.W Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  ROXLW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE2F)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<WORD_SHIFT;
-  d = REG68.d[dec]&63;
-  ROLW(a,d);
-  REG68.d[reg] = (REG68.d[reg]&WORD_MASK) + ((uint68_t)a>>WORD_SHIFT);
+  /* ROL.W Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<WORD_FIX;
+  ROLW(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & WORD_MSK) + (a>>WORD_FIX);
 }
 
 DECL_LINE68(lineE30)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = ((dec-1)&7)+1;
-  ASLL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ASL.L #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  ASLL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE31)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = ((dec-1)&7)+1;
-  LSLL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* LSL.L #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  LSLL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE32)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = ((dec-1)&7)+1;
-  ROXLL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ROXL.L #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  ROXLL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE33)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = ((dec-1)&7)+1;
-  ROLL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ROL.L #d,Dn */
+  const int d = ((reg9-1)&7)+1;
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  ROLL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE34)
 {
-  const int dec = reg9, reg = reg0;
-  sint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = REG68.d[dec]&63;
-  ASLL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ASL.L Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  ASLL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE35)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = REG68.d[dec]&63;
-  LSLL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* LSL.L Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  LSLL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE36)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = REG68.d[dec]&63;
-  ROXLL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ROXL.L Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  ROXLL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE37)
 {
-  const int dec = reg9, reg = reg0;
-  uint68_t a;
-  uint68_t d;
-  a=REG68.d[reg]<<LONG_SHIFT;
-  d = REG68.d[dec]&63;
-  ROLL(a,d);
-  REG68.d[reg] = (REG68.d[reg]&LONG_MASK) + ((uint68_t)a>>LONG_SHIFT);
+  /* ROL.L Dn,Dn */
+  const int d = REG68.d[reg9];
+   uint68_t a = (uint68_t)REG68.d[reg0]<<LONG_FIX;
+  ROLL(a,a,d);
+  REG68.d[reg0] = (REG68.d[reg0] & LONG_MSK) + (a>>LONG_FIX);
 }
 
 DECL_LINE68(lineE38)

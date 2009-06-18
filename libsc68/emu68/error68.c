@@ -44,13 +44,13 @@
 
 /*  Push error message
  */
-int emu68_error_add(emu68_t * emu68, char *format, ... )
+int emu68_error_add(emu68_t * const emu68, const char * format, ...)
 {
   if (emu68 && format) {
     va_list list;
     int n = emu68->nerr;
 
-    if(n >= MAXERROR) {
+    if (n >= MAXERROR) {
       memmove(emu68->err[0],emu68->err[1],MAXERRORSTR*(MAXERROR-1));
       n = MAXERROR-1;
     }
@@ -64,13 +64,11 @@ int emu68_error_add(emu68_t * emu68, char *format, ... )
   return -1;
 }
 
-const char * emu68_error_empty = "no more error";
-
 /*  Pop error message
  */
-const char * emu68_error_get(emu68_t * emu68)
+const char * emu68_error_get(emu68_t * const emu68)
 {
-  const char * res = emu68_error_empty;
+  const char * res = 0;
   if (emu68 && emu68->nerr > 0) {
     res = emu68->err[--emu68->nerr];
   }

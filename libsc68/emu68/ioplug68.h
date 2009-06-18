@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_ioplug_devel
+ * @ingroup   emu68_lib
  * @file      emu68/ioplug68.h
  * @date      1999/03/13
  * @brief     68k IO plugger header.
@@ -18,8 +18,8 @@
 #include "struct68.h"
 
 /**
- * @defgroup  emu68_ioplug_devel  68k IO plugger
- * @ingroup   emu68_devel
+ * @defgroup  emu68_lib_ioplug  68k IO plugger
+ * @ingroup   emu68_lib_api
  * @brief     IO plugging and mapping facilities.
  *
  *   Provide functions for warm plugging/unplugging of IO

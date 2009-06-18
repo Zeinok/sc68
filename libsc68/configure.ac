@@ -38,6 +38,13 @@ SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
 # | Optional features                                                    |
 # `----------------------------------------------------------------------'
 
+AC_ARG_ENABLE(
+  [emu68-monolitic],
+  [AS_HELP_STRING([--enable-emu68-monolitic],
+      [compile 68k instructions as a single huge file @<:@default=no@:>@])],
+  [],[enable_emu68_monolitic='no'])
+AM_CONDITIONAL([emu68_monolitic],[test "X${enable_emu68_monolitic}" = 'Xyes'])
+
 AC_ARG_WITH(
   [ym-engine],
   [AS_HELP_STRING([--with-ym-engine],
@@ -49,8 +56,12 @@ case X${with_ym_engine} in
     YM_EMUL='YM_EMUL_BLEP'
     with_ym_engine='BLEP synthesis'
     ;;
-  Xorig)
-    YM_EMUL='YM_EMUL_ORIG'
+  Xdump)
+    YM_EMUL='YM_EMUL_DUMP'
+    with_ym_engine='DUMP registers'
+    ;;
+  Xorig | Xpuls*)
+    YM_EMUL='YM_EMUL_PULS'
     with_ym_engine='sc68 original'
     ;;
   Xx | Xyes | Xno)

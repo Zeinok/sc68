@@ -25,64 +25,64 @@
 # include "config.h"
 #endif
 
-#include "getea68.h"
 #include "error68.h"
+#include "assert68.h"
 #include "mem68.h"
 
 static addr68_t ea_error(emu68_t * const emu68, const int reg)
 {
-  /* BREAKPOINT68("invalid ea") */
+  assert(EMU68_BREAK);
   return 0;
 }
 
 /* (AN) */
 static addr68_t ea_inAN(emu68_t * const emu68, const int reg)
 {
-  return REG68.a[reg];
+  return (s32) REG68.a[reg];
 }
 
 /* (AN)+ */
 static addr68_t ea_inANpb(emu68_t * const emu68, const int reg)
 {
-  addr68_t addr = REG68.a[reg];
-  REG68.a[reg] += 1+(reg==7);
+  addr68_t addr = (s32) REG68.a[reg];
+  REG68.a[reg]  = (u32) ( REG68.a[reg] + 1 + (reg==7) );
   return addr;
 }
 
 static addr68_t ea_inANpw(emu68_t * const emu68, const int reg)
 {
-  addr68_t addr = REG68.a[reg];
-  REG68.a[reg] += 2;
+  addr68_t addr = (s32) REG68.a[reg];
+  REG68.a[reg]  = (u32) ( REG68.a[reg] + 2 );
   return addr;
 }
 
 static addr68_t ea_inANpl(emu68_t * const emu68, const int reg)
 {
-  addr68_t addr = REG68.a[reg];
-  REG68.a[reg] += 4;
+  addr68_t addr = (s32) REG68.a[reg];
+  REG68.a[reg]  = (u32) ( REG68.a[reg] + 4 );
   return addr;
 }
 
 /* -(AN) */
 static addr68_t ea_inmANb(emu68_t * const emu68, const int reg)
 {
-  return REG68.a[reg]-=1+(reg==7);
+  return (s32) ( REG68.a[reg] = (u32) ( REG68.a[reg] - 1 - (reg==7) ) );
 }
 
 static addr68_t ea_inmANw(emu68_t * const emu68, const int reg)
 {
-  return REG68.a[reg]-=2;
+  return (s32) ( REG68.a[reg] = (u32) ( REG68.a[reg] - 2 ) );
 }
 
 static addr68_t ea_inmANl(emu68_t * const emu68, const int reg)
 {
-  return REG68.a[reg]-=4;
+  return (s32) ( REG68.a[reg] = (u32) ( REG68.a[reg] - 4 ) );
 }
 
 /* d(AN) */
 static addr68_t ea_indAN(emu68_t * const emu68, const int reg)
 {
-  return REG68.a[reg]+get_nextw();
+  return (s32) ( REG68.a[reg] + get_nextw() );
 }
 
 /* d(AN,Xi) */
@@ -90,9 +90,12 @@ static addr68_t ea_inANXI(emu68_t * const emu68, const int reg)
 {
   int68_t w = get_nextw();
   int68_t reg2;
-  reg2 = (w>>12)&15;
-  reg2 = (w&(1<<11)) ? (int68_t)REG68.d[reg2] : (int68_t)(s16)REG68.d[reg2];
-  return REG68.a[reg]+(s8)w+reg2;
+  reg2 = ( w >> 12 ) & 15;
+  reg2 = ( w & 04000 )
+    ? (int68_t) (s32) REG68.d[reg2]
+    : (int68_t) (s16) REG68.d[reg2]
+    ;
+  return (s32) ( REG68.a[reg] + (s8) w + reg2 );
 }
 
 /* ABS.W */
@@ -110,39 +113,43 @@ static addr68_t ea_inABSL(emu68_t * const emu68, const int reg)
 /* d(PC) */
 static addr68_t ea_inrelPC(emu68_t * const emu68, const int reg)
 {
-  addr68_t pc = REG68.pc;
-  return pc+get_nextw();
+  addr68_t pc = (s32) REG68.pc;
+  return (s32) ( pc + get_nextw() );
 }
 
 /* d(PC,Xi) */
 static addr68_t ea_inPCXI(emu68_t * const emu68, const int reg)
 {
-  int68_t w = get_nextw();
-  int68_t reg2;
-  reg2 = (w>>12)&15;
-  reg2 = (w&(1<<11)) ? (int68_t)REG68.d[reg2] : (int68_t)(s16)REG68.d[reg2];
-  return REG68.pc+(s8)w+reg2-2;
+  addr68_t  pc = (s32) REG68.pc;
+  int68_t    w = get_nextw();
+  int68_t reg2 = ( w >> 12 ) & 15;
+  pc += ( w & 04000 )
+    ? (int68_t) (s32) REG68.d[reg2]
+    : (int68_t) (s16) REG68.d[reg2]
+    ;
+  pc += (s8) w;
+  return (s32) pc;
 }
 
 /* # */
 static addr68_t ea_inIMMb(emu68_t * const emu68, const int reg)
 {
-  addr68_t pc = REG68.pc;
-  REG68.pc += 2;
-  return pc+1;
+  addr68_t pc = (s32) REG68.pc;
+  REG68.pc = (u32) ( pc + 2 );
+  return (s32) ( pc + 1 );
 }
 
 static addr68_t ea_inIMMw(emu68_t * const emu68, const int reg)
 {
-  addr68_t pc = REG68.pc;
-  REG68.pc += 2;
+  s32 pc = REG68.pc;
+  REG68.pc = (u32) (pc + 2);
   return pc;
 }
 
 static addr68_t ea_inIMMl(emu68_t * const emu68, const int reg)
 {
-  addr68_t pc = REG68.pc;
-  REG68.pc += 4;
+  s32 pc = REG68.pc;
+  REG68.pc = (u32) ( pc + 4 );
   return pc;
 }
 

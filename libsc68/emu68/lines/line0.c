@@ -1,1587 +1,1362 @@
-/* line0.c : EMU68 generated code by
- * gen68 Wed May  2 21:50:31 CEST 2007
- * (C) 1998-2007 Benjamin Gerard
+/* line0.c - EMU68 generated code by
+ * gen68 2009-06-12 07:20:25
+ * Copyright (C) 1998-2009 Benjamin Gerard
  *
  * $Id$
  */
 
-static void BTST_reg(emu68_t * const emu68, int b, int reg0)
+static inline
+void BTST_reg(emu68_t * const emu68, const int bit, int reg0)
 {
+  /* BTST.L #b,Dn */
   int68_t a = REG68.d[reg0];
-  b &= 31;
-  BTST(a,b);
+  BTSTL(a,a,bit);
   ADDCYCLE(2);
 }
 
-static void BTST_mem(emu68_t * const emu68, int b, int mode, int reg0)
+static inline
+void BTST_mem(emu68_t * const emu68, const int bit, int mode, int reg0)
 {
+  /* BTST.B #b,<Ae> */
   addr68_t addr = get_eab68[mode](emu68,reg0);
   int68_t a = read_B(addr);
-  b &= 7;
-  BTST(a,b);
+  BTSTB(a,a,bit);
   ADDCYCLE(0);
 }
 
-static void BCHG_reg(emu68_t * const emu68, int b, int reg0)
+static inline
+void BCHG_reg(emu68_t * const emu68, const int bit, int reg0)
 {
+  /* BCHG.L #b,Dn */
   int68_t a = REG68.d[reg0];
-  b &= 31;
-  BCHG(a,b);
-  REG68.d[reg0] = a;
+  BCHGL(a,a,bit);
+  REG68.d[reg0] = (u32) a;
   ADDCYCLE(4);
 }
 
-static void BCHG_mem(emu68_t * const emu68, int b, int mode, int reg0)
+static inline
+void BCHG_mem(emu68_t * const emu68, const int bit, int mode, int reg0)
 {
+  /* BCHG.B #b,<Ae> */
   addr68_t addr = get_eab68[mode](emu68,reg0);
   int68_t a = read_B(addr);
-  b &= 7;
-  BCHG(a,b);
+  BCHGB(a,a,bit);
   write_B(addr,a);
   ADDCYCLE(4);
 }
 
-static void BCLR_reg(emu68_t * const emu68, int b, int reg0)
+static inline
+void BCLR_reg(emu68_t * const emu68, const int bit, int reg0)
 {
+  /* BCLR.L #b,Dn */
   int68_t a = REG68.d[reg0];
-  b &= 31;
-  BCLR(a,b);
-  REG68.d[reg0] = a;
+  BCLRL(a,a,bit);
+  REG68.d[reg0] = (u32) a;
   ADDCYCLE(6);
 }
 
-static void BCLR_mem(emu68_t * const emu68, int b, int mode, int reg0)
+static inline
+void BCLR_mem(emu68_t * const emu68, const int bit, int mode, int reg0)
 {
+  /* BCLR.B #b,<Ae> */
   addr68_t addr = get_eab68[mode](emu68,reg0);
   int68_t a = read_B(addr);
-  b &= 7;
-  BCLR(a,b);
+  BCLRB(a,a,bit);
   write_B(addr,a);
   ADDCYCLE(4);
 }
 
-static void BSET_reg(emu68_t * const emu68, int b, int reg0)
+static inline
+void BSET_reg(emu68_t * const emu68, const int bit, int reg0)
 {
+  /* BSET.L #b,Dn */
   int68_t a = REG68.d[reg0];
-  b &= 31;
-  BSET(a,b);
-  REG68.d[reg0] = a;
+  BSETL(a,a,bit);
+  REG68.d[reg0] = (u32) a;
   ADDCYCLE(4);
 }
 
-static void BSET_mem(emu68_t * const emu68, int b, int mode, int reg0)
+static inline
+void BSET_mem(emu68_t * const emu68, const int bit, int mode, int reg0)
 {
+  /* BSET.B #b,<Ae> */
   addr68_t addr = get_eab68[mode](emu68,reg0);
   int68_t a = read_B(addr);
-  b &= 7;
-  BSET(a,b);
+  BSETB(a,a,bit);
   write_B(addr,a);
   ADDCYCLE(4);
 }
 
 static void l0_ill(emu68_t * const emu68, int reg0)
 {
-  reg0=reg0; ILLEGAL;
+  reg0 = reg0;
+  ILLEGAL;
 }
 
-static void l0_ORb0(emu68_t * const emu68, int reg0)
+static void l0_ORRb0(emu68_t * const emu68, int reg0)
 {
-  /* OR.B #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextw()<<BYTE_SHIFT;
-  b = REG68.d[reg0]<<BYTE_SHIFT;
-  ORB(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&BYTE_MASK) + ((uint68_t)s>>BYTE_SHIFT);
+  /* ORRI.B #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << BYTE_FIX;
+  ORRB(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & BYTE_MSK ) + ( d >> BYTE_FIX );
 }
 
 static void l0_ANDb0(emu68_t * const emu68, int reg0)
 {
-  /* AND.B #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextw()<<BYTE_SHIFT;
-  b = REG68.d[reg0]<<BYTE_SHIFT;
-  ANDB(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&BYTE_MASK) + ((uint68_t)s>>BYTE_SHIFT);
+  /* ANDI.B #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << BYTE_FIX;
+  ANDB(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & BYTE_MSK ) + ( d >> BYTE_FIX );
 }
 
 static void l0_EORb0(emu68_t * const emu68, int reg0)
 {
-  /* EOR.B #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextw()<<BYTE_SHIFT;
-  b = REG68.d[reg0]<<BYTE_SHIFT;
-  EORB(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&BYTE_MASK) + ((uint68_t)s>>BYTE_SHIFT);
+  /* EORI.B #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << BYTE_FIX;
+  EORB(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & BYTE_MSK ) + ( d >> BYTE_FIX );
 }
 
 static void l0_ADDb0(emu68_t * const emu68, int reg0)
 {
-  /* ADD.B #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextw()<<BYTE_SHIFT;
-  b = REG68.d[reg0]<<BYTE_SHIFT;
-  ADDB(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&BYTE_MASK) + ((uint68_t)s>>BYTE_SHIFT);
+  /* ADDI.B #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << BYTE_FIX;
+  ADDB(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & BYTE_MSK ) + ( d >> BYTE_FIX );
 }
 
 static void l0_SUBb0(emu68_t * const emu68, int reg0)
 {
-  /* SUB.B #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextw()<<BYTE_SHIFT;
-  b = REG68.d[reg0]<<BYTE_SHIFT;
-  SUBB(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&BYTE_MASK) + ((uint68_t)s>>BYTE_SHIFT);
+  /* SUBI.B #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << BYTE_FIX;
+  SUBB(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & BYTE_MSK ) + ( d >> BYTE_FIX );
 }
 
 static void l0_CMPb0(emu68_t * const emu68, int reg0)
 {
-  /* CMP.B #imm,Dy */
-  int68_t a,b;
-  a = get_nextw()<<BYTE_SHIFT;
-  b = REG68.d[reg0]<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMPI.B #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << BYTE_FIX;
+  CMPB(s,d);
 }
 
-static void l0_ORw0(emu68_t * const emu68, int reg0)
+static void l0_ORRw0(emu68_t * const emu68, int reg0)
 {
-  /* OR.W #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextw()<<WORD_SHIFT;
-  b = REG68.d[reg0]<<WORD_SHIFT;
-  ORW(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&WORD_MASK) + ((uint68_t)s>>WORD_SHIFT);
+  /* ORRI.W #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << WORD_FIX;
+  ORRW(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & WORD_MSK ) + ( d >> WORD_FIX );
 }
 
 static void l0_ANDw0(emu68_t * const emu68, int reg0)
 {
-  /* AND.W #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextw()<<WORD_SHIFT;
-  b = REG68.d[reg0]<<WORD_SHIFT;
-  ANDW(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&WORD_MASK) + ((uint68_t)s>>WORD_SHIFT);
+  /* ANDI.W #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << WORD_FIX;
+  ANDW(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & WORD_MSK ) + ( d >> WORD_FIX );
 }
 
 static void l0_EORw0(emu68_t * const emu68, int reg0)
 {
-  /* EOR.W #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextw()<<WORD_SHIFT;
-  b = REG68.d[reg0]<<WORD_SHIFT;
-  EORW(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&WORD_MASK) + ((uint68_t)s>>WORD_SHIFT);
+  /* EORI.W #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << WORD_FIX;
+  EORW(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & WORD_MSK ) + ( d >> WORD_FIX );
 }
 
 static void l0_ADDw0(emu68_t * const emu68, int reg0)
 {
-  /* ADD.W #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextw()<<WORD_SHIFT;
-  b = REG68.d[reg0]<<WORD_SHIFT;
-  ADDW(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&WORD_MASK) + ((uint68_t)s>>WORD_SHIFT);
+  /* ADDI.W #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << WORD_FIX;
+  ADDW(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & WORD_MSK ) + ( d >> WORD_FIX );
 }
 
 static void l0_SUBw0(emu68_t * const emu68, int reg0)
 {
-  /* SUB.W #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextw()<<WORD_SHIFT;
-  b = REG68.d[reg0]<<WORD_SHIFT;
-  SUBW(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&WORD_MASK) + ((uint68_t)s>>WORD_SHIFT);
+  /* SUBI.W #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << WORD_FIX;
+  SUBW(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & WORD_MSK ) + ( d >> WORD_FIX );
 }
 
 static void l0_CMPw0(emu68_t * const emu68, int reg0)
 {
-  /* CMP.W #imm,Dy */
-  int68_t a,b;
-  a = get_nextw()<<WORD_SHIFT;
-  b = REG68.d[reg0]<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMPI.W #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << WORD_FIX;
+  CMPW(s,d);
 }
 
-static void l0_ORl0(emu68_t * const emu68, int reg0)
+static void l0_ORRl0(emu68_t * const emu68, int reg0)
 {
-  /* OR.L #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextl()<<LONG_SHIFT;
-  b = REG68.d[reg0]<<LONG_SHIFT;
-  ORL(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&LONG_MASK) + ((uint68_t)s>>LONG_SHIFT);
+  /* ORRI.L #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << LONG_FIX;
+  ORRL(d,s,d);
+  REG68.d[reg0] = ( d >> LONG_FIX );
 }
 
 static void l0_ANDl0(emu68_t * const emu68, int reg0)
 {
-  /* AND.L #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextl()<<LONG_SHIFT;
-  b = REG68.d[reg0]<<LONG_SHIFT;
-  ANDL(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&LONG_MASK) + ((uint68_t)s>>LONG_SHIFT);
+  /* ANDI.L #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << LONG_FIX;
+  ANDL(d,s,d);
+  REG68.d[reg0] = ( d >> LONG_FIX );
 }
 
 static void l0_EORl0(emu68_t * const emu68, int reg0)
 {
-  /* EOR.L #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextl()<<LONG_SHIFT;
-  b = REG68.d[reg0]<<LONG_SHIFT;
-  EORL(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&LONG_MASK) + ((uint68_t)s>>LONG_SHIFT);
+  /* EORI.L #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << LONG_FIX;
+  EORL(d,s,d);
+  REG68.d[reg0] = ( d >> LONG_FIX );
 }
 
 static void l0_ADDl0(emu68_t * const emu68, int reg0)
 {
-  /* ADD.L #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextl()<<LONG_SHIFT;
-  b = REG68.d[reg0]<<LONG_SHIFT;
-  ADDL(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&LONG_MASK) + ((uint68_t)s>>LONG_SHIFT);
+  /* ADDI.L #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << LONG_FIX;
+  ADDL(d,s,d);
+  REG68.d[reg0] = ( d >> LONG_FIX );
 }
 
 static void l0_SUBl0(emu68_t * const emu68, int reg0)
 {
-  /* SUB.L #imm,Dy */
-  int68_t a,b,s;
-  a = get_nextl()<<LONG_SHIFT;
-  b = REG68.d[reg0]<<LONG_SHIFT;
-  SUBL(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&LONG_MASK) + ((uint68_t)s>>LONG_SHIFT);
+  /* SUBI.L #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << LONG_FIX;
+  SUBL(d,s,d);
+  REG68.d[reg0] = ( d >> LONG_FIX );
 }
 
 static void l0_CMPl0(emu68_t * const emu68, int reg0)
 {
-  /* CMP.L #imm,Dy */
-  int68_t a,b;
-  a = get_nextl()<<LONG_SHIFT;
-  b = REG68.d[reg0]<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMPI.L #I,Dn */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << LONG_FIX;
+  CMPL(s,d);
 }
 
-static void l0_ORb2(emu68_t * const emu68, int reg0)
+static void l0_ORRb2(emu68_t * const emu68, int reg0)
 {
-  /* OR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[2](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ORRI.B #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(2,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ORRB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_ANDb2(emu68_t * const emu68, int reg0)
 {
-  /* AND.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[2](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ANDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ANDI.B #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(2,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ANDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_EORb2(emu68_t * const emu68, int reg0)
 {
-  /* EOR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[2](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* EORI.B #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(2,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_ADDb2(emu68_t * const emu68, int reg0)
 {
-  /* ADD.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[2](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ADDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ADDI.B #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(2,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ADDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_SUBb2(emu68_t * const emu68, int reg0)
 {
-  /* SUB.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[2](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  SUBB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* SUBI.B #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(2,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  SUBB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_CMPb2(emu68_t * const emu68, int reg0)
 {
-  /* CMP.B #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[2](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMPI.B #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(2,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  CMPB(s,d);
 }
 
-static void l0_ORw2(emu68_t * const emu68, int reg0)
+static void l0_ORRw2(emu68_t * const emu68, int reg0)
 {
-  /* OR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[2](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ORRI.W #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(2,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ORRW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_ANDw2(emu68_t * const emu68, int reg0)
 {
-  /* AND.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[2](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ANDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ANDI.W #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(2,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ANDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_EORw2(emu68_t * const emu68, int reg0)
 {
-  /* EOR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[2](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* EORI.W #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(2,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_ADDw2(emu68_t * const emu68, int reg0)
 {
-  /* ADD.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[2](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ADDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ADDI.W #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(2,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ADDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_SUBw2(emu68_t * const emu68, int reg0)
 {
-  /* SUB.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[2](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  SUBW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* SUBI.W #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(2,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  SUBW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_CMPw2(emu68_t * const emu68, int reg0)
 {
-  /* CMP.W #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[2](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMPI.W #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(2,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  CMPW(s,d);
 }
 
-static void l0_ORl2(emu68_t * const emu68, int reg0)
+static void l0_ORRl2(emu68_t * const emu68, int reg0)
 {
-  /* OR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[2](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ORRI.L #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(2,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ORRL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ANDl2(emu68_t * const emu68, int reg0)
 {
-  /* AND.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[2](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ANDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ANDI.L #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(2,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ANDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_EORl2(emu68_t * const emu68, int reg0)
 {
-  /* EOR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[2](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* EORI.L #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(2,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ADDl2(emu68_t * const emu68, int reg0)
 {
-  /* ADD.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[2](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ADDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ADDI.L #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(2,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ADDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_SUBl2(emu68_t * const emu68, int reg0)
 {
-  /* SUB.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[2](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  SUBL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* SUBI.L #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(2,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  SUBL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_CMPl2(emu68_t * const emu68, int reg0)
 {
-  /* CMP.L #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[2](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMPI.L #I,(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(2,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  CMPL(s,d);
 }
 
-static void l0_ORb3(emu68_t * const emu68, int reg0)
+static void l0_ORRb3(emu68_t * const emu68, int reg0)
 {
-  /* OR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[3](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ORRI.B #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(3,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ORRB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_ANDb3(emu68_t * const emu68, int reg0)
 {
-  /* AND.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[3](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ANDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ANDI.B #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(3,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ANDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_EORb3(emu68_t * const emu68, int reg0)
 {
-  /* EOR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[3](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* EORI.B #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(3,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_ADDb3(emu68_t * const emu68, int reg0)
 {
-  /* ADD.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[3](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ADDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ADDI.B #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(3,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ADDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_SUBb3(emu68_t * const emu68, int reg0)
 {
-  /* SUB.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[3](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  SUBB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* SUBI.B #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(3,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  SUBB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_CMPb3(emu68_t * const emu68, int reg0)
 {
-  /* CMP.B #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[3](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMPI.B #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(3,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  CMPB(s,d);
 }
 
-static void l0_ORw3(emu68_t * const emu68, int reg0)
+static void l0_ORRw3(emu68_t * const emu68, int reg0)
 {
-  /* OR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[3](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ORRI.W #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(3,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ORRW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_ANDw3(emu68_t * const emu68, int reg0)
 {
-  /* AND.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[3](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ANDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ANDI.W #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(3,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ANDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_EORw3(emu68_t * const emu68, int reg0)
 {
-  /* EOR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[3](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* EORI.W #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(3,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_ADDw3(emu68_t * const emu68, int reg0)
 {
-  /* ADD.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[3](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ADDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ADDI.W #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(3,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ADDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_SUBw3(emu68_t * const emu68, int reg0)
 {
-  /* SUB.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[3](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  SUBW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* SUBI.W #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(3,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  SUBW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_CMPw3(emu68_t * const emu68, int reg0)
 {
-  /* CMP.W #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[3](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMPI.W #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(3,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  CMPW(s,d);
 }
 
-static void l0_ORl3(emu68_t * const emu68, int reg0)
+static void l0_ORRl3(emu68_t * const emu68, int reg0)
 {
-  /* OR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[3](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ORRI.L #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(3,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ORRL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ANDl3(emu68_t * const emu68, int reg0)
 {
-  /* AND.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[3](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ANDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ANDI.L #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(3,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ANDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_EORl3(emu68_t * const emu68, int reg0)
 {
-  /* EOR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[3](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* EORI.L #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(3,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ADDl3(emu68_t * const emu68, int reg0)
 {
-  /* ADD.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[3](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ADDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ADDI.L #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(3,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ADDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_SUBl3(emu68_t * const emu68, int reg0)
 {
-  /* SUB.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[3](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  SUBL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* SUBI.L #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(3,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  SUBL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_CMPl3(emu68_t * const emu68, int reg0)
 {
-  /* CMP.L #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[3](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMPI.L #I,(An)+ */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(3,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  CMPL(s,d);
 }
 
-static void l0_ORb4(emu68_t * const emu68, int reg0)
+static void l0_ORRb4(emu68_t * const emu68, int reg0)
 {
-  /* OR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[4](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ORRI.B #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(4,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ORRB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_ANDb4(emu68_t * const emu68, int reg0)
 {
-  /* AND.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[4](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ANDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ANDI.B #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(4,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ANDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_EORb4(emu68_t * const emu68, int reg0)
 {
-  /* EOR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[4](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* EORI.B #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(4,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_ADDb4(emu68_t * const emu68, int reg0)
 {
-  /* ADD.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[4](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ADDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ADDI.B #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(4,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ADDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_SUBb4(emu68_t * const emu68, int reg0)
 {
-  /* SUB.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[4](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  SUBB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* SUBI.B #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(4,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  SUBB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_CMPb4(emu68_t * const emu68, int reg0)
 {
-  /* CMP.B #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[4](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMPI.B #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(4,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  CMPB(s,d);
 }
 
-static void l0_ORw4(emu68_t * const emu68, int reg0)
+static void l0_ORRw4(emu68_t * const emu68, int reg0)
 {
-  /* OR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[4](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ORRI.W #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(4,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ORRW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_ANDw4(emu68_t * const emu68, int reg0)
 {
-  /* AND.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[4](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ANDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ANDI.W #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(4,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ANDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_EORw4(emu68_t * const emu68, int reg0)
 {
-  /* EOR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[4](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* EORI.W #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(4,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_ADDw4(emu68_t * const emu68, int reg0)
 {
-  /* ADD.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[4](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ADDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ADDI.W #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(4,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ADDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_SUBw4(emu68_t * const emu68, int reg0)
 {
-  /* SUB.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[4](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  SUBW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* SUBI.W #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(4,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  SUBW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_CMPw4(emu68_t * const emu68, int reg0)
 {
-  /* CMP.W #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[4](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMPI.W #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(4,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  CMPW(s,d);
 }
 
-static void l0_ORl4(emu68_t * const emu68, int reg0)
+static void l0_ORRl4(emu68_t * const emu68, int reg0)
 {
-  /* OR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[4](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ORRI.L #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(4,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ORRL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ANDl4(emu68_t * const emu68, int reg0)
 {
-  /* AND.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[4](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ANDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ANDI.L #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(4,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ANDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_EORl4(emu68_t * const emu68, int reg0)
 {
-  /* EOR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[4](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* EORI.L #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(4,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ADDl4(emu68_t * const emu68, int reg0)
 {
-  /* ADD.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[4](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ADDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ADDI.L #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(4,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ADDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_SUBl4(emu68_t * const emu68, int reg0)
 {
-  /* SUB.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[4](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  SUBL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* SUBI.L #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(4,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  SUBL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_CMPl4(emu68_t * const emu68, int reg0)
 {
-  /* CMP.L #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[4](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMPI.L #I,-(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(4,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  CMPL(s,d);
 }
 
-static void l0_ORb5(emu68_t * const emu68, int reg0)
+static void l0_ORRb5(emu68_t * const emu68, int reg0)
 {
-  /* OR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[5](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ORRI.B #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(5,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ORRB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_ANDb5(emu68_t * const emu68, int reg0)
 {
-  /* AND.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[5](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ANDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ANDI.B #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(5,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ANDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_EORb5(emu68_t * const emu68, int reg0)
 {
-  /* EOR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[5](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* EORI.B #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(5,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_ADDb5(emu68_t * const emu68, int reg0)
 {
-  /* ADD.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[5](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ADDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ADDI.B #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(5,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ADDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_SUBb5(emu68_t * const emu68, int reg0)
 {
-  /* SUB.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[5](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  SUBB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* SUBI.B #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(5,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  SUBB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_CMPb5(emu68_t * const emu68, int reg0)
 {
-  /* CMP.B #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[5](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMPI.B #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(5,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  CMPB(s,d);
 }
 
-static void l0_ORw5(emu68_t * const emu68, int reg0)
+static void l0_ORRw5(emu68_t * const emu68, int reg0)
 {
-  /* OR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[5](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ORRI.W #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(5,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ORRW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_ANDw5(emu68_t * const emu68, int reg0)
 {
-  /* AND.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[5](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ANDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ANDI.W #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(5,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ANDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_EORw5(emu68_t * const emu68, int reg0)
 {
-  /* EOR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[5](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* EORI.W #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(5,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_ADDw5(emu68_t * const emu68, int reg0)
 {
-  /* ADD.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[5](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ADDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ADDI.W #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(5,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ADDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_SUBw5(emu68_t * const emu68, int reg0)
 {
-  /* SUB.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[5](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  SUBW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* SUBI.W #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(5,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  SUBW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_CMPw5(emu68_t * const emu68, int reg0)
 {
-  /* CMP.W #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[5](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMPI.W #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(5,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  CMPW(s,d);
 }
 
-static void l0_ORl5(emu68_t * const emu68, int reg0)
+static void l0_ORRl5(emu68_t * const emu68, int reg0)
 {
-  /* OR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[5](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ORRI.L #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(5,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ORRL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ANDl5(emu68_t * const emu68, int reg0)
 {
-  /* AND.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[5](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ANDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ANDI.L #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(5,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ANDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_EORl5(emu68_t * const emu68, int reg0)
 {
-  /* EOR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[5](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* EORI.L #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(5,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ADDl5(emu68_t * const emu68, int reg0)
 {
-  /* ADD.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[5](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ADDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ADDI.L #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(5,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ADDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_SUBl5(emu68_t * const emu68, int reg0)
 {
-  /* SUB.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[5](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  SUBL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* SUBI.L #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(5,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  SUBL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_CMPl5(emu68_t * const emu68, int reg0)
 {
-  /* CMP.L #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[5](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMPI.L #I,d(An) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(5,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  CMPL(s,d);
 }
 
-static void l0_ORb6(emu68_t * const emu68, int reg0)
+static void l0_ORRb6(emu68_t * const emu68, int reg0)
 {
-  /* OR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[6](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ORRI.B #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(6,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ORRB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_ANDb6(emu68_t * const emu68, int reg0)
 {
-  /* AND.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[6](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ANDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ANDI.B #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(6,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ANDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_EORb6(emu68_t * const emu68, int reg0)
 {
-  /* EOR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[6](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* EORI.B #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(6,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_ADDb6(emu68_t * const emu68, int reg0)
 {
-  /* ADD.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[6](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ADDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ADDI.B #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(6,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ADDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_SUBb6(emu68_t * const emu68, int reg0)
 {
-  /* SUB.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[6](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  SUBB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* SUBI.B #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(6,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  SUBB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_CMPb6(emu68_t * const emu68, int reg0)
 {
-  /* CMP.B #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[6](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMPI.B #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(6,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  CMPB(s,d);
 }
 
-static void l0_ORw6(emu68_t * const emu68, int reg0)
+static void l0_ORRw6(emu68_t * const emu68, int reg0)
 {
-  /* OR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[6](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ORRI.W #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(6,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ORRW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_ANDw6(emu68_t * const emu68, int reg0)
 {
-  /* AND.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[6](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ANDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ANDI.W #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(6,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ANDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_EORw6(emu68_t * const emu68, int reg0)
 {
-  /* EOR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[6](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* EORI.W #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(6,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_ADDw6(emu68_t * const emu68, int reg0)
 {
-  /* ADD.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[6](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ADDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ADDI.W #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(6,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ADDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_SUBw6(emu68_t * const emu68, int reg0)
 {
-  /* SUB.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[6](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  SUBW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* SUBI.W #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(6,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  SUBW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_CMPw6(emu68_t * const emu68, int reg0)
 {
-  /* CMP.W #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[6](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMPI.W #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(6,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  CMPW(s,d);
 }
 
-static void l0_ORl6(emu68_t * const emu68, int reg0)
+static void l0_ORRl6(emu68_t * const emu68, int reg0)
 {
-  /* OR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[6](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ORRI.L #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(6,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ORRL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ANDl6(emu68_t * const emu68, int reg0)
 {
-  /* AND.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[6](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ANDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ANDI.L #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(6,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ANDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_EORl6(emu68_t * const emu68, int reg0)
 {
-  /* EOR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[6](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* EORI.L #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(6,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ADDl6(emu68_t * const emu68, int reg0)
 {
-  /* ADD.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[6](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ADDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ADDI.L #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(6,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ADDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_SUBl6(emu68_t * const emu68, int reg0)
 {
-  /* SUB.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[6](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  SUBL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* SUBI.L #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(6,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  SUBL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_CMPl6(emu68_t * const emu68, int reg0)
 {
-  /* CMP.L #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[6](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMPI.L #I,d(An,Xi) */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(6,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  CMPL(s,d);
 }
 
-static void l0_ORb7(emu68_t * const emu68, int reg0)
+static void l0_ORRb7(emu68_t * const emu68, int reg0)
 {
-  if (reg0==4) {
+  if (reg0==4) { /* ORR TO CCR */
     uint68_t a;
     a = get_nextw()&255;
     REG68.sr |= a;
   } else {
-  /* OR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[7](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ORRI.B #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(7,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ORRB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
   }
 }
 
 static void l0_ANDb7(emu68_t * const emu68, int reg0)
 {
-  if (reg0==4) {
+  if (reg0==4) { /* AND TO CCR */
     uint68_t a;
     a = get_nextw()|0xFF00;
     REG68.sr &= a;
   } else {
-  /* AND.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[7](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ANDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ANDI.B #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(7,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ANDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
   }
 }
 
 static void l0_EORb7(emu68_t * const emu68, int reg0)
 {
-  if (reg0==4) {
+  if (reg0==4) { /* EOR TO CCR */
     uint68_t a;
     a = get_nextw()&255;
     REG68.sr ^= a;
   } else {
-  /* EOR.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[7](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* EORI.B #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(7,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
   }
 }
 
 static void l0_ADDb7(emu68_t * const emu68, int reg0)
 {
-  /* ADD.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[7](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  ADDB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* ADDI.B #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(7,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  ADDB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_SUBb7(emu68_t * const emu68, int reg0)
 {
-  /* SUB.B #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[7](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  SUBB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* SUBI.B #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(7,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  SUBB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 static void l0_CMPb7(emu68_t * const emu68, int reg0)
 {
-  /* CMP.B #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<BYTE_SHIFT;
-  addr = get_eab68[7](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMPI.B #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << BYTE_FIX );
+  const addr68_t l = get_EAB(7,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  CMPB(s,d);
 }
 
-static void l0_ORw7(emu68_t * const emu68, int reg0)
+static void l0_ORRw7(emu68_t * const emu68, int reg0)
 {
-  if (reg0==4) {
+  if (reg0==4) { /* ORR TO SR */
     uint68_t a;
     a = get_nextw();
     REG68.sr |= a;
   } else {
-  /* OR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[7](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ORRI.W #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(7,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ORRW(d,s,d);
+  write_W(l, d >> WORD_FIX);
   }
 }
 
 static void l0_ANDw7(emu68_t * const emu68, int reg0)
 {
-  if (reg0==4) {
+  if (reg0==4) { /* AND TO SR */
     uint68_t a;
     a = get_nextw();
     REG68.sr &= a;
   } else {
-  /* AND.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[7](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ANDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ANDI.W #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(7,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ANDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
   }
 }
 
 static void l0_EORw7(emu68_t * const emu68, int reg0)
 {
-  if (reg0==4) {
+  if (reg0==4) { /* EOR TO SR */
     uint68_t a;
     a = get_nextw();
     REG68.sr ^= a;
   } else {
-  /* EOR.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[7](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* EORI.W #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(7,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
   }
 }
 
 static void l0_ADDw7(emu68_t * const emu68, int reg0)
 {
-  /* ADD.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[7](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  ADDW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* ADDI.W #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(7,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  ADDW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_SUBw7(emu68_t * const emu68, int reg0)
 {
-  /* SUB.W #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[7](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  SUBW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* SUBI.W #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(7,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  SUBW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 static void l0_CMPw7(emu68_t * const emu68, int reg0)
 {
-  /* CMP.W #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextw()<<WORD_SHIFT;
-  addr = get_eaw68[7](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMPI.W #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextw() << WORD_FIX );
+  const addr68_t l = get_EAW(7,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  CMPW(s,d);
 }
 
-static void l0_ORl7(emu68_t * const emu68, int reg0)
+static void l0_ORRl7(emu68_t * const emu68, int reg0)
 {
-  /* OR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[7](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ORRI.L #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(7,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ORRL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ANDl7(emu68_t * const emu68, int reg0)
 {
-  /* AND.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[7](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ANDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ANDI.L #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(7,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ANDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_EORl7(emu68_t * const emu68, int reg0)
 {
-  /* EOR.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[7](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* EORI.L #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(7,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_ADDl7(emu68_t * const emu68, int reg0)
 {
-  /* ADD.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[7](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  ADDL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* ADDI.L #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(7,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  ADDL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_SUBl7(emu68_t * const emu68, int reg0)
 {
-  /* SUB.L #imm,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[7](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  SUBL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* SUBI.L #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(7,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  SUBL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 static void l0_CMPl7(emu68_t * const emu68, int reg0)
 {
-  /* CMP.L #imm,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  a = get_nextl()<<LONG_SHIFT;
-  addr = get_eal68[7](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMPI.L #I,<Ae> */
+  const uint68_t s = ( (int68_t)   get_nextl() << LONG_FIX );
+  const addr68_t l = get_EAL(7,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  CMPL(s,d);
 }
 
 static void (*const line0_imm[8][32])(emu68_t * const emu68, int) =
 {
-/* OR */
+/* ORR */
   {
-  l0_ORb0,l0_ill,l0_ORb2,l0_ORb3,l0_ORb4,l0_ORb5,l0_ORb6,l0_ORb7,
-  l0_ORw0,l0_ill,l0_ORw2,l0_ORw3,l0_ORw4,l0_ORw5,l0_ORw6,l0_ORw7,
-  l0_ORl0,l0_ill,l0_ORl2,l0_ORl3,l0_ORl4,l0_ORl5,l0_ORl6,l0_ORl7,
+  l0_ORRb0,l0_ill,l0_ORRb2,l0_ORRb3,l0_ORRb4,l0_ORRb5,l0_ORRb6,l0_ORRb7,
+  l0_ORRw0,l0_ill,l0_ORRw2,l0_ORRw3,l0_ORRw4,l0_ORRw5,l0_ORRw6,l0_ORRw7,
+  l0_ORRl0,l0_ill,l0_ORRl2,l0_ORRl3,l0_ORRl4,l0_ORRl5,l0_ORRl6,l0_ORRl7,
   l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,
 
   },
@@ -1609,7 +1384,7 @@ static void (*const line0_imm[8][32])(emu68_t * const emu68, int) =
   l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,
 
   },
-/* ? */
+/* ??? */
   {
   l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,
   l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,
@@ -1633,7 +1408,7 @@ static void (*const line0_imm[8][32])(emu68_t * const emu68, int) =
   l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,
 
   },
-/* ? */
+/* ??? */
   {
   l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,
   l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,l0_ill,
@@ -1645,8 +1420,9 @@ static void (*const line0_imm[8][32])(emu68_t * const emu68, int) =
 
 DECL_LINE68(line000)
 {
-  if (reg9==4) {
-    BTST_reg(emu68,get_nextw(),reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BTST_reg(emu68, bit, reg0);
   } else {
     line0_imm[reg9][0](emu68,reg0);
   }
@@ -1654,8 +1430,9 @@ DECL_LINE68(line000)
 
 DECL_LINE68(line001)
 {
-  if (reg9==4) {
-    BTST_mem(emu68,get_nextw(),1,reg0);
+  if (reg9 == 4) {
+    ILLEGAL; /* BTST #xx,An (op:00000000000000000000000000000001) */
+    assert(EMU68_BREAK);
   } else {
     line0_imm[reg9][1](emu68,reg0);
   }
@@ -1663,8 +1440,9 @@ DECL_LINE68(line001)
 
 DECL_LINE68(line002)
 {
-  if (reg9==4) {
-    BTST_mem(emu68,get_nextw(),2,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BTST_mem(emu68, bit, 2, reg0);
   } else {
     line0_imm[reg9][2](emu68,reg0);
   }
@@ -1672,8 +1450,9 @@ DECL_LINE68(line002)
 
 DECL_LINE68(line003)
 {
-  if (reg9==4) {
-    BTST_mem(emu68,get_nextw(),3,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BTST_mem(emu68, bit, 3, reg0);
   } else {
     line0_imm[reg9][3](emu68,reg0);
   }
@@ -1681,8 +1460,9 @@ DECL_LINE68(line003)
 
 DECL_LINE68(line004)
 {
-  if (reg9==4) {
-    BTST_mem(emu68,get_nextw(),4,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BTST_mem(emu68, bit, 4, reg0);
   } else {
     line0_imm[reg9][4](emu68,reg0);
   }
@@ -1690,8 +1470,9 @@ DECL_LINE68(line004)
 
 DECL_LINE68(line005)
 {
-  if (reg9==4) {
-    BTST_mem(emu68,get_nextw(),5,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BTST_mem(emu68, bit, 5, reg0);
   } else {
     line0_imm[reg9][5](emu68,reg0);
   }
@@ -1699,8 +1480,9 @@ DECL_LINE68(line005)
 
 DECL_LINE68(line006)
 {
-  if (reg9==4) {
-    BTST_mem(emu68,get_nextw(),6,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BTST_mem(emu68, bit, 6, reg0);
   } else {
     line0_imm[reg9][6](emu68,reg0);
   }
@@ -1708,8 +1490,9 @@ DECL_LINE68(line006)
 
 DECL_LINE68(line007)
 {
-  if (reg9==4) {
-    BTST_mem(emu68,get_nextw(),7,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BTST_mem(emu68, bit, 7, reg0);
   } else {
     line0_imm[reg9][7](emu68,reg0);
   }
@@ -1717,8 +1500,9 @@ DECL_LINE68(line007)
 
 DECL_LINE68(line008)
 {
-  if (reg9==4) {
-    BCHG_reg(emu68,get_nextw(),reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCHG_reg(emu68, bit, reg0);
   } else {
     line0_imm[reg9][8](emu68,reg0);
   }
@@ -1726,8 +1510,9 @@ DECL_LINE68(line008)
 
 DECL_LINE68(line009)
 {
-  if (reg9==4) {
-    BCHG_mem(emu68,get_nextw(),1,reg0);
+  if (reg9 == 4) {
+    ILLEGAL; /* BCHG #xx,An (op:00000000000000000000000000000011) */
+    assert(EMU68_BREAK);
   } else {
     line0_imm[reg9][9](emu68,reg0);
   }
@@ -1735,8 +1520,9 @@ DECL_LINE68(line009)
 
 DECL_LINE68(line00A)
 {
-  if (reg9==4) {
-    BCHG_mem(emu68,get_nextw(),2,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCHG_mem(emu68, bit, 2, reg0);
   } else {
     line0_imm[reg9][10](emu68,reg0);
   }
@@ -1744,8 +1530,9 @@ DECL_LINE68(line00A)
 
 DECL_LINE68(line00B)
 {
-  if (reg9==4) {
-    BCHG_mem(emu68,get_nextw(),3,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCHG_mem(emu68, bit, 3, reg0);
   } else {
     line0_imm[reg9][11](emu68,reg0);
   }
@@ -1753,8 +1540,9 @@ DECL_LINE68(line00B)
 
 DECL_LINE68(line00C)
 {
-  if (reg9==4) {
-    BCHG_mem(emu68,get_nextw(),4,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCHG_mem(emu68, bit, 4, reg0);
   } else {
     line0_imm[reg9][12](emu68,reg0);
   }
@@ -1762,8 +1550,9 @@ DECL_LINE68(line00C)
 
 DECL_LINE68(line00D)
 {
-  if (reg9==4) {
-    BCHG_mem(emu68,get_nextw(),5,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCHG_mem(emu68, bit, 5, reg0);
   } else {
     line0_imm[reg9][13](emu68,reg0);
   }
@@ -1771,8 +1560,9 @@ DECL_LINE68(line00D)
 
 DECL_LINE68(line00E)
 {
-  if (reg9==4) {
-    BCHG_mem(emu68,get_nextw(),6,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCHG_mem(emu68, bit, 6, reg0);
   } else {
     line0_imm[reg9][14](emu68,reg0);
   }
@@ -1780,8 +1570,9 @@ DECL_LINE68(line00E)
 
 DECL_LINE68(line00F)
 {
-  if (reg9==4) {
-    BCHG_mem(emu68,get_nextw(),7,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCHG_mem(emu68, bit, 7, reg0);
   } else {
     line0_imm[reg9][15](emu68,reg0);
   }
@@ -1789,8 +1580,9 @@ DECL_LINE68(line00F)
 
 DECL_LINE68(line010)
 {
-  if (reg9==4) {
-    BCLR_reg(emu68,get_nextw(),reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCLR_reg(emu68, bit, reg0);
   } else {
     line0_imm[reg9][16](emu68,reg0);
   }
@@ -1798,8 +1590,9 @@ DECL_LINE68(line010)
 
 DECL_LINE68(line011)
 {
-  if (reg9==4) {
-    BCLR_mem(emu68,get_nextw(),1,reg0);
+  if (reg9 == 4) {
+    ILLEGAL; /* BCLR #xx,An (op:00000000000000000000000000000021) */
+    assert(EMU68_BREAK);
   } else {
     line0_imm[reg9][17](emu68,reg0);
   }
@@ -1807,8 +1600,9 @@ DECL_LINE68(line011)
 
 DECL_LINE68(line012)
 {
-  if (reg9==4) {
-    BCLR_mem(emu68,get_nextw(),2,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCLR_mem(emu68, bit, 2, reg0);
   } else {
     line0_imm[reg9][18](emu68,reg0);
   }
@@ -1816,8 +1610,9 @@ DECL_LINE68(line012)
 
 DECL_LINE68(line013)
 {
-  if (reg9==4) {
-    BCLR_mem(emu68,get_nextw(),3,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCLR_mem(emu68, bit, 3, reg0);
   } else {
     line0_imm[reg9][19](emu68,reg0);
   }
@@ -1825,8 +1620,9 @@ DECL_LINE68(line013)
 
 DECL_LINE68(line014)
 {
-  if (reg9==4) {
-    BCLR_mem(emu68,get_nextw(),4,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCLR_mem(emu68, bit, 4, reg0);
   } else {
     line0_imm[reg9][20](emu68,reg0);
   }
@@ -1834,8 +1630,9 @@ DECL_LINE68(line014)
 
 DECL_LINE68(line015)
 {
-  if (reg9==4) {
-    BCLR_mem(emu68,get_nextw(),5,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCLR_mem(emu68, bit, 5, reg0);
   } else {
     line0_imm[reg9][21](emu68,reg0);
   }
@@ -1843,8 +1640,9 @@ DECL_LINE68(line015)
 
 DECL_LINE68(line016)
 {
-  if (reg9==4) {
-    BCLR_mem(emu68,get_nextw(),6,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCLR_mem(emu68, bit, 6, reg0);
   } else {
     line0_imm[reg9][22](emu68,reg0);
   }
@@ -1852,8 +1650,9 @@ DECL_LINE68(line016)
 
 DECL_LINE68(line017)
 {
-  if (reg9==4) {
-    BCLR_mem(emu68,get_nextw(),7,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BCLR_mem(emu68, bit, 7, reg0);
   } else {
     line0_imm[reg9][23](emu68,reg0);
   }
@@ -1861,8 +1660,9 @@ DECL_LINE68(line017)
 
 DECL_LINE68(line018)
 {
-  if (reg9==4) {
-    BSET_reg(emu68,get_nextw(),reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BSET_reg(emu68, bit, reg0);
   } else {
     line0_imm[reg9][24](emu68,reg0);
   }
@@ -1870,8 +1670,9 @@ DECL_LINE68(line018)
 
 DECL_LINE68(line019)
 {
-  if (reg9==4) {
-    BSET_mem(emu68,get_nextw(),1,reg0);
+  if (reg9 == 4) {
+    ILLEGAL; /* BSET #xx,An (op:00000000000000000000000000000031) */
+    assert(EMU68_BREAK);
   } else {
     line0_imm[reg9][25](emu68,reg0);
   }
@@ -1879,8 +1680,9 @@ DECL_LINE68(line019)
 
 DECL_LINE68(line01A)
 {
-  if (reg9==4) {
-    BSET_mem(emu68,get_nextw(),2,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BSET_mem(emu68, bit, 2, reg0);
   } else {
     line0_imm[reg9][26](emu68,reg0);
   }
@@ -1888,8 +1690,9 @@ DECL_LINE68(line01A)
 
 DECL_LINE68(line01B)
 {
-  if (reg9==4) {
-    BSET_mem(emu68,get_nextw(),3,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BSET_mem(emu68, bit, 3, reg0);
   } else {
     line0_imm[reg9][27](emu68,reg0);
   }
@@ -1897,8 +1700,9 @@ DECL_LINE68(line01B)
 
 DECL_LINE68(line01C)
 {
-  if (reg9==4) {
-    BSET_mem(emu68,get_nextw(),4,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BSET_mem(emu68, bit, 4, reg0);
   } else {
     line0_imm[reg9][28](emu68,reg0);
   }
@@ -1906,8 +1710,9 @@ DECL_LINE68(line01C)
 
 DECL_LINE68(line01D)
 {
-  if (reg9==4) {
-    BSET_mem(emu68,get_nextw(),5,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BSET_mem(emu68, bit, 5, reg0);
   } else {
     line0_imm[reg9][29](emu68,reg0);
   }
@@ -1915,8 +1720,9 @@ DECL_LINE68(line01D)
 
 DECL_LINE68(line01E)
 {
-  if (reg9==4) {
-    BSET_mem(emu68,get_nextw(),6,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BSET_mem(emu68, bit, 6, reg0);
   } else {
     line0_imm[reg9][30](emu68,reg0);
   }
@@ -1924,8 +1730,9 @@ DECL_LINE68(line01E)
 
 DECL_LINE68(line01F)
 {
-  if (reg9==4) {
-    BSET_mem(emu68,get_nextw(),7,reg0);
+  if (reg9 == 4) {
+    const int bit = get_nextw();
+    BSET_mem(emu68, bit, 7, reg0);
   } else {
     line0_imm[reg9][31](emu68,reg0);
   }
@@ -1933,396 +1740,344 @@ DECL_LINE68(line01F)
 
 DECL_LINE68(line020)
 {
-  /* BTST Dx,Dy */
-  int68_t a,b;
-  a = REG68.d[reg0];
-  b = REG68.d[reg9]&31;
-  BTST(a,b);
+  /* BTST.L Dx,Dy */
+  int68_t   y = REG68.d[reg0];
+  const int x = REG68.d[reg9];
+  BTSTL(y,y,x);
   ADDCYCLE(2);
 }
 
 DECL_LINE68(line021)
 {
   /* MOVEP.W d(An),Dn */
-  const addr68_t addr = REG68.a[reg0] + get_nextw();
-  uint68_t a;
-  a  =(u8)read_B(addr+0)<<8;
-  a +=(u8)read_B(addr+2)<<0;
-  REG68.d[reg9] = (REG68.d[reg9]&~0xFFFF) | a;
+  const addr68_t l = REG68.a[reg0] + get_nextw();
+        uint68_t a;
+  a  = read_B( l + 0 ) << 8;
+  a += read_B( l + 2 ) << 0;
+  REG68.d[reg9] = ( REG68.d[reg9] & ~0xFFFF ) + a;
   ADDCYCLE(8);
 }
 
 DECL_LINE68(line022)
 {
-  /* BTST Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[2](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BTST(a,b);
+  /* BTST.B Dn,(An) */
+  const addr68_t l = get_EAB(2,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BTSTB(y,y,x);
   ADDCYCLE(0);
 }
 
 DECL_LINE68(line023)
 {
-  /* BTST Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[3](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BTST(a,b);
+  /* BTST.B Dn,(An)+ */
+  const addr68_t l = get_EAB(3,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BTSTB(y,y,x);
   ADDCYCLE(0);
 }
 
 DECL_LINE68(line024)
 {
-  /* BTST Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[4](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BTST(a,b);
+  /* BTST.B Dn,-(An) */
+  const addr68_t l = get_EAB(4,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BTSTB(y,y,x);
   ADDCYCLE(0);
 }
 
 DECL_LINE68(line025)
 {
-  /* BTST Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[5](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BTST(a,b);
+  /* BTST.B Dn,d(An) */
+  const addr68_t l = get_EAB(5,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BTSTB(y,y,x);
   ADDCYCLE(0);
 }
 
 DECL_LINE68(line026)
 {
-  /* BTST Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[6](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BTST(a,b);
+  /* BTST.B Dn,d(An,Xi) */
+  const addr68_t l = get_EAB(6,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BTSTB(y,y,x);
   ADDCYCLE(0);
 }
 
 DECL_LINE68(line027)
 {
-  /* BTST Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[7](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BTST(a,b);
+  /* BTST.B Dn,<Ae> */
+  const addr68_t l = get_EAB(7,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BTSTB(y,y,x);
   ADDCYCLE(0);
 }
 
 DECL_LINE68(line028)
 {
-  /* BCHG Dx,Dy */
-  int68_t a,b;
-  a = REG68.d[reg0];
-  b = REG68.d[reg9]&31;
-  BCHG(a,b);
-  REG68.d[reg0] = a;
+  /* BCHG.L Dx,Dy */
+  int68_t   y = REG68.d[reg0];
+  const int x = REG68.d[reg9];
+  BCHGL(y,y,x);
+  REG68.d[reg0] = (u32) y;
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line029)
 {
   /* MOVEP.L d(An),Dn */
-  const addr68_t addr = REG68.a[reg0] + get_nextw();
-  uint68_t a;
-  a  =(u8)read_B(addr+0)<<24;
-  a +=(u8)read_B(addr+2)<<16;
-  a +=(u8)read_B(addr+4)<<8;
-  a +=(u8)read_B(addr+6)<<0;
+  const addr68_t l = REG68.a[reg0] + get_nextw();
+        uint68_t a;
+  a  = read_B( l + 0 ) << 24;
+  a += read_B( l + 2 ) << 16;
+  a += read_B( l + 4 ) << 8;
+  a += read_B( l + 6 ) << 0;
   REG68.d[reg9] = a;
   ADDCYCLE(16);
 }
 
 DECL_LINE68(line02A)
 {
-  /* BCHG Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[2](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCHG(a,b);
-  write_B(addr,a);
+  /* BCHG.B Dn,(An) */
+  const addr68_t l = get_EAB(2,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCHGB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line02B)
 {
-  /* BCHG Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[3](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCHG(a,b);
-  write_B(addr,a);
+  /* BCHG.B Dn,(An)+ */
+  const addr68_t l = get_EAB(3,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCHGB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line02C)
 {
-  /* BCHG Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[4](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCHG(a,b);
-  write_B(addr,a);
+  /* BCHG.B Dn,-(An) */
+  const addr68_t l = get_EAB(4,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCHGB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line02D)
 {
-  /* BCHG Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[5](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCHG(a,b);
-  write_B(addr,a);
+  /* BCHG.B Dn,d(An) */
+  const addr68_t l = get_EAB(5,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCHGB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line02E)
 {
-  /* BCHG Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[6](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCHG(a,b);
-  write_B(addr,a);
+  /* BCHG.B Dn,d(An,Xi) */
+  const addr68_t l = get_EAB(6,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCHGB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line02F)
 {
-  /* BCHG Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[7](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCHG(a,b);
-  write_B(addr,a);
+  /* BCHG.B Dn,<Ae> */
+  const addr68_t l = get_EAB(7,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCHGB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line030)
 {
-  /* BCLR Dx,Dy */
-  int68_t a,b;
-  a = REG68.d[reg0];
-  b = REG68.d[reg9]&31;
-  BCLR(a,b);
-  REG68.d[reg0] = a;
+  /* BCLR.L Dx,Dy */
+  int68_t   y = REG68.d[reg0];
+  const int x = REG68.d[reg9];
+  BCLRL(y,y,x);
+  REG68.d[reg0] = (u32) y;
   ADDCYCLE(6);
 }
 
 DECL_LINE68(line031)
 {
   /* MOVEP.W Dn,d(An) */
-  const addr68_t addr = REG68.a[reg0] + get_nextw();
+  const addr68_t l = REG68.a[reg0] + get_nextw();
   const uint68_t a = REG68.d[reg9];
-  write_B(addr+0,a>>8);
-  write_B(addr+2,a>>0);
+  write_B( l + 0, a >> 8);
+  write_B( l + 2, a >> 0);
   ADDCYCLE(8);
 }
 
 DECL_LINE68(line032)
 {
-  /* BCLR Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[2](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCLR(a,b);
-  write_B(addr,a);
+  /* BCLR.B Dn,(An) */
+  const addr68_t l = get_EAB(2,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCLRB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line033)
 {
-  /* BCLR Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[3](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCLR(a,b);
-  write_B(addr,a);
+  /* BCLR.B Dn,(An)+ */
+  const addr68_t l = get_EAB(3,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCLRB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line034)
 {
-  /* BCLR Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[4](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCLR(a,b);
-  write_B(addr,a);
+  /* BCLR.B Dn,-(An) */
+  const addr68_t l = get_EAB(4,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCLRB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line035)
 {
-  /* BCLR Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[5](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCLR(a,b);
-  write_B(addr,a);
+  /* BCLR.B Dn,d(An) */
+  const addr68_t l = get_EAB(5,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCLRB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line036)
 {
-  /* BCLR Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[6](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCLR(a,b);
-  write_B(addr,a);
+  /* BCLR.B Dn,d(An,Xi) */
+  const addr68_t l = get_EAB(6,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCLRB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line037)
 {
-  /* BCLR Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[7](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BCLR(a,b);
-  write_B(addr,a);
+  /* BCLR.B Dn,<Ae> */
+  const addr68_t l = get_EAB(7,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BCLRB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line038)
 {
-  /* BSET Dx,Dy */
-  int68_t a,b;
-  a = REG68.d[reg0];
-  b = REG68.d[reg9]&31;
-  BSET(a,b);
-  REG68.d[reg0] = a;
+  /* BSET.L Dx,Dy */
+  int68_t   y = REG68.d[reg0];
+  const int x = REG68.d[reg9];
+  BSETL(y,y,x);
+  REG68.d[reg0] = (u32) y;
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line039)
 {
   /* MOVEP.L Dn,d(An) */
-  const addr68_t addr = REG68.a[reg0] + get_nextw();
+  const addr68_t l = REG68.a[reg0] + get_nextw();
   const uint68_t a = REG68.d[reg9];
-  write_B(addr+0,a>>24);
-  write_B(addr+2,a>>16);
-  write_B(addr+4,a>>8);
-  write_B(addr+6,a>>0);
+  write_B( l + 0, a >> 24);
+  write_B( l + 2, a >> 16);
+  write_B( l + 4, a >> 8);
+  write_B( l + 6, a >> 0);
   ADDCYCLE(16);
 }
 
 DECL_LINE68(line03A)
 {
-  /* BSET Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[2](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BSET(a,b);
-  write_B(addr,a);
+  /* BSET.B Dn,(An) */
+  const addr68_t l = get_EAB(2,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BSETB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line03B)
 {
-  /* BSET Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[3](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BSET(a,b);
-  write_B(addr,a);
+  /* BSET.B Dn,(An)+ */
+  const addr68_t l = get_EAB(3,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BSETB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line03C)
 {
-  /* BSET Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[4](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BSET(a,b);
-  write_B(addr,a);
+  /* BSET.B Dn,-(An) */
+  const addr68_t l = get_EAB(4,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BSETB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line03D)
 {
-  /* BSET Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[5](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BSET(a,b);
-  write_B(addr,a);
+  /* BSET.B Dn,d(An) */
+  const addr68_t l = get_EAB(5,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BSETB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line03E)
 {
-  /* BSET Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[6](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BSET(a,b);
-  write_B(addr,a);
+  /* BSET.B Dn,d(An,Xi) */
+  const addr68_t l = get_EAB(6,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BSETB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 
 DECL_LINE68(line03F)
 {
-  /* BSET Dn,<Ae> */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[7](emu68,reg0);
-  a = read_B(addr);
-  b = REG68.d[reg9]&7;
-  BSET(a,b);
-  write_B(addr,a);
+  /* BSET.B Dn,<Ae> */
+  const addr68_t l = get_EAB(7,reg0);
+        int68_t  y = read_B(l);
+  const int      x = REG68.d[reg9];
+  BSETB(y,y,x);
+  write_B(l,y);
   ADDCYCLE(4);
 }
 

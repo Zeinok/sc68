@@ -1,37 +1,37 @@
 /**
  * @ingroup   emu68_devel
- * @file      emu68/ym_orig.h
+ * @file      emu68/ym_puls.h
  * @author    Benjamin Gerard
  * @date      2009/02/10
- * @brief     sc68 original YM-2149 emulator header.
+ * @brief     sc68 pulse YM-2149 emulator header.
  *
  */
 
 IO68_EXTERN
-/** Setup function for sc68 original ym engine.
+/** Setup function for sc68 pulse ym engine.
  *
- *    The ym_orig_setup() function sets ym original engine for this ym
+ *    The ym_puls_setup() function sets ym pulsinal engine for this ym
  *    emulator instance.
  *
  *  @parm    ym  ym emulator instance to setup
  *  @retval   0  on success
  *  @retval  -1  on failure
  */
-int ym_orig_setup(ym_t * const ym);
+int ym_puls_setup(ym_t * const ym);
 
 IO68_EXTERN
-/** Creates and parse ym original engine options
+/** Creates and parse ym pulse engine options
  *
  *  @params  argc  argument count
  *  @params  argv  argument values
  *  @retval  remaining argument count
  */
-int ym_orig_options(int argc, char ** argv);
+int ym_puls_options(int argc, char ** argv);
 
-typedef void (*ym_orig_filter_t)(ym_t * const);
+typedef void (*ym_puls_filter_t)(ym_t * const);
 
-/** YM-2149 internal data structure for original emulator. */
-struct ym2149_orig_s
+/** YM-2149 internal data structure for pulse emulator. */
+struct ym2149_puls_s
 {
 
   /** @name  Envelop generator
@@ -89,4 +89,4 @@ struct ym2149_orig_s
 };
 
 /** YM-2149 emulator instance type */
-typedef struct ym2149_orig_s ym_orig_t;
+typedef struct ym2149_puls_s ym_puls_t;

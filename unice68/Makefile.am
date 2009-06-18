@@ -16,7 +16,7 @@ ACLOCAL_AMFLAGS = -I m4 --install
 
 lib_LTLIBRARIES        = libunice68.la
 libunice68_la_SOURCES  = unice68_native.c
-libunice68_la_CFLAGS   = $(ALL_EFLAGS) $(LIB_CFLAGS)
+libunice68_la_CFLAGS   = $(ALL_CFLAGS) $(LIB_CFLAGS)
 libunice68_la_CPPFLAGS = $(ALL_EFLAGS) $(LIB_EFLAGS) -DUNICE68_EXPORT=1
 libunice68_la_LDFLAGS  = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
 LFLAGS                 = -avoid-version $(NOINSTALL)
@@ -30,9 +30,9 @@ if UNICE68_CLI
 bin_PROGRAMS     = unice68
 unice68_SOURCES  = unice68.c
 unice68_LDADD    = libunice68.la
-unice68_LDFLAGS  = $(ALL_EFLAGS) $(BIN_LFLAGS)
-unice68_CFLAGS   = $(ALL_EFLAGS) $(BIN_CFLAGS)
-unice68_CPPFLAGS = $(ALL_LFLAGS) $(BIN_EFLAGS)
+unice68_LDFLAGS  = $(ALL_LFLAGS) $(BIN_LFLAGS)
+unice68_CFLAGS   = $(ALL_CFLAGS) $(BIN_CFLAGS)
+unice68_CPPFLAGS = $(ALL_EFLAGS) $(BIN_EFLAGS)
 
 endif
 

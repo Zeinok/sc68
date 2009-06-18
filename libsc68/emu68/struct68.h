@@ -1,9 +1,9 @@
 /**
- * @ingroup   emu68_type68_devel
+ * @ingroup   emu68_lib
  * @file      emu68/struct68.h
  * @author    Benjamin Gerard
  * @date      13/03/1999
- * @brief     Struture definitions.
+ * @brief     Struture definitions header.
  *
  */
 
@@ -16,14 +16,14 @@
 
 #include "type68.h"
 
-/** @addtogroup emu68_type68_devel
+/** @addtogroup emu68_lib_types
  *  @{
  */
 
-/** IO no pending interrupetion return value.
+/** IO no pending interruption return value.
  *
  *    The next_int function of IO plugin must return IO68_NO_INT when no
- *    interruption are expected.
+ *    interruption has been triggered.
  */
 #define IO68_NO_INT (0x80000000)
 
@@ -40,13 +40,23 @@
 
 /** Write memory function. */
 typedef void (*memwfunc68_t)(emu68_t * const);
+/** Write IO chip function. */
 typedef void (*iomemfunc68_t)(io68_t * const);
 
 /** @} */
 
 /** First level (16 lines) decoder function. */
-typedef void (linefunc68_t)(emu68_t * const/*emu68*/,int/*reg9*/,int/*reg0*/);
-#define DECL_LINE68(N) void N(emu68_t * const emu68,int reg9 ,int reg0)
+typedef void (linefunc68_t)(emu68_t * const, int, int);
+
+#ifndef EMU68_MONOLITIC
+# define DECL_LINE68(N) \
+  void N(emu68_t * const emu68, int reg9, int reg0)
+# define DECL_STATIC_LINE68(N) static DECL_LINE68(N)
+#else
+# define DECL_LINE68(N) \
+  static void N(emu68_t * const emu68, int reg9, int reg0)
+# define DECL_STATIC_LINE68(N) DECL_LINE68(N)
+#endif
 
 /** Alloc function type. */
 typedef void * (*emu68_alloc_t)(unsigned int);
@@ -58,9 +68,9 @@ typedef void (*emu68_free_t)(void *);
  */
 typedef struct
 {
-  addr68_t vector;  /**< Interrupt vector.             */
-  int level;        /**< Interrupt level [0..7].       */
-  cycle68_t cycle;  /**< Cycle the interruption falls. */
+  addr68_t  vector;              /**< Interrupt vector.             */
+  int        level;              /**< Interrupt level [0..7].       */
+  cycle68_t  cycle;              /**< Cycle the interruption falls. */
 } interrupt68_t;
 
 /** IO emulator plugin structure.
@@ -104,11 +114,11 @@ struct io68_s
  */
 typedef struct
 {
-  int68_t d[8];   /**< 68000 data registers.      */
-  int68_t a[8];   /**< 68000 address registers.   */
-  int68_t usp;    /**< 68000 User Stack Pointers. */
-  int68_t pc;     /**< 68000 Program Counter.     */
-  int68_t sr;     /**< 68000 Status Register.     */
+  s32 d[8];                    /**< 68000 data registers.      */
+  s32 a[8];                    /**< 68000 address registers.   */
+  s32 usp;                     /**< 68000 User Stack Pointers. */
+  s32 pc;                      /**< 68000 Program Counter.     */
+  int sr;                      /**< 68000 Status Register.     */
 } reg68_t;
 
 #define REG68_D0_IDX 000
@@ -147,28 +157,44 @@ struct emu68_s {
   emu68_alloc_t alloc;                  /**< Alloc fonction.        */
   emu68_free_t  free;                   /**< Free function.         */
 
-  reg68_t reg;                       /**< 68000 internal registers. */
+  reg68_t   reg;                     /**< 68000 internal registers. */
   cycle68_t cycle;                   /**< Internal cycle counter.   */
-  uint68_t clock;                    /**< Master clock frequency.   */
+  uint68_t  clock;                   /**< Master clock frequency.   */
 
   /* IO chips. */
-  int nio;                            /**< # IO plug in IO-list.    */
-  io68_t *iohead;                     /**< Head of IO-list.         */
-  io68_t *interrupt_io;               /**< Current interuptible IO. */
-  io68_t *mapped_io[256];
+  int      nio;                       /**< # IO plug in IO-list.    */
+  io68_t * iohead;                    /**< Head of IO-list.         */
+  io68_t * interrupt_io;              /**< Current interuptible IO. */
+  io68_t * mapped_io[256];
 
   /* Memory access. */
   addr68_t bus_addr;        /**< bus address for memory access.     */
   int68_t  bus_data;        /**< bus data for memory access.        */
   int framechk;             /**< ORed chk change for current frame. */
-  u8  *chk;                 /**< Access-Control-Memory buffer.      */
+  u8     * chk;             /**< Access-Control-Memory buffer.      */
 
   /* Onboard memory. */
   addr68_t memmsk;     /**< Onboard memory mask (2^log2mem-1).      */
-  int log2mem;         /**< Onboard memory buffer size (2^log2mem). */
-  u8 mem[16];          /**< Onboard memory buffer.
+  int      log2mem;    /**< Onboard memory buffer size (2^log2mem). */
+  u8       mem[16];    /**< Onboard memory buffer.
                             @notice Must be last in struct.         */
 };
+
+static inline
+void inl_setcycle68(emu68_t * const emu68, const cycle68_t n)
+{
+#ifdef EMU68CYCLE
+  emu68->cycle = n;
+#endif
+}
+
+static inline
+void inl_addcycle68(emu68_t * const emu68, const cycle68_t n)
+{
+#ifdef EMU68CYCLE
+  emu68->cycle += n;
+#endif
+}
 
 /**
  *  @}

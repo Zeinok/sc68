@@ -14,12 +14,12 @@ EFLAGS             = -I$(top_srcdir) $(file68_inc) -DIO68_EXPORT
 
 mysources=\
  io68.c mfp_io.c mfpemul.c mw_io.c mwemul.c paula_io.c paulaemul.c	\
- shifter_io.c ym_blep.c ym_io.c ym_orig.c ymemul.c
+ shifter_io.c ym_blep.c ym_dump.c ym_io.c ym_puls.c ymemul.c
 
 myheaders=\
  default_option68.h io68.h io68_api.h mfp_io.h mfpemul.h mw_io.h	\
- mwemul.h paula_io.h paulaemul.h shifter_io.h ym_blep.h ym_fixed_vol.h	\
- ym_io.h ym_orig.h ymemul.h ymout1c5bit.h ymoutorg.h
+ mwemul.h paula_io.h paulaemul.h shifter_io.h ym_blep.h ym_dump.h	\
+ ym_fixed_vol.h ym_io.h ym_puls.h ymemul.h ymout1c5bit.h ymoutorg.h
 
 srcextra=\
  ym_atarist_table.c ym_linear_table.c

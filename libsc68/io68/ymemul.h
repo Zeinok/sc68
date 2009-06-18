@@ -17,7 +17,7 @@
 #include "io68_api.h"
 #include "emu68/emu68.h"
 
-/* Need these defines in ymemul.c and ym_orig.c */
+/* Need these defines in ymemul.c and ym_puls.c */
 #define YM_OUT_MSK_A   0x001F
 #define YM_OUT_MSK_B   0x03E0
 #define YM_OUT_MSK_C   0x7C00
@@ -110,8 +110,9 @@ typedef union ym_reg_u {
 /** Available emulation modes. */
 enum ym_emul_e {
   YM_EMUL_DEFAULT = 0, /**< Use default mode.                            */
-  YM_EMUL_ORIG,        /**< sc68 original emulation.                     */
+  YM_EMUL_PULS,        /**< sc68 original (pulse) emulation.             */
   YM_EMUL_BLEP,        /**< Antti Lankila's Band Limited Step synthesis. */
+  YM_EMUL_DUMP         /**< Dummy register dump.                         */
 };
 
 /** Available emulation modes. */
@@ -126,7 +127,6 @@ enum ym_hz_e {
   YM_HZ_DEFAULT = 0    /**< Default sampling rate. */
 };
 
-
 /** YM master clock frequency. */
 enum ym_clock_e {
   /** Default frequency (YM_CLOCK_ATARIST). */
@@ -138,8 +138,9 @@ enum ym_clock_e {
 /* struct ym_s; */
 typedef struct ym_s ym_t;
 
-#include "ym_orig.h" /* data structure for original ym emulator. */
-#include "ym_blep.h" /* data structure for blep ym emulator.     */
+#include "ym_puls.h" /* data structure for pulse ym emulator. */
+#include "ym_blep.h" /* data structure for blep ym emulator.  */
+#include "ym_dump.h" /* data structure for dump ym emulator.  */
 
 struct ym_s {
 
@@ -192,8 +193,9 @@ struct ym_s {
 
   /** Data */
   union emu_u {
-    ym_orig_t orig; /**< Original YM emulator data. */
+    ym_puls_t puls; /**< Original YM emulator data. */
     ym_blep_t blep; /**< BLEP YM emulator data.     */
+    ym_dump_t dump; /**< DUMP YM emulator data.     */
   } emu;
 };
 

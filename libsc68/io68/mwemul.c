@@ -284,7 +284,7 @@ int mw_setup(mw_t * const mw,
 
   mw->mem     = setup->mem;
   mw->log2mem = setup->log2mem;
-  mw->ct_fix  = (sizeof(uint68_t)<<3)-mw->log2mem;
+  mw->ct_fix  = (sizeof(s32)<<3)-mw->log2mem;
 
   mw_reset(mw);
 
@@ -343,6 +343,50 @@ static void rescale(s32 * b, int68_t f, int n)
 static void no_mix_ste(mw_t * const mw, s32 * b, int n)
 {
   rescale(b, (mw->db_conv == Db_alone) ? 0 : MW_YM_MULT, n);
+}
+
+static void skip_ste(mw_t * const mw, int n)
+{
+  addr68_t base, end2;
+  addr68_t ct, end, stp;
+
+  const int        loop = mw->map[MW_ACTI] & 2;
+  const int        mono = (mw->map[MW_MODE]>>7) & 1;
+  const uint68_t    frq = 50066u >> ((mw->map[MW_MODE]&3)^3);
+  const int      ct_fix = mw->ct_fix;
+
+ /* Get internal register for sample base and sample end
+   * $$$ ??? what if base > end2 ???
+   */
+  base = TOINTERNAL(MW_BASH) << ct_fix;
+  end2 = TOINTERNAL(MW_ENDH) << ct_fix;
+
+  /* Get current sample counter and end */
+  ct  = mw->ct;
+  end = mw->end;
+  stp = ( (frq * n) << ( ct_fix + 1 - mono ) ) / mw->hz;
+
+  if ( stp >= end - ct ) {
+    if ( ! loop ) goto out;
+    stp -= end - ct;
+    ct   = base;
+    end  = end2;
+    if (ct == end) {
+      stp = 0;
+    } else {
+      stp %= end - ct;
+    }
+    ct += stp;
+  }
+
+out:
+  if (!loop && ct >= end) {
+    mw->map[MW_ACTI] = 0;
+    ct  = base;
+    end = end2;
+  }
+  mw->ct  = ct;
+  mw->end = end;
 }
 
 static void mix_ste(mw_t * const mw, s32 *b, int n)
@@ -474,11 +518,16 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
 /* void mw_mix(mw_t * const mw, u32 *b, int n) */
 void mw_mix(mw_t * const mw, s32 *b, int n)
 {
-  if (n<=0) {
+  if ( n <= 0 ) {
     return;
   }
-
-  if (!(mw->map[MW_ACTI]&1)) {
+  
+  if ( !b ) {
+    if ( mw->map[MW_ACTI] & 1 ) {
+      /* no buffer and active : advance counters only */
+      skip_ste(mw,n);
+    }
+  } else if ( ! (mw->map[MW_ACTI] & 1 ) ) {
     /* Micro-Wire desactivated */
     no_mix_ste(mw,b,n);
   } else {

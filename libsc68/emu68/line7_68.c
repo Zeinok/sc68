@@ -4,7 +4,9 @@
 # include "config.h"
 #endif
 
-#include "emu68.h"
-#include "lines/line7.c"
-
-
+#ifdef EMU68_MONOLITIC
+# error "EMU68_MONOLITIC should NOT be defined when compiling this file."
+#else
+# include "lines68.h"
+# include "lines/line7.c"
+#endif

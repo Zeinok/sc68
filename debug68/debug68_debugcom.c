@@ -199,7 +199,7 @@ static int trace(addr68_t addr, int display, int do_bp)
     for(i=0; i<16; i++)
       if (reg68->d[i]!=oldreg68.d[i])
         printf("%c%d : %08X => %08X\n",
-               i<8 ? 'D' : 'A', i&7, oldreg68.d[i], reg68->d[i]);
+               i<8 ? 'D' : 'A', i&7, (int)oldreg68.d[i], (int)reg68->d[i]);
 
   last_desa = reg68->pc&dbg68->memmsk;
   return -1;
@@ -363,11 +363,11 @@ static void show_reg(void)
   int i;
   int ccr = GET_CCR(reg68->sr);
   for(i=0; i<8; i++)
-    printf("  D%d=%08X  A%d=%08X\n",i,reg68->d[i],i,reg68->a[i]);
+    printf("  D%d=%08X  A%d=%08X\n",i,(int)reg68->d[i],i,(int)reg68->a[i]);
   printf("  PC=%08X USP=%08X\n"
          "  SR=%04X %c%c%c%c%c\n",
-         reg68->pc,reg68->usp,
-         reg68->sr&0xFFFF,
+         (int)reg68->pc,(int)reg68->usp,
+         (int)reg68->sr&0xFFFF,
          (ccr&SR_X) ? 'X' : '-',
          (ccr&SR_N) ? 'N' : '-',
          (ccr&SR_Z) ? 'Z' : '-',
@@ -376,7 +376,7 @@ static void show_reg(void)
     );
 }
 
-static int *is_reg_change(char *s);
+static int68_t *is_reg_change(char *s);
 
 /* Run a new debugger command. If no arg are given, previous command
  * is used.
@@ -707,9 +707,9 @@ int debug68_newcom(int na, char **a)
     if (p=is_reg_change(a[0]), p) {
       char *n=NULL,*err=NULL;
       int v=0;
-      for(n=a[0]+3; *n && isspace(*n); n++);
+      for (n=a[0]+3; *n && isspace(*n); n++);
       if (*n==0 && argc>1)
-        for(n=a[1]; *n && isspace(*n); n++);
+        for (n=a[1]; *n && isspace(*n); n++);
       if (*n==0 || (v=debug68_eval(dbg68, n,&err),err!=NULL))
         printf("Bad value for register\n");
       else *p = v;

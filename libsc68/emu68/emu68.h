@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_devel
+ * @ingroup   emu68_lib
  * @file      emu68/emu68.h
  * @author    Benjamin Gerard
  * @date      1999/03/13
@@ -17,19 +17,17 @@
 #include "emu68_api.h"
 
 #include "struct68.h"
-#include "getea68.h"
-#include "macro68.h"
 #include "error68.h"
 #include "cc68.h"
-#include "inst68.h"
+#include "srdef68.h"
 #include "mem68.h"
 
-/** @defgroup  emu68_core_devel  68k emulator core
- *  @ingroup   emu68_devel
+/** @defgroup  emu68_lib_core  68k emulator core
+ *  @ingroup   emu68_lib
  *  @brief     The core of the 68k emulator.
  */
 
-/** @addtogroup  emu68_devel
+/** @addtogroup  emu68_lib
  *  @{
  */
 

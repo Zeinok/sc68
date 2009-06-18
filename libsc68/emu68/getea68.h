@@ -1,4 +1,6 @@
-/**
+#error "don't use anymore"
+
+/*
  * @ingroup   emu68_core_devel
  * @file      emu68/getea68.h
  * @author    Benjamin Gerard
@@ -47,6 +49,7 @@ addr68_t (*const get_eaw68[8])(emu68_t * const,int reg);
 EMU68_EXTERN
 /** Long operand effective address calculation function table. */
 addr68_t (*const get_eal68[8])(emu68_t * const,int reg);
+
 
 /** @} */
 

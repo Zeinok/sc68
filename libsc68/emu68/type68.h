@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_type68_devel
+ * @ingroup   emu68_lib
  * @file      emu68/type68.h
  * @brief     Type definitions header.
  * @date      1999/03/13
@@ -11,8 +11,8 @@
 
 /* Copyright (C) 1998-2009 Benjamin Gerard */
 
-#ifndef _TYPE68_H_
-#define _TYPE68_H_
+#ifndef _EMU68_TYPE68_H_
+#define _EMU68_TYPE68_H_
 
 #ifdef HAVE_STDINT_H
 # include <stdint.h>
@@ -22,8 +22,8 @@
 # include <sys/types.h>
 #endif
 
-/** @defgroup  emu68_type68_devel  Type definitions
- *  @ingroup   emu68_devel
+/** @defgroup  emu68_lib_types  Type definitions
+ *  @ingroup   emu68_lib
  *
  *   Definition of types used by EMU68 and SC68 related projects.
  *   Some of them are probably not neccessary and should be remove to
@@ -38,60 +38,84 @@
  *  @{
  */
 
-typedef uint8_t u8;        /**< Must be an unsigned 8 bit integer. */
-typedef int8_t  s8;        /**< Must be an   signed 8 bit integer. */
+typedef  uint8_t  u8;      /**< Must be an unsigned 8 bit integer.  */
+typedef   int8_t  s8;      /**< Must be a    signed 8 bit integer.  */
 
 typedef uint16_t u16;      /**< Must be an unsigned 16 bit integer. */
-typedef int16_t  s16;      /**< Must be an   signed 16 bit integer. */
+typedef  int16_t s16;      /**< Must be a    signed 16 bit integer. */
 
 typedef uint32_t u32;      /**< Must be an unsigned 32 bit integer. */
-typedef int32_t  s32;      /**< Must be an   signed 32 bit integer. */
+typedef  int32_t s32;      /**< Must be a    signed 32 bit integer. */
 
-typedef uint64_t u64;      /**< Must be at an unsigned 64 bit integer. */
-typedef int64_t  s64;      /**< Must be an   signed 64 bit integer. */
+typedef uint64_t u64;      /**< Must be an unsigned 64 bit integer. */
+typedef  int64_t s64;      /**< Must be a    signed 64 bit integer. */
 
 /** @} */
 
+#ifndef INT68_BITS 
 
-/** Commonly used int (should be fastest at least 32 bit type). */
+/* Commonly used int (should be fastest at least 32 bit type). */
+typedef  int_fast32_t int68_t;     /**< fast   signed integer type. */
+typedef       int68_t sint68_t;    /**< fast   signed integer type. */
+typedef uint_fast32_t uint68_t;    /**< fast unsigned integer type. */
 
-/* typedef  int_fast32_t int68_t; */
-/* typedef       int68_t sint68_t; */
-/* typedef uint_fast32_t uint68_t; */
+#elif  INT68_BITS == 32
+
+typedef           s32 int68_t;     /**< 32bit   signed integer type. */
+typedef           s32 sint68_t;    /**< 32bit   signed integer type. */
+typedef           u32 uint68_t;    /**< 32bit unsigned integer type. */
+
+#elif  INT68_BITS == 64
+
+typedef           s64 int68_t;     /**< 64bit   signed integer type. */
+typedef           s64 sint68_t;    /**< 64bit   signed integer type. */
+typedef           u64 uint68_t;    /**< 64bit unsigned integer type. */
+
+#else
+# error "invalid define INT68_BITS"
+#endif
 
 /* $$$ Switch back to int_fast as soon as it is safe to have int68_t
  * width > 32bit. Most problems about it probably are in the macro68.h
- * file. */
-typedef  int32_t int68_t;
-typedef  int68_t sint68_t;
-typedef uint32_t uint68_t;
+ * file.
+ *
+ * $$$ Thing should be fixed now. Still need more testing to validate
+ * the new 68K emulator engine.
+ *
+ * */
 
+typedef       uint68_t cycle68_t; /**< Type for cycle counters.        */
+typedef        int68_t  addr68_t; /**< Type for 68k memory addressing. */
+typedef struct  io68_s    io68_t; /**< IO chip instance type.          */
+typedef struct emu68_s   emu68_t; /**< 68k emulator instance type.     */
 
-/** Used by cycle counters. */
-typedef uint68_t cycle68_t;
-
-/** Used for addressing 68k memory. */
-typedef uint68_t addr68_t;
-
-/** IO chip instance type. */
-typedef struct io68_s io68_t;
-
-/** 68k Emulateur instance type. */
-typedef struct emu68_s emu68_t;
-
-/** 68k memory acces function. */
+/** 68k memory access function. */
 typedef void (*memfunc68_t)(emu68_t * const);
 
 /**
  * @}
  */
 
-#define BYTE_MASK ~0xFF
-#define WORD_MASK ~0xFFFF
-#define LONG_MASK 0
+#define BASE_FIX (sizeof(int68_t)<<3) /* number of bit of int68_t type. */
+#define BYTE_FIX (BASE_FIX-8)  /* shift to normalize byte operands. */
+#define WORD_FIX (BASE_FIX-16) /* shift to normalize word operands. */
+#define LONG_FIX (BASE_FIX-32) /* shift to normalize long operands. */
+#define SIGN_FIX (BASE_FIX-1)  /* sign bit raw. */
+#define SIGN_BIT SIGN_FIX      /* sign bit raw. */
+#define SIGN_MSK ( (int68_t) ( (int68_t) 1 << SIGN_FIX ) ) /* sign mask. */
 
-#define BYTE_SHIFT ((sizeof(int68_t)-1)<<3)
-#define WORD_SHIFT ((sizeof(int68_t)-2)<<3)
-#define LONG_SHIFT ((sizeof(int68_t)-4)<<3)
+#define BYTE_MSK ( (int68_t) 0xFFFFFF00 )
+#define WORD_MSK ( (int68_t) 0xFFFF0000 )
+#define LONG_MSK ( (int68_t) 0x00000000 )
 
-#endif /* #ifndef _TYPE68_H_ */
+#define NRM_BYTE_MSK ( (int68_t) ( (int68_t) 0x000000FF << BYTE_FIX ) )
+#define NRM_WORD_MSK ( (int68_t) ( (int68_t) 0x0000FFFF << WORD_FIX ) )
+#define NRM_LONG_MSK ( (int68_t) ( (int68_t) 0xFFFFFFFF << LONG_FIX ) )
+/* L={7,15,31} */
+#define NRM_MSK(L)   ( (int68_t) ( (int68_t) ((int68_t) 1 << SIGN_BIT) >> (L)))
+
+#define NRM_BYTE_ONE ( (int68_t) ( (int68_t) 0x00000001 << BYTE_FIX ) )
+#define NRM_WORD_ONE ( (int68_t) ( (int68_t) 0x00000001 << WORD_FIX ) )
+#define NRM_LONG_ONE ( (int68_t) ( (int68_t) 0x00000001 << LONG_FIX ) )
+
+#endif /* #ifndef _EMU68_TYPE68_H_ */

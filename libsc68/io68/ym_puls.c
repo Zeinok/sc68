@@ -1,5 +1,5 @@
 /*
- *                  sc68 - YM-2149 original engine
+ *                   sc68 - YM-2149 pulse engine
  *            Copyright (C) 2001-2009 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
  *
@@ -44,7 +44,7 @@ extern int ym_feature;          /* defined in ymemul.c */
 # define INTMSB (sizeof(int)*8-1)
 #endif
 
-#define YM_ORIG_FILTER 1        /* 0:none 1:fast 2:slow */
+#define YM_PULS_FILTER 1        /* 0:none 1:fast 2:slow */
 
 #define YM_OUT_MSK(C,B,A)                       \
   (((((C)&0x1F)<<10))                           \
@@ -74,7 +74,7 @@ static void filter_mixed(ym_t * const);
 static void filter_boxcar(ym_t * const);
 static struct {
   const char * name;
-  ym_orig_filter_t filter;
+  ym_puls_filter_t filter;
 } filters[] = {
   { "2-pole", filter_2pole },   /* first is default */
   { "none",   filter_none  },
@@ -87,37 +87,37 @@ static int default_filter = 0;
 
 static int reset(ym_t * const ym, const cycle68_t ymcycle)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
+  ym_puls_t * const puls = &ym->emu.puls;
 
   /* Reset envelop generator */
-  orig->env_bit            = 0;
-  orig->env_ct             = 0;
+  puls->env_bit            = 0;
+  puls->env_ct             = 0;
 
   /* Reset noise generator */
-  orig->noise_gen          = 1;
-  orig->noise_ct           = 0;
+  puls->noise_gen          = 1;
+  puls->noise_ct           = 0;
 
   /* Reset tone generator */
-  orig->voice_ctA          = 0;
-  orig->voice_ctB          = 0;
-  orig->voice_ctC          = 0;
-  orig->levels             = 0;
+  puls->voice_ctA          = 0;
+  puls->voice_ctB          = 0;
+  puls->voice_ctC          = 0;
+  puls->levels             = 0;
 
   /* Reset filters */
-  orig->hipass_inp1 = 0;
-  orig->hipass_out1 = 0;
-  orig->lopass_out1 = 0;
+  puls->hipass_inp1 = 0;
+  puls->hipass_out1 = 0;
+  puls->lopass_out1 = 0;
 
   /* Reset butterworth */
-  orig->btw.x[0] = orig->btw.x[1] = 0;
-  orig->btw.y[0] = orig->btw.y[1] = 0;
+  puls->btw.x[0] = puls->btw.x[1] = 0;
+  puls->btw.y[0] = puls->btw.y[1] = 0;
 
   /* Butterworth low-pass cutoff=15.625khz sampling=250khz */
-  orig->btw.a[0] =  0x01eac69f; /* fix 30 */
-  orig->btw.a[1] =  0x03d58d3f;
-  orig->btw.a[2] =  0x01eac69f;
-  orig->btw.b[0] = -0x5d1253b0;
-  orig->btw.b[1] =  0x24bd6e2f;
+  puls->btw.a[0] =  0x01eac69f; /* fix 30 */
+  puls->btw.a[1] =  0x03d58d3f;
+  puls->btw.a[2] =  0x01eac69f;
+  puls->btw.b[0] = -0x5d1253b0;
+  puls->btw.b[1] =  0x24bd6e2f;
 
   return 0;
 }
@@ -137,7 +137,7 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
  */
 static int noise_generator(ym_t * const ym, int ymcycles)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
+  ym_puls_t * const puls = &ym->emu.puls;
   int rem_cycles;
   int v, noise_gen, ct, per, msk;
   s32 * b;
@@ -146,8 +146,8 @@ static int noise_generator(ym_t * const ym, int ymcycles)
   if(!(ymcycles >>= 3)) goto finish;
 
   /* All inits */
-  ct        = orig->noise_ct;
-  noise_gen = orig->noise_gen;
+  ct        = puls->noise_ct;
+  noise_gen = puls->noise_gen;
   per       = ym->reg.name.per_noise & 0x1F;
 
   per     <<= 1;    /* because the noise generator base frequency is
@@ -157,7 +157,7 @@ static int noise_generator(ym_t * const ym, int ymcycles)
 
   msk       = ym_smsk_table[7 & (ym->reg.name.ctl_mixer >> 3)];
   v         = (u16)(-(noise_gen & 1) | msk);
-  b         = orig->noiptr;
+  b         = puls->noiptr;
   do {
     if (++ct >= per) {
       ct = 0;
@@ -178,9 +178,9 @@ static int noise_generator(ym_t * const ym, int ymcycles)
   } while (--ymcycles);
 
   /* Save value for next pass */
-  orig->noiptr    = b;
-  orig->noise_gen = noise_gen;
-  orig->noise_ct  = ct;
+  puls->noiptr    = b;
+  puls->noise_gen = noise_gen;
+  puls->noise_ct  = ct;
 
   finish:
   /* return not mixed cycle */
@@ -193,12 +193,12 @@ static int noise_generator(ym_t * const ym, int ymcycles)
  */
 static void do_noise(ym_t * const ym, cycle68_t ymcycle)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
+  ym_puls_t * const puls = &ym->emu.puls;
   ym_waccess_t * access;
   ym_waccess_list_t * const regs = &ym->noi_regs;
   cycle68_t lastcycle;
 
-  orig->noiptr = ym->outbuf;
+  puls->noiptr = ym->outbuf;
   if (!ymcycle) {
     return;
   }
@@ -367,7 +367,7 @@ static  const int * waveforms[16] = {
 static int envelop_generator(ym_t * const ym, int ymcycles)
 #if YM_ENV_TABLE
 {
-  ym_orig_t * const orig = &ym->emu.orig;
+  ym_puls_t * const puls = &ym->emu.puls;
   int rem_cycle = ymcycles & 7;
 
   if((ymcycles >>= 3)) {
@@ -375,9 +375,9 @@ static int envelop_generator(ym_t * const ym, int ymcycles)
     const int * const waveform = waveforms[shape];
     /* Do Not Repeat is NOT ([CONT] AND NOT [HOLD]) */
     const int dnr = 1 & ~((shape>>3)&~shape);
-    s32 *b  = orig->envptr;
-    int ct  = orig->env_ct;
-    int bit = orig->env_bit;
+    s32 *b  = puls->envptr;
+    int ct  = puls->env_ct;
+    int bit = puls->env_bit;
     int per = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi<<8);
 
     do {
@@ -390,9 +390,9 @@ static int envelop_generator(ym_t * const ym, int ymcycles)
     } while (--ymcycles);
 
     /* Save value for next pass */
-    orig->envptr     = b;
-    orig->env_ct     = ct;
-    orig->env_bit    = bit;
+    puls->envptr     = b;
+    puls->env_ct     = ct;
+    puls->env_bit    = bit;
   }
   return rem_cycle;
 }
@@ -500,13 +500,13 @@ static int envelop_generator(ym_t * const ym, int ymcycles)
  */
 static void do_envelop(ym_t * const ym, cycle68_t ymcycle)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
+  ym_puls_t * const puls = &ym->emu.puls;
   ym_waccess_t * access;
   ym_waccess_list_t * const regs = &ym->env_regs;
 
   cycle68_t lastcycle;
 
-  orig->envptr = ym->outbuf;
+  puls->envptr = ym->outbuf;
   if (!ymcycle) {
     return;
   }
@@ -528,16 +528,16 @@ static void do_envelop(ym_t * const ym, cycle68_t ymcycle)
     ym->reg.index[access->reg] = access->val;
     if(access->reg == YM_ENVTYPE) {
 #if YM_ENV_TABLE
-      orig->env_bit = 0;
-      orig->env_ct  = 0; /* $$$ Needs to be verifed. It seems cleaner. */
+      puls->env_bit = 0;
+      puls->env_ct  = 0; /* $$$ Needs to be verifed. It seems cleaner. */
 #else
       int shape = access->val & 15;
       /* Alternate mask start value depend on ATTack bit */
-      orig->env_alt    = (~((shape << (INTMSB-2)) >> INTMSB)) & 0x1F;
-      orig->env_bit    = 0;
-      orig->env_bitstp = 1;
-      orig->env_cont   = 0x1f;
-      orig->env_ct = 0; /* $$$ Needs to be verifed. It seems cleaner. */
+      puls->env_alt    = (~((shape << (INTMSB-2)) >> INTMSB)) & 0x1F;
+      puls->env_bit    = 0;
+      puls->env_bitstp = 1;
+      puls->env_cont   = 0x1f;
+      puls->env_ct = 0; /* $$$ Needs to be verifed. It seems cleaner. */
 #endif
 
     }
@@ -553,7 +553,7 @@ static void do_envelop(ym_t * const ym, cycle68_t ymcycle)
 
 static int tone_generator(ym_t  * const ym, int ymcycles)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
+  ym_puls_t * const puls = &ym->emu.puls;
 
   int ctA,  ctB,  ctC;
   int perA, perB, perC;
@@ -569,7 +569,7 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
   if(!ymcycles) goto finish;
 
   /* init buffer address */
-  b = orig->tonptr;
+  b = puls->tonptr;
 
   mute = ym->voice_mute & YM_OUT_MSK_ALL;
   smsk = ym_smsk_table[7 & ym->reg.name.ctl_mixer];
@@ -590,15 +590,15 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
   else       vols |= (v<<11)+(1<<10);
 
   /* Mixer steps & couters */
-  ctA = orig->voice_ctA;
-  ctB = orig->voice_ctB;
-  ctC = orig->voice_ctC;
+  ctA = puls->voice_ctA;
+  ctB = puls->voice_ctB;
+  ctC = puls->voice_ctC;
 
   perA = ym->reg.name.per_a_lo | ((ym->reg.name.per_a_hi&0xF)<<8);
   perB = ym->reg.name.per_b_lo | ((ym->reg.name.per_b_hi&0xF)<<8);
   perC = ym->reg.name.per_c_lo | ((ym->reg.name.per_c_hi&0xF)<<8);
 
-  levels = orig->levels;
+  levels = puls->levels;
   do {
     int sq;
 
@@ -631,11 +631,11 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
   } while (--ymcycles);
 
   /* Save value for next pass */
-  orig->tonptr    = b;
-  orig->voice_ctA = ctA;
-  orig->voice_ctB = ctB;
-  orig->voice_ctC = ctC;
-  orig->levels    = levels;
+  puls->tonptr    = b;
+  puls->voice_ctA = ctA;
+  puls->voice_ctB = ctB;
+  puls->voice_ctC = ctC;
+  puls->levels    = levels;
   finish:
   return rem_cycles;
 }
@@ -647,13 +647,13 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
  */
 static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
+  ym_puls_t * const puls = &ym->emu.puls;
 
   ym_waccess_t * access;
   ym_waccess_list_t * const regs = &ym->ton_regs;
   cycle68_t lastcycle;
 
-  orig->tonptr = ym->outbuf;
+  puls->tonptr = ym->outbuf;
   if (!ymcycle) {
     return;
   }
@@ -797,8 +797,8 @@ static s32 * resampling(s32 * dst, const int n,
 
 static void filter_none(ym_t * const ym)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
-  const int n = (orig->tonptr - ym->outbuf);
+  ym_puls_t * const puls = &ym->emu.puls;
+  const int n = (puls->tonptr - ym->outbuf);
 
   if (n > 0) {
     ym->outptr =
@@ -808,8 +808,8 @@ static void filter_none(ym_t * const ym)
 
 static void filter_boxcar2(ym_t * const ym)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
-  const int n = (orig->tonptr - ym->outbuf) >> 1;
+  ym_puls_t * const puls = &ym->emu.puls;
+  const int n = (puls->tonptr - ym->outbuf) >> 1;
 
   if (n > 0) {
     int m = n;
@@ -827,8 +827,8 @@ static void filter_boxcar2(ym_t * const ym)
 
 static void filter_boxcar4(ym_t * const ym)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
-  const int n = (orig->tonptr - ym->outbuf) >> 2;
+  ym_puls_t * const puls = &ym->emu.puls;
+  const int n = (puls->tonptr - ym->outbuf) >> 2;
 
   if (n > 0) {
     int m = n;
@@ -861,14 +861,14 @@ static void filter_boxcar(ym_t * const ym) {
  */
 static void filter_mixed(ym_t * const ym)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
-  const int n = (orig->tonptr - ym->outbuf) >> 2; /* Number of block */
+  ym_puls_t * const puls = &ym->emu.puls;
+  const int n = (puls->tonptr - ym->outbuf) >> 2; /* Number of block */
 
   if (n > 0) {
     s32 * src = ym->outbuf, * dst = src;
-    int68_t h_i1 = orig->hipass_inp1;
-    int68_t h_o1 = orig->hipass_out1;
-    int68_t l_o1 = orig->lopass_out1;
+    int68_t h_i1 = puls->hipass_inp1;
+    int68_t h_o1 = puls->hipass_out1;
+    int68_t l_o1 = puls->lopass_out1;
     int m = n;
 
     do {
@@ -913,9 +913,9 @@ static void filter_mixed(ym_t * const ym)
 
     } while (--m);
 
-    orig->hipass_inp1 = h_i1;
-    orig->hipass_out1 = h_o1;
-    orig->lopass_out1 = l_o1;
+    puls->hipass_inp1 = h_i1;
+    puls->hipass_out1 = h_o1;
+    puls->lopass_out1 = l_o1;
 
     ym->outptr =
       resampling(ym->outbuf, n, ym->outlevel, ym->clock>>(3+2), ym->hz);
@@ -924,15 +924,15 @@ static void filter_mixed(ym_t * const ym)
 
 static void filter_1pole(ym_t * const ym)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
-  const int n = orig->tonptr - ym->outbuf;
+  ym_puls_t * const puls = &ym->emu.puls;
+  const int n = puls->tonptr - ym->outbuf;
 
   if (n > 0) {
     s32 * src = ym->outbuf, * dst = src;
 
-    int68_t h_i1 = orig->hipass_inp1;
-    int68_t h_o1 = orig->hipass_out1;
-    int68_t l_o1 = orig->lopass_out1;
+    int68_t h_i1 = puls->hipass_inp1;
+    int68_t h_o1 = puls->hipass_out1;
+    int68_t l_o1 = puls->lopass_out1;
     int m = n;
 
     do {
@@ -968,9 +968,9 @@ static void filter_1pole(ym_t * const ym)
 
     } while (--m);
 
-    orig->hipass_inp1 = h_i1;
-    orig->hipass_out1 = h_o1;
-    orig->lopass_out1 = l_o1;
+    puls->hipass_inp1 = h_i1;
+    puls->hipass_out1 = h_o1;
+    puls->lopass_out1 = l_o1;
 
     ym->outptr =
       resampling(ym->outbuf, n, ym->outlevel, ym->clock>>(3+0), ym->hz);
@@ -985,26 +985,26 @@ static void filter_1pole(ym_t * const ym)
  */
 static void filter_2pole(ym_t * const ym)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
-  const int n = orig->tonptr - ym->outbuf;
+  ym_puls_t * const puls = &ym->emu.puls;
+  const int n = puls->tonptr - ym->outbuf;
 
   if (n > 0) {
     s32 * src = ym->outbuf, * dst = src;
     int m = n;
 
-    int68_t h_i1 = orig->hipass_inp1;
-    int68_t h_o1 = orig->hipass_out1;
+    int68_t h_i1 = puls->hipass_inp1;
+    int68_t h_o1 = puls->hipass_out1;
 
-    const int68_t a0 = orig->btw.a[0] >> 15;
-    const int68_t a1 = orig->btw.a[1] >> 15;
-    const int68_t a2 = orig->btw.a[2] >> 15;
-    const int68_t b0 = orig->btw.b[0] >> 15;
-    const int68_t b1 = orig->btw.b[1] >> 15;
+    const int68_t a0 = puls->btw.a[0] >> 15;
+    const int68_t a1 = puls->btw.a[1] >> 15;
+    const int68_t a2 = puls->btw.a[2] >> 15;
+    const int68_t b0 = puls->btw.b[0] >> 15;
+    const int68_t b1 = puls->btw.b[1] >> 15;
 
-    int68_t x0 = orig->btw.x[0];
-    int68_t x1 = orig->btw.x[1];
-    int68_t y0 = orig->btw.y[0];
-    int68_t y1 = orig->btw.y[1];
+    int68_t x0 = puls->btw.x[0];
+    int68_t x1 = puls->btw.x[1];
+    int68_t y0 = puls->btw.y[0];
+    int68_t y1 = puls->btw.y[1];
 
     do {
       int68_t i0,o0;
@@ -1037,13 +1037,13 @@ static void filter_2pole(ym_t * const ym)
 
     } while (--m);
 
-    orig->btw.x[0] = x0;
-    orig->btw.x[1] = x1;
-    orig->btw.y[0] = y0;
-    orig->btw.y[1] = y1;
+    puls->btw.x[0] = x0;
+    puls->btw.x[1] = x1;
+    puls->btw.y[0] = y0;
+    puls->btw.y[1] = y1;
 
-    orig->hipass_inp1 = h_i1;
-    orig->hipass_out1 = h_o1;
+    puls->hipass_inp1 = h_i1;
+    puls->hipass_out1 = h_o1;
 
     ym->outptr =
       resampling(ym->outbuf, n, ym->outlevel, ym->clock>>3, ym->hz);
@@ -1062,7 +1062,7 @@ int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
   ym->waccess = ym->static_waccess;
   ym->waccess_nxt = ym->waccess;
 
-  filters[ym->emu.orig.ifilter].filter(ym);
+  filters[ym->emu.puls.ifilter].filter(ym);
 
   return ym->outptr - ym->outbuf;
 }
@@ -1079,9 +1079,9 @@ void cleanup(ym_t * const ym)
 {
 }
 
-int ym_orig_setup(ym_t * const ym)
+int ym_puls_setup(ym_t * const ym)
 {
-  ym_orig_t * const orig = &ym->emu.orig;
+  ym_puls_t * const puls = &ym->emu.puls;
   int err = 0;
 
   /* fill callback functions */
@@ -1092,22 +1092,22 @@ int ym_orig_setup(ym_t * const ym)
   ym->cb_sampling_rate = (void*)0;
 
   /* use default filter */
-  orig->ifilter        = default_filter;
+  puls->ifilter        = default_filter;
   msg68_info("ym-2149: select *%s* filter\n",
-             filters[orig->ifilter].name);
+             filters[puls->ifilter].name);
 
   return err;
 }
 
 /* command line options option */
 static const char prefix[] = "sc68-";
-static const char engcat[] = "ym-orig";
+static const char engcat[] = "ym-puls";
 static option68_t opts[] = {
   { option68_STR, prefix, "ym-filter", engcat,
     "set ym-2149 filter [none|boxcar|mixed|1-pole|2-pole*]" },
 };
 
-int ym_orig_options(int argc, char ** argv)
+int ym_puls_options(int argc, char ** argv)
 {
   option68_t * opt;
   const int n_opts = sizeof(opts) / sizeof(*opts);

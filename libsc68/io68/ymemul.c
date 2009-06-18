@@ -165,7 +165,7 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 
 /* -DYM_EMUL=YM_EMUL_BLEP choose BLEP as default engine */
 #ifndef YM_EMUL
-# define YM_EMUL YM_EMUL_ORIG
+# define YM_EMUL YM_EMUL_PULS
 #endif
 
 /* -DYM_VOL_TABLE=YM_VOL_LINEAR choose linear volume table */
@@ -181,24 +181,37 @@ static ym_parms_t default_parms =  {
   /* outlevel */ 0x80,
 };
 
+static 
+const char * ym_engine_name(int emul)
+{
+  switch (emul) {
+  case YM_EMUL_PULS:
+    return "PULSE";
+  case YM_EMUL_BLEP:
+    return "BLEP";
+  case YM_EMUL_DUMP:
+    return "DUMP";
+  }
+  return 0;
+}
+
 int ym_default_engine(int emul)
 {
   switch (emul) {
   case YM_EMUL_DEFAULT:         /* Get current value. */
     emul = default_parms.emul;
     break;
-
   default:                      /* Invalid values */
     msg68_error("ym-2149: unknown ym-engine (%d)\n",emul);
     emul = default_parms.emul;
-  case YM_EMUL_ORIG:
+  case YM_EMUL_PULS:
   case YM_EMUL_BLEP:
+  case YM_EMUL_DUMP:
     default_parms.emul = emul;
-    msg68_info("ym-2149: switch default engine to *%s*\n",
-               emul==YM_EMUL_ORIG ? "SC68 ORIGINAL":"BLEP SYSNTHESIS");
+    msg68_info("ym-2149: default engine is *%s*\n",
+               ym_engine_name(emul));
     break;
   }
-
   return emul;
 }
 
@@ -210,7 +223,7 @@ static const char prefix[] = "sc68-";
 static const char engcat[] = "ym-2149";
 static option68_t opts[] = {
   { option68_STR, prefix, "ym-engine", engcat,
-    "set ym-2149 engine [orig|blep]" },
+    "set ym-2149 engine [pulse|blep|dump]" },
   { option68_STR, prefix, "ym-voltable", engcat,
     "set ym-2149 volume table [atari|linear]" },
   { option68_INT, prefix, "ym-chans", engcat,
@@ -247,10 +260,12 @@ int ym_init(ym_parms_t * const parms)
   opt = option68_get("ym-engine",1);
   if (opt) {
     int k;
-    if (!strcmp(opt->val.str,"orig")) {
-      k = YM_EMUL_ORIG;
+    if (!strcmp(opt->val.str,"pulse")) {
+      k = YM_EMUL_PULS;
     } else if (!strcmp(opt->val.str,"blep")) {
       k = YM_EMUL_BLEP;
+    } else if (!strcmp(opt->val.str,"dump")) {
+      k = YM_EMUL_DUMP;
     } else {
       k = YM_EMUL_DEFAULT;
     }
@@ -284,8 +299,8 @@ int ym_init(ym_parms_t * const parms)
     ym_create_5bit_atarist_table(ymout5, ym_output_level);
   }
 
-  /* Process ym-orig options */
-  argc = ym_orig_options(argc, argv);
+  /* Process ym-puls options */
+  argc = ym_puls_options(argc, argv);
 
   /* Save remaining cli options */
   if (parms && parms->argc) {
@@ -387,7 +402,7 @@ void ym_adjust_cycle(ym_t * const ym, const cycle68_t ymcycles)
  * `-----------------------------------------------------------------'
  */
 
-extern const int ym_smsk_table[];       /* declared in ym_orig.c */
+extern const int ym_smsk_table[];       /* declared in ym_puls.c */
 int ym_active_channels(ym_t * const ym, const int off, const int on)
 {
   int v = 0;
@@ -485,16 +500,22 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
        valid range. */
     ym->cb_sampling_rate = 0;
     ym_sampling_rate(ym, p->hz);
+    ym->type = p->emul;
 
     switch (p->emul) {
-    case YM_EMUL_ORIG:
-      msg68_info("ym-2149: select *SC68 ORIGINAL* engine\n");
-      err = ym_orig_setup(ym);
+    case YM_EMUL_PULS:
+      msg68_info("ym-2149: select *PULSE SYNTHESIS* engine\n");
+      err = ym_puls_setup(ym);
       break;
 
     case YM_EMUL_BLEP:
-      msg68_info("ym-2149: select *BLEP SYSNTHESIS* engine\n");
+      msg68_info("ym-2149: select *BLEP SYNTHESIS* engine\n");
       err = ym_blep_setup(ym);
+      break;
+
+    case YM_EMUL_DUMP:
+      msg68_info("ym-2149: select *DUMP REGISTERS* engine\n");
+      err = ym_dump_setup(ym);
       break;
 
     default:

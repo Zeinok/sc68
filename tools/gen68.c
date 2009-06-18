@@ -21,13 +21,20 @@
  *
  */
 
+/* Time-stamp: <2009-06-12 07:20:25 ben> */
+static const char modifdate[] = "2009-06-12 07:20:25";
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <ctype.h>
+#undef NDEBUG
+#include <assert.h>
 
-/* becoz puts add a '\n' */
-#define putsss printf
+
+static int quiet = 0;
+static int debug = 0;
 
 static int error(const char * format, ...)
 {
@@ -38,7 +45,6 @@ static int error(const char * format, ...)
   return -1;
 }
 
-static int quiet = 0;
 static void msg(const char * format, ...)
 {
   if (!quiet) {
@@ -49,37 +55,69 @@ static void msg(const char * format, ...)
   }
 }
 
+static void dbg(const char * format, ...)
+{
+  if (debug) {
+    va_list list;
+    va_start(list,format);
+    vfprintf(stderr,format,list);
+    va_end(list);
+  }
+}
+
+static FILE * output;
+static void outf(const char * format, ...)
+{
+  va_list list;
+  va_start(list,format);
+  vfprintf(output,format,list);
+  va_end(list);
+}
+
+
 #define TAB   "  "
 #define TAB2  "    "
 #define TAB33 "      "
-
-static const char modifdate[] = "Wed May  2 21:50:31 CEST 2007";
+#define OUTF_ASSERT(T,V) outf("%sassert(%s);\n",(T),(V))
 
 static int Usage(void)
 {
-  putsss("Usage: gen68 (T|[0-F])*|all [<output-dir>]\n"
-         "\n"
-         " 'C' code generator for sc68 project.\n"
-         "\n"
-         " T     Generate function table\n"
-         " 0-F   Generate code for given lines\n"
-         " all   Generate all (equiv. 0123456789ABCDEFT)\n"
-         "\n"
-         "Copyright (C) 1999-2009 Benjamin Gerard\n"
-         "\n");
+  printf(
+    "Usage: gen68 [-hvqDV] (T|[0-F])*|all [prefix]\n"
+    "\n"
+    " 'C' code generator for sc68 project.\n"
+    "\n"
+    " T     Generate function table\n"
+    " 0-F   Generate code for given lines\n"
+    " all   Generate all (equiv. 0123456789ABCDEFT)\n"
+    "\n"
+    " If no prefix was given output is stdout.\n"
+    "\n"
+    " If prefix is given output is done in file(s)\n"
+    " - <prefix>line<X>.c for lines 0 to F\n"
+    " - <prefix>table.c for function table\n"
+    "\n"
+    "Copyright (C) 1999-2009 Benjamin Gerard\n"
+    );
+  return 1;
+}
+
+static int Version(void)
+{
+  printf("gen68 %s\n",modifdate);
   return 1;
 }
 
 /* Convert ID (0 .. 1024) -> id-string
  * $$$ static string inside, use one at a time
  */
-static char *to_line_id(int i)
+static char * to_line_id(int i)
 {
-  int line,num;
   static  char s[8];
+  int line,num;
+
   line = i>>6;
-  switch(line)
-  {
+  switch(line) {
   case 0xa: case 0xf:
     num=0;
     break;
@@ -92,272 +130,638 @@ static char *to_line_id(int i)
 
 static void print_fileheader(const char * name)
 {
-  printf("/* %s : EMU68 generated code by\n"
-         " * gen68 %s\n"
-         " * (C) 1998-2007 Benjamin Gerard\n"
-         " *\n"
-         " * $Id$\n"
-         " */\n"
-         "\n", name, modifdate);
+  outf("/* %s - EMU68 generated code by\n"
+       " * gen68 %s\n"
+       " * Copyright (C) 1998-2009 Benjamin Gerard\n"
+       " *\n"
+       " * %cId$\n"
+       " */\n"
+       "\n", name, modifdate, '$');
 }
 
 static void gene_table(char *s, int n)
 {
   int i;
 
-  putsss("#include \"struct68.h\"\n"
-         "\n"
-         "extern linefunc68_t");
+  outf("#include \"struct68.h\"\n"
+       "\n"
+       "#ifndef EMU68_MONOLITIC\n"
+       "EMU68_EXTERN linefunc68_t");
   for (i=0; i<n; i++) {
-    if (!(i&7)) putsss("\n"TAB);
-    printf("%s%X%02X%c",s,i>>6,i&63,i==n-1?';':',');
+    if (!(i&7)) outf("\n"TAB);
+    outf("%s%X%02X%c",s,i>>6,i&63,i==n-1?';':',');
   }
+  outf("\n"
+       "#endif\n");
 
-  printf("\n"
-         "\n"
-         "linefunc68_t *%s_func[%d] = \n",s,n);
-  putsss("{");
+  outf("\n"
+       "\n"
+       "linefunc68_t *%s_func[%d] = \n",s,n);
+  outf("{");
   for(i=0; i<n; i++) {
-    if ((i&7)==0) putsss("\n"TAB);
-    printf("%s%s,",s,to_line_id(i));
-
+    if ((i&7)==0) outf("\n"TAB);
+    outf("%s%s,",s,to_line_id(i));
   }
-  putsss("\n};\n\n");
+  outf("\n};\n\n");
 }
 
+static const char tsz[] = "bwlw";
 
-static char tsz[] = "bwl?";
-static char *tm[] = { "&BYTE_MASK", "&WORD_MASK", "&LONG_MASK" };
-static char *shift_name[] = { "BYTE_SHIFT", "WORD_SHIFT", "LONG_SHIFT" };
+static const char *  suffix_name[4] = {  ".B",  ".W",  ".L", 0 };
+static const char * isuffix_name[4] = { "I.B", "I.W", "I.L", 0 };
+static const char * qsuffix_name[4] = { "Q.B", "Q.W", "Q.L", 0 };
+static const char * asuffix_name[4] = { "A.B", "A.W", "A.L", 0 };
+
+static const char *mask_name[] = {
+  "BYTE_MSK", "WORD_MSK", "LONG_MSK", "LONG_MSK"
+};
+static const char *shift_name[] = {
+  "BYTE_FIX", "WORD_FIX", "LONG_FIX", "WORD_FIX"
+};
+static const char *ae_name[8] = {
+  "Dn", "An", "(An)", "(An)+", "-(An)", "d(An)", "d(An,Xi)", "<Ae>"
+};
+static const char *sae_name[8] = {
+  "Dx", "Ax", "(Ax)", "(Ax)+", "-(Ax)", "d(Ax)", "d(Ax,Xi)", "<Ae>"
+};
+static const char *dae_name[8] = {
+  "Dy", "Ay", "(Ay)", "(Ay)+", "-(Ay)", "d(Ay)", "d(Ay,Xi)", "<Ae>"
+};
+/*
+static char * cc_name[16] = {
+  "T ", "F ", "HI", "LS", "CC", "CS", "NE", "EQ",
+  "VC", "VS", "PL", "MI", "GE", "LT", "GT", "LE"
+};
+*/
+
 
 /* ,------------------------------------------------------------------.
  * | n   : opmode+mode                                                |
- * | s   : name                                                       |
- * | sz  : 0,1,2 ->b,w,l                                              |
+ * | sz  : 1,2 -> w,l                                                 |
  * '------------------------------------------------------------------'
  */
-static void gene_any_move(int n, char *s, int sz)
+static void gene_movea(int n, int sz)
 {
-  int srcmode=n&7, dstmode=(n>>3)&7;
-  char c = tsz[sz],
-    rs = srcmode==0 ? 'd' : 'a',
-    rd = dstmode==0 ? 'd' : 'a';
-  char *m = tm[sz];
-  char *d = shift_name[sz];
+  int smode = n & 7, dmode = ( n >> 3 ) & 7;
+  const char   c = tsz[sz], C = toupper(c);
 
-  sz = 1<<sz; /* 1 2 4 */
+  assert(n >= 0 &&  n < 0100);
+  assert(sz >= 0 && sz < 3);
+  assert(dmode == 1);
 
-  /* Generate header */
-  printf(TAB"/* %s.%c ",s,c^32);
-  if (srcmode<2)
-    printf("%cn,",rs^32);
-  else printf("<Ae>,");
-  if (dstmode<2)
-    printf("%cn */\n",rd^32);
-  else printf("<Ae> */\n");
-
-  /* printf(TAB"int68_t a;\n"); */
-  /* if (srcmode>=2 || dstmode>=2) printf(TAB"addr68_t addr;\n"); */
-
-  /* Source is register */
-  if (srcmode<2) {
-    printf(TAB"int68_t a = (u%d)REG68.%c[reg0]/*<<%s*/;\n",sz<<3,rs,d);
-  }
-  /* Source is memory */
-  else {
-    printf(TAB"addr68_t addr = get_ea%c68[%d](emu68,reg0);\n",c,srcmode);
-    printf(TAB"int68_t a = /*(u%d)*/read_%c(addr)/*<<%s*/;\n",sz<<3,c^32,d);
-  }
-
-  /* Destination is data register */
-  if (dstmode==0) {
-    printf(TAB"REG68.d[reg9] = (REG68.d[reg9]%s)|a/*((uint68_t)a>>%s)*/;\n",
-           m,d);
-    printf(TAB"a <<= %s;\n",d);
-    printf(TAB"%s(a);\n",s);
-  }
-  /* Destination is address register */
-  else if (dstmode==1) {
-    printf(TAB"REG68.a[reg9] = (s%d)a;\n",sz<<3);
-  }
-  /* Destination is memory */
-  else {
-    printf(TAB"%saddr = get_ea%c68[%d](emu68,reg9);\n",
-           (srcmode<2)?"addr68_t ":"",c,dstmode);
-    printf(TAB"write_%c(addr,a);\n",c^32);
-    printf(TAB"a <<= %s;\n",d);
-    printf(TAB"%s(a);\n",s);
-  }
-}
-
-/* ,------------------------------------------------------------------.
- * | n   : opmode+mode                                                |
- * | s   : name                                                       |
- * | sz  : 0,1,2 ->b,w,l                                              |
- * | resflag : 0:no result                                            |
- * |           1:result is stored in same size                        |
- * |           2:result stored in long                                |
- * |           3:result stored in long , and reg9 is long (DIV like)  |
- * | regflag : 0:dn 1:an                                              |
- * '------------------------------------------------------------------'
- */
-static void gene_any_rn(int n, char *s, int sz, int resflag, int regflag)
-{
-  char *m = tm[sz];
-  char c = tsz[sz],
-    r = regflag ? 'a' : 'd',
-    q = (n&7)==0 ? 'd' : 'a';
-  char *db, *d = shift_name[sz];
-  sz = 1<<sz;
-  db = (resflag==3) ? shift_name[2] : d; /* ? what if resflag == 2 */
-
-  if (regflag==1 && sz==1) {
-    printf(TAB"ILLEGAL;\n");
+  if (sz == 0) {
+    /* MOVEA.B is ILLEGAL */
+    outf(TAB"ILLEGAL; /* MOVEA.B %s,An */\n", sae_name[smode]);
+    OUTF_ASSERT(TAB,"EMU68_BREAK");
     return;
   }
 
-  printf(TAB"/* %s.%c ",s,c^32);
-
-  /* Source is memory */
-  if ((n&7)>=2) {
-    printf("<Ae>,%cn */\n",r^32);
-    printf(TAB"int68_t a,b%s;\n",resflag ? ",s" : "");
-    printf(TAB"addr68_t addr;\n");
-    printf(TAB"addr = get_ea%c68[%d](emu68,reg0);\n",c,n&7);
-    printf(TAB"a = read_%c(addr)<<%s;\n",c^32,d);
+  outf(TAB"/* MOVEA.%c %s,An */\n", C, sae_name[smode]);
+  outf(TAB"REG68.a[reg9] = %s", (sz == 1) ? "(u32)(s16) " : "");
+  if (smode < 2) {
+    outf("REG68.%c[reg0];\n", smode["da"]);
+  } else {
+    outf("read_EA%c(%d,reg0);\n", C, smode);
   }
-  /* Source is register */
-  else  {
-    printf("%cx,%cy */\n",q^32,r^32);
-    printf(TAB"int68_t a,b%s;\n",resflag ? ",s" : "");
-    printf(TAB"a = REG68.%c[reg0]<<%s;\n",q,d);
-  }
+}
 
-  switch(regflag) {
-    /* Destination is data register */
+/* ,------------------------------------------------------------------.
+ * | n   : opmode+mode                                                |
+ * | s   : name                                                       |
+ * | sz  : 0,1,2 -> b,w,l                                             |
+ * '------------------------------------------------------------------'
+ */
+static void gene_move(int n, int sz)
+{
+  int smode = n & 7, dmode = ( n >> 3 ) & 7;
+  const char   c = tsz[sz], C = toupper(c);
+  const char * mask  =  mask_name[sz];
+  const char * shift = shift_name[sz];
+
+  assert(n >= 0 && n < 0100);
+  assert(sz >= 0 && sz < 3);
+  assert(dmode != 1);
+
+  sz = 1 << sz; /* 1 2 4 */
+
+  /* Generate header */
+  outf(TAB"/* MOVE.%c %s,%s */\n", C, sae_name[smode], dae_name[dmode]);
+
+  outf(TAB"const int68_t a = (int68_t) ");
+  switch (smode) {
+  case 0: case 1:
+    outf("REG68.%c[reg0]", smode["da"]);
+    break;
+  default:
+    outf("read_EA%c(%d,reg0)", C, smode);
+    break;
+  }
+  outf(" << %s;\n", shift);
+  outf(TAB"MOVE%c(a);\n", C);
+
+  switch (dmode) {
   case 0:
-    printf(TAB"b = REG68.d[reg9]<<%s;\n",db);
-    printf(TAB"%s%c(%sa,b);\n",s,c^32,resflag ? "s,":"");
+    /* Destination is Dn */
+    outf(TAB"REG68.d[reg9] = ");
+    if (sz != 4) {
+      outf("( REG68.d[reg9] & %s ) + ", mask);
+    }
+    outf("( (uint68_t) a >> %s );\n", shift);
     break;
-    /* Destination is address register */
+
   case 1:
-    printf(TAB"b = REG68.a[reg9];\n");
-    printf(TAB"%sA%c(%sa,b);\n",s,c^32,resflag ? "s,":"");
+    /* Destination is An */
+    assert(0);
+    break;
+
+  default:
+    /* Destination is <Ae> */
+    outf(TAB"write_EA%c(%d, reg9, a >> %s);\n", C, dmode, shift);
     break;
   }
+}
 
-  if (resflag==1) {
-    printf(TAB"REG68.%c[reg9] = (REG68.%c[reg9]%s) + ((uint68_t)s>>%s);\n",
-           r,r,m,d);
-  } else if (resflag >= 2) {
-    /* $$$ add shift must be verified */
-    printf(TAB"REG68.%c[reg9] = s>>%s;\n",r,shift_name[2]);
+/* direction */
+enum {
+  TO_RN = 0,
+  TO_AE = 1
+};
+
+/* An as source for AE_RN mode */
+enum {
+  OK_AN = 0,                         /* <An> allowed as source <Ae> */
+  NO_AN = 1                          /* <An>  denied as source <Ae> */
+};
+
+/* Immediat mode */
+enum {
+  NOT_IMM = 0,
+  REG_IMM = 1,
+  SIZ_IMM = 2
+};
+
+/* ,------------------------------------------------------------------.
+ * | n        : opmode+mode (hacked)                                  |
+ * | s        : name                                                  |
+ * | no_an    : what with An as source <Ae> operand                   |
+ * | hax_size : 0:normal R=D=S=opmode&3 !0:RDS 3bit each              |
+ * | immode   : immediat mode                                         |
+ * '------------------------------------------------------------------'
+ */
+
+static void gene_any_rn(int n, char * s, int no_an, int hax_size, int immode)
+{
+  const int store = s[0] != 'C'; /* HAXXX: Don't store result for CMP/CHK */
+  int aemode = ( n & 007 ) >> 0;
+  int opmode = ( n & 070 ) >> 3;
+  int opsize, dir, regtyp, dst_is_an, src_xtend;
+
+  const char * suf;                 /* Name suffix ["","Q","I","A"] */
+  const char * src;                 /* src name [Dn,#Q,#B,#W,#L     */
+
+  int src_size, dst_size, res_size;
+
+  dbg("GEN: %03o %6s, nan:%d, osz:%04d, imm:%d\n",
+      n, s, no_an, hax_size, immode);
+
+  assert(n >= 0 && n < 0100);
+  assert(no_an == OK_AN || no_an == NO_AN);
+  assert(immode == NOT_IMM || immode == REG_IMM || immode == SIZ_IMM);
+
+  switch (immode) {
+  case NOT_IMM:
+    switch ( opmode ) {
+    case 00:                              /* .B AE_DN */
+    case 01:                              /* .W AE_DN */
+    case 02:                              /* .L AE_DN */
+      opsize = opmode;
+      regtyp = 'd';
+      suf    = suffix_name[opsize];
+      src    = 0;
+      dir    = TO_RN;
+      break;
+
+    case 03:                              /* .W AE_AN */
+      opsize = 1;
+      regtyp = 'a';
+      suf    = asuffix_name[opsize];
+      src    = 0;
+      dir    = TO_RN;
+      break;
+
+    case 04:                              /* .B DN_AE */
+    case 05:                              /* .W DN_AE */
+    case 06:                              /* .L DN_AE */
+      opsize = opmode - 4;
+      regtyp = 'd';
+      suf    = suffix_name[opsize];
+      src    = "Dn";
+      dir    = TO_AE;
+      break;
+
+    case 07:                              /* .L AE_AN */
+      opsize = 2;
+      regtyp = 'a';
+      suf    = asuffix_name[opsize];
+      src    = "An";
+      dir    = TO_RN;
+      break;
+
+    default:
+      assert(!"INVALID OPMODE FOR NON IMMEDIAT");
+    }
+    break;
+
+  case REG_IMM:
+    switch ( opmode & 3 ) {
+    case 00: case 01: case 02:
+      opsize = opmode & 3;
+      regtyp = 'q';
+      suf    = qsuffix_name[opsize];
+      src    = "#Q";
+      dir    = TO_AE;
+      break;
+    default:
+      assert(!"INVALID OPMODE FOR QUICK IMMEDIAT");
+    }
+    break;
+
+  case SIZ_IMM:
+    switch ( opmode & 3 ) {
+    case 00: case 01: case 02:
+      opsize = opmode & 3;
+      regtyp = 'i';
+      suf    = isuffix_name[opsize];
+      src    = "#I";
+      dir    = TO_AE;
+      break;
+    default:
+      assert(!"INVALID OPMODE FOR IMMEDIAT");
+    }
+    break;
+
+  default:
+    assert(!"INVALID IMMEDIAT MODE");
+  }
+  assert(opsize >= 0 && opsize <= 2);
+  assert(suf);
+
+  src_size = ( hax_size & 0007 ) ? (hax_size & 0003 ) >> 0 : opsize;
+  res_size = ( hax_size & 0700 ) ? (hax_size & 0300 ) >> 6 : src_size;
+  dst_size = ( hax_size & 0070 ) ? (hax_size & 0030 ) >> 3 : src_size;
+
+  outf(TAB"/* %s%s ", s, suf);
+  dbg ("     %s%s ", s, suf);
+  if ( dir == TO_RN ) {
+    outf("%s,%cn */\n", ae_name[aemode], toupper(regtyp));
+    dbg ("%s,%cn\n", ae_name[aemode], toupper(regtyp));
+  } else {
+    outf("%s,%s */\n", src, ae_name[aemode]);
+    dbg ("%s,%s\n", src, ae_name[aemode]);
+  }
+
+  dst_is_an =
+    ( dir == TO_RN && regtyp == 'a' )
+    ||
+    ( dir == TO_AE && aemode == 1 )
+    ;
+
+  src_xtend = 0;
+  if ( dst_is_an ) {
+    dst_size = res_size = 2;
+    switch (opsize) {
+    case 0:
+      dbg("GEN : ILLEGAL (.B not allowed)\n");
+      outf(TAB"ILLEGAL; /* .B not allowed */\n");
+      OUTF_ASSERT(TAB,"EMU68_BREAK");
+      return;
+    case 1:
+      src_xtend = 1;
+      break;
+    case 2:
+      break;
+    default:
+      assert(!"OPSIZE SHOULD BE VALID");
+      break;
+    }
+  }
+
+  if ( dir == TO_RN && aemode == 1 && no_an == NO_AN ) {
+    dbg("GEN : ILLEGAL (source An not allowed)\n");
+    outf(TAB"ILLEGAL; /* source An not allowed */\n");
+    OUTF_ASSERT(TAB,"EMU68_BREAK");
+    return;
+  }
+
+  /* Source */
+  outf(TAB"const uint68_t s = ( (int68_t) ");
+  switch (dir) {
+
+  case TO_RN:
+    /* Source is <Ae> */
+    switch (aemode) {
+    case 0:                             /* Ae is Dn */
+      outf("REG68.d[reg0]");
+      break;
+    case 1:                             /* Ae is An */
+      assert(no_an == OK_AN);
+      outf("REG68.a[reg0]");
+      break;
+    default:                            /* Ae is Memory */
+      outf("read_EA%c(%d,reg0)", src_size["BWL?"], aemode);
+    }
+    break;
+
+  case TO_AE:
+    switch (regtyp) {
+    case 'd': case 'a':
+      /* Source is Dn */
+      outf("REG68.%c[reg9]", regtyp);
+      break;
+    case 'q':
+      /* Source is Quick */
+      outf("( ( ( reg9 - 1 ) & 7 ) + 1 )");
+      break;
+    case 'i':
+      /* Source is immediat */
+      outf(TAB"get_next%c()", opsize["wwl?"]);
+      break;
+    default:
+      assert(!"INVALID source regtype");
+    }
+    break;
+  default:
+    assert(!"INVALID dir");
+  }
+  outf(" << %s )", shift_name[opsize]);
+
+  if (src_xtend) {
+    dbg("GENERATE SIGN EXTENSION TO LONG\n");
+    outf(" >> 16");
+    assert(dst_size == 2);
+    assert(res_size == 2);
+  }
+  outf(";\n");
+
+  /* Destination */
+  switch (dir) {
+  case TO_RN:
+    /* Destination is Rn */
+    outf(TAB"      uint68_t d = (int68_t) REG68.%c[reg9]", regtyp);
+    break;
+
+  case TO_AE:
+    /* Destination is Ae */
+    switch (aemode) {
+    case 0:                             /* Ae is Dn */
+      outf(TAB"      uint68_t d = (int68_t) REG68.d[reg0]");
+      break;
+    case 1:                             /* Ae is An */
+      outf(TAB"      uint68_t d = (int68_t) REG68.a[reg0]");
+      break;
+    default:                            /* Ae is Memory */
+      outf(TAB"const addr68_t l = get_EA%c(%d,reg0);\n",
+           dst_size["BWL?"], aemode);
+      outf(TAB"      uint68_t d = read_%c(l)", dst_size["BWL?"]);
+    }
+    break;
+
+  default:
+    assert(!"INVALID dir");
+  }
+  outf(" << %s;\n", shift_name[dst_size]);
+
+  /* Operation */
+  if (store) {
+    outf(TAB"%s%c(d,s,d);\n", s, opsize["BWL?"]);
+  } else {
+    outf(TAB"%s%c(s,d);\n", s, opsize["BWL?"]);
+    return;
+  }
+
+  if (dir == TO_RN || aemode < 2) {
+    /* Destination is a register */
+    static const char * regs[2][2] = {
+      { "d[reg0]" , "d[reg9]" },        /* aemode 0 */
+      { "a[reg0]" , "a[reg9]" },        /* aemode 1 */
+    };
+    const char * reg;
+    if (dir == TO_RN) {
+      assert(regtyp == 'a' || regtyp == 'd');
+      reg = regs[regtyp == 'a'][1];
+    } else {
+      reg = regs[aemode][0];
+    }
+
+    /* Can't be An except for immediat; SEE gene_any_an() */
+/*     assert(dir == TO_DN || imm != NOT_IMM || aemode != 1); */
+
+    outf(TAB"REG68.%s = ", reg);
+
+    switch (res_size) {
+    case 0: case 1:                     /* BYTE or WORD */
+      outf("( REG68.%s & %s ) + ", reg, mask_name[res_size] );
+    case 2: case 3:                     /* LONG */
+      outf("( d >> %s )", shift_name[res_size]);
+    }
+    outf(";\n");
+  } else {
+    /* Destnation is Ae */
+    assert(aemode >= 2);                /* ... and not a register */
+    outf(TAB"write_%c(l, d >> %s);\n", res_size["BWL?"], shift_name[res_size]);
   }
 }
 
-static void gene_any_dn(int n, char *s, int sz, int resflag)
+/* static void gene_any_dn(int n, char * s, int sz, int resflag) */
+/* { */
+/*   gene_any_rn(n,s,sz,resflag,0); */
+/* } */
+
+/* static void gene_any_an(int n, char * s, int sz, int resflag) */
+/* { */
+/*   assert(sz == 1 || sz == 2); */
+/*   assert(resflag == 0 || resflag == 2); */
+/*   gene_any_rn(n, s, sz, resflag, 1); */
+/* } */
+
+/* ,------------------------------------------------------------------.
+ * | n   : opmode+mode                                                |
+ * | s   : name (ADD,CMP,SUB)                                         |
+ * '------------------------------------------------------------------'
+ */
+  static void gene_any_an(int n, char * s)
 {
-  gene_any_rn(n,s,sz,resflag,0);
+  const int L = n & 040;
+  const int O = L ? 0222 : 0221;
+  assert ( (n & 030) == 030 );
+#if 1
+  gene_any_rn(n, s, OK_AN, O, NOT_IMM);
+#else
+/* static void gene_any_rn(int n, char * s, int no_an, int opsz, int imm) */
+
+  const int opmode = (n >> 3) & 7;
+  const int aemode = n & 7;
+  const int sz     = (opmode == 7) + 1; /* .W=1 .L=2 */
+  const int c      = tsz[sz], C = toupper(c);
+  const int store  = s[0] != 'C';       /* Do not store result for CMP */
+
+  const char * long_shift = shift_name[2];
+
+  assert(n >= 0 && n < 0100);
+  assert(opmode == 3 || opmode == 7);
+  assert(sz == 1 || sz == 2);
+
+  outf(TAB"/* %sA.%c %s,An */\n", s, C, ae_name[aemode]);
+
+  /* Source */
+  outf(TAB"const sint68_t a = ( (sint68_t) ");
+  switch (aemode) {
+  case 0: case 1:
+    /* Source is Rn */
+    outf("REG68.%c[reg0] << %s", aemode["da"], shift_name[sz]);
+    break;
+  default:
+    /* Source is <Ae> */
+    outf("read_EA%c(%d, reg0) << %s", C, aemode, shift_name[sz]);
+    break;
+  }
+  if (sz == 1) {
+    outf(" ) >> 16;\n");                /* Extend Word to Long */
+  } else {
+    outf(" );\n");
+  }
+  outf(TAB"%suint68_t b = ( (uint68_t) REG68.a[reg9] << %s );\n",
+       store ? "      " : "const ", long_shift);
+  outf(TAB"%sA%c(b,a,b);\n", s, C);
+  if (store) {
+    outf(TAB"REG68.a[reg9] = b >> %s;\n", long_shift);
+  }
+#endif
 }
 
-static void gene_any_an(int n, char *s, int sz, int resflag)
-{
-  gene_any_rn(n,s,sz,resflag,1);
-}
 
 /* ,------------------------------------------------------------------.
  * |  n       : opmode+mode                                           |
  * |  s       : name                                                  |
  * |  sz      : 0,1,2 -> b,w,l                                        |
  * |  resflag : result is stored                                      |
- * |  regflag : 0:dn 1:an 2:immediat 3 bit 3:imm                      |
+ * |  regflag : 0:dn 1:an 2:immediat-3-bit 3:imm                      |
  * '------------------------------------------------------------------'
  */
-static void gene_any_rn_mem(int n, char *s, int sz, int resflag, int regflag)
+static void gene_any_rn_mem(int n, char * s, int sz, int resflag, int regflag)
 {
-  char *m = tm[sz];
-  char c = tsz[sz],
+#if 1
+  int imm, nan = NO_AN, osz = 0;
+
+  switch (regflag) {
+  case 1:
+    assert(0);
+  case 0:                               /* Dn / An */
+    imm = NOT_IMM;
+    nan = NO_AN;
+    osz = 0;
+    break;
+
+  case 2:                                 /* Quick */
+  case 3:                                 /* Immediat */
+    n   = ( n & ~070 ) | 040 | (sz << 3); /* Force TO_AE and op size */
+    imm = regflag == 2 ? REG_IMM : SIZ_IMM;
+    nan = OK_AN;
+    osz = 0;
+    break;
+
+  default:
+    assert(0);
+  }
+  gene_any_rn(n, s, nan, osz, imm);
+
+#else
+
+  const int  aemode = n & 7;
+  const char * m =  mask_name[sz];
+  const char * d = shift_name[sz];
+  const char
+    c = tsz[sz], C = toupper(c),
     r = regflag ? 'a' : 'd',
-    q = (n&7)==0 ? 'd' : 'a';
-  char * d = shift_name[sz];
+    q = !(aemode)  ? 'd' : 'a';
   sz = 1<<sz;
 
-  if ((n&7)==1 && sz==1) {
-    printf(TAB"ILLEGAL;\n");
+  if ((aemode)==1 && sz==1) {
+    outf(TAB"ILLEGAL;\n");
     return;
   }
 
-  printf(TAB"/* %s.%c ",s,c^32);
+  outf(TAB"/* %s.%c ",s,C);
 
   /* Destination is memory */
-  if ((n&7)>=2) {
-    if (regflag>=2) printf("#imm,<Ae> */\n");
-    else printf("%cn,<Ae> */\n",r^32);
-    printf(TAB"int68_t a,b%s;\n",resflag ? ",s" : "");
-    printf(TAB"addr68_t addr;\n");
+  if ((aemode)>=2) {
+    if (regflag>=2) outf("#imm,<Ae> */\n");
+    else outf("%cn,<Ae> */\n",r^32);
+    outf(TAB"int68_t a,b%s;\n",resflag ? ",s" : "");
+    outf(TAB"addr68_t addr;\n");
     /* Source is quick imm */
     if (regflag==2)
-      printf(TAB"a = (((reg9-1)&7)+1)<<%s;\n",d);
+      outf(TAB"a = (int68_t)(((reg9-1)&7)+1)<<%s;\n",d);
     /* Source is imm */
     else if (regflag==3)
-      printf(TAB"a = get_next%c()<<%s;\n",sz==4 ? 'l' : 'w',d);
+      outf(TAB"a = get_next%c()<<%s;\n",sz==4 ? 'l' : 'w',d);
     /* Source is register */
     else
-      printf(TAB"a = REG68.%c[reg9]<<%s;\n",r,d);
+      outf(TAB"a = (int68_t)REG68.%c[reg9]<<%s;\n",r,d);
 
-    printf(TAB"addr = get_ea%c68[%d](emu68,reg0);\n",c,n&7);
-    printf(TAB"b = read_%c(addr)<<%s;\n",c^32,d);
-    printf(TAB"%s%c(%sa,b);\n",s,c^32,resflag ? "s,":"");
+    outf(TAB"addr = get_EA%c(%d,reg0);\n",C,aemode);
+    outf(TAB"b = read_%c(addr)<<%s;\n",C,d);
+    outf(TAB"%s%c(%sa,b);\n",s,C,resflag ? "s,":"");
     if (resflag) {
-      printf(TAB"write_%c(addr,(uint68_t)s>>%s);\n",c^32,d);
+      outf(TAB"write_%c(addr,(uint68_t)s>>%s);\n",C,d);
     }
   }
   /* Destination is register */
   else {
-    if (regflag>=2) printf("#imm,%cy */\n",q^32);
-    else printf("%cx,%cy */\n",r^32,q^32);
-    printf(TAB"int68_t a,b%s;\n",resflag ? ",s" : "");
-    /* Source is quick imm */
-    if (regflag==2)
-      printf(TAB"a = (((reg9-1)&7)+1)<<%s;\n",d);
-    else if (regflag==3)
-      printf(TAB"a = get_next%c()<<%s;\n",sz==4 ? 'l' : 'w',d);
-    else
-      /* Source is register */
-      printf(TAB"a = REG68.%c[reg9]<<%s;\n",r,d);
+    if (regflag>=2) outf("#imm,%cy */\n",q^32);
+    else outf("%cx,%cy */\n",r^32,q^32);
+    outf(TAB"int68_t a,b%s;\n",resflag ? ",s" : "");
 
-    printf(TAB"b = REG68.%c[reg0]",q);
+    outf(TAB"a = ( ");
+    /* Source is quick imm */
+    if (regflag==2) {
+      outf("(int68_t) ( ( (reg9 -1 ) & 7 ) + 1 )");
+    } else if (regflag==3) {
+      outf("get_next%c()",sz==4 ? 'l' : 'w');
+    } else {
+      /* Source is register */
+      outf("(int68_t) REG68.%c[reg9] << %s",r,d);
+    }
+    outf(" << %s )", d);
+    if (q == 'a' && sz == 2) {
+      outf(" >> 16");                   /* Sign extend */
+    }
+    outf(";\n");
+
+    outf(TAB"b = (int68_t)REG68.%c[reg0]",q);
+
     /* Destination is data register */
-    if (q!='a')
-    {
-      printf("<<%s;\n",d);
-      printf(TAB"%s%c(%sa,b);\n",s,c^32,resflag ? "s,":"");
+    if (q!='a') {
+      outf("<<%s;\n",d);
+      outf(TAB"%s%c(%sa,b);\n",s,C,resflag ? "s,":"");
     }
     /* Destination is address register */
     else {
-      printf(";\n");
-      printf(TAB"%sA%c(%sa,b);\n",s,c^32,resflag ? "s,":"");
+      outf(" << LONG_FIX;\n");
+      outf(TAB"%sA%c(%sa,b);\n",s,C,resflag ? "s,":"");
     }
 
     if (resflag) {
-      if (q=='a') {
-        printf(TAB"REG68.a[reg0] = s;\n");
+      if ( q == 'a' ) {
+        outf(TAB"REG68.a[reg0] = (u32) ( s >> LONG_FIX );\n");
       } else {
-        printf(TAB"REG68.d[reg0] = (REG68.d[reg0]%s) + ((uint68_t)s>>%s);\n",
-               m,d);
+        outf(TAB"REG68.d[reg0] = (REG68.d[reg0] & %s) + ((uint68_t)s>>%s);\n",
+             m,d);
       }
     }
   }
-}
 
-static void gene_any_dn_mem(int n, char *s, int sz, int resflag)
-{
-  gene_any_rn_mem(n,s,sz,resflag,0);
-}
-
-static void gene_any_an_mem(int n, char *s, int sz, int resflag)
-{
-  gene_any_rn_mem(n,s,sz,resflag,1);
+#endif
 }
 
 /* ,-----------------------------------------------------------.
@@ -366,59 +770,51 @@ static void gene_any_an_mem(int n, char *s, int sz, int resflag)
  */
 static void gene_add_sub(int n, int t)
 {
-  char s[2][4] = { "ADD","SUB" };
-  int sz = (n>>3)&3;
-
-  if (n&040) {
-    /* add dn,<ae> */
-    gene_any_dn_mem(n,s[t],sz,1);
-  } else {
-    /* add <ae>,dn */
-    gene_any_dn(n,s[t],sz,1);
-  }
+  static char s[2][4] = { "ADD","SUB" };
+  gene_any_rn(n, s[t], OK_AN, 0, NOT_IMM);
 }
 
 static void gene_addx_subx(int n, int t)
 {
-  char s[2][4] = { "ADD","SUB" };
-  int sz = (n>>3)&3;
-  char c = tsz[sz], *d = shift_name[sz], *m = tm[sz];
+  static const char s[2][4] = { "ADD","SUB" };
+  int   sz = (n>>3)&3;
+  const char   c = tsz[sz];
+  const char * d = shift_name[sz];
+  const char * m =  mask_name[sz];
   sz = 1<<sz;
 
-  printf(TAB"int68_t a,b,s;\n");
+  outf(TAB"int68_t a,b,s;\n");
 
   /* addx -(ay),-(ax) */
   if (n&1) {
-    printf(TAB"a = read_%c(REG68.a[reg0]-=%d)<<%s;\n",c^32,sz,d);
-    printf(TAB"b = read_%c(REG68.a[reg9]-=%d)<<%s;\n",c^32,sz,d);
-    printf(TAB"%sX%c(s,a,b);\n",s[t],c^32);
-    printf(TAB"write_%c(REG68.a[reg9],(uint68_t)s>>%s);\n",c^32,d);
+    outf(TAB"a = read_%c(REG68.a[reg0]-=%d)<<%s;\n",c^32,sz,d);
+    outf(TAB"b = read_%c(REG68.a[reg9]-=%d)<<%s;\n",c^32,sz,d);
+    outf(TAB"%sX%c(s,a,b);\n",s[t],c^32);
+    outf(TAB"write_%c(REG68.a[reg9],(uint68_t)s>>%s);\n",c^32,d);
   }
   /* addx dy,dx */
   else {
-    printf(TAB"a = REG68.d[reg0]<<%s;\n",d);
-    printf(TAB"b = REG68.d[reg9]<<%s;\n",d);
-    printf(TAB"%sX%c(s,a,b);\n",s[t],c^32);
-    printf(TAB"REG68.d[reg9] = (REG68.d[reg9]%s) + ((uint68_t)s>>%s);\n",m,d);
+    outf(TAB"a = (int68_t)REG68.d[reg0]<<%s;\n",d);
+    outf(TAB"b = (int68_t)REG68.d[reg9]<<%s;\n",d);
+    outf(TAB"%sX%c(s,a,b);\n",s[t],c^32);
+    outf(TAB"REG68.d[reg9] = (REG68.d[reg9] & %s) + ((uint68_t)s>>%s);\n",m,d);
   }
-
 }
 
 static void gene_adda_suba(int n, int t)
 {
-  char *s= t ? "SUB" : "ADD";
-  int sz = (n&(1<<5)) ? 2 : 1;
-  gene_any_an(n,s,sz,2);
+  char * s = t ? "SUB" : "ADD";
+  gene_any_an(n, s);
 }
 
 static void gene_line9_D(int n, int t)
 {
-  printf("DECL_LINE68(line%c%02X)\n{\n",t ? '9' : 'D',n);
+  outf("DECL_LINE68(line%c%02X)\n{\n",t ? '9' : 'D',n);
   if ((n&030)==030) gene_adda_suba(n,t);
   else if ((n&046)==040 ) gene_addx_subx(n,t);
   else gene_add_sub(n,t);
 
-  printf("}\n\n");
+  outf("}\n\n");
 }
 
 /* ,-----------------------------------------------------------.
@@ -436,54 +832,52 @@ static void gene_tbl_lsl_mem(void)
   for (d=0; d<2; d++) {
     c = d ? 'L' : 'R';
     for (n=0; n<4; n++) {
-      printf("static void %s%c_mem"
-             "(emu68_t * const emu68, int reg, int mode)\n{\n",
-             shf_str[n],c);
-
-      printf(TAB"%sint68_t a;\n",(n&3)?"u":"s");
-      putsss(TAB"const addr68_t addr = get_eaw68[mode](emu68,reg);\n");
-      putsss(TAB"int dec=1;\n");
-      putsss(TAB"a = read_W(addr)<<WORD_SHIFT;\n");
-      printf(TAB"%s%cW(a,dec);\n",shf_str[n],c);
-      putsss(TAB"write_W(addr,a>>WORD_SHIFT);\n");
-      putsss("}\n\n");
+      outf("static void %s%c_mem"
+           "(emu68_t * const emu68, int reg, int mode)\n{\n", shf_str[n],c);
+      outf(TAB"/* %s%c.W <Ae> */\n", shf_str[n], c);
+      outf(TAB"const addr68_t l = get_EAW(mode,reg);\n");
+      outf(TAB"       int68_t a = read_W(l)<<WORD_FIX;\n");
+      outf(TAB"%s%cW(a,a,1);\n",shf_str[n],c);
+      outf(TAB"write_W(l,a>>WORD_FIX);\n");
+      outf("}\n\n");
     }
   }
 
   for (d=0; d<2; d++) {
-    c = d ? 'L' : 'R';
-    printf("static void (*const lslmem%c_fc[4])"
-           "(emu68_t *const,int,int)=\n{\n", c);
+    c = "RL"[d];
+    outf("static void (*const lslmem%c_fc[4])"
+         "(emu68_t *const,int,int)=\n{\n", c);
     for(n=0; n<4; n++) {
-      printf(TAB"%s%c_mem,",shf_str[n], c);
+      outf(TAB"%s%c_mem,",shf_str[n], c);
     }
-    printf("\n};\n\n");
+    outf("\n};\n\n");
   }
 }
 
 static void gene_any_lsl_mem(int n)
 {
-  printf(TAB"lslmem%c_fc[reg9&3](emu68,reg0,%d);\n", n&(1<<5)?'L':'R', n&7);
+  outf(TAB"lslmem%c_fc[reg9&3](emu68,reg0,%d);\n", "RL"[(n>>5)&1], n & 7);
 }
 
 static void gene_any_lsl_reg(int n)
 {
   static char shf_str[][4] = { "AS", "LS", "ROX", "RO" };
-  int sz = (n>>3)&3;
-  char c = tsz[sz], *m = tm[sz], *d = shift_name[sz];
-  sz = 1<<sz;
-  /* d = 32-sz*8; */
-  printf(TAB"const int dec = reg9, reg = reg0;\n");
-  printf(TAB"%cint68_t a;\n",(n&3) ? 'u' : 's' );
-  printf(TAB"uint68_t d;\n");
-  printf(TAB"a=REG68.d[reg]<<%s;\n",d);
+  int sz = (n >> 3) & 3;
+  const char   c = tsz[sz];
+  const char * m =  mask_name[sz];
+  const char * d = shift_name[sz];
+  sz = 1 << sz;
+
   if (n&4) {
-    printf(TAB"d = REG68.d[dec]&63;\n");
+    outf(TAB"/* %s%c.%c Dn,Dn */\n", shf_str[n&3], "RL"[(n>>5)&1], c^32);
+    outf(TAB"const int d = REG68.d[reg9];\n");
   } else {
-    printf(TAB"d = ((dec-1)&7)+1;\n");
+    outf(TAB"/* %s%c.%c #d,Dn */\n", shf_str[n&3], "RL"[(n>>5)&1], c^32);
+    outf(TAB"const int d = ((reg9-1)&7)+1;\n");
   }
-  printf(TAB"%s%c%c(a,d);\n",shf_str[n&3], (n&(1<<5)) ? 'L' : 'R', c^32);
-  printf(TAB"REG68.d[reg] = (REG68.d[reg]%s) + ((uint68_t)a>>%s);\n",m,d);
+  outf(TAB" uint68_t a = (uint68_t)REG68.d[reg0]<<%s;\n",d);
+  outf(TAB"%s%c%c(a,a,d);\n", shf_str[n&3], "RL"[(n>>5)&1], c^32);
+  outf(TAB"REG68.d[reg0] = (REG68.d[reg0] & %s) + (a>>%s);\n", m, d);
 }
 
 static void gene_lineE(int n)
@@ -493,10 +887,10 @@ static void gene_lineE(int n)
   if (!n) gene_tbl_lsl_mem();
 
   sz=(n>>3)&3;
-  printf("DECL_LINE68(lineE%02X)\n{\n",n);
+  outf("DECL_LINE68(lineE%02X)\n{\n",n);
   if (sz==3) gene_any_lsl_mem(n);
   else gene_any_lsl_reg(n);
-  printf("}\n\n");
+  outf("}\n\n");
 }
 
 /* ,-----------------------------------------------------------.
@@ -506,40 +900,60 @@ static void gene_lineE(int n)
 
 static void gene_cmp_eor(int n)
 {
-  int t = (n>>5)&1;
-  char s[2][4] = { "CMP","EOR" };
-  int sz = (n>>3)&3;
-  if (t)
-    gene_any_dn_mem(n,s[t],sz,t);
-  else
-    gene_any_dn(n,s[t],sz,t);
+  if ( n & 040 ) {
+    /* EOR */
+    gene_any_rn(n, "EOR", NO_AN, 0, NOT_IMM);
+  } else {
+    /* CMP */
+    gene_any_rn(n, "CMP", OK_AN, 0, NOT_IMM);
+  }
+/*   int sz = (n>>3)&3; */
+/*   if (t) */
+/*     gene_any_dn_mem(n,s[t],sz,t); */
+/*   else */
+/*     gene_any_dn(n,s[t],sz,t); */
 }
 
 static void gene_cmp_mem(int n)
 {
-  int sz = (n>>3)&3;
-  char c = tsz[sz];
+  int sz =  ( n >> 3 ) & 3;
+  char C = tsz[sz] ^ 32;
+  const char * shift = shift_name[sz];
   sz = 1<<sz;
-  printf(TAB"/* CMPM.%c (Ay)+,(Ax)+ */\n",c^32);
-  printf(TAB"int68_t x,y;\n");
-  printf(TAB"y = read_%c(REG68.a[reg0]-=%d);\n",c^32,sz);
-  printf(TAB"x = read_%c(REG68.a[reg9]-=%d);\n",c^32,sz);
-  printf(TAB"CMP%c(y,x);\n",c^32);
+
+  assert( (n & 047) == 041 );
+
+  outf(
+    TAB"/* CMPM.%c (Ay)+,(Ax)+ */\n"
+    TAB"int68_t y0, x9; addr68_t l;\n", C);
+  outf(
+    TAB"l = (s32) REG68.a[reg0];\n"
+    TAB"REG68.a[reg0] = (u32) ( REG68.a[reg0] + %d );\n"
+    TAB"y0 = read_%c(l) << %s;\n", sz, C, shift);
+  outf(
+    TAB"l = (s32) REG68.a[reg9];\n"
+    TAB"REG68.a[reg9] = (u32) ( REG68.a[reg9] + %d );\n"
+    TAB"x9 = read_%c(l) << %s;\n", sz, C, shift);
+  outf(
+    TAB"CMP%c(y0,x9);\n", C);
 }
 
 static void gene_cmpa(int n)
 {
-  int sz = n&(1<<5) ? 2 : 1;
-  gene_any_an(n,"CMP",sz,0);
+  gene_any_an(n, "CMP");
 }
 
 static void gene_lineB(int n)
 {
-  printf("DECL_LINE68(lineB%02X)\n{\n",n);
-  if (((n>>3)&3)==3) gene_cmpa(n);
-  else if ((n&047)==041) gene_cmp_mem(n);
-  else gene_cmp_eor(n);
-  printf("}\n\n");
+  outf("DECL_LINE68(lineB%02X)\n{\n",n);
+  if ( (n & 030) == 030 ) {
+    gene_cmpa(n);
+  } else if ( ( n & 047 ) == 041 ) {
+    gene_cmp_mem(n);
+  } else {
+    gene_cmp_eor(n);
+  }
+  outf("}\n\n");
 }
 
 
@@ -548,77 +962,100 @@ static void gene_lineB(int n)
  * `-----------------------------------------------------------'
  */
 
-static void gene_abcd_sbcd(char *s, int n)
+static void gene_abcd_sbcd(int n, char * s)
 {
-  printf(TAB"/* %s ",s);
-  if (n&1) {
-    printf("-(Ay),-(Ax) */\n");
-    printf(TAB"REG68.a[reg0] -= 2;\n");
-    printf(TAB"REG68.a[reg9] -= 2;\n");
-  }
-  else {
-    printf("Dy,Dx */\n");
-    printf(TAB"reg0=reg0; reg9=reg9;\n");
+  assert ( (n & 076) == 040 );
+
+  if ( n & 1 ) {
+    outf(TAB"/* %s -(Ay),-(Ax) */\n",s);
+    outf(TAB"const addr68_t l0 = REG68.a[reg0] = "
+         "(u32) ( REG68.a[reg0] - 1 );\n");
+    outf(TAB"const addr68_t l9 = REG68.a[reg9] = "
+         "(u32) ( REG68.a[reg9] - 1 );\n");
+    outf(TAB"int s = read_B(l0);\n");
+    outf(TAB"int d = read_B(l9);\n");
+    outf(TAB"%sB(d,s,d);\n", s);
+    outf(TAB"write_B(l9,d);\n");
+  } else {
+    outf(TAB"/* %s Dy,Dx */\n",s);
+    outf(TAB"int s = (u8) REG68.d[reg0];\n");
+    outf(TAB"int d = (u8) REG68.d[reg9];\n");
+    outf(TAB"%sB(d,s,d);\n", s);
+    outf(TAB"REG68.d[reg9] = (REG68.d[reg9] & 0xFFFFFF00) | d;\n");
   }
 }
 
-static void gene_mul_div(char *s, int n, int typ)
+
+static void gene_mul_div(int n, char * s)
 {
-  char na[8];
-  sprintf(na,"%s%c",s,(n&(1<<5)) ? 'S' : 'U');
-  gene_any_dn(n,na,1,2+typ);
+  char name[8];
+  int aemode = ( n & 007 );
+/*   int opmode = ( n & 070 ); */
+
+  sprintf(name, "%s%c", s, "US"[ ( n >> 5 ) & 1 ]);
+
+  assert( ( n & 030 ) == 030 );
+
+  if (*s == 'M') {
+    /* MUL */
+    gene_any_rn(aemode | 010, name, NO_AN, 0211, NOT_IMM);
+  } else {
+    /* DIV */
+    gene_any_rn(aemode | 010, name, NO_AN, 0221, NOT_IMM);
+  }
 }
 
 static void gene_exg(int n)
 {
-  switch(n&0x1f)
-  {
-  case 8:
-    printf(TAB"/* EXG Dx,Dy */\n");
-    printf(TAB"EXG(REG68.d[reg9],REG68.d[reg0]);\n");
+  assert( (n & 040) == 040 );
+
+  switch (n &= 037) {
+  case 010:
+    outf(TAB"/* EXG Dx,Dy */\n");
+    outf(TAB"EXG(reg9,reg0);\n");
     break;
-  case 9:
-    printf(TAB"/* EXG Ax,Ay */\n");
-    printf(TAB"EXG(REG68.a[reg9],REG68.a[reg0]);\n");
+  case 011:
+    outf(TAB"/* EXG Ax,Ay */\n");
+    outf(TAB"EXG(reg9+8,reg0+8);\n");
     break;
-  case 17:
-    printf(TAB"/* EXG Dx,Ay */\n");
-    printf(TAB"EXG(REG68.d[reg9],REG68.a[reg0]);\n");
+  case 021:
+    outf(TAB"/* EXG Dx,Ay */\n");
+    outf(TAB"EXG(reg9,reg0+8);\n");
     break;
   default:
-    printf(TAB"/*ILLEGAL in EXG*/\n");
-    printf(TAB"ILLEGAL;\n");
+    outf(TAB"ILLEGAL; /* EXG op:%03o */\n", n);
+    OUTF_ASSERT(TAB,"EMU68_BREAK");
+    assert(0);
     break;
   }
 }
 
-static void gene_and_or(char *s,int n)
-{
-  if ((n&7)==1) {
-    printf(TAB"ILLEGAL;\n");
-  }
-  else if (n&(1<<5)) {
-    gene_any_dn_mem(n,s,(n>>3)&3,1);
-  }
-  else {
-    gene_any_dn(n,s,(n>>3)&3,1);
-  }
-}
-
-
-/* t=0 -> and, t=1 -> or */
+/* t := [ 0:AND 1:ORR ] */
 static void gene_line8_C(int n, int t)
 {
-  printf("DECL_LINE68(line%c%02X)\n{\n",t ? '8' : 'C', n);
-  if ((n&0x3e)==0x20)
-    gene_abcd_sbcd(t ? "SBCD" : "ABCD", n);
-  else if ( (n&0x18) == 0x18 )
-    gene_mul_div(t ? "DIV" : "MUL", n, t);
-  else if ( t==0 && ((n&07)==1 || (n&077) == 050) )
-    gene_exg(n);
-  else
-    gene_and_or(t ? "OR" : "AND",n);
-  printf("}\n\n");
+  outf("DECL_LINE68(line%c%02X)\n{\n", t["C8"], n);
+
+  switch ( n ) {
+  case 050: case 051: case 061:
+    if (t) {
+      gene_exg(n);
+    } else {
+      outf(TAB"ILLEGAL; /* EXG on other line (op:%03o) */\n", n);
+    }
+    break;
+  case 040: case 041:
+    gene_abcd_sbcd(n, t ? "SBCD" : "ABCD");
+    break;
+
+  default:
+
+    if ( ( n & 030 ) == 030 ) {
+      gene_mul_div(n, t ? "DIV" : "MUL");
+    } else {
+      gene_any_rn(n, t ? "ORR" : "AND", NO_AN, 0, NOT_IMM);
+    }
+  }
+  outf("}\n\n");
 }
 
 /* ,-----------------------------------------------------------.
@@ -628,59 +1065,40 @@ static void gene_line8_C(int n, int t)
 
 static void gene_dbcc(int n)
 {
-  printf(TAB"/* DBcc Dn,<adr> */\n");
-  if (n&(1<<5))
-    printf(TAB"if (!is_cc68[reg9](REG68.sr)) {\n");
-  else
-    printf(TAB"if (is_cc68[reg9](REG68.sr)) {\n");
-  printf(TAB2"int68_t a;\n");
-  printf(TAB2"a=REG68.d[reg0]-1;\n");
-  printf(TAB2"a&=0xFFFF;\n");
-  printf(TAB2"REG68.d[reg0] = (REG68.d[reg0]&0xFFFF0000) + a;\n");
-  printf(TAB2"if (a!=0xFFFF) {\n");
-  printf(TAB33"uint68_t pc=REG68.pc;\n");
-  printf(TAB33"REG68.pc = pc+get_nextw();\n");
-  printf(TAB2"} else REG68.pc += 2;\n");
-  printf(TAB"} else REG68.pc += 2;\n");
+  const int cclsb = ( n >> 5 ) & 1;     /* LSB of code condition */
+
+  outf(TAB"/* DBcc Dn,<addr> */\n");
+  outf(TAB"DBCC(reg0,(reg9<<1)+%d);\n", cclsb);
 }
 
 static void gene_scc(int n)
 {
-  if ((n&7)>=2) {
-    printf(TAB"/* Scc <AE> */\n");
-    printf(TAB"addr68_t addr;\n");
-    printf(TAB"addr = get_eab68[%d](emu68,reg0);\n",n&7);
-    if (n&(1<<5))
-      printf(TAB"write_B(addr,-is_cc68[reg9](REG68.sr));\n");
-    else
-      printf(TAB"write_B(addr,-(is_cc68[reg9](REG68.sr)^1));\n");
-  }
-  else {
-    printf(TAB"/* Scc Dn */\n");
-    if (n&(1<<5))
-      printf(TAB
-             "REG68.d[reg0] = \n"
-             "(REG68.d[reg0]&0xFFFFFF00)+(u8)-is_cc68[reg9](REG68.sr);\n");
-    else
-      printf(TAB
-             "REG68.d[reg0] = \n"
-             "(REG68.d[reg0]&0xFFFFFF00)+"
-             "(u8)-(is_cc68[reg9](REG68.sr)^1);\n");
-  }
+  const int cclsb = ( n >> 5 ) & 1;     /* LSB of code condition */
+
+  outf(TAB"/* Scc %s */\n", ae_name[n&7]);
+  outf(TAB"const int r = SCC((reg9<<1)+%d);\n", cclsb);
+  if ( (n&7) >= 2 )
+    outf(TAB"write_EAB(%d,reg0,r);\n", n&7);
+  else
+    outf(TAB"REG68.d[reg0] = (REG68.d[reg0]&0xFFFFFF00)+r;\n");
 }
 
 static void gene_line5(int n)
 {
   int sz=(n>>3)&3;
-  printf("DECL_LINE68(line5%02X)\n{\n",n);
+  outf("DECL_LINE68(line5%02X)\n{\n",n);
   if (sz!=3)
     gene_any_rn_mem(n, (n&(1<<5)) ? "SUB" : "ADD", sz, 1, 2);
   else if ((n&7)==1)
     gene_dbcc(n);
-  else if ((n&030)==030)
+  else if ( (n&030) == 030 )
     gene_scc(n);
-  else printf(TAB"ILLEGAL\n");
-  printf("}\n\n");
+  else {
+    error("internal: line 5 opmode=0%o\n",n);
+    outf("#error \"internal: line 5 opmode=0%o\"\n",n);
+    outf(TAB"ILLEGAL /* LINE5 op:%03o */\n",n);
+  }
+  outf("}\n\n");
 }
 
 /* ,-----------------------------------------------------------.
@@ -689,153 +1107,179 @@ static void gene_line5(int n)
  */
 static void gene_movep(int n)
 {
-  int sz = (n&(1<<3)) ? 4 : 2;
-  int cycle;
-  int sens = n&(1<<4);
-  int i;
+  int cycle, i;
+  int sz   = 2 << ( (n >> 3) & 1 );
+  int sens = n & (1 << 4);
 
-  cycle = 4*sz; /* 8 or 16 */
-  printf(TAB"/* MOVEP.%c %s */\n","WL"[sz>>2],
-         !sens ? "d(An),Dn" : "Dn,d(An)");
+  assert( ( n & 047 ) == 041 );
 
-  printf(TAB"const addr68_t addr = REG68.a[reg0] + get_nextw();\n");
+  cycle = 4 * sz; /* 8 or 16 */
+  outf(TAB"/* MOVEP.%c %s */\n","WL"[sz>>2],
+       !sens ? "d(An),Dn" : "Dn,d(An)");
+
+  outf(TAB"const addr68_t l = REG68.a[reg0] + get_nextw();\n");
 
   /* Dn -> Mem */
   if (sens) {
-    putsss(TAB"const uint68_t a = REG68.d[reg9];\n");
+    outf(TAB"const uint68_t a = REG68.d[reg9];\n");
     for(i=0; i<sz; i++) {
-      printf(TAB"write_B(addr+%d,a>>%d);\n", i*2, (sz-i-1)*8);
+      outf(TAB"write_B( l + %d, a >> %d);\n", i*2, (sz-i-1)*8);
     }
   }
   /* Mem -> Dn */
   else {
-    putsss(TAB"uint68_t a;\n");
+    outf(TAB"      uint68_t a;\n");
     for(i=0; i<sz; i++) {
-      printf(TAB"a %c=(u8)read_B(addr+%d)<<%d;\n",
-             i ? '+' : ' ', i*2, (sz-i-1)*8);
+      outf(TAB"a %c= read_B( l + %d ) << %d;\n",
+           i ? '+' : ' ', i*2, (sz-i-1)*8);
     }
     if (sz==2) {
-      putsss(TAB"REG68.d[reg9] = (REG68.d[reg9]&~0xFFFF) | a;\n");
+      outf(TAB"REG68.d[reg9] = ( REG68.d[reg9] & ~0xFFFF ) + a;\n");
     } else {
-      putsss(TAB"REG68.d[reg9] = a;\n");
+      outf(TAB"REG68.d[reg9] = a;\n");
     }
   }
-  printf(TAB"ADDCYCLE(%d);\n",cycle);
+  outf(TAB"ADDCYCLE(%d);\n",cycle);
 }
 
-static void gene_bitop(int n,int mode)
+static void gene_bitop_dynamic(int n)
 {
   static char s[4][5] = { "BTST", "BCHG", "BCLR", "BSET" };
   static int cycler[4] = { 2, 4, 6, 4 };
   static int cyclem[4] = { 0, 4, 4, 4 };
-  int t = (n>>3)&3;
+  const int t = (n>>3) & 3;             /* type */
+  const int dstmode = n & 7;            /* <Ae>+reg0 */
+  const int dynamic = (n>>5) & 1;       /* bit is Dn[reg9] */
 
-  if (!mode) {
-    printf(TAB"/* %s Dx,Dy */\n",s[t]);
-    putsss(TAB"int68_t a,b;\n");
-    putsss(TAB"a = REG68.d[reg0];\n");
-    putsss(TAB"b = REG68.d[reg9]&31;\n");
-    printf(TAB"%s(a,b);\n",s[t]);
+  assert(n >= 0 && n < 0100);
+  assert(dstmode != 1);
+  assert(dynamic == 1);
+
+  if (dstmode == 0) {
+    outf(TAB"/* %s.L Dx,Dy */\n",s[t]);
+    outf(TAB"int68_t   y = REG68.d[reg0];\n");
+    outf(TAB"const int x = REG68.d[reg9];\n");
+    outf(TAB"%sL(y,y,x);\n",s[t]);
     if (t) {
-      putsss(TAB"REG68.d[reg0] = a;\n");
+      outf(TAB"REG68.d[reg0] = (u32) y;\n");
     }
-    printf(TAB"ADDCYCLE(%d);\n",cycler[t]);
+    outf(TAB"ADDCYCLE(%d);\n",cycler[t]);
   } else {
-    printf(TAB"/* %s Dn,<Ae> */\n",s[t]);
-    putsss(TAB"int68_t a,b;\n");
-    putsss(TAB"addr68_t addr;\n");
-    printf(TAB"addr = get_eab68[%d](emu68,reg0);\n",mode);
-    putsss(TAB"a = read_B(addr);\n");
-    putsss(TAB"b = REG68.d[reg9]&7;\n");
-    printf(TAB"%s(a,b);\n",s[t]);
-    if (t) putsss(TAB"write_B(addr,a);\n");
-    printf(TAB"ADDCYCLE(%d);\n",cyclem[t]);
+    outf(TAB"/* %s.B Dn,%s */\n",s[t],ae_name[dstmode]);
+    outf(TAB"const addr68_t l = get_EAB(%d,reg0);\n",dstmode);
+    outf(TAB"      int68_t  y = read_B(l);\n");
+    outf(TAB"const int      x = REG68.d[reg9];\n");
+    outf(TAB"%sB(y,y,x);\n", s[t]);
+    if (t) {
+      outf(TAB"write_B(l,y);\n");
+    }
+    outf(TAB"ADDCYCLE(%d);\n",cyclem[t]);
   }
 }
 
 static void gene_bxxx_mem(int t)
 {
-  static char s[4][5] = { "BTST", "BCHG", "BCLR", "BSET" };
+  static char s[4][5]  = { "BTST", "BCHG", "BCLR", "BSET" };
   static int cyclem[4] = { 0, 4, 4, 4 };
-  printf("static void %s_mem"
-         "(emu68_t * const emu68, int b, int mode, int reg0)\n{\n",
-         s[t]);
-  putsss(TAB"addr68_t addr = get_eab68[mode](emu68,reg0);\n");
-  putsss(TAB"int68_t a = read_B(addr);\n");
-  putsss(TAB"b &= 7;\n");
-  printf(TAB"%s(a,b);\n",s[t]);
-  if (t) putsss(TAB"write_B(addr,a);\n");
-  printf(TAB"ADDCYCLE(%d);\n",cyclem[t]);
-  putsss("}\n\n");
+
+  assert(t>=0 && t<4);
+
+  outf("static inline\nvoid %s_mem"
+       "(emu68_t * const emu68, const int bit, int mode, int reg0)\n{\n",
+       s[t]);
+  outf(TAB"/* %s.B #b,<Ae> */\n",s[t]);
+  outf(TAB"addr68_t addr = get_eab68[mode](emu68,reg0);\n");
+  outf(TAB"int68_t a = read_B(addr);\n");
+  outf(TAB"%sB(a,a,bit);\n",s[t]);
+  if (t) outf(TAB"write_B(addr,a);\n"); /* $$$ should write ???  */
+  outf(TAB"ADDCYCLE(%d);\n",cyclem[t]);
+  outf("}\n\n");
 }
 
 static void gene_bxxx_reg(int t)
 {
   static char s[4][5] = { "BTST", "BCHG", "BCLR", "BSET" };
   static int cycler[4] = { 2, 4, 6, 4 };
-  printf("static void %s_reg"
-         "(emu68_t * const emu68, int b, int reg0)\n{\n",s[t]);
-  putsss(TAB"int68_t a = REG68.d[reg0];\n");
-  putsss(TAB"b &= 31;\n");
-  printf(TAB"%s(a,b);\n",s[t]);
-  if (t) putsss(TAB"REG68.d[reg0] = a;\n");
-  printf(TAB"ADDCYCLE(%d);\n",cycler[t]);
-  putsss("}\n\n");
-}
 
+  assert(t>=0 && t<4);
+
+  outf("static inline\nvoid %s_reg"
+       "(emu68_t * const emu68, const int bit, int reg0)\n{\n",s[t]);
+  outf(TAB"/* %s.L #b,Dn */\n",s[t]);
+  outf(TAB"int68_t a = REG68.d[reg0];\n");
+  outf(TAB"%sL(a,a,bit);\n",s[t]);
+  if (t) outf(TAB"REG68.d[reg0] = (u32) a;\n");
+  outf(TAB"ADDCYCLE(%d);\n",cycler[t]);
+  outf("}\n\n");
+}
 
 static void gene_line0_mix(int n)
 {
   static char s[4][5] = { "BTST", "BCHG", "BCLR", "BSET" };
-  int mode = n&7;
-  int t=(n>>3)&3;
+  const int dstmode = n & 7;
+  const int t       = ( n >> 3 ) & 3;   /* type            */
+  const int dynamic = (n>>5) & 1;       /* bit is Dn[reg9] */
 
-  putsss(TAB"if (reg9==4) {\n");
-  if (!mode) printf(TAB2"%s_reg(emu68,get_nextw(),reg0);\n",s[t]);
-  else       printf(TAB2"%s_mem(emu68,get_nextw(),%d,reg0);\n",s[t], mode);
-  putsss(TAB"} else {\n");
-  if (n&(1<<5)) {
-    putsss(TAB2"ILLEGAL;\n");
-    return;
-  } else {
-    printf(TAB2"line0_imm[reg9][%d](emu68,reg0);\n",n&31);
+  assert(n >= 0 && n < 0100 && (n&63) < 32);
+  assert(dynamic == 0);
+
+  outf(TAB"if (reg9 == 4) {\n");
+  switch (dstmode) {
+  case 0:
+    outf(TAB2"const int bit = get_nextw();\n");
+    outf(TAB2"%s_reg(emu68, bit, reg0);\n",s[t]);
+    break;
+  case 1:
+    outf(TAB2"ILLEGAL; /* %s #xx,An (op:%032o) */\n", s[t], n);
+    OUTF_ASSERT(TAB2,"EMU68_BREAK");
+    break;
+  default:
+    outf(TAB2"const int bit = get_nextw();\n");
+    outf(TAB2"%s_mem(emu68, bit, %d, reg0);\n", s[t], dstmode);
+    break;
   }
-  putsss(TAB"}\n");
+  outf(TAB"} else {\n");
+  outf(TAB2"line0_imm[reg9][%d](emu68,reg0);\n", n & 63);
+  outf(TAB"}\n");
 }
 
 static void gene_imm_sr(int n, int sz)
 {
-/*  printf("static void l0_%s%s(int reg0)\n{\n",s,t ? "CCR" : "SR" );*/
+/*  outf("static void l0_%s%s(int reg0)\n{\n",s,t ? "CCR" : "SR" );*/
 
-  putsss(TAB"if (reg0==4) {\n");
-  putsss(TAB2"uint68_t a;\n");
+  static const char * iname [] = { "ORR", "AND", "EOR", "???" };
+  static const char * idest [] = { "CCR", "SR" };
+
+
+  outf(TAB"if (reg0==4) { /* %s TO %s */\n",iname[n&3], idest[!!sz]);
+  outf(TAB2"uint68_t a;\n");
 
   switch(n)
   {
-  case 0: /* OR */
-    if (!sz) putsss(TAB2"a = get_nextw()&255;\n");
-    else     putsss(TAB2"a = get_nextw();\n");
-    putsss(TAB2"REG68.sr |= a;\n");
+  case 0: /* ORR */
+    if (!sz) outf(TAB2"a = get_nextw()&255;\n");
+    else     outf(TAB2"a = get_nextw();\n");
+    outf(TAB2"REG68.sr |= a;\n");
     break;
 
   case 1: /* AND */
-    if (!sz) putsss(TAB2"a = get_nextw()|0xFF00;\n");
-    else     putsss(TAB2"a = get_nextw();\n");
-    putsss(TAB2"REG68.sr &= a;\n");
+    if (!sz) outf(TAB2"a = get_nextw()|0xFF00;\n");
+    else     outf(TAB2"a = get_nextw();\n");
+    outf(TAB2"REG68.sr &= a;\n");
     break;
 
   case 2: /*EOR */
-    if (!sz) putsss(TAB2"a = get_nextw()&255;\n");
-    else     putsss(TAB2"a = get_nextw();\n");
-    putsss(TAB2"REG68.sr ^= a;\n");
+    if (!sz) outf(TAB2"a = get_nextw()&255;\n");
+    else     outf(TAB2"a = get_nextw();\n");
+    outf(TAB2"REG68.sr ^= a;\n");
     break;
   }
-  putsss(TAB"} else {\n");
+  outf(TAB"} else {\n");
 
   switch(n)
   {
   case 0:
-    gene_any_rn_mem(7,"OR",sz,1,3);
+    gene_any_rn_mem(7,"ORR",sz,1,3);
     break;
   case 1:
     gene_any_rn_mem(7,"AND",sz,1,3);
@@ -844,36 +1288,37 @@ static void gene_imm_sr(int n, int sz)
     gene_any_rn_mem(7,"EOR",sz,1,3);
     break;
   }
-  printf(TAB"}\n");
+  outf(TAB"}\n");
 }
 
 static void gene_imm_op(int n, char *s, int sz, int op)
 {
   if ((n&7)==1) return;
 
-  printf("static void l0_%s%c%d(emu68_t * const emu68, int reg0)\n{\n",
-         s,tsz[sz],n);
+  outf("static void l0_%s%c%d(emu68_t * const emu68, int reg0)\n{\n",
+       s,tsz[sz],n);
   if ((n&7)!=7 || op>2 || sz==2)
     gene_any_rn_mem(n,s,sz,op!=5,3);
   else
     gene_imm_sr(op,sz);
 
-  putsss("}\n\n");
+  outf("}\n\n");
 }
 
 
 static void gene_imm_illegal(void)
 {
-  printf("static void l0_ill(emu68_t * const emu68, int reg0)\n{\n");
-  printf(TAB"reg0=reg0; ILLEGAL;\n}\n\n");
-
+  outf("static void l0_ill(emu68_t * const emu68, int reg0)\n{\n");
+  outf(TAB"reg0 = reg0;\n");
+  outf(TAB"ILLEGAL;\n");
+  outf("}\n\n");
 }
 
 
 static void gene_line0(int n)
 {
   int i;
-  static char ts[8][5] = {"OR","AND","SUB","ADD","?","EOR","CMP","?"};
+  static char ts[8][5] = {"ORR","AND","SUB","ADD","???","EOR","CMP","???"};
 
   if (!n) {
     for(i=0; i<4; i++) {
@@ -883,76 +1328,75 @@ static void gene_line0(int n)
 
     gene_imm_illegal();
 
-    for(i=0; i<8; i++) {
+    for (i=0; i<8; i++) {
       int j;
-      for(j=0; j<3; j++) {
-        gene_imm_op(i, "OR" ,j,0);
-        gene_imm_op(i, "AND",j,1);
-        gene_imm_op(i, "EOR",j,2);
-        gene_imm_op(i, "ADD",j,3);
-        gene_imm_op(i, "SUB",j,4);
-        gene_imm_op(i, "CMP",j,5);
+      for (j=0; j<3; j++) {
+        gene_imm_op(i, "ORR", j, 0);
+        gene_imm_op(i, "AND", j, 1);
+        gene_imm_op(i, "EOR", j, 2);
+        gene_imm_op(i, "ADD", j, 3);
+        gene_imm_op(i, "SUB", j, 4);
+        gene_imm_op(i, "CMP", j, 5);
       }
     }
 
-    printf("static void (*const line0_imm[8][32])"
-           "(emu68_t * const emu68, int) =\n{\n");
-    for(i=0; i<8; i++) {
+    outf("static void (*const line0_imm[8][32])"
+         "(emu68_t * const emu68, int) =\n{\n");
+    for (i=0; i<8; i++) {
       int j;
       char *s;
       s = ts[i];
-      printf("/* %s */\n  {\n",s);
-      for(j=0;j<32; j++)
+      outf("/* %s */\n  {\n",s);
+      for (j=0;j<32; j++)
       {
         char c;
 
-        if ((j&7)==0) printf(TAB);
+        if ((j&7)==0) outf(TAB);
         c = tsz[j>>3];
-        printf("l0_");
+        outf("l0_");
         switch(i)
         {
 
-        case 0: /* OR */
+        case 0: /* ORR */
         case 1: /* AND */
         case 5: /* EOR */
           /*if (j==007)
-            printf("%sCCR,",s);
+            outf("%sCCR,",s);
             else if (j==017)
-            printf("%sSR,",s);
+            outf("%sSR,",s);
             else */if ((j&030)==030 || (j&7)==1)
-            printf("ill,");
+            outf("ill,");
           else
-            printf("%s%c%d,",s,c,j&7);
+            outf("%s%c%d,",s,c,j&7);
           break;
 
         case 2: /* SUB */
         case 3: /* ADD */
         case 6: /* CMP */
           if ((j&030)==030 || (j&7)==1)
-            printf("ill,");
+            outf("ill,");
           else
-            printf("%s%c%d,",s,c,j&7);
+            outf("%s%c%d,",s,c,j&7);
           break;
 
         default:
-          printf("ill,");
+          outf("ill,");
           break;
         }
-        if ((j&7)==7) printf("\n");
+        if ((j&7)==7) outf("\n");
       }
-      printf("\n  },\n");
+      outf("\n  },\n");
     }
-    printf("};\n\n");
+    outf("};\n\n");
   }
-  printf("DECL_LINE68(line0%02X)\n{\n",n);
-  if ( (n & 047) == 041 ) gene_movep(n);
-  else if ( (n & 040) == 040 ) gene_bitop(n,n&7);
-  else gene_line0_mix(n);
-/*  else if ( (n & (0xFF00) == 0x0800 ) desa_bitop(d);
-    else if ( (n & 0677) == 0074 ) desa_IMM_SR(d);
-    else if ( (n & 0x100 )==0) desa_imm_op(d);
-    else printf(TAB"ILLEGAL;\n");            */
-  putsss("}\n\n");
+  outf("DECL_LINE68(line0%02X)\n{\n",n);
+  if ( (n & 047) == 041 )
+    gene_movep(n);
+  else if ( (n & 040) == 040 )
+    gene_bitop_dynamic(n);
+  else
+    gene_line0_mix(n);
+  outf("}\n\n");
 }
 
 /* ,-----------------------------------------------------------.
@@ -960,11 +1404,20 @@ static void gene_line0(int n)
  * `-----------------------------------------------------------'
  */
 
-static void gene_line1_2_3(int n,int sz, int l)
+
+static void gene_line1_2_3(int n, int sz, int line)
 {
-  printf("DECL_LINE68(line%d%02X)\n{\n",l,n);
-  gene_any_move(n,"MOVE",sz);
-  putsss("}\n\n");
+  const int dmode = ( n >> 3 ) & 7;
+
+  outf("DECL_LINE68(line%d%02X)\n{\n", line, n);
+
+  switch (dmode) {
+  case 1:
+    gene_movea(n, sz); break;
+  default:
+    gene_move(n, sz);
+  }
+  outf("}\n\n");
 }
 
 /* ,-----------------------------------------------------------.
@@ -973,47 +1426,31 @@ static void gene_line1_2_3(int n,int sz, int l)
  */
 static void gene_bcc(int n)
 {
-  int hdep = (signed char)((n&31)<<3), ccnot = (n>>5)&1;
+  const int hdep  = (signed char)((n&31)<<3); /* MSB of displacement   */
+  const int cclsb = (n>>5)&1;                 /* LSB of code condition */
 
-  putsss(TAB"uint68_t pc = REG68.pc;\n");
+  outf(TAB"/* Bcc or BSR */\n");
+  outf(TAB"uint68_t pc = REG68.pc;\n");
 
   /* Possible jmp word */
-  if (hdep==0) {
-    putsss(TAB"/* Bcc.w */\n");
-    putsss(TAB"if (reg0==0) pc += get_nextw();\n");
-    putsss(TAB"/* Bcc.s */\n");
-    putsss(TAB"else pc += reg0;\n");
+  if (!hdep) {
+    outf(TAB"if (!reg0)\n");
+    outf(TAB2"pc += get_nextw(); /* .W */\n");
+    outf(TAB"else\n");
+    outf(TAB2"pc += reg0;        /* .B */\n");
   }
   /* only jmp short */
   else {
-    putsss(TAB"/* Bcc.s */\n");
-    printf(TAB"pc += reg0+%d;\n",hdep);
+    outf(TAB"pc += reg0%+4d;      /* .B */\n", hdep);
   }
-
-  /* Possible BSR */
-  if (ccnot) {
-    putsss(TAB"/* BSR */ \n");
-    putsss(TAB"if (reg9==0)\n");
-    putsss(TAB"{\n");
-    putsss(TAB2"pushl(REG68.pc);\n");
-    putsss(TAB2"REG68.pc = pc;\n");
-    putsss(TAB2"ADDCYCLE(12);\n");
-    putsss(TAB"}\n");
-    putsss(TAB"else");
-  }
-  putsss(TAB"/* Bcc */ \n");
-  if (ccnot) {
-    putsss(TAB"if (is_cc68[reg9](REG68.sr)) REG68.pc = pc;\n");
-  } else {
-    putsss(TAB"if (!is_cc68[reg9](REG68.sr)) REG68.pc = pc;\n");
-  }
+  outf(TAB"BCC(pc,(reg9<<1)+%d);\n", cclsb);
 }
 
 static void gene_line6( int n )
 {
-  printf("DECL_LINE68(line6%02X)\n{\n",n);
+  outf("DECL_LINE68(line6%02X)\n{\n",n);
   gene_bcc(n);
-  putsss("}\n\n");
+  outf("}\n\n");
 }
 
 /* ,-----------------------------------------------------------.
@@ -1022,17 +1459,28 @@ static void gene_line6( int n )
  */
 static void gene_any_moveq(int n)
 {
-  putsss(TAB"/* MOVEQ #xx,Dn */\n");
-  printf(TAB"int68_t a=(int68_t)(s8) (reg0+((%d&31)<<3));\n",n);
-  putsss(TAB"REG68.d[reg9] = a;\n");
-  putsss(TAB"MOVE(a);\n");
+  int v = (n&31) << 3;
+  assert(n >= 0 && n < 0100 && ( ( n>>5 ) & 1 ) == 0);
+
+  outf(TAB"/* MOVEQ #N,Dn [%d..%d] */\n", (signed char)v, (signed char)(v+7));
+  outf(TAB"int68_t a = reg0%+5d;\n", (signed char)v);
+  outf(TAB"REG68.d[reg9] = (u32)a;\n");
+  outf(TAB"MOVEL(a);\n");
 }
 
 static void gene_line7( int n )
 {
-  printf("DECL_LINE68(line7%02X)\n{\n",n);
-  gene_any_moveq(n);
-  putsss("}\n\n");
+  outf("DECL_LINE68(line7%02X)\n{\n",n);
+  switch ( (n >> 5) & 1 ) {
+  case 0:
+    gene_any_moveq(n);
+    break;
+  case 1:
+    outf(TAB"ILLEGAL; /* op:%03o */\n",n);
+    OUTF_ASSERT(TAB,"EMU68_BREAK");
+    break;
+  }
+  outf("}\n\n");
 }
 
 /* ,-----------------------------------------------------------.
@@ -1041,13 +1489,12 @@ static void gene_line7( int n )
  */
 
 /* t=1 -> lineA  t=0 -> lineF  */
-static void gene_lineA_F(int n,int t)
+static void gene_lineA_F(int n, int t)
 {
   if (!n) {
-    printf("DECL_LINE68(line%c%02X)\n{\n"
-           ,t ? 'A' : 'F',n);
-    printf(TAB"LINE%c;\n",t ? 'A' : 'F' );
-    putsss("}\n\n");
+    outf("DECL_LINE68(line%c%02X)\n{\n", "FA"[t], n);
+    outf(TAB"LINE%c;\n", "FA"[t]);
+    outf("}\n\n");
   }
 }
 
@@ -1057,184 +1504,217 @@ static void gene_lineA_F(int n,int t)
  */
 static void gene_chk(int n)
 {
-  if ((n&7)==1)
-  {
-    putsss(TAB"/* CHK <AE>,Dn */;\n");
-    putsss(TAB"ILLEGAL;\n");
+  int opmode = ( n & 070 );
+  int aemode = ( n & 007 );
+
+  assert ( opmode == 060 || opmode == 040 );
+
+  if ( opmode == 040 ) {
+    /* CHK.L */
+    outf("#ifndef EMU68_68020\n");
+    outf(TAB"ILLEGAL; /* CHK.L op:%03o */\n", n);
+    outf("#else\n");
+    gene_any_rn(aemode|020, "CHK", NO_AN, 0, NOT_IMM);
+    outf("#endif\n");
+  } else {
+    gene_any_rn(aemode|010, "CHK", NO_AN, 0, NOT_IMM);
   }
-  else gene_any_dn(n,"CHK",1,0);
 }
 
 static void gene_lea(int n)
 {
-  int mode=n&7;
-  putsss(TAB"/* LEA <AE>,an */\n");
-  if (mode<5 && mode!=2)
-  {
-    putsss(TAB"ILLEGAL;\n");
+  int mode = n & 7;
+
+  outf(TAB"/* LEA %s,An */\n", ae_name[mode]);
+
+  switch (mode) {
+  case 2:
+    outf(TAB"REG68.a[reg9] = (u32) REG68.a[reg0];\n");
+    break;
+  case 5:
+    outf(TAB"REG68.a[reg9] = (u32) ( REG68.a[reg0] + get_nextw() );\n");
+    break;
+  case 6: case 7:
+    outf(TAB"REG68.a[reg9] = (u32) get_eal68[%d](emu68,reg0);\n",mode);
+    break;
+  default:
+    outf(TAB"ILLEGAL; /* LEA %s,An */\n", ae_name[mode]);
+    OUTF_ASSERT(TAB,"EMU68_BREAK");
     return;
   }
-  if (mode==2)
-    putsss(TAB"REG68.a[reg9] = REG68.a[reg0];\n");
-  else if (mode==5)
-    putsss(TAB"REG68.a[reg9] = REG68.a[reg0] + get_nextw();\n");
-  else
-    printf(TAB"REG68.a[reg9] = (get_eal68[%d])(emu68,reg0);\n",mode);
 }
 
 static void gene_movefromsr(void)
 {
-  putsss(TAB"/* MOVE FROM SR */\n");
-  putsss(TAB"if (mode)\n");
-  putsss(TAB2"write_W(get_eaw68[mode](emu68,reg0),REG68.sr);\n");
-  putsss(TAB"else\n");
-  putsss(TAB2"REG68.d[reg0]=(REG68.d[reg0]&0xFFFF0000)+(u16)REG68.sr;\n");
+  outf(TAB"/* MOVE FROM SR */\n");
+  outf(TAB"if (mode)\n");
+  outf(TAB2"write_W(get_eaw68[mode](emu68,reg0),REG68.sr);\n");
+  outf(TAB"else\n");
+  outf(TAB2"REG68.d[reg0] = (REG68.d[reg0]&0xFFFF0000) + (u16)REG68.sr;\n");
 }
 
 static void gene_movetosr(void)
 {
-  putsss(TAB"/* MOVE TO SR */\n");
-  putsss(TAB"if (mode)\n");
-  putsss(TAB2"REG68.sr = read_W(get_eaw68[mode](emu68,reg0));\n");
-  putsss(TAB"else\n");
-  putsss(TAB2"REG68.sr = (u16)REG68.d[reg0];\n");
+  outf(TAB"/* MOVE TO SR */\n");
+  outf(TAB"if (mode)\n");
+  outf(TAB2"REG68.sr = read_W(get_eaw68[mode](emu68,reg0));\n");
+  outf(TAB"else\n");
+  outf(TAB2"REG68.sr = (u16)REG68.d[reg0];\n");
 }
 
 static void gene_moveccr(void)
 {
-  putsss(TAB"/* MOVE TO CCR */\n");
-  putsss(TAB"if (mode)\n");
-  putsss(TAB2"SET_CCR(REG68.sr,read_W(get_eaw68[mode](emu68,reg0)));\n");
-  putsss(TAB"else\n");
-  putsss(TAB2"SET_CCR(REG68.sr,REG68.d[reg0]);\n");
+  outf(TAB"/* MOVE TO CCR */\n");
+  outf(TAB"if (mode)\n");
+  outf(TAB2"SET_CCR(REG68.sr,read_W(get_eaw68[mode](emu68,reg0)));\n");
+  outf(TAB"else\n");
+  outf(TAB2"SET_CCR(REG68.sr,REG68.d[reg0]);\n");
 }
 
 static void gene_pea_swap(void)
 {
-  putsss(TAB"/* SWP or PEA */\n");
-  putsss(TAB"if (!mode){ SWAP(REG68.d[reg0]); }\n");
-  putsss(TAB"else pushl(get_eal68[mode](emu68,reg0));\n");
+  outf(TAB"if (!mode) {\n");
+  outf(TAB2"/* SWAP */\n");
+  outf(TAB2"SWAP(reg0);\n");
+  outf(TAB"} else {\n");
+  outf(TAB2"/* PEA */\n");
+  outf(TAB2"pushl(get_eal68[mode](emu68,reg0));\n");
+  outf(TAB"}\n");
 }
 
 static void gene_movemmem_ext(int sz)
 {
-  printf(TAB"if (!mode){ EXT%c(REG68.d[reg0]); }\n", sz ? 'L' : 'W');
-  printf(TAB"else movemmem%c(emu68,mode,reg0);\n", sz ? 'l' : 'w');
+  sz = "WL"[sz];
+  outf(TAB"if (!mode) {\n");
+  outf(TAB2"/* EXT.%c Dn */\n", sz);
+  if (sz == 'W') {
+    outf(TAB2"const int68_t d = (int68_t) (s8) REG68.d[reg0] << WORD_FIX;\n");
+    outf(TAB2"EXTW(d);\n");
+    outf(TAB2"REG68.d[reg0] &= 0xFFFF0000;\n");
+    outf(TAB2"REG68.d[reg0] |= (uint68_t) d >> WORD_FIX;\n");
+  } else {
+    outf(TAB2"const int68_t d = (int68_t) (s16) REG68.d[reg0] << LONG_FIX;\n");
+    outf(TAB2"EXTL(d);\n");
+    outf(TAB2"REG68.d[reg0] = d>>LONG_FIX;\n", sz);
+  }
+  outf(TAB"} else {\n");
+  outf(TAB2"/* MOVEM.%c REGS,<AE> */\n", sz);
+  outf(TAB2"movemmem%c(emu68, mode, reg0);\n", sz^32);
+  outf(TAB"}\n");
 }
 
 static void gene_movemreg( int sz )
 {
-  printf(TAB"movemreg%c(emu68,mode,reg0);\n", sz ? 'l' : 'w');
+  sz = "WL"[sz];
+  outf(TAB"/* MOVEM.%c <AE>,REGS */\n", sz);
+  outf(TAB"movemreg%c(emu68,mode,reg0);\n", sz^32);
 }
 
 static void gene_movemregfunc( int sz )
 {
-  char c=sz ? 'l' : 'w';
-  sz = (sz+1)*2;
-  printf("static void movemreg%c"
-         "(emu68_t * const emu68, int mode, int reg0)\n",c);
-  printf("{\n");
-  printf(TAB"uint68_t m = (u16)get_nextw(), addr;\n");
-  printf(TAB"int68_t *r = REG68.d;\n");
-  printf(TAB"addr = get_ea%c68[mode](emu68,reg0);\n",c);
-  printf(TAB"for(; m; r++, m>>=1)\n");
-  printf(TAB2"if (m&1){ *r=(int68_t)read_%c(addr); addr+=%d; }\n",c^32,sz);
-  printf(TAB"if (mode==3) REG68.a[reg0] = addr;\n");
-  printf("}\n\n");
+  char c = "wl"[sz];
+  sz = ( sz + 1 ) * 2;
+  outf("static void movemreg%c"
+       "(emu68_t * const emu68, int mode, int reg0)\n",c);
+  outf("{\n");
+  outf(TAB"uint68_t m = (u16) get_nextw(), addr;\n");
+  outf(TAB"s32 * r = REG68.d;\n");
+  outf(TAB"addr = get_ea%c68[mode](emu68,reg0);\n",c);
+  outf(TAB"for(; m; r++, m>>=1)\n");
+  outf(TAB2"if ( m & 1 ){ *r = read_%c(addr); addr += %d; }\n", c^32, sz);
+  outf(TAB"if ( mode == 3 ) REG68.a[reg0] = addr;\n");
+  outf("}\n\n");
 }
 
 static void gene_movemmemfunc( int sz )
 {
-  char c=sz ? 'l' : 'w';
-  sz = (sz+1)*2;
-  printf("static void movemmem%c"
-         "(emu68_t * const emu68, int mode, int reg0)\n",c);
-  putsss("{\n");
-  putsss(TAB"uint68_t m = (u16)get_nextw(), addr;\n");
-  putsss(TAB"if (mode==4) {\n");
-  putsss(TAB2"int68_t *r = REG68.a+7;\n");
-  printf(TAB2"addr = get_ea%c68[3](emu68,reg0);\n",c);
-  putsss(TAB2"for(; m; r--, m>>=1)\n");
-  printf(TAB33"if (m&1) write_%c(addr-=%d,*r);\n",c^32,sz);
-  putsss(TAB2"REG68.a[reg0] = addr;\n");
-  putsss(TAB"} else {\n");
-  putsss(TAB2"int68_t *r = REG68.d;\n");
-  printf(TAB2"addr = get_ea%c68[mode](emu68,reg0);\n",c);
-  putsss(TAB2"for(; m; r++, m>>=1)\n");
-  printf(TAB33"if (m&1) { write_%c(addr,*r); addr+=%d; }\n",c^32,sz);
-  putsss(TAB"}\n");
-  putsss("}\n\n");
+  char c = "wl"[sz];
+  sz = ( sz + 1 ) * 2;
+  outf("static void movemmem%c"
+       "(emu68_t * const emu68, int mode, int reg0)\n",c);
+  outf("{\n");
+  outf(TAB"uint68_t m = (u16)get_nextw(), addr;\n");
+  outf(TAB"if (mode==4) {\n");
+  outf(TAB2"s32 * r = REG68.a+7;\n");
+  outf(TAB2"addr = get_ea%c68[3](emu68,reg0);\n",c);
+  outf(TAB2"for(; m; r--, m>>=1)\n");
+  outf(TAB33"if (m&1) write_%c(addr-=%d,*r);\n",c^32,sz);
+  outf(TAB2"REG68.a[reg0] = addr;\n");
+  outf(TAB"} else {\n");
+  outf(TAB2"s32 * r = REG68.d;\n");
+  outf(TAB2"addr = get_ea%c68[mode](emu68,reg0);\n",c);
+  outf(TAB2"for(; m; r++, m>>=1)\n");
+  outf(TAB33"if (m&1) { write_%c(addr,*r); addr+=%d; }\n",c^32,sz);
+  outf(TAB"}\n");
+  outf("}\n\n");
 }
 
 static void gene_tas_illegal(void)
 {
-  putsss(TAB"if (mode<2) {\n");
-  putsss(TAB2"int68_t a = REG68.d[reg0]<<BYTE_SHIFT;\n");
-  putsss(TAB2"TAS(a);\n");
-  putsss(TAB2"REG68.d[reg0] = (REG68.d[reg0]&BYTE_MASK) | "
-         "((uint68_t)a>>BYTE_SHIFT);\n");
-  putsss(TAB"} else {\n");
-  putsss(TAB2"int68_t a;\n");
-  putsss(TAB2"if (mode==7 && reg0>1) {\n");
-  putsss(TAB33"ILLEGAL;\n");
-  putsss(TAB2"} else {\n");
-  putsss(TAB33"const addr68_t addr = get_eab68[mode](emu68,reg0);\n");
-  putsss(TAB33"a = read_B(addr)<<BYTE_SHIFT;\n");
-  putsss(TAB33"TAS(a);\n");
-  putsss(TAB33"write_B(addr,(uint68_t)a>>BYTE_SHIFT);\n");
-  putsss(TAB2"}\n");
-  putsss(TAB"}\n");
+  outf(TAB"if (mode<2) {\n");
+  outf(TAB2"/* TAS.B Dn */\n");
+  outf(TAB2"int68_t a = (int68_t) REG68.d[reg0];\n");
+  outf(TAB2"TASB(a,a);\n");
+  outf(TAB2"REG68.d[reg0] = a;\n");
+  outf(TAB"} else {\n");
+  outf(TAB2"if ( mode == 7 && reg0 > 1 ) {\n");
+  outf(TAB33"ILLEGAL;\n");
+  outf(TAB2"} else {\n");
+  outf(TAB33"/* TAS.B <Ae> */\n");
+  outf(TAB33"const addr68_t l = get_eab68[mode](emu68,reg0);\n");
+  outf(TAB33"       int68_t a = read_B(l) << BYTE_FIX;\n");
+  outf(TAB33"TASB(a,a);\n");
+  outf(TAB33"write_B(l,(uint68_t)a >> BYTE_FIX);\n");
+  outf(TAB2"}\n");
+  outf(TAB"}\n");
 }
 
 static void gene_jmp(int s)
 {
-  printf(TAB"/* J%s <Ae> */\n",s ? "MP" : "SR");
-  putsss(TAB"const addr68_t addr = get_eal68[mode](emu68,reg0);\n");
-  if (!s) putsss(TAB"pushl(REG68.pc);\n");
-  putsss(TAB"REG68.pc = addr;\n");
-  putsss(TAB"ADDCYCLE(4);\n");
+  outf(TAB"/* J%s <Ae> */\n", s ? "MP" : "SR");
+  outf(TAB"const addr68_t pc = get_eal68[mode](emu68,reg0);\n");
+  outf(TAB"J%s(pc);\n", s ? "MP" : "SR");
 }
 
 /* flags : bit 0:no read bit 1:no write */
-static void gene_any_impl(char *s, int sz, int flags)
+static void gene_implicit(char * s, int sz, int flags)
 {
-  char c=tsz[sz]^32;
-  char * d = shift_name[sz];
-  char *m=tm[sz];
-  sz = 1<<sz;
-/*   d = 32-8*sz; */
+  const char   c = tsz[sz], C = toupper(c);
+  const char * d = shift_name[sz];
+  const char * m =  mask_name[sz];
 
-  printf(TAB"/* %s.%c <Ae> */\n",s,c);
+  assert(sz >= 0 && sz < 3);
+  assert(flags >= 0 && flags < 3);
 
-  putsss(TAB"if (mode<2)\n");
-  putsss(TAB"{\n");
+  sz = 1 << sz;
 
-  putsss(TAB2"int68_t s;\n");
-  if (flags & 1) {
-    putsss(TAB2"int68_t a=0;\n");
-  } else {
-    printf(TAB2"int68_t a=REG68.d[reg0]<<%s;\n",d);
+  outf(TAB"uint68_t b;\n\n");
+  outf(TAB"if ( !mode ) {\n"); {
+    outf(TAB2"/* %s.%c Dn */\n", s, C);
+    if ( ! (flags & 1) ) {
+      outf(TAB2"b = (uint68_t) REG68.d[reg0] << %s;\n", d);
+    }
+    outf(TAB2"%s%c(b,b);\n", s, C);
+    if ( ! (flags & 2) ) {
+      outf(TAB2"REG68.d[reg0] = ");
+      if (sz != 4) {
+        outf("( REG68.d[reg0] & %s ) + ", m);
+      }
+      outf("( b >> %s );\n",  d);
+    }
+  } outf(TAB"} else {\n"); {
+    OUTF_ASSERT(TAB2,"mode != 1");
+    outf(TAB2"/* %s.%c <Ae> */\n", s, C);
+    outf(TAB2"const addr68_t addr = get_ea%c68[mode](emu68,reg0);\n", c);
+    if ( ! (flags & 1) ) {
+      outf(TAB2"b = read_%c(addr) << %s;\n", C, d);
+    }
+    outf(TAB2"%s%c(b,b);\n", s, C);
+    if ( ! (flags & 2) ) {
+      outf(TAB2"write_%c(addr, b >> %s);\n", C, d);
+    }
   }
-  printf(TAB2"%s%c(s,a);\n",s,c);
-  if (! (flags & 2)) {
-    printf(TAB2"REG68.d[reg0] = (REG68.d[reg0]%s) | (uint68_t)s>>%s;\n",m,d);
-  }
-  putsss(TAB"}\n");
-
-  putsss(TAB"else\n");
-  putsss(TAB"{\n");
-  printf(TAB2"addr68_t addr=get_ea%c68[mode](emu68,reg0);\n",c^32);
-  printf(TAB2"int68_t s,a;\n");
-  if (!(flags & 1)) {
-    printf(TAB2"a=read_%c(addr)<<%s;\n",c,d);
-  } else {
-    printf(TAB2"a=0;\n");
-  }
-  printf(TAB2"%s%c(s,a);\n",s,c);
-  if (!(flags & 2)) {
-    printf(TAB2"write_%c(addr,(uint68_t)s>>%s);\n",c,d);
-  }
-  putsss(TAB"}\n");
+  outf(TAB"}\n");
 }
 
 static void gene_funky4_mode6( void)
@@ -1242,393 +1722,438 @@ static void gene_funky4_mode6( void)
   int reg0;
   for(reg0=0; reg0<8;reg0++)
   {
-    printf("static void funky4_m6_%d(emu68_t * const emu68)\n{\n",reg0);
+    outf("static void funky4_m6_%d(emu68_t * const emu68)\n"
+         "{\n", reg0);
     switch(reg0)
     {
-    case 0: putsss(TAB"RESET;\n"); break;
-    case 1: putsss(TAB"NOP;\n"); break;
-    case 2: putsss(TAB"STOP;\n"); break;
-    case 3: putsss(TAB"RTE;\n"); break;
-    case 4: putsss(TAB"ILLEGAL;\n"); break;
-    case 5: putsss(TAB"RTS;\n"); break;
-    case 6: putsss(TAB"TRAPV;\n"); break;
-    case 7: putsss(TAB"RTR;\n"); break;
+    case 0: outf(TAB"RESET;\n");   break;
+    case 1: outf(TAB"NOP;\n");     break;
+    case 2: outf(TAB"STOP;\n");    break;
+    case 3: outf(TAB"RTE;\n");     break;
+    case 4: outf(TAB"ILLEGAL;\n"); break;
+    case 5: outf(TAB"RTS;\n");     break;
+    case 6: outf(TAB"TRAPV;\n");   break;
+    case 7: outf(TAB"RTR;\n");     break;
     }
-    putsss("}\n\n");
+    outf("}\n\n");
   }
-  putsss("\nstatic void (*const funky4_m6_func[8])(emu68_t * const) =\n{ ");
-  for(reg0=0; reg0<8;reg0++) {
-    printf("funky4_m6_%d,",reg0);
+  outf("\n"
+       "static void (*const funky4_m6_func[8])(emu68_t * const) = {");
+  for ( reg0 = 0; reg0 < 8; ++reg0) {
+    if ( ! (reg0 % 4) ) outf("\n"TAB);
+    outf("funky4_m6_%d,",reg0);
   }
-  putsss(" };\n\n");
+  outf("\n};\n\n");
 }
 
 static void gene_funky4_mode(void)
 {
   int mode;
-  for(mode=0; mode<8; mode++)
+
+  for ( mode = 0; mode < 8; ++mode )
   {
-    printf("static void funky4_m%d(emu68_t * const emu68, int reg0)\n{\n",
-           mode);
+    outf("static void funky4_m%d(emu68_t * const emu68, int reg0)\n{\n",
+         mode);
     switch(mode)
     {
     case 0: case 1:
-      printf(TAB"int68_t a = (%d<<3)+reg0;\n",mode);
-      putsss(TAB"TRAP(a);\n");
+      outf(TAB"const int a = ( %d << 3 ) + reg0;\n",mode);
+      outf(TAB"TRAP(a);\n");
       break;
     case 2:
-      putsss(TAB"LINK(reg0);\n");
+      outf(TAB"LINK(reg0);\n");
       break;
     case 3:
-      putsss(TAB"UNLK(reg0);\n");
+      outf(TAB"UNLK(reg0);\n");
       break;
     case 4:
-      putsss(TAB"REG68.usp = REG68.a[reg0];\n");
+      outf(TAB"REG68.usp = REG68.a[reg0];\n");
       break;
     case 5:
-      putsss(TAB"REG68.a[reg0] = REG68.usp;\n");
+      outf(TAB"REG68.a[reg0] = REG68.usp;\n");
       break;
     case 6:
-      putsss(TAB"funky4_m6_func[reg0](emu68);\n");
+      outf(TAB"funky4_m6_func[reg0](emu68);\n");
       break;
     case 7:
-      putsss(TAB"ILLEGAL;\n");
+      outf(TAB"ILLEGAL;\n");
     }
-    printf("}\n\n");
+    outf("}\n\n");
   }
 
-  printf("static void (* const funky4_func[8])(emu68_t * const, int) =\n{ ");
-  for(mode=0; mode<8; mode++)
-    printf("funky4_m%d,",mode);
-  printf("\n};\n\n");
+  outf("static void (* const funky4_func[8])(emu68_t * const, int) = {");
+  for ( mode = 0; mode < 8; ++mode) {
+    if ( ! (mode % 4) ) outf("\n"TAB);
+    outf("funky4_m%d,",mode);
+  }
+  outf("\n};\n\n");
 }
 
 static void gene_funky4(void)
 {
-  printf(TAB"funky4_func[mode](emu68,reg0);\n");
+  outf(TAB"funky4_func[mode](emu68,reg0);\n");
 }
 
 static void gene_line4(int n)
 {
-  if (!n) {
+  if ( ! n ) {
+    /* */
     int i,j,r,s;
 
     gene_funky4_mode6();
     gene_funky4_mode();
-    gene_movemregfunc(0);
-    gene_movemregfunc(1);
-    gene_movemmemfunc(0);
-    gene_movemmemfunc(1);
 
-    for (r=0; r<8; r++) {
-      for (s=0; s<4; s++) {
-        printf("static void line4_r%d_s%d"
-               "(emu68_t * const emu68, int mode, int reg0)\n{\n",r,s);
+    gene_movemregfunc( 0 );
+    gene_movemregfunc( 1 );
+    gene_movemmemfunc( 0 );
+    gene_movemmemfunc( 1 );
+
+    for ( r = 0; r < 8; r++ ) {
+      for ( s = 0; s < 4; s++ ) {
+        outf("static void line4_r%d_s%d"
+             "(emu68_t * const emu68, int mode, int reg0)\n{\n", r, s);
         switch (r) {
         case 0:
-          if (s==3) gene_movefromsr();
-          else gene_any_impl("NEGX",s,0);
+          if ( s == 3 )
+            gene_movefromsr();
+          else
+            gene_implicit("NEGX", s, 0);
           break;
 
         case 1:
-          if (s==3) printf(TAB"ILLEGAL;\n");
-          else gene_any_impl("CLR",s,1);
+          if ( s == 3 )
+            outf(TAB"ILLEGAL;\n");
+          else
+            gene_implicit("CLR", s, 1);
           break;
 
         case 2:
-          if (s==3) gene_moveccr();
-          else gene_any_impl("NEG",s,0);
+          if ( s == 3 )
+            gene_moveccr();
+          else
+            gene_implicit("NEG", s, 0);
           break;
 
         case 3:
-          if (s==3) gene_movetosr();
-          else gene_any_impl("NOT",s,0);
+          if ( s == 3 )
+            gene_movetosr();
+          else
+            gene_implicit("NOT",s,0);
           break;
 
         case 4:
-          if (s==0) gene_any_impl("NBCD",s,0);
-          else if (s==1) gene_pea_swap();
-          else gene_movemmem_ext(s-2);
+          if ( s == 0 )
+            gene_implicit("NBCD",s,0);
+          else if ( s == 1 )
+            gene_pea_swap();
+          else
+            gene_movemmem_ext( s - 2 );
           break;
 
         case 5:
-          if (s==3) gene_tas_illegal();
-          else gene_any_impl("TST",s,2);
+          if ( s == 3 )
+            gene_tas_illegal();
+          else
+            gene_implicit("TST",s,2);
           break;
 
         case 6:
-          if (s>=2) gene_movemreg(s-2);
-          else printf(TAB"ILLEGAL;\n");
+          if ( s >= 2 )
+            gene_movemreg(s-2);
+          else
+            outf(TAB"ILLEGAL;\n");
           break;
 
         case 7:
-          if (s==0) printf(TAB"ILLEGAL;\n");
-          else if (s==1) gene_funky4();
-          else gene_jmp(s-2);
+          if ( s == 0 )
+            outf(TAB"ILLEGAL;\n");
+          else if ( s == 1 )
+            gene_funky4();
+          else
+            gene_jmp( s - 2);
           break;
-
         }
-        printf("}\n\n");
+        outf("}\n\n");
       }
     }
 
-    for(i=0; i<4; i++) {
-      printf("static DECL_LINE68((* const line4_%d_func[8])) =\n{\n"TAB,i);
-      for(j=0; j<8;j++) {
-        printf("line4_r%d_s%d,",j,i);
+    for ( i = 0; i < 4; ++i ) {
+      outf("DECL_STATIC_LINE68((* const line4_%d_func[8])) = {", i);
+      for ( j = 0; j < 8; ++j ) {
+        if ( ! (j % 4) ) outf("\n"TAB);
+        outf("line4_r%d_s%d,", j, i);
       }
-      printf("\n};\n\n");
+      outf("\n};\n\n");
     }
   }
 
-
-  printf("DECL_LINE68(line4%02X)\n{\n",n);
-  if (n&040) {
-    if ((n&070)==060) gene_chk(n);
-    else if ((n&070)==070) gene_lea(n);
-    else printf(TAB"ILLEGAL;\n");
+  outf("DECL_LINE68(line4%02X)\n{\n", n);
+  if ( n & 040 ) {
+    switch ( n & 070 ) {
+    case 040:                           /* CHK.L */
+    case 060:                           /* CHK.W */
+      gene_chk(n);
+      break;
+    case 070:                           /* LEA   */
+      gene_lea(n);
+      break;
+    case 050:
+      outf(TAB"ILLEGAL; /* line:4 op:050 */\n");
+      OUTF_ASSERT(TAB,"EMU68_BREAK");
+      break;
+    default:
+      assert(!"UNEXPECTED ERROR");
+    }
   } else {
-    printf(TAB"line4_%d_func[reg9](emu68,%d,reg0);\n",(n&070)>>3,n&7);
+    outf(TAB"line4_%d_func[reg9](emu68,%d,reg0);\n",(n&070)>>3,n&7);
   }
-  printf("}\n\n");
+  outf("}\n\n");
 }
 
-/*  Create a filename from path + name,
- *  Check trailing '/' at end of path
- *  returns NULL if any error
- *  or pointer to internal static string : !! use once a time !!
+/*  Create a filename from prefix + name,
+ *  @warning return a static string
  */
-static char *output_fname(char *path, char *name)
+static char * output_fname(char *prefix, char *name)
 {
-  static char fname[1024];
-  snprintf(fname,sizeof(fname),"%s/%s",path,name);
+  static char fname[4096];
+  snprintf(fname,sizeof(fname),"%s%s",prefix,name);
   fname[sizeof(fname)-1] = 0;
   return fname;
 }
 
-static FILE * outfile(char *path, char *name)
+static int outfile(char * prefix, char * name)
 {
-  FILE *output;
-  char *outname;
-  if (!path) {
+  char * outname;
+
+  if (!prefix) {
+    output = stdout;
     print_fileheader(name);
-    return stdout;
   } else if (!name) {
-    return NULL;
+    error("internal error: null pointer\n");
+    return -1;
   } else {
-    outname = output_fname(path,name);
-    if (output = freopen(outname,"wt",stdout), !output) {
+    outname = output_fname(prefix,name);
+    if (output = fopen(outname,"wt"), !output) {
       perror(outname);
-      return NULL;
+      return -1;
     }
     print_fileheader(name);
-    return output;
   }
+  return 0;
 }
 
 int main(int na, char **a)
 {
-  int i;
-  int linetogen = 0;
-  char *destpath=NULL;
-  FILE *output,*savestdout=stdout;
+  int i, linetogen  = 0;
+  char * prefix     = NULL;
+  FILE * savestdout = stdout;
 
   if (na < 2) {
     return Usage();
   }
-  for(i=1; i<na; i++) {
-    if (!strcmp("--help",a[i])  ||
-        !strcmp("--usage",a[i]) ||
-        !strcmp("-h",a[i])) {
-      return Usage();
+  for(i=1; i<na && a[i][0] == '-'; i++) {
+    if (a[i][1] != '-') {
+      /* Short Options */
+      int j;
+      for (j=1; a[i][j]; ++j) {
+        switch (a[i][j]) {
+        case 'h':
+          return Usage();
+        case 'q':
+          quiet = 1; break;
+        case 'v':
+          quiet = 0; break;
+        case 'D':
+          debug = 1; break;
+        case 'V':
+          return Version();
+        default:
+          return error("gen68: invalid option `-%c'\n", a[i][j]);
+        }
+      }
+    } else {
+      if (!a[i][2]) {
+        /* `--' */
+        ++i; break;
+      } else if (!strcmp("--help",a[i])  || !strcmp("--usage",a[i])) {
+        return Usage();
+      } else if (!strcmp("--version",a[i])) {
+        return Version();
+      } else if (!strcmp("--verbose",a[i])) {
+        quiet = 0;
+      } else if (!strcmp("--quiet",a[i])) {
+        quiet = 1;
+      } else if (!strcmp("--debug",a[i])) {
+        debug = 1;
+      } else
+        return error("gen68: invalid option `%s'\n", a[i]);
     }
   }
 
-  if (!strcmp(a[1],"all")) {
-    linetogen = 0x1FFFF;
-  } else {
-    char *s;
-    for(s=a[1]; *s; s++) {
-      if ((*s>='0' && *s<='9')) linetogen |= 1<<(*s-'0');
-      else if ((*s>='a' && *s<='f')) linetogen |= 1<<(*s-'a'+10);
-      else if ((*s>='A' && *s<='F')) linetogen |= 1<<(*s-'A'+10);
-      else if ((*s=='T' || *s=='t')) linetogen |= 1<<16;
-      else  {
-        error("Invalid parameter in %s: hexa digit or 't' expected\n",a[1]);
-        return 3;
+  /* What to generate */
+  if (i < na) {
+    if (!strcmp(a[i], "all")) {
+      linetogen = 0x1FFFF;
+    } else {
+      char * s;
+      for (s = a[i]; *s; s++) {
+        if ((*s>='0' && *s<='9')) linetogen |= 1<<(*s-'0');
+        else if ((*s>='a' && *s<='f')) linetogen |= 1<<(*s-'a'+10);
+        else if ((*s>='A' && *s<='F')) linetogen |= 1<<(*s-'A'+10);
+        else if ((*s=='T' || *s=='t')) linetogen |= 1<<16;
+        else return
+               error("gen68: parameter `%s'; xdigit or 't' expected\n", a[i]);
       }
     }
+    ++i;
   }
 
-  if (na>2) {
-    destpath = a[2];
+  /* Prefix */
+  if (i < na) {
+    prefix = a[i++];
   }
 
   if (!linetogen) {
-    msg("Nothing to generate.\n");
+    msg("nothing to generate.\n");
     return 0;
   }
-  if (destpath) {
-    msg("Files generate into '%s' directory\n", destpath);
+  if (prefix) {
+    msg("prefix is `%s'\n", prefix);
   } else {
-    msg("Files generate to stdout\n");
+    msg("output to stdout\n");
   }
 
-  if (linetogen&(1<<0x0)) {
+  if (linetogen & ( 1 << 0x0 ) ) {
     msg("generating line 0\n");
-    if (output=outfile(destpath,"line0.c"), output==NULL)
+    if (outfile(prefix,"line0.c" ) )
       return 10+0;
     for(i=0; i<64; i++) gene_line0(i);
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0x1)) {
+  if (linetogen & ( 1 << 0x1 ) ) {
     msg("generating line 1\n");
-    if (output=outfile(destpath,"line1.c"), output==NULL)
+    if (outfile(prefix,"line1.c" ) )
       return 10+0x1;
     for(i=0; i<64; i++) gene_line1_2_3(i,0,1);
-    /*gene_table("line1",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0x2)) {
+  if (linetogen & ( 1 << 0x2 ) ) {
     msg("generating line 2\n");
-    if (output=outfile(destpath,"line2.c"), output==NULL)
+    if (outfile(prefix,"line2.c" ) )
       return 10+0x2;
     for(i=0; i<64; i++) gene_line1_2_3(i,2,2);
-    /*gene_table("line2",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0x3)) {
+  if (linetogen & ( 1 << 0x3 ) ) {
     msg("generating line 3\n");
-    if (output=outfile(destpath,"line3.c"), output==NULL)
+    if (outfile(prefix,"line3.c" ) )
       return 10+0x3;
     for(i=0; i<64; i++) gene_line1_2_3(i,1,3);
-    /*gene_table("line3",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0x4)) {
+  if (linetogen & ( 1 << 0x4 ) ) {
     msg("generating line 4\n");
-    if (output=outfile(destpath,"line4.c"), output==NULL)
+    if (outfile(prefix,"line4.c" ) )
       return 10+0x4;
     for(i=0; i<64; i++) gene_line4(i);
-    /*gene_table("line4",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0x5)) {
+  if (linetogen & ( 1 << 0x5 ) ) {
     msg("generating line 5\n");
-    if (output=outfile(destpath,"line5.c"), output==NULL)
+    if (outfile(prefix,"line5.c" ) )
       return 10+0x5;
     for(i=0; i<64; i++) gene_line5(i);
-    /*gene_table("line5",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0x6)) {
+  if (linetogen & ( 1 << 0x6 ) ) {
     msg("generating line 6\n");
-    if (output=outfile(destpath,"line6.c"), output==NULL)
+    if (outfile(prefix,"line6.c" ) )
       return 10+0x6;
     for(i=0; i<64; i++) gene_line6(i);
-    /*gene_table("line6",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0x7))
-  {
+  if (linetogen & ( 1 << 0x7 ) ) {
     msg("generating line 7\n");
-    if (output=outfile(destpath,"line7.c"), output==NULL)
+    if (outfile(prefix,"line7.c" ) )
       return 10+0x7;
     for(i=0; i<64; i++) gene_line7(i);
-    /*gene_table("line7",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0x8))
-  {
+  if (linetogen & ( 1 << 0x8 ) ) {
     msg("generating line 8\n");
-    if (output=outfile(destpath,"line8.c"), output==NULL)
+    if (outfile(prefix,"line8.c" ) )
       return 10+0x8;
     for(i=0; i<64; i++) gene_line8_C(i,1);
-    /*gene_table("line8",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0x9))
-  {
+  if (linetogen & ( 1 << 0x9 ) ) {
     msg("generating line 9\n");
-    if (output=outfile(destpath,"line9.c"), output==NULL)
+    if (outfile(prefix,"line9.c" ) )
       return 10+0x9;
     for(i=0; i<64; i++) gene_line9_D(i,1);
-    /*gene_table("line9",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0xA))
-  {
+  if (linetogen & ( 1 << 0xA ) ) {
     msg("generating line A\n");
-    if (output=outfile(destpath,"lineA.c"), output==NULL)
+    if (outfile(prefix,"lineA.c" ) )
       return 10+0xA;
     for(i=0; i<64; i++) gene_lineA_F(i,1);
-    /*gene_table("lineA",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0xB))
-  {
+  if (linetogen & ( 1 << 0xB ) ) {
     msg("generating line B\n");
-    if (output=outfile(destpath,"lineB.c"), output==NULL)
+    if (outfile(prefix,"lineB.c" ) )
       return 10+0xB;
     for(i=0; i<64; i++) gene_lineB(i);
-    /*gene_table("lineB",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0xC))
-  {
+  if (linetogen & ( 1 << 0xC ) ) {
     msg("generating line C\n");
-    if (output=outfile(destpath,"lineC.c"), output==NULL)
+    if (outfile(prefix,"lineC.c" ) )
       return 10+0xC;
     for(i=0; i<64; i++) gene_line8_C(i,0);
-    /*gene_table("lineC",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0xD))
-  {
+  if (linetogen & ( 1 << 0xD ) ) {
     msg("generating line D\n");
-    if (output=outfile(destpath,"lineD.c"), output==NULL)
+    if (outfile(prefix,"lineD.c" ) )
       return 10+0xD;
     for(i=0; i<64; i++) gene_line9_D(i,0);
-    /*gene_table("lineD",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0xE))
-  {
+  if (linetogen & ( 1 << 0xE ) ) {
     msg("generating line E\n");
-    if (output=outfile(destpath,"lineE.c"), output==NULL)
+    if (outfile(prefix,"lineE.c" ) )
       return 10+0xE;
     for(i=0; i<64; i++) gene_lineE(i);
-    /*gene_table("lineE",64);*/
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0xF))
-  {
+  if (linetogen & ( 1 << 0xF ) ) {
     msg("generating line F\n");
-    if (output=outfile(destpath,"lineF.c"), output==NULL)
+    if (outfile(prefix,"lineF.c" ) )
       return 10+0xF;
     for(i=0; i<64; i++) gene_lineA_F(i,0);
     if (output!=savestdout) fclose(output);
   }
 
-  if (linetogen&(1<<0x10))
-  {
+  if (linetogen & ( 1 << 020 ) ) {
     msg("generating function table\n");
-    if (output=outfile(destpath,"table.c"), output==NULL)
+    if (outfile(prefix,"table.c"))
       return 10+0x10;
     gene_table("line",64*16); fflush(output);
     if (output!=savestdout) fclose(output);

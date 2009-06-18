@@ -39,6 +39,7 @@
 #include "mixer68.h"
 #include "conf68.h"
 #include "emu68/emu68.h"
+#include "emu68/excep68.h"
 #include "emu68/ioplug68.h"
 #include "io68/io68.h"
 
@@ -929,7 +930,7 @@ static int apply_change_track(sc68_t * sc68)
   /* Compute size of buffer needed for cycleperpass length at current rate. */
   if (1) {
     u64 len;
-    len = sc68->mix.rate;
+    len  = sc68->mix.rate;
     len *= sc68->mix.cycleperpass;
     len /= sc68->emu68->clock;
     sc68->mix.stdbuflen = (int) len;
@@ -1079,14 +1080,27 @@ int sc68_process(sc68_t * sc68, void * buf16st, int n)
           }
           sc68->mix.buflen = err;
         }
-        if (sc68->mus->hwflags.bit.ste) {
-          /* STE - MicroWire */
-          mw_mix(sc68->mw, (s32 *)sc68->mix.bufptr, sc68->mix.buflen);
-        } else {
-          /* No STE, process channel duplication. */
-          mixer68_dup_L_to_R(sc68->mix.bufptr, sc68->mix.bufptr,
-                             sc68->mix.buflen, 0);
-        }
+
+/*         switch ( ymio_emulator(sc68->ymio) -> type ) { */
+/*         case  YM_EMUL_DUMP: */
+/*           /\* Special case for register dump: no transform *\/ */
+/*           if (sc68->mus->hwflags.bit.ste) { */
+/*             /\* STE - MicroWire *\/ */
+/*             mw_mix(sc68->mw, 0, sc68->mix.buflen); */
+/*           } */
+/*           break; */
+/*         default: */
+
+          if (sc68->mus->hwflags.bit.ste) {
+            /* STE - MicroWire */
+            mw_mix(sc68->mw, (s32 *)sc68->mix.bufptr, sc68->mix.buflen);
+          } else {
+            /* No STE, process channel duplication. */
+            mixer68_dup_L_to_R(sc68->mix.bufptr, sc68->mix.bufptr,
+                               sc68->mix.buflen, 0);
+          }
+
+/*         } */
       }
 
       /* Advance time */

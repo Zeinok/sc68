@@ -1,6 +1,6 @@
-/* lineF.c : EMU68 generated code by
- * gen68 Wed May  2 21:50:31 CEST 2007
- * (C) 1998-2007 Benjamin Gerard
+/* lineF.c - EMU68 generated code by
+ * gen68 2009-06-12 07:20:25
+ * Copyright (C) 1998-2009 Benjamin Gerard
  *
  * $Id$
  */

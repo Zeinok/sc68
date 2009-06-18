@@ -1,700 +1,573 @@
-/* lineB.c : EMU68 generated code by
- * gen68 Wed May  2 21:50:31 CEST 2007
- * (C) 1998-2007 Benjamin Gerard
+/* lineB.c - EMU68 generated code by
+ * gen68 2009-06-12 07:20:25
+ * Copyright (C) 1998-2009 Benjamin Gerard
  *
  * $Id$
  */
 
 DECL_LINE68(lineB00)
 {
-  /* CMP.B Dx,Dy */
-  int68_t a,b;
-  a = REG68.d[reg0]<<BYTE_SHIFT;
-  b = REG68.d[reg9]<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMP.B Dn,Dn */
+  const uint68_t s = ( (int68_t) REG68.d[reg0] << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << BYTE_FIX;
+  CMPB(s,d);
 }
 
 DECL_LINE68(lineB01)
 {
-  /* CMP.B Ax,Dy */
-  int68_t a,b;
-  a = REG68.a[reg0]<<BYTE_SHIFT;
-  b = REG68.d[reg9]<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMP.B An,Dn */
+  const uint68_t s = ( (int68_t) REG68.a[reg0] << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << BYTE_FIX;
+  CMPB(s,d);
 }
 
 DECL_LINE68(lineB02)
 {
-  /* CMP.B <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[2](emu68,reg0);
-  a = read_B(addr)<<BYTE_SHIFT;
-  b = REG68.d[reg9]<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMP.B (An),Dn */
+  const uint68_t s = ( (int68_t) read_EAB(2,reg0) << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << BYTE_FIX;
+  CMPB(s,d);
 }
 
 DECL_LINE68(lineB03)
 {
-  /* CMP.B <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[3](emu68,reg0);
-  a = read_B(addr)<<BYTE_SHIFT;
-  b = REG68.d[reg9]<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMP.B (An)+,Dn */
+  const uint68_t s = ( (int68_t) read_EAB(3,reg0) << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << BYTE_FIX;
+  CMPB(s,d);
 }
 
 DECL_LINE68(lineB04)
 {
-  /* CMP.B <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[4](emu68,reg0);
-  a = read_B(addr)<<BYTE_SHIFT;
-  b = REG68.d[reg9]<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMP.B -(An),Dn */
+  const uint68_t s = ( (int68_t) read_EAB(4,reg0) << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << BYTE_FIX;
+  CMPB(s,d);
 }
 
 DECL_LINE68(lineB05)
 {
-  /* CMP.B <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[5](emu68,reg0);
-  a = read_B(addr)<<BYTE_SHIFT;
-  b = REG68.d[reg9]<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMP.B d(An),Dn */
+  const uint68_t s = ( (int68_t) read_EAB(5,reg0) << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << BYTE_FIX;
+  CMPB(s,d);
 }
 
 DECL_LINE68(lineB06)
 {
-  /* CMP.B <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[6](emu68,reg0);
-  a = read_B(addr)<<BYTE_SHIFT;
-  b = REG68.d[reg9]<<BYTE_SHIFT;
-  CMPB(a,b);
+  /* CMP.B d(An,Xi),Dn */
+  const uint68_t s = ( (int68_t) read_EAB(6,reg0) << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << BYTE_FIX;
+  CMPB(s,d);
 }
 
 DECL_LINE68(lineB07)
 {
   /* CMP.B <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eab68[7](emu68,reg0);
-  a = read_B(addr)<<BYTE_SHIFT;
-  b = REG68.d[reg9]<<BYTE_SHIFT;
-  CMPB(a,b);
+  const uint68_t s = ( (int68_t) read_EAB(7,reg0) << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << BYTE_FIX;
+  CMPB(s,d);
 }
 
 DECL_LINE68(lineB08)
 {
-  /* CMP.W Dx,Dy */
-  int68_t a,b;
-  a = REG68.d[reg0]<<WORD_SHIFT;
-  b = REG68.d[reg9]<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMP.W Dn,Dn */
+  const uint68_t s = ( (int68_t) REG68.d[reg0] << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << WORD_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB09)
 {
-  /* CMP.W Ax,Dy */
-  int68_t a,b;
-  a = REG68.a[reg0]<<WORD_SHIFT;
-  b = REG68.d[reg9]<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMP.W An,Dn */
+  const uint68_t s = ( (int68_t) REG68.a[reg0] << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << WORD_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB0A)
 {
-  /* CMP.W <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[2](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.d[reg9]<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMP.W (An),Dn */
+  const uint68_t s = ( (int68_t) read_EAW(2,reg0) << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << WORD_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB0B)
 {
-  /* CMP.W <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[3](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.d[reg9]<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMP.W (An)+,Dn */
+  const uint68_t s = ( (int68_t) read_EAW(3,reg0) << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << WORD_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB0C)
 {
-  /* CMP.W <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[4](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.d[reg9]<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMP.W -(An),Dn */
+  const uint68_t s = ( (int68_t) read_EAW(4,reg0) << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << WORD_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB0D)
 {
-  /* CMP.W <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[5](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.d[reg9]<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMP.W d(An),Dn */
+  const uint68_t s = ( (int68_t) read_EAW(5,reg0) << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << WORD_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB0E)
 {
-  /* CMP.W <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[6](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.d[reg9]<<WORD_SHIFT;
-  CMPW(a,b);
+  /* CMP.W d(An,Xi),Dn */
+  const uint68_t s = ( (int68_t) read_EAW(6,reg0) << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << WORD_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB0F)
 {
   /* CMP.W <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[7](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.d[reg9]<<WORD_SHIFT;
-  CMPW(a,b);
+  const uint68_t s = ( (int68_t) read_EAW(7,reg0) << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << WORD_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB10)
 {
-  /* CMP.L Dx,Dy */
-  int68_t a,b;
-  a = REG68.d[reg0]<<LONG_SHIFT;
-  b = REG68.d[reg9]<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMP.L Dn,Dn */
+  const uint68_t s = ( (int68_t) REG68.d[reg0] << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB11)
 {
-  /* CMP.L Ax,Dy */
-  int68_t a,b;
-  a = REG68.a[reg0]<<LONG_SHIFT;
-  b = REG68.d[reg9]<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMP.L An,Dn */
+  const uint68_t s = ( (int68_t) REG68.a[reg0] << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB12)
 {
-  /* CMP.L <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[2](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.d[reg9]<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMP.L (An),Dn */
+  const uint68_t s = ( (int68_t) read_EAL(2,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB13)
 {
-  /* CMP.L <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[3](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.d[reg9]<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMP.L (An)+,Dn */
+  const uint68_t s = ( (int68_t) read_EAL(3,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB14)
 {
-  /* CMP.L <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[4](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.d[reg9]<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMP.L -(An),Dn */
+  const uint68_t s = ( (int68_t) read_EAL(4,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB15)
 {
-  /* CMP.L <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[5](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.d[reg9]<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMP.L d(An),Dn */
+  const uint68_t s = ( (int68_t) read_EAL(5,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB16)
 {
-  /* CMP.L <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[6](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.d[reg9]<<LONG_SHIFT;
-  CMPL(a,b);
+  /* CMP.L d(An,Xi),Dn */
+  const uint68_t s = ( (int68_t) read_EAL(6,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB17)
 {
   /* CMP.L <Ae>,Dn */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[7](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.d[reg9]<<LONG_SHIFT;
-  CMPL(a,b);
+  const uint68_t s = ( (int68_t) read_EAL(7,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB18)
 {
-  /* CMP.W Dx,Ay */
-  int68_t a,b;
-  a = REG68.d[reg0]<<WORD_SHIFT;
-  b = REG68.a[reg9];
-  CMPAW(a,b);
+  /* CMPA.W Dn,An */
+  const uint68_t s = ( (int68_t) REG68.d[reg0] << WORD_FIX ) >> 16;
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB19)
 {
-  /* CMP.W Ax,Ay */
-  int68_t a,b;
-  a = REG68.a[reg0]<<WORD_SHIFT;
-  b = REG68.a[reg9];
-  CMPAW(a,b);
+  /* CMPA.W An,An */
+  const uint68_t s = ( (int68_t) REG68.a[reg0] << WORD_FIX ) >> 16;
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB1A)
 {
-  /* CMP.W <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[2](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.a[reg9];
-  CMPAW(a,b);
+  /* CMPA.W (An),An */
+  const uint68_t s = ( (int68_t) read_EAW(2,reg0) << WORD_FIX ) >> 16;
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB1B)
 {
-  /* CMP.W <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[3](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.a[reg9];
-  CMPAW(a,b);
+  /* CMPA.W (An)+,An */
+  const uint68_t s = ( (int68_t) read_EAW(3,reg0) << WORD_FIX ) >> 16;
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB1C)
 {
-  /* CMP.W <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[4](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.a[reg9];
-  CMPAW(a,b);
+  /* CMPA.W -(An),An */
+  const uint68_t s = ( (int68_t) read_EAW(4,reg0) << WORD_FIX ) >> 16;
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB1D)
 {
-  /* CMP.W <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[5](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.a[reg9];
-  CMPAW(a,b);
+  /* CMPA.W d(An),An */
+  const uint68_t s = ( (int68_t) read_EAW(5,reg0) << WORD_FIX ) >> 16;
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB1E)
 {
-  /* CMP.W <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[6](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.a[reg9];
-  CMPAW(a,b);
+  /* CMPA.W d(An,Xi),An */
+  const uint68_t s = ( (int68_t) read_EAW(6,reg0) << WORD_FIX ) >> 16;
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB1F)
 {
-  /* CMP.W <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eaw68[7](emu68,reg0);
-  a = read_W(addr)<<WORD_SHIFT;
-  b = REG68.a[reg9];
-  CMPAW(a,b);
+  /* CMPA.W <Ae>,An */
+  const uint68_t s = ( (int68_t) read_EAW(7,reg0) << WORD_FIX ) >> 16;
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPW(s,d);
 }
 
 DECL_LINE68(lineB20)
 {
-  /* EOR.B Dx,Dy */
-  int68_t a,b,s;
-  a = REG68.d[reg9]<<BYTE_SHIFT;
-  b = REG68.d[reg0]<<BYTE_SHIFT;
-  EORB(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&BYTE_MASK) + ((uint68_t)s>>BYTE_SHIFT);
+  /* EOR.B Dn,Dn */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << BYTE_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << BYTE_FIX;
+  EORB(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & BYTE_MSK ) + ( d >> BYTE_FIX );
 }
 
 DECL_LINE68(lineB21)
 {
   /* CMPM.B (Ay)+,(Ax)+ */
-  int68_t x,y;
-  y = read_B(REG68.a[reg0]-=1);
-  x = read_B(REG68.a[reg9]-=1);
-  CMPB(y,x);
+  int68_t y0, x9; addr68_t l;
+  l = (s32) REG68.a[reg0];
+  REG68.a[reg0] = (u32) ( REG68.a[reg0] + 1 );
+  y0 = read_B(l) << BYTE_FIX;
+  l = (s32) REG68.a[reg9];
+  REG68.a[reg9] = (u32) ( REG68.a[reg9] + 1 );
+  x9 = read_B(l) << BYTE_FIX;
+  CMPB(y0,x9);
 }
 
 DECL_LINE68(lineB22)
 {
-  /* EOR.B Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<BYTE_SHIFT;
-  addr = get_eab68[2](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* EOR.B Dn,(An) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << BYTE_FIX );
+  const addr68_t l = get_EAB(2,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 DECL_LINE68(lineB23)
 {
-  /* EOR.B Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<BYTE_SHIFT;
-  addr = get_eab68[3](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* EOR.B Dn,(An)+ */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << BYTE_FIX );
+  const addr68_t l = get_EAB(3,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 DECL_LINE68(lineB24)
 {
-  /* EOR.B Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<BYTE_SHIFT;
-  addr = get_eab68[4](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* EOR.B Dn,-(An) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << BYTE_FIX );
+  const addr68_t l = get_EAB(4,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 DECL_LINE68(lineB25)
 {
-  /* EOR.B Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<BYTE_SHIFT;
-  addr = get_eab68[5](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* EOR.B Dn,d(An) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << BYTE_FIX );
+  const addr68_t l = get_EAB(5,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 DECL_LINE68(lineB26)
 {
-  /* EOR.B Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<BYTE_SHIFT;
-  addr = get_eab68[6](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  /* EOR.B Dn,d(An,Xi) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << BYTE_FIX );
+  const addr68_t l = get_EAB(6,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 DECL_LINE68(lineB27)
 {
   /* EOR.B Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<BYTE_SHIFT;
-  addr = get_eab68[7](emu68,reg0);
-  b = read_B(addr)<<BYTE_SHIFT;
-  EORB(s,a,b);
-  write_B(addr,(uint68_t)s>>BYTE_SHIFT);
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << BYTE_FIX );
+  const addr68_t l = get_EAB(7,reg0);
+        uint68_t d = read_B(l) << BYTE_FIX;
+  EORB(d,s,d);
+  write_B(l, d >> BYTE_FIX);
 }
 
 DECL_LINE68(lineB28)
 {
-  /* EOR.W Dx,Dy */
-  int68_t a,b,s;
-  a = REG68.d[reg9]<<WORD_SHIFT;
-  b = REG68.d[reg0]<<WORD_SHIFT;
-  EORW(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&WORD_MASK) + ((uint68_t)s>>WORD_SHIFT);
+  /* EOR.W Dn,Dn */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << WORD_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << WORD_FIX;
+  EORW(d,s,d);
+  REG68.d[reg0] = ( REG68.d[reg0] & WORD_MSK ) + ( d >> WORD_FIX );
 }
 
 DECL_LINE68(lineB29)
 {
   /* CMPM.W (Ay)+,(Ax)+ */
-  int68_t x,y;
-  y = read_W(REG68.a[reg0]-=2);
-  x = read_W(REG68.a[reg9]-=2);
-  CMPW(y,x);
+  int68_t y0, x9; addr68_t l;
+  l = (s32) REG68.a[reg0];
+  REG68.a[reg0] = (u32) ( REG68.a[reg0] + 2 );
+  y0 = read_W(l) << WORD_FIX;
+  l = (s32) REG68.a[reg9];
+  REG68.a[reg9] = (u32) ( REG68.a[reg9] + 2 );
+  x9 = read_W(l) << WORD_FIX;
+  CMPW(y0,x9);
 }
 
 DECL_LINE68(lineB2A)
 {
-  /* EOR.W Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<WORD_SHIFT;
-  addr = get_eaw68[2](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* EOR.W Dn,(An) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << WORD_FIX );
+  const addr68_t l = get_EAW(2,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 DECL_LINE68(lineB2B)
 {
-  /* EOR.W Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<WORD_SHIFT;
-  addr = get_eaw68[3](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* EOR.W Dn,(An)+ */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << WORD_FIX );
+  const addr68_t l = get_EAW(3,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 DECL_LINE68(lineB2C)
 {
-  /* EOR.W Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<WORD_SHIFT;
-  addr = get_eaw68[4](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* EOR.W Dn,-(An) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << WORD_FIX );
+  const addr68_t l = get_EAW(4,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 DECL_LINE68(lineB2D)
 {
-  /* EOR.W Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<WORD_SHIFT;
-  addr = get_eaw68[5](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* EOR.W Dn,d(An) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << WORD_FIX );
+  const addr68_t l = get_EAW(5,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 DECL_LINE68(lineB2E)
 {
-  /* EOR.W Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<WORD_SHIFT;
-  addr = get_eaw68[6](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  /* EOR.W Dn,d(An,Xi) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << WORD_FIX );
+  const addr68_t l = get_EAW(6,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 DECL_LINE68(lineB2F)
 {
   /* EOR.W Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<WORD_SHIFT;
-  addr = get_eaw68[7](emu68,reg0);
-  b = read_W(addr)<<WORD_SHIFT;
-  EORW(s,a,b);
-  write_W(addr,(uint68_t)s>>WORD_SHIFT);
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << WORD_FIX );
+  const addr68_t l = get_EAW(7,reg0);
+        uint68_t d = read_W(l) << WORD_FIX;
+  EORW(d,s,d);
+  write_W(l, d >> WORD_FIX);
 }
 
 DECL_LINE68(lineB30)
 {
-  /* EOR.L Dx,Dy */
-  int68_t a,b,s;
-  a = REG68.d[reg9]<<LONG_SHIFT;
-  b = REG68.d[reg0]<<LONG_SHIFT;
-  EORL(s,a,b);
-  REG68.d[reg0] = (REG68.d[reg0]&LONG_MASK) + ((uint68_t)s>>LONG_SHIFT);
+  /* EOR.L Dn,Dn */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << LONG_FIX );
+        uint68_t d = (int68_t) REG68.d[reg0] << LONG_FIX;
+  EORL(d,s,d);
+  REG68.d[reg0] = ( d >> LONG_FIX );
 }
 
 DECL_LINE68(lineB31)
 {
   /* CMPM.L (Ay)+,(Ax)+ */
-  int68_t x,y;
-  y = read_L(REG68.a[reg0]-=4);
-  x = read_L(REG68.a[reg9]-=4);
-  CMPL(y,x);
+  int68_t y0, x9; addr68_t l;
+  l = (s32) REG68.a[reg0];
+  REG68.a[reg0] = (u32) ( REG68.a[reg0] + 4 );
+  y0 = read_L(l) << LONG_FIX;
+  l = (s32) REG68.a[reg9];
+  REG68.a[reg9] = (u32) ( REG68.a[reg9] + 4 );
+  x9 = read_L(l) << LONG_FIX;
+  CMPL(y0,x9);
 }
 
 DECL_LINE68(lineB32)
 {
-  /* EOR.L Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<LONG_SHIFT;
-  addr = get_eal68[2](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* EOR.L Dn,(An) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << LONG_FIX );
+  const addr68_t l = get_EAL(2,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 DECL_LINE68(lineB33)
 {
-  /* EOR.L Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<LONG_SHIFT;
-  addr = get_eal68[3](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* EOR.L Dn,(An)+ */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << LONG_FIX );
+  const addr68_t l = get_EAL(3,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 DECL_LINE68(lineB34)
 {
-  /* EOR.L Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<LONG_SHIFT;
-  addr = get_eal68[4](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* EOR.L Dn,-(An) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << LONG_FIX );
+  const addr68_t l = get_EAL(4,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 DECL_LINE68(lineB35)
 {
-  /* EOR.L Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<LONG_SHIFT;
-  addr = get_eal68[5](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* EOR.L Dn,d(An) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << LONG_FIX );
+  const addr68_t l = get_EAL(5,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 DECL_LINE68(lineB36)
 {
-  /* EOR.L Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<LONG_SHIFT;
-  addr = get_eal68[6](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  /* EOR.L Dn,d(An,Xi) */
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << LONG_FIX );
+  const addr68_t l = get_EAL(6,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 DECL_LINE68(lineB37)
 {
   /* EOR.L Dn,<Ae> */
-  int68_t a,b,s;
-  addr68_t addr;
-  a = REG68.d[reg9]<<LONG_SHIFT;
-  addr = get_eal68[7](emu68,reg0);
-  b = read_L(addr)<<LONG_SHIFT;
-  EORL(s,a,b);
-  write_L(addr,(uint68_t)s>>LONG_SHIFT);
+  const uint68_t s = ( (int68_t) REG68.d[reg9] << LONG_FIX );
+  const addr68_t l = get_EAL(7,reg0);
+        uint68_t d = read_L(l) << LONG_FIX;
+  EORL(d,s,d);
+  write_L(l, d >> LONG_FIX);
 }
 
 DECL_LINE68(lineB38)
 {
-  /* CMP.L Dx,Ay */
-  int68_t a,b;
-  a = REG68.d[reg0]<<LONG_SHIFT;
-  b = REG68.a[reg9];
-  CMPAL(a,b);
+  /* CMPA.L Dn,An */
+  const uint68_t s = ( (int68_t) REG68.d[reg0] << LONG_FIX );
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB39)
 {
-  /* CMP.L Ax,Ay */
-  int68_t a,b;
-  a = REG68.a[reg0]<<LONG_SHIFT;
-  b = REG68.a[reg9];
-  CMPAL(a,b);
+  /* CMPA.L An,An */
+  const uint68_t s = ( (int68_t) REG68.a[reg0] << LONG_FIX );
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB3A)
 {
-  /* CMP.L <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[2](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.a[reg9];
-  CMPAL(a,b);
+  /* CMPA.L (An),An */
+  const uint68_t s = ( (int68_t) read_EAL(2,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB3B)
 {
-  /* CMP.L <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[3](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.a[reg9];
-  CMPAL(a,b);
+  /* CMPA.L (An)+,An */
+  const uint68_t s = ( (int68_t) read_EAL(3,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB3C)
 {
-  /* CMP.L <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[4](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.a[reg9];
-  CMPAL(a,b);
+  /* CMPA.L -(An),An */
+  const uint68_t s = ( (int68_t) read_EAL(4,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB3D)
 {
-  /* CMP.L <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[5](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.a[reg9];
-  CMPAL(a,b);
+  /* CMPA.L d(An),An */
+  const uint68_t s = ( (int68_t) read_EAL(5,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB3E)
 {
-  /* CMP.L <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[6](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.a[reg9];
-  CMPAL(a,b);
+  /* CMPA.L d(An,Xi),An */
+  const uint68_t s = ( (int68_t) read_EAL(6,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 
 DECL_LINE68(lineB3F)
 {
-  /* CMP.L <Ae>,An */
-  int68_t a,b;
-  addr68_t addr;
-  addr = get_eal68[7](emu68,reg0);
-  a = read_L(addr)<<LONG_SHIFT;
-  b = REG68.a[reg9];
-  CMPAL(a,b);
+  /* CMPA.L <Ae>,An */
+  const uint68_t s = ( (int68_t) read_EAL(7,reg0) << LONG_FIX );
+        uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
+  CMPL(s,d);
 }
 

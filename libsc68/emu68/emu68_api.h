@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_devel
+ * @ingroup   emu68_lib
  * @file      emu68/emu68_api.h
  * @author    Benjamin Gerard
  * @date      2009/02/10
