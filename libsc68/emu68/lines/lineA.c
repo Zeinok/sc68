@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line A: (Unassigned, Reserved) */
+
 DECL_LINE68(lineA00)
 {
   LINEA;

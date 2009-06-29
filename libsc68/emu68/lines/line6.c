@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line 6: Bcc/BSR/BRA */
+
 DECL_LINE68(line600)
 {
   /* Bcc or BSR */

@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line 1: Move Byte */
+
 DECL_LINE68(line100)
 {
   /* MOVE.B Dx,Dy */

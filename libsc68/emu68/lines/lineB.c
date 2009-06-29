@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line B: CMP/EOR */
+
 DECL_LINE68(lineB00)
 {
   /* CMP.B Dn,Dn */
@@ -202,7 +204,7 @@ DECL_LINE68(lineB18)
   /* CMPA.W Dn,An */
   const uint68_t s = ( (int68_t) REG68.d[reg0] << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPW(s,d);
+  CMPAW(s,d);
 }
 
 DECL_LINE68(lineB19)
@@ -210,7 +212,7 @@ DECL_LINE68(lineB19)
   /* CMPA.W An,An */
   const uint68_t s = ( (int68_t) REG68.a[reg0] << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPW(s,d);
+  CMPAW(s,d);
 }
 
 DECL_LINE68(lineB1A)
@@ -218,7 +220,7 @@ DECL_LINE68(lineB1A)
   /* CMPA.W (An),An */
   const uint68_t s = ( (int68_t) read_EAW(2,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPW(s,d);
+  CMPAW(s,d);
 }
 
 DECL_LINE68(lineB1B)
@@ -226,7 +228,7 @@ DECL_LINE68(lineB1B)
   /* CMPA.W (An)+,An */
   const uint68_t s = ( (int68_t) read_EAW(3,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPW(s,d);
+  CMPAW(s,d);
 }
 
 DECL_LINE68(lineB1C)
@@ -234,7 +236,7 @@ DECL_LINE68(lineB1C)
   /* CMPA.W -(An),An */
   const uint68_t s = ( (int68_t) read_EAW(4,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPW(s,d);
+  CMPAW(s,d);
 }
 
 DECL_LINE68(lineB1D)
@@ -242,7 +244,7 @@ DECL_LINE68(lineB1D)
   /* CMPA.W d(An),An */
   const uint68_t s = ( (int68_t) read_EAW(5,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPW(s,d);
+  CMPAW(s,d);
 }
 
 DECL_LINE68(lineB1E)
@@ -250,7 +252,7 @@ DECL_LINE68(lineB1E)
   /* CMPA.W d(An,Xi),An */
   const uint68_t s = ( (int68_t) read_EAW(6,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPW(s,d);
+  CMPAW(s,d);
 }
 
 DECL_LINE68(lineB1F)
@@ -258,7 +260,7 @@ DECL_LINE68(lineB1F)
   /* CMPA.W <Ae>,An */
   const uint68_t s = ( (int68_t) read_EAW(7,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPW(s,d);
+  CMPAW(s,d);
 }
 
 DECL_LINE68(lineB20)
@@ -512,7 +514,7 @@ DECL_LINE68(lineB38)
   /* CMPA.L Dn,An */
   const uint68_t s = ( (int68_t) REG68.d[reg0] << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPL(s,d);
+  CMPAL(s,d);
 }
 
 DECL_LINE68(lineB39)
@@ -520,7 +522,7 @@ DECL_LINE68(lineB39)
   /* CMPA.L An,An */
   const uint68_t s = ( (int68_t) REG68.a[reg0] << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPL(s,d);
+  CMPAL(s,d);
 }
 
 DECL_LINE68(lineB3A)
@@ -528,7 +530,7 @@ DECL_LINE68(lineB3A)
   /* CMPA.L (An),An */
   const uint68_t s = ( (int68_t) read_EAL(2,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPL(s,d);
+  CMPAL(s,d);
 }
 
 DECL_LINE68(lineB3B)
@@ -536,7 +538,7 @@ DECL_LINE68(lineB3B)
   /* CMPA.L (An)+,An */
   const uint68_t s = ( (int68_t) read_EAL(3,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPL(s,d);
+  CMPAL(s,d);
 }
 
 DECL_LINE68(lineB3C)
@@ -544,7 +546,7 @@ DECL_LINE68(lineB3C)
   /* CMPA.L -(An),An */
   const uint68_t s = ( (int68_t) read_EAL(4,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPL(s,d);
+  CMPAL(s,d);
 }
 
 DECL_LINE68(lineB3D)
@@ -552,7 +554,7 @@ DECL_LINE68(lineB3D)
   /* CMPA.L d(An),An */
   const uint68_t s = ( (int68_t) read_EAL(5,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPL(s,d);
+  CMPAL(s,d);
 }
 
 DECL_LINE68(lineB3E)
@@ -560,7 +562,7 @@ DECL_LINE68(lineB3E)
   /* CMPA.L d(An,Xi),An */
   const uint68_t s = ( (int68_t) read_EAL(6,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPL(s,d);
+  CMPAL(s,d);
 }
 
 DECL_LINE68(lineB3F)
@@ -568,6 +570,6 @@ DECL_LINE68(lineB3F)
   /* CMPA.L <Ae>,An */
   const uint68_t s = ( (int68_t) read_EAL(7,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  CMPL(s,d);
+  CMPAL(s,d);
 }
 

@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line 9: SUB/SUBX */
+
 DECL_LINE68(line900)
 {
   /* SUB.B Dn,Dn */
@@ -226,7 +228,7 @@ DECL_LINE68(line918)
   /* SUBA.W Dn,An */
   const uint68_t s = ( (int68_t) REG68.d[reg0] << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBW(d,s,d);
+  SUBAW(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -235,7 +237,7 @@ DECL_LINE68(line919)
   /* SUBA.W An,An */
   const uint68_t s = ( (int68_t) REG68.a[reg0] << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBW(d,s,d);
+  SUBAW(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -244,7 +246,7 @@ DECL_LINE68(line91A)
   /* SUBA.W (An),An */
   const uint68_t s = ( (int68_t) read_EAW(2,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBW(d,s,d);
+  SUBAW(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -253,7 +255,7 @@ DECL_LINE68(line91B)
   /* SUBA.W (An)+,An */
   const uint68_t s = ( (int68_t) read_EAW(3,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBW(d,s,d);
+  SUBAW(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -262,7 +264,7 @@ DECL_LINE68(line91C)
   /* SUBA.W -(An),An */
   const uint68_t s = ( (int68_t) read_EAW(4,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBW(d,s,d);
+  SUBAW(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -271,7 +273,7 @@ DECL_LINE68(line91D)
   /* SUBA.W d(An),An */
   const uint68_t s = ( (int68_t) read_EAW(5,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBW(d,s,d);
+  SUBAW(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -280,7 +282,7 @@ DECL_LINE68(line91E)
   /* SUBA.W d(An,Xi),An */
   const uint68_t s = ( (int68_t) read_EAW(6,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBW(d,s,d);
+  SUBAW(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -289,7 +291,7 @@ DECL_LINE68(line91F)
   /* SUBA.W <Ae>,An */
   const uint68_t s = ( (int68_t) read_EAW(7,reg0) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBW(d,s,d);
+  SUBAW(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -532,7 +534,7 @@ DECL_LINE68(line938)
   /* SUBA.L Dn,An */
   const uint68_t s = ( (int68_t) REG68.d[reg0] << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBL(d,s,d);
+  SUBAL(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -541,7 +543,7 @@ DECL_LINE68(line939)
   /* SUBA.L An,An */
   const uint68_t s = ( (int68_t) REG68.a[reg0] << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBL(d,s,d);
+  SUBAL(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -550,7 +552,7 @@ DECL_LINE68(line93A)
   /* SUBA.L (An),An */
   const uint68_t s = ( (int68_t) read_EAL(2,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBL(d,s,d);
+  SUBAL(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -559,7 +561,7 @@ DECL_LINE68(line93B)
   /* SUBA.L (An)+,An */
   const uint68_t s = ( (int68_t) read_EAL(3,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBL(d,s,d);
+  SUBAL(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -568,7 +570,7 @@ DECL_LINE68(line93C)
   /* SUBA.L -(An),An */
   const uint68_t s = ( (int68_t) read_EAL(4,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBL(d,s,d);
+  SUBAL(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -577,7 +579,7 @@ DECL_LINE68(line93D)
   /* SUBA.L d(An),An */
   const uint68_t s = ( (int68_t) read_EAL(5,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBL(d,s,d);
+  SUBAL(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -586,7 +588,7 @@ DECL_LINE68(line93E)
   /* SUBA.L d(An,Xi),An */
   const uint68_t s = ( (int68_t) read_EAL(6,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBL(d,s,d);
+  SUBAL(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 
@@ -595,7 +597,7 @@ DECL_LINE68(line93F)
   /* SUBA.L <Ae>,An */
   const uint68_t s = ( (int68_t) read_EAL(7,reg0) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg9] << LONG_FIX;
-  SUBL(d,s,d);
+  SUBAL(d,s,d);
   REG68.a[reg9] = ( d >> LONG_FIX );
 }
 

@@ -108,6 +108,60 @@ static int Version(void)
   return 1;
 }
 
+static const char tsz[] = "bwlw";
+static const char *  suffix_name[4] = {  ".B",  ".W",  ".L", 0 };
+static const char * isuffix_name[4] = { "I.B", "I.W", "I.L", 0 };
+static const char * qsuffix_name[4] = { "Q.B", "Q.W", "Q.L", 0 };
+static const char * asuffix_name[4] = { "A.B", "A.W", "A.L", 0 };
+
+static const char *mask_name[] = {
+  "BYTE_MSK", "WORD_MSK", "LONG_MSK", "LONG_MSK"
+};
+static const char *shift_name[] = {
+  "BYTE_FIX", "WORD_FIX", "LONG_FIX", "WORD_FIX"
+};
+static const char *ae_name[8] = {
+  "Dn", "An", "(An)", "(An)+", "-(An)", "d(An)", "d(An,Xi)", "<Ae>"
+};
+static const char *sae_name[8] = {
+  "Dx", "Ax", "(Ax)", "(Ax)+", "-(Ax)", "d(Ax)", "d(Ax,Xi)", "<Ae>"
+};
+static const char *dae_name[8] = {
+  "Dy", "Ay", "(Ay)", "(Ay)+", "-(Ay)", "d(Ay)", "d(Ay,Xi)", "<Ae>"
+};
+
+static const char thex[16] = {
+  '0','1','2','3','4','5','6','7',
+  '8','9','A','B','C','D','E','F'
+};
+  
+/*
+static char * cc_name[16] = {
+  "T ", "F ", "HI", "LS", "CC", "CS", "NE", "EQ",
+  "VC", "VS", "PL", "MI", "GE", "LT", "GT", "LE"
+};
+*/
+
+/* Operation Code Map */
+static const char * line_name[16] = {
+  /* 0000 */ "Bit Manipulation/MOVEP/Immediate",
+  /* 0001 */ "Move Byte",
+  /* 0010 */ "Move Long",
+  /* 0011 */ "Move Word",
+  /* 0100 */ "Miscellaneous",
+  /* 0101 */ "ADDQ/SUBQ/Scc/DBcc/TRAPcc",
+  /* 0110 */ "Bcc/BSR/BRA",
+  /* 0111 */ "MOVEQ",
+  /* 1000 */ "OR/DIV/SBCD",
+  /* 1001 */ "SUB/SUBX",
+  /* 1010 */ "(Unassigned, Reserved)",
+  /* 1011 */ "CMP/EOR",
+  /* 1100 */ "AND/MUL/ABCD/EXG",
+  /* 1101 */ "ADD/ADDX",
+  /* 1110 */ "Shift/Rotate/Bit Field",
+  /* 1111 */ "Coprocessor Interface/MC68040 and CPU32 Extensions"
+};
+
 /* Convert ID (0 .. 1024) -> id-string
  * $$$ static string inside, use one at a time
  */
@@ -165,34 +219,6 @@ static void gene_table(char *s, int n)
   outf("\n};\n\n");
 }
 
-static const char tsz[] = "bwlw";
-
-static const char *  suffix_name[4] = {  ".B",  ".W",  ".L", 0 };
-static const char * isuffix_name[4] = { "I.B", "I.W", "I.L", 0 };
-static const char * qsuffix_name[4] = { "Q.B", "Q.W", "Q.L", 0 };
-static const char * asuffix_name[4] = { "A.B", "A.W", "A.L", 0 };
-
-static const char *mask_name[] = {
-  "BYTE_MSK", "WORD_MSK", "LONG_MSK", "LONG_MSK"
-};
-static const char *shift_name[] = {
-  "BYTE_FIX", "WORD_FIX", "LONG_FIX", "WORD_FIX"
-};
-static const char *ae_name[8] = {
-  "Dn", "An", "(An)", "(An)+", "-(An)", "d(An)", "d(An,Xi)", "<Ae>"
-};
-static const char *sae_name[8] = {
-  "Dx", "Ax", "(Ax)", "(Ax)+", "-(Ax)", "d(Ax)", "d(Ax,Xi)", "<Ae>"
-};
-static const char *dae_name[8] = {
-  "Dy", "Ay", "(Ay)", "(Ay)+", "-(Ay)", "d(Ay)", "d(Ay,Xi)", "<Ae>"
-};
-/*
-static char * cc_name[16] = {
-  "T ", "F ", "HI", "LS", "CC", "CS", "NE", "EQ",
-  "VC", "VS", "PL", "MI", "GE", "LT", "GT", "LE"
-};
-*/
 
 
 /* ,------------------------------------------------------------------.
@@ -533,9 +559,9 @@ static void gene_any_rn(int n, char * s, int no_an, int hax_size, int immode)
 
   /* Operation */
   if (store) {
-    outf(TAB"%s%c(d,s,d);\n", s, opsize["BWL?"]);
+    outf(TAB"%s%s%c(d,s,d);\n", s, *suf == 'A' ? "A" : "", opsize["BWL?"]);
   } else {
-    outf(TAB"%s%c(s,d);\n", s, opsize["BWL?"]);
+    outf(TAB"%s%s%c(s,d);\n", s, *suf == 'A' ? "A" : "", opsize["BWL?"]);
     return;
   }
 
@@ -1944,14 +1970,15 @@ static int outfile(char * prefix, char * name)
 
 int main(int na, char **a)
 {
-  int i, linetogen  = 0;
+  int l, i, linetogen  = 0;
   char * prefix     = NULL;
   FILE * savestdout = stdout;
 
-  if (na < 2) {
+  if ( na < 2 ) {
     return Usage();
   }
-  for(i=1; i<na && a[i][0] == '-'; i++) {
+
+  for ( i=1; i<na && a[i][0] == '-'; i++ ) {
     if (a[i][1] != '-') {
       /* Short Options */
       int j;
@@ -1972,18 +1999,18 @@ int main(int na, char **a)
         }
       }
     } else {
-      if (!a[i][2]) {
+      if ( ! a[i][2] ) {
         /* `--' */
         ++i; break;
-      } else if (!strcmp("--help",a[i])  || !strcmp("--usage",a[i])) {
+      } else if ( !strcmp("--help",a[i]) || !strcmp("--usage",a[i]) ) {
         return Usage();
-      } else if (!strcmp("--version",a[i])) {
+      } else if ( !strcmp("--version",a[i]) ) {
         return Version();
-      } else if (!strcmp("--verbose",a[i])) {
+      } else if ( !strcmp("--verbose",a[i]) ) {
         quiet = 0;
-      } else if (!strcmp("--quiet",a[i])) {
+      } else if ( !strcmp("--quiet",a[i]) ) {
         quiet = 1;
-      } else if (!strcmp("--debug",a[i])) {
+      } else if ( !strcmp("--debug",a[i]) ) {
         debug = 1;
       } else
         return error("gen68: invalid option `%s'\n", a[i]);
@@ -1991,13 +2018,13 @@ int main(int na, char **a)
   }
 
   /* What to generate */
-  if (i < na) {
-    if (!strcmp(a[i], "all")) {
+  if ( i < na ) {
+    if ( !strcmp(a[i], "all") ) {
       linetogen = 0x1FFFF;
     } else {
       char * s;
-      for (s = a[i]; *s; s++) {
-        if ((*s>='0' && *s<='9')) linetogen |= 1<<(*s-'0');
+      for ( s = a[i]; *s; s++ ) {
+        if ( ( *s>='0' && *s<='9' ) )  linetogen |= 1<<(*s-'0');
         else if ((*s>='a' && *s<='f')) linetogen |= 1<<(*s-'a'+10);
         else if ((*s>='A' && *s<='F')) linetogen |= 1<<(*s-'A'+10);
         else if ((*s=='T' || *s=='t')) linetogen |= 1<<16;
@@ -2009,154 +2036,81 @@ int main(int na, char **a)
   }
 
   /* Prefix */
-  if (i < na) {
+  if ( i < na ) {
     prefix = a[i++];
   }
 
-  if (!linetogen) {
+  if ( !linetogen ) {
     msg("nothing to generate.\n");
     return 0;
   }
-  if (prefix) {
+  if ( prefix ) {
     msg("prefix is `%s'\n", prefix);
   } else {
     msg("output to stdout\n");
   }
 
-  if (linetogen & ( 1 << 0x0 ) ) {
-    msg("generating line 0\n");
-    if (outfile(prefix,"line0.c" ) )
-      return 10+0;
-    for(i=0; i<64; i++) gene_line0(i);
-    if (output!=savestdout) fclose(output);
-  }
+  for ( l = 0; l < 17; ++l ) {
+    static int first = 1;
+    static char fline[] = "lineX.c";
+    char * fname   = 0;
 
-  if (linetogen & ( 1 << 0x1 ) ) {
-    msg("generating line 1\n");
-    if (outfile(prefix,"line1.c" ) )
-      return 10+0x1;
-    for(i=0; i<64; i++) gene_line1_2_3(i,0,1);
-    if (output!=savestdout) fclose(output);
-  }
+    if ( ! ( linetogen & ( 1 << l ) ) ) continue;
 
-  if (linetogen & ( 1 << 0x2 ) ) {
-    msg("generating line 2\n");
-    if (outfile(prefix,"line2.c" ) )
-      return 10+0x2;
-    for(i=0; i<64; i++) gene_line1_2_3(i,2,2);
-    if (output!=savestdout) fclose(output);
-  }
+    if ( l == 16 ) {
+      msg("Generating instruction table ...\n");
+      fname = "table.c";
+    } else {
+      msg("Generating line %X ...\n", l);
+      fname = fline;
+      fname[4] = thex[l];
+    }
 
-  if (linetogen & ( 1 << 0x3 ) ) {
-    msg("generating line 3\n");
-    if (outfile(prefix,"line3.c" ) )
-      return 10+0x3;
-    for(i=0; i<64; i++) gene_line1_2_3(i,1,3);
-    if (output!=savestdout) fclose(output);
-  }
+    if ( outfile( prefix, fname ) )
+      return 10+l;
 
-  if (linetogen & ( 1 << 0x4 ) ) {
-    msg("generating line 4\n");
-    if (outfile(prefix,"line4.c" ) )
-      return 10+0x4;
-    for(i=0; i<64; i++) gene_line4(i);
-    if (output!=savestdout) fclose(output);
-  }
+    if ( first && !prefix ) {
+      int i;
+      outf("/*\n");
+      for ( i = 0; i < 16; ++i )
+        if ( linetogen & ( 1 << i ) )
+          outf(" * Line %X: %s\n", i, line_name[i]);
+      if ( linetogen & ( 1 << i ) )
+        outf(" * Table\n");
+      outf(" */\n\n");
+      first = 0;
+    }
 
-  if (linetogen & ( 1 << 0x5 ) ) {
-    msg("generating line 5\n");
-    if (outfile(prefix,"line5.c" ) )
-      return 10+0x5;
-    for(i=0; i<64; i++) gene_line5(i);
-    if (output!=savestdout) fclose(output);
-  }
+    outf("/* Line %X: %s */\n\n", l, line_name[l]);
 
-  if (linetogen & ( 1 << 0x6 ) ) {
-    msg("generating line 6\n");
-    if (outfile(prefix,"line6.c" ) )
-      return 10+0x6;
-    for(i=0; i<64; i++) gene_line6(i);
-    if (output!=savestdout) fclose(output);
-  }
+    for ( i=0; i<64; i++ ) {
+      switch (l) {
+      case 0x0: gene_line0(i);         break;
+      case 0x1: gene_line1_2_3(i,0,1); break;
+      case 0x2: gene_line1_2_3(i,2,2); break;
+      case 0x3: gene_line1_2_3(i,1,3); break;
+      case 0x4: gene_line4(i);         break;
+      case 0x5: gene_line5(i);         break;
+      case 0x6: gene_line6(i);         break;
+      case 0x7: gene_line7(i);         break;
+      case 0x8: gene_line8_C(i,1);     break;
+      case 0x9: gene_line9_D(i,1);     break;
+      case 0xA: gene_lineA_F(i,1);     break;
+      case 0xB: gene_lineB(i);         break;
+      case 0xC: gene_line8_C(i,0);     break;
+      case 0xD: gene_line9_D(i,0);     break;
+      case 0xE: gene_lineE(i);         break;
+      case 0xF: gene_lineA_F(i,0);     break;
+      default:
+        if (!i) gene_table("line",64*16);
+      }
+      fflush(output);
+    }
 
-  if (linetogen & ( 1 << 0x7 ) ) {
-    msg("generating line 7\n");
-    if (outfile(prefix,"line7.c" ) )
-      return 10+0x7;
-    for(i=0; i<64; i++) gene_line7(i);
-    if (output!=savestdout) fclose(output);
-  }
-
-  if (linetogen & ( 1 << 0x8 ) ) {
-    msg("generating line 8\n");
-    if (outfile(prefix,"line8.c" ) )
-      return 10+0x8;
-    for(i=0; i<64; i++) gene_line8_C(i,1);
-    if (output!=savestdout) fclose(output);
-  }
-
-  if (linetogen & ( 1 << 0x9 ) ) {
-    msg("generating line 9\n");
-    if (outfile(prefix,"line9.c" ) )
-      return 10+0x9;
-    for(i=0; i<64; i++) gene_line9_D(i,1);
-    if (output!=savestdout) fclose(output);
-  }
-
-  if (linetogen & ( 1 << 0xA ) ) {
-    msg("generating line A\n");
-    if (outfile(prefix,"lineA.c" ) )
-      return 10+0xA;
-    for(i=0; i<64; i++) gene_lineA_F(i,1);
-    if (output!=savestdout) fclose(output);
-  }
-
-  if (linetogen & ( 1 << 0xB ) ) {
-    msg("generating line B\n");
-    if (outfile(prefix,"lineB.c" ) )
-      return 10+0xB;
-    for(i=0; i<64; i++) gene_lineB(i);
-    if (output!=savestdout) fclose(output);
-  }
-
-  if (linetogen & ( 1 << 0xC ) ) {
-    msg("generating line C\n");
-    if (outfile(prefix,"lineC.c" ) )
-      return 10+0xC;
-    for(i=0; i<64; i++) gene_line8_C(i,0);
-    if (output!=savestdout) fclose(output);
-  }
-
-  if (linetogen & ( 1 << 0xD ) ) {
-    msg("generating line D\n");
-    if (outfile(prefix,"lineD.c" ) )
-      return 10+0xD;
-    for(i=0; i<64; i++) gene_line9_D(i,0);
-    if (output!=savestdout) fclose(output);
-  }
-
-  if (linetogen & ( 1 << 0xE ) ) {
-    msg("generating line E\n");
-    if (outfile(prefix,"lineE.c" ) )
-      return 10+0xE;
-    for(i=0; i<64; i++) gene_lineE(i);
-    if (output!=savestdout) fclose(output);
-  }
-
-  if (linetogen & ( 1 << 0xF ) ) {
-    msg("generating line F\n");
-    if (outfile(prefix,"lineF.c" ) )
-      return 10+0xF;
-    for(i=0; i<64; i++) gene_lineA_F(i,0);
-    if (output!=savestdout) fclose(output);
-  }
-
-  if (linetogen & ( 1 << 020 ) ) {
-    msg("generating function table\n");
-    if (outfile(prefix,"table.c"))
-      return 10+0x10;
-    gene_table("line",64*16); fflush(output);
-    if (output!=savestdout) fclose(output);
+    if ( output != savestdout ) {
+      fclose(output);
+      output = 0;
+    }
   }
 
   return 0;

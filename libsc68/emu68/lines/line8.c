@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line 8: OR/DIV/SBCD */
+
 DECL_LINE68(line800)
 {
   /* ORR.B Dn,Dn */

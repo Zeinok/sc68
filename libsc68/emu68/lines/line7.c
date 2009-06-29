@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line 7: MOVEQ */
+
 DECL_LINE68(line700)
 {
   /* MOVEQ #N,Dn [0..7] */

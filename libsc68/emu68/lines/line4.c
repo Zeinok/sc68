@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line 4: Miscellaneous */
+
 static void funky4_m6_0(emu68_t * const emu68)
 {
   RESET;

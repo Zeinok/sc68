@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line 0: Bit Manipulation/MOVEP/Immediate */
+
 static inline
 void BTST_reg(emu68_t * const emu68, const int bit, int reg0)
 {

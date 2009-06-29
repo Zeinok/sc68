@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line 3: Move Word */
+
 DECL_LINE68(line300)
 {
   /* MOVE.W Dx,Dy */

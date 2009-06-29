@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line 10: d[reg0] */
+
 #include "struct68.h"
 
 #ifndef EMU68_MONOLITIC

@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line 2: Move Long */
+
 DECL_LINE68(line200)
 {
   /* MOVE.L Dx,Dy */

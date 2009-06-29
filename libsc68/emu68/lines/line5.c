@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line 5: ADDQ/SUBQ/Scc/DBcc/TRAPcc */
+
 DECL_LINE68(line500)
 {
   /* ADDQ.B #Q,Dn */

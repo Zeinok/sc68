@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line C: AND/MUL/ABCD/EXG */
+
 DECL_LINE68(lineC00)
 {
   /* AND.B Dn,Dn */

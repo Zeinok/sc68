@@ -5,6 +5,8 @@
  * $Id$
  */
 
+/* Line E: Shift/Rotate/Bit Field */
+
 static void ASR_mem(emu68_t * const emu68, int reg, int mode)
 {
   /* ASR.W <Ae> */
