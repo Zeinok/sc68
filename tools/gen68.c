@@ -558,10 +558,16 @@ static void gene_any_rn(int n, char * s, int no_an, int hax_size, int immode)
   outf(" << %s;\n", shift_name[dst_size]);
 
   /* Operation */
+/*   if (store) { */
+/*     outf(TAB"%s%s%c(d,s,d);\n", s, *suf == 'A' ? "A" : "", opsize["BWL?"]); */
+/*   } else { */
+/*     outf(TAB"%s%s%c(s,d);\n", s, *suf == 'A' ? "A" : "", opsize["BWL?"]); */
+/*     return; */
+/*   } */
   if (store) {
-    outf(TAB"%s%s%c(d,s,d);\n", s, *suf == 'A' ? "A" : "", opsize["BWL?"]);
+    outf(TAB"%s%s%c(d,s,d);\n", s, dst_is_an ? "A" : "", opsize["BWL?"]);
   } else {
-    outf(TAB"%s%s%c(s,d);\n", s, *suf == 'A' ? "A" : "", opsize["BWL?"]);
+    outf(TAB"%s%s%c(s,d);\n",   s, dst_is_an ? "A" : "", opsize["BWL?"]);
     return;
   }
 

@@ -97,7 +97,7 @@ DECL_LINE68(line509)
   /* ADDQ.W #Q,An */
   const uint68_t s = ( (int68_t) ( ( ( reg9 - 1 ) & 7 ) + 1 ) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg0] << LONG_FIX;
-  ADDW(d,s,d);
+  ADDAW(d,s,d);
   REG68.a[reg0] = ( d >> LONG_FIX );
 }
 
@@ -175,7 +175,7 @@ DECL_LINE68(line511)
   /* ADDQ.L #Q,An */
   const uint68_t s = ( (int68_t) ( ( ( reg9 - 1 ) & 7 ) + 1 ) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg0] << LONG_FIX;
-  ADDL(d,s,d);
+  ADDAL(d,s,d);
   REG68.a[reg0] = ( d >> LONG_FIX );
 }
 
@@ -384,7 +384,7 @@ DECL_LINE68(line529)
   /* SUBQ.W #Q,An */
   const uint68_t s = ( (int68_t) ( ( ( reg9 - 1 ) & 7 ) + 1 ) << WORD_FIX ) >> 16;
         uint68_t d = (int68_t) REG68.a[reg0] << LONG_FIX;
-  SUBW(d,s,d);
+  SUBAW(d,s,d);
   REG68.a[reg0] = ( d >> LONG_FIX );
 }
 
@@ -462,7 +462,7 @@ DECL_LINE68(line531)
   /* SUBQ.L #Q,An */
   const uint68_t s = ( (int68_t) ( ( ( reg9 - 1 ) & 7 ) + 1 ) << LONG_FIX );
         uint68_t d = (int68_t) REG68.a[reg0] << LONG_FIX;
-  SUBL(d,s,d);
+  SUBAL(d,s,d);
   REG68.a[reg0] = ( d >> LONG_FIX );
 }
 
