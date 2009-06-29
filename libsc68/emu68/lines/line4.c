@@ -529,9 +529,9 @@ static void line4_r5_s3(emu68_t * const emu68, int mode, int reg0)
     } else {
       /* TAS.B <Ae> */
       const addr68_t l = get_eab68[mode](emu68,reg0);
-             int68_t a = read_B(l) << BYTE_FIX;
+             int68_t a = read_B(l);
       TASB(a,a);
-      write_B(l,(uint68_t)a >> BYTE_FIX);
+      write_B(l,a);
     }
   }
 }

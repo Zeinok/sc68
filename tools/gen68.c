@@ -1688,9 +1688,9 @@ static void gene_tas_illegal(void)
   outf(TAB2"} else {\n");
   outf(TAB33"/* TAS.B <Ae> */\n");
   outf(TAB33"const addr68_t l = get_eab68[mode](emu68,reg0);\n");
-  outf(TAB33"       int68_t a = read_B(l) << BYTE_FIX;\n");
+  outf(TAB33"       int68_t a = read_B(l);\n");
   outf(TAB33"TASB(a,a);\n");
-  outf(TAB33"write_B(l,(uint68_t)a >> BYTE_FIX);\n");
+  outf(TAB33"write_B(l,a);\n");
   outf(TAB2"}\n");
   outf(TAB"}\n");
 }
