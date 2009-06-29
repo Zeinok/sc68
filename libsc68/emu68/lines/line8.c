@@ -369,14 +369,12 @@ DECL_LINE68(line827)
 
 DECL_LINE68(line828)
 {
-  /* EXG Dx,Dy */
-  EXG(reg9,reg0);
+  ILLEGAL; /* EXG on other line (op:050) */
 }
 
 DECL_LINE68(line829)
 {
-  /* EXG Ax,Ay */
-  EXG(reg9+8,reg0+8);
+  ILLEGAL; /* EXG on other line (op:051) */
 }
 
 DECL_LINE68(line82A)
@@ -450,8 +448,7 @@ DECL_LINE68(line830)
 
 DECL_LINE68(line831)
 {
-  /* EXG Dx,Ay */
-  EXG(reg9,reg0+8);
+  ILLEGAL; /* EXG on other line (op:061) */
 }
 
 DECL_LINE68(line832)

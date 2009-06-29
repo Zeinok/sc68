@@ -1063,7 +1063,7 @@ static void gene_line8_C(int n, int t)
 
   switch ( n ) {
   case 050: case 051: case 061:
-    if (t) {
+    if (!t) {
       gene_exg(n);
     } else {
       outf(TAB"ILLEGAL; /* EXG on other line (op:%03o) */\n", n);
