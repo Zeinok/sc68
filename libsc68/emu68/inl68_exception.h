@@ -12,33 +12,31 @@
 #ifndef _EMU68_INL_EXCEPTION68_H_
 #define _EMU68_INL_EXCEPTION68_H_
 
+EMU68_EXTERN
+void exception68(emu68_t * const emu68, const int vector, const int level);
+
 static inline
-void inl_exception68(emu68_t * const emu68,
-                     const addr68_t vector, const int level)
+void inl_exception68(emu68_t * const emu68, const int vector, const int level)
 {
-  pushl(REG68.pc);
-  pushw(REG68.sr);
-  REG68.sr &= 0x70FF;
-  REG68.sr |= ( 0x2000 + ( (level&7) <<SR_I_BIT ) );
-  REG68.pc  = read_L(vector);
+  exception68(emu68, vector, level);
 }
 
 static inline
 void inl_buserror68(emu68_t * const emu68, int addr, int mode)
 {
-  inl_exception68(emu68, BUSERROR_VECTOR, BUSERROR_LEVEL);
+  inl_exception68(emu68, BUSERR_VECTOR, -1);
 }
 
 static inline
 void inl_linea68(emu68_t * const emu68)
 {
-  inl_exception68(emu68, LINEA_VECTOR, LINEA_LEVEL);
+  inl_exception68(emu68, LINEA_VECTOR, -1);
 }
 
 static inline
 void inl_linef68(emu68_t * const emu68)
 {
-  inl_exception68(emu68, LINEF_VECTOR, LINEF_LEVEL);
+  inl_exception68(emu68, LINEF_VECTOR, -1);
 }
 
 #endif /* #ifndef _EMU68_INL_EXCEPTION68_H_ */

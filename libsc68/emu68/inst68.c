@@ -40,10 +40,47 @@
 
 #include "inl68_exception.h"
 
-void exception68(emu68_t * const emu68,
-                 const addr68_t vector, const int level)
+void exception68(emu68_t * const emu68, const int vector, const int level)
 {
-  inl_exception68(emu68, vector, level);
+  if ( vector & 0x100 ) {
+    /* Those are specific to EMU68 */
+    switch (vector) {
+    case HWBREAK_VECTOR:
+    case HWTRACE_VECTOR:
+      break;
+    default:
+      assert(!"invalid eception vector");
+    }
+  } else {
+    int savesr = REG68.sr;
+    int savest = emu68->status.bit.mode;
+
+    emu68->status.bit.mode = EMU68_STAT_ECPT; /* enter exception stat      */
+    REG68.sr &= ~SR_T;                        /* no TRACE                  */
+    REG68.sr |=  SR_S;                        /* Supervisor                */
+
+    if ( savest == EMU68_STAT_ECPT &&
+         ( vector == BUSERR_VECTOR || vector == ADRERR_VECTOR ) ) {
+      /* Double fault ! */
+      emu68->status.bit.mode = EMU68_STAT_HALT; /* Halt processor */
+      emu68->status.bit.exit = 1;               /* Force exit     */
+    } else if ( vector == RESET_VECTOR ) {
+      REG68.sr  |= SR_I;
+      REG68.a[7] = read_L(RESET_SP_VECTOR << 2);
+      REG68.pc   = read_L(RESET_PC_VECTOR << 2);
+    } else {
+      if ( (unsigned int)level < 8u ) {
+        SET_IPL(REG68.sr,level);
+      }
+      pushl(REG68.pc);
+      pushw(savesr);
+      REG68.pc  = read_L(vector << 2);
+      emu68->status.bit.mode = EMU68_STAT_NORM; /* Back to normal mode */
+    }
+    if (emu68->handler && emu68->handler(emu68, vector, emu68->cookie) ) {
+      emu68->status.bit.exit = 1;       /* User forced exit */
+    }
+  }
 }
 
 void buserror68(emu68_t * const emu68, const int addr, const int mode)

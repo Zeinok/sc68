@@ -58,11 +58,11 @@ typedef void (linefunc68_t)(emu68_t * const, int, int);
 # define DECL_STATIC_LINE68(N) DECL_LINE68(N)
 #endif
 
-/** Alloc function type. */
-typedef void * (*emu68_alloc_t)(unsigned int);
+/* /\** Alloc function type. *\/ */
+/* typedef void * (*emu68_alloc_t)(unsigned int); */
 
-/** Free function type. */
-typedef void (*emu68_free_t)(void *);
+/* /\** Free function type. *\/ */
+/* typedef void (*emu68_free_t)(void *); */
 
 /**  68K interruption exception structure.
  */
@@ -145,6 +145,27 @@ typedef struct
 #define REG68_PC_IDX 021
 #define REG68_SR_IDX 022
 
+/** Exception trapping handler.
+ *
+ *    The emu68_handler_t handler is called by EMU68 when an exception
+ *    occurs. This does not include interruption triggered by IO chip
+ *    but only software exception like TRACE, ILLEGAL, ZERO DIVIDE,
+ *    CHK, TRAP, RESET ...
+ *
+ *  @param  emu68   emulator instance
+ *  @param  vector  exception vector number
+ *  @param  cookie  user-data pointer
+*/
+typedef int (*emu68_handler_t)(emu68_t* const emu68, int vector, void * cookie);
+
+/** Execution modes. */
+enum emu68_stat_e {
+  EMU68_STAT_NORM = 0,                  /**< Normal execution mode.  */
+  EMU68_STAT_ECPT = 1,                  /**< In exception            */
+  EMU68_STAT_STOP = 2,                  /**< Stopped (by stop)       */
+  EMU68_STAT_HALT = 3                   /**< Halted                  */
+};
+
 /** 68K Emulator struct. */
 struct emu68_s {
   char name[32];                        /**< Identifier.            */
@@ -153,13 +174,21 @@ struct emu68_s {
   char err[128][4];                     /**< Error message stack.   */
   int  nerr;                            /**< Error counter.         */
 
-  /* Dynamic memory handlers. */
-  emu68_alloc_t alloc;                  /**< Alloc fonction.        */
-  emu68_free_t  free;                   /**< Free function.         */
-
   reg68_t   reg;                     /**< 68000 internal registers. */
   cycle68_t cycle;                   /**< Internal cycle counter.   */
   uint68_t  clock;                   /**< Master clock frequency.   */
+
+  /* Exception trapping. */
+  emu68_handler_t   handler;         /**< Exception trap handler.   */
+  void            * cookie;          /**< User data.                */
+
+  union {
+    unsigned int all;                   /**< All status bits.  */
+    struct {
+      unsigned int mode : 2;            /**< @see emu68_stat_e */
+      unsigned int exit : 1;            /**< Exit requested,   */
+    } bit;
+  } status;
 
   /* IO chips. */
   int      nio;                       /**< # IO plug in IO-list.    */
@@ -195,6 +224,12 @@ void inl_addcycle68(emu68_t * const emu68, const cycle68_t n)
   emu68->cycle += n;
 #endif
 }
+
+#ifndef CUSTOM_ALLOC
+# include <stdlib.h>
+# define emu68_alloc(size) malloc(size)
+# define emu68_free(size)  free(size)
+#endif
 
 /**
  *  @}

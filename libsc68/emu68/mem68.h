@@ -60,24 +60,19 @@
  * @{
  */
 
-/** @name  Memory access flags for reg68.chk (debug mode only).
- *  @{
- */
-
-#define READ_68      1  /**< Memory location has been read           */
-#define WRITTEN_68   2  /**< Memory location has been written        */
-#define EXECUTED_68  4  /**< Memory location has been executed       */
-#define BREAKED_68   8  /**< Memory location has emulator-breakpoint */
-
-/** @} */
-
+/** Memory access flags for emu68_t::chk (debug mode only). */
+enum {
+  EMU68_R = 0x01,  /**< Memory location has been read           */
+  EMU68_W = 0x02,  /**< Memory location has been written        */
+  EMU68_X = 0x04,  /**< Memory location has been executed       */
+  EMU68_B = 0x08,  /**< Memory location has emulator-breakpoint */
+  EMU68_M = 0xF0   /**< Breakpoint number                       */
+};
 
 /** @name  Memory/IO quick access tables.
  *  @{
  */
 
-/** Test for direct memory access or IO quick table access */
-#define ISIO68(ADDR) ((ADDR)&0x800000)
 
 /** @} */
 

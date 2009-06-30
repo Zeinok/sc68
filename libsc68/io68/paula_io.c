@@ -373,8 +373,8 @@ io68_t * paulaio_create(emu68_t * const emu68, paula_parms_t * const parms)
 {
   paula_io68_t * paulaio = 0;
 
-  if (emu68 && emu68->alloc) {
-    paulaio = emu68->alloc(sizeof(*paulaio));
+  if (emu68) {
+    paulaio = emu68_alloc(sizeof(*paulaio));
     if (paulaio) {
       paula_setup_t setup;
       if (parms) {

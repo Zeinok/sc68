@@ -37,18 +37,13 @@ volumetable_get(int i, int j, int k)
   if (k == 16)
     k = 15;
   /* but calling with < 0 or > 16 should still trigger assert */
-/*   assert(i >= 0 && i <= 15); */
-/*   assert(j >= 0 && j <= 15); */
-/*   assert(k >= 0 && k <= 15); */
+  assert(i >= 0 && i <= 15);
+  assert(j >= 0 && j <= 15);
+  assert(k >= 0 && k <= 15);
 
-  /* Close your eyes now... */
-/*   i = 15 - i; */
-/*   j = 15 - j; */
-/*   k = 15 - k; */
-
-  v = volumetable_original[i + 16 * j + 16 * 16 * k];
-  v2 = (v*12)>>4;
-  /*   TRACE68(ym_feature,"v[%x %x %x] = %d->%d\n",k,j,i,v,v2); */
+  /* close your eyes now... */
+  v  = volumetable_original[i + 16 * j + 16 * 16 * k];
+  v2 = ( v * 12 ) >> 4;
 
   return v2;
 }
@@ -56,26 +51,19 @@ volumetable_get(int i, int j, int k)
 static void
 volumetable_set(s16 * const volumetable, int i, int j, int k, int val)
 {
-/*   assert(i >= 0 && i <= 31); */
-/*   assert(j >= 0 && j <= 31); */
-/*   assert(k >= 0 && k <= 31); */
-
-  /* Close your eyes now... Volumetable needs to be reversed for me
-   * compared to the tabulated data I stole from someone else. */
-/*   i = 31 - i; */
-/*   j = 31 - j; */
-/*   k = 31 - k; */
+  assert(i >= 0 && i <= 31);
+  assert(j >= 0 && j <= 31);
+  assert(k >= 0 && k <= 31);
+  assert(val >= 0x00000);
+  assert(val <  0x10000);
 
   val -= 32768;
   if (val < -32768) {
-/*     TRACE68(ym_feature,"set [%02x %02x %02x] sature:%d\n",k,j,i,val); */
     val = -32768;
   }
   if (val > 32767) {
-/*     TRACE68(ym_feature,"set [%02x %02x %02x] sature:%d\n",k,j,i,val); */
     val = 32767;
   }
-
   volumetable[i + 32 * j + 32 * 32 * k] = val;
 }
 
@@ -87,16 +75,16 @@ volumetable_interpolate(int y1, int y2)
 {
   int erpolate;
   erpolate = (y1 * 4 + y2 * 6) / 10u;
+
+  assert(erpolate >= 0x00000);
+  assert(erpolate <  0x10000);
+
   if (erpolate > 65535) {
-    TRACE68(ym_feature, "sature>:%d %d %d\n",erpolate,y1,y2);
     erpolate = 65535;
   }
   if (erpolate < 0) {
-    TRACE68(ym_feature, "sature<:%d %d %d\n",erpolate,y1,y2);
     erpolate = 0;
   }
-/*   TRACE68(ym_feature, "erpole:%d <-%d %d\n",erpolate,y1,y2); */
-/*   assert(erpolate >= volumetable_original[0] && erpolate <= volumetable_original[0xfff]); */
   return erpolate;
 }
 
@@ -136,49 +124,60 @@ interpolate_volumetable(s16 * const out)
 
         /* interpolate in i direction */
         i2 = volumetable_get(i + 1, j, k);
-        volumetable_set(out,i*2 + 1, j*2, k*2, volumetable_interpolate(i1, i2));
+        volumetable_set(out, i*2 + 1, j*2, k*2,
+                        volumetable_interpolate(i1, i2));
 
         /* interpolate in j direction */
         i2 = volumetable_get(i, j+1, k);
-        volumetable_set(out,i*2, j*2 + 1, k*2, volumetable_interpolate(i1, i2));
+        volumetable_set(out, i*2, j*2 + 1, k*2,
+                        volumetable_interpolate(i1, i2));
 
         /* interpolate in k direction */
         i2 = volumetable_get(i, j, k+1);
-        volumetable_set(out,i*2, j*2, k*2+1, volumetable_interpolate(i1, i2));
+        volumetable_set(out, i*2, j*2, k*2+1,
+                        volumetable_interpolate(i1, i2));
 
         /* interpolate in i + j direction */
         i2 = volumetable_get(i + 1, j + 1, k);
-        volumetable_set(out,i*2 + 1, j*2 + 1, k*2, volumetable_interpolate(i1, i2));
+        volumetable_set(out, i*2 + 1, j*2 + 1, k*2,
+                        volumetable_interpolate(i1, i2));
 
         /* interpolate in i + k direction */
         i2 = volumetable_get(i + 1, j, k + 1);
-        volumetable_set(out,i*2 + 1, j*2, k*2 + 1, volumetable_interpolate(i1, i2));
+        volumetable_set(out, i*2 + 1, j*2, k*2 + 1,
+                        volumetable_interpolate(i1, i2));
 
         /* interpolate in j + k direction */
         i2 = volumetable_get(i, j + 1, k + 1);
-        volumetable_set(out,i*2, j*2 + 1, k*2 + 1, volumetable_interpolate(i1, i2));
+        volumetable_set(out, i*2, j*2 + 1, k*2 + 1,
+                        volumetable_interpolate(i1, i2));
 
         /* interpolate in i + j + k direction */
         i2 = volumetable_get(i + 1, j + 1, k + 1);
-        volumetable_set(out,i*2 + 1, j*2 + 1, k*2 + 1, volumetable_interpolate(i1, i2));
+        volumetable_set(out, i*2 + 1, j*2 + 1, k*2 + 1,
+                        volumetable_interpolate(i1, i2));
       }
     }
   }
 }
 
-/* Create a linear 3 channels 5 bit per channels DAC table.
+/* Create a non-linear 3 channels 5 bit per channels DAC table.
  */
 void ym_create_5bit_atarist_table(s16 * out, unsigned int level)
 {
   interpolate_volumetable(out);
+
   if (level) {
     int h;
     const int min = out[0x0000];
     const int max = out[0x7fff];
     const int div = max-min ? max-min : 1;
-    const int center = (level+1)>>1;
+    const int center = ( level + 1 ) >> 1;
     for (h=0; h<32*32*32; ++h) {
       int tmp = out[h], res;
+
+      assert(tmp >= min);
+      assert(tmp <= max);
 
       if (tmp < min || tmp > max)
         msg68_critical
@@ -189,6 +188,7 @@ void ym_create_5bit_atarist_table(s16 * out, unsigned int level)
       out[h] = res;
     }
   }
+
   msg68_info("ym-2149: using *ATARI-ST* volumes %d [%d..%d]\n",
              level, out[0],out[0x7FFF]);
 }

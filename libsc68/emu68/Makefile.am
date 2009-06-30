@@ -49,7 +49,7 @@ extrasources=\
  lines/line0.c lines/line1.c lines/line2.c lines/line3.c lines/line4.c	\
  lines/line5.c lines/line6.c lines/line7.c lines/line8.c lines/line9.c	\
  lines/lineA.c lines/lineB.c lines/lineC.c lines/lineD.c lines/lineE.c	\
- lines/lineF.c lines/table.c
+ lines/lineF.c lines/table.c crc32.c
 
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |

@@ -214,9 +214,7 @@ static void ymio_destroy(io68_t * const io)
     ym_io68_t * const ymio = (ym_io68_t *)io;
 
     ym_cleanup(&ymio->ym);
-    if (io->emu68 && io->emu68->free) {
-      io->emu68->free(io);
-    }
+    emu68_free(io);
   }
 }
 
@@ -257,8 +255,8 @@ io68_t * ymio_create(emu68_t * const emu68, ym_parms_t * const parms)
 {
   ym_io68_t * ymio = 0;
 
-  if (emu68 && emu68->alloc) {
-    ymio = emu68->alloc(sizeof(*ymio));
+  if (emu68) {
+    ymio = emu68_alloc(sizeof(*ymio));
     if (ymio) {
       int s,p;
       uint68_t quotient,numerator,denominator;

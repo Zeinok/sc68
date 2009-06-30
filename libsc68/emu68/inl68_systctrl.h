@@ -35,26 +35,33 @@ void inl_eortosr68(emu68_t * const emu68, int68_t v)
 static inline
 void inl_reset68(emu68_t * const emu68)
 {
-  emu68_reset(emu68);
+  /* $$$ TODO */
 }
 
 static inline
 void inl_stop68(emu68_t * const emu68)
 {
-  emu68->reg.sr = (u16) get_nextw();
+  u16 sr = (u16) get_nextw();
+  if ( emu68->reg.sr & SR_S ) {
+    emu68->reg.sr = sr;
+    emu68->status.bit.mode = EMU68_STAT_STOP;
+  } else {
+    exception68(emu68, PRIVV_VECTOR, -1);
+  }
 }
+
 static inline
 void inl_trapv68(emu68_t * const emu68)
 {
   if (REG68.sr & SR_V) {
-    inl_exception68(emu68,TRAPV_VECTOR,TRAPV_LEVEL);
+    inl_exception68(emu68, TRAPV_VECTOR, -1);
   }
 }
 
 static inline
 void inl_trap68(emu68_t * const emu68, const int n)
 {
-  inl_exception68(emu68,TRAP_VECTOR(n),TRAP_LEVEL);
+  inl_exception68(emu68,TRAP_VECTOR(n), -1);
 }
 
 static inline
@@ -64,17 +71,17 @@ void inl_chk68(emu68_t * const emu68, const int68_t a, const int68_t b)
   REG68.sr |= !b << SR_Z_BIT;
   if ( b < 0 ) {
     REG68.sr |= SR_N;
-    inl_exception68(emu68,CHK_VECTOR,CHK_LEVEL);
+    inl_exception68(emu68, CHK_VECTOR, -1);
   } else if ( b > a ) {
     REG68.sr &= ~SR_N;
-    inl_exception68(emu68,CHK_VECTOR,CHK_LEVEL);
+    inl_exception68(emu68, CHK_VECTOR, -1);
   }
 }
 
 static inline
 void inl_illegal68(emu68_t * const emu68)
 {
-  inl_exception68(emu68,ILLEGAL_VECTOR,ILLEGAL_LEVEL);
+  inl_exception68(emu68, ILLEGAL_VECTOR, -1);
 }
 
 #endif /* #ifndef _INL68_SYSTCTRL_H_ */

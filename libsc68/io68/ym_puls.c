@@ -38,7 +38,7 @@
 #include <sc68/string68.h>
 #include <sc68/option68.h>
 
-extern int ym_feature;          /* defined in ymemul.c */
+extern int ym_cat;          /* defined in ymemul.c */
 
 #ifndef INTMSB
 # define INTMSB (sizeof(int)*8-1)
@@ -207,7 +207,7 @@ static void do_noise(ym_t * const ym, cycle68_t ymcycle)
     int ymcycles = access->ymcycle-lastcycle;
 
     if (access->ymcycle > ymcycle) {
-      TRACE68(ym_feature,"%s access reg %X out of frame!! (%u>%u %u)\n",
+      TRACE68(ym_cat,"%s access reg %X out of frame!! (%u>%u %u)\n",
               regs->name, access->reg, access->ymcycle, ymcycle,
               access->ymcycle/ymcycle);
       break;
@@ -515,7 +515,7 @@ static void do_envelop(ym_t * const ym, cycle68_t ymcycle)
     int ymcycles = access->ymcycle-lastcycle;
 
     if (access->ymcycle > ymcycle) {
-      TRACE68(ym_feature,"%s access reg %X out of frame!! (%u>%u %u)\n",
+      TRACE68(ym_cat,"%s access reg %X out of frame!! (%u>%u %u)\n",
               regs->name, access->reg, access->ymcycle, ymcycle,
               access->ymcycle/ymcycle);
       break;
@@ -662,7 +662,7 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
     const int ymcycles = access->ymcycle - lastcycle;
 
     if (access->ymcycle > ymcycle) {
-      TRACE68(ym_feature,"%s access reg %X out of frame!! (%u>%u %u)\n",
+      TRACE68(ym_cat,"%s access reg %X out of frame!! (%u>%u %u)\n",
               regs->name, access->reg, access->ymcycle, ymcycle,
               access->ymcycle/ymcycle);
       break;

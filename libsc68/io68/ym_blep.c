@@ -1,6 +1,6 @@
 /*
  *                 sc68 - YM-2149 blep synthesis engine
- *                Copyright (C) 1998-2009 Antti Lankila
+ *                Copyright (C) 200X-2009 Antti Lankila
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -153,7 +153,7 @@ static const uint8_t envelopes[16][32+64] = {
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, },
 };
 
-extern int ym_feature;          /* defined in ymemul.c */
+extern int ym_cat;          /* defined in ymemul.c */
 
 static void ym2149_new_output_level(ym_t * const ym)
 {
@@ -330,7 +330,7 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
   ym_waccess_t *access;
   for (access = ym->waccess; access != ym->waccess_nxt; access ++) {
     if (access->ymcycle > ymcycles) {
-      TRACE68(ym_feature, "access reg %X out of frame: (%u > %u)\n",
+      TRACE68(ym_cat, "access reg %X out of frame: (%u > %u)\n",
               access->reg, access->ymcycle, ymcycles);
     }
 

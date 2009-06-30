@@ -50,7 +50,7 @@
 #ifndef DEBUG_CONFIG68_O
 # define DEBUG_CONFIG68_O 0
 #endif
-static int config68_feature = msg68_DEFAULT;
+static int config68_cat = msg68_DEFAULT;
 
 typedef union {
   int i;          /**< Used with CONFIG68_INT fields.     */
@@ -274,14 +274,14 @@ static int config_set_int(config68_t * conf, config68_entry_t *e, int v)
   int m,M;
 
   if (e->type != CONFIG68_INT) {
-    TRACE68(config68_feature,
+    TRACE68(config68_cat,
             "conf: set int name='%s' bad type (%d)\n", e->name, e->type);
     return -1;
   }
   m = e->min.i;
   M = e->max.i;
 
-  /*   TRACE68(config68_feature, */
+  /*   TRACE68(config68_cat, */
   /*           "conf: set int name='%s' [%d..%d] cur:%d req:%d \n", */
   /*           e->name, m, M, e->val.i, v); */
 
@@ -298,7 +298,7 @@ static int config_set_int(config68_t * conf, config68_entry_t *e, int v)
   if (v != e->val.i) {
     conf->saved = 0;
     e->val.i = v;
-    TRACE68(config68_feature,
+    TRACE68(config68_cat,
             "conf: set int name='%s' [%d..%d] new:%d\n",
             e->name, m, M, e->val.i);
   }
@@ -520,7 +520,7 @@ static int save_config_entry(istream68_t * os, const config68_entry_t * e)
     err |= istream68_putc(os, '=') < 0;
     sprintf(tmp, "%d", e->val.i);
     err |= istream68_puts(os, tmp) < 0;
-    TRACE68(config68_feature,"conf: save name='%s'=%d\n",e->name,e->val.i);
+    TRACE68(config68_cat,"conf: save name='%s'=%d\n",e->name,e->val.i);
     break;
 
   case CONFIG68_STR: {
@@ -533,7 +533,7 @@ static int save_config_entry(istream68_t * os, const config68_entry_t * e)
     err |= istream68_putc(os, '"') < 0;
     err |= istream68_puts(os, s) < 0;
     err |= istream68_putc(os, '"') < 0;
-    TRACE68(config68_feature,"conf: save name='%s'=\"%s\"\n",e->name,s);
+    TRACE68(config68_cat,"conf: save name='%s'=\"%s\"\n",e->name,s);
   } break;
 
   default:
@@ -549,7 +549,7 @@ int config68_save(config68_t * conf)
   istream68_t * os=0;
   const int sizeof_config_hd = sizeof(config_header)-1; /* Remove '\0' */
 
-  TRACE68(config68_feature,"conf: saving ...\n", conf);
+  TRACE68(config68_cat,"conf: saving ...\n", conf);
 
   if (!conf) {
     err = error68(0,"conf: null pointer");
@@ -558,7 +558,7 @@ int config68_save(config68_t * conf)
   os = url68_stream_create("RSC68://config", 2);
   err = istream68_open(os);
   if (!err) {
-    TRACE68(config68_feature,"conf: save into \"%s\"\n",
+    TRACE68(config68_cat,"conf: save into \"%s\"\n",
             istream68_filename(os));
     err =
       - (istream68_write(os, config_header, sizeof_config_hd)
@@ -572,7 +572,7 @@ int config68_save(config68_t * conf)
   istream68_close(os);
   istream68_destroy(os);
 
-  TRACE68(config68_feature, "config68_save => [%s]\n",strok68(err));
+  TRACE68(config68_cat, "config68_save => [%s]\n",strok68(err));
   return err;
 }
 
@@ -586,7 +586,7 @@ int config68_load(config68_t * conf)
   int err;
   config68_type_t type;
 
-  TRACE68(config68_feature, "conf: loading ...\n",conf);
+  TRACE68(config68_cat, "conf: loading ...\n",conf);
 
   err = config68_default(conf);
   if (err) {
@@ -598,7 +598,7 @@ int config68_load(config68_t * conf)
   if (err) {
     goto error;
   }
-  TRACE68(config68_feature, "conf: filename='%s'\n",
+  TRACE68(config68_cat, "conf: filename='%s'\n",
           istream68_filename(is));
 
   for(;;) {
@@ -630,7 +630,7 @@ int config68_load(config68_t * conf)
       if (c == '_') s[i-1] = c = '-';
     s[i-1] = 0;
 
-    /* TRACE68(config68_feature,"conf: load get key name='%s\n", name); */
+    /* TRACE68(config68_cat,"conf: load get key name='%s\n", name); */
 
     /* Skip space */
     while (i < len && (c == ' ' || c == 9)) {
@@ -650,37 +650,37 @@ int config68_load(config68_t * conf)
     if (c == '"') {
       type = CONFIG68_STR;
       word = s + i;
-      /*       TRACE68(config68_feature, */
+      /*       TRACE68(config68_cat, */
       /*               "conf: load name='%s' looks like a string(%d)\n", */
       /*               name, type); */
     } else if (c == '-' || digit(c, 10) != -1) {
       type = CONFIG68_INT;
       word = s + i - 1;
-      /*       TRACE68(config68_feature, */
+      /*       TRACE68(config68_cat, */
       /*               "conf: load name='%s' looks like an int(%d)\n", name, type); */
     } else {
-      TRACE68(config68_feature,
+      TRACE68(config68_cat,
               "conf: load name='%s' looks like nothing valid\n", name);
       continue;
     }
-    /*     TRACE68(config68_feature, */
+    /*     TRACE68(config68_cat, */
     /*             "conf: load name='%s' not parsed value='%s'\n", name, word); */
 
     idx = config68_get_idx(conf, name);
     if (idx < 0) {
       /* Create this config entry */
-      TRACE68(config68_feature, "conf: load name='%s' unknown\n", name);
+      TRACE68(config68_cat, "conf: load name='%s' unknown\n", name);
       continue;
     }
     if (conf->entries[idx].type != type) {
-      TRACE68(config68_feature, "conf: load name='%s' types differ\n", name);
+      TRACE68(config68_cat, "conf: load name='%s' types differ\n", name);
       continue;
     }
 
     switch (type) {
     case CONFIG68_INT:
       config_set_int(conf, conf->entries+idx, mystrtoul(word, 0, 0));
-      TRACE68(config68_feature, "conf: load name='%s'=%d\n",
+      TRACE68(config68_cat, "conf: load name='%s'=%d\n",
               conf->entries[idx].name, conf->entries[idx].val.i);
       break;
     case CONFIG68_STR:
@@ -688,7 +688,7 @@ int config68_load(config68_t * conf)
         ;
       s[i-1] = 0;
       config_set_str(conf, conf->entries+idx, word);
-      TRACE68(config68_feature, "conf: load name='%s'=\"%s\"\n",
+      TRACE68(config68_cat, "conf: load name='%s'=\"%s\"\n",
               conf->entries[idx].name, conf->entries[idx].val.s);
     default:
       break;
@@ -700,7 +700,7 @@ int config68_load(config68_t * conf)
 
  error:
   istream68_destroy(is);
-  TRACE68(config68_feature, "conf: loaded => [%s]\n",strok68(err));
+  TRACE68(config68_cat, "conf: loaded => [%s]\n",strok68(err));
   return err;
 }
 
@@ -735,7 +735,7 @@ config68_t * config68_create(int size)
   config68_t * c;
   int i,j;
 
-  TRACE68(config68_feature, "config68: create size=%d\n",size);
+  TRACE68(config68_cat, "config68: create size=%d\n",size);
 
   if (size < nconfig) {
     size = nconfig;
@@ -765,14 +765,14 @@ config68_t * config68_create(int size)
     }
     c->n = j;
   }
-  TRACE68(config68_feature, "config68: create => [%s]\n",strok68(!c));
+  TRACE68(config68_cat, "config68: create => [%s]\n",strok68(!c));
 
   return c;
 }
 
 void config68_destroy(config68_t * c)
 {
-  TRACE68(config68_feature, "config68: destroy [%p]\n",c);
+  TRACE68(config68_cat, "config68: destroy [%p]\n",c);
   if (c) {
     int i;
 
@@ -790,9 +790,9 @@ int config68_option_count;
 
 int config68_init(void)
 {
-  if (config68_feature == msg68_DEFAULT) {
-    int f = msg68_feature("conf","config file", DEBUG_CONFIG68_O);
-    if (f > 0) config68_feature = f;
+  if (config68_cat == msg68_DEFAULT) {
+    int f = msg68_cat("conf","config file", DEBUG_CONFIG68_O);
+    if (f > 0) config68_cat = f;
   }
 
   if (!config68_options) {
@@ -804,7 +804,7 @@ int config68_init(void)
       n += !!conftab[i].exported;
     }
 
-    TRACE68(config68_feature,"config68: got %d exportable keys\n",n);
+    TRACE68(config68_cat,"config68: got %d exportable keys\n",n);
 
     if (n > 0) {
       options = alloc68(n*sizeof(*options));
@@ -825,7 +825,7 @@ int config68_init(void)
           options[j].next    = 0;
           options[j].name_len =
             options[j].prefix_len = 0;
-          TRACE68(config68_feature,"config68: export %s %s%s\n",
+          TRACE68(config68_cat,"config68: export %s %s%s\n",
                   options[j].cat, options[j].prefix, options[j].name);
           ++j;
         }
@@ -840,9 +840,9 @@ int config68_init(void)
 void config68_shutdown()
 {
   /* release debug feature. */
-  if (config68_feature != msg68_DEFAULT) {
-    msg68_feature_free(config68_feature);
-    config68_feature = msg68_DEFAULT;
+  if (config68_cat != msg68_DEFAULT) {
+    msg68_cat_free(config68_cat);
+    config68_cat = msg68_DEFAULT;
   }
 
   /* release options */

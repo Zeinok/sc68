@@ -638,7 +638,8 @@ EMU68_EXTERN
 void buserror68(emu68_t * const emu68, const int addr, const int mode);
 
 EMU68_EXTERN
-void exception68(emu68_t * const emu68, const addr68_t vector, const int level);
+void exception68(emu68_t * const emu68,
+                 const addr68_t vector, const int level);
 
 EMU68_EXTERN
 void linea68(emu68_t * const emu68);

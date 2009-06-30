@@ -135,7 +135,7 @@ int68_t inl_divs68(emu68_t * const emu68, int68_t s, int68_t d)
   } else {
     /* Divide by zero */
     REG68.sr = sr;
-    inl_exception68(emu68, DIVIDE_VECTOR, DIVIDE_LEVEL);
+    inl_exception68(emu68, DIVIDE_VECTOR, -1);
   }
   return d;
 }
@@ -161,7 +161,7 @@ int68_t inl_divu68(emu68_t * const emu68, uint68_t s, uint68_t d)
   } else {
     /* Divide by zero */
     REG68.sr = sr;
-    inl_exception68(emu68, DIVIDE_VECTOR, DIVIDE_LEVEL);
+    inl_exception68(emu68, DIVIDE_VECTOR, -1);
   }
   return d;
 }

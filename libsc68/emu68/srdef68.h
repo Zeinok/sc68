@@ -92,7 +92,7 @@ enum {
  *  @return new SR value
  *  @retval ((SR)&~SR_I)|((IPL)<<SR_IPL_BIT)
  */
-#define SET_IPL(SR,IPL) (SR) = ( ( (SR) & ~SR_I ) | ( (IPL) << SR_IPL_BIT ) )
+#define SET_IPL(SR,IPL) (SR) = ( ( (SR) & ~SR_I ) | ( (IPL) << SR_I_BIT ) )
 
 /** @} */
 

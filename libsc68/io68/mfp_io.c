@@ -357,7 +357,7 @@ static interrupt68_t * mfpio_interrupt(io68_t * const io,
 
        Register dump:
        CS:0073 SS:007b DS:007b ES:007b FS:0033 GS:003b
-       EIP:0040b38c ESP:008dfd70 EBP:008dfd88 EFLAGS:00010246(   - 00      -RIZP1)
+       EIP:0040b38c ESP:008dfd70 EBP:008dfd88 EFLAGS:00010246(- 00 -RIZP1)
        EAX:deadbeef EBX:01d58000 ECX:00164c88 EDX:00027200
        ESI:00027200 EDI:0007fff0
 
@@ -371,13 +371,16 @@ static interrupt68_t * mfpio_interrupt(io68_t * const io,
 
        Backtrace:
        =>1 0x0040b38c mfpio_interrupt+0x4c(io=0x164b90, cycle=0x27200)
-       [/home/ben/Development/sc68-CVS/build/i686-pc-mingw32/libsc68/io68/../../../../libsc68/io68/mfp_io.c:348]
+       [./libsc68/io68/mfp_io.c:348]
        in sc68 (0x008dfd88)
 
-       2 0x004078f5 emu68_level_and_interrupt+0x165(emu68=0x166618, cycleperpass=0x27200) [/home/ben/Development/sc68-CVS/build/i686-pc-mingw32/libsc68/emu68/../../../../libsc68/emu68/emu68.c:341] in sc68 (0x008dfda8)
+       2 0x004078f5 emu68_level_and_interrupt+0x165(emu68=0x166618,
+       cycleperpass=0x27200)
+       [./libsc68/emu68/emu68.c:341]
+       in sc68 (0x008dfda8)
 
-       0x0040b38c mfpio_interrupt+0x4c [/home/ben/Development/sc68-CVS/build/i686-pc-mingw32/libsc68/io68/../../../../libsc68/io68/mfp_io.c:348] in sc68: movl %eax,0x00000000
-       348           *(int *)0 = 0xDEADBEEF;
+       0x0040b38c mfpio_interrupt+0x4c [./libsc68/io68/mfp_io.c:348]
+       in sc68: movl %eax,0x00000000 348 *(int *)0 = 0xDEADBEEF;
        Modules:
     */
 
@@ -410,9 +413,7 @@ void mfpio_destroy(io68_t * const io)
   mfp_io68_t * const mfpio = (mfp_io68_t * const)io;
   if (io) {
     mfp_cleanup(&mfpio->mfp);
-    if (io->emu68 && io->emu68->free) {
-      io->emu68->free(io);
-    }
+    emu68_free(io);
   }
 }
 
@@ -443,8 +444,8 @@ io68_t * mfpio_create(emu68_t * const emu68)
 {
   mfp_io68_t * mfpio = 0;
 
-  if (emu68 && emu68->alloc) {
-    mfpio = emu68->alloc(sizeof(*mfpio));
+  if (emu68) {
+    mfpio = emu68_alloc(sizeof(*mfpio));
     if (mfpio) {
       mfpio->io = mfp_io;
       mfp_setup(&mfpio->mfp);

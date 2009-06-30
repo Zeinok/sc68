@@ -215,8 +215,8 @@
 #define ADDAL(S, A, B)  S = _ADDA(A, B)
 #define SUBAW(S, A, B)  S = _SUBA(A, B)
 #define SUBAL(S, A, B)  S = _SUBA(A, B)
-#define CMPAW(S, A, B)      _CMPA(A, B)
-#define CMPAL(S, A, B)      _CMPA(A, B)
+#define CMPAW(A, B)         _CMPA(A, B)
+#define CMPAL(A, B)         _CMPA(A, B)
 
 #define MULSW(S, A, B)  S = _MULS(A, B)
 #define MULUW(S, A, B)  S = _MULU(A, B)

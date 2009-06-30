@@ -32,6 +32,8 @@
 #endif
 
 #include "ymemul.h"
+#include "emu68/assert68.h"
+
 #include <sc68/msg68.h>
 #include <sc68/option68.h>
 
@@ -44,7 +46,7 @@
 #ifndef DEBUG_YM_O
 # define DEBUG_YM_O 0
 #endif
-int ym_feature = msg68_DEFAULT;
+int ym_cat = msg68_DEFAULT;
 
 int ym_default_chans = 7;
 
@@ -78,9 +80,9 @@ static void access_list_add(ym_t * const ym,
 
   if (free_access >= ym->waccess+ym->waccess_max) {
     /* No more free entries. */
-
     /* $$$ TODO: realloc buffer, reloc all lists ... */
-    TRACE68(ym_feature,"access_list_add(%s,%d,%02X) OVERFLOW",
+    TRACE68(msg68_CRITICAL,
+            "ym: access_list_add(%s,%d,%02X) OVERFLOW",
             access_list->name,reg,val);
     return;
   }
@@ -97,9 +99,6 @@ static void access_list_add(ym_t * const ym,
     access_list->head = free_access;
   }
   access_list->tail = free_access;
-
-/*   TRACE68(ym_feature,"WriteBack %s #%X <= %02X (%u)\n", */
-/*        access_list->name,reg,val,ymcycle); */
 }
 
 static void access_adjust_cycle(ym_waccess_list_t * const access_list,
@@ -181,7 +180,7 @@ static ym_parms_t default_parms =  {
   /* outlevel */ 0x80,
 };
 
-static 
+static
 const char * ym_engine_name(int emul)
 {
   switch (emul) {
@@ -237,7 +236,7 @@ int ym_init(ym_parms_t * const parms)
   option68_t * opt;
 
   /* Debug */
-  ym_feature = msg68_feature("ym","ym-2149 emulator",DEBUG_YM_O);
+  ym_cat = msg68_cat("ym","ym-2149 emulator",DEBUG_YM_O);
 
   /* Set default parameters. */
   if (parms) {
@@ -352,7 +351,7 @@ void ym_writereg(ym_t * const ym,
 
   if (reg >= 0 && reg < 16) {
 
-    /*TRACE68(ym_feature,"write #%X = %02X (%u)\n",reg,(int)(u8)val,ymcycle); */
+    /*TRACE68(ym_cat,"write #%X = %02X (%u)\n",reg,(int)(u8)val,ymcycle); */
 
     ym->shadow.index[reg] = val;
 
@@ -411,7 +410,7 @@ int ym_active_channels(ym_t * const ym, const int off, const int on)
     v = (voice_mute&1) | ((voice_mute>>5)&2) | ((voice_mute>>10)&4);
     v = ((v&~off)|on)&7;
     ym->voice_mute = ym_smsk_table[v];
-    TRACE68(ym_feature,"ym-2149: active channels -- %c%c%c\n",
+    TRACE68(ym_cat,"ym-2149: active channels -- %c%c%c\n",
             (v&1)?'A':'.', (v&1)?'B':'.', (v&1)?'B':'.');
   }
   return v;
@@ -439,7 +438,7 @@ uint68_t ym_sampling_rate(ym_t * const ym, const uint68_t hz)
         ret = ym->cb_sampling_rate(ym,ret);
       }
       ym->hz = ret;
-      TRACE68(ym_feature,"ym-2149: rate -- %d -> %d\n", hz, ret);
+      TRACE68(ym_cat,"ym-2149: rate -- %d -> %d\n", hz, ret);
     }
   }
 
@@ -485,7 +484,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
     p->outlevel = 0x100;
   }
 
-  TRACE68(ym_feature,"ym-2149: setup -- engine:%d rate:%d clock:%d level:%d\n",
+  TRACE68(ym_cat,"ym-2149: setup -- engine:%d rate:%d clock:%d level:%d\n",
           p->emul,p->hz,p->clock,p->outlevel);
 
   if (ym) {
@@ -534,7 +533,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
  */
 void ym_cleanup(ym_t * const ym)
 {
-  TRACE68(ym_feature,"ym-2149: cleanup\n");
+  TRACE68(ym_cat,"ym-2149: cleanup\n");
   if (ym && ym->cb_cleanup) {
     ym->cb_cleanup(ym);
   }

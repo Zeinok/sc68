@@ -1,5 +1,5 @@
 /**
- * @ingroup   sc68_headers
+ * @ingroup   sc68_lib
  * @file      sc68/sc68.h
  * @author    Benjamin Gerard
  * @date      2003/08/07
@@ -42,7 +42,8 @@
 # endif
 #endif
 
-/** @defgroup  sc68_lib  sc68 library
+/**
+ *  @defgroup  sc68_lib  sc68 library
  *  @ingroup   api68
  *
  *  This API provides functions to use sc68 libraries efficiently.

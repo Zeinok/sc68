@@ -47,7 +47,7 @@
 #ifndef DEBUG_MW_O
 # define DEBUG_MW_O 0
 #endif
-int mw_feature = msg68_DEFAULT;
+int mw_cat = msg68_DEFAULT;
 
 /* #define MW_CALCUL_TABLE 1 */
 
@@ -304,7 +304,7 @@ int mw_init(mw_parms_t * const parms_data)
 {
   mw_parms_t * parms = parms_data ? parms_data : &default_parms;
 
-  mw_feature = msg68_feature("mw","micro-wire emulator", DEBUG_MW_O);
+  mw_cat = msg68_cat("mw","micro-wire emulator", DEBUG_MW_O);
 
   /* Default emulation mode */
   if (parms->emul == MW_EMUL_DEFAULT) {

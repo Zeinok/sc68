@@ -263,8 +263,8 @@ io68_t * mwio_create(emu68_t * const emu68, mw_parms_t * const parms)
 {
   mw_io68_t * mwio = 0;
 
-  if (emu68 && emu68->alloc) {
-    mwio = emu68->alloc(sizeof(*mwio));
+  if (emu68) {
+    mwio = emu68_alloc(sizeof(*mwio));
     if (mwio) {
       mw_setup_t setup;
       if (parms) {

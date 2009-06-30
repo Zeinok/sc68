@@ -27,6 +27,9 @@
 
 #include "mem68.h"
 
+/** Test for direct memory access or IO quick table access */
+#define ISIO68(ADDR) ((ADDR)&0x800000)
+
 /* Set memory access check flags. */
 static void chkframe(emu68_t * const emu68, addr68_t addr, const int flags)
 {
@@ -97,7 +100,7 @@ void mem68_read_b(emu68_t * const emu68)
   } else {
     emu68->bus_data = emu68->mem[addr&MEMMSK68];
     if (emu68->chk) {
-      chkframe_b(emu68, READ_68);
+      chkframe_b(emu68, EMU68_R);
     }
   }
 }
@@ -112,7 +115,7 @@ void mem68_read_w(emu68_t * const emu68)
     const u8 * const mem = emu68->mem+(addr&MEMMSK68);
     emu68->bus_data = (mem[0]<<8) + mem[1];
     if (emu68->chk) {
-      chkframe_w(emu68, READ_68);
+      chkframe_w(emu68, EMU68_R);
     }
   }
 }
@@ -127,7 +130,7 @@ void mem68_read_l(emu68_t * const emu68)
     const u8 * const mem = emu68->mem+(addr&MEMMSK68);
     emu68->bus_data = (mem[0]<<24) + (mem[1]<<16) + (mem[2]<<8) + mem[3];
     if (emu68->chk) {
-      chkframe_l(emu68, READ_68);
+      chkframe_l(emu68, EMU68_R);
     }
   }
 }
@@ -147,7 +150,7 @@ void mem68_write_b(emu68_t * emu68)
   } else {
     emu68->mem[addr&MEMMSK68] = emu68->bus_data;
     if (emu68->chk) {
-      chkframe_b(emu68, WRITTEN_68);
+      chkframe_b(emu68, EMU68_W);
     }
   }
 }
@@ -163,7 +166,7 @@ void mem68_write_w(emu68_t * emu68)
     int68_t v = emu68->bus_data;
     mem[1] = v; v>>=8; mem[0] = v;
     if (emu68->chk) {
-      chkframe_w(emu68, WRITTEN_68);
+      chkframe_w(emu68, EMU68_W);
     }
   }
 }
@@ -179,7 +182,7 @@ void mem68_write_l(emu68_t * emu68)
     int68_t v = emu68->bus_data;
     mem[3] = v; v>>=8; mem[2] = v; v>>=8; mem[1] = v; v>>=8; mem[0] = v;
     if (emu68->chk) {
-      chkframe_l(emu68, WRITTEN_68);
+      chkframe_l(emu68, EMU68_W);
     }
   }
 }
@@ -198,7 +201,7 @@ int68_t mem68_nextw(emu68_t * const emu68)
   v  = (int68_t)(s8)mem[0]<<8;
   v |=              mem[1];
   if (emu68->chk) {
-    chkframe_w(emu68, READ_68+EXECUTED_68);
+    chkframe_w(emu68, EMU68_R+EMU68_X);
   }
   REG68.pc += 2;
   return v;
@@ -213,7 +216,7 @@ int68_t mem68_nextl(emu68_t * const emu68)
   v |=              mem[2]<< 8;
   v |=              mem[3];
   if (emu68->chk) {
-    chkframe_l(emu68, READ_68+EXECUTED_68);
+    chkframe_l(emu68, EMU68_R+EMU68_X);
   }
   REG68.pc += 4;
   return v;

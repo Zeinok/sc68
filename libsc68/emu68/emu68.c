@@ -28,48 +28,17 @@
 #include "struct68.h"
 #include "srdef68.h"
 #include "excep68.h"
+#include "assert68.h"
 
 #include "emu68.h"
 #include "ioplug68.h"
 
 #include "macro68.h"
 
-/* #include "inst68.h" */
 #include "inl68_exception.h"
-
 #include <string.h>
 
 EMU68_EXTERN linefunc68_t *line_func[1024];
-
-/* ,-----------------------------------------------------------------.
- * |                           Historic                              |
- * `-----------------------------------------------------------------'
- */
-#ifdef DEBUG_HISTOTIC
-static u32 historic68[1024], *h68=historic68;
-static unsigned int count_pass_68 = 0;
-#endif
-
-/* ,-----------------------------------------------------------------.
- * |                      Dynamic memory handler                     |
- * `-----------------------------------------------------------------'
- */
-static emu68_alloc_t emu68_alloc_fct;
-static void * emu68_alloc(uint68_t size)
-{
-  return emu68_alloc_fct
-    ? emu68_alloc_fct(size)
-    : 0;
-}
-
-static emu68_free_t  emu68_free_fct;
-static void emu68_free(void * ptr)
-{
-  if (emu68_free_fct) {
-    emu68_free_fct(ptr);
-  }
-}
-
 
 /* ,-----------------------------------------------------------------.
  * |                     Internal struct access                      |
@@ -89,17 +58,17 @@ io68_t * emu68_set_interrupt_io(emu68_t * emu68, io68_t * io)
   return 0;
 }
 
-void emu68_set_registers(emu68_t * emu68, const reg68_t *r, int mask)
+void emu68_set_registers(emu68_t * emu68, const reg68_t * r, int mask)
 {
   if (emu68 && r) {
     int i;
-    if (mask&(1<<REG68_US_IDX)) REG68.usp = r->usp;
-    if (mask&(1<<REG68_PC_IDX)) REG68.pc  = r->pc;
-    if (mask&(1<<REG68_SR_IDX)) REG68.sr  = r->sr;
-    for(i=0; i<8; i++)
-      if (mask&(1<<(REG68_D0_IDX+i))) REG68.d[i] = r->d[i];
-    for(i=0; i<8; i++)
-      if (mask&(1<<(REG68_A0_IDX+i))) REG68.a[i] = r->a[i];
+    if (mask & ( 1 << REG68_US_IDX ) ) REG68.usp = r->usp;
+    if (mask & ( 1 << REG68_PC_IDX ) ) REG68.pc  = r->pc;
+    if (mask & (1  << REG68_SR_IDX ) ) REG68.sr  = r->sr;
+    for ( i=0; i<8; i++ )
+      if ( mask & ( 1 << ( REG68_D0_IDX + i ) ) ) REG68.d[i] = r->d[i];
+    for ( i=0; i<8; i++)
+      if ( mask & ( 1 << ( REG68_A0_IDX + i ) ) ) REG68.a[i] = r->a[i];
   }
 }
 
@@ -127,6 +96,42 @@ void emu68_set_cycle(emu68_t * const emu68, cycle68_t cycle)
 cycle68_t emu68_get_cycle(emu68_t * const emu68)
 {
   return emu68->cycle;
+}
+
+void * emu68_set_cookie(emu68_t * const emu68, void * cookie)
+{
+  void * old = 0;
+  if (emu68) {
+    old = emu68->cookie;
+    emu68->cookie = cookie;
+  }
+  return old;
+}
+
+void * emu68_get_cookie(emu68_t * const emu68)
+{
+  return emu68
+    ? emu68->cookie
+    : 0
+    ;
+}
+
+emu68_handler_t emu68_set_handler(emu68_t * const emu68, emu68_handler_t hdl)
+{
+  emu68_handler_t old = 0;
+  if (emu68) {
+    old = emu68->handler;
+    emu68->handler = hdl;
+  }
+  return old;
+}
+
+emu68_handler_t emu68_get_handler(emu68_t * const emu68)
+{
+  return emu68
+    ? emu68->handler
+    : 0
+    ;
 }
 
 
@@ -256,6 +261,31 @@ int emu68_chkset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz)
   return -!ptr;
 }
 
+#include "crc32.c"
+
+uint68_t emu68_crc32(emu68_t * const emu68)
+{
+  uint68_t crc = 0;
+  if ( emu68 ) {
+    int i;
+    u8 tmp [ 18 * 4 + 2 ];              /* serialize registers */
+    s32 * reg32 = emu68->reg.d;
+    for ( i = 0; i < 18*4; i += 4 ) {
+      unsigned int v = reg32[i>>2];
+      tmp[i+0] = v >> 24;
+      tmp[i+1] = v >> 16;
+      tmp[i+2] = v >> 8;
+      tmp[i+3] = v;
+    }
+    tmp[i++] = emu68->reg.sr >> 8;
+    tmp[i++] = emu68->reg.sr;
+    assert ( i == sizeof(tmp) );
+
+    crc = crc32(crc, tmp, i);
+    crc = crc32(crc, emu68->mem, emu68->memmsk+1);
+  }
+  return crc;
+}
 
 /* 68000 OP-WORD format :
  * 1111 0000 0000 0000 ( LINE  )
@@ -265,23 +295,14 @@ int emu68_chkset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz)
  */
 
 
-static void step68(emu68_t * const emu68)
+static inline void step68(emu68_t * const emu68)
 {
   int line,opw,reg9;
 
-#ifdef DEBUG_HISTORIC
-  /* Fill historic buffer */
-  if (h68 == historic68) {
-    h68 = historic68 + (sizeof(historic68)/sizeof(*historic68));
-  }
-  --h68;
-  *h68 = REG68.pc;
-  opw = (u16)get_nextw();
-#else
   u8 * mem = emu68->mem + (REG68.pc & MEMMSK68);
   REG68.pc += 2;
   opw  = (mem[0]<<8) | mem[1];
-#endif
+
   /*                       LINE RG9 OPCODE  RG0 */
   /*                       -------------------- */
   line = opw & 0170000; /* 1111 000 000-000 000 */
@@ -329,41 +350,8 @@ void emu68_level_and_interrupt(emu68_t * const emu68,
   pc = REG68.pc;
   REG68.a[7] = stack - 4;
 
-#if _DEBUG
-  emu68_poke(emu68, REG68.a[7]+0, 0x12);
-  emu68_poke(emu68, REG68.a[7]+1, 0x34);
-  emu68_poke(emu68, REG68.a[7]+2, 0x56);
-  emu68_poke(emu68, REG68.a[7]+3, 0x78);
-#endif
-
   /* Clear ORed memory access flags ... */
   emu68->framechk = 0;
-
-#if 0/* _DEBUG */
-  if (!count_pass_68) {
-    if (cycleperpass) {
-      BREAKPOINT68;
-    }
-    if (emu68->cycle) {
-      BREAKPOINT68;
-    }
-  } else {
-    if (!cycleperpass) {
-      BREAKPOINT68;
-    }
-    if (count_pass_68 == 1) {
-      if (emu68->cycle) {
-        BREAKPOINT68;
-      }
-    } else {
-      if (!emu68->cycle) {
-        BREAKPOINT68;
-      }
-    }
-
-  }
-  count_pass_68++;
-#endif
 
   /* Adjust internal IO cycle counter */
   for (io=emu68->iohead; io; io=io->next) {
@@ -377,15 +365,6 @@ void emu68_level_and_interrupt(emu68_t * const emu68,
   } while (stack>(addr68_t)REG68.a[7]);
 
   cycle=0;
-
-#if defined (_DEBUG) && 0
-  if (stack != (addr68_t)REG68.a[7]) {
-    BREAKPOINT68;
-  }
-  if (REG68.pc != 0x12345678) {
-    BREAKPOINT68;
-  }
-#endif
 
   /* Get interrupt IO (MFP) if any */
   if (emu68->interrupt_io) {
@@ -600,10 +579,10 @@ int emu68_debugmode(emu68_t * const emu68)
  */
 
 static emu68_parms_t def_parms = {
-  0,       /* name                        */
-  19,      /* log2mem: 2^19 => 512Kb      */
-  8000000, /* master clock for Atari520ST */
-  0        /* debug mode off              */
+  0,                                 /* name                        */
+  19,                                /* log2mem: 2^19 => 512Kb      */
+  EMU68_ATARIST_CLOCK,               /* master clock for Atari520ST */
+  0,                                 /* debug mode off              */
 };
 
 emu68_t * emu68_create(emu68_parms_t * const parms)
@@ -634,8 +613,6 @@ emu68_t * emu68_create(emu68_parms_t * const parms)
   }
   memset(emu68,0,sizeof(membyte));
   strncpy(emu68->name,p->name?p->name:"emu68",sizeof(emu68->name)-1);
-  emu68->alloc = emu68_alloc_fct;
-  emu68->free  = emu68_free_fct;
   emu68->clock = p->clock;
 
   emu68->log2mem = p->log2mem;
@@ -701,25 +678,17 @@ void emu68_destroy(emu68_t * const emu68)
 void emu68_reset(emu68_t * const emu68)
 {
   if (emu68) {
-    io68_t *io;
+    io68_t * io;
     for (io=emu68->iohead; io; io=io->next) {
       (io->reset)(io);
     }
     memset(REG68.d,0,sizeof(REG68.d)*2);
-    emu68->cycle  = 0;
+    emu68->cycle = 0;
     REG68.pc     = 0;
     REG68.sr     = 0x2700;
     REG68.a[7]   = MEMMSK68+1-4;
-    /* REG68.status = 0; */
+    REG68.usp    = REG68.a[7];
   }
-
-#ifdef DEBUG_HISTOTIC
-  for (h68=historic68;
-       h68<historic68+(sizeof(historic68)/sizeof(*historic68)); h68++) {
-    *h68 = 0x12345678;
-  }
-  count_pass_68=0;
-#endif
 }
 
 
@@ -729,20 +698,18 @@ void emu68_reset(emu68_t * const emu68)
  */
 
 /* Library initialize. */
-int emu68_init(emu68_init_t * init)
+int emu68_init(int argc, const char * argv[])
 {
-  int err = -1;
-  if (init && init->alloc && init->free && !emu68_alloc_fct) {
-    err = 0;
-    emu68_alloc_fct = init->alloc;
-    emu68_free_fct  = init->free;
-  }
-  return err;
+  int i,j;
+  for ( i=j=1; i<argc; ++i )
+    if ( strncmp(argv[i], "--emu68-", 8) )
+      argv[j++] = argv[i];
+    else
+      ;
+  return j;
 }
 
 /* Library shutdown. */
 void emu68_shutdown(void)
 {
-  emu68_alloc_fct = 0;
-  emu68_free_fct  = 0;
 }

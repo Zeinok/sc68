@@ -162,9 +162,7 @@ static void shifter_adjust_cycle(io68_t * const io, const cycle68_t cycle)
 
 static  void shifter_destroy(io68_t * const io)
 {
-  if (io && io->emu68 && io->emu68->free) {
-    io->emu68->free(io);
-  }
+  emu68_free(io);
 }
 
 static io68_t const shifter_io =
@@ -192,9 +190,10 @@ void shifterio_shutdown(void)
 io68_t * shifterio_create(emu68_t * const emu68, int hz)
 {
   shifter_io68_t * const io =
-    (emu68 && emu68->alloc)
-    ? emu68->alloc(sizeof(*io))
-    : 0;
+    emu68
+    ? emu68_alloc(sizeof(*io))
+    : 0
+    ;
 
   if (io) {
     io->io = shifter_io;

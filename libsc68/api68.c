@@ -175,7 +175,7 @@ struct _sc68_s {
 # endif
 #endif
 
-static int           sc68_feature = msg68_NEVER;
+static int           sc68_cat = msg68_NEVER;
 static int           sc68_id;        /* counter for auto generated name. */
 static volatile int  sc68_init_flag; /* Library init flag     */
 static sc68_estack_t sc68_estack;    /* Library error message */
@@ -208,33 +208,28 @@ static int stream_read_68k(sc68_t * sc68, unsigned int dest,
 static int init_emu68(sc68_t * const sc68, int * pargc, char ** argv)
 {
   int err;
-  emu68_init_t emu68_inits;
   io68_init_t  io68_inits;
 
-  sc68_debug(sc68,"init_emu68() {\n");
-
   /* Initialize emu68 */
-  sc68_debug(sc68,"init_emu68() : Initialize emu68 (68k emulator)\n");
-  emu68_inits.alloc = sc68_alloc;
-  emu68_inits.free  = sc68_free;
-  emu68_inits.argc  = pargc;
-  emu68_inits.argv  = argv;
-  err = emu68_init(&emu68_inits);
-  sc68_debug(sc68,"init_emu68() : emu68 library init %s\n", ok_int(err));
-  if (err) {
+  sc68_debug(sc68,"libsc68: initialise 68k emulator\n");
+  err = emu68_init(*pargc, argv);
+  if (err < 0) {
+    sc68_error_add(sc68, "libsc68: failed to initialise 68k emulator");
     goto error;
   }
+  *pargc = err;
 
   /* Initialize chipset */
-  sc68_debug(sc68,"init_emu68() : Initialise io68 (chipset)\n");
+  sc68_debug(sc68,"libsc68: initialise chipsets\n");
   memset(&io68_inits, 0, sizeof(io68_inits)); /* set all to default */
   io68_inits.argc = pargc;
   io68_inits.argv = argv;
   err = io68_init(&io68_inits);
-  sc68_debug(sc68,"init_emu68() : io68 library init %s\n", ok_int(err));
+  if (err < 0) {
+    sc68_error_add(sc68, "libsc68: failed to chipsets");
+  }
 
- error:
-  sc68_debug(sc68,"} init_emu68() => [%s]\n", ok_int(err));
+error:
   return err;
 }
 
@@ -528,13 +523,13 @@ int sc68_init(sc68_init_t * init)
     init = &dummy_init;
   }
 
-  sc68_feature = msg68_feature("sc68","sc68 library",DEBUG_SC68_O);
+  sc68_cat = msg68_cat("sc68","sc68 library",DEBUG_SC68_O);
 
   /* 1st thing to do : set debug handler. */
   msg68_set_handler((msg68_t)init->msg_handler);
   msg68_set_cookie(init->msg_cookie);
 
-  msg68_mask(init->debug_clr_mask,init->debug_set_mask);
+  msg68_cat_filter(init->debug_clr_mask,init->debug_set_mask);
 
   sc68_debug(0,"sc68_init() {\n");
 
@@ -567,7 +562,7 @@ int sc68_init(sc68_init_t * init)
   /* $$$: No good */
   opt = option68_get("debug", 1);
   if (opt) {
-    msg68_mask(~0,opt->val.num);
+    msg68_cat_filter(~0,opt->val.num);
   }
 
   sc68_init_flag = !err;
@@ -1611,7 +1606,7 @@ void sc68_debug(sc68_t * sc68, const char * fmt, ...)
 {
   va_list list;
   va_start(list,fmt);
-  msg68_va(sc68_feature,fmt,list);
+  msg68_va(sc68_cat,fmt,list);
   va_end(list);
 }
 
