@@ -14,8 +14,19 @@
 #ifndef _FILE68_FILE68_API_H_
 #define _FILE68_FILE68_API_H_
 
+/**
+ *  @defgroup file68_lib file68 library
+ *  @ingroup  api68
+ *
+ *  file68 is a library to manipulate sc68 files and access sc68
+ *  resources and much more.
+ *
+ *  @{
+ */
+
 #ifndef FILE68_EXTERN
 # ifdef __cplusplus
+/** Decorate symbols exported locally. */
 #   define FILE68_EXTERN extern "C"
 # else
 #   define FILE68_EXTERN extern
@@ -42,18 +53,8 @@
 # endif
 #endif
 
-/** @addtogroup file68_lib
- *
- *     How symbols are exported.
- *
- *  @{
- */
-
+/** Decorate symbols exported for public. */
 #ifndef FILE68_API
-/** file68 symbols specification.
- *
- *  Define special atributs for importing/exporting file68 symbols.
- */
 #define FILE68_API FILE68_EXTERN
 #error "FILE68_API should be defined"
 #endif

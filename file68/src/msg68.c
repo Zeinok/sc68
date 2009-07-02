@@ -21,10 +21,6 @@
 
 /* $Id$ */
 
-/* $$$ Nothing in there is thread safe... Anyway nothing should be
-   really harmful either.
-*/
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -32,36 +28,34 @@
 #include "msg68.h"
 #include "string68.h"
 
-static msg68_t debug  = 0;                /* Debug function.            */
-static void * debug_cookie = 0;           /* Debug function user param. */
-static int current_feature = msg68_DEBUG; /* Default current feature.   */
+static msg68_t   output = 0;           /* Output function.  */
+static void    * cookie = 0;           /* User data.        */
+static int       curcat = msg68_DEBUG; /* Current category. */
 
-/** Filter debug messages.
+/** Default message filter mask.
  *
- *  Bit have to be clear to mask/filter a debug feature. The default
- *  value depend on compilation. If debug feature was enabled (DEBUG
- *  defined) msg68_bitmsk value is set to ~0, allowing all
- *  messages. On the contrary its msg68_bitmsk is set to 0,
- *  filtering out all messages (except
- *  enum_msg68_bit::msg68_unmaskable).
+ *  Corresponding bit have to be cleared to mask/filter a message
+ *  category. The default value depend on compilation.
  */
-static
+static unsigned int msg68_bitmsk =
 #if defined(DEBUGMSG_MASK)
-unsigned int msg68_bitmsk = DEBUGMSG_MASK; /* User defined mask.         */
-#elif defined(DEBUG)
-unsigned int msg68_bitmsk = ~0;            /* Filter none.               */
+  DEBUGMSG_MASK
+#elif defined(DEBUG_FILE68)
+  ~0
+#elif defined(NDEBUG_FILE68)
+  (1<<msg68_CRITICAL)|(1<<msg68_ERROR)|(1<<msg68_INFO)
 #else
-unsigned int msg68_bitmsk =                /* Filter almost all.         */
-  (1<<msg68_CRITICAL)|(1<<msg68_ERROR)|(1<<msg68_WARNING);
+  (1<<msg68_CRITICAL)|(1<<msg68_ERROR)|(1<<msg68_WARNING)|(1<<msg68_INFO)
 #endif
+  ;
 
-#define MAX_FEATURES (((sizeof(int)<<3)))
+#define MAX_CATEGORIES (((sizeof(int)<<3)))
 
-struct struct_debug_bit {
-  int bit;           /* equal to its array's index when entry is used. */
-  const char * name; /* feature name.                                  */
+struct struct_cat_bit {
+  int          bit;  /* equal to its array's index when entry is used. */
+  const char * name; /* category name.                                 */
   const char * desc; /* short descrition.                              */
-} debug_bits[MAX_FEATURES] = {
+} cat_bits[MAX_CATEGORIES] = {
   { msg68_CRITICAL, "critical", "critical error message" },
   { msg68_ERROR   , "error"   , "error message"          },
   { msg68_WARNING , "warning" , "warning message"        },
@@ -70,55 +64,63 @@ struct struct_debug_bit {
   { msg68_TRACE   , "trace"   , "trace message"          }
 };
 
-/* Set handler. */
 msg68_t msg68_set_handler(msg68_t handler)
 {
-  msg68_t old = debug;
-  debug = handler;
+  msg68_t old = output;
+  output = handler;
   return old;
 }
 
-/* Set cookie. */
-void * msg68_set_cookie(void * cookie)
+void * msg68_set_cookie(void * userdata)
 {
-  void * old = debug_cookie;
-  debug_cookie = cookie;
+  void * old = cookie;
+  cookie = userdata;
   return old;
 }
 
-/* Print debug message (variable argument). */
-void msg68_va(int bit, const char * fmt, va_list list)
+/* Print message (variable argument). */
+void msg68x_va(int bit, void * cookie, const char * fmt, va_list list)
 {
-  if (debug) {
-    const int feature = (bit == msg68_CURRENT)
-      ? current_feature
+  if (output) {
+    const int category = (bit == msg68_CURRENT)
+      ? curcat
       : bit
       ;
 
-    switch (feature) {
+    switch (category) {
     case msg68_NEVER:
       break;
     default:
-      if ( ! (msg68_bitmsk&(1<<feature)) )
+      if ( ! ( msg68_bitmsk & ( 1 << category ) ) )
         break;
-      if (feature>msg68_TRACE &&
-          ! (msg68_bitmsk&(1<<msg68_TRACE)))
+      if ( category > msg68_TRACE &&
+          ! ( msg68_bitmsk & ( 1 << msg68_TRACE ) ) )
         break;
     case msg68_ALWAYS:
-      debug(feature, debug_cookie, fmt, list);
+      output(category, cookie, fmt, list);
     }
   }
 }
 
-/* Print debug message. */
-void msg68(const int bit, const char * fmt, ...)
+void msg68x(int bit, void * cookie, const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
-  msg68_va(bit, fmt, list);
+  msg68x_va(bit, cookie, fmt, list);
   va_end(list);
 }
 
-/* Print debug message (debug level) */
+void msg68_va(int bit, const char * fmt, va_list list)
+{
+  msg68x_va(bit, cookie, fmt, list);
+}
+
+void msg68(const int bit, const char * fmt, ...)
+{
+  va_list list; va_start(list,fmt);
+  msg68x_va(bit, cookie, fmt, list);
+  va_end(list);
+}
+
 void msg68_trace(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
@@ -126,7 +128,13 @@ void msg68_trace(const char * fmt, ...)
   va_end(list);
 }
 
-/* Print debug message (debug level) */
+void msg68x_trace(void * userdata, const char * fmt, ...)
+{
+  va_list list; va_start(list,fmt);
+  msg68x_va(msg68_TRACE, userdata, fmt, list);
+  va_end(list);
+}
+
 void msg68_debug(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
@@ -134,7 +142,13 @@ void msg68_debug(const char * fmt, ...)
   va_end(list);
 }
 
-/* Print debug message (info level) */
+void msg68x_debug(void * userdata, const char * fmt, ...)
+{
+  va_list list; va_start(list,fmt);
+  msg68x_va(msg68_DEBUG, userdata, fmt, list);
+  va_end(list);
+}
+
 void msg68_info(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
@@ -142,7 +156,13 @@ void msg68_info(const char * fmt, ...)
   va_end(list);
 }
 
-/* Print debug message (warning level) */
+void msg68x_info(void * userdata, const char * fmt, ...)
+{
+  va_list list; va_start(list,fmt);
+  msg68x_va(msg68_INFO, userdata, fmt, list);
+  va_end(list);
+}
+
 void msg68_warning(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
@@ -150,15 +170,27 @@ void msg68_warning(const char * fmt, ...)
   va_end(list);
 }
 
-/* Print debug message (error level) */
-void msg68_error(const char * fmt, ...)
+void msg68x_warning(void * userdata, const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
-  msg68_va(msg68_ERROR,fmt,list);
+  msg68x_va(msg68_WARNING, userdata, fmt, list);
   va_end(list);
 }
 
-/* Print debug message (critical level) */
+void msg68_error(const char * fmt, ...)
+{
+  va_list list; va_start(list,fmt);
+  msg68_va(msg68_ERROR, fmt,list);
+  va_end(list);
+}
+
+void msg68x_error(void * userdata, const char * fmt, ...)
+{
+  va_list list; va_start(list,fmt);
+  msg68x_va(msg68_ERROR, userdata, fmt,list);
+  va_end(list);
+}
+
 void msg68_critical(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
@@ -166,7 +198,13 @@ void msg68_critical(const char * fmt, ...)
   va_end(list);
 }
 
-/* Print debug message (current level) */
+void msg68x_critical(void * userdata, const char * fmt, ...)
+{
+  va_list list; va_start(list,fmt);
+  msg68x_va(msg68_CRITICAL, userdata, fmt, list);
+  va_end(list);
+}
+
 void msg68_current(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
@@ -174,7 +212,13 @@ void msg68_current(const char * fmt, ...)
   va_end(list);
 }
 
-/* Print debug message (always) */
+void msg68x_current(void * userdata, const char * fmt, ...)
+{
+  va_list list; va_start(list,fmt);
+  msg68x_va(msg68_CURRENT, userdata, fmt, list);
+  va_end(list);
+}
+
 void msg68_always(const char * fmt, ...)
 {
   va_list list; va_start(list,fmt);
@@ -182,54 +226,61 @@ void msg68_always(const char * fmt, ...)
   va_end(list);
 }
 
-static inline int is_valid_feature(const int i)
+void msg68x_always(void * userdata, const char * fmt, ...)
 {
-  return i>=0 && i<MAX_FEATURES;
+  va_list list; va_start(list,fmt);
+  msg68x_va(msg68_ALWAYS, userdata, fmt, list);
+  va_end(list);
 }
 
-static inline int get_feature(const char *name)
+static inline int is_valid_category(const int i)
+{
+  return i>=0 && i<MAX_CATEGORIES;
+}
+
+static inline int get_category(const char *name)
 {
   int i;
-  for (i=MAX_FEATURES; --i>=0 && strcmp68(name,debug_bits[i].name);)
+  for (i=MAX_CATEGORIES; --i>=0 && strcmp68(name,cat_bits[i].name);)
     ;
   return i;
 }
 
-static inline int is_free_feature(const int i)
+static inline int is_free_category(const int i)
 {
-  return debug_bits[i].bit != i;
+  return cat_bits[i].bit != i;
 }
 
-static inline int get_free_feature(void)
+static inline int get_free_category(void)
 {
   int i;
-  for (i=MAX_FEATURES; --i>=0 && !is_free_feature(i);)
+  for (i=MAX_CATEGORIES; --i>=0 && !is_free_category(i);)
     ;
   if (i>=0)
-    debug_bits[i].bit = i;
+    cat_bits[i].bit = i;
   return i;
 }
 
 
-/* Get named features. */
-int msg68_feature_bit(const char * name)
+/* Get named categories. */
+int msg68_cat_bit(const char * name)
 {
-  return name ? get_feature(name) : -1;
+  return name ? get_category(name) : -1;
 }
 
-/* Create/Modify a feature. */
-int msg68_feature(const char * name, const char * desc, const int masked)
+/* Create/Modify a category. */
+int msg68_cat(const char * name, const char * desc, const int masked)
 {
   int i = msg68_NEVER;
 
-  if (name && desc) {
-    i = get_feature(name);
+  if (name) {
+    i = get_category(name);
     if (i < 0) {
-      i = get_free_feature();
+      i = get_free_category();
     }
     if (i >= 0) {
-      debug_bits[i].name = name;
-      debug_bits[i].desc = desc;
+      cat_bits[i].name = name;
+      cat_bits[i].desc = desc ? desc : "N/A";
       if (masked) {
         msg68_bitmsk |= 1<<i;
       } else {
@@ -241,75 +292,75 @@ int msg68_feature(const char * name, const char * desc, const int masked)
   return i;
 }
 
-/* Free/Destroy a debug feature. */
-void msg68_feature_free(const int feature)
+/* Free/Destroy a debug category. */
+void msg68_cat_free(const int category)
 {
-  if (is_valid_feature(feature) && feature>msg68_TRACE) {
-    debug_bits[feature].bit = -1;
-    msg68_bitmsk |= 1<<feature;
+  if (is_valid_category(category) && category > msg68_TRACE) {
+    cat_bits[category].bit = -1;
+    msg68_bitmsk |= 1 << category;
   }
 }
 
-/* Get/Set current feature. */
-int msg68_feature_current(const int feature)
+/* Get/Set current category. */
+int msg68_cat_current(const int category)
 {
-  int old = current_feature;
+  int old = curcat;
 
-  /* Allow always or never or any other existing feature */
-  if (feature == msg68_ALWAYS || feature == msg68_NEVER ||
-      (is_valid_feature(feature) && !is_free_feature(feature))) {
-    current_feature = feature;
+  /* Allow always or never or any other existing category */
+  if (category == msg68_ALWAYS || category == msg68_NEVER ||
+      (is_valid_category(category) && !is_free_category(category))) {
+    curcat = category;
   }
   return old;
 }
 
-/* Set all predefined features mask according to given level. */
-int msg68_feature_level(const int feature)
+/* Set all predefined categories mask according to given level. */
+int msg68_cat_level(const int category)
 {
-  int ret = -(feature < msg68_CRITICAL || feature > msg68_TRACE);
+  int ret = -(category < msg68_CRITICAL || category > msg68_TRACE);
   if (!ret) {
     unsigned int v = msg68_bitmsk & ~((1<<(msg68_TRACE+1))-1);
-    v |= (1<<(feature+1))-1;
+    v |= (1<<(category+1))-1;
     msg68_bitmsk = v;
   }
   return ret;
 }
 
-/* Get info on feature */
-int msg68_feature_info(const int feature, const char **pname,
+/* Get info on category */
+int msg68_cat_info(const int category, const char **pname,
                        const char **pdesc, int *pnext)
 {
-  int ret = -1, next = feature;
-  if (is_valid_feature(feature)) {
-    if (pname) *pname = debug_bits[feature].name;
-    if (pdesc) *pdesc = debug_bits[feature].desc;
-    ret = 1 & (msg68_bitmsk>>feature);
+  int ret = -1, next = category;
+  if (is_valid_category(category)) {
+    if (pname) *pname = cat_bits[category].name;
+    if (pdesc) *pdesc = cat_bits[category].desc;
+    ret = 1 & (msg68_bitmsk>>category);
   } else {
     next = -1;
   }
   if (pnext) {
-    while (++next<MAX_FEATURES && is_free_feature(next))
+    while (++next<MAX_CATEGORIES && is_free_category(next))
       ;
-    if (feature<MAX_FEATURES) {
+    if (category<MAX_CATEGORIES) {
       *pnext = next;
     }
   }
   return ret;
 }
 
-void msg68_feature_help(void * cookie, msg68_help_t fct)
+void msg68_cat_help(void * cookie, msg68_help_t fct)
 {
   if (fct) {
     int i;
-    for (i=0; i<MAX_FEATURES; ++i) {
-      const int isfree = is_free_feature(i);
+    for (i=0; i<MAX_CATEGORIES; ++i) {
+      const int isfree = is_free_category(i);
       if (!isfree)
-        fct (cookie, i, debug_bits[i].name, debug_bits[i].desc);
+        fct (cookie, i, cat_bits[i].name, cat_bits[i].desc);
     }
   }
 }
 
-unsigned int msg68_mask(unsigned int clr, unsigned int set)
+unsigned int msg68_cat_filter(unsigned int clr, unsigned int set)
 {
   msg68_bitmsk &= ~clr;
   msg68_bitmsk |=  set;

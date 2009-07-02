@@ -80,16 +80,18 @@ const char file68_idstr_v2[8] = SC68_IDSTR_V2;
 #ifndef DEBUG_FILE68_O
 # define DEBUG_FILE68_O 0
 #endif
-int file68_feature = msg68_DEFAULT;
+int file68_cat = msg68_DEFAULT;
 
 int file68_o_init(void)
 {
-  file68_feature =
-    msg68_feature("loader", "music file loader", DEBUG_FILE68_O);
+  file68_cat = msg68_cat("loader", "music file loader", DEBUG_FILE68_O);
   return 0;
 }
 
-void file68_o_shutdown(void) {
+void file68_o_shutdown(void)
+{
+  msg68_cat_free(file68_cat);
+  file68_cat = msg68_DEFAULT;
 }
 
 /* Peek Little Endian Unaligned 32 bit value */
@@ -147,7 +149,7 @@ static int sndh_is_magic(const char *buffer, int max)
       ;
   }
   i = (v == sndh_cc) ? i-4: 0;
-  TRACE68(file68_feature,"sndh_is_magic := %d\n",i);
+  TRACE68(file68_cat,"sndh_is_magic := %d\n",i);
   return i;
 }
 
@@ -201,26 +203,26 @@ static int read_header(istream68_t * const is)
     if (memcmp(id, file68_idstr, idv1_req)) {
       return error68(missing_id);
     }
-    TRACE68(file68_feature,"found file-id: [%s]\n",file68_idstr);
+    TRACE68(file68_cat,"found file-id: [%s]\n",file68_idstr);
   } else if (!memcmp(id, file68_idstr_v2, idv2_req)) {
-    TRACE68(file68_feature,"found file-id: [%s]\n",file68_idstr_v2);
+    TRACE68(file68_cat,"found file-id: [%s]\n",file68_idstr_v2);
   } else {
     if (have = ensure_header(is, id, have, sndh_req), !have) {
       return -1;
     }
     if (gzip68_is_magic(id)) {
-      TRACE68(file68_feature,"found GZIP signature\n");
+      TRACE68(file68_cat,"found GZIP signature\n");
       return -gzip_cc;
     } else if (ice68_is_magic(id)) {
-      TRACE68(file68_feature,"found ICE! signature\n");
+      TRACE68(file68_cat,"found ICE! signature\n");
       return -ice_cc;
     } else {
       /* Must be done after gzip or ice becausez id-string may appear
        * in compressed buffer too.
        */
-      TRACE68(file68_feature,"try SNDH\n");
+      TRACE68(file68_cat,"try SNDH\n");
       if (sndh_is_magic(id,sndh_req)) {
-        TRACE68(file68_feature,"found SNDH signature\n");
+        TRACE68(file68_cat,"found SNDH signature\n");
         return -sndh_cc;
       }
     }
@@ -238,7 +240,7 @@ static int read_header(istream68_t * const is)
       || (have = LPeek(id), have <= 8)) {
     return error68("Not SC68 file : Weird BASE Chunk size");
   }
-  TRACE68(file68_feature,"sc68-header: [%d bytes]\n",have-8);
+  TRACE68(file68_cat,"sc68-header: [%d bytes]\n",have-8);
   return have-8;
 }
 
@@ -374,7 +376,7 @@ int file68_is_our_url(const char * url, const char * exts, int * is_remote)
   char protocol[16], *p;
   int has_protocol, remote, is_our;
 
-  TRACE68(file68_feature,"file68_is_our_url([url:[%s],...) {\n",url);
+  TRACE68(file68_cat,"file68_is_our_url([url:[%s],...) {\n",url);
 
   is_our = remote = 0;
   if (!url || !*url) {
@@ -435,7 +437,7 @@ int file68_is_our_url(const char * url, const char * exts, int * is_remote)
 
   exit:
   if (is_remote) *is_remote = remote;
-  TRACE68(file68_feature,"} file68_is_our_url => [%s]\n",ok_int(!is_our));
+  TRACE68(file68_cat,"} file68_is_our_url => [%s]\n",ok_int(!is_our));
   return is_our;
 }
 
@@ -447,7 +449,7 @@ int file68_verify(istream68_t * is)
   int res;
   const char * fname = strnull(istream68_filename(is));
 
-  TRACE68(file68_feature,"file68_verify([is:[%s],...) {\n",fname);
+  TRACE68(file68_cat,"file68_verify([is:[%s],...) {\n",fname);
 
   if (!is) {
     res = error68("file68_verify(): null pointer");
@@ -491,7 +493,7 @@ int file68_verify(istream68_t * is)
   }
 
   error:
-  TRACE68(file68_feature,"} file68_verify => [%s]\n",ok_int(res));
+  TRACE68(file68_cat,"} file68_verify => [%s]\n",ok_int(res));
   return -(res < 0);
 }
 
@@ -505,7 +507,7 @@ static istream68_t * url_or_file_create(const char * url, int mode,
   char * newname = 0;
 
 /*   CONTEXT68_CHECK(context); */
-  TRACE68(file68_feature,"url_or_file_create([url:[%s],mode:%d,info:%p) {\n",
+  TRACE68(file68_cat,"url_or_file_create([url:[%s],mode:%d,info:%p) {\n",
           strnull(url),mode,info);
 
   if (info) {
@@ -524,7 +526,7 @@ static istream68_t * url_or_file_create(const char * url, int mode,
       tmp[max] = 0;
       url = tmp;
       strcpy(protocol,"rsc68");
-      TRACE68(file68_feature,"url is now [%s]\n",url);
+      TRACE68(file68_cat,"url is now [%s]\n",url);
     }
 
     if (!strcmp68(protocol, "RSC68")) {
@@ -540,7 +542,7 @@ static istream68_t * url_or_file_create(const char * url, int mode,
   }
 
   free68(newname);
-  TRACE68(file68_feature,"} url_or_file_create() => [%s,%s]\n",
+  TRACE68(file68_cat,"} url_or_file_create() => [%s,%s]\n",
           ok_int(!isf),
           strnull(istream68_filename(isf)));
   return isf;
@@ -552,13 +554,13 @@ int file68_verify_url(const char * url)
   istream68_t * is;
 
 /*   CONTEXT68_CHECK(context); */
-  TRACE68(file68_feature,"file68_verify_url([url:[%s]) {\n",url?url:"<NUL>");
+  TRACE68(file68_cat,"file68_verify_url([url:[%s]) {\n",url?url:"<NUL>");
 
   is = url_or_file_create(url,1,0);
   res = file68_verify(is);
   istream68_destroy(is);
 
-  TRACE68(file68_feature,"} file68_verify_url() => [%s]\n",!res?"success":"error");
+  TRACE68(file68_cat,"} file68_verify_url() => [%s]\n",!res?"success":"error");
   return -(res < 0);
 }
 
@@ -589,7 +591,7 @@ disk68_t * file68_load_url(const char * fname)
   istream68_t * is;
   rsc68_info_t info;
 
-  TRACE68(file68_feature,"file68: load url '%s\n", strnull(fname));
+  TRACE68(file68_cat,"file68: load url '%s\n", strnull(fname));
 
   is = url_or_file_create(fname, 1, &info);
   d = file68_load(is);
@@ -598,7 +600,7 @@ disk68_t * file68_load_url(const char * fname)
   if (d && info.type == rsc68_music) {
     int i;
 
-    TRACE68(file68_feature,
+    TRACE68(file68_cat,
             "file68: on the fly path: #%d/%d/%d\n",
             info.data.music.track,
             info.data.music.loop,
@@ -630,7 +632,7 @@ disk68_t * file68_load_url(const char * fname)
     }
   }
 
-  TRACE68(file68_feature,"file68: load url => [%s]\n", ok_int(!d));
+  TRACE68(file68_cat,"file68: load url => [%s]\n", ok_int(!d));
   return d;
 }
 
@@ -704,7 +706,7 @@ static int sndh_info(disk68_t * mb, int len)
       s = mb->mus[0].converter = b+i+4;
     } else if (!memcmp(b+i,"MuMo",4)) {
       /* Music Mon ???  */
-      TRACE68(file68_feature,
+      TRACE68(file68_cat,
               "file68: sndh 'MuMo';don't know what to do with that\n");
       musicmon = 1;
       i += 4;
@@ -766,7 +768,7 @@ static int sndh_info(disk68_t * mb, int len)
     if (unknown) {
       ++unknowns;
       /* Unkwown tag, finish here. */
-      TRACE68(file68_feature,
+      TRACE68(file68_cat,
               "UNKNOWN TAG #%02d [%c%c%c%c] at %d\n",unknowns,
               b[i],b[i+1],b[i+2],b[i+3], i);
       ++i;
@@ -1153,7 +1155,7 @@ static int save_nonzero(istream68_t * os, const char * chunk, int n)
 int file68_save_url(const char * fname, const disk68_t * mb,
                     int gzip)
 {
-  int feature = msg68_feature_current(file68_feature);
+  int feature = msg68_cat_current(file68_cat);
   istream68_t * os;
   int err;
 
@@ -1161,14 +1163,14 @@ int file68_save_url(const char * fname, const disk68_t * mb,
   err = file68_save(os, mb, gzip);
   istream68_destroy(os);
 
-  msg68_feature_current(feature);
+  msg68_cat_current(feature);
   return err;
 }
 
 int file68_save_mem(const char * buffer, int len, const disk68_t * mb,
                     int gzip)
 {
-  int feature =  msg68_feature_current(file68_feature);
+  int feature =  msg68_cat_current(file68_cat);
   istream68_t * os;
   int err;
 
@@ -1177,7 +1179,7 @@ int file68_save_mem(const char * buffer, int len, const disk68_t * mb,
   err = file68_save(os, mb, gzip);
   istream68_destroy(os);
 
-  msg68_feature_current(feature);
+  msg68_cat_current(feature);
   return err;
 }
 

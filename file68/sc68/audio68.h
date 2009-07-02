@@ -16,8 +16,10 @@
 
 #include "file68_api.h"
 
-/** @defgroup  file68_audio  Audio backend
+/** @defgroup  file68_audio  Audio output interface.
  *  @ingroup   file68_lib
+ *
+ *    Provides function for controling audio output backend.
  *
  *  @{
  */
@@ -25,8 +27,14 @@
 FILE68_API
 /** Set/Get audio output default sampling rate.
  *
- *  @params  hz  New default sampling rate [8000..96000]; 0:Get cuurent
- *  @return      Current or new default sampling rate
+ *    Set the default sampling rate for audio output. This default
+ *    rate is used by the audio output backend if no sampling rate is
+ *    specified.
+ *
+ *  @param   hz  New default sampling rate [8000..96000]; 0:Get current.
+ *  @return  Either new or current sampling rate. The value may not be
+ *           the exact requested value; it depends on the granularity of
+ *           the audio backend.
  */
 unsigned int audio68_sampling_rate(const unsigned int hz);
 

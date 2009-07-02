@@ -34,7 +34,7 @@
 #ifndef DEBUG_CURL_O
 # define DEBUG_CURL_O 0
 #endif
-static int curl_feature = msg68_DEFAULT;
+static int curl_cat = msg68_DEFAULT;
 
 #include "istream68_def.h"
 #include "alloc68.h"
@@ -176,7 +176,7 @@ static size_t isf_write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
   bytes = org_bytes = (int)(size * nmemb);
   pos = isf->curl_pos;
 
-/*   TRACE68(curl_feature,"curl68::write_cb(%s:%p,%d) pos=%x\n", */
+/*   TRACE68(curl_cat,"curl68::write_cb(%s:%p,%d) pos=%x\n", */
 /*           isf->name, isf->curm, bytes, pos); */
   isf->has_write = 1;
   if (!bytes) {
@@ -270,7 +270,7 @@ static int isf_debug_cb(CURL *handle, curl_infotype type,
     break;
   }
 
-  TRACE68(curl_feature,"%s:%p:%p >%s\n", isf->name, isf->curm, handle, typestr);
+  TRACE68(curl_cat,"%s:%p:%p >%s\n", isf->name, isf->curm, handle, typestr);
   if (data) {
     int i;
     char tmp[256];
@@ -283,7 +283,7 @@ static int isf_debug_cb(CURL *handle, curl_infotype type,
     }
     tmp[i] = 0;
     if (i>0) {
-      TRACE68(curl_feature,"[%s]\n", tmp);
+      TRACE68(curl_cat,"[%s]\n", tmp);
     }
   }
 #endif
@@ -309,7 +309,7 @@ static int match_header(int *v,
         len = len * 10 + c - '0';
       }
       *v = len;
-/*       TRACE68(curl_feature,"Match header %s-> %d\n", header, len); */
+/*       TRACE68(curl_cat,"Match header %s-> %d\n", header, len); */
       return 1;
     }
   }
@@ -332,13 +332,13 @@ static size_t isf_header_cb(void  *ptr, size_t  size,
 
   isf->has_hd_write = 1;
 
-/*   TRACE68(curl_feature,"curl68::header_cb(%s:%p, %d)\n", */
+/*   TRACE68(curl_cat,"curl68::header_cb(%s:%p, %d)\n", */
 /*           isf->name, isf->curm, size*nmemb); */
 
   if (match_header(&len, ptr, bytes, content_length, sizeof(content_length))
       || match_header(&len, ptr, bytes, ftp_size, sizeof(ftp_size))) {
     isf->length = len;
-/*     TRACE68(curl_feature,"%s::Set length to %d\n", isf->name, len); */
+/*     TRACE68(curl_cat,"%s::Set length to %d\n", isf->name, len); */
   }
 
   /* $$$ TODO : Add transfert complete checks */
@@ -385,7 +385,7 @@ static int isf_open(istream68_t * istream)
   /* Create curl handle */
   isf->curl = curl_easy_init();
   isf->curm = curl_multi_init();
-/*   TRACE68(curl_feature,"%s:%p:%p:open()\n",isf->name, isf->curm, isf->curl); */
+/*   TRACE68(curl_cat,"%s:%p:%p:open()\n",isf->name, isf->curm, isf->curl); */
   if (!isf->curl || !isf->curm) {
     goto error;
   }
@@ -445,15 +445,15 @@ static int isf_open(istream68_t * istream)
     do {
       int n;
       mcode = curl_multi_perform(isf->curm, &n);
-/*       TRACE68(curl_feature,"READ_HEADER: MCODE=[%s]\n", */
+/*       TRACE68(curl_cat,"READ_HEADER: MCODE=[%s]\n", */
 /*               mcode == CURLM_OK ? "OK" : */
 /*               (mcode == CURLM_CALL_MULTI_PERFORM) ? "MULTI" : "OTHER"); */
 
       if (mcode == CURLM_OK) {
-/*         TRACE68(curl_feature,"OK, timeleft:%d\n",timeout); */
+/*         TRACE68(curl_cat,"OK, timeleft:%d\n",timeout); */
         timeout -= mysleep(200);
         if (timeout < 0) {
-          TRACE68(curl_feature,"istream_curl: READ_HEADER: TIME-OUT\n");
+          TRACE68(curl_cat,"istream_curl: READ_HEADER: TIME-OUT\n");
           break;
         }
       } else if (mcode != CURLM_CALL_MULTI_PERFORM) {
@@ -494,7 +494,7 @@ static int isf_close(istream68_t * istream)
   int err = -1;
 
   if (isf) {
-/*     TRACE68(curl_feature,"curl68::%s:%p:%p:close()\n", */
+/*     TRACE68(curl_cat,"curl68::%s:%p:%p:close()\n", */
 /*             isf->name, isf->curm, isf->curl); */
     if (isf->curm) {
       err = 0;
@@ -518,7 +518,7 @@ static int isf_need_more(istream68_curl_t * isf)
   isf->mcode = curl_multi_perform(isf->curm, &n);
   n = isf->curl_pos - pos;
   if (n) {
-/*     TRACE68(curl_feature,"%s:%p:GETS MORE\n" */
+/*     TRACE68(curl_cat,"%s:%p:GETS MORE\n" */
 /*             "-> %d (code=%d)\n", */
 /*             isf->name, isf->curm, */
 /*             n, isf->mcode); */
@@ -528,7 +528,7 @@ static int isf_need_more(istream68_curl_t * isf)
       break;
     case CURLM_CALL_MULTI_PERFORM:
     default:
-/*       TRACE68(curl_feature,"%s:%p:GETS MORE DETECTS EOF\n" */
+/*       TRACE68(curl_cat,"%s:%p:GETS MORE DETECTS EOF\n" */
 /*               "-> pos:%d length:%d (code=%d)\n", */
 /*               isf->name, isf->curm, */
 /*               isf->curl_pos, isf->length, isf->mcode); */
@@ -564,13 +564,13 @@ static int isf_read(istream68_t * istream, void * data, int n)
     int n = -1;
 
     if (isf->length != -1 && pos >= isf->length) {
-/*       TRACE68(curl_feature,"%s:%p, EOF:\n" */
+/*       TRACE68(curl_cat,"%s:%p, EOF:\n" */
 /*               "->pos:%p/%p\n", */
 /*               isf->name, isf->curm, */
 /*               pos, isf->length); */
       break;
     } else if (timeout < 0) {
-/*       TRACE68(curl_feature,"%s:%p, TIME-OUT :\n" */
+/*       TRACE68(curl_cat,"%s:%p, TIME-OUT :\n" */
 /*             "->pos:%d/%d (%d ms)\n", */
 /*             isf->name, isf->curm, */
 /*             pos, isf->length, re_timeout); */
@@ -583,7 +583,7 @@ static int isf_read(istream68_t * istream, void * data, int n)
 
     if (top == isf->cache[blk].top) {
 
-/*       TRACE68(curl_feature,"%s:%p, read block:\n" */
+/*       TRACE68(curl_cat,"%s:%p, read block:\n" */
 /*               "->pos:%x top:%x blk:%x off:%x bytes:%d cache:[%x:%d]\n", */
 /*             isf->name, isf->curm, */
 /*             pos, top, blk, off, bytes, */
@@ -595,12 +595,12 @@ static int isf_read(istream68_t * istream, void * data, int n)
         n = bytes;
       }
     } else {
-/*       TRACE68(curl_feature,"NOT MY TOP\n"); */
+/*       TRACE68(curl_cat,"NOT MY TOP\n"); */
     }
 
     if (n <= 0) {
       if (pos < isf->curl_pos) {
-        TRACE68(curl_feature,"%s:%p: Can not seek backward from %d to %d\n",
+        TRACE68(curl_cat,"%s:%p: Can not seek backward from %d to %d\n",
                 isf->name, isf->curm, isf->curl_pos, pos);
         break;
       }
@@ -626,7 +626,7 @@ static int isf_read(istream68_t * istream, void * data, int n)
   if (isf->mcode != CURLM_OK && isf->mcode != CURLM_CALL_MULTI_PERFORM) {
     return -1;
   }
-/*   TRACE68(curl_feature,"%s:%p:read -> %d\n", isf->name, isf->curm, n-bytes); */
+/*   TRACE68(curl_cat,"%s:%p:read -> %d\n", isf->name, isf->curm, n-bytes); */
   return n - bytes;
 }
 
@@ -696,9 +696,9 @@ static const istream68_t istream68_curl = {
 
 int istream68_curl_init(void)
 {
-  if (curl_feature == msg68_DEFAULT) {
-    curl_feature = msg68_feature("curl","cURL stream message",DEBUG_CURL_O);
-    curl_feature = curl_feature != -1 ? curl_feature : msg68_DEFAULT;
+  if (curl_cat == msg68_DEFAULT) {
+    curl_cat = msg68_cat("curl","cURL stream message",DEBUG_CURL_O);
+    curl_cat = curl_cat != -1 ? curl_cat : msg68_DEFAULT;
   }
   if (!init) {
     CURLcode code;
@@ -714,9 +714,9 @@ void istream68_curl_shutdown(void)
     curl_global_cleanup();
     init = 0;
   }
-  if (curl_feature != msg68_DEFAULT) {
-    msg68_feature_free(curl_feature);
-    curl_feature = msg68_DEFAULT;
+  if (curl_cat != msg68_DEFAULT) {
+    msg68_cat_free(curl_cat);
+    curl_cat = msg68_DEFAULT;
   }
 }
 

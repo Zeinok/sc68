@@ -31,7 +31,7 @@ FILE68_EXTERN
  *
  *  @param  buffer  Buffer containing at least 3 bytes from gzip header.
  *
- *  @retval  1  buffer seems to be gzipped..
+ *  @retval  1  buffer may be gzipped.
  *  @retval  0  buffer is not gzipped.
  */
 int gzip68_is_magic(const void * buffer);
@@ -44,12 +44,11 @@ FILE68_EXTERN
  *
  * @param  fname    Name of file to load.
  * @param  ulen     Pointer to uncompressed or total size of file.
- *                  May be set to 0.
  *
- * @return Pointer to the loaded file buffer.
- * @retval 0 Error
+ * @return A pointer to loaded file buffer.
+ * @retval 0 on error.
  */
-void *gzip68_load(const char *fname, int *ulen);
+void * gzip68_load(const char * fname, int * ulen);
 
 /**
  *  @}
