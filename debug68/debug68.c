@@ -103,11 +103,11 @@ static unsigned int cycleperpass;
 # define DEBUG68_O 0
 #endif
 
-int debug68_feature = msg68_DEFAULT;
+int debug68_cat = msg68_DEFAULT;
 
 void dmsg_va(const char * fmt, va_list list)
 {
-  msg68_va(debug68_feature, fmt, list);
+  msg68_va(debug68_cat, fmt, list);
 }
 
 void dmsg(const char * fmt, ...)
@@ -1458,9 +1458,9 @@ int main(int argc, char *argv[])
 
   if (opt_verb < msg68_CRITICAL) opt_verb = msg68_CRITICAL;
   if (opt_verb > msg68_TRACE)    opt_verb = msg68_TRACE;
-  msg68_feature_level(opt_verb);
-  debug68_feature = msg68_feature("debug68","sc68 toolbox",DEBUG68_O);
-  if (debug68_feature == -1) debug68_feature = msg68_DEFAULT;
+  msg68_cat_level(opt_verb);
+  debug68_cat = msg68_cat("debug68","sc68 toolbox",DEBUG68_O);
+  if (debug68_cat == -1) debug68_cat = msg68_DEFAULT;
 
   memset(&create68,0,sizeof(create68));
   create68.log2mem     = 19;

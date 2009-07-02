@@ -49,7 +49,7 @@ INPUTS='$(srcdir)'
 m4_foreach_w([dir],[
     sc68-doc/sc68_doc.h as68/as68_doc.h info68/info68_doc.h
     sourcer68/sourcer68_doc.h debug68/debug68_doc.h sc68/sc68_doc.h 
-    desa68 unice68 file68],[
+    desa68 unice68 file68 libsc68],[
     AC_MSG_CHECKING([whether dir exists])
     AS_IF([test -e "${srcdir}/../dir"],
       [INPUTS="$INPUTS"' $(srcdir)/../dir'

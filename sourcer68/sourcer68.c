@@ -42,7 +42,7 @@
 # include <sc68/url68.h>
 # include <sc68/msg68.h>
 # include <sc68/option68.h>
-static int sourcer68_feature = -1;
+static int sourcer68_cat = -1;
 static int no_sc68 = 0;
 #endif
 
@@ -1120,8 +1120,8 @@ int main(int argc, char **argv)
 
 #ifdef USE_FILE68
   argc = file68_init(argc, argv);
-  sourcer68_feature =
-    msg68_feature("src","sourcer68 specific message",1);
+  sourcer68_cat =
+    msg68_cat("src","sourcer68 specific message",1);
   msg68_set_cookie(stderr);
   msg68_set_handler(msg_handler);
 #endif
@@ -1240,7 +1240,7 @@ int main(int argc, char **argv)
     if (tosreloc == TOS_RELOC_AUTO) {
       int err = TOSreloc(mem_data, mem_datasz, addr, fsize, 0, 1);
       if (err < 0) {
-        const char *s = error_get(0);
+        error_get(0);
 /*         Warning(-1, "Not a TOS file: %s\n", s ? s : "no error !"); */
         tosreloc = TOS_RELOC_NEVER;
       }

@@ -83,7 +83,7 @@ typedef struct my_option_s my_option_t;
 #endif
 
 static sc68_t * sc68 = 0;
-static const int sc68_feature = msg68_TRACE;
+static const int sc68_cat = msg68_TRACE;
 static int opt_verb = msg68_WARNING;
 static int opt_vers = 0;
 static int opt_help = 0;
@@ -116,7 +116,7 @@ static void Debug(const char * fmt, ...)
 {
   va_list list;
   va_start(list,fmt);
-  msg68_va(sc68_feature,fmt,list);
+  msg68_va(sc68_cat,fmt,list);
   va_end(list);
 }
 
@@ -187,21 +187,21 @@ print_option(void * data,
 	  desc+1);
 }	 
 
-/* Callback for debug feature printing. */
+/* Callback for message category printing. */
 static void
-print_feature(void * data, 
+print_cat(void * data, 
 	      const int bit, const char * name, const char * desc)
 {
   const char * fmt = "%02d | %-10s | %-40s | %-3s\n";
-  const int mask = (msg68_mask(0,0) >> bit) & 1;
+  const int mask = (msg68_cat_filter(0,0) >> bit) & 1;
   fprintf(data,fmt, bit, name, desc, mask?"ON":"OFF");
 }
 
-/* Print debug features. */
-static int print_features(void)
+/* Print message category. */
+static int print_cats(void)
 {
-  printf("debug features: current mask is %08X\n",msg68_mask(0,0));
-  msg68_feature_help(stdout,print_feature);
+  printf("message category: current mask is %08X\n",msg68_cat_filter(0,0));
+  msg68_cat_help(stdout,print_cat);
   return 0;
 }
 
@@ -540,10 +540,10 @@ int main(int argc, char *argv[])
 
   if (opt_verb < msg68_CRITICAL) opt_verb = msg68_CRITICAL;
   if (opt_verb > msg68_TRACE)    opt_verb = msg68_TRACE;
-  msg68_feature_level(opt_verb);
+  msg68_cat_level(opt_verb);
 
   if (opt_list) {
-    return print_features();
+    return print_cats();
   }
 
 

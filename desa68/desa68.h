@@ -102,7 +102,7 @@ enum {
 
   /** Force symbol disassemble.
    *
-   *    The DESA68_FORCESYMB_FLAG is a set of 5 bits. If the Nth bit if set it
+   *    The DESA68_FORCESYMB_FLAG is a set of 5 bits. If the Nth bit is set it
    *    forces a symbolic dissassembly for a long starting at the Nth word.
    *    Since 68000 instructions are not more than 10 bytes long 5 bit is just
    *    enough.
@@ -174,7 +174,7 @@ struct desa68_parm_s
   int            flags;  /**< @ref desa68_opt_flags "Disassemble options" */
   char          *str;    /**< Destination string.                         */
   int            strmax; /**< Destination string buffer size.
-                            @warning Unused                             */
+                            @warning Unused                               */
   /** Minimum value to interpret long immediat or absolute long as symbol.
    * @see DESA68_SYMBOL_FLAG for more details
    * @see immsym_max
