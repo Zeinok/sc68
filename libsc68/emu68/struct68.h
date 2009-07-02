@@ -58,20 +58,16 @@ typedef void (linefunc68_t)(emu68_t * const, int, int);
 # define DECL_STATIC_LINE68(N) DECL_LINE68(N)
 #endif
 
-/* /\** Alloc function type. *\/ */
-/* typedef void * (*emu68_alloc_t)(unsigned int); */
-
-/* /\** Free function type. *\/ */
-/* typedef void (*emu68_free_t)(void *); */
 
 /**  68K interruption exception structure.
  */
 typedef struct
 {
-  addr68_t  vector;              /**< Interrupt vector.             */
+  int       vector;              /**< Interrupt vector number       */
   int        level;              /**< Interrupt level [0..7].       */
   cycle68_t  cycle;              /**< Cycle the interruption falls. */
 } interrupt68_t;
+
 
 /** IO emulator plugin structure.
  *
@@ -95,18 +91,18 @@ struct io68_s
   iomemfunc68_t w_long;             /**< IO write long function.         */
 
   /** IO interruption function claim. */
-  interrupt68_t *(*interrupt)(io68_t * const, const cycle68_t);
+  interrupt68_t* (*interrupt)(io68_t * const, const cycle68_t);
   /** IO get next interruption cycle. */
-  cycle68_t (*next_interrupt)(io68_t * const, const cycle68_t);
+  cycle68_t      (*next_interrupt)(io68_t * const, const cycle68_t);
   /** IO adjust cycle function.       */
-  void (*adjust_cycle)(io68_t * const, const cycle68_t);
+  void           (*adjust_cycle)(io68_t * const, const cycle68_t);
   /** IO reset function.              */
-  int (*reset)(io68_t * const);
+  int            (*reset)(io68_t * const);
   /** Destructor. */
-  void (*destroy)(io68_t * const);
+  void           (*destroy)(io68_t * const);
 
   /** Emulator this IO is attached to. */
-  emu68_t *emu68;
+  emu68_t * emu68;
 };
 
 
@@ -157,6 +153,12 @@ typedef struct
  *  @param  cookie  user-data pointer
 */
 typedef int (*emu68_handler_t)(emu68_t* const emu68, int vector, void * cookie);
+
+/** Init parameters. */
+typedef struct {
+  int          * argc;                  /**< Argument count.        */
+  char        ** argv;                  /**< Arguments.             */
+} emu68_init_t;
 
 /** Execution modes. */
 enum emu68_stat_e {

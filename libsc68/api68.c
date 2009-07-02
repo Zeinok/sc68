@@ -205,27 +205,29 @@ static int stream_read_68k(sc68_t * sc68, unsigned int dest,
   return (istream68_read(is, mem68, sz) == sz) ? 0 : -1;
 }
 
-static int init_emu68(sc68_t * const sc68, int * pargc, char ** argv)
+static int init_emu68(sc68_t * const sc68, int * argc, char ** argv)
 {
   int err;
+  emu68_init_t emu68_inits;
   io68_init_t  io68_inits;
 
   /* Initialize emu68 */
   sc68_debug(sc68,"libsc68: initialise 68k emulator\n");
-  err = emu68_init(*pargc, argv);
-  if (err < 0) {
+  emu68_inits.argc = argc;
+  emu68_inits.argv = argv;
+  err = emu68_init(&emu68_inits);
+  if (err) {
     sc68_error_add(sc68, "libsc68: failed to initialise 68k emulator");
     goto error;
   }
-  *pargc = err;
 
   /* Initialize chipset */
   sc68_debug(sc68,"libsc68: initialise chipsets\n");
   memset(&io68_inits, 0, sizeof(io68_inits)); /* set all to default */
-  io68_inits.argc = pargc;
+  io68_inits.argc = argc;
   io68_inits.argv = argv;
   err = io68_init(&io68_inits);
-  if (err < 0) {
+  if (err) {
     sc68_error_add(sc68, "libsc68: failed to chipsets");
   }
 

@@ -50,14 +50,13 @@ EMU68_API
  *    passing arguments in the argv[] array. Parsed arguments are
  *    removed and the remaining number of argument is returned.
  *
- *  @param  argc  argument count.
- *  @param  argv  argument values.
- *  @return remaining number of argument (new argc)
- *  @retval -1 Error
+ *  @param   parms  init parameters
+ *  @retval  -1     on error
+ *  @retval   0     on success
  *
  *  @see emu68_shutdown()
  */
-int emu68_init(int argc, const char * argv[]);
+int emu68_init(emu68_init_t * const parms);
 
 EMU68_API
 /**

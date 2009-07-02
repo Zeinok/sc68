@@ -698,15 +698,9 @@ void emu68_reset(emu68_t * const emu68)
  */
 
 /* Library initialize. */
-int emu68_init(int argc, const char * argv[])
+int emu68_init(emu68_init_t * const parms)
 {
-  int i,j;
-  for ( i=j=1; i<argc; ++i )
-    if ( strncmp(argv[i], "--emu68-", 8) )
-      argv[j++] = argv[i];
-    else
-      ;
-  return j;
+  return 0;
 }
 
 /* Library shutdown. */
