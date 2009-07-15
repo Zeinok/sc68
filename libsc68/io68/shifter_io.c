@@ -178,8 +178,9 @@ static io68_t const shifter_io =
   shifter_destroy
 };
 
-int shifterio_init(void)
+int shifterio_init(int * argc, char ** argv)
 {
+  argc = argc; argv = argv;
   return 0;
 }
 

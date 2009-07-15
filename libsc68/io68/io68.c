@@ -26,77 +26,49 @@
 #endif
 
 #include "io68.h"
+#include "sc68/msg68.h"
 
-static volatile int isinit_paula;
-static volatile int isinit_ym;
-static volatile int isinit_mw;
-static volatile int isinit_mfp;
-static volatile int isinit_shifter;
+static const struct {
+  const char * name;
+  int  (* init)    (int *, char **);
+  void (* shutdown)(void);
+} func[] = {
+  { "paula",     paulaio_init,   paulaio_shutdown   },
+  { "ym-2149",   ymio_init,      ymio_shutdown      },
+  { "microwire", mwio_init,      mwio_shutdown      },
+  { "mfp-68901", mfpio_init,     mfpio_shutdown     },
+  { "shifter",   shifterio_init, shifterio_shutdown },
+};
 
-int io68_init(io68_init_t * const parms)
+const int max = sizeof(func) / sizeof(*func);
+
+int io68_init(int * argc, char ** argv)
 {
-  int err = 0;
-
-  /* Copy argc and argv where applicable. */
-  if (parms) {
-    parms->mw.argc = parms->ym.argc = parms->paula.argc = parms->argc;
-    parms->mw.argv = parms->ym.argv = parms->paula.argv = parms->argv;
+  int i,err;
+  for ( err = i = 0; i < max; ++i ) {
+    if (func[i].init) {
+      err = func[i].init(argc, argv);
+      if (err) {
+        msg68_error("io68: failed to initialize *%s* IO plugin\n",func[i].name);
+        break;
+      }
+    }
   }
-
-  if (!isinit_paula) {
-    isinit_paula = !paulaio_init(parms?&parms->paula:0);
-  }
-  if (!isinit_ym) {
-    isinit_ym = !ymio_init(parms?&parms->ym:0);
-  }
-  if (!isinit_mw) {
-    isinit_mw = !mwio_init(parms?&parms->mw:0);
-  }
-  if (!isinit_mfp) {
-    isinit_mfp = !mfpio_init();
-  }
-  if (!isinit_shifter) {
-    isinit_shifter = !shifterio_init();
-  }
-
-  err = -!(1
-           & isinit_paula
-           & isinit_ym
-           & isinit_mw
-           & isinit_mfp
-           & isinit_shifter
-    );
-
   return err;
+}
+
+void io68_shutdown(void)
+{
+  int i;
+  for ( i=0; i < max; ++i ) {
+    if (func[i].shutdown)
+      func[i].shutdown();
+  }
 }
 
 void io68_destroy(io68_t * const io)
 {
   if (io && io->destroy) {
     io->destroy(io);
-  }
-}
-
-void io68_shutdown(void)
-{
-  if (isinit_paula) {
-    paulaio_shutdown();
-    isinit_paula = 0;
-  }
-  if (isinit_ym) {
-    ymio_shutdown();
-    isinit_ym = 0;
-  }
-  if (isinit_mw) {
-    mwio_shutdown();
-    isinit_mw = 0;
-  }
-  if (isinit_mfp) {
-    mfpio_shutdown();
-    isinit_mfp = 0;
-  }
-  if (isinit_shifter) {
-    shifterio_shutdown();
-    isinit_shifter = 0;
   }
 }

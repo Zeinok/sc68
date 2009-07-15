@@ -29,27 +29,52 @@
 
 #include <string.h>
 
-/* Process error message (printf like format). */
-int error68_va(const char * format, va_list list)
+/* Process error message (printf like fmt). */
+int error68_va(const char * fmt, va_list list)
 {
-  if (format) {
-    int len = strlen(format);
-    msg68_va(msg68_ERROR, format, list);
-    if (len > 0 && format[len-1] != '\n') {
+  if (fmt) {
+    int len = strlen(fmt);
+    msg68_va(msg68_ERROR, fmt, list);
+    if (len > 0 && fmt[len-1] != '\n') {
       msg68(msg68_ERROR,"\n");
     }
   }
   return -1;
 }
 
-/* Process error message (printf like format). */
-int error68(const char * format, ...)
+int error68x_va(void * cookie, const char * fmt, va_list list)
+{
+  if (fmt) {
+    int len = strlen(fmt);
+    msg68x_va(msg68_ERROR, cookie, fmt, list);
+    if (len > 0 && fmt[len-1] != '\n') {
+      msg68x(msg68_ERROR, cookie, "\n");
+    }
+  }
+  return -1;
+}
+
+/* Process error message (printf like fmt). */
+int error68(const char * fmt, ...)
 {
   int err;
   va_list list;
 
-  va_start(list, format);
-  err = error68_va(format, list);
+  va_start(list, fmt);
+  err = error68_va(fmt, list);
+  va_end(list);
+
+  return err;
+}
+
+/* Process error message (printf like fmt). */
+int error68x(void * cookie, const char * fmt, ...)
+{
+  int err;
+  va_list list;
+
+  va_start(list, fmt);
+  err = error68x_va(cookie, fmt, list);
   va_end(list);
 
   return err;

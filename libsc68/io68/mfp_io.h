@@ -27,7 +27,7 @@
 
 IO68_EXTERN
 /** Initialize MFP IO library. */
-int mfpio_init(void);
+int mfpio_init(int * argc, char ** argv);
 
 IO68_EXTERN
 /** Shutdown MFP IO library. */

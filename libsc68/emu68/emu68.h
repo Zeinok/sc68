@@ -50,13 +50,12 @@ EMU68_API
  *    passing arguments in the argv[] array. Parsed arguments are
  *    removed and the remaining number of argument is returned.
  *
- *  @param   parms  init parameters
  *  @retval  -1     on error
  *  @retval   0     on success
  *
  *  @see emu68_shutdown()
  */
-int emu68_init(emu68_init_t * const parms);
+int emu68_init(int * argc, char ** argv);
 
 EMU68_API
 /**
@@ -87,10 +86,10 @@ void emu68_shutdown(void);
  *  the instance. Members set to zero are replaced by default values.
  */
 typedef struct {
-  const char * name; /**< Identifier name.                         */
-  int log2mem;       /**< Memory amount (value of the power of 2). */
-  uint68_t clock;    /**< CPU clock frequency (in hz).             */
-  int debug;         /**< Run in debug mode (0:off).               */
+  const char * name;  /**< Identifier name.                         */
+  int log2mem;        /**< Memory amount (value of the power of 2). */
+  int clock;          /**< CPU clock frequency (in hz).             */
+  int debug;          /**< Run in debug mode (0:off).               */
 } emu68_parms_t;
 
 EMU68_API
@@ -159,7 +158,7 @@ void emu68_reset(emu68_t * const emu68);
 /*  \/  ============================================================  \/  */
 
 
-/** @name  Interrupt handling functions.
+/** @name  Exception and Interruption control functions.
  *
  *     EMU68 has a very limited interrupt handler. In fact only one
  *     source of interruption is used which is enought for sc68
@@ -343,6 +342,34 @@ EMU68_API
 int emu68_chkset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz);
 
 EMU68_API
+/** Push 32-bit long word.
+ *  @param  emu68  emulator instance
+ *  @param  val    value to push.
+ */
+void emu68_pushl(emu68_t * const emu68, int68_t val);
+
+EMU68_API
+/** Push 16-bit word.
+ *  @param  emu68  emulator instance
+ *  @param  val    value to push.
+ */
+void emu68_pushw(emu68_t * const emu68, int68_t val);
+
+EMU68_API
+/** Pop 32-bit long word.
+ *  @param  emu68  emulator instance
+ *  @return poped 32-bit value
+ */
+int68_t emu68_popl(emu68_t * emu68);
+
+EMU68_API
+/** Pop 16-bit word.
+ *  @param  emu68  emulator instance
+ *  @return poped 16-bit value
+ */
+int68_t emu68_popw(emu68_t * emu68);
+
+EMU68_API
 /** Compute CRC32 of emu68 object (registers + memory).
  *  @param  emu68   emulator instance
  *  @return crc32
@@ -354,72 +381,104 @@ uint68_t emu68_crc32(emu68_t * const emu68);
 
 /** @name  Execution functions
  *  @{
+ *
+ *  @todo Describe execution loop here ...
+ *
  */
+
+/** Execution status code.
+ *
+ *    The emu68_status_e:: values
+ */
+enum emu68_status_e {
+  EMU68_ERR  = -1,          /**< Execution failed.            */
+  EMU68_NRM  =  0,          /**< Execution finished.          */
+  EMU68_STP  =  1,          /**< Execution stopped.           */
+  EMU68_BRK  =  2,          /**< Execution breaked.           */
+  EMU68_XCT  =  3           /**< Execution in exception.      */
+};
 
 EMU68_API
 /** Execute one instruction.
  *
  *   @param  emu68  emulator instance
- *
+ *   @return @ref emu68_status_e "execution status"
  */
-void emu68_step(emu68_t * const emu68);
+int emu68_step(emu68_t * const emu68);
 
 EMU68_API
-/** Execute a JSR at pc.
+/** Execute until RTS (Return To Subroutine).
  *
  *   @param  emu68  emulator instance
+ *   @return @ref emu68_status_e "execution status"
  */
-void emu68_run_rts(emu68_t * const emu68,
-                   addr68_t pc, cycle68_t cycleperpass);
+int emu68_finish(emu68_t * const emu68, cycle68_t cycles);
 
 EMU68_API
-/** Execute until RTS.
+/** Continue a breaked execution.
  *
- *   The emu68_level_and_interrupt() function runs an emulation loop
- *   until stack address becomes higher than its start value (usually
- *   happen after a rts). After that interrupt IO is tested and interrupt
- *   routine is called until cycleperpass cycles elapsed.
- *
- *   @param   emu68         emulator instance
- *   @param   cycleperpass  number of cycle to execute
- *
- *   @notice  Very specific to sc68 implementation.
+ *   @param  emu68  emulator instance
+ *   @return @ref emu68_status_e "execution status"
  */
-void emu68_level_and_interrupt(emu68_t * const emu68,
-                               cycle68_t cycleperpass);
+int emu68_continue(emu68_t * const emu68);
+
 
 EMU68_API
-/** Execute for given number of cycle.
+/** Execute interruptions with given cycle interval.
  *
- *   @param   emu68         emulator instance
- *   @param   cycleperpass  number of cycle to execute
- *
+ *   @param  emu68   emulator instance
+ *   @param  cycles  interval within to excute interruptions
+ *   @return @ref emu68_rc_e "execution return code"
  */
-void emu68_cycle(emu68_t * const emu68,
-                 cycle68_t cycleperpass);
-
-EMU68_API
-/** Execute until PC reachs breakpoint.
- *
- *   @param  emu68    emulator instance
- *   @param  breakpc  Breakpoint location
- */
-void emu68_break(emu68_t * const emu68,
-                 addr68_t breakpc);
+int emu68_interrupt(emu68_t * const emu68, cycle68_t cycles);
 
 /** @} */
 
+/** @name  Breakpoint functions.
+ *  @{
+ */
+
+/** Kill all existing breakpoints.
+ */
+void emu68_bp_delall(emu68_t * const emu68);
+
+/** Delete a existing breakpoint.
+ *  @param  emu68  emulator instance
+ *  @param  id      breakpoint identifier
+ */
+void emu68_bp_del(emu68_t * const emu68, int id);
+
+/** Set/Create a breakpoint.
+ *  @param  emu68  emulator instance
+ *  @param  id      breakpoint identifier (-1:find free breakpooint)
+ *  @param  addr    breakpoint address
+ *  @param  count   breakpoint countdown
+ *  @param  reset   breakpoint countdown reset (0:remove after break)
+ *  @return breakpoint identifier
+ *  @retval -1 on error
+ */
+int emu68_bp_set(emu68_t * const emu68, int id,
+                 addr68_t addr, uint68_t count, uint68_t reset);
+
+/** Find breakpoint.
+ *  @param  emu68  emulator instance
+ *  @param  addr   breakpoint address
+ *  @return breakpoint identifier
+ *  @retval -1 on error
+ */
+int emu68_bp_find(emu68_t * const emu68, addr68_t addr);
+
+/** @} */
 
 /** @name  Version checking functions
  *  @{
  */
 
 EMU68_API
-/** Get EMU68 debug mode.
+/** Get debug mode.
  *
  *  @param  emu68  emulator instance
  *
- *  @return  running mode status
  *  @retval  0  normal mode
  *  @retval  1  debug mode
  *  @retval -1  error

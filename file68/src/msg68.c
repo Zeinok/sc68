@@ -104,7 +104,8 @@ void msg68x_va(int bit, void * cookie, const char * fmt, va_list list)
 
 void msg68x(int bit, void * cookie, const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
+  va_list list;
+  va_start(list, fmt);
   msg68x_va(bit, cookie, fmt, list);
   va_end(list);
 }
@@ -116,119 +117,132 @@ void msg68_va(int bit, const char * fmt, va_list list)
 
 void msg68(const int bit, const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
+  va_list list;
+  va_start(list, fmt);
   msg68x_va(bit, cookie, fmt, list);
   va_end(list);
 }
 
 void msg68_trace(const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
-  msg68_va(msg68_TRACE,fmt,list);
+  va_list list; 
+  va_start(list, fmt);
+  msg68_va(msg68_TRACE, fmt, list);
   va_end(list);
 }
 
 void msg68x_trace(void * userdata, const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
+  va_list list;
+  va_start(list, fmt);
   msg68x_va(msg68_TRACE, userdata, fmt, list);
   va_end(list);
 }
 
 void msg68_debug(const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
-  msg68_va(msg68_DEBUG,fmt,list);
+  va_list list; 
+  va_start(list, fmt);
+  msg68_va(msg68_DEBUG, fmt, list);
   va_end(list);
 }
 
 void msg68x_debug(void * userdata, const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
+  va_list list;
+  va_start(list, fmt);
   msg68x_va(msg68_DEBUG, userdata, fmt, list);
   va_end(list);
 }
 
 void msg68_info(const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
-  msg68_va(msg68_INFO,fmt,list);
+  va_list list;
+  va_start(list, fmt);
+  msg68_va(msg68_INFO, fmt, list);
   va_end(list);
 }
 
 void msg68x_info(void * userdata, const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
+  va_list list;
+  va_start(list, fmt);
   msg68x_va(msg68_INFO, userdata, fmt, list);
   va_end(list);
 }
 
 void msg68_warning(const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
-  msg68_va(msg68_WARNING,fmt,list);
+  va_list list;
+  va_start(list, fmt);
+  msg68_va(msg68_WARNING, fmt, list);
   va_end(list);
 }
 
 void msg68x_warning(void * userdata, const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
+  va_list list;
+  va_start(list, fmt);
   msg68x_va(msg68_WARNING, userdata, fmt, list);
   va_end(list);
 }
 
 void msg68_error(const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
-  msg68_va(msg68_ERROR, fmt,list);
+  va_list list;
+  va_start(list, fmt);
+  msg68_va(msg68_ERROR, fmt, list);
   va_end(list);
 }
 
 void msg68x_error(void * userdata, const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
-  msg68x_va(msg68_ERROR, userdata, fmt,list);
+  va_list list;
+  va_start(list, fmt);
+  msg68x_va(msg68_ERROR, userdata, fmt, list);
   va_end(list);
 }
 
 void msg68_critical(const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
-  msg68_va(msg68_CRITICAL,fmt,list);
+  va_list list;
+  va_start(list, fmt);
+  msg68_va(msg68_CRITICAL, fmt, list);
   va_end(list);
 }
 
 void msg68x_critical(void * userdata, const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
+  va_list list; va_start(list, fmt);
   msg68x_va(msg68_CRITICAL, userdata, fmt, list);
   va_end(list);
 }
 
 void msg68_current(const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
-  msg68_va(msg68_CURRENT,fmt,list);
+  va_list list;
+  va_start(list, fmt);
+  msg68_va(msg68_CURRENT, fmt, list);
   va_end(list);
 }
 
 void msg68x_current(void * userdata, const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
+  va_list list; va_start(list, fmt);
   msg68x_va(msg68_CURRENT, userdata, fmt, list);
   va_end(list);
 }
 
 void msg68_always(const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
-  msg68_va(msg68_ALWAYS,fmt,list);
+  va_list list; va_start(list, fmt);
+  msg68_va(msg68_ALWAYS, fmt, list);
   va_end(list);
 }
 
 void msg68x_always(void * userdata, const char * fmt, ...)
 {
-  va_list list; va_start(list,fmt);
+  va_list list; va_start(list, fmt);
   msg68x_va(msg68_ALWAYS, userdata, fmt, list);
   va_end(list);
 }

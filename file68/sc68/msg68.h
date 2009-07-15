@@ -57,7 +57,7 @@ typedef void (*msg68_t)(int, void*, const char*, va_list);
 typedef void (*msg68_help_t)(void*, int, const char*, const char*);
 
 /** Predefined message categories. */
-enum enum_msg68_bit
+enum msg68_cat_e
 {
   msg68_NEVER    = -3, /**< Never printed message.    */
   msg68_ALWAYS   = -2, /**< Always printed message.   */

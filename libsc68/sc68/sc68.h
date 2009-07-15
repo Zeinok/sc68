@@ -48,37 +48,33 @@
  *
  *  This API provides functions to use sc68 libraries efficiently.
  *
- *  @par Multi-threading issue
+ *  @par Multi-threading concern
  *
- *  The API is not thread safe. Currently the 68000 emulator does not
- *  handle multi instance. Anyway the API may be used in multi-thread
- *  context as soon as you take care to play only one disk at a time.
- *
- *  Have a look to the xmms68 package to see how to use this API in
- *  multi-thread context.
+ *  sc68 should now be thread safe. At least concerning the functions
+ *  with a sc68_t parameter. As no torture test has been run against
+ *  it this should be considered as quiet experimental.
  *
  *  @par Quick start
  *
- *  @code
- *  #include "sc68/sc68.h"
+ *  Here is a quiet minimalist piece of code to use basics of sc68
+ *  library:
  *
- *  sc68_init_t init68;
+ *  @code
+ *  #include <sc68/sc68.h>
+ *
  *  sc68_t * sc68 = 0;
  *  char buffer[512*4];
  *
- *  // Clean up init structure (required).
- *  memset(&init68, 0, sizeof(init68));
- *  // Set dynamic handler (required).
- *  init68.alloc = malloc;
- *  init68.free = free;
- *  // Set debug message handler (optionnal).
- *  init68.debug = vfprintf;
- *  init68.debug_cookie = stderr;
- *  sc68 = sc68_init(&init68);
- *  if (!sc68) goto error;
+ *  // Initialise the library.
+ *  // You should consider using sc68_init_t struct.
+ *  if (sc68_init(0)) goto error;
+ *
+ *  // Create an emulator instance.
+ *  // You should consider using sc68_create_t struct.
+ *  if (sc68 = sc68_create(0), !sc68) goto error;
  *
  *  // Load an sc68 file.
- *  if (sc68_load_file(sc68, fname)) {
+ *  if (sc68_load_url(sc68, fname)) {
  *    goto error;
  *  }
  *
@@ -92,12 +88,16 @@
  *    // Do something with buffer[] here.
  *  }
  *
- *  // Stop current track (optionnal).
- *  sc68_stop(sc68);
+ *  // Close eject the current disk.
+ *  sc68_close(sc68);
  *
  * error:
- *  // Shutdown everything (0 pointer could be sent safely).
- *  sc68_shutdown(sc68);
+ *
+ *  // Destroy sc68 instance.
+ *  sc68_destroy(sc68);
+ *
+ *  // Shutdown sc68 library.
+ *  sc68_shutdown();
  *
  * @endcode
  *
@@ -117,9 +117,20 @@
 #define SC68_API extern
 #endif
 
-/** message function */
-typedef void (*sc68_msg_t)();
+/** API information. */
+typedef struct _sc68_s sc68_t;
 
+/** API disk. */
+typedef void * sc68_disk_t;
+
+/** message function.
+ *
+ *  @param  cat   @ref msg68_cat_e "message category"
+ *  @param  sc68  sc68 instance
+ *  @param  fmt   printf like format string
+ *  @param  list  variable argument list
+ * */
+typedef void (*sc68_msg_t)();
 
 /** API initialization parameters.
  *
@@ -135,21 +146,8 @@ typedef void (*sc68_msg_t)();
  */
 typedef struct {
 
-  /** dynamic memory allocation handler (malloc).
-   *  @see alloc68_set().
-   */
-  void * (*alloc)(unsigned int);
-
-  /** dynamic memory free handler (free).
-   *  @see free68_set().
-   */
-  void (*free)(void *);
-
   /** message handler. */
   sc68_msg_t msg_handler;
-
-  /** default message cookie. */
-  void * msg_cookie;
 
   /** debug mask (set bit to clear in debugmsg68). */
   int debug_clr_mask;
@@ -182,6 +180,9 @@ typedef struct {
   /** Run  68k emulator in debug mode (enable memory access trace). */
   int emu68_debug;
 
+  /** User private data. */
+  void * cookie;
+
 } sc68_create_t;
 
 /** Music information.
@@ -213,11 +214,6 @@ typedef struct {
   unsigned int addr;      /**< Load address.                      */
 } sc68_music_info_t;
 
-/** API information. */
-typedef struct _sc68_s sc68_t;
-
-/** API disk. */
-typedef void * sc68_disk_t;
 
 /** @name  Process status (as returned by sc68_process() function)
  *  @{
@@ -237,6 +233,12 @@ typedef void * sc68_disk_t;
 #define SC68_MIX_ERROR  -1 /**< Error.           */
 
 /** @} */
+
+/** sc68 sampling rate values in hertz (hz). */
+enum sc68_spr_e {
+  SC68_SPR_QUERY   = -1, /**< Query default or current sampling rate. */
+  SC68_SPR_DEFAULT =  0  /**< Default sampling rate.                  */
+};
 
 /** @name API control functions.
  *  @{
@@ -296,15 +298,29 @@ SC68_API
 void sc68_destroy(sc68_t * sc68);
 
 SC68_API
+/** Get user private data pointer.
+ *
+ *   The sc68_cookie_ptr() function get a pointer to the user private
+ *   data. This pointer can be use to get a modify this sc68 instance
+ *   private data.
+ *
+ * @param   sc68  sc68 instance.
+ * @return        a pointer to the user data inside this sc68 instance.
+ * @retval  0     on error
+ */
+void ** sc68_cookie_ptr(sc68_t * sc68);
+
+SC68_API
 /** Set/Get sampling rate.
  *
  * @param   sc68  sc68 api or 0 for library default.
- * @param   f     New sampling rate in hz or 0 to read current.
+ * @param   hz    @ref sc68_spr_e "sampling rate" (in hz).
  *
- * @return  Sampling rate (could be different from requested one).
- * @retval  Should always be a valid value.
+ * @return  Actual @ref sc68_spr_e "sampling rate"
+ * @retval  -1  on error
+ * @retval  >0  on success
  */
-unsigned int sc68_sampling_rate(sc68_t * sc68, unsigned int f);
+int sc68_sampling_rate(sc68_t * sc68, int hz);
 
 SC68_API
 /** Set share data path.

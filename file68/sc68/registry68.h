@@ -21,23 +21,24 @@
 /** @defgroup  file68_registry  Registry access
  *  @ingroup   file68_lib
  *
- *    Provides registry access functions.
+ *    Provides Windows registry access functions.
  *
  *  @{
  */
 
-/** Enumerate registry key types. */
+/** Enumerate registry key type. */
+/*  *** DO NOT CHANGE ORDER ***  */
 enum registry68_key_e {
-  REGISTRY68_INK = -1,
-  REGISTRY68_CRK = 0,
-  REGISTRY68_CUK,
-  REGISTRY68_LMK,
-  REGISTRY68_USK,
-  REGISTRY68_PDK,
-  REGISTRY68_CCK,
-  REGISTRY68_DDK,
+  REGISTRY68_INK = -1,                  /**< INvalid Key.          */
+  REGISTRY68_CRK = 0,                   /**< Classes Root Key.     */
+  REGISTRY68_CUK,                       /**< Current User Key.     */
+  REGISTRY68_LMK,                       /**< Local Machine Key.    */
+  REGISTRY68_USK,                       /**< USers Key.            */
+  REGISTRY68_PDK,                       /**< Performance Data Key. */
+  REGISTRY68_CCK,                       /**< Current Config Key.   */
+  REGISTRY68_DDK,                       /**< Dynamic Data Key.     */
 
-  REGISTRY68_LST  /* Last element */
+  REGISTRY68_LST                        /**< Last element.         */
 };
 
 /** Registry key type (override Microsoft HKEY type) */
@@ -45,6 +46,15 @@ typedef void * registry68_key_t;
 
 /* Last error message. */
 /* extern char registry68_errorstr[]; */
+
+FILE68_API
+/** Check for registry support.
+ *
+ *  @retval  0  registry not supported
+ *  @retval  1  registry supported
+ */
+int registry68_support(void);
+
 
 FILE68_API
 /** Get key handler for a registry root type.

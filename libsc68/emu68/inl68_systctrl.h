@@ -44,7 +44,7 @@ void inl_stop68(emu68_t * const emu68)
   u16 sr = (u16) get_nextw();
   if ( emu68->reg.sr & SR_S ) {
     emu68->reg.sr = sr;
-    emu68->status.bit.mode = EMU68_STAT_STOP;
+    emu68->status = EMU68_STP;
   } else {
     exception68(emu68, PRIVV_VECTOR, -1);
   }
@@ -81,6 +81,7 @@ void inl_chk68(emu68_t * const emu68, const int68_t a, const int68_t b)
 static inline
 void inl_illegal68(emu68_t * const emu68)
 {
+
   inl_exception68(emu68, ILLEGAL_VECTOR, -1);
 }
 

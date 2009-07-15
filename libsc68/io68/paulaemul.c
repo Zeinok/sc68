@@ -32,20 +32,30 @@
 #endif
 
 #include "io68/paulaemul.h"
+#include "emu68/assert68.h"
+#include <sc68/msg68.h>
 
-/* #define PAULA_CALCUL_TABLE 1 */
+#ifndef DEBUG_PL_O
+# define DEBUG_PL_O 0
+#endif
+int pl_cat = msg68_DEFAULT;
+
+/* Define this once to calculate and copy past the volume table. This
+ * is required only if PL_VOL_FIX or Tvol[] are modified.
+ */ 
+#undef PAULA_CALCUL_TABLE
 
 #ifdef PAULA_CALCUL_TABLE
 # include <math.h>
 # include <stdio.h>
 #endif
 
-#define CT_FIX       ct_fix
 #define PL_VOL_FIX   16
 #define PL_VOL_MUL   (1<<PL_VOL_FIX)
 #define PL_MIX_FIX   (PL_VOL_FIX+1+8-16) /*(PL_VOL_FIX+2+8-16) */
 
 #ifdef PAULA_CALCUL_TABLE
+
 # define LN_10_OVER_10 0.230258509299
 # define PL_N_DECIBEL 65
 
@@ -56,9 +66,8 @@ static const s16 Tvol[] = {
   115, 120, 126, 132, 138, 145, 153, 161, 170, 181, 192, 206,
   221, 241, 266, 301, 361, 450
 };
-static unsigned int volume[65];
-
-static unsigned int calc_volume(unsigned int vol, unsigned int mult)
+static uint68_t volume[65];
+static uint68_t calc_volume(unsigned int vol, unsigned int mult)
 {
   double r;
 
@@ -66,7 +75,7 @@ static unsigned int calc_volume(unsigned int vol, unsigned int mult)
     return 0;
   }
   r = (double) mult / exp((double) Tvol[64 - vol] / 100.0);
-  return (unsigned int) r;
+  return (uint68_t) r;
 }
 
 static void init_volume(void)
@@ -96,52 +105,45 @@ static const uint68_t volume[65] = {
 
 static void init_volume(void) {}
 
-
 #endif
 
-static paula_parms_t default_parms = {
-  PAULA_EMUL_SIMPLE,SAMPLING_RATE_DEF,PAULA_CLOCK_PAL
-};
+/* Filled by paula_init() to avoid field order dependencies */
+static paula_parms_t default_parms;
 
-static int msw_first = 0; /* big/little endian compliance */
+ /* big/little endian compliance */
+static int msw_first = 0;
 
 /* ,-----------------------------------------------------------------.
- * |                         Paula init                             |
+ * |                         Paula init                              |
  * `-----------------------------------------------------------------'
  */
 
-static /* volatile */ u32 tmp = 0x1234;
+static const u32 tmp = 0x1234;
 
-int paula_init(paula_parms_t * const parms_data)
+int paula_init(int * argc, char ** argv)
 {
-  paula_parms_t * parms = parms_data ? parms_data : &default_parms;
+  if (pl_cat == msg68_DEFAULT)
+    pl_cat = msg68_cat("paula","amiga sound emulator", DEBUG_PL_O);
 
-  /* Setup little/big endian swap */
-  msw_first = !(*(u8 *)&tmp);
-
-  /* Default emulation mode */
-  if (parms->emul == PAULA_EMUL_DEFAULT) {
-    parms->emul = default_parms.emul;
-  }
-
-  /* Default sampling rate */
-  if (!parms->hz) {
-    parms->hz = default_parms.hz;
-  }
-
-  /* Default clock mode */
-  if (parms->clock == PAULA_CLOCK_DEFAULT) {
-    parms->clock = default_parms.clock;
-  }
-
-  /* Init volume table. */
+  /* Build (or not) volume table. */
   init_volume();
 
+  /* Setup little/big endian swap */
+  msw_first = !(*(const u8 *)&tmp);
+
+  /* Set default default */
+  default_parms.engine = PAULA_ENGINE_SIMPLE;
+  default_parms.clock  = PAULA_CLOCK_PAL;
+  default_parms.hz     = SAMPLING_RATE_DEF;
+
+  /* $$$ TODO: parsing options paula options */
   return 0;
 }
 
 void paula_shutdown()
 {
+  msg68_cat_free(pl_cat);
+  pl_cat = msg68_DEFAULT;
 }
 
 /* ,-----------------------------------------------------------------.
@@ -153,53 +155,112 @@ static int set_clock(paula_t * const paula, int clock_type, uint68_t f)
 {
   u64 tmp;
   const int ct_fix = paula->ct_fix;
+  const int fix    = 40;
 
-  paula->hz = f;
+  paula->hz    = f;
   paula->clock = clock_type;
-  tmp = (clock_type == PAULA_CLOCK_PAL ? PAULA_PAL_FRQ : PAULA_NTSC_FRQ);
-  tmp <<= CT_FIX;
+  tmp = (clock_type == PAULA_CLOCK_PAL)
+    ? PAULA_PAL_FRQ
+    : PAULA_NTSC_FRQ
+    ;
+  tmp <<= fix;
   tmp /= f;
-  paula->dividand = (uint68_t) tmp;
+
+  if ( ct_fix < fix )
+    tmp >>= fix - ct_fix;
+  else
+    tmp <<= ct_fix - fix;
+  msg68(pl_cat,"paula  : clock -- *%s*\n",
+        clock_type == PAULA_CLOCK_PAL ? "PAL" : "NTSC");
+  paula->clkperspl = (plct_t) tmp;
   return f;
 }
 
-uint68_t paula_sampling_rate(paula_t * const paula, uint68_t f)
+int paula_sampling_rate(paula_t * const paula, int hz)
 {
-  uint68_t hz = default_parms.hz;
-  if (paula) {
-    hz = !f
-      ? paula->hz
-      : set_clock(paula, paula->clock, f);
+  switch (hz) {
+  case PAULA_HZ_QUERY:
+    hz = paula ? paula->hz : default_parms.hz;
+    break;
+
+  case PAULA_HZ_DEFAULT:
+      hz = default_parms.hz;
+
+  default:
+    if (hz < SAMPLING_RATE_MIN) {
+      msg68(pl_cat,"paula  : sampling rate out of range -- *%dhz*\n", hz);
+      hz = SAMPLING_RATE_MIN;
+    }
+    if (hz > SAMPLING_RATE_MAX) {
+      msg68(pl_cat,"paula  : sampling rate out of range -- *%dhz*\n", hz);
+      hz = SAMPLING_RATE_MAX;
+    }
+    if (!paula) {
+      default_parms.hz = hz;
+    } else {
+      set_clock(paula, paula->clock, hz);
+    }
+    msg68(pl_cat,"paula  : %s sampling rate -- *%dhz*\n",
+          paula ? "select" : "default", hz);
+    break;
   }
   return hz;
 }
 
-int paula_set_emulation(paula_t * const paula, int emul)
+/* ,-----------------------------------------------------------------.
+ * |                   Set/Get emulator engine                       |
+ * `-----------------------------------------------------------------'
+ */
+
+static
+const char * pl_engine_name(const int engine)
 {
-  switch (emul) {
-  case PAULA_EMUL_SIMPLE:
-  case PAULA_EMUL_LINEAR:
+  switch (engine) {
+  case PAULA_ENGINE_SIMPLE: return "SIMPLE";
+  case PAULA_ENGINE_LINEAR: return "LINEAR";
+  }
+  return 0;
+}
+
+int paula_engine(paula_t * const paula, int engine)
+{
+  switch (engine) {
+  case PAULA_ENGINE_QUERY:
+    engine = paula ? paula->engine : default_parms.engine;
     break;
+
   default:
-    emul = default_parms.emul;
+    msg68_warning("paula  : invalid engine -- %d\n", engine);
+  case PAULA_ENGINE_DEFAULT:
+    engine = default_parms.engine;
+  case PAULA_ENGINE_SIMPLE:
+  case PAULA_ENGINE_LINEAR:
+    *(paula ? &paula->engine : &default_parms.engine) = engine;
+    msg68(pl_cat, "paula  : %s engine -- *%s*\n",
+          paula ? "select" : "default",
+          pl_engine_name(engine));
     break;
   }
-  if (paula) paula->emul = emul;
-  return emul;
+  return engine;
 }
 
 int paula_clock(paula_t * const paula, int clock)
 {
   switch (clock) {
-  case PAULA_CLOCK_PAL:
-  case PAULA_CLOCK_NTSC:
+  case PAULA_CLOCK_QUERY:
+    clock = paula ? paula->clock : default_parms.clock;
     break;
+
   default:
     clock = default_parms.clock;
+  case PAULA_CLOCK_PAL:
+  case PAULA_CLOCK_NTSC:
+    if (paula) {
+      set_clock(paula, clock, paula->hz);
+    } else {
+      default_parms.clock = clock;
+    }
     break;
-  }
-  if (paula) {
-    set_clock(paula, clock,paula->hz);
   }
   return clock;
 }
@@ -220,9 +281,9 @@ int paula_reset(paula_t * const paula)
 
   /* reset voices */
   for (i=0; i<4; i++) {
-    paula->voice[i].adr = 0;
+    paula->voice[i].adr   = 0;
     paula->voice[i].start = 0;
-    paula->voice[i].end = 2;
+    paula->voice[i].end   = 2;
   }
 
   /* Reset DMACON and INTENA/REQ to something that
@@ -238,18 +299,25 @@ int paula_reset(paula_t * const paula)
 
 void paula_cleanup(paula_t * const paula) {}
 
+static void pl_info(paula_t * const paula)
+{
+  const char * clock = (paula->clock == PAULA_CLOCK_PAL)
+    ? "PAL"
+    : "NTSC"
+    ;
+  
+  msg68_info("paula  : engine -- *%s*\n", pl_engine_name(paula->engine));
+  msg68_info("paula  : clock -- *%s*\n", clock);
+  msg68_info("paula  : sampling rate -- *%dhz*\n", (int)paula->hz);
+}
+
+
 int paula_setup(paula_t * const paula,
                 paula_setup_t * const setup)
 {
 
   if (!paula || !setup || !setup->mem) {
     return -1;
-  }
-
-
-  /* Default emulation mode */
-  if (setup->parms.emul == PAULA_EMUL_DEFAULT) {
-    setup->parms.emul = default_parms.emul;
   }
 
   /* Default sampling rate */
@@ -264,10 +332,13 @@ int paula_setup(paula_t * const paula,
 
   paula->mem     = setup->mem;
   paula->log2mem = setup->log2mem;
-  paula->ct_fix  = (sizeof(uint68_t)<<3)-paula->log2mem;
+  paula->ct_fix  = ( sizeof(plct_t) << 3 ) - paula->log2mem;
 
+  setup->parms.engine = paula_engine(paula, setup->parms.engine);
   paula_reset(paula);
   set_clock(paula, setup->parms.clock, setup->parms.hz);
+
+  pl_info(paula);
 
   return 0;
 }
@@ -284,15 +355,16 @@ static void poll_irq(paula_t * const paula, unsigned int N)
      |
      ~((paula->intena << (8*sizeof(int)-1-14) >> (8*sizeof(int)-1))
        & paula->intena)) & (1 << (N + 7))) {
-    unsigned int a,l;
+    uint68_t a,l;
 
     /* Get sample pointer. */
-    a = (((p[1] << 16) | (p[2] << 8) | p[3]) & 0x7FFFE) << PAULA_CT_FIX;
+    a = (uint68_t) ( ((p[1] << 16) | (p[2] << 8) | p[3]) & 0x7FFFE )
+      << PAULA_ct_fix;
     w->adr = w->start = a;
     /* Get length */
     l = (p[4] << 8) | p[5];
     l |= (!l) << 16;
-    l <<= (1 + PAULA_CT_FIX);
+    l <<= (1 + PAULA_ct_fix);
     w->end = a + l;
   }
   paula->intreq |= 1 << (N + 7);
@@ -305,71 +377,93 @@ static void mix_one(paula_t * const paula,
                     int N, const int shift,
                     s32 * b, int n)
 {
-  paulav_t * const w = paula->voice+N;
-  u8 * const p = paula->map+PAULA_VOICE(N);
   const u8 * const mem = paula->mem;
-  const int ct_fix = paula->ct_fix;
-  int last;
-  unsigned int stp, vol, per, readr, reend, end;
-  int hasloop = 0;
-  u32 adr;
-  s16 *b2 = (s16 *)b + shift;
-  const int imask = -(paula->emul == PAULA_EMUL_LINEAR);
+  paulav_t * const w   = paula->voice+N;
+  u8       * const p   = paula->map+PAULA_VOICE(N);
+  s16      *       b2  = (s16 *)b + shift;
+  const int     ct_fix = paula->ct_fix;
+  plct_t adr, stp, readr, reend, end, vol, per;
+  u8 last, hasloop;
 
-
+  /* Mask to get the fractionnal part of the sample counter. Therefore
+   * forcing it to 0 will disable linear interpolation by forcing
+   * exact sample point.
+   */
+  const plct_t imask = paula->engine == PAULA_ENGINE_LINEAR
+    ? ( ( (plct_t) 1 << ct_fix ) - 1 )
+    : 0
+    ;
+  const signed_plct_t one = (signed_plct_t) 1 << ct_fix;
 
   hasloop = 0;
+
+ /* $$$ dunno exactly what if volume is not in proper range [0..64] */
   vol = p[9] & 127;
   if (vol >= 64) {
     vol = 64;
   }
   vol = volume[vol];
 
-  per = (p[6]<<8) + p[7];
-  if (!per) per = 1;
-  stp = paula->dividand / per;
+  per = ( p[6] << 8 ) + p[7];
+  if (!per) per = 1;                    /* or is it +1 for all ?? */
+  stp = paula->clkperspl / per;
 
-// /* audio int enable for this voice */
-// if(paula_intena & ((paula_intena&~paula_intreq)<<(14-7-N)) & (1<<14) )
-// {
-//  /* Audio interrupt enable for this voice : No internal reload */
-//  readr = v->start;
-//  reend = v->end;
-// }
-// else
-
-  {
-    /* Audio irq disable for this voice :
-     * Internal will be reload at end of block
-     */
-    readr = (((p[1] << 16) | (p[2] << 8) | p[3])) << CT_FIX;
-    reend = ((p[4] << 8) | p[5]);
-    reend |= (!reend)<<16;
-    reend <<= (1 + CT_FIX);
-    reend += readr;
-  }
-
+  /* Audio irq disable for this voice :
+   * Internal will be reload at end of block
+   */
+  readr   = ( p[1] << 16 ) | ( p[2] << 8 ) | p[3];
+  readr <<= ct_fix;
+  reend   = ((p[4] << 8) | p[5]);
+  reend  |= (!reend) << 16;           /* 0 is 0x10000 */
+  reend <<= (1 + ct_fix);             /* +1 as unit is 16-bit word */
+  reend  += readr;
+  assert( reend > readr );
   if (reend < readr) {
-    /* ??? */
+    /* $$$ ??? dunno why I did this !!! */
     return;
   }
 
   adr = w->adr;
   end = w->end;
-
   if (end < adr) {
     return;
   }
 
   /* mix stereo */
   do {
-    int v, ov;
-    int low;
+    int idx;
+    signed_plct_t low, v0, v1;
 
-    low = adr & ((1 << CT_FIX) - 1) & imask;
+    low = adr & imask;
+    idx = adr >> ct_fix;                /* current index         */
+    last = mem[idx++];                  /* save last sample read */
+    
+    if ( ( (plct_t) idx << ct_fix ) >= end )
+      idx = readr >> ct_fix;            /* loop index     */
+    v1 = (s8) mem[idx];                 /* next sample    */
+    v0 = (s8) last;                     /* current sample */
 
+    /* linear interpolation (or not if imask is zero) */
+    v0 = ( v1 * low + v0 * ( one - low ) ) >> ct_fix;
+
+    /* apply volume */
+    v0  *= vol;
+    v0 >>= PL_MIX_FIX;
+
+    if (v0 < -16384 || v0 >= 16384)
+      msg68_critical("paula  : pcm clipping -- %d\n", (int) v0);
+
+    assert(v0 >= -16384);
+    assert(v0 <   16384);
+
+    /* Store and advance output buffer */
+    *b2 += v0;
+    b2  += 2;
+
+    /* Advance */
+    adr += stp;
     if (adr >= end) {
-      unsigned int relen = reend - readr;
+      plct_t relen = reend - readr;
       hasloop = 1;
       adr = readr + adr - end;
       end = reend;
@@ -377,43 +471,14 @@ static void mix_one(paula_t * const paula,
         adr -= relen;
       }
     }
-
-    {
-      int i = (int)(adr >> CT_FIX);
-      last = (int)(s8)mem[i++];
-      v = last;
-
-      if (( (u32)i << CT_FIX) >= end) {
-        i = (int)(readr >> CT_FIX);
-      }
-      ov = (int)(s8)mem[i];
-    }
-
-    /* Linear interpol */
-    v = (ov * low + v * ((1 << CT_FIX) - low)) >> CT_FIX;
-    v *= vol;
-    v >>= PL_MIX_FIX;
-    *b2 += v;
-    b2 += 2;
-    adr += stp;
   } while (--n);
-
-  if (adr >= end) {
-    unsigned int relen = reend - readr;
-
-    hasloop = 1;
-    adr = readr + adr - end;
-    end = reend;
-    while (adr >= end)
-      adr -= relen;
-  }
 
   last &= 0xFF;
   p[0xA] = last + (last << 8);
   w->adr = adr;
   if (hasloop) {
     w->start = readr;
-    w->end = end;
+    w->end   = end;
   }
 }
 
@@ -435,7 +500,7 @@ static void clear_buffer(s32 * b, int n)
 void paula_mix(paula_t * const paula, s32 * splbuf, int n)
 {
 
-  if (n>0) {
+  if ( n > 0 ) {
     int i;
     clear_buffer(splbuf, n);
     for (i=0; i<4; i++) {
@@ -448,26 +513,4 @@ void paula_mix(paula_t * const paula, s32 * splbuf, int n)
 
   /* HaxXx: assuming next mix is next frame reset beam V/H position. */
   paula->vhpos = 0;
-}
-
-int paula_configure(paula_t * const paula, paula_parms_t * const parms)
-{
-  int err = -1;
-  if (paula) {
-    err = 0;
-    if (parms) {
-      uint68_t newclock = parms->clock ? parms->clock : paula->clock;
-      uint68_t  newhz   = parms->hz    ? parms->hz    : paula->hz;
-
-      if (newclock != paula->clock || newhz != paula->hz) {
-        set_clock(paula, newclock, newhz);
-      }
-
-      if (parms->emul != PAULA_EMUL_DEFAULT &&
-          parms->emul != paula->emul) {
-        paula_set_emulation(paula,parms->emul);
-      }
-    }
-  }
-  return err;
 }

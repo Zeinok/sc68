@@ -97,15 +97,14 @@ struct sc68_debug_data_s {
 static struct sc68_debug_data_s sc68_debug_data;
 
 static void
-sc68_debug_cb(const int bit, void *data, const char *fmt, va_list list)
+sc68_debug_cb(const int bit, sc68_t * sc68, const char *fmt, va_list list)
 {
-  struct sc68_debug_data_s * debug_data = data;
   FILE * out;
 
   /* select output: always error output except for INFO messages */
   out = bit == msg68_INFO
-    ? debug_data->out
-    : debug_data->err
+    ? sc68_debug_data.out
+    : sc68_debug_data.err
     ;
 
   vfprintf(out,fmt,list);
@@ -295,7 +294,7 @@ static void spool_error_message(sc68_t * sc68)
     msg68_error("%s\n","sc68: stacked error message:");
     do {
       msg68_error("      - %s\n",s);
-    } while (sc68 && (s = sc68_error_get(sc68), !s));
+    } while (s = sc68_error_get(sc68), s);
   }
 }
 
@@ -469,7 +468,6 @@ int main(int argc, char *argv[])
   init68.argc = argc;
   init68.argv = argv;
   init68.msg_handler = sc68_debug_cb;
-  init68.msg_cookie  = &sc68_debug_data;
   if (sc68_init(&init68)) {
     goto error;
   }

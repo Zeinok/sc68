@@ -40,7 +40,7 @@
 #include <string.h>
 
 #ifndef BREAKPOINT68
-# define BREAKPOINT68 while(0)
+# define BREAKPOINT68 assert(!"breakpoint")
 #endif
 
 #ifndef DEBUG_YM_O
@@ -82,8 +82,7 @@ static void access_list_add(ym_t * const ym,
     /* No more free entries. */
     /* $$$ TODO: realloc buffer, reloc all lists ... */
     TRACE68(msg68_CRITICAL,
-            "ym: access_list_add(%s,%d,%02X) OVERFLOW",
-            access_list->name,reg,val);
+            "ym-2148: access list *%s* -- *OVERFLOW*", access_list->name);
     return;
   }
   ym->waccess_nxt = free_access+1;
@@ -162,122 +161,88 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
  *                  Yamaha init                        *
  ******************************************************/
 
-/* -DYM_EMUL=YM_EMUL_BLEP choose BLEP as default engine */
-#ifndef YM_EMUL
-# define YM_EMUL YM_EMUL_PULS
+/* -DYM_ENGINE=YM_ENGINE_BLEP choose BLEP as default engine */
+#ifndef YM_ENGINE
+# define YM_ENGINE YM_ENGINE_PULS
 #endif
 
 /* -DYM_VOL_TABLE=YM_VOL_LINEAR choose linear volume table */
 #ifndef YM_VOL_TABLE
-# define YM_VOL_TABLE  YM_VOL_ATARIST
+# define YM_VOL_TABLE YM_VOL_ATARIST
 #endif
 
-static ym_parms_t default_parms =  {
-  /* emul     */ YM_EMUL,
-  /* voltable */ YM_VOL_TABLE,
-  /* hz       */ SAMPLING_RATE_DEF,
-  /* clock    */ YM_CLOCK_ATARIST,
-  /* outlevel */ 0x80,
-};
-
-static
-const char * ym_engine_name(int emul)
-{
-  switch (emul) {
-  case YM_EMUL_PULS:
-    return "PULSE";
-  case YM_EMUL_BLEP:
-    return "BLEP";
-  case YM_EMUL_DUMP:
-    return "DUMP";
-  }
-  return 0;
-}
-
-int ym_default_engine(int emul)
-{
-  switch (emul) {
-  case YM_EMUL_DEFAULT:         /* Get current value. */
-    emul = default_parms.emul;
-    break;
-  default:                      /* Invalid values */
-    msg68_error("ym-2149: unknown ym-engine (%d)\n",emul);
-    emul = default_parms.emul;
-  case YM_EMUL_PULS:
-  case YM_EMUL_BLEP:
-  case YM_EMUL_DUMP:
-    default_parms.emul = emul;
-    msg68_info("ym-2149: default engine is *%s*\n",
-               ym_engine_name(emul));
-    break;
-  }
-  return emul;
-}
+/* Default parameters */
+static ym_parms_t default_parms;
 
 /* Max output level for volume tables. */
-static const int ym_output_level = 0xEFFF;
+static const int output_level = 0xDEAD;
 
-/* command line options option */
+/* Command line options */
 static const char prefix[] = "sc68-";
 static const char engcat[] = "ym-2149";
 static option68_t opts[] = {
   { option68_STR, prefix, "ym-engine", engcat,
     "set ym-2149 engine [pulse|blep|dump]" },
-  { option68_STR, prefix, "ym-voltable", engcat,
-    "set ym-2149 volume table [atari|linear]" },
+  { option68_STR, prefix, "ym-volmodel", engcat,
+    "set ym-2149 volume model [atari|linear]" },
   { option68_INT, prefix, "ym-chans", engcat,
     "set ym-2149 active channel [bit-0:A ... bit-2:C]" }
 };
 
-int ym_init(ym_parms_t * const parms)
+
+int ym_init(int * argc, char ** argv)
 {
-  int argc = 0;
-  char ** argv = 0;
   option68_t * opt;
 
   /* Debug */
   ym_cat = msg68_cat("ym","ym-2149 emulator",DEBUG_YM_O);
 
+  /* Setup default */
+  default_parms.engine   = YM_ENGINE;
+  default_parms.volmodel = YM_VOL_TABLE;
+  default_parms.clock    = YM_CLOCK_ATARIST;
+  default_parms.hz       = SAMPLING_RATE_DEF;
+
   /* Set default parameters. */
-  if (parms) {
-    if (parms->emul)     default_parms.emul     = parms->emul;
-    if (parms->voltable) default_parms.voltable = parms->voltable;
-    if (parms->hz)       default_parms.hz       = parms->hz;
-    if (parms->clock)    default_parms.clock    = parms->clock;
-    if (parms->outlevel) default_parms.outlevel = parms->outlevel;
-    if (parms->argc) {
-      argc = *parms->argc;
-      argv = parms->argv;
-    }
-  }
+/*   if (parms) { */
+/*     if (parms->emul)     default_parms.emul     = parms->emul; */
+/*     if (parms->volmodel) default_parms.volmodel = parms->volmodel; */
+/*     if (parms->hz)       default_parms.hz       = parms->hz; */
+/*     if (parms->clock)    default_parms.clock    = parms->clock; */
+/*     if (parms->outlevel) default_parms.outlevel = parms->outlevel; */
+/*     if (parms->argc) { */
+/*       argc = *parms->argc; */
+/*       argv = parms->argv; */
+/*     } */
+/*   } */
 
   /* ym- Options */
   option68_append(opts,sizeof(opts)/sizeof(*opts));
-  argc = option68_parse(argc,argv,0);
+  *argc = option68_parse(*argc,argv,0);
 
   /* --sc68-ym-engine */
   opt = option68_get("ym-engine",1);
   if (opt) {
     int k;
     if (!strcmp(opt->val.str,"pulse")) {
-      k = YM_EMUL_PULS;
+      k = YM_ENGINE_PULS;
     } else if (!strcmp(opt->val.str,"blep")) {
-      k = YM_EMUL_BLEP;
+      k = YM_ENGINE_BLEP;
     } else if (!strcmp(opt->val.str,"dump")) {
-      k = YM_EMUL_DUMP;
+      k = YM_ENGINE_DUMP;
     } else {
-      k = YM_EMUL_DEFAULT;
+      k = YM_ENGINE_DEFAULT;
     }
-    ym_default_engine(k);
+    ym_engine(0, k);
   }
 
-  /* --sc68-ym-voltable */
-  opt = option68_get("ym-voltable",1);
+  /* --sc68-ym-volmodel */
+  opt = option68_get("ym-volmodel",1);
   if (opt) {
     if (!strcmp(opt->val.str,"linear")) {
-      default_parms.voltable = YM_VOL_LINEAR;
+      default_parms.volmodel = YM_VOL_LINEAR;
     } else if (!strcmp(opt->val.str,"atari")) {
-      default_parms.voltable = YM_VOL_ATARIST;
+      default_parms.volmodel = YM_VOL_ATARIST;
     }
   }
 
@@ -288,23 +253,18 @@ int ym_init(ym_parms_t * const parms)
   }
 
   /* Set volume table (unique for all instance) */
-  switch (default_parms.voltable) {
+  switch (default_parms.volmodel) {
   case YM_VOL_LINEAR:
-    ym_create_5bit_linear_table(ymout5, ym_output_level);
+    ym_create_5bit_linear_table(ymout5, output_level);
     break;
   case YM_VOL_DEFAULT:
   case YM_VOL_ATARIST:
   default:
-    ym_create_5bit_atarist_table(ymout5, ym_output_level);
+    ym_create_5bit_atarist_table(ymout5, output_level);
   }
 
   /* Process ym-puls options */
-  argc = ym_puls_options(argc, argv);
-
-  /* Save remaining cli options */
-  if (parms && parms->argc) {
-    *parms->argc =  argc;
-  }
+  *argc = ym_puls_options(*argc, argv);
 
   return 0;
 }
@@ -402,48 +362,204 @@ void ym_adjust_cycle(ym_t * const ym, const cycle68_t ymcycles)
  */
 
 extern const int ym_smsk_table[];       /* declared in ym_puls.c */
-int ym_active_channels(ym_t * const ym, const int off, const int on)
+int ym_active_channels(ym_t * const ym, const int clr, const int set)
 {
   int v = 0;
   if (ym) {
     const int voice_mute = ym->voice_mute;
-    v = (voice_mute&1) | ((voice_mute>>5)&2) | ((voice_mute>>10)&4);
-    v = ((v&~off)|on)&7;
+    v = ( voice_mute & 1 ) | ( (voice_mute>>5) & 2 ) | ( (voice_mute>>10) & 4);
+    v = ( (v & ~clr ) | set ) & 7;
     ym->voice_mute = ym_smsk_table[v];
-    TRACE68(ym_cat,"ym-2149: active channels -- %c%c%c\n",
-            (v&1)?'A':'.', (v&1)?'B':'.', (v&1)?'B':'.');
+    msg68_info("ym-2149: active channels -- *%c%c%c*\n",
+               (v&1)?'A':'.', (v&2)?'B':'.', (v&4)?'C':'.');
   }
   return v;
 }
+
+/* ,-----------------------------------------------------------------.
+ * |                        Engine selection                         |
+ * `-----------------------------------------------------------------'
+ */
+
+static
+const char * ym_engine_name(int emul)
+{
+  switch (emul) {
+  case YM_ENGINE_PULS:    return "PULSE";
+  case YM_ENGINE_BLEP:    return "BLEP";
+  case YM_ENGINE_DUMP:    return "DUMP";
+  }
+  return 0;
+}
+
+int ym_engine(ym_t * const ym, int engine)
+{
+  switch (engine) {
+
+  case YM_ENGINE_QUERY:
+    /* Get current value. */
+    engine = ym ? ym->engine : default_parms.engine;
+    break;
+
+  default:
+    /* Invalid values */
+    msg68_warning("ym-2149: unknown ym-engine -- *%d*\n", engine);
+  case YM_ENGINE_DEFAULT:
+    /* Default values */
+    engine = default_parms.engine;
+  case YM_ENGINE_PULS:
+  case YM_ENGINE_BLEP:
+  case YM_ENGINE_DUMP:
+    /* Valid values */
+    if (!ym) {
+      default_parms.engine = engine;
+      msg68_info("ym-2149: default engine -- *%s*\n",
+                 ym_engine_name(engine));
+    } else {
+      engine = ym->engine;
+    }
+    break;
+  }
+  return engine;
+}
+
+
+/* ,-----------------------------------------------------------------.
+ * |                           Master clock                          |
+ * `-----------------------------------------------------------------'
+ */
+
+int ym_clock(ym_t * const ym, int clock)
+{
+  switch (clock) {
+
+  case YM_CLOCK_QUERY:
+    clock = ym ? ym->clock : default_parms.clock;
+    break;
+
+  case YM_CLOCK_DEFAULT:
+    clock = default_parms.clock;
+
+  default:
+    if (clock != YM_CLOCK_ATARIST) {
+      msg68_warning("ym-2149: unsupported clock -- %u\n",
+                    (unsigned int)clock);
+    }
+    clock = YM_CLOCK_ATARIST;
+    if (!ym) {
+      default_parms.clock = clock;
+      msg68_info("ym-2149: default clock -- *ATARI-ST*\n",
+                 (unsigned int)clock);
+    } else {
+      clock = ym->clock;
+    }
+    break;
+  }
+  return clock;
+}
+
+/* ,-----------------------------------------------------------------.
+ * |                           Volume model                          |
+ * `-----------------------------------------------------------------'
+ */
+
+static
+const char * ym_volmodel_name(int model)
+{
+  switch (model) {
+  case YM_VOL_LINEAR:  return "LINEAR";
+  case YM_VOL_ATARIST: return "ATARI-ST";
+  }
+  return 0;
+}
+
+int ym_volume_model(ym_t * const ym, int model)
+{
+  /* Set volume table (unique for all instance) */
+  switch (model) {
+    
+  case YM_VOL_QUERY:
+    model = default_parms.volmodel;
+    break;
+
+  default:
+    msg68_warning("ym-2149: unknown volume model -- %d\n", model);
+  case YM_VOL_DEFAULT:
+    model = default_parms.volmodel;
+  case YM_VOL_LINEAR:
+  case YM_VOL_ATARIST:
+    if (ym) {
+      model = ym->volmodel;
+    } else {
+      ym->volmodel = model;
+      assert(model == YM_VOL_LINEAR || model == YM_VOL_ATARIST);
+      if ( model == YM_VOL_LINEAR ) {
+        ym_create_5bit_linear_table(ymout5, output_level);
+      } else {
+        ym_create_5bit_atarist_table(ymout5, output_level);
+      }
+      msg68_info("ym-2149: default volume model -- *%s*\n",
+                 ym_volmodel_name(model));
+    }
+    break;
+  }
+  return model;
+}
+
 
 /* ,-----------------------------------------------------------------.
  * |                        Output sampling rate                     |
  * `-----------------------------------------------------------------'
  */
 
-uint68_t ym_sampling_rate(ym_t * const ym, const uint68_t hz)
+int ym_sampling_rate(ym_t * const ym, int hz)
 {
-  uint68_t ret = 0;
-  if (ym) {
-    if (!hz) {
-      /* Get current sampling rate */
-      ret = ym->hz;
-    } else {
-      /* Clips in range [SAMPLING_RATE_MIN..SAMPLING_RATE_MAX] */
-      ret = hz;
-      if (ret < SAMPLING_RATE_MIN) ret = SAMPLING_RATE_MIN;
-      if (ret > SAMPLING_RATE_MAX) ret = SAMPLING_RATE_MAX;
-      if (ym->cb_sampling_rate) {
-        /* engine sampling rate callback */
-        ret = ym->cb_sampling_rate(ym,ret);
-      }
-      ym->hz = ret;
-      TRACE68(ym_cat,"ym-2149: rate -- %d -> %d\n", hz, ret);
-    }
-  }
+  switch (hz) {
 
-  return ret;
+  case YM_VOL_QUERY:
+    hz = ym ? ym->hz : default_parms.hz;
+    break;
+
+  case YM_VOL_DEFAULT:
+    hz = default_parms.hz;
+    
+  default:
+    if (hz < SAMPLING_RATE_MIN) hz = SAMPLING_RATE_MIN;
+    if (hz > SAMPLING_RATE_MAX) hz = SAMPLING_RATE_MAX;
+    if (ym->cb_sampling_rate) {
+      /* engine sampling rate callback */
+      hz = ym->cb_sampling_rate(ym,hz);
+    }
+    if (ym) {
+      ym->hz = hz;
+    } else {
+      default_parms.hz = hz;
+    }
+    msg68_info("ym-2149: %ssampling rate -- *%dhz*\n",
+               ym ? "" : "default ", hz);
+  }
+  return hz;
 }
+
+
+/* ,-----------------------------------------------------------------.
+ * |               Configure default or emulator instance            |
+ * `-----------------------------------------------------------------'
+ */
+
+int ym_configure(ym_t * const ym, ym_parms_t * const parms)
+{
+  if (!parms) {
+    msg68_error("ym-2149: nothing to configure\n");
+    return -1;
+  }
+  parms->engine   = ym_engine(ym, parms->engine);
+  parms->volmodel = ym_volume_model(ym, parms->volmodel);
+  parms->clock    = ym_clock(ym, parms->clock);
+  parms->hz       = ym_sampling_rate(ym, parms->hz);
+  return 0;
+}
+
 
 /* ,-----------------------------------------------------------------.
  * |                  Setup / Cleanup emulator instance              |
@@ -456,8 +572,8 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
   int err = -1;
 
   /* engine */
-  if (p->emul == YM_EMUL_DEFAULT) {
-    p->emul = default_parms.emul;
+  if (p->engine == YM_ENGINE_DEFAULT) {
+    p->engine = default_parms.engine;
   }
 
   /* sampling rate */
@@ -475,17 +591,17 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
   }
 
   /* output level */
-  if (p->outlevel == 0) {
-    p->outlevel = default_parms.outlevel;
-  }
-  if (p->outlevel <= 0) {
-    p->outlevel = 0;
-  } else if (p->outlevel >= 0x100) {
-    p->outlevel = 0x100;
-  }
+/*   if (p->outlevel == 0) { */
+/*     p->outlevel = default_parms.outlevel; */
+/*   } */
+/*   if (p->outlevel <= 0) { */
+/*     p->outlevel = 0; */
+/*   } else if (p->outlevel >= 0x100) { */
+/*     p->outlevel = 0x100; */
+/*   } */
 
   TRACE68(ym_cat,"ym-2149: setup -- engine:%d rate:%d clock:%d level:%d\n",
-          p->emul,p->hz,p->clock,p->outlevel);
+          p->engine,p->hz,p->clock,256);
 
   if (ym) {
     ym->ymout5      = ymout5;
@@ -493,37 +609,43 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
     ym->waccess     = ym->static_waccess;
     ym->waccess_nxt = ym->waccess;
     ym->clock       = p->clock;
-    ym->outlevel    = p->outlevel >> 2;
+/*     ym->outlevel    = p->outlevel >> 2; */
     ym->voice_mute  = ym_smsk_table[7 & ym_default_chans];
     /* clearing sampling rate callback ensure requested rate to be in
        valid range. */
     ym->cb_sampling_rate = 0;
     ym_sampling_rate(ym, p->hz);
-    ym->type = p->emul;
+    ym->engine = p->engine;
 
-    switch (p->emul) {
-    case YM_EMUL_PULS:
-      msg68_info("ym-2149: select *PULSE SYNTHESIS* engine\n");
+    TRACE68(ym_cat,"ym-2149: engine -- *%d*\n", p->engine);
+
+    switch (p->engine) {
+    case YM_ENGINE_PULS:
       err = ym_puls_setup(ym);
       break;
 
-    case YM_EMUL_BLEP:
-      msg68_info("ym-2149: select *BLEP SYNTHESIS* engine\n");
+    case YM_ENGINE_BLEP:
       err = ym_blep_setup(ym);
       break;
 
-    case YM_EMUL_DUMP:
-      msg68_info("ym-2149: select *DUMP REGISTERS* engine\n");
+    case YM_ENGINE_DUMP:
       err = ym_dump_setup(ym);
       break;
 
     default:
-      msg68_critical("ym-2149: invalid ym engine (%d)\n", p->emul);
+      msg68_critical("ym-2149: engine %d -- *invalid*\n", p->engine);
       err = -1;
     }
+    if (!err)
+      msg68_info("ym-2149: engine -- *%s*\n", ym_engine_name(ym->engine));
+
+
     /* at this point specific sampling rate callback can be call */
     ym_sampling_rate(ym, ym->hz);
   }
+
+  /* Just for info print */
+  ym_active_channels(ym,0,0);
 
   return err ? err : ym_reset(ym, 0);
 }

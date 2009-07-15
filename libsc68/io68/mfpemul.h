@@ -202,24 +202,19 @@ typedef struct
 {
   mfp_timer_def_t def; /**< Timer definition. */
 
-  //  bogoc68_t udc;       /**< Last bogo-cycle registers have been updated. */
   bogoc68_t cti;       /**< bogo-cycle to next timer interrupt.          */
-  //  bogoc68_t psc_cnt;   /**< Number of bogo-cycles in prescaler counter.  */
-  //  bogoc68_t psc_width; /**< Prescaler width in BOGO.                     */
-  //bogoc68_t cpp;       /**< Number of MFP cycles per period (0:stopped). */
-  uint68_t  tdr_cur;   /**< Timer Data register current value.           */
-  uint68_t  tdr_res;   /**< Timer Data register reset value.             */
-  uint68_t  tcr;       /**< Timer control register (prescaler) [0..7].   */
+  uint_t    tdr_cur;   /**< Timer Data register current value.           */
+  uint_t    tdr_res;   /**< Timer Data register reset value.             */
+  uint_t    tcr;       /**< Timer control register (prescaler) [0..7].   */
 
   bogoc68_t psc;
-  //uint68_t  psc;
 
   /* On Interrupt */
-  uint68_t int_lost;   /**< Interrupts missed (should be 0).           */
-  uint68_t int_mask;   /**< Interrupts ignored (masked or whatever)    */
-  uint68_t int_fall;   /**< Interrupts counter.                        */
+  uint_t   int_lost;   /**< Interrupts missed (should be 0).           */
+  uint_t   int_mask;   /**< Interrupts ignored (masked or whatever)    */
+  uint_t   int_fall;   /**< Interrupts counter.                        */
 
-  interrupt68_t interrupt; /**< Interruption info.                       */
+  interrupt68_t interrupt; /**< Interruption info.                     */
 } mfp_timer_t;
 
 /** @} */
@@ -228,7 +223,6 @@ typedef struct
 typedef struct {
   u8 map[0x40];          /**< Registers map.        */
   mfp_timer_t timers[4]; /**< Timers.               */
-  /* mfp_timer_t *itimer; */   /**< Next interrupt timer. */
 } mfp_t;
 
 /** @name  MFP-68901 emulator library.

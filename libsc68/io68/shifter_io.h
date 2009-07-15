@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_shifter_devel
+ * @ingroup   io68_lib
  * @file      io68/shifter_io.h
  * @author    Benjamin Gerard
  * @date      1999/06/10
@@ -16,8 +16,8 @@
 
 #include "io68_api.h"
 
-/** @defgroup  io68_shifter_devel  Atari-ST shifter emulator
- *  @ingroup   io68_devel
+/** @defgroup  io68_lib_shifter  Atari-ST shifter (video chip)
+ *  @ingroup   io68_lib
  *
  *    Atari-ST shifter emulator is limited to 50/60Hz detection.
  *    It is used by some player to adapt the replay speed.
@@ -62,7 +62,7 @@ IO68_EXTERN
 /** Init shifter io library.
  *  @return error-code
  */
-int shifterio_init(void);
+int shifterio_init(int * argc, char ** argv);
 
 IO68_EXTERN
 /** Shutdown shifter io library.

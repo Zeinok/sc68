@@ -248,6 +248,36 @@ int68_t mem68_popw(emu68_t * emu68)
   return v;
 }
 
+
+void emu68_pushl(emu68_t * const emu68, int68_t val)
+{
+  if (emu68)
+    mem68_pushl(emu68, val);
+}
+
+void emu68_pushw(emu68_t * const emu68, int68_t val)
+{
+  if (emu68)
+    mem68_pushw(emu68, val);
+}
+
+
+int68_t emu68_popl(emu68_t * emu68)
+{
+  return emu68
+    ? mem68_popl(emu68)
+    : -1
+    ;
+}
+
+int68_t emu68_popw(emu68_t * emu68)
+{
+  return emu68
+    ? mem68_popw(emu68)
+    : -1
+    ;
+}
+
 /* Init memory quick acces table for SC68
  */
 void emu68_mem_init(emu68_t * emu68)

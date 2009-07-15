@@ -455,12 +455,12 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
 }
 
 /* Get required length of buffer at run(s32 *output) (number of frames). */
-static uint68_t buffersize(const ym_t const * ym, const cycle68_t ymcycles)
+static int buffersize(const ym_t const * ym, const cycle68_t ymcycles)
 {
   return MAX_MIXBUF;
 }
 
-static uint68_t sampling_rate(ym_t * const ym, const uint68_t hz)
+static int sampling_rate(ym_t * const ym, const int hz)
 {
   ym_blep_t *orig = &ym->emu.blep;
   orig->cycles_per_sample = (ym->clock << 8) / hz;

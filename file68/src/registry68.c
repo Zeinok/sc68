@@ -28,6 +28,8 @@
 
 #ifdef USE_REGISTRY68
 
+int registry68_support(void) { return 1; }
+
 #include "msg68.h"
 #include "string68.h"
 #include <windows.h>
@@ -84,7 +86,7 @@ static HKEY keyhandle(const enum registry68_key_e const key)
 registry68_key_t registry68_rootkey(enum registry68_key_e rootkey)
 {
   registry68_key_t key = (registry68_key_t) keyhandle(rootkey);
-  msg68_trace("registry68: rootkey %d '%s' => %p '%s'\n",
+  msg68_debug("registry68: rootkey %d '%s' => %p '%s'\n",
               rootkey, keyname(rootkey), (void*)key, keyhdlname(key));
   return key;
 }
@@ -121,7 +123,7 @@ static void SetSystemError(char * str, int max)
   l = strlen(str);
   while (--l>=0 && (str[l] == '\n' || str[l] == '\r' ||str[l] == ' '))
     str[l] = 0;
-  msg68_error("registry68: system error '%s'\n", str);
+  msg68_error("registry68: system error -- '%s'\n", str);
 }
 
 static int GetOneLevelKey(HKEY hkey, char **kname, HKEY *hkeyres)
@@ -283,7 +285,7 @@ int registry68_gets(registry68_key_t rootkey,
   }
   error_out:
 
-  msg68_trace("registry68: gets '%s' => [%s,'%s']\n",
+  msg68_debug("registry68: gets '%s' => [%s,'%s']\n",
               strnevernull68(kname_save),
               strok68(!kdata),
               strnevernull68(kdata));
@@ -291,6 +293,8 @@ int registry68_gets(registry68_key_t rootkey,
 }
 
 #else
+
+int registry68_support(void) { return 0; }
 
 registry68_key_t registry68_rootkey(enum registry68_key_e rootkey)
 {

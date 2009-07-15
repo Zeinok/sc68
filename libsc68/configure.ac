@@ -53,29 +53,29 @@ AC_ARG_WITH(
 
 case X${with_ym_engine} in
   Xblep)
-    YM_EMUL='YM_EMUL_BLEP'
+    YM_ENGINE='YM_ENGINE_BLEP'
     with_ym_engine='BLEP synthesis'
     ;;
   Xdump)
-    YM_EMUL='YM_EMUL_DUMP'
+    YM_ENGINE='YM_ENGINE_DUMP'
     with_ym_engine='DUMP registers'
     ;;
   Xorig | Xpuls*)
-    YM_EMUL='YM_EMUL_PULS'
+    YM_ENGINE='YM_ENGINE_PULS'
     with_ym_engine='sc68 original'
     ;;
   Xx | Xyes | Xno)
-    YM_EMUL='x'
+    YM_ENGINE='x'
     ;;
   *)
-    YM_EMUL="YM_EMUL_"[]AS_TR_CPP($with_ym_engine)
+    YM_ENGINE="YM_ENGINE_"[]AS_TR_CPP($with_ym_engine)
     with_ym_engine="unknown (3rd party?) $with_ym_engine engine"
     AC_MSG_WARN([Using unknown YM engine may break compilation.])
     ;;
 esac
 
-if test "x-$YM_EMUL" != "x-x"; then
-  AC_DEFINE_UNQUOTED([YM_EMUL],[$YM_EMUL],[set default YM engine])
+if test "x-$YM_ENGINE" != "x-x"; then
+  AC_DEFINE_UNQUOTED([YM_ENGINE],[$YM_ENGINE],[set default YM engine])
 else
   with_ym_engine='auto-select (should be sc68 original)'
 fi

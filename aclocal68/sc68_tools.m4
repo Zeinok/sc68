@@ -1,4 +1,4 @@
-yesdnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
+dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# autoconf macros
 dnl#
@@ -29,6 +29,12 @@ AC_DEFUN_ONCE([SC68_TOOLS],[
     AC_C_VISIBILITY_ATTRIBUT([has_visibility])
     # tools
     AC_PROG_INSTALL
+#     # This need to be before AC_PROG_LIBTOOL
+#     if test X[$]enable_all_static = Xyes; then
+#       AC_ENABLE_STATIC
+#       AC_DISABLE_SHARED
+#     fi
+#     AC_PROG_LIBTOOL
     AC_PATH_PROG([help2man],[help2man],[false])
     AC_PATH_PROG([texinfo2man],[texinfo2man],[false])
   ])

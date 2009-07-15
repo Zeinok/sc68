@@ -42,11 +42,17 @@ FILE68_API
 int error68(const char * format, ... );
 
 FILE68_API
+int error68x(void * cookie, const char * format, ... );
+
+FILE68_API
 /** Print a formatted error message (variable argument version).
  *
  *  @see error68()
  */
 int error68_va(const char * format, va_list list);
+
+FILE68_API
+int error68x_va(void * cookie, const char * format, va_list list);
 
 /**
  *  @}

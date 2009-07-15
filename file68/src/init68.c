@@ -68,26 +68,23 @@ static char * mygetenv(const char *name)
 static char * get_reg_path(registry68_key_t key, char * kname,
                            char * buffer, int buflen)
 {
-  int i = registry68_gets(key,kname,buffer,buflen);
+  char * e = 0;
 
-  buffer[buflen-1] = 0;
-  if (i < 0) {
-    buffer[0] = 0;
-    msg68_trace("[%s]: not found\n");
-    return 0;
-  } else {
-    char *e;
-    for (e=buffer; *e; ++e) {
-      if (*e == '\\') *e = '/';
+  if (registry68_support()) {
+    int i = registry68_gets(key,kname,buffer,buflen);
+    buffer[buflen-1] = 0;
+    if (i >= 0) {
+      for (e=buffer; *e; ++e) {
+        if (*e == '\\') *e = '/';
+      }
+      if (e > buffer && e[-1] != '/') {
+        *e++ = '/';
+        *e = 0;
+      }
     }
-    if (e > buffer && e[-1] != '/') {
-      *e++ = '/';
-      *e = 0;
-    }
-    msg68_trace("[%s]='%s'\n", kname, buffer);
-
-    return e;
   }
+  if (!e) buffer[0] = 0;
+  return e;
 }
 
 static const char dbgcat[] = "debug";
@@ -119,7 +116,7 @@ int file68_init(int argc, char **argv)
     const char *message[4] = {
       "clean","initialized","shutdowning","initializing"
     };
-    error68("file68: init error on %s", message[i]);
+    error68("file68: init error -- *%s*", message[i]);
     argc = -1;
     goto out_no_init;
   }

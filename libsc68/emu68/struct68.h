@@ -49,11 +49,11 @@ typedef void (*iomemfunc68_t)(io68_t * const);
 typedef void (linefunc68_t)(emu68_t * const, int, int);
 
 #ifndef EMU68_MONOLITIC
-# define DECL_LINE68(N) \
+# define DECL_LINE68(N)                                 \
   void N(emu68_t * const emu68, int reg9, int reg0)
 # define DECL_STATIC_LINE68(N) static DECL_LINE68(N)
 #else
-# define DECL_LINE68(N) \
+# define DECL_LINE68(N)                                         \
   static void N(emu68_t * const emu68, int reg9, int reg0)
 # define DECL_STATIC_LINE68(N) DECL_LINE68(N)
 #endif
@@ -106,15 +106,15 @@ struct io68_s
 };
 
 
-/** 68000 internal registers.
+/** 68K internal registers.
  */
 typedef struct
 {
-  s32 d[8];                    /**< 68000 data registers.      */
-  s32 a[8];                    /**< 68000 address registers.   */
-  s32 usp;                     /**< 68000 User Stack Pointers. */
-  s32 pc;                      /**< 68000 Program Counter.     */
-  int sr;                      /**< 68000 Status Register.     */
+  s32 d[8];                    /**< 68K data registers.      */
+  s32 a[8];                    /**< 68K address registers.   */
+  s32 usp;                     /**< 68K User Stack Pointers. */
+  s32 pc;                      /**< 68K Program Counter.     */
+  int sr;                      /**< 68K Status Register.     */
 } reg68_t;
 
 #define REG68_D0_IDX 000
@@ -155,18 +155,17 @@ typedef struct
 typedef int (*emu68_handler_t)(emu68_t* const emu68, int vector, void * cookie);
 
 /** Init parameters. */
-typedef struct {
-  int          * argc;                  /**< Argument count.        */
-  char        ** argv;                  /**< Arguments.             */
-} emu68_init_t;
+/* typedef struct { */
+/*   int          * argc;                  /\**< Argument count.        *\/ */
+/*   char        ** argv;                  /\**< Arguments.             *\/ */
+/* } emu68_init_t; */
 
-/** Execution modes. */
-enum emu68_stat_e {
-  EMU68_STAT_NORM = 0,                  /**< Normal execution mode.  */
-  EMU68_STAT_ECPT = 1,                  /**< In exception            */
-  EMU68_STAT_STOP = 2,                  /**< Stopped (by stop)       */
-  EMU68_STAT_HALT = 3                   /**< Halted                  */
-};
+/** Breakpoint definition. */
+typedef struct {
+  addr68_t addr;                        /**< Breakpoint address.          */
+  uint68_t count;                       /**< Break countdown; 0:disable   */
+  uint68_t reset;                       /**< Reset countdown after break. */
+} emu68_bp_t;
 
 /** 68K Emulator struct. */
 struct emu68_s {
@@ -184,13 +183,9 @@ struct emu68_s {
   emu68_handler_t   handler;         /**< Exception trap handler.   */
   void            * cookie;          /**< User data.                */
 
-  union {
-    unsigned int all;                   /**< All status bits.  */
-    struct {
-      unsigned int mode : 2;            /**< @see emu68_stat_e */
-      unsigned int exit : 1;            /**< Exit requested,   */
-    } bit;
-  } status;
+  int status;                           /**< Execution status.      */
+  uint68_t instructions;                /**< Instruction countdown. */
+  addr68_t finish_sp;                   /**< Finish Stack Pointer.  */
 
   /* IO chips. */
   int      nio;                       /**< # IO plug in IO-list.    */
@@ -201,8 +196,10 @@ struct emu68_s {
   /* Memory access. */
   addr68_t bus_addr;        /**< bus address for memory access.     */
   int68_t  bus_data;        /**< bus data for memory access.        */
-  int framechk;             /**< ORed chk change for current frame. */
+  int      framechk;        /**< ORed chk change for current frame. */
   u8     * chk;             /**< Access-Control-Memory buffer.      */
+
+  emu68_bp_t breakpoints[16];           /**< Hardware breakpoints.  */
 
   /* Onboard memory. */
   addr68_t memmsk;     /**< Onboard memory mask (2^log2mem-1).      */

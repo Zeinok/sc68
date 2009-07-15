@@ -430,8 +430,10 @@ static io68_t mfp_io =
   mfpio_destroy
 };
 
-int mfpio_init(void)
+int mfpio_init(int * argc, char ** argv)
 {
+  argc = argc;
+  argv = argv;
   return mfp_init();
 }
 

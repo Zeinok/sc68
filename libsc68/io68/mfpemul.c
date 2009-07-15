@@ -28,6 +28,7 @@
 /* #include <stdio.h> //$$$DEBUG */
 
 #include "mfpemul.h"
+#include "emu68/assert68.h"
 #include <sc68/msg68.h>
 
 #define cpp(V)      (V*prediv_width[(int)ptimer->tcr])
@@ -138,35 +139,6 @@ int timer_get_tdr(const mfp_timer_t * const ptimer, const bogoc68_t bogoc)
   return tdr;
 }
 
-#if 0
-static int timer_get_tdr(const char * tag,
-                         const mfp_timer_t * const ptimer,
-                         const bogoc68_t bogoc, uint68_t * const ppsr)
-{
-  const bogoc68_t cti = ptimer->cti - bogoc;       /* cycles to interrupt */
-  const uint68_t  psw = prediv_width[ptimer->tcr]; /* cycles count-down   */
-  const uint68_t  cnt = cti/psw;                   /* count-down          */
-  const uint68_t  tdr = cnt%ptimer->tdr_res+1;
-  const uint68_t  psr = cti % psw;
-  const uint68_t  cpp = psw * ptimer->tdr_res;
-
-  const uint68_t cti_verif = tdr * psw - psw + psr;
-
-  msg68(mfp_cat,
-        "timer-%c get TDR(%s) @%u cti:%u/%u cnt:%u psr:%u/%u => %u/%u\n",
-        ptimer->def.letter, tag, bogoc,
-        cti, cpp, cnt, psr, psw, tdr, ptimer->tdr_res);
-
-  /* Verify */
-  if (cti_verif != cti) {
-    msg68(mfp_cat,
-          "=> verify error (%u != %u)\n", cti_verif, cti);
-  }
-
-  return tdr;
-}
-#endif
-
 /* Control register changes, adjust ``cti'' (cycle to next interrupt)
  *
  *    This case is a bit tricky : Changing timer prescale on the fly
@@ -180,41 +152,32 @@ static int timer_get_tdr(const char * tag,
 static inline
 void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
 {
-  uint68_t        frq = timerfrq(ptimer->tdr_res); /* old frequency       */
+  uint_t          frq = timerfrq(ptimer->tdr_res); /* old frequency       */
   const bogoc68_t cti = ptimer->cti - bogoc;       /* cycles to interrupt */
-  const uint68_t  psw = prediv_width[ptimer->tcr]; /* cycles count-down   */
-  const uint68_t  cnt = cti/psw;                   /* count-down          */
-  const uint68_t  psr = cti % psw;
+  const uint_t    psw = prediv_width[ptimer->tcr]; /* cycles count-down   */
+  const uint_t    cnt = cti/psw;                   /* count-down          */
+  const uint_t    psr = cti % psw;
   /* const uint68_t  psc = psw-psr; */
 
   /* cnt%ptimer->tdr_res+1; no MODULO since TDR may have change and anyway
      cti was calculated with 1 timer cycle !!! */
-  const uint68_t  tdr = cnt+1;
+  const uint_t    tdr = cnt+1;
   const cycle68_t new_psw = prediv_width[(int)tcr];
-
 
   if (bogoc > ptimer->cti) {
     msg68(mfp_cat,
-          "Reconf timer-%c @%u > cti:%u !!!CYCLE OUT OF RANGE!!!\n",
+          "mfp: timer-%c -- reconf out of range -- @%u > cti:%u\n",
           ptimer->def.letter, bogoc, ptimer->cti);
     ptimer->cti = bogoc + psw * ptimer->tdr_res;
   } else {
-
     ptimer->cti = bogoc + psr + (tdr-1) * new_psw;
     ptimer->cti = bogoc + /* psr + */ (tdr/* -1 */) * new_psw;
-
-/*     if (ptimer->cti != cti_verif) { */
-/*       if (mfp_cat) fprintf(stderr, */
-/*            "Reconf timer-%c @%u psw:%u->%u psc:%u  cti:%u!=%u !!!\n", */
-/*            ptimer->def.letter, bogoc, psw, new_psw, psc, */
-/*            cti_verif, ptimer->cti); */
-/*     } */
   }
 
   ptimer->tcr = tcr;
 
   msg68(mfp_cat,
-        "Reconf timer-%c @%u cti:%u cpp:%u=> %d->%dhz\n",
+        "mfp: timer-%c -- reconf @%u cti:%u cpp:%u -- %d:%dhz\n",
         ptimer->def.letter, bogoc,
         ptimer->cti, cpp(ptimer->tdr_res),
         frq,timerfrq(ptimer->tdr_res));
@@ -258,8 +221,8 @@ void resume_timer(mfp_timer_t * const ptimer, int tcr, bogoc68_t bogoc)
   ptimer->cti = bogoc + ptimer->tdr_cur * prediv_width[tcr] - ptimer->psc;
 
   msg68(mfp_cat,
-        "Resume timer-%c @%u cti:%u cpp:%u "
-        "tdr:%u/%u psw:%u(%u) => %dhz\n",
+        "mfp: timer-%c  -- resume @%u cti:%u cpp:%u "
+        "tdr:%u/%u psw:%u(%u) -- %dhz\n",
         ptimer->def.letter, bogoc, ptimer->cti,
         cpp(ptimer->tdr_res),
         (int)ptimer->tdr_cur,(int)ptimer->tdr_res,
@@ -277,6 +240,7 @@ void resume_timer(mfp_timer_t * const ptimer, int tcr, bogoc68_t bogoc)
    the timer counter value is not affected unless TDR is written.
 
 */
+
 int68_t mfp_get_tdr(mfp_t * const mfp, const int timer, const bogoc68_t bogoc)
 {
   mfp_timer_t * const ptimer = &mfp->timers[timer&3];
@@ -307,13 +271,13 @@ int68_t mfp_get_tdr(mfp_t * const mfp, const int timer, const bogoc68_t bogoc)
    written to while the timer is enabled, the value is not loaded into
    the timer until the timer counts through 01. If a write is
    performed while the timer is counting through 01 then an
-   *INDETERMINATE* value is loaded into the main counter.
+   INDETERMINATE value is loaded into the main counter.
 
-   */
+*/
 void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, bogoc68_t bogoc)
 {
-  mfp_timer_t * const ptimer = &mfp->timers[timer&3];
-  const uint68_t old_tdr = ptimer->tdr_res;
+  mfp_timer_t * const  ptimer = &mfp->timers[timer&3];
+  const uint_t old_tdr = ptimer->tdr_res;
 
   /* Interrupt when count down to 0 so 0 is 256 */
   v  = (u8)v; v += (!v)<<8;
@@ -322,13 +286,13 @@ void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, bogoc68_t bogoc)
   if (!ptimer->tcr) {
     ptimer->tdr_cur = v;
     msg68(mfp_cat,
-          "Reload timer-%c TDR @%u => %u\n",
+          "mfp: timer-%c -- reload TDR @%u -- %u\n",
           ptimer->def.letter, bogoc, ptimer->tdr_res);
   } else if (ptimer->tcr && v != old_tdr) {
-    uint68_t old_frq = timerfrq(old_tdr);
+    uint_t old_frq = timerfrq(old_tdr);
     msg68(mfp_cat,
-          "Change timer-%c @%u cti:%u psw:%u(%u) cpp:%u"
-          " => %u(%u)->%u(%u)hz\n",
+          "mfp: timer-%c -- change @%u cti:%u psw:%u(%u) cpp:%u"
+          " -- %u(%u) -> %u(%u)hz\n",
           ptimer->def.letter, bogoc, ptimer->cti,
           prediv_width[ptimer->tcr], ptimer->tcr,
           cpp(ptimer->tdr_res),
@@ -345,8 +309,6 @@ void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, bogoc68_t bogoc)
    verify the fact than writting 2 times the same value in the
    predivisor does not affect its count.
 
-   $$$
-
 */
 static void mfp_put_tcr_bogo(mfp_timer_t * const ptimer,
                              int v, const bogoc68_t bogoc)
@@ -362,8 +324,8 @@ static void mfp_put_tcr_bogo(mfp_timer_t * const ptimer,
   }
 }
 
-
-void mfp_put_tcr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
+void mfp_put_tcr(mfp_t * const mfp,
+                 int timer, int68_t v, const bogoc68_t bogoc)
 {
   timer &= 3;
 
@@ -373,7 +335,7 @@ void mfp_put_tcr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
     /* $$$ Event mode + Pulse mode not emulate */
     if (v&0x10) {
       msg68(mfp_cat,
-            "timer-%c: mode(%02x) not supported\n",
+            "mfp: timer-%c -- mode not supported --  %02x\n",
             timer_def[timer].letter,(int)(u8)v);
     }
     mfp_put_tcr_bogo(mfp->timers+timer, v&7, bogoc);
@@ -413,8 +375,8 @@ interrupt68_t * mfp_interrupt(mfp_t * const mfp, const bogoc68_t bogoc)
 {
   mfp_timer_t * itimer;
 
-  /* Better recheck which timer interrupts coz previous
-     interrupt code may have modified timer.
+  /* Better recheck which timer interrupts because previous interrupt
+     code may have modified timer.
   */
   while ((itimer = find_next_int(mfp)) && itimer->cti < bogoc) {
     /* Have a candidate */
@@ -476,17 +438,18 @@ void mfp_adjust_bogoc(mfp_t * const mfp, const bogoc68_t bogoc)
     if (ptimer->tcr) {
       if (ptimer->cti < bogoc) {
         msg68(mfp_cat,
-              "Adjust timer-%c cti:%u cycle:%u",
+              "mfp: timer-%c -- adjust -- cti:%u cycle:%u\n",
               ptimer->def.letter,ptimer->cti, bogoc);
       }
+      assert(ptimer->cti >= bogoc);
       while (ptimer->cti < bogoc) {
         /* $$$ !!! SHOULD NOT HAPPEN !!! */
         ++ptimer->int_lost;
         ptimer->cti += cpp(ptimer->tdr_res);
       }
       if (ptimer->int_lost) {
-        msg68(mfp_cat,
-              " ->%d lost\n",ptimer->int_lost);
+        msg68_critical("mfp: timer-%c -- adjust has lost interrupt -- %d\n",
+                       ptimer->def.letter, ptimer->int_lost);
         ptimer->int_lost = 0;
       }
       ptimer->cti -= bogoc;
@@ -501,18 +464,15 @@ void mfp_adjust_bogoc(mfp_t * const mfp, const bogoc68_t bogoc)
 
 static void reset_timer(mfp_timer_t * const ptimer, bogoc68_t bogoc)
 {
-  //ptimer->udc       = bogoc;
   ptimer->cti       = bogoc;
-  //  ptimer->psc_cnt   = 0;
-  //ptimer->psc_width = 0;
-  //ptimer->cpp       = 0;
   ptimer->tcr       = 0;
   ptimer->psc       = 0;
 
-  /* $$$ Motorola Datasheet: timer counters are not cleared */
-
-/*   ptimer->tdr_res   = 256; */
-/*   ptimer->tdr_cur   = ptimer->tdr_res; */
+  /* $$$ Motorola Datasheet: timer counters should not be cleared
+     but we don't really care
+  */
+  ptimer->tdr_res   = 256;
+  ptimer->tdr_cur   = ptimer->tdr_res;
   ptimer->int_lost  = 0;
   ptimer->int_mask  = 0;
   ptimer->int_fall  = 0;
@@ -577,8 +537,8 @@ void mfp_cleanup(mfp_t * const mfp)
 
 int mfp_init(void)
 {
-  mfp_cat =
-    msg68_cat("mfp","MFP-68901 emulator", DEBUG_MFP_O);
+  if (mfp_cat == msg68_DEFAULT)
+    mfp_cat = msg68_cat("mfp","MFP-68901 emulator", DEBUG_MFP_O);
   return 0;
 }
 

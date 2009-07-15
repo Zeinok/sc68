@@ -53,17 +53,16 @@ void exception68(emu68_t * const emu68, const int vector, const int level)
     }
   } else {
     int savesr = REG68.sr;
-    int savest = emu68->status.bit.mode;
+    int savest = emu68->status;
 
-    emu68->status.bit.mode = EMU68_STAT_ECPT; /* enter exception stat      */
-    REG68.sr &= ~SR_T;                        /* no TRACE                  */
-    REG68.sr |=  SR_S;                        /* Supervisor                */
+    emu68->status = EMU68_XCT;         /* enter exception stat      */
+    REG68.sr &= ~SR_T;                 /* no TRACE                  */
+    REG68.sr |=  SR_S;                 /* Supervisor                */
 
-    if ( savest == EMU68_STAT_ECPT &&
+    if ( savest == EMU68_XCT &&
          ( vector == BUSERR_VECTOR || vector == ADRERR_VECTOR ) ) {
       /* Double fault ! */
-      emu68->status.bit.mode = EMU68_STAT_HALT; /* Halt processor */
-      emu68->status.bit.exit = 1;               /* Force exit     */
+      emu68->status = EMU68_ERR;        /* Halt processor */
     } else if ( vector == RESET_VECTOR ) {
       REG68.sr  |= SR_I;
       REG68.a[7] = read_L(RESET_SP_VECTOR << 2);
@@ -75,11 +74,11 @@ void exception68(emu68_t * const emu68, const int vector, const int level)
       pushl(REG68.pc);
       pushw(savesr);
       REG68.pc  = read_L(vector << 2);
-      emu68->status.bit.mode = EMU68_STAT_NORM; /* Back to normal mode */
+      emu68->status = EMU68_NRM;        /* Back to normal mode */
     }
-    if (emu68->handler && emu68->handler(emu68, vector, emu68->cookie) ) {
-      emu68->status.bit.exit = 1;       /* User forced exit */
-    }
+  }
+  if (emu68->handler && emu68->handler(emu68, vector, emu68->cookie) ) {
+    emu68->status = EMU68_BRK;        /* User forced exit */
   }
 }
 

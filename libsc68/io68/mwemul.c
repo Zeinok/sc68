@@ -42,6 +42,7 @@
 #endif
 #include "mwemul.h"
 
+#include "emu68/assert68.h"
 #include <sc68/msg68.h>
 
 #ifndef DEBUG_MW_O
@@ -57,9 +58,6 @@ int mw_cat = msg68_DEFAULT;
 
 #define MW_STE_MULT ((1<<MW_MIX_FIX)/4)
 #define MW_YM_MULT  ((1<<MW_MIX_FIX)-MW_STE_MULT)
-
-#define TOINTERNAL(N) ((mw->map[N]<<16)+(mw->map[(N)+2]<<8)+(mw->map[(N)+4]))
-
 
 #ifndef MW_CALCUL_TABLE
 
@@ -156,25 +154,79 @@ static void init_volume(void)
 
 #endif
 
-static mw_parms_t default_parms = {
-  MW_EMUL_LINEAR, SAMPLING_RATE_DEF
-};
+static mw_parms_t default_parms;
 
 /* ,-----------------------------------------------------------------.
- * |                     Set replay frequency                        |
+ * |                   Set/Get emulator engine                       |
  * `-----------------------------------------------------------------'
  */
-uint68_t mw_sampling_rate(mw_t * const mw, uint68_t f)
+
+static
+const char * mw_engine_name(const int engine)
 {
-  if (f) {
-    if (f < SAMPLING_RATE_MIN) {
-      f = SAMPLING_RATE_MIN;
-    } else if (f > SAMPLING_RATE_MAX) {
-      f = SAMPLING_RATE_MAX;
-    }
-    mw->hz = f;
+  switch (engine) {
+  case MW_ENGINE_SIMPLE: return "SIMPLE";
+  case MW_ENGINE_LINEAR: return "LINEAR";
   }
-  return mw->hz;
+  return 0;
+}
+
+int mw_engine(mw_t * const mw, int engine)
+{
+  switch (engine) {
+
+  case MW_ENGINE_QUERY:
+    engine = mw ? mw->engine : default_parms.engine;
+    break;
+
+  default:
+    msg68_warning("microwire: invalid engine -- %d\n", engine);
+
+  case MW_ENGINE_DEFAULT:
+    engine = default_parms.engine;
+
+  case MW_ENGINE_SIMPLE:
+  case MW_ENGINE_LINEAR:
+    *(mw ? &mw->engine : &default_parms.engine) = engine;
+    msg68(mw_cat, "microwire: %s engine -- *%s*\n",
+          mw ? "select" : "default",
+          mw_engine_name(engine));
+    break;
+  }
+  return engine;
+}
+
+
+/* ,-----------------------------------------------------------------.
+ * |                   Set/Get replay frequency                      |
+ * `-----------------------------------------------------------------'
+ */
+int mw_sampling_rate(mw_t * const mw, int hz)
+{
+  switch (hz) {
+
+  case MW_HZ_QUERY:
+    hz = mw ? mw->hz : default_parms.hz;
+    break;
+
+  case MW_HZ_DEFAULT:
+    hz = default_parms.hz;
+
+  default:
+    if (hz < SAMPLING_RATE_MIN) {
+      msg68_warning("microwire: sampling rate out of range -- %dhz\n", hz);
+      hz = SAMPLING_RATE_MIN;
+    }
+    if (hz > SAMPLING_RATE_MAX) {
+      msg68_warning("microwire: sampling rate out of range -- %dhz\n", hz);
+      hz = SAMPLING_RATE_MAX;
+    }
+    *(mw ? &mw->hz : &default_parms.hz) = hz;
+    msg68(mw_cat, "microwire: %s sampling rate -- *%dhz*\n",
+               mw ? "select" : "default", hz);
+    break;
+  }
+  return hz;
 }
 
 /* ,-----------------------------------------------------------------.
@@ -183,82 +235,207 @@ uint68_t mw_sampling_rate(mw_t * const mw, uint68_t f)
  * | Set right volume    0=-40 Db, 40=0 Db                           |
  * | Set high frequency  0=-12 Db, 40=12 Db                          |
  * | Set low  frequency  0=-12 Db, 40=12 Db                          |
- * | Set mixer type : 0=-12 Db 1=YM+STE 2=STE only 3=reserved        |
+ * | Set mixer type : 0=-12 Db 1=YM+STE 2=STE-only 3=reserved        |
  * `-----------------------------------------------------------------'
  */
 
-void mw_set_lmc_mixer(mw_t * const mw, int n)
+static
+const char * const mixermode[4] = {
+  "-12-Db", "YM+STE", "STE-ONLY", "RESERVED"
+};
+
+int mw_lmc_mixer(mw_t * const mw, int n)
 {
-  static const int * table[] = { Db_mix12, Db_mix, Db_alone };
-  n &= 3;
-  mw->lmc.mixer = n;
-  if (n != 3) {
-    mw->db_conv = table[n];
+  static const int * const table[3] = { Db_mix12, Db_mix, Db_alone };
+
+  if (n == MW_LMC_QUERY) {
+    n = mw->lmc.mixer;
+  } else {
+    n &= 3;
+    mw->lmc.mixer = n;
+    if (n != 3) {
+      mw->db_conv = table[n];
+    } else {
+      msg68_warning("microwire: invalid LMC mixer mode -- 3\n");
+    }
   }
+  TRACE68(mw_cat,"microwire: LMC mixer mode -- *%s*\n",
+          mixermode[mw->lmc.mixer]);
+  return n;
 }
 
-void mw_set_lmc_master(mw_t * const mw, int n)
+/* range [0..40] -> [80..0] (-dB) */
+int mw_lmc_master(mw_t * const mw, int n)
 {
-  if (n<0)  n = 0;
-  if (n>40) n = 40;
-  mw->lmc.master = -80+2*n;
+  if (n == MW_LMC_QUERY) {
+    n = ( 80 - mw->lmc.master ) >> 1;
+  } else {
+    if (n <  0) n = 0;
+    if (n > 40) n = 40;
+    mw->lmc.master = 80 - (n << 1 );
+    TRACE68(mw_cat,"microwire: LMC -- master -- *-%02ddB*\n", mw->lmc.master);
+  }
+  return n;
 }
 
-void mw_set_lmc_left(mw_t * const mw, int n)
+/* range [0..20] -> [40..0] (-dB) */
+static int lmc_lr(mw_t * const mw, const int lr, int n)
 {
-  if (n<0)  n = 0;
-  if (n>20) n = 20;
-  mw->lmc.left = -40+2*n;
-  mw->lmc.lr = (mw->lmc.left+mw->lmc.right)>>1;
+  u8 * pval = lr ? &mw->lmc.left : &mw->lmc.right;
+
+  if (n == MW_LMC_QUERY) {
+    n = ( 40 - *pval ) >> 1;
+  } else {
+    if (n <  0) n = 0;
+    if (n > 20) n = 20;
+    *pval = 40 - ( n << 1 );
+    mw->lmc.lr = ( mw->lmc.left + mw->lmc.right ) >> 1;
+    TRACE68(mw_cat,"microwire: LMC -- %s channel -- *-%02ddB*\n",
+            lr ? "left" : "right", *pval);
+  }
+  return n;
 }
 
-void mw_set_lmc_right(mw_t * const mw, int n)
+int mw_lmc_left(mw_t * const mw, int n)
 {
-  if (n<0)  n = 0;
-  if (n>20) n = 20;
-  mw->lmc.right = -40+2*n;
-  mw->lmc.lr = (mw->lmc.left+mw->lmc.right)>>1;
+  return lmc_lr(mw,0,n);
 }
 
-void mw_set_lmc_high(mw_t * const mw, int n)
+int mw_lmc_right(mw_t * const mw, int n)
 {
-  if (n<0)  n = 0;
-  if (n>12) n = 12;
-  mw->lmc.high = -12+2*n;
+  return lmc_lr(mw,1,n);
 }
 
-void mw_set_lmc_low(mw_t * const mw, int n)
+/* range [0..12] -> [12..0] (-dB) */
+static int lmc_hl(mw_t * const mw, const int hl, int n)
 {
-  if (n<0)  n = 0;
-  if (n>12) n = 12;
-  mw->lmc.low = -12+2*n;
+  u8 * pval = hl ? &mw->lmc.high : &mw->lmc.low;
+
+  if (n == MW_LMC_QUERY) {
+    n = 12 - *pval;
+  } else {
+    if (n <  0) n = 0;
+    if (n > 12) n = 12;
+    *pval = 12 - n;
+    TRACE68(mw_cat,"microwire: LMC -- %s pass filter -- *-%02ddB*\n",
+            hl ? "high" : "low", *pval);
+  }
+  return n;
 }
+
+int mw_lmc_high(mw_t * const mw, int n)
+{
+  return lmc_hl(mw,0,n);
+}
+
+int mw_lmc_low(mw_t * const mw, int n)
+{
+  return lmc_hl(mw,1,n);
+}
+
+static int command_dispatcher(mw_t * const mw, int n)
+{
+  const int c = n & 0700;
+  n -= c;
+
+  TRACE68(mw_cat,"microwire: dispatch -- %o:%02x\n", c>>6, n);
+  switch(c) {
+  case 0000:
+    mw_lmc_mixer(mw, n&3);
+    break;
+  case 0100:
+    mw_lmc_low(mw, n&15);
+    break;
+  case 0200:
+    mw_lmc_high(mw, n&15);
+    break;
+  case 0300:
+    mw_lmc_master(mw, n&63);
+    break;
+  case 0400:
+    mw_lmc_right(mw, n&31);
+    break;
+  case 0500:
+    mw_lmc_left(mw, n&31);
+    break;
+  default:
+    TRACE68(mw_cat,"microwire: unknown command -- %04o\n", c);
+    return -1;
+  }
+  return 0;
+}
+
+int mw_command(mw_t * const mw)
+{
+  uint_t ctrl, data;
+
+  if (!mw) {
+    return -1;
+  }
+
+  ctrl = ( mw->map[MW_CTRL] << 8 ) + mw->map[MW_CTRL+1];
+  data = ( mw->map[MW_DATA] << 8 ) + mw->map[MW_DATA+1];
+
+  TRACE68(mw_cat,"microwire: shiting -- %04x:%04x\n", ctrl, data);
+
+  /* Find first address */
+  for(; ctrl && ( ctrl & 0xC000 ) != 0xC000; ctrl<<=1, data<<=1)
+    ;
+
+  if (!ctrl) {
+    TRACE68(mw_cat,"microwire: address -- not found\n");
+    return -1;
+  } else {
+    const uint_t addr = ( data >> 14 ) & 3;
+    assert( ( ctrl & 0xC000 ) == 0xC000);
+    TRACE68(mw_cat,"microwire: address -- %d\n", addr);
+    if ( addr != 2 )
+      return -1;
+  }
+
+  for (ctrl<<=2, data<<=2; ctrl && ( ctrl & 0xFF80 ) != 0xFF80;
+       ctrl<<=1, data<<=1)
+    ;
+
+  if (ctrl) {
+    const uint_t cmd = (data >>7 ) & 0x1ff;
+    assert( ( ctrl & 0xFF80 ) == 0xFF80 );
+    TRACE68(mw_cat,"microwire: command -- %04o\n", cmd);
+    return command_dispatcher(mw, cmd);
+  } else {
+    TRACE68(mw_cat,"microwire: command -- not found\n");
+  }
+
+  return -1;
+}
+
 
 /* ,-----------------------------------------------------------------.
- * |                         Micro-Wire reset                        |
+ * |                         Microwire reset                        |
  * `-----------------------------------------------------------------'
  */
 
 static void lmc_reset(mw_t * const mw)
 {
-  mw_set_lmc_mixer(mw,1);
-  mw_set_lmc_master(mw,40);
-  mw_set_lmc_left(mw,20);
-  mw_set_lmc_right(mw,20);
-  mw_set_lmc_high(mw,0);
-  mw_set_lmc_low(mw,0);
+  mw_lmc_mixer(mw,MW_MIXER_BOTH);
+  mw_lmc_master(mw,40);
+  mw_lmc_left(mw,20);
+  mw_lmc_right(mw,20);
+  mw_lmc_high(mw,12);
+  mw_lmc_low(mw,12);
 }
 
 int mw_reset(mw_t * const mw)
 {
   int i;
 
-  for (i=0; i<sizeof(mw->map); i++) {
+  for ( i=0; i<sizeof(mw->map); i++ ) {
     mw->map[i] = 0;
   }
   mw->ct = mw->end = 0;
   lmc_reset(mw);
 
+  msg68(mw_cat,"microwire: chip reset\n");
   return 0;
 }
 
@@ -267,54 +444,42 @@ void mw_cleanup(mw_t * const mw) {}
 int mw_setup(mw_t * const mw,
              mw_setup_t * const setup)
 {
-
   if (!mw || !setup || !setup->mem) {
+    msg68_error("microwire: invalid parameter\n");
     return -1;
   }
 
-  /* Default emulation mode */
-  if (setup->parms.emul == MW_EMUL_DEFAULT) {
-    setup->parms.emul = default_parms.emul;
-  }
+  /* setup emulation mode */
+  setup->parms.engine = mw_engine(mw, setup->parms.engine);
 
-  /* Default sampling rate */
-  if (!setup->parms.hz) {
-    setup->parms.hz = default_parms.hz;
-  }
+  /* setup sampling rate */
+  setup->parms.hz = mw_sampling_rate(mw, setup->parms.hz);
 
+  /* setup memory access */
   mw->mem     = setup->mem;
   mw->log2mem = setup->log2mem;
-  mw->ct_fix  = (sizeof(s32)<<3)-mw->log2mem;
+  mw->ct_fix  = ( sizeof(mwct_t) << 3 ) - mw->log2mem;
 
+  msg68(mw_cat,"microwire: %d-bit memory, %d-bit precision\n",
+        setup->log2mem, mw->ct_fix);
   mw_reset(mw);
-
-  msg68_info("micro-wire: select *%s* %dhz %d-bit memory\n",
-             setup->parms.emul == MW_EMUL_SIMPLE ? "SIMPLE":"LINEAR",
-             setup->parms.hz, setup->log2mem);
 
   return 0;
 }
 
 /* ,-----------------------------------------------------------------.
- * |                    Micro-Wire initialization                    |
+ * |                    Microwire initialization                    |
  * `-----------------------------------------------------------------'
  */
 
-int mw_init(mw_parms_t * const parms_data)
+int mw_init(int * argc, char ** argv)
 {
-  mw_parms_t * parms = parms_data ? parms_data : &default_parms;
+  if (mw_cat == msg68_DEFAULT)
+    mw_cat = msg68_cat("mw","microwire emulator", DEBUG_MW_O);
 
-  mw_cat = msg68_cat("mw","micro-wire emulator", DEBUG_MW_O);
-
-  /* Default emulation mode */
-  if (parms->emul == MW_EMUL_DEFAULT) {
-    parms->emul = default_parms.emul;
-  }
-
-  /* Default sampling rate */
-  if (!parms->hz) {
-    parms->hz = default_parms.hz;
-  }
+  /* Setup defaults */
+  default_parms.engine = MW_ENGINE_LINEAR;
+  default_parms.hz     = SAMPLING_RATE_DEF;
 
   /* Init volume table */
   init_volume();
@@ -322,19 +487,22 @@ int mw_init(mw_parms_t * const parms_data)
   return 0;
 }
 
-void mw_shutdown(void) {}
-
+void mw_shutdown(void)
+{
+  msg68_cat_free(mw_cat);
+  mw_cat = msg68_DEFAULT;
+}
 
 /* Rescale n sample of b with f ( << MW_MIX_FIX ) */
-static void rescale(s32 * b, int68_t f, int n)
+static void rescale(s32 * b, int f, int n)
 {
   if (!f) {
     do { *b++ = 0; } while (--n);
   } else if (f != (1<<MW_MIX_FIX)) {
     do {
-      int68_t v;
+      int v;
       v = ((*b)*f) >> MW_MIX_FIX;
-      *b++ = ((u32)(u16)v) + (v<<16);
+      *b++ = ( v << 16 ) | ( v & 0xFFFF );
     } while (--n);
   }
 }
@@ -347,31 +515,30 @@ static void no_mix_ste(mw_t * const mw, s32 * b, int n)
 
 static void skip_ste(mw_t * const mw, int n)
 {
-  addr68_t base, end2;
-  addr68_t ct, end, stp;
+  mwct_t base, end2, ct, end, stp;
 
   const int        loop = mw->map[MW_ACTI] & 2;
   const int        mono = (mw->map[MW_MODE]>>7) & 1;
-  const uint68_t    frq = 50066u >> ((mw->map[MW_MODE]&3)^3);
+  const uint_t      frq = 50066u >> ((mw->map[MW_MODE]&3)^3);
   const int      ct_fix = mw->ct_fix;
 
  /* Get internal register for sample base and sample end
-   * $$$ ??? what if base > end2 ???
-   */
-  base = TOINTERNAL(MW_BASH) << ct_fix;
-  end2 = TOINTERNAL(MW_ENDH) << ct_fix;
+  * $$$ ??? what if base > end2 ???
+  */
+  base = mw_counter_read(mw, MW_BASH);
+  end2 = mw_counter_read(mw, MW_ENDH);
 
-  /* Get current sample counter and end */
+  /* Get counters */
   ct  = mw->ct;
   end = mw->end;
-  stp = ( (frq * n) << ( ct_fix + 1 - mono ) ) / mw->hz;
+  stp = ( (mwct_t) ( frq * n ) << ( ct_fix + 1 - mono ) ) / mw->hz;
 
   if ( stp >= end - ct ) {
     if ( ! loop ) goto out;
     stp -= end - ct;
     ct   = base;
     end  = end2;
-    if (ct == end) {
+    if ( ct == end ) {
       stp = 0;
     } else {
       stp %= end - ct;
@@ -380,7 +547,7 @@ static void skip_ste(mw_t * const mw, int n)
   }
 
 out:
-  if (!loop && ct >= end) {
+  if ( !loop && ct >= end ) {
     mw->map[MW_ACTI] = 0;
     ct  = base;
     end = end2;
@@ -391,22 +558,21 @@ out:
 
 static void mix_ste(mw_t * const mw, s32 *b, int n)
 {
-  addr68_t base, end2;
-  addr68_t ct, end, stp;
-  const int vl = mw->db_conv[0/*mw->lmc.master+mw->lmc.left*/];
-  const int vr = mw->db_conv[0/*mw->lmc.master+mw->lmc.right*/];
-  const int loop = mw->map[MW_ACTI] & 2;
-  const int mono = (mw->map[MW_MODE]>>7) & 1;
-  const uint68_t frq = 50066u >> ((mw->map[MW_MODE]&3)^3);
+  mwct_t base, end2, ct, end, stp;
+  const int          vl = mw->db_conv[mw->lmc.master+mw->lmc.left];
+  const int          vr = mw->db_conv[mw->lmc.master+mw->lmc.right];
+  const int        loop = mw->map[MW_ACTI] & 2;
+  const int        mono = (mw->map[MW_MODE]>>7) & 1;
+  const uint_t      frq = 50066u >> ((mw->map[MW_MODE]&3)^3);
   const int68_t ym_mult = (mw->db_conv == Db_alone) ? 0 : MW_YM_MULT;
-  const int ct_fix = mw->ct_fix;
-  const s8 * spl = (const s8 *)mw->mem;
+  const int      ct_fix = mw->ct_fix;
+  const s8 *        spl = (const s8 *)mw->mem;
 
   /* Get internal register for sample base and sample end
    * $$$ ??? what if base > end2 ???
    */
-  base = TOINTERNAL(MW_BASH) << ct_fix;
-  end2 = TOINTERNAL(MW_ENDH) << ct_fix;
+  base = mw_counter_read(mw, MW_BASH);
+  end2 = mw_counter_read(mw, MW_ENDH);
 
   /* Get current sample counter and end */
   ct  = mw->ct;
@@ -416,11 +582,11 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
     if (!loop) {
       goto out;
     } else {
-      uint68_t overflow = ct-end;
-      uint68_t length   = end-base;
+      mwct_t overflow =  ct - end;
+      mwct_t length   = end - base;
       ct  = base;
       if (length) {
-        ct += overflow>length ? overflow%length : overflow;
+        ct += overflow > length ? overflow % length : overflow;
       }
       end = end2;
     }
@@ -428,7 +594,7 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
   /* Calculate sample step.
    * Stereo trick : Advance 2 times faster, take care of word alignment later.
    */
-  stp = (frq << (ct_fix+1-mono)) / mw->hz;
+  stp = ( (mwct_t) frq << ( ct_fix + 1 - mono ) ) / mw->hz;
 
   if (mono) {
     /* mix mono */
@@ -436,7 +602,7 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
       int68_t v, ym;
 
       ym = (*b) * ym_mult;
-      v = spl[(int)(ct>>ct_fix)];
+      v = spl[ (int)( ct >> ct_fix ) ];
       *b++ =
         (
           (u16)((v*vl + ym) >> MW_MIX_FIX)
@@ -450,8 +616,8 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
           --n;
           break;
         } else {
-          uint68_t overflow = ct-end;
-          uint68_t length   = end-base;
+          mwct_t overflow = ct-end;
+          mwct_t length   = end-base;
           ct  = base;
           if (length) {
             ct += overflow>length ? overflow%length : overflow;
@@ -459,16 +625,16 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
           end = end2;
         }
       }
-    } while(--n);
+    } while (--n);
 
   } else {
     /* mix stereo */
     do {
       int68_t l,r,ym;
-      int68_t addr;
+      int addr;
 
       ym = (*b) * ym_mult;
-      addr = (ct >> ct_fix) & ~1;
+      addr = ( ct >> ct_fix ) & ~1;
       l = spl[addr+0];
       r = spl[addr+1];
       *b++ =
@@ -484,8 +650,8 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
           --n;
           break;
         } else {
-          uint68_t overflow = ct-end;
-          uint68_t length   = end-base;
+          mwct_t overflow = ct-end;
+          mwct_t length   = end-base;
           ct  = base;
           if (length) {
             ct += overflow>length ? overflow%length : overflow;
@@ -493,7 +659,7 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
           end = end2;
         }
       }
-    } while(--n);
+    } while (--n);
   }
 
   out:
@@ -512,26 +678,26 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
 }
 
 /* ,-----------------------------------------------------------------.
- * |                      Micro-Wire process                         |
+ * |                      Microwire process                         |
  * `-----------------------------------------------------------------'
  */
-/* void mw_mix(mw_t * const mw, u32 *b, int n) */
-void mw_mix(mw_t * const mw, s32 *b, int n)
+
+void mw_mix(mw_t * const mw, s32 * b, int n)
 {
   if ( n <= 0 ) {
     return;
   }
-  
+
   if ( !b ) {
     if ( mw->map[MW_ACTI] & 1 ) {
       /* no buffer and active : advance counters only */
       skip_ste(mw,n);
     }
   } else if ( ! (mw->map[MW_ACTI] & 1 ) ) {
-    /* Micro-Wire desactivated */
+    /* Microwire desactivated */
     no_mix_ste(mw,b,n);
   } else {
-    /* Micro-Wire activated */
+    /* Microwire activated */
     mix_ste(mw,b,n);
   }
 }

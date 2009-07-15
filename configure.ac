@@ -56,6 +56,7 @@ AS_CASE(["x$enable_all"],
 SC68_ENABLE_PACKAGE([as68],[68k macro assembler],[[$]enable_devtools])
 SC68_ENABLE_PACKAGE([sourcer68],[68k sourcer],[[$]enable_devtools])
 SC68_ENABLE_PACKAGE([debug68],[68k debugger],[[$]enable_devtools])
+SC68_ENABLE_PACKAGE([cdbg68],[68k curses debugger],[[$]enable_devtools])
 SC68_ENABLE_PACKAGE([desa68],[68k disassembler library],[[$]enable_devtools])
 
 # API Libraries
@@ -68,7 +69,7 @@ SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[[$]enable_all])
 SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_all])
 
 # DOC
-SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[[$]enable_all])
+SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])
 
 # ,----------------------------------------------------------------------.
 # | Package Dependencies                                                 |
@@ -121,6 +122,10 @@ fi
 
 if test "x${enable_debug68}"   = "xyes"; then
   AC_CONFIG_SUBDIRS([debug68])
+fi
+
+if test "x${enable_cdbg68}"   = "xyes"; then
+  AC_CONFIG_SUBDIRS([cdbg68])
 fi
 
 if test "x${enable_sc68_doc}"   = "xyes"; then

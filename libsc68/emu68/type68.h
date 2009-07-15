@@ -84,6 +84,7 @@ typedef           u64 uint68_t;    /**< 64bit unsigned integer type. */
  *
  * */
 
+typedef   unsigned int    uint_t; /**< natural unsigned int.           */
 typedef       uint68_t cycle68_t; /**< Type for cycle counters.        */
 typedef        int68_t  addr68_t; /**< Type for 68k memory addressing. */
 typedef struct  io68_s    io68_t; /**< IO chip instance type.          */

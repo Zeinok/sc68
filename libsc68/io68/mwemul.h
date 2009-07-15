@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_mw_devel
+ * @ingroup   io68_lib
  * @file      io68/mwemul.h
  * @author    Benjamin Gerard
  * @date      1999/03/20
@@ -17,72 +17,87 @@
 #include "io68_api.h"
 #include "emu68/type68.h"
 
-/** @defgroup  io68_mw_devel  STE sound emulator
- *  @ingroup   io68_devel
+/**
+ *  @defgroup  io68_lib_mw  STE sound emulator
+ *  @ingroup   io68_lib
  *  @brief     STE (MicroWire/LMC/DMA) emulator.
  *
  *  @{
  */
 
-/** @name  Micro-Wire registers
- *  @{
- */
-
-#define MW_ACTI 0x01        /**< Microwire enabled */
-
-#define MW_BASH 0x03        /**< Microwire sample start address, bit 16-23 */
-#define MW_BASM (MW_BASH+2) /**< Microwire sample start address, bit 8-15  */
-#define MW_BASL (MW_BASH+4) /**< Microwire sample start address, bit 0-7   */
-
-#define MW_CTH 0x09         /**< Microwire sample counter, bit 16-23 */
-#define MW_CTM (MW_CTH+2)   /**< Microwire sample counter, bit 8-15  */
-#define MW_CTL (MW_CTH+4)   /**< Microwire sample counter, bit 0-7   */
-
-#define MW_ENDH 0x0f        /**< Microwire sample end address, bit 16-23 */
-#define MW_ENDM (MW_ENDH+2) /**< Microwire sample end address, bit 8-15  */
-#define MW_ENDL (MW_ENDH+4) /**< Microwire sample end address, bit 0-7   */
-
-#define MW_MODE 0x21        /**< Microwire playing mode     */
-
-#define MW_DATA 0x22        /**< Microwire data register    */
-#define MW_CTRL 0x24        /**< Microwire control register */
-
-/** @} */
-
-
-/** @name  Micro-Wire internal data
- *  @{
- */
-
-/** available emulation  modes. */
-enum mw_emul_e {
-  MW_EMUL_DEFAULT = 0, /**< Use default mode.                           */
-  MW_EMUL_SIMPLE,      /**< Simple emulation without interpolation.     */
-  MW_EMUL_LINEAR       /**< Simple emulation with linear interpolation. */
+/** Micro-Wire registers. */
+enum mw_reg_e {
+  MW_ACTI = 0x01,        /**< Microwire enabled */
+  MW_BASH = 0x03,        /**< Microwire sample start address, bit 16-23 */
+  MW_BASM = (MW_BASH+2), /**< Microwire sample start address, bit 8-15  */
+  MW_BASL = (MW_BASH+4), /**< Microwire sample start address, bit 0-7   */
+  MW_CTH  = 0x09,        /**< Microwire sample counter, bit 16-23 */
+  MW_CTM  = (MW_CTH+2),  /**< Microwire sample counter, bit 8-15  */
+  MW_CTL  = (MW_CTH+4),  /**< Microwire sample counter, bit 0-7   */
+  MW_ENDH = 0x0f,        /**< Microwire sample end address, bit 16-23 */
+  MW_ENDM = (MW_ENDH+2), /**< Microwire sample end address, bit 8-15  */
+  MW_ENDL = (MW_ENDH+4), /**< Microwire sample end address, bit 0-7   */
+  MW_MODE = 0x21,        /**< Microwire playing mode     */
+  MW_DATA = 0x22,        /**< Microwire data register    */
+  MW_CTRL = 0x24         /**< Microwire control register */
 };
 
-/** init parameters. */
-typedef struct
-{
-  int68_t  emul;  /**< Default interpolation mode. @see mw_emul_e. */
-  uint68_t hz;    /**< Default sampling rate in Hz.                */
-  int    * argc;  /**< Argument count (before and after).          */
-  char  ** argv;  /**< Arguments.                                  */
+/** Microwire/LMC mixer modes. */
+enum mw_mixer_e {
+  MW_MIXER_DB12     = 0,                /**< -12dB atttenuation. */
+  MW_MIXER_BOTH     = 1,                /**< normal blend.       */
+  MW_MIXER_STE      = 2,                /**< STE only.           */
+  MW_MIXER_RESERVED = 3,                /**< Reserved.           */
+};
+
+/** Microwire emulator engines. */
+enum mw_engine_e {
+  MW_ENGINE_QUERY   = -1, /**< Query default or current engine.         */
+  MW_ENGINE_DEFAULT = 0,  /**< Use default engine.                      */
+  MW_ENGINE_SIMPLE,       /**< Simple engine without interpolation.     */
+  MW_ENGINE_LINEAR        /**< Simple engine with linear interpolation. */
+};
+
+/** Microwire sampling rate is given in hertz (hz). */
+enum mw_hz_e {
+  MW_HZ_QUERY   = -1,                   /**< Query current value.   */
+  MW_HZ_DEFAULT = 0                     /**< Default sampling rate. */
+};
+
+/** LMC register values are mostly unsigned bytes. */
+enum mw_lmc_e {
+  MW_LMC_QUERY  = -1,                   /**< Query current value.   */
+};
+
+/** Microwire configuration parameters. */
+typedef struct {
+  int engine;       /**< @ref mw_engine_e "Microwire emulator engine". */
+  int hz;           /**< @ref mw_hz_e     "Microwire sampling rate".   */
 } mw_parms_t;
 
-/** setup data. */
+/** Microwire setup structure. */
 typedef struct {
-  mw_parms_t parms; /**< Mw_ params.                       */
+  mw_parms_t parms; /**< configuration parameters.           */
   u8 * mem;         /**< 68K memory buffer.                  */
   int log2mem;      /**< 68K memory buffer size (2^log2mem). */
 } mw_setup_t;
 
-typedef struct {
-  u8 map[0x40];     /**< Micro-Wire register array.                  */
-  addr68_t ct;      /**< DMA current location (8 bit fixed point).   */
-  addr68_t end;     /**< DMA end point location (8 bit fixed point). */
+/** Type used by internal counters.
+ *
+ *   This type must be an unsigned of at least 32-bit. Values are
+ *   always fixed point. The amount of shifting is calculated so that
+ *   the most useful bit is the most signifiant bit. Therefore these
+ *   counters get an automatic natural modulo.
+ */
+typedef uint68_t mwct_t;
 
-  /** LMC */
+/** Microwire emulator instance. */
+typedef struct {
+  u8 map[0x40];    /**< Microwire register array.                   */
+  mwct_t ct;      /**< DMA current location (ct_fix fixed point).   */
+  mwct_t end;     /**< DMA end point location (ct_fix fixed point). */
+
+  /** LMC chip. */
   struct
   {
     u8 master; /**< Master volume.             */
@@ -94,189 +109,219 @@ typedef struct {
     u8 mixer;  /**< Mixer mode.                */
     u8 align;  /**< reserved for struct align. */
   } lmc;
-  const int68_t * db_conv; /**< Current decibel table (depend on lmc::mixer) */
+  const int * db_conv;       /**< Current decibel conversion table. */
 
-  uint68_t hz;      /**< Output frequency.                        */
-  int ct_fix;       /**< fixed point: sizeof(addr68_t)*8-log2mem. */
-  const u8 * mem;   /**< 68000 memory buffer.                     */
-  int log2mem;      /**< Size of 68K memory (2^log2mem).          */
+  int engine;         /**< @ref mw_engine_e "Emulator engine".      */
+  int hz;             /**< @ref mw_hz_e "Sampling rate" (in hz).    */
+  int ct_fix;         /**< fixed point for automatic memory modulo. */
+  const u8 * mem;     /**< 68000 memory buffer.                     */
+  int log2mem;        /**< Size of 68K memory (2^log2mem).          */
 
 } mw_t;
 
 
-/** @} */
+static inline
+mwct_t mw_counter_read(const mw_t * const mw, const int n)
+{
+  return
+    (mwct_t) (
+      ( mw->map[n] << 16 ) + ( mw->map[n+2] << 8 ) + mw->map[n+4] )
+    << mw->ct_fix;
+}
 
+static inline
+void mw_counter_write(mw_t * const mw, const int n, const mwct_t v)
+{
+  uint vnorm = v >> mw->ct_fix;
+  mw->map[n+0] = vnorm >> 16;
+  mw->map[n+2] = vnorm >>  8;
+  mw->map[n+4] = vnorm;
+}
 
-/** @name  Library initialization functions
+/** @name  Microwire emulator functions
  *  @{
  */
 
 IO68_EXTERN
-/** Micro-Wire emulator initialization.
+/** Microwire emulator setup.
  *
- *    The mw_init() function must be call before all other MW
- *    functions.  It mainly setups internal tables.
+ *    The mw_init() function must be call before any other
+ *    function. It mainly setups internal tables.
  *
- *    @return error-code (always success)
- *    @retval 0  Success
+ *    @return error-code
+ *    @retval  0 on success
+ *    @retval -1 on error (should never happen)
  *
  *  @see mw_shutdown()
  */
-int mw_init(mw_parms_t * const parms);
+int mw_init(int * argc,char ** argv);
 
 IO68_EXTERN
-/** Micro-Wire emulator shutdown.
+/** Microwire emulator shutdown.
  *
  *  @see mw_init()
  */
 void mw_shutdown(void);
 
-/**@}*/
-
-/** @name  MicroWire emulator initialization functions
- *  @{
+IO68_EXTERN
+/** Setup microwire instance.
+ *
+ *  @param   mw     microwire instance
+ *  @param   setup  setup configuration
+ *  @return         error status
+ *  @retval   0     on success
+ *  @retval  -1     on error
  */
+int mw_setup(mw_t * const mw, mw_setup_t * const setup);
 
 IO68_EXTERN
-int mw_setup(mw_t * const mw,
-             mw_setup_t * const setup);
-
-IO68_EXTERN
+/** Cleanup microwire instance. */
 void mw_cleanup(mw_t * const mw);
 
 IO68_EXTERN
-/** Set/Get sampling rate.
+/** Set/Get microwire sampling rate.
  *
- *    The mw_sampling_rate() function set Micro-Wire emulator sampling
- *    rate. f is given in hz. If f is 0 the current replay is return.
+ *    The mw_sampling_rate() function set microwire emulator sampling
+ *    rate.
  *
- *  @param  mw  microwire instance
- *  @param  f   sampling rate in hz (0 to get current value).
- *
- *  @return new sampling rate
+ *  @param   mw  microwire instance (0 for set or get library default)
+ *  @param   hz  @ref mw_hz_e "sampling rate"
+ *  @return      @ref mw_hz_e "sampling rate"
  */
-uint68_t mw_sampling_rate(mw_t * const mw, uint68_t f);
+int mw_sampling_rate(mw_t * const mw, int hz);
 
 IO68_EXTERN
-/** Micro-Wire hardware reset.
+/** Set/Get microwire emulator engine.
+ *  @param   mw      microwire instance (0 for set or get library default)
+ *  @param   engine  @ref mw_engine_e "engine descriptor"
+ *  @return          @ref mw_engine_e "engine descriptor"
+ */
+int mw_engine(mw_t * const mw, int engine);
+
+IO68_EXTERN
+/** Microwire reset.
  *
- *    The mw_reset() reset function perform a Micro-Wire reset. It performs
- *    following operations :
- *    - all registers zeroed
- *    - all internal counter zeroed
- *    - LMC reset
- *      - mixer mode YM2149+Micro-Wire
- *      - master volume to -40db
- *      - left and right volumes to -20db
- *      - low-pass filter to 0
+ *    The mw_reset() reset function restore the chip on to its default
+ *    configuation or what it is believed to be.
  *
- *    @return error-code (always success)
- *    @retval 0  Success
+ *  @param   mw   microwire instance
+ *  @return       error status (always success)
+ *  @retval   0   on success
+ *  @retval  -1   on error
  */
 int mw_reset(mw_t * const mw);
 
-
-/** @} */
-
-/** @name  Emulation functions
- *  @{
- */
-
 IO68_EXTERN
-/** Execute Micro-Wire emulation.
+/** Execute microwire emulation.
  *
  *    The mw_mix() function processes sample mixing with current internal
  *    parameters for n samples. Mixed samples are stored in a large enough
  *    (at least n) 32 bit buffer pointed by b. This buffer have to be
  *    previously filled with the YM-2149 samples. Typically it is the YM-2149
- *    emulator output buffer. This allows Micro-Wire emulator to honnor the
+ *    emulator output buffer. This allows Microwire emulator to honnor the
  *    LMC mixer mode.iven LMC mode. This porocess include the mono to stereo
  *    expansion. The mem68 starting pointer locates the 68K memory buffer
  *    where samples are stored to allow DMA fetch emulation.
  *
- *    @param  b      Pointer to YM-2149 source sample directly used for
- *                   Micro-Wire output mixing.
+ *    @param  out    Pointer to YM-2149 source sample directly used for
+ *                   Microwire output mixing.
  *    @param  mem68  Pointer to 68K memory buffer start address
- *    @param  n      Number of sample to mix in b buffer
+ *    @param  n      Number of sample to mix in out buffer
  *
  *    @see YM_mix()  @see YM_get_buffer()
  */
-void mw_mix(mw_t * const mw,
-            s32 *b, int n);
+void mw_mix(mw_t * const mw, s32 * out, int n);
 
 /** @} */
 
 
-/** @name  Micro-Wire LMC control functions
+/** @name  Microwire LMC functions
  *  @{
  */
 
-IO68_EXTERN
-/** Set LMC mixer type.
- *
- *   The mw_set_lmc_mixer() function choose the mixer mode :
- *   - 0  -12 Db
- *   - 1  YM+STE
- *   - 2  STE only
- *   - 3  reserved ???
- *
- *   @param n  New mixer mode (see above)
- */
-void mw_set_lmc_mixer(mw_t * const mw, int n);
 
 IO68_EXTERN
-/** Set LMC master volume.
+/** Set/Get LMC mixer mode.
  *
- *  @param  n  New volume in range [0..40]=>[-80Db..0Db]
+ *   The mw_lmc_mixer() function selects or retrieves the function
+ *   used by the chip to blend the YM-2149 signal and the digital
+ *   signal produce by microwire chip.
  *
- *  @see mw_set_lmc_left()
- *  @see mw_set_lmc_right()
+ *  @param   mw    microwire instance
+ *  @param   mode  @ref mw_mixer_e "mixer mode"
+ *  @return        @ref mw_mixer_e "mixer mode"
  */
-void mw_set_lmc_master(mw_t * const mw, int n);
+int mw_lmc_mixer(mw_t * const mw, int mode);
 
 IO68_EXTERN
-/** Set LMC left channel volume.
+/** Set/Get LMC master volume.
  *
- *    Set LMC left channel volume in decibel.
+ *  @param   mw  microwire instance
+ *  @param   n   @ref mw_lmc_e "volume" in range [0..40] for [-80..0] dB
+ *  @return      master @ref mw_lmc_e "volume"
  *
- *    @param  n  New volume in range [0..20]=>[-40Db..0Db]
- *
- *  @see mw_set_lmc_master()
- *  @see mw_set_lmc_right()
+ *  @see mw_lmc_left()
+ *  @see mw_lmc_right()
  */
-void mw_set_lmc_left(mw_t * const mw, int n);
+int mw_lmc_master(mw_t * const mw, int n);
 
 IO68_EXTERN
-/** Set LMC right channel volume.
+/** Set/Get LMC left channel volume.
  *
- *    @param  n  New volume in range [0..20]=>[-40Db..0Db]
+ *  @param   mw  microwire instance
+ *  @param   n   @ref mw_lmc_e "volume" in range [0..20] for [-40..0] dB
+ *  @return      left @ref mw_lmc_e "volume"
  *
- *  @see mw_set_lmc_master()
- *  @see mw_set_lmc_left()
+ *  @see mw_lmc_master()
+ *  @see mw_lmc_right()
  */
-void mw_set_lmc_right(mw_t * const mw, int n);
+int mw_lmc_left(mw_t * const mw, int n);
 
 IO68_EXTERN
-/** Set high pass filter.
+/** Set/Get LMC right channel volume.
  *
- *  @param  n  New high pass filter [0..12]=>[-12Db..0Db]
+ *  @param   mw  microwire instance
+ *  @param   n   @ref mw_lmc_e "volume" in range [0..20] for [-40..0] dB
+ *  @return      right @ref mw_lmc_e "volume"
  *
- *  @see mw_set_lmc_low()
- *
- *  @warning  Filters are not supported by MicroWire emulator.
+ *  @see mw_lmc_master()
+ *  @see mw_lmc_left()
  */
-void mw_set_lmc_high(mw_t * const mw, int n);
+int mw_lmc_right(mw_t * const mw, int n);
 
 IO68_EXTERN
-/** Set low pass filter.
+/** Set/Get high pass filter.
  *
- *  @param  n  New low pass filter [0..12]=>[-12Db..0Db]
+ *  @param   mw  microwire instance
+ *  @param    n  @mw_lmc_e "high pass filter" in range [0..12] for [-12..0] dB
+ *  @return      @mw_lmc_e "high pass filter"
  *
- *  @see mw_set_lmc_high()
- *
- *  @warning  Unsupported by MicroWire emulator.
+ *  @see      mw_lmc_low()
+ *  @warning  Filters are not supported by this microwire emulator.
  */
-void mw_set_lmc_low(mw_t * const mw,int n);
+int mw_lmc_high(mw_t * const mw, int n);
+
+IO68_EXTERN
+/** Set/Get low pass filter.
+ *
+ *  @param   mw  microwire instance
+ *  @param    n  @mw_lmc_e "low pass filter" in range [0..12] for [-12..0] dB
+ *  @return      @mw_lmc_e "low pass filter"
+ *
+ *  @see      mw_lmc_high()
+ *  @warning  Filters are not supported by this microwire emulator.
+ */
+int mw_lmc_low(mw_t * const mw,int n);
+
+IO68_EXTERN
+/** Parse and execute a microwire command.
+ *
+ *  @param   mw  microwire instance
+ *  @retval  0 on success (a command was found)
+ *  @retval -1 on error
+ *
+ */
+int mw_command(mw_t * const mw);
 
 /** @} */
 

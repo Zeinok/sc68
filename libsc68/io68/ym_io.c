@@ -231,9 +231,9 @@ static io68_t ym_io =
   ymio_destroy
 };
 
-int ymio_init(ym_parms_t * const parms)
+int ymio_init(int * argc, char ** argv)
 {
-  return ym_init(parms);
+  return ym_init(argc,argv);
 }
 
 void ymio_shutdown(void)
@@ -244,7 +244,7 @@ void ymio_shutdown(void)
 static int get_power_of_2(int v)
 {
   int p,r;
-  for (p=0,r=1; r; ++p,r<<=1) {
+  for ( p=0,r=1; r; ++p, r<<=1 ) {
     if (r == v) return p;
   }
   return -1;
@@ -287,7 +287,7 @@ io68_t * ymio_create(emu68_t * const emu68, ym_parms_t * const parms)
   return &ymio->io;
 }
 
-uint68_t ymio_sampling_rate(io68_t * const io, uint68_t sampling_rate)
+int ymio_sampling_rate(io68_t * const io, int sampling_rate)
 {
   return io
     ? ym_sampling_rate(&((ym_io68_t*)io)->ym,sampling_rate)

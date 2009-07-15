@@ -33,7 +33,10 @@
 # include <default_option68.h>
 #endif
 
+
 #include "ymemul.h"
+#include "emu68/assert68.h"
+
 #include <sc68/msg68.h>
 #include <sc68/string68.h>
 #include <sc68/option68.h>
@@ -76,11 +79,11 @@ static struct {
   const char * name;
   ym_puls_filter_t filter;
 } filters[] = {
-  { "2-pole", filter_2pole },   /* first is default */
-  { "none",   filter_none  },
-  { "boxcar", filter_boxcar},
-  { "1-pole", filter_1pole },
-  { "mixed",  filter_mixed }
+  { "2-poles", filter_2pole },   /* first is default */
+  { "none",    filter_none  },
+  { "boxcar",  filter_boxcar},
+  { "1-pole",  filter_1pole },
+  { "mixed",   filter_mixed }
 };
 static const int n_filters = sizeof(filters) / sizeof(*filters);
 static int default_filter = 0;
@@ -206,12 +209,7 @@ static void do_noise(ym_t * const ym, cycle68_t ymcycle)
   for (access=regs->head, lastcycle=0; access; access=access->link) {
     int ymcycles = access->ymcycle-lastcycle;
 
-    if (access->ymcycle > ymcycle) {
-      TRACE68(ym_cat,"%s access reg %X out of frame!! (%u>%u %u)\n",
-              regs->name, access->reg, access->ymcycle, ymcycle,
-              access->ymcycle/ymcycle);
-      break;
-    }
+    assert(access->ymcycle <= ymcycle);
 
     if (ymcycles) {
       lastcycle = access->ymcycle - noise_generator(ym,ymcycles);
@@ -755,7 +753,7 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
  * @warning irate <= 262143 or 32bit overflow
  */
 static s32 * resampling(s32 * dst, const int n,
-                        const int _vol,
+/*                         const int _vol, */
                         const uint68_t irate, const uint68_t orate)
 {
   s32   * const src = dst;
@@ -802,7 +800,7 @@ static void filter_none(ym_t * const ym)
 
   if (n > 0) {
     ym->outptr =
-      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>3, ym->hz);
+      resampling(ym->outbuf, n, /* 64, */ ym->clock>>3, ym->hz);
   }
 }
 
@@ -821,7 +819,7 @@ static void filter_boxcar2(ym_t * const ym)
     } while (--m);
 
     ym->outptr =
-      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>(3+1), ym->hz);
+      resampling(ym->outbuf, n, /* 64, */ ym->clock>>(3+1), ym->hz);
   }
 }
 
@@ -840,7 +838,7 @@ static void filter_boxcar4(ym_t * const ym)
     } while (--m);
 
     ym->outptr =
-      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>(3+2), ym->hz);
+      resampling(ym->outbuf, n, /* 64, */ ym->clock>>(3+2), ym->hz);
   }
 }
 
@@ -918,7 +916,7 @@ static void filter_mixed(ym_t * const ym)
     puls->lopass_out1 = l_o1;
 
     ym->outptr =
-      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>(3+2), ym->hz);
+      resampling(ym->outbuf, n, /* 64, */ ym->clock>>(3+2), ym->hz);
   }
 }
 
@@ -973,7 +971,7 @@ static void filter_1pole(ym_t * const ym)
     puls->lopass_out1 = l_o1;
 
     ym->outptr =
-      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>(3+0), ym->hz);
+      resampling(ym->outbuf, n, /* 64, */ ym->clock>>(3+0), ym->hz);
   }
 }
 
@@ -1046,7 +1044,7 @@ static void filter_2pole(ym_t * const ym)
     puls->hipass_out1 = h_o1;
 
     ym->outptr =
-      resampling(ym->outbuf, n, ym->outlevel, ym->clock>>3, ym->hz);
+      resampling(ym->outbuf, n, /* 64, */ ym->clock>>3, ym->hz);
   }
 }
 
@@ -1069,7 +1067,7 @@ int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
 
 
 static
-uint68_t buffersize(const ym_t const * ym, const cycle68_t ymcycles)
+int buffersize(const ym_t const * ym, const cycle68_t ymcycles)
 {
   return ((ymcycles+7u) >> 3);
 }
@@ -1089,12 +1087,11 @@ int ym_puls_setup(ym_t * const ym)
   ym->cb_reset         = reset;
   ym->cb_run           = run;
   ym->cb_buffersize    = buffersize;
-  ym->cb_sampling_rate = (void*)0;
+  ym->cb_sampling_rate = 0;
 
   /* use default filter */
   puls->ifilter        = default_filter;
-  msg68_info("ym-2149: select *%s* filter\n",
-             filters[puls->ifilter].name);
+  msg68_info("ym-2149: filter -- *%s*\n", filters[puls->ifilter].name);
 
   return err;
 }
@@ -1129,12 +1126,10 @@ int ym_puls_options(int argc, char ** argv)
       }
     }
     if (i == n_filters) {
-      msg68_warning("ym-2149: bad filter (%s)\n"
-                    "       : %s\n",
-                    opt->val.str, opt->desc);
+      msg68_warning("ym-2149: invalid filter -- *%s*\n", opt->val.str);
     }
   }
-  msg68_info("ym-2149: set default filter *%s* \n",
+  msg68_info("ym-2149: default filter -- *%s* \n",
              filters[default_filter].name);
 
   return argc;

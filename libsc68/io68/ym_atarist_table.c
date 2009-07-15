@@ -23,8 +23,16 @@
 
 /* Table of 4 bit D/A output level for 1 channel.*/
 static const u16 volumetable_original[16 * 16 * 16] =
-#include "ym_fixed_vol.h"
+
+#undef YMORGVOL
+
+#ifndef YMORGVOL
+# include "ym_fixed_vol.h"
+#else
+# include "ymoutorg.h"
+#endif
   ;
+
 static int
 volumetable_get(int i, int j, int k)
 {
@@ -181,7 +189,7 @@ void ym_create_5bit_atarist_table(s16 * out, unsigned int level)
 
       if (tmp < min || tmp > max)
         msg68_critical
-          ("ym-2149: *ATARI-ST* volumes value %d out of range [%d..%d]\n",
+          ("ym-2149: volume model -- *ATARI-ST* -- %d out of range [%d..%d]\n",
            tmp,min,max);
 
       res = (tmp-min) * level / div - center;
@@ -189,6 +197,6 @@ void ym_create_5bit_atarist_table(s16 * out, unsigned int level)
     }
   }
 
-  msg68_info("ym-2149: using *ATARI-ST* volumes %d [%d..%d]\n",
-             level, out[0],out[0x7FFF]);
+  msg68_info("ym-2149: volume model -- *ATARI-ST* -- [%d..%d]\n",
+             out[0],out[0x7FFF]);
 }

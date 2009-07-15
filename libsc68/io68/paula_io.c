@@ -36,8 +36,7 @@ typedef struct {
 
 static void reload(paulav_t * const v, const u8 * const p, const int fix);
 
-static inline unsigned int clearset(const unsigned int v,
-                                    const unsigned int clrset)
+static inline int clearset(const int v, const int clrset)
 {
   if (clrset & 0x8000) {
     return (v | clrset) & 0x7FFF;
@@ -72,6 +71,11 @@ static int68_t _paula_readB(paula_io68_t * const paulaio,
 
   switch(i) {
   case PAULA_VHPOSR:
+    /* This is an ugly HAXXX: some player use this register in order
+     * to wait for an actual DMA access to occur. Here the register is
+     * just incremented each time it is read so that these players do
+     * not loop forever.
+     */
     v = paula->vhpos++;
     break;
 
@@ -168,10 +172,10 @@ static void start_DMA(paula_t * const paula, const int bit)
   cur = DMACON(paula->dmacon);
   chg = cur & ~old;
 
-  if(chg&1) reload(paula->voice+0, paula->map+PAULA_VOICEA, paula->ct_fix);
-  if(chg&2) reload(paula->voice+1, paula->map+PAULA_VOICEB, paula->ct_fix);
-  if(chg&4) reload(paula->voice+2, paula->map+PAULA_VOICEC, paula->ct_fix);
-  if(chg&8) reload(paula->voice+3, paula->map+PAULA_VOICED, paula->ct_fix);
+  if (chg&1) reload(paula->voice+0, paula->map+PAULA_VOICEA, paula->ct_fix);
+  if (chg&2) reload(paula->voice+1, paula->map+PAULA_VOICEB, paula->ct_fix);
+  if (chg&4) reload(paula->voice+2, paula->map+PAULA_VOICEC, paula->ct_fix);
+  if (chg&8) reload(paula->voice+3, paula->map+PAULA_VOICED, paula->ct_fix);
 }
 #endif
 
@@ -184,16 +188,14 @@ static inline void stop_DMA(paula_t * const paula, const int bit)
 /* Reload paula internal register with current value */
 static void reload(paulav_t * v, const u8 * p, const int fix)
 {
-  int len;
+  plct_t len;
 
-  v->start = v->adr = ((p[1]<<16) | (p[2]<<8) | p[3])<<fix;
-
+  v->start = v->adr = (plct_t) ( (p[1]<<16) | (p[2]<<8) | p[3] ) << fix;
   len = (p[4]<<8) | p[5];
   len |= (!len) << 16;
   len <<= 1+fix;
   v->end = v->start + len;
 }
-
 
 /* Write INTREQ :
  *
@@ -204,7 +206,6 @@ static void reload(paulav_t * v, const u8 * p, const int fix)
  */
 static void write_intreq(paula_t * const paula, const int intreq)
 {
-
   if ( !(intreq & 0x8000) ) {
     /* Clearing ... */
     paula->intreq &= ~intreq;
@@ -246,7 +247,9 @@ static void _paula_writeB(paula_io68_t * const paulaio,
 
   case PAULA_INTREQL:
     write_intreq(paula,
-                 (paula->map[PAULA_INTREQH]<<8)|paula->map[PAULA_INTREQL]);
+                 ( paula->map[PAULA_INTREQH] << 8 )
+                 |
+                 paula->map[PAULA_INTREQL] );
     break;
 
   }
@@ -283,10 +286,10 @@ static void _paula_writeW(paula_io68_t * const paulaio,
 
     start = new_dmaena & ~old_dmaena;
 
-    if(start&1) reload(paula->voice+0,paula->map+PAULA_VOICEA,paula->ct_fix);
-    if(start&2) reload(paula->voice+1,paula->map+PAULA_VOICEB,paula->ct_fix);
-    if(start&4) reload(paula->voice+2,paula->map+PAULA_VOICEC,paula->ct_fix);
-    if(start&8) reload(paula->voice+3,paula->map+PAULA_VOICED,paula->ct_fix);
+    if (start&1) reload(paula->voice+0,paula->map+PAULA_VOICEA,paula->ct_fix);
+    if (start&2) reload(paula->voice+1,paula->map+PAULA_VOICEB,paula->ct_fix);
+    if (start&4) reload(paula->voice+2,paula->map+PAULA_VOICEC,paula->ct_fix);
+    if (start&8) reload(paula->voice+3,paula->map+PAULA_VOICED,paula->ct_fix);
 
   } break;
 
@@ -380,9 +383,9 @@ io68_t * paulaio_create(emu68_t * const emu68, paula_parms_t * const parms)
       if (parms) {
         setup.parms = *parms;
       } else {
-        setup.parms.emul  = PAULA_EMUL_DEFAULT;
-        setup.parms.hz    = 0;
-        setup.parms.clock = PAULA_CLOCK_DEFAULT;
+        setup.parms.engine = PAULA_ENGINE_DEFAULT;
+        setup.parms.hz     = 0;
+        setup.parms.clock  = PAULA_CLOCK_DEFAULT;
       }
       setup.mem     = emu68->mem;
       setup.log2mem = emu68->log2mem;
@@ -393,22 +396,14 @@ io68_t * paulaio_create(emu68_t * const emu68, paula_parms_t * const parms)
   return &paulaio->io;
 }
 
-int paulaio_init(paula_parms_t * const parms)
+int paulaio_init(int * argc, char ** argv)
 {
-  return paula_init(parms);
+  return paula_init(argc, argv);
 }
 
 void paulaio_shutdown(void)
 {
   paula_shutdown();
-}
-
-uint68_t paulaio_sampling_rate(io68_t * const io, uint68_t sampling_rate)
-{
-  return io
-    ? paula_sampling_rate(&((paula_io68_t*)io)->paula,sampling_rate)
-    : sampling_rate
-    ;
 }
 
 paula_t * paulaio_emulator(io68_t * const io)
@@ -417,4 +412,9 @@ paula_t * paulaio_emulator(io68_t * const io)
     ? &((paula_io68_t*)io)->paula
     : 0
     ;
+}
+
+int paulaio_sampling_rate(io68_t * const io, int hz)
+{
+  return paula_sampling_rate(paulaio_emulator(io),hz);
 }

@@ -27,7 +27,7 @@
 
 IO68_EXTERN
 /** Initialize paula library. */
-int paulaio_init(paula_parms_t * const parms);
+int paulaio_init(int * argc, char ** argv);
 
 IO68_EXTERN
 /** Shutdown paula library. */
@@ -48,12 +48,10 @@ IO68_EXTERN
 /** Get/Set sampling rate.
  *
  *  @param  io  Paula IO instance
- *  @param  hz  0:read current sampling rate, >0:new requested sampling rate
- *
- *  @return actual sampling rate
- *
+ *  @param  hz  @ref paula_hz_e "sampling rate" in hz
+ *  @return     Actual @ref paula_hz_e "sampling rate".
  */
-uint68_t paulaio_sampling_rate(io68_t * const io, uint68_t sampling_rate);
+int paulaio_sampling_rate(io68_t * const io, int hz);
 
 IO68_EXTERN
 /** Get paula emulator instance. */

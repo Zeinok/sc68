@@ -11,13 +11,8 @@
 
 /* Copyright (C) 1998-2009 Benjamin Gerard */
 
-
 #ifndef _FILE68_ALLOC68_H_
 #define _FILE68_ALLOC68_H_
-
-#ifndef FILE68_API
-# include "file68_api.h"
-#endif
 
 /** @defgroup  file68_alloc  Dynamic memory management
  *  @ingroup   file68_lib
@@ -40,13 +35,8 @@
  *  @{
  */
 
-/** Alloc function (malloc). */
-typedef void * (*alloc68_t)(unsigned int);
-
-/** Free function (free). */
-typedef void (*free68_t)(void *);
-
-FILE68_API
+#ifndef alloc68
+#include <stdlib.h>
 /** Allocate dynamic memory.
  *
  *   The alloc68() function calls user defined dynamic memory
@@ -61,9 +51,11 @@ FILE68_API
  * @see calloc68()
  * @see free68()
  */
-void * alloc68(unsigned int n);
+#define alloc68(N) malloc(N)
+#endif
 
-FILE68_API
+#ifndef calloc68
+#include <stdlib.h>
 /** Allocate and clean dynamic memory.
  *
  *   The calloc68() function calls user defined dynamic memory
@@ -78,9 +70,11 @@ FILE68_API
  * @see alloc68()
  * @see free68()
  */
-void * calloc68(unsigned int n);
+#define calloc68(N) calloc(N,1)
+#endif
 
-FILE68_API
+#ifndef free68
+#include <stdlib.h>
 /** Free dynamic memory.
  *
  *   The free68() function calls user defined dynamic memory
@@ -96,31 +90,8 @@ FILE68_API
  * @see alloc68()
  * @see calloc68()
  */
-void free68(void * data);
-
-FILE68_API
-/** Set/get dynamic memory allocation handler.
- *
- * @param  alloc  Set new alloc handler (0:get old value).
- *
- * @return previous alloc handler.
- *
- * @see alloc68()
- * @see calloc68()
- *
- */
-alloc68_t alloc68_set(alloc68_t alloc);
-
-FILE68_API
-/** Set/get dynamic memory free handler.
- *
- * @param  free  Set new free handler (0:get old value).
- * @return previous free handler.
- *
- * @see free68()
- * @see alloc68_set()
- */
-free68_t free68_set(free68_t free);
+#define free68(DATA) free(DATA);
+#endif
 
 /**
  *  @}

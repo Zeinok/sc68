@@ -23,21 +23,20 @@ hdir=sc68
 null=
 
 mysources=\
- $(sdir)/alloc68.c $(sdir)/endian68.c $(sdir)/error68.c			\
- $(sdir)/file68.c $(sdir)/gzip68.c $(sdir)/ice68.c $(sdir)/init68.c	\
- $(sdir)/istream68.c $(sdir)/istream68_ao.c $(sdir)/istream68_curl.c	\
- $(sdir)/istream68_fd.c $(sdir)/istream68_file.c			\
- $(sdir)/istream68_mem.c $(sdir)/istream68_null.c			\
- $(sdir)/istream68_pa.c $(sdir)/istream68_z.c $(sdir)/msg68.c		\
- $(sdir)/option68.c $(sdir)/registry68.c $(sdir)/rsc68.c		\
- $(sdir)/string68.c $(sdir)/url68.c $(null)
+ $(sdir)/error68.c $(sdir)/file68.c $(sdir)/gzip68.c $(sdir)/ice68.c	\
+ $(sdir)/init68.c $(sdir)/istream68.c $(sdir)/istream68_ao.c		\
+ $(sdir)/istream68_curl.c $(sdir)/istream68_fd.c			\
+ $(sdir)/istream68_file.c $(sdir)/istream68_mem.c			\
+ $(sdir)/istream68_null.c $(sdir)/istream68_pa.c $(sdir)/istream68_z.c	\
+ $(sdir)/msg68.c $(sdir)/option68.c $(sdir)/registry68.c		\
+ $(sdir)/rsc68.c $(sdir)/string68.c $(sdir)/url68.c $(null)
 
 apiheaders=\
- $(hdir)/alloc68.h $(hdir)/audio68.h $(hdir)/endian68.h		\
- $(hdir)/error68.h $(hdir)/file68.h $(hdir)/file68_api.h	\
- $(hdir)/init68.h $(hdir)/istream68.h $(hdir)/istream68_def.h	\
- $(hdir)/msg68.h $(hdir)/option68.h $(hdir)/registry68.h	\
- $(hdir)/rsc68.h $(hdir)/string68.h $(hdir)/url68.h $(null)
+ $(hdir)/alloc68.h $(hdir)/audio68.h $(hdir)/error68.h		\
+ $(hdir)/file68.h $(hdir)/file68_api.h $(hdir)/init68.h		\
+ $(hdir)/istream68.h $(hdir)/istream68_def.h $(hdir)/msg68.h	\
+ $(hdir)/option68.h $(hdir)/registry68.h $(hdir)/rsc68.h	\
+ $(hdir)/string68.h $(hdir)/url68.h $(null)
 
 otherheaders=\
  $(hdir)/gzip68.h $(hdir)/ice68.h $(hdir)/istream68_ao.h		\

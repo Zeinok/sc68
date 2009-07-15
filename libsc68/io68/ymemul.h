@@ -107,33 +107,38 @@ typedef union ym_reg_u {
 # define YM_ENV_TABLE 1
 #endif
 
-/** Available emulation modes. */
-enum ym_emul_e {
-  YM_EMUL_DEFAULT = 0, /**< Use default mode.                            */
-  YM_EMUL_PULS,        /**< sc68 original (pulse) emulation.             */
-  YM_EMUL_BLEP,        /**< Antti Lankila's Band Limited Step synthesis. */
-  YM_EMUL_DUMP         /**< Dummy register dump.                         */
+/** YM-2149 emulation engines. */
+enum ym_engine_e {
+  YM_ENGINE_QUERY   = -1, /**< Query current or default engine.             */
+  YM_ENGINE_DEFAULT = 0,  /**< Use default mode.                            */
+  YM_ENGINE_PULS,         /**< sc68 original (pulse) emulation.             */
+  YM_ENGINE_BLEP,         /**< Antti Lankila's Band Limited Step synthesis. */
+  YM_ENGINE_DUMP          /**< Dummy register dump.                         */
 };
 
-/** Available emulation modes. */
+/** YM-2149 volume models. */
 enum ym_vol_e {
-  YM_VOL_DEFAULT = 0, /**< Use default mode.           */
-  YM_VOL_ATARIST,     /**< Atari-ST volume table.      */
-  YM_VOL_LINEAR,      /**< Linear mixing volume table. */
+  YM_VOL_QUERY   = -1, /**< Query current or default volume model. */
+  YM_VOL_DEFAULT = 0,  /**< Use default volume model.              */
+  YM_VOL_ATARIST,      /**< Atari-ST volume table.                 */
+  YM_VOL_LINEAR,       /**< Linear mixing volume table.            */
 };
 
 /** Sampling rate. */
 enum ym_hz_e {
+  YM_HZ_QUERY   = -1,  /**< Query current or default sampling rate. */
   YM_HZ_DEFAULT = 0    /**< Default sampling rate. */
 };
 
 /** YM master clock frequency. */
 enum ym_clock_e {
-  /** Default frequency (YM_CLOCK_ATARIST). */
+  /** Query current or default master clock frequency. */
+  YM_CLOCK_QUERY   = 1,
+  /** Default master clock frequency. */
   YM_CLOCK_DEFAULT = 0,
-  /** Atari-ST YM-2149 clock is about 2Mz. */
+  /** Atari-ST YM-2149 master clock is about 2Mz. */
   YM_CLOCK_ATARIST = EMU68_ATARIST_CLOCK/4u,
-} ;
+};
 
 /* struct ym_s; */
 typedef struct ym_s ym_t;
@@ -147,11 +152,11 @@ struct ym_s {
   /** @name Interface
    *  @{
    */
-  void     (*cb_cleanup)       (ym_t * const);
-  int      (*cb_reset)         (ym_t * const, const cycle68_t);
-  int      (*cb_run)           (ym_t * const, s32 *, const cycle68_t);
-  uint68_t (*cb_buffersize)    (const ym_t const *, const cycle68_t);
-  uint68_t (*cb_sampling_rate) (ym_t * const, const uint68_t);
+  void (*cb_cleanup)       (ym_t * const);
+  int  (*cb_reset)         (ym_t * const, const cycle68_t);
+  int  (*cb_run)           (ym_t * const, s32 *, const cycle68_t);
+  int  (*cb_buffersize)    (const ym_t const *, const cycle68_t);
+  int  (*cb_sampling_rate) (ym_t * const, const int);
   /** @} */
 
   /** @name Internal YM registers
@@ -162,10 +167,9 @@ struct ym_s {
   ym_reg_t shadow;            /**< Shadow YM registers (for reading).    */
   /** @} */
 
-  s16 * ymout5;               /**< DAC lookup table                      */
-  unsigned int voice_mute;    /**< Mask muted voices.                    */
-  unsigned int hz;            /**< Sampling rate.                        */
-  int outlevel;               /**< Output level (volume) [0..64].        */
+  s16    * ymout5;            /**< DAC lookup table                      */
+  uint_t   voice_mute;        /**< Mask muted voices.                    */
+  uint_t   hz;                /**< Sampling rate.                        */
   uint68_t clock;             /**< Master clock frequency in Hz.         */
 
   /** @name  Write access back storage.
@@ -189,9 +193,10 @@ struct ym_s {
   s32 * outptr;             /**< generated sample pointer (into outbuf)  */
   /** @} */
 
-  int type;                     /**< engine type @see ym_emul_e */
+  int engine;               /**< @ref ym_engine_e "engine type". */
+  int volmodel;             /**< @ref ym_vol_e "volume model".   */
 
-  /** Data */
+  /** Engine private data. */
   union emu_u {
     ym_puls_t puls; /**< Original YM emulator data. */
     ym_blep_t blep; /**< BLEP YM emulator data.     */
@@ -210,30 +215,15 @@ struct ym_s {
  */
 typedef struct
 {
-  int68_t  emul;     /**< @see ym_emul_e emulator mode.      */
-  int68_t  voltable; /**< @see ym_vol_e volume table type.   */
-  uint68_t hz;       /**< Sampling rate in Hz.               */
-  uint68_t clock;    /**< @see ym_clock_e frequency.         */
-  uint68_t outlevel; /**< Output level [0..256] (disabled).  */
-  int    * argc;     /**< Argument count (before and after). */
-  char  ** argv;     /**< Arguments.                         */
+  int engine;        /**< @ref ym_engine_e "emulator engine".       */
+  int volmodel;      /**< @ref ym_vol_e "volume model".             */
+  int clock;         /**< @see ym_clock_e "master clock frequency". */
+  int hz;            /**< Sampling rate in Hz.                      */
 } ym_parms_t;
-
 
 /** @name  Initialization functions
  *  @{
  */
-
-IO68_EXTERN
-/** Set or get default Yamaha-2149 emulator engine.
- *
- *    @param  emul  YM_EMUL_DEFAULT:get current; others:set new
- *    @retval emul             on success
- *    @retval YM_EMUL_DEFAULT  on failure (bad value)
- *
- *  @see ym_emul_e
- */
-int ym_default_engine(int emul);
 
 IO68_EXTERN
 /** Create an Yamaha-2149 emulator instance.
@@ -291,7 +281,7 @@ IO68_EXTERN
  *
  *  @see ym_reset()
  */
-int ym_init(ym_parms_t * const parms);
+int ym_init(int * argc, char ** argv);
 
 IO68_EXTERN
 /** Shutdown the ym-2149 library.
@@ -371,7 +361,6 @@ void ym_adjust_cycle(ym_t * const ym, const cycle68_t ymcycles);
  *  @{
  */
 
-
 IO68_EXTERN
 /** Write in YM-2149 register.
  *
@@ -414,6 +403,13 @@ int ym_readreg(ym_t * const ym, const cycle68_t ymcycle)
     : 0;
 }
 
+/** @} */
+
+
+/** @name  YM-2149 emulator configuration functions.
+ *  @{
+ */
+
 IO68_EXTERN
 /** Get/Set active channels status.
  *
@@ -451,15 +447,36 @@ IO68_EXTERN
 int ym_active_channels(ym_t * const ym, const int off, const int on);
 
 IO68_EXTERN
+/** Set/Get configuration.
+ */
+int ym_configure(ym_t * const ym, ym_parms_t * const parms);
+
+IO68_EXTERN
 /** Get/Set sampling rate.
  *
  *  @param  ym   YM-2149 emulator instance
- *  @param  hz   0:Get, >0:Set
+ *  @param  hz   frequency in hz or @ref ym_hz_e "special values".
  *
  *  @return Actual sampling rate (may differs from requested).
- *  @retval 0    Failure
+ *  @retval -1 on error
  */
-uint68_t ym_sampling_rate(ym_t * const ym, const uint68_t hz);
+int ym_sampling_rate(ym_t * const ym, const int hz);
+
+IO68_EXTERN
+/** Set or get Yamaha-2149 emulator engine.
+ *
+ *    @param  engine  @ref ym_engine_e "special values"
+ *    @return @ref ym_engine_e "engine value".
+ *    @retval -1 on error
+ */
+int ym_engine(ym_t * const ym, int engine);
+
+IO68_EXTERN
+int ym_volume_model(ym_t * const ym, int model);
+
+IO68_EXTERN
+int ym_clock(ym_t * const ym, int clock);
+
 
 /** @} */
 

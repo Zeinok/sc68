@@ -28,7 +28,7 @@
 
 IO68_EXTERN
 /** Initialize YM-2149 library. */
-int ymio_init(ym_parms_t * const parms);
+int ymio_init(int * argc, char ** argv);
 
 IO68_EXTERN
 /** Shutdown YM-2149 library. */
@@ -54,7 +54,7 @@ IO68_EXTERN
  * @return actual sampling rate
  *
  */
-uint68_t ymio_sampling_rate(io68_t * const io, uint68_t sampling_rate);
+int ymio_sampling_rate(io68_t * const io, int sampling_rate);
 
 IO68_EXTERN
 /** Get ym-2149 emulator instance. */
