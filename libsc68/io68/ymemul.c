@@ -184,7 +184,7 @@ static option68_t opts[] = {
   { option68_STR, prefix, "ym-engine", engcat,
     "set ym-2149 engine [pulse|blep|dump]" },
   { option68_STR, prefix, "ym-volmodel", engcat,
-    "set ym-2149 volume model [atari|linear]" },
+    "set ym-2149 volume model [atari|linear|atari4]" },
   { option68_INT, prefix, "ym-chans", engcat,
     "set ym-2149 active channel [bit-0:A ... bit-2:C]" }
 };
@@ -243,6 +243,8 @@ int ym_init(int * argc, char ** argv)
       default_parms.volmodel = YM_VOL_LINEAR;
     } else if (!strcmp(opt->val.str,"atari")) {
       default_parms.volmodel = YM_VOL_ATARIST;
+    } else if (!strcmp(opt->val.str,"atari4")) {
+      default_parms.volmodel = YM_VOL_ATARIST_4BIT;
     }
   }
 
@@ -256,6 +258,9 @@ int ym_init(int * argc, char ** argv)
   switch (default_parms.volmodel) {
   case YM_VOL_LINEAR:
     ym_create_5bit_linear_table(ymout5, output_level);
+    break;
+  case YM_VOL_ATARIST_4BIT:
+    ym_create_4bit_atarist_table(ymout5, output_level);
     break;
   case YM_VOL_DEFAULT:
   case YM_VOL_ATARIST:
@@ -272,7 +277,6 @@ int ym_init(int * argc, char ** argv)
 void ym_shutdown(void)
 {
 }
-
 
 
 /* ,-----------------------------------------------------------------.
@@ -646,6 +650,8 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
 
   /* Just for info print */
   ym_active_channels(ym,0,0);
+
+  msg68(ym_cat,"ym-2149: trace level -- *active*\n");
 
   return err ? err : ym_reset(ym, 0);
 }

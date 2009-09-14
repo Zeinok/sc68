@@ -465,13 +465,6 @@ static int envelop_generator(ym_t * const ym, int ymcycles)
     ncycle -= n;
     ct += n;
 
-#ifdef _DEBUG
-    if (n<=0) {
-      BREAKPOINT68;
-      break;
-    }
-#endif
-
     do {
       *b++ |= v;
     } while (--n);
@@ -748,6 +741,31 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
 #endif
 #define CLIP(V) CLIP3(V,-32768,32767)
 
+
+static inline int clip(int o)
+{
+#ifdef DEBUG
+  static int max, min;
+  if ( o < min ) {
+    min = o;
+    msg68(ym_cat,"ym-2149: pulse -- pcm min -- %d\n", o);
+  }
+  if ( o > max ) {
+    max = o;
+    msg68(ym_cat,"ym-2149: pulse -- pcm max -- %d\n", o);
+  }
+  if (o < -32768) {
+    msg68(ym_cat,"ym-2149: pulse -- pcm clip -- %d < -32768\n", o);
+    o = -32768;
+  }
+  if (o > 32767) {
+    msg68(ym_cat,"ym-2149: pulse -- pcm clip -- %d > 32767\n", o);
+    o = 32767;
+  }
+#endif
+  return CLIP(o);
+}
+
 /* Resample ``n'' input samples from ``irate'' to ``orate''
  * With volume adjustement [0..64]
  * @warning irate <= 262143 or 32bit overflow
@@ -766,7 +784,7 @@ static s32 * resampling(s32 * dst, const int n,
     /* forward */
     do {
       int o = REVOL(src[idx]);
-      *dst++ = CLIP(o);
+      *dst++ = clip(o);
     } while ((idx += istp) < iend);
   } else {
     const int68_t end = n << 14;
@@ -776,7 +794,7 @@ static s32 * resampling(s32 * dst, const int n,
       /* forward */
       do {
         int o = REVOL(src[(int)(idx>>14)]);
-        *dst++ = CLIP(o);
+        *dst++ = clip(o);
       } while ((idx += stp) < end);
     } else {
       /* backward */
@@ -785,7 +803,7 @@ static s32 * resampling(s32 * dst, const int n,
       idx  = end;
       do {
         int o = REVOL(src[(int)((idx -= stp)>>14)]);
-        *dst = CLIP(o);
+        *dst = clip(o);
       } while (--dst != src);
       dst = src+m;
     }

@@ -1,9 +1,12 @@
 /* YM-2149 D/A output levels
  *
- * $$$ ben : the function is:
- * 310 * exp(X*ln(65535/310)) with 0 <= X <= 1
+ * $Id$
+ *
  */
 
+/* $$$ ben : the function is:
+ * 310 * exp(X*ln(65535/310)) with 0 <= X <= 1
+ */
 {
   /* 00,00 */   310,
   /* 01,00 */   369,

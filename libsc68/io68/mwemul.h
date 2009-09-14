@@ -132,7 +132,7 @@ mwct_t mw_counter_read(const mw_t * const mw, const int n)
 static inline
 void mw_counter_write(mw_t * const mw, const int n, const mwct_t v)
 {
-  uint vnorm = v >> mw->ct_fix;
+  uint_t vnorm = v >> mw->ct_fix;
   mw->map[n+0] = vnorm >> 16;
   mw->map[n+2] = vnorm >>  8;
   mw->map[n+4] = vnorm;

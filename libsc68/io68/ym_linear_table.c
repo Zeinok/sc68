@@ -21,15 +21,26 @@
 
 /* $Id$ */
 
-/* Table of 5 bit D/A output level for 1 channel.*/
-
+/* Table of 5 bit D/A output level for 1 channel. */
 static const u16 ymout1c5bit[32] =
+#if 0
+/* -1.5dB by step */
 {
-  310,  369,  438,  521,  619,  735,  874, 1039,
-  1234, 1467, 1744, 2072, 2463, 2927, 3479, 4135,
-  4914, 5841, 6942, 8250, 9806,11654,13851,16462,
-  19565,23253,27636,32845,39037,46395,55141,65535
-};
+  310,   369,   438,   521,   619,   735,   874,   1039,
+  1234,  1467,  1744,  2072,  2463,  2927,  3479,  4135,
+  4914,  5841,  6942,  8250,  9806,  11654, 13851, 16462,
+  19565, 23253, 27636, 32845, 39037, 46395, 55141, 65535
+}
+#else
+/* rescale in range [0..65535] */
+{
+  0,     59,    128,   212,   310,   427,   566,   732,
+  928,   1162,  1440,  1770,  2163,  2629,  3184,  3843,
+  4625,  5557,  6663,  7977,  9541,  11398, 13605, 16229,
+  19346, 23052, 27456, 32690, 38911, 46304, 55092, 65535
+}
+#endif
+;
 
 /* Create a linear 3 channels 5 bit per channels DAC table.
  */
@@ -48,6 +59,6 @@ void ym_create_5bit_linear_table(s16 * out, unsigned int level)
          3u * min ) / 3u * level / div;
     out[i] = tmp - center;
   }
-  msg68_info("ym-2149: volume model -- *LINEAR* -- [%d..%d]\n",
+  msg68_info("ym-2149: volume model -- *linear* -- [%d..%d]\n",
              out[0],out[0x7FFF]);
 }

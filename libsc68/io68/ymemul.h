@@ -122,6 +122,7 @@ enum ym_vol_e {
   YM_VOL_DEFAULT = 0,  /**< Use default volume model.              */
   YM_VOL_ATARIST,      /**< Atari-ST volume table.                 */
   YM_VOL_LINEAR,       /**< Linear mixing volume table.            */
+  YM_VOL_ATARIST_4BIT, /**< Atari-ST volume table (4bit).          */
 };
 
 /** Sampling rate. */

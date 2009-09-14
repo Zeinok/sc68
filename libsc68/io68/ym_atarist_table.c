@@ -22,181 +22,74 @@
 /* $Id$ */
 
 /* Table of 4 bit D/A output level for 1 channel.*/
-static const u16 volumetable_original[16 * 16 * 16] =
-
-#undef YMORGVOL
-
-#ifndef YMORGVOL
-# include "ym_fixed_vol.h"
-#else
-# include "ymoutorg.h"
-#endif
+static const u16 volumetable_original[32 * 32 * 32] =
+# include "ymout2k9.h"
   ;
 
-static int
-volumetable_get(int i, int j, int k)
-{
-  int v,v2;
-  /* access at boundary finds the last value instead of the first */
-  if (i == 16)
-    i = 15;
-  if (j == 16)
-    j = 15;
-  if (k == 16)
-    k = 15;
-  /* but calling with < 0 or > 16 should still trigger assert */
-  assert(i >= 0 && i <= 15);
-  assert(j >= 0 && j <= 15);
-  assert(k >= 0 && k <= 15);
-
-  /* close your eyes now... */
-  v  = volumetable_original[i + 16 * j + 16 * 16 * k];
-  v2 = ( v * 12 ) >> 4;
-
-  return v2;
-}
-
+/* Create a non-linear 3 channels 5 bit per channels DAC table.
+ */
 static void
-volumetable_set(s16 * const volumetable, int i, int j, int k, int val)
+create_table(s16 * out, uint_t level, const char * name)
 {
-  assert(i >= 0 && i <= 31);
-  assert(j >= 0 && j <= 31);
-  assert(k >= 0 && k <= 31);
-  assert(val >= 0x00000);
-  assert(val <  0x10000);
+  int h;
 
-  val -= 32768;
-  if (val < -32768) {
-    val = -32768;
-  }
-  if (val > 32767) {
-    val = 32767;
-  }
-  volumetable[i + 32 * j + 32 * 32 * k] = val;
-}
-
-/* the table is exponential in nature. These weighing factors
- * approximate that the value in-between needs to be closer to the
- * lower value in y2 */
-static int
-volumetable_interpolate(int y1, int y2)
-{
-  int erpolate;
-  erpolate = (y1 * 4 + y2 * 6) / 10u;
-
-  assert(erpolate >= 0x00000);
-  assert(erpolate <  0x10000);
-
-  if (erpolate > 65535) {
-    erpolate = 65535;
-  }
-  if (erpolate < 0) {
-    erpolate = 0;
-  }
-  return erpolate;
-}
-
-static void
-interpolate_volumetable(s16 * const out)
-{
-  int i, j, k;
-  int i1, i2;
-
-  /* we are doing 4-dimensional interpolation here. For each known
-   * measurement point, we must find 8 new values. These values occur
-   * as follows:
-   *
-   * - one at the exact same position
-   * - one half-way in i direction
-   * - one half-way in j direction
-   * - one half-way in k direction
-   * - one half-way in i+j direction
-   * - one half-way in i+k direction
-   * - one half-way in j+k direction
-   * - one half-way in i+j+k direction
-   *
-   * The algorithm currently is very simplistic. Probably more points
-   * should be weighted in the multicomponented directions, for
-   * instance i+j+k should be an average of all surrounding data
-   * points. This probably doesn't matter much, though. This is
-   * because the only way to reach those locations is to modulate more
-   * than one voice with the envelope, and this is rare.
-   */
-
-  for (i = 0; i < 16; i += 1) {
-    for (j = 0; j < 16; j += 1) {
-      for (k = 0; k < 16; k += 1) {
-        i1 = volumetable_get(i, j, k);
-        /* copy value unchanged to new position */
-        volumetable_set(out,i*2, j*2, k*2, i1);
-
-        /* interpolate in i direction */
-        i2 = volumetable_get(i + 1, j, k);
-        volumetable_set(out, i*2 + 1, j*2, k*2,
-                        volumetable_interpolate(i1, i2));
-
-        /* interpolate in j direction */
-        i2 = volumetable_get(i, j+1, k);
-        volumetable_set(out, i*2, j*2 + 1, k*2,
-                        volumetable_interpolate(i1, i2));
-
-        /* interpolate in k direction */
-        i2 = volumetable_get(i, j, k+1);
-        volumetable_set(out, i*2, j*2, k*2+1,
-                        volumetable_interpolate(i1, i2));
-
-        /* interpolate in i + j direction */
-        i2 = volumetable_get(i + 1, j + 1, k);
-        volumetable_set(out, i*2 + 1, j*2 + 1, k*2,
-                        volumetable_interpolate(i1, i2));
-
-        /* interpolate in i + k direction */
-        i2 = volumetable_get(i + 1, j, k + 1);
-        volumetable_set(out, i*2 + 1, j*2, k*2 + 1,
-                        volumetable_interpolate(i1, i2));
-
-        /* interpolate in j + k direction */
-        i2 = volumetable_get(i, j + 1, k + 1);
-        volumetable_set(out, i*2, j*2 + 1, k*2 + 1,
-                        volumetable_interpolate(i1, i2));
-
-        /* interpolate in i + j + k direction */
-        i2 = volumetable_get(i + 1, j + 1, k + 1);
-        volumetable_set(out, i*2 + 1, j*2 + 1, k*2 + 1,
-                        volumetable_interpolate(i1, i2));
-      }
+  if (!level) {
+    for (h=0; h<32*32*32; ++h) {
+      out[h] = 0;
+    }
+  } else {
+    for (h=0; h<32*32*32; ++h) {
+      out[h] = volumetable_original[h];
     }
   }
+
+  if (level) {
+    const int min = ((u16*)out)[0x0000];
+    const int max = ((u16*)out)[0x7fff];
+    const int div = max-min ? max-min : 1;
+    const int mid = ( level + 1 ) >> 1;
+
+    msg68(ym_cat,
+	  "ym-2149: creating %s -- min:%d max:%d div:%d mid:%d\n",
+	  name, min, max, div, mid);
+
+    assert(level < 65536u);
+    assert(max > min);
+
+    for (h=0; h<32*32*32; ++h) {
+      int tmp = ((u16*)out)[h], res;
+      assert(tmp >= min);
+      assert(tmp <= max);
+      
+      if (tmp < min || tmp > max) {
+	msg68_critical
+	  ("ym-2149: volume model -- *%s* -- %d out of range [%d..%d]\n",
+	   name, tmp, min, max);
+      }
+      
+      res = (tmp-min) * level / div - mid;
+      out[h] = res;
+
+      TRACE68(ym_cat,
+	      "ym-2149: -- %s -- %02x %02x %02x -- %d\n",
+	      name, h&31, (h>>5)&31, (h>>10)&31, res);
+    }
+  }
+  msg68_info("ym-2149: volume model -- *%s* -- [%d..%d]\n",
+	     name, out[0], out[0x7FFF]);
 }
 
 /* Create a non-linear 3 channels 5 bit per channels DAC table.
  */
 void ym_create_5bit_atarist_table(s16 * out, unsigned int level)
 {
-  interpolate_volumetable(out);
-
-  if (level) {
-    int h;
-    const int min = out[0x0000];
-    const int max = out[0x7fff];
-    const int div = max-min ? max-min : 1;
-    const int center = ( level + 1 ) >> 1;
-    for (h=0; h<32*32*32; ++h) {
-      int tmp = out[h], res;
-
-      assert(tmp >= min);
-      assert(tmp <= max);
-
-      if (tmp < min || tmp > max)
-        msg68_critical
-          ("ym-2149: volume model -- *ATARI-ST* -- %d out of range [%d..%d]\n",
-           tmp,min,max);
-
-      res = (tmp-min) * level / div - center;
-      out[h] = res;
-    }
-  }
-
-  msg68_info("ym-2149: volume model -- *ATARI-ST* -- [%d..%d]\n",
-             out[0],out[0x7FFF]);
+  create_table(out, level,"atarist-5bit-2k9");
 }
+
+/* Create a non-linear 3 channels 4 bit per channels DAC table.
+ */
+void ym_create_4bit_atarist_table(s16 * out, unsigned int level)
+{
+  create_table(out, level,"atarist-4bit");
+}
+
