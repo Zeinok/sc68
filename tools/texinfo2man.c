@@ -2,6 +2,7 @@
 #include <malloc.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdlib.h>
 
 /* texinfo2man.
  * Convert a texinfo document to man format.
@@ -162,7 +163,7 @@ int start_line[256];
 
 static char value_updated[64], value_edition[64], value_version[64];
 
-process_texi (FILE * in)
+void process_texi (FILE * in)
 {
   char buf[1024];
   int in_block = 0;
