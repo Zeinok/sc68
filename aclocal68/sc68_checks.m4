@@ -6,10 +6,10 @@ dnl# (C) 2009 Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
 dnl#
 dnl# Distribued under the term of the GPL3+
 dnl#
-dnl# $Id: sc68_package.m4 96 2009-02-15 01:07:39Z benjihan $
+dnl# $Id$
 dnl#
 
-# serial 20090303
+# serial 20090921
 
 # SC68_CHECKS()
 # -------------
@@ -43,18 +43,18 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
       [AX_CHECK_COMPILER_FLAGS(FLAG,SC68_ADD_FLAG(PKG_ALL_CFLAGS,FLAG))])
 
     # --enable-debug
-    if test X[$]enable_debug = Xyes; then
+    if test X[$]enable_sc68_debug = Xyes; then
       AC_FOREACH([FLAG],
         [-g -O0],
         [AX_CHECK_COMPILER_FLAGS(FLAG,[SC68_ADD_FLAG(PKG_ALL_CFLAGS,FLAG)])])
     fi
 
     # --enable-all-static
-    if test X[$]enable_all_static = Xyes; then
+    if test X[$]enable_sc68_static = Xyes; then
       AC_ENABLE_STATIC
       AC_DISABLE_SHARED
       SC68_ADD_FLAG(PKG_ALL_LFLAGS,[-all-static])
-      SC68_ADD_FLAG(PKG_ALL_CFLAGS,[-static])
+      SC68_ADD_FLAGS(PKG_ALL_CFLAG,[-static])
     fi
 
     # libtool shared library needs -no-undefined
@@ -69,9 +69,6 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
     # How to handle assert and add --enable-assert
     AC_CHECK_HEADERS([limits.h])
     AC_CHECK_HEADERS([assert.h])
-    if test X[$]enable_release == Xyes; then
-      enable_assert=no
-    fi
     AC_HEADER_ASSERT
 
     # PUP_FLAGS : common for all (both libraries and programms)
@@ -101,6 +98,6 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
 
 dnl# ----------------------------------------------------------------------
 dnl#
-dnl# End Of $Id: sc68_package.m4 96 2009-02-15 01:07:39Z benjihan $
+dnl# End Of $Id$
 dnl#
 dnl# ----------------------------------------------------------------------

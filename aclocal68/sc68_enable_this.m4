@@ -6,7 +6,7 @@ dnl# (C) 2007-2009 Benjamin Gerard
 dnl#
 dnl# Distributed under the term of the GPL
 dnl#
-dnl# $Id: ac_arg_enable_debug.m4 65 2009-02-02 01:50:56Z benjihan $
+dnl# $Id$
 dnl#
 
 # serial 20090304
@@ -34,6 +34,6 @@ AC_DEFUN([SC68_ENABLE_THIS],[
 
 dnl# ----------------------------------------------------------------------
 dnl#
-dnl# End Of $Id: ac_arg_enable_debug.m4 65 2009-02-02 01:50:56Z benjihan $
+dnl# End Of $Id$
 dnl#
 dnl# ----------------------------------------------------------------------

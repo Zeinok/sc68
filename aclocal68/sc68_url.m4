@@ -6,7 +6,7 @@ dnl# (C) 2010 Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
 dnl#
 dnl# Distribued under the term of the GPL3+
 dnl#
-dnl# $Id: sc68_package.m4 102 2009-03-14 17:21:58Z benjihan $
+dnl# $Id$
 dnl#
 
 # serial 20100906

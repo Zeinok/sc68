@@ -10,18 +10,18 @@ dnl# $Id$
 dnl#
 
 
-# serial 20090304
+# serial 20090727
 
 # SC68_ENABLE_ALLSTATIC([MORE-ENABLE-ACTION],[MORE-DISABLE-ACTION])
 # -----------------------------------------------------------------
-# Defines --enable-all-static option
+# Defines --enable-sc68-static option
 AC_DEFUN_ONCE([SC68_ENABLE_ALLSTATIC],[
     AC_ARG_ENABLE(
-      [all-static],
-      [AS_HELP_STRING([--enable-all-static],
+      [sc68-static],
+      [AS_HELP_STRING([--enable-sc68-static],
 	  [all static linkage @<:@default=no@:>@])],
-      [],[enable_all_static=no])
-    SC68_ENABLE_THIS([enable_all_static])
+      [],[enable_sc68_static=no])
+    SC68_ENABLE_THIS([enable_sc68_static])
   ])
 
 dnl# ----------------------------------------------------------------------

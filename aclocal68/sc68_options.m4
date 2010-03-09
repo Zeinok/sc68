@@ -6,7 +6,7 @@ dnl# (C) 2009 Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
 dnl#
 dnl# Distribued under the term of the GPL3+
 dnl#
-dnl# $Id: sc68_package.m4 96 2009-02-15 01:07:39Z benjihan $
+dnl# $Id$
 dnl#
 
 # serial 20090304
@@ -19,15 +19,15 @@ AC_DEFUN_ONCE([SC68_OPTIONS],[
     SC68_ENABLE_DEBUG
     SC68_ENABLE_ALLSTATIC
 
-    case X[$]enable_debug in
+    case X"[$]enable_sc68_debug" in
       Xyes);;
       *);;
     esac
-    case X[$]enable_release in
+    case X"[$]enable_sc68_release" in
       Xyes);;
       *);;
     esac
-    case X[$]enable_allstatic in
+    case X"[$]enable_sc68_static" in
       Xyes);;
       *);;
     esac
@@ -35,6 +35,6 @@ AC_DEFUN_ONCE([SC68_OPTIONS],[
 
 dnl# ----------------------------------------------------------------------
 dnl#
-dnl# End Of $Id: sc68_package.m4 96 2009-02-15 01:07:39Z benjihan $
+dnl# End Of $Id$
 dnl#
 dnl# ----------------------------------------------------------------------

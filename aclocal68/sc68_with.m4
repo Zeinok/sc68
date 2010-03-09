@@ -197,7 +197,7 @@ m4_define([DO_SC68_PACKAGE],[
 
           if test "x-[$]has_$1" = "x-maybe"; then
             ac_wp_CPPFLAGS="[$]CPPFLAGS"
-            CPPFLAGS="-I[$]_$1_abs"
+            CPPFLAGS="-I[$]_$1_abs [$]CPPFLAGS"
             AC_CHECK_HEADERS([[$]_$1_hdr],[has_$1=yes],[has_$1=no])
             CPPFLAGS="[$]ac_wp_CPPFLAGS"
           fi

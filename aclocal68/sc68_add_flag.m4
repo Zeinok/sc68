@@ -6,7 +6,7 @@ dnl# (C) 2009 Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
 dnl#
 dnl# Distribued under the term of the GPL3+
 dnl#
-dnl# $Id: sc68_package.m4 96 2009-02-15 01:07:39Z benjihan $
+dnl# $Id$
 dnl#
 
 # serial 20090305
@@ -15,17 +15,13 @@ dnl#
 # ---------------------------
 # Add unique FLAG to VAR
 AC_DEFUN([SC68_ADD_FLAG],[
-    if test X"[$]$1" = X"" ; then
+    if test X"[$]$1" = X ; then
       $1="$2"
     else
       for sc68_add_flag in [$]$1 ; do
-        if test X"[$]sc68_add_flag" = X"$2"; then
-          true
-          break
-        fi
-        false
+        test X"[$]sc68_add_flag" = X"$2" && break
       done
-      if test [$?] -ne 0; then
+      if test [$]? -ne 0; then
         $1="[$]$1 $2"
       fi
     fi
@@ -44,6 +40,6 @@ AC_DEFUN([SC68_ADD_FLAGS],[
 
 dnl# ----------------------------------------------------------------------
 dnl#
-dnl# End Of $Id: sc68_package.m4 96 2009-02-15 01:07:39Z benjihan $
+dnl# End Of $Id$
 dnl#
 dnl# ----------------------------------------------------------------------

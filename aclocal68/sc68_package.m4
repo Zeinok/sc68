@@ -9,15 +9,14 @@ dnl#
 dnl# $Id$
 dnl#
 
-# serial 20090304
+# serial 20100306
 
 # SC68_PACKAGE([DESC])
 # --------------------
 # Common package info for sc68 related packages.
 AC_DEFUN_ONCE([SC68_PACKAGE],[
     AC_PACKAGE_INFO(
-      [$1 It is part of the sc68 project.],
-      [http://sc68.atari.org])
+      [$1 It is part of the sc68 project.])
     [PACKAGE_INFOCAT='sc68 - /|\ Atari ST and C= Amiga music player']
     AC_SUBST([PACKAGE_INFOCAT])
     m4_define([PKG],AS_TR_CPP(AC_PACKAGE_NAME))
@@ -33,7 +32,7 @@ AC_DEFUN_ONCE([SC68_PACKAGE],[
     PKG_ALL_CFLAGS=''; PKG_BIN_CFLAGS=''; PKG_LIB_CFLAGS=''; PACKAGE_CFLAGS=''
     PKG_ALL_EFLAGS=''; PKG_BIN_EFLAGS=''; PKG_LIB_EFLAGS=''; PACKAGE_EFLAGS=''
     PKG_ALL_LFLAGS=''; PKG_BIN_LFLAGS=''; PKG_LIB_LFLAGS=''; PACKAGE_LFLAGS=''
-  ])
+    ])
 
 dnl# ----------------------------------------------------------------------
 dnl#
