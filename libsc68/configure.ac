@@ -14,7 +14,11 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
-AC_INIT([libsc68],[3.0.0],[benjihan -4t- users.sourcefourge -d0t- net])
+AC_INIT(
+  [libsc68],
+  [3.0.0],
+  [SC68_EMAIL],,
+  [SC68_URL])
 AC_CONFIG_SRCDIR([api68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
@@ -48,7 +52,7 @@ AM_CONDITIONAL([emu68_monolitic],[test "X${enable_emu68_monolitic}" = 'Xyes'])
 AC_ARG_WITH(
   [ym-engine],
   [AS_HELP_STRING([--with-ym-engine],
-      [set default YM-2149 engine (orig or blep) @<:@default=auto-select@:>@])],
+      [set default YM-2149 engine (pulse|blep) @<:@default=auto-select@:>@])],
   [],[with_ym_engine='x'])
 
 case X${with_ym_engine} in
@@ -62,7 +66,7 @@ case X${with_ym_engine} in
     ;;
   Xorig | Xpuls*)
     YM_ENGINE='YM_ENGINE_PULS'
-    with_ym_engine='sc68 original'
+    with_ym_engine='pulse'
     ;;
   Xx | Xyes | Xno)
     YM_ENGINE='x'
@@ -77,7 +81,7 @@ esac
 if test "x-$YM_ENGINE" != "x-x"; then
   AC_DEFINE_UNQUOTED([YM_ENGINE],[$YM_ENGINE],[set default YM engine])
 else
-  with_ym_engine='auto-select (should be sc68 original)'
+  with_ym_engine='auto-select (should be pulse)'
 fi
 
 # ,----------------------------------------------------------------------.
@@ -126,9 +130,9 @@ AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   debug-mode          : $enable_debug])
-AC_MSG_NOTICE([|   release-mode        : $enable_release])
-AC_MSG_NOTICE([|   all-static          : $enable_all_static])
+AC_MSG_NOTICE([|   debug-mode          : $enable_sc68_debug])
+AC_MSG_NOTICE([|   release-mode        : $enable_sc68_release])
+AC_MSG_NOTICE([|   all-static          : $enable_sc68_static])
 AC_MSG_NOTICE([|   file68              : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   default YM engine   : $with_ym_engine])
 AC_MSG_NOTICE([+-----------------------])

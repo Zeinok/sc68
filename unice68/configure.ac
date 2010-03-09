@@ -13,7 +13,11 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
-AC_INIT([unice68],[20090117],[benjihan -4t- users.sourcefourge -d0t- net])
+AC_INIT(
+  [unice68],
+  [20090117],
+  [SC68_EMAIL],,
+  [SC68_URL])
 AC_CONFIG_SRCDIR([unice68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
@@ -37,11 +41,11 @@ SC68_CHECKS
 
 # Command line depacker.
 AC_ARG_ENABLE(
-  [cli],
-  [AS_HELP_STRING([--enable-cli],
+  [unice68-cli],
+  [AS_HELP_STRING([--enable-unice68-cli],
       [enable command line depacker @<:@default=yes@:>@])],
-  [],[enable_cli="yes"])
-AM_CONDITIONAL([UNICE68_CLI],[test "x$enable_cli" = "xyes"])
+  [],[enable_unice68_cli="yes"])
+AM_CONDITIONAL([UNICE68_CLI],[test "x$enable_unice68_cli" = "xyes"])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
@@ -63,10 +67,10 @@ AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   debug-mode          : $enable_debug])
-AC_MSG_NOTICE([|   release-mode        : $enable_release])
-AC_MSG_NOTICE([|   all-static-mode     : $enable_all_static])
-AC_MSG_NOTICE([|   build cli depacker  : $enable_cli])
+AC_MSG_NOTICE([|   debug-mode          : $enable_sc68_debug])
+AC_MSG_NOTICE([|   release-mode        : $enable_sc68_release])
+AC_MSG_NOTICE([|   all-static-mode     : $enable_sc68_static])
+AC_MSG_NOTICE([|   build cli depacker  : $enable_unice68_cli])
 AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])
 

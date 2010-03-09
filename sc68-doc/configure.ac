@@ -14,7 +14,11 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
-AC_INIT([sc68-doc],[20090110],[benjihan -4t- users.sourceforge -d0t- net])
+AC_INIT(
+  [sc68-doc],
+  [20090110],
+  [SC68_EMAIL],,
+  [SC68_URL])
 AC_CONFIG_SRCDIR([sc68_doc.h])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])

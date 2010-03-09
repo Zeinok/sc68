@@ -14,7 +14,12 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
-AC_INIT([file68],[3.0.0],[benjihan -4t- users.sourcefourge -d0t- net])
+AC_INIT(
+  [file68],
+  [3.0.0],
+  [SC68_EMAIL],
+  [sc68-libfile68],
+  [SC68_URL])
 AC_CONFIG_SRCDIR([src/file68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.10 check-news])
@@ -200,8 +205,8 @@ AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|----------------------])
-AC_MSG_NOTICE([|   debug-mode          : $enable_debug])
-AC_MSG_NOTICE([|   release-mode        : $enable_release])
+AC_MSG_NOTICE([|   debug-mode          : $enable_sc68_debug])
+AC_MSG_NOTICE([|   release-mode        : $enable_sc68_release])
 AC_MSG_NOTICE([|   file-stream         : $enable_file])
 AC_MSG_NOTICE([|   fd-stream           : $enable_fd])
 AC_MSG_NOTICE([|   memory-stream       : $enable_mem])
