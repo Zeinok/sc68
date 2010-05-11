@@ -14,10 +14,10 @@ dnl#
 # SC68_URL([PACKAGE])
 # --------------------
 # Expand as package website url
-AC_DEFUN([SC68_URL],
+AC_DEFINE([SC68_URL],
   [http://sc68.atari.org/][ifdef([AC_PACKAGE_NAME],AC_PACKAGE_NAME)])
 
 # SC68_EMAIL()
 # ------------
 # Expand as contact email 
-AC_DEFUN([SC68_EMAIL],[benjihan -4t- users.sourceforge -d0t- net])
+AC_DEFINE([SC68_EMAIL],[benjihan -4t- users.sourceforge -d0t- net])
