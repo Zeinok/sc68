@@ -268,7 +268,8 @@ int option68_parse(int argc, char ** argv, int reset)
 
   /* Get enviromment variables */
   FOREACH_OPT(opt) {
-    option68_getenv(opt, 1);
+    if ( ! option68_isset(opt) )
+      option68_getenv(opt, 1);
   }
 
   return argc;
