@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 #
 # Delete all files and directories not under svn source control.
 #
@@ -9,7 +9,11 @@
 #
 # $Id$
 
-cmd="$1"; shift
+if [ $# = 0 ]; then
+    cmd="help"
+else
+    cmd="$1"; shift 
+fi;
 action="true"
 
 opt_force=""
