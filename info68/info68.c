@@ -146,6 +146,7 @@ static int display_help(void)
     ("  misc-commands:\n"
      "\n"
      "    `%%'         display %\n"
+     "    `%0'         display null char\n"
      "    `%L'         display a newline character\n");
 
   puts
@@ -405,6 +406,9 @@ int main(int argc, char ** argv)
             break;
           case '%':
             Putc(out,'%');
+            break;
+          case '0':
+            Putc(out,'\0');
             break;
 
             /* DISK commands */

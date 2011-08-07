@@ -24,16 +24,17 @@ cflags="${cppflags} @PACKAGE_CFLAGS@"
 ldflags="-L${libdir} @PACKAGE_LFLAGS@"
 me="${pkgname}-config"
 
-filter_only() {
+filter_only()
+{
     local i what="" set_what=no
     for i in : "$@"; do
-	if [ "x$set_what" = 'xyes' ]; then
+	if [ "x${set_what}" = 'xyes' ]; then
 	    what="$i"
 	    set_what=no
 	else
 	    case "$i" in
 		':') set -- ;;
-		'--') set_what=yes;  ;;
+		'--') set_what=yes  ;;
 		$what*) set -- "$@" "$i" ;;
 	    esac
 	fi
@@ -120,11 +121,11 @@ EOF
 	--uninstalled);;
 
 	--*)
-	    echo "${me}: unknown option `$1'" 1>&2
+	    echo "${me}: unknown option \`$1'" 1>&2
 	    exit 255
 	    ;;
 	*)
-	    echo "${me}: invalid argument `$1'" 1>&2
+	    echo "${me}: invalid argument \`$1'" 1>&2
 	    exit 255
 	    ;;
     esac

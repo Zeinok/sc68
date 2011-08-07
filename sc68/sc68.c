@@ -1,8 +1,8 @@
 /*
  *    sc68 - atari st and amiga music emulator - command line player
  *
- *	      Copyright (C) 2001-2009 Ben(jamin) Gerard
- *	     <benjihan -4t- users.sourceforge -d0t- net>
+ *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -176,20 +176,20 @@ static int print_version(void)
 /* Callback for option printing. */
 static void
 print_option(void * data,
-	     const char * option, const char * envvar, const char * desc)
+             const char * option, const char * envvar, const char * desc)
 {
-  fprintf(data, 
-	  "  %s or `$%s'\n"
-	  "                      %c%s\n",
-	  option, envvar, 
-	  (desc[0]>='a' && desc[0]<='z') ? desc[0]-'a'+'A' : desc[0],
-	  desc+1);
-}	 
+  fprintf(data,
+          "  %s or `$%s'\n"
+          "                      %c%s\n",
+          option, envvar,
+          (desc[0]>='a' && desc[0]<='z') ? desc[0]-'a'+'A' : desc[0],
+          desc+1);
+}
 
 /* Callback for message category printing. */
 static void
-print_cat(void * data, 
-	      const int bit, const char * name, const char * desc)
+print_cat(void * data,
+              const int bit, const char * name, const char * desc)
 {
   const char * fmt = "%02d | %-10s | %-40s | %-3s\n";
   const int mask = (msg68_cat_filter(0,0) >> bit) & 1;
@@ -222,7 +222,7 @@ static int print_usage(void)
      "  -r --rate=<val>     Sampling rate (in hz)\n"
      "  -t --track=<val>    Choose track to play [\"all\"|\"def\"|track-#]\n"
      "  -l --loop=<val>     Track loop [\"def\"|\"inf\"|loop-#]\n"
-     "  -o --output=<URI>   Set output\n" 
+     "  -o --output=<URI>   Set output\n"
      "  -c --stdout         Output raw to stdout (--output=stdout://)\n"
      "  -n --null           No output (--output=null://)\n"
      "  -w --wav            Riff Wav output. Use in combination with -o.\n"
@@ -311,7 +311,7 @@ static void DisplayInfo(int track)
     Print("Replay     : %s\n",info.replay);
     Print("Hardware   : %s\n",info.hwname);
     Print("Start time : %u:%02u\n",
-	 info.start_ms/60000u, (info.start_ms/1000u)%60u);
+         info.start_ms/60000u, (info.start_ms/1000u)%60u);
     Print("Duration   : %s\n", info.time);
   }
 }
@@ -324,11 +324,11 @@ static int PlayLoop(istream68_t * out, int track, int loop)
   int code;
 
   Debug("PlayLoop:\n"
-	" track  : %d\n"
-	" loop   : %d\n"
-	" output : '%s'\n",
-	track,loop,istream68_filename(out));
-  
+        " track  : %d\n"
+        " loop   : %d\n"
+        " output : '%s'\n",
+        track,loop,istream68_filename(out));
+
   if (track == -1) {
     Debug("PlayLoop: default track resquested\n");
     track = 0;
@@ -340,10 +340,10 @@ static int PlayLoop(istream68_t * out, int track, int loop)
     Debug("PlayLoop: track #%d resquested\n",track);
   }
   Debug(" all    : %s\n",all?"yes":"no");
-  
+
   /* Set track. */
   sc68_play(sc68, track, loop);
-  
+
   /* DisplayInfo(-1); */
 
   /* Update return code (load the track) */
@@ -363,7 +363,7 @@ static int PlayLoop(istream68_t * out, int track, int loop)
 
     if (code & SC68_CHANGE) {
       if (!all) {
-	break;
+        break;
       }
       DisplayInfo(-1);
     }
@@ -373,10 +373,10 @@ static int PlayLoop(istream68_t * out, int track, int loop)
       return -1;
     }
   }
-  
+
   return -(code == SC68_MIX_ERROR);
 }
-  
+
 /* Build output URI for wav output */
 static char * build_output_uri(char * inname, char * outname)
 {
@@ -415,13 +415,13 @@ static char * build_output_uri(char * inname, char * outname)
   return namebuf;
 }
 
-int main(int argc, char *argv[]) 
+int main(int argc, char *argv[])
 {
   char *namebuf = 0, *outname = 0, *inname  = 0;
   const char * tracks  = "def";
   const char * loops   = "def";
   const char * rates   = "def";
-  
+
   int i,j;
   int track = -1;
   int loop  = -1;
@@ -483,36 +483,36 @@ int main(int argc, char *argv[])
       getopt_long(argc, argv, shortopts, longopts, &longindex);
 
     switch (val) {
-    case  -1: break;		    /* Scan finish   */
+    case  -1: break;                /* Scan finish   */
     case 'h': opt_help = 1; break;  /* --help        */
     case 'V': opt_vers = 1; break;  /* --version     */
     case 'D': opt_list = 1; break;  /* --debug-list  */
     case 'v': ++opt_verb; break;    /* --verbose     */
     case 'q': --opt_verb; break;    /* --quiet       */
-    case 'n': case 'c': case 'o':			  
+    case 'n': case 'c': case 'o':
       if (outname) {
-	fprintf(stderr,"%s: output already setted -- '%c'\n", argv[0], val);
-	goto error;
+        fprintf(stderr,"%s: output already setted -- '%c'\n", argv[0], val);
+        goto error;
       }
       switch (val) {
       case 'n':
-	outname = "null://"; break; /* --null        */
+        outname = "null://"; break; /* --null        */
       case 'c':
-	outname = "-"; break;  	    /* --stdout      */
-      case 'o':			  
-	outname = optarg; break;    /* --output=     */
+        outname = "-"; break;       /* --stdout      */
+      case 'o':
+        outname = optarg; break;    /* --output=     */
       }
       break;
-    case 't':			  
-      tracks = optarg; break;	    /* --track=      */
-    case 'l':			  
-      loops = optarg; break;	    /* --loop=       */
-    case 'r':			  
-      rates = optarg; break;	    /* --rate=       */
-    case 'w':	  
+    case 't':
+      tracks = optarg; break;       /* --track=      */
+    case 'l':
+      loops = optarg; break;        /* --loop=       */
+    case 'r':
+      rates = optarg; break;        /* --rate=       */
+    case 'w':
       opt_owav = 1; break;          /* --wav         */
 
-    case '?':			    /* Unknown or missing parameter */
+    case '?':                       /* Unknown or missing parameter */
       goto error;
     default:
       fprintf(stderr,"%s: unexpected getopt return value (%d)\n", argv[0], val);
@@ -567,7 +567,7 @@ int main(int argc, char *argv[])
   if (outname && !strcmp(outname,"-")) {
     outname = "stdout://sc68";
   }
-  
+
   if (opt_owav) {
     outname = namebuf = build_output_uri(inname, outname);
     if (!outname) goto error;
@@ -593,7 +593,7 @@ int main(int argc, char *argv[])
   } else if (!strcmp(tracks,"all")) {
     track = 0;
   } else {
-    track = strtol(tracks,0,0);
+    track = strtol(tracks,0,10);
   }
 
   /* Parse --loop= */
@@ -619,7 +619,7 @@ int main(int argc, char *argv[])
   if (!sc68) {
     goto error;
   }
-  
+
   out = sc68_stream_create(outname, 2);
   if (!out) {
     goto error;
@@ -627,7 +627,7 @@ int main(int argc, char *argv[])
   if (istream68_open(out)) {
     goto error;
   }
-  
+
   /* Verify sc68 file. */
 #if 0  /* Mess with stdin  */
   if (sc68_verify_file(inname) < 0) {
@@ -638,7 +638,7 @@ int main(int argc, char *argv[])
   if (sc68_load_url(sc68, inname)) {
     goto error;
   }
-    
+
   /* Loop */
   Debug("sc68: Enter Playloop\n");
   if (PlayLoop(out, track, loop) < 0) {

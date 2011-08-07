@@ -1198,8 +1198,9 @@ static int find_time(uint68_t nbsec,
       lastframe=0;
       break;
     }
-    printf("Pass #%d: [%s] (%7u frames, %u cpf). Processing ... ", pass,
-           strtime68(0,track+1, nbsec), nbframe-i, cycleperpass);
+    printf("Pass #%u: [%s] (%7u frames, %u cpf). Processing ... ",
+           (uint_t) pass, strtime68(0,track+1, nbsec), 
+           (uint_t) nbframe-i, (uint_t) cycleperpass);
     fflush(stdout);
     /* Run emulation code for given time */
     emu68->framechk = 0;
@@ -1222,7 +1223,7 @@ static int find_time(uint68_t nbsec,
   } while(1);
 
   nb_ms = frames_to_ms(lastframe, cycleperpass);
-  nbsec = nb_ms/1000u;
+  nbsec = nb_ms / 1000u;
 
   /* Retrieve memory access bound */
   min = emu68->memmsk+1-1024;

@@ -125,7 +125,7 @@ static void desa_char(desa68_parm_t * d,const unsigned char c)
 static void desa_str(desa68_parm_t * d, char *str)
 {
   char c;
-  while(c=*str++, c)
+  while (c=*str++, c)
     desa_char(d, c);
 }
 

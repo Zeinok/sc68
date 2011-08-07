@@ -53,7 +53,6 @@ int ym_default_chans = 7;
 #include "ym_linear_table.c"
 #include "ym_atarist_table.c"
 
-
 /** 3 channels output table.
  *  Using a table for non linear mixing.
  */
@@ -82,7 +81,7 @@ static void access_list_add(ym_t * const ym,
     /* No more free entries. */
     /* $$$ TODO: realloc buffer, reloc all lists ... */
     TRACE68(msg68_CRITICAL,
-            "ym-2148: access list *%s* -- *OVERFLOW*", access_list->name);
+            "ym-2149: access list *%s* -- *OVERFLOW*\n", access_list->name);
     return;
   }
   ym->waccess_nxt = free_access+1;
@@ -156,6 +155,7 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 
   return ret;
 }
+
 
 /******************************************************
  *                  Yamaha init                        *
@@ -302,7 +302,6 @@ int ym_run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
 }
 
 
-
 /* ,-----------------------------------------------------------------.
  * |                         Write YM register                       |
  * `-----------------------------------------------------------------'
@@ -347,6 +346,7 @@ void ym_writereg(ym_t * const ym,
   }
 }
 
+
 /* ,-----------------------------------------------------------------.
  * |                  Adjust YM-2149 cycle counters                  |
  * `-----------------------------------------------------------------'
@@ -359,6 +359,7 @@ void ym_adjust_cycle(ym_t * const ym, const cycle68_t ymcycles)
     access_adjust_cycle(&ym->env_regs, ymcycles);
   }
 }
+
 
 /* ,-----------------------------------------------------------------.
  * |                  Yamaha get activated voices                    |
@@ -379,6 +380,7 @@ int ym_active_channels(ym_t * const ym, const int clr, const int set)
   }
   return v;
 }
+
 
 /* ,-----------------------------------------------------------------.
  * |                        Engine selection                         |
@@ -462,6 +464,7 @@ int ym_clock(ym_t * const ym, int clock)
   return clock;
 }
 
+
 /* ,-----------------------------------------------------------------.
  * |                           Volume model                          |
  * `-----------------------------------------------------------------'
@@ -481,7 +484,7 @@ int ym_volume_model(ym_t * const ym, int model)
 {
   /* Set volume table (unique for all instance) */
   switch (model) {
-    
+
   case YM_VOL_QUERY:
     model = default_parms.volmodel;
     break;
@@ -526,7 +529,7 @@ int ym_sampling_rate(ym_t * const ym, int hz)
 
   case YM_VOL_DEFAULT:
     hz = default_parms.hz;
-    
+
   default:
     if (hz < SAMPLING_RATE_MIN) hz = SAMPLING_RATE_MIN;
     if (hz > SAMPLING_RATE_MAX) hz = SAMPLING_RATE_MAX;
@@ -666,6 +669,7 @@ void ym_cleanup(ym_t * const ym)
     ym->cb_cleanup(ym);
   }
 }
+
 
 /** Get required output buffer size.
  */

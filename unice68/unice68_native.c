@@ -1,7 +1,7 @@
 /*
  *         unice68 - ice depacker library (native version)
  *
- *             Copyright (C) 2003-2009 Benjamin Gerard
+ *             Copyright (C) 2003-2010 Benjamin Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  *  This program is free software; you can redistribute it and/or

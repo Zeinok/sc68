@@ -1,5 +1,5 @@
 ; Tos relocation 
-; by Ben(jamin) Gerard <ben@sashipa.com>
+; by Ben(jamin) Gerard <benjihan [] users sourceforge net>
 ;
 
 load_prg:

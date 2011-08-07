@@ -7,6 +7,8 @@
  *
  */
 
+/* Copyright (C) 1998-2010 Benjamin Gerard */
+
 /* $Id$ */
 
 #ifndef _UNICE68_H_

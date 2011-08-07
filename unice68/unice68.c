@@ -1,6 +1,6 @@
 /*
  *                       sc68 - ICE! depacker
- *             Copyright (C) 1998-2009 Benjamin Gerard
+ *             Copyright (C) 1998-2010 Benjamin Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or

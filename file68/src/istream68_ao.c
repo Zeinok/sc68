@@ -1,6 +1,6 @@
 /*
  *                      file68 - libao stream
- *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *            Copyright (C) 2001-2010 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
@@ -90,15 +90,22 @@ unsigned int audio68_sampling_rate(const unsigned int rate)
   return f;
 }
 
+/* Init does not actually initialize aolib. That task will be
+   performed on the fly only if needed. */
 int istream68_ao_init(void)
 {
-  int err = -1;
-
-  if (ao68_cat != msg68_DEFAULT) {
+  if (ao68_cat == msg68_DEFAULT) {
     ao68_cat =
       msg68_cat("audio","Xiph AO audio stream",DEBUG_AO68_O);
-    if (ao68_cat == -1)  ao68_cat = msg68_DEFAULT;
+    if (ao68_cat == -1)
+      ao68_cat = msg68_DEFAULT;
   }
+  return - ( ao68_cat == msg68_DEFAULT );
+}
+
+static int init_aolib(void)
+{
+  int err = -1;
 
   if (init) {
     msg68_critical("libao68: init -- *already done*\n");
@@ -106,18 +113,23 @@ int istream68_ao_init(void)
     ao_initialize();
     err = 0;
     init = 1;
-    TRACE68(ao68_cat,"libao68: initialized\n");
+    TRACE68(ao68_cat,"libao68: init -- *initialized*\n");
   }
   return err;
 }
 
-void istream68_ao_shutdown(void)
+static void shutdown_aolib(void)
 {
   if (init) {
     init = 0;
     ao_shutdown();
-    TRACE68(ao68_cat,"libao68: shutdowned\n");
+    TRACE68(ao68_cat,"libao68: aolib shutdowned\n");
   }
+}
+
+void istream68_ao_shutdown(void)
+{
+  shutdown_aolib();
   if (ao68_cat != msg68_DEFAULT) {
     msg68_cat_free(ao68_cat);
     ao68_cat = msg68_DEFAULT;
@@ -354,11 +366,13 @@ static int isao_close(istream68_t * istream)
   }
   ao_close(is->ao.device);
   is->ao.device = 0;
-  istream68_ao_shutdown();
+
+/* $$$ Should be shutdown ? Rather do it at destroy ... */
+/*   istream68_ao_shutdown(); */
 
   err = 0;
-  error:
-  TRACE68(ao68_cat, "libao68: close -- *%s*\n",strok68(err));
+error:
+  TRACE68(ao68_cat, "libao68: close -- *%s*\n", strok68(err));
   return err;
 }
 
@@ -449,8 +463,10 @@ istream68_t * istream68_ao_create(const char * fname, int mode)
           strnevernull68(fname), mode);
 
   if (!init) {
-    msg68_critical("libao68: create error -- *libao*\n");
-    goto error;
+    if (init_aolib() || !init) {
+      msg68_critical("libao68: create error -- *libao*\n");
+      goto error;
+    }
   }
 
   if (!fname || !fname[0]) {
@@ -507,7 +523,7 @@ istream68_t * istream68_ao_create(const char * fname, int mode)
 
 istream68_t * istream68_ao_create(const char * fname, int mode)
 {
-  msg68_error("libao68: create error -- *NOT SUPPORTED*\n");
+  msg68_error("libao68: create -- *NOT SUPPORTED*\n");
   return 0;
 }
 

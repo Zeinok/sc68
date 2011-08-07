@@ -1075,7 +1075,7 @@ int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
   do_envelop(ym,ymcycles);
   do_tone_and_mixer(ym,ymcycles);
 
-  ym->waccess = ym->static_waccess;
+  ym->waccess     = ym->static_waccess;
   ym->waccess_nxt = ym->waccess;
 
   filters[ym->emu.puls.ifilter].filter(ym);

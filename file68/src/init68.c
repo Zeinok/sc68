@@ -1,6 +1,6 @@
 /*
  *                init68 - initialization functions
- *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *            Copyright (C) 2001-2010 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
@@ -240,7 +240,7 @@ int file68_init(int argc, char **argv)
   }
 
   init = 1;
-  out_no_init:
+ out_no_init:
   return argc;
 }
 
@@ -270,4 +270,3 @@ void file68_shutdown(void)
     init = 0;
   }
 }
-
