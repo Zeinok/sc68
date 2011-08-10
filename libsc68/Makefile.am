@@ -45,6 +45,14 @@ libsc68_la_LIBADD  = io68/libio68.la emu68/libemu68.la $(FILE68_LA)
 # | Installed headers                                                    |
 # `----------------------------------------------------------------------'
 
-noinst_HEADERS     = sc68/conf68.h sc68/mixer68.h
+noinst_HEADERS     = sc68/conf68.h sc68/mixer68.h sc68/trap68.h
 pkginclude_HEADERS = sc68/sc68.h
 pkgincludedir      = $(includedir)/sc68
+
+# ,----------------------------------------------------------------------.
+# | Assemble and transform TOS trap emulator                             |
+# `----------------------------------------------------------------------'
+$(srcdir)/sc68/trap68.h: $(srcdir)/trapfunc.s
+	e=false; $(as68) -p $< -o trapfunc.bin && $(hexdump) -v -e '1/1 "0x%02x,\n" ' trapfunc.bin >$@ && e=true; rm trapfunc.bin; $$e
+
+MAINTAINERCLEANFILES = $(srcdir)/sc68/trap68.h  

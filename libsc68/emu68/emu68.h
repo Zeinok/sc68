@@ -437,6 +437,15 @@ enum emu68_status_e {
 
 EMU68_API
 /**
+ *  Get status name.
+ *
+ *   @param  status  one of the emu68_status_e value.
+ *   @return status name
+ */
+const char * emu68_status_name(enum emu68_status_e status);
+
+EMU68_API
+/**
  *  Execute one instruction.
  *
  *   @param  emu68  emulator instance

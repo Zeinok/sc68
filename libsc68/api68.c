@@ -60,10 +60,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define PLAY_MAX_INST 1000000u /* # of instructions for music play code */
+#define PLAY_MAX_INST 1000000u  /* # of instructions for music play code */
 #define INIT_MAX_INST 10000000u /* # of instructions for music init code */
 #define TIME_DEF    (3 * 60)          /* default music time in seconds  */
 #define TIMEMS_DEF  (TIME_DEF * 1000) /* default music time in millisec */
+
+/* TOS emulator */
+#define TRAP_ADDR 0x600
+static u8 trap_func[] = {
+#include "sc68/trap68.h"
+};
 
 #if 0
 #define TRAP_14_ADDR 0x600
@@ -143,6 +149,12 @@ struct _sc68_s {
     unsigned int total;       /**< total sec so far.                     */
     unsigned int total_ms;    /**< total ms correction.                  */
   } time;
+
+  /** IRQ handler. */
+  struct {
+    int pc;                   /**< value of PC at last IRQ.              */
+    int vector;               /**< what was the last IRQ type.           */
+  } irq;
 
   /** Mixer info struture. */
   struct
@@ -270,29 +282,51 @@ static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
 {
   sc68_t     * sc68 = cookie;
   const char * irqname;
+  u32 sr, pc;
+
+  sc68->irq.pc     = emu68->reg.pc;
+  sc68->irq.vector = vector;
 
   if ( vector == HWTRACE_VECTOR )
     return 0;
 
-  if ( (irqname = emu68_exception_name(vector) ) || 1 ) {
-    u32 sr, pc;
-    if ( vector < 256 ) {
-      sr = Wpeek(emu68, emu68->reg.a[7]);
-      pc = Lpeek(emu68, emu68->reg.a[7]+2);
-    } else {
-      sr = pc = 0;
-    }
-    sc68_debug(sc68,
-               "libsc68: 68k interruption -- emu68<%p,%s> sc68<%p,%s>\n"
-               "         vector : %d\n"
-               "         type   : %s\n"
-               "         sr     : %04x\n"
-               "         pc     : %08x\n",
-               emu68, emu68->name,
-               sc68, sc68->name, vector, irqname?irqname:"?", sr, pc);
+  irqname = emu68_exception_name(vector);
+  if (!irqname) irqname = "?";
+  if ( vector < 256 ) {
+    sr = Wpeek(emu68, emu68->reg.a[7]);
+    pc = Lpeek(emu68, emu68->reg.a[7]+2);
+    sc68->irq.pc = pc;
+  } else {
+    sr = pc = 0;
   }
+  if (vector <= 48)
+  sc68_debug(sc68,
+             "libsc68: 68k interruption -- emu68<%p,%s> sc68<%p,%s>\n"
+             "         vector : %02x\n"
+             "         type   : %s\n"
+             "         pc:%08x sr:%04x\n"
+             "         d0:%08x d1:%08x d2:%08x d3:%08x\n"
+             "         d4:%08x d5:%08x d6:%08x d7:%08x\n"
+             "         a0:%08x a1:%08x a2:%08x a3:%08x\n"
+             "         a4:%08x a5:%08x a6:%08x a7:%08x\n",
+             emu68, emu68->name, sc68, sc68->name,
+             vector, irqname, pc, sr,
+             emu68->reg.d[0], emu68->reg.d[1],
+             emu68->reg.d[2], emu68->reg.d[3],
+             emu68->reg.d[4], emu68->reg.d[5],
+             emu68->reg.d[6], emu68->reg.d[7],
+             emu68->reg.a[0], emu68->reg.a[1],
+             emu68->reg.a[2], emu68->reg.a[3],
+             emu68->reg.a[4], emu68->reg.a[5],
+             emu68->reg.a[6], emu68->reg.a[7]);
 
-  if ( vector < 64 )
+  if ( vector >= 32 && vector < 48 ) {
+    int cmd = Wpeek(emu68, emu68->reg.a[7]+6);
+    sc68_debug(sc68,
+               "         trap #%x func:%02d ($%04X)\n",
+               vector-32, cmd, cmd);
+  }
+  if (vector < 32)
     return 1;                   /* Request execution break  */
   return 0;                     /* Continue execution normally */
 }
@@ -331,6 +365,7 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
   /* Install cookie and interruption handler (debug mode only). */
   emu68_set_handler(sc68->emu68, emu68_debug ? irqhandler : 0);
   emu68_set_cookie(sc68->emu68, sc68);
+  sc68->irq.pc = sc68->irq.vector = -1;
 
   /* Setup critical 68K registers (SR and SP) */
   sc68->emu68->reg.sr   = 0x2000;
@@ -906,6 +941,28 @@ static int apply_change_track(sc68_t * sc68)
   memptr[0x41a] = 0;         /* Zound Dragger */
   memptr[0x41b] = 0x10;      /* Zound Dragger */
 
+  /* Install TOS trap emulator */
+  if (1 && !m->hwflags.bit.amiga) {
+    sc68_debug(sc68," -> Load TOS trap emulator @$06x-$06x\n",
+               TRAP_ADDR,TRAP_ADDR+sizeof(trap_func)-1);
+    emu68_memput(sc68->emu68,TRAP_ADDR,trap_func, sizeof(trap_func));
+    sc68->emu68->reg.a[7] = sc68->emu68->memmsk+1-16;
+    sc68->emu68->reg.pc   = TRAP_ADDR;
+    sc68->emu68->reg.sr   = 0x2300;
+    sc68->emu68->cycle    = 0;
+    sc68_debug(sc68," -> Running trap init code ...\n");
+    status = emu68_finish(sc68->emu68, INIT_MAX_INST);
+    if ( status != EMU68_NRM ) {
+      sc68_debug(sc68,
+                 " -> trap init -- ERROR -- status %d (%s)"
+                 " [@%06x %02x]\n",
+                 status, emu68_status_name(status), sc68->irq.pc, sc68->irq.vector);
+      sc68_error_add(sc68, "libsc68: abnormal 68K status %d (%s) in trap code",
+                     status, emu68_status_name(status));
+      return SC68_MIX_ERROR;
+    }
+  }
+
 #if 0
   memptr[TRAP_VECTOR(14)+0] = (u8) (TRAP_14_ADDR >> 24); /* XBIOS */
   memptr[TRAP_VECTOR(14)+1] = (u8) (TRAP_14_ADDR >> 16);
@@ -1085,9 +1142,12 @@ static int apply_change_track(sc68_t * sc68)
   sc68->track         = track;
 
   if ( status != EMU68_NRM ) {
-    sc68_debug(sc68," -> music init -- ERROR -- status %d\n", status);
-    sc68_error_add(sc68, "libsc68: abnormal 68K status in init code (%d)",
-                   status);
+    sc68_debug(sc68,
+               " -> music init -- ERROR -- status %d (%s)"
+               " [@%06x %02x]\n",
+               status, emu68_status_name(status), sc68->irq.pc, sc68->irq.vector);
+    sc68_error_add(sc68, "libsc68: abnormal 68K status %d (%s) in init code",
+                   status, emu68_status_name(status));
     return SC68_MIX_ERROR;
   }
   sc68_debug(sc68," -> music init -- OK\n");
