@@ -1,18 +1,14 @@
 ;*****************************************************************************
 ;*   JAM   TaoSid-Plugin     Version 1.00 (+FASTRAM)          rev 21.04.2000 *
 ;*****************************************************************************
-;
-; SC68 version by Ben(jamin) Gerard <ben@sashipa.com> 12/30/2001 5:07PM
-;
-
-;
-;
-;
+; sc68 modified version by Ben(jamin) Gerard
+; Time-stamp: <2011-08-17 06:40:14 ben>
+; Init-Stamp: <2001-12-30 05:07:00 ben>
 
 DMA_VALUE     = 0 ;[0:50066 1:25033 2:12516.5 3:6258.25]
 DMA_FREQUENCY = 50066>>DMA_VALUE
 
-        ORG $8000
+        ;; ORG $8000
         
         bra   BEGIN
         rts
@@ -307,7 +303,7 @@ START:
 ; in  = -
 ; out = a0 ptr to the plugininfo header
 pluginextinfo_rout:
-                LEA     PLUGININFO,A0
+                LEA     PLUGININFO(pc),A0
                 rts
 ;-----------------------------------------------------------------------
 ; msg = plugInExtInit:
@@ -1289,7 +1285,7 @@ VOICE_1:        LEA     STIMME1(PC),A0
                 BEQ.S   DO_VOICE1
                 CLR.W   D1
 DO_VOICE1:      BSR.S   GET_WAVE
-                MOVE.L  A1,SAMPLE_1
+                MOVE.L  A1,SAMPLE_1-STIMME1(A0)
 ;----------------------------------------------------
 VOICE_2:        LEA     STIMME2(PC),A0
                 MOVE.B  $0E(A0),D0
@@ -1299,7 +1295,7 @@ VOICE_2:        LEA     STIMME2(PC),A0
                 BEQ.S   DO_VOICE2
                 CLR.W   D1
 DO_VOICE2:      BSR.S   GET_WAVE
-                MOVE.L  A1,SAMPLE_2
+                MOVE.L  A1,SAMPLE_2-STIMME2(A0)
 ;----------------------------------------------------
 VOICE_3:        LEA     STIMME3(PC),A0
                 MOVE.B  $0E(A0),D0
@@ -1309,7 +1305,7 @@ VOICE_3:        LEA     STIMME3(PC),A0
                 BEQ.S   DO_VOICE3
                 CLR.W   D1
 DO_VOICE3:      BSR.S   GET_WAVE
-                MOVE.L  A1,SAMPLE_3
+                MOVE.L  A1,SAMPLE_3-STIMME3(A0)
                 RTS
 ;----------------------------------------------------
 
@@ -1376,17 +1372,17 @@ INIT_FILL:
                 MOVEA.L SAMPLE_3(PC),A2
 
                 MOVEQ   #$00,D0
-                MOVE.W  STIMME1+$1C,D0
+                MOVE.W  STIMME1+$1C(pc),D0
                 BSR     CALC_FREQ
                 MOVE.L  D0,D6
                 
                 MOVEQ   #$00,D0
-                MOVE.W  STIMME2+$1C,D0
+                MOVE.W  STIMME2+$1C(pc),D0
                 BSR     CALC_FREQ
                 MOVE.L  D0,D4
                 
                 MOVEQ   #$00,D0
-                MOVE.W  STIMME3+$1C,D0
+                MOVE.W  STIMME3+$1C(pc),D0
                 BSR     CALC_FREQ
                 MOVE.L  D0,D5
 
@@ -1672,7 +1668,7 @@ SID_MIX_PTR:    dc.l  0
 SID_MIX_CNT:    dc.w  0
 SID_MIX_BUF:    ds.w  1024  ; DMA frequency / Replay Frequency
 
-DMA_PTR:  dc.l  DMA_BUF
+DMA_PTR:  	dc.l  0;; DMA_BUF
 DMA_BUF:        dcb.b 512
 DMA_BUF_END:
 DMA_BUF_SZ: = DMA_BUF_END-DMA_BUF
