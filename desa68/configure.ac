@@ -7,7 +7,6 @@ dnl#
 dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
 dnl#
 dnl# $Id$
-dnl#
 
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
@@ -15,10 +14,10 @@ dnl#
 
 AC_INIT(
   [desa68],
-  [20090117],
-  [SC68_EMAIL],
+  [20110825],
+  [benjihan -4t- users.sourceforge -d0t- net],
   [sc68-libdesa68],
-  [SC68_URL])
+  [http://sc68.atari.org])
 
 AC_CONFIG_SRCDIR([desa68.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -38,7 +37,7 @@ SC68_TOOLS
 SC68_CHECKS
 
 AX_CHECK_COMPILER_FLAGS([-Wno-multichar],
-  SC68_ADD_FLAG(PKG_ALL_CFLAGS,[-Wno-multichar]))
+  SC68_ADD_FLAG(PAC_ALL_CFLAGS,[-Wno-multichar]))
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
@@ -47,6 +46,7 @@ AX_CHECK_COMPILER_FLAGS([-Wno-multichar],
 AC_CONFIG_FILES([
     desa68.spec
     desa68-${VERSION}.ebuild:desa68.ebuild.in
+    desa68.pc
     Makefile])
 AC_OUTPUT
 
