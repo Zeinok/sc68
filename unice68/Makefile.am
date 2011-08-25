@@ -1,7 +1,8 @@
 # ,----------------------------------------------------------------------.
+# |                                                                      |
 # | unice68 -- Makefile.am -- Use with automake to produce configure.in  | 
 # |                                                                      |
-# |                 (C) 2007-2009 Benjamin Gerard                        |
+# |                 (C) 2007-2011 Benjamin Gerard                        |
 # |          <benjihan -4t- users.sourceforge -d0t- net>                 |
 # |                                                                      |
 # `----------------------------------------------------------------------'
@@ -20,6 +21,13 @@ libunice68_la_CFLAGS   = $(ALL_CFLAGS) $(LIB_CFLAGS)
 libunice68_la_CPPFLAGS = $(ALL_EFLAGS) $(LIB_EFLAGS) -DUNICE68_EXPORT=1
 libunice68_la_LDFLAGS  = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
 LFLAGS                 = -avoid-version $(NOINSTALL)
+
+# ,----------------------------------------------------------------------.
+# | pkg-config                                                           |
+# `----------------------------------------------------------------------'
+
+pkgconfigdir   = $(libdir)/pkgconfig
+pkgconfig_DATA = unice68.pc
 
 # ,----------------------------------------------------------------------.
 # | Libtool binary                                                       |

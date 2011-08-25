@@ -15,12 +15,12 @@ dnl#
 
 AC_INIT(
   [unice68],
-  [20090117],
-  [SC68_EMAIL],,
-  [SC68_URL])
+  [20110825],
+  [benjihan -4t- users.sourceforge -d0t- net],,
+  [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([unice68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 check-news])
+AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
@@ -56,6 +56,7 @@ AC_CONFIG_FILES([
     package.texi
     unice68-${VERSION}.ebuild:unice68.ebuild.in
     unice68.1.tpl
+    unice68.pc
     unice68.spec])
 AC_OUTPUT
 
