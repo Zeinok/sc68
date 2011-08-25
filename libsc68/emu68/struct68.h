@@ -199,7 +199,7 @@ struct emu68_s {
   /* Onboard memory. */
   addr68_t memmsk;     /**< Onboard memory mask (2^log2mem-1).      */
   int      log2mem;    /**< Onboard memory buffer size (2^log2mem). */
-  u8       mem[16];    /**< Onboard memory buffer.
+  u8       mem[32];    /**< Onboard memory buffer.
                             @notice Must be last in struct.         */
 };
 

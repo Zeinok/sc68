@@ -768,14 +768,14 @@ void emu68_bp_delall(emu68_t * const emu68)
 
 void emu68_bp_del(emu68_t * const emu68, int id)
 {
-  if (emu68 && (unsigned int)id<16u && emu68->breakpoints[id].count) {
-      if (emu68->chk) {
-        const addr68_t addr = emu68->breakpoints[id].addr & MEMMSK68;
-        emu68->chk[addr] &= ~(EMU68_B|EMU68_M);
-      }
-      emu68->breakpoints[id].addr  = 0;
-      emu68->breakpoints[id].count = 0;
-      emu68->breakpoints[id].reset = 0;
+  if (emu68 && (unsigned int)id<16u) {
+    if (emu68->chk && emu68->breakpoints[id].count ) {
+      const addr68_t addr = emu68->breakpoints[id].addr & MEMMSK68;
+      emu68->chk[addr] &= ~(EMU68_B|EMU68_M);
+    }
+    emu68->breakpoints[id].addr  = 0;
+    emu68->breakpoints[id].count = 0;
+    emu68->breakpoints[id].reset = 0;
   }
 }
 
@@ -789,9 +789,11 @@ int emu68_bp_set(emu68_t * const emu68, int id,
       for ( id=0; id<16 && emu68->breakpoints[id].count; ++id)
         ;
     if ( (unsigned int) id < 16u) {
-      emu68->breakpoints[id].addr  = addr;
+      emu68->breakpoints[id].addr  = addr &= MEMMSK68;
       emu68->breakpoints[id].count = count;
       emu68->breakpoints[id].reset = reset;
+      if (emu68->chk)
+        emu68->chk[addr] = (emu68->chk[addr] & ~EMU68_M) | EMU68_B | (id<<4);
     } else {
       id = -1;
     }
@@ -832,7 +834,9 @@ emu68_t * emu68_create(emu68_parms_t * const parms)
   if (!p->log2mem) {
     p->log2mem = def_parms.log2mem;
   }
-  if (p->log2mem<16||p->log2mem>24) {
+  if (p->log2mem < 16 || p->log2mem > 24) {
+    emu68_error_add(emu68,
+                    "Invalid requested amount of memory -- 2^%d", p->log2mem);
     goto error;
   }
 
@@ -840,29 +844,31 @@ emu68_t * emu68_create(emu68_parms_t * const parms)
     p->clock = def_parms.clock;
   }
   if (p->clock<500000u || p->clock>60000000u) {
+    emu68_error_add(emu68,
+                    "Invalid clock frequency -- %u", p->clock);
     goto error;
   }
 
-  memsize = 1<<p->log2mem;
-  membyte = sizeof(emu68_t) + (memsize<<!!p->debug);
+  memsize = 1 << p->log2mem;
+  membyte = sizeof(emu68_t) + (memsize << !!p->debug);
   emu68   = emu68_alloc(membyte);
   if (!emu68) {
     goto error;
   }
-  memset(emu68,0,sizeof(membyte));
+  memset(emu68,0,membyte);
   strncpy(emu68->name,p->name?p->name:"emu68",sizeof(emu68->name)-1);
   emu68->clock = p->clock;
 
   emu68->log2mem = p->log2mem;
   emu68->memmsk  = memsize-1;
   if (p->debug) {
-    emu68->chk = emu68->mem + memsize+4;
+    emu68->chk = emu68->mem + memsize+8;
   }
 
   emu68_mem_init(emu68);
   emu68_reset(emu68);
 
-  error:
+error:
   return emu68;
 }
 
@@ -950,7 +956,7 @@ void emu68_reset(emu68_t * const emu68)
 /* Library initialize. */
 int emu68_init(int * argc, char ** argv)
 {
-  def_parms.name     = 0;
+  def_parms.name    = 0;
   def_parms.log2mem = 19;            /* log2mem: 2^19 => 512 kB */
   def_parms.clock   = EMU68_ATARIST_CLOCK;
   def_parms.debug   = 0;
@@ -963,4 +969,3 @@ int emu68_init(int * argc, char ** argv)
 void emu68_shutdown(void)
 {
 }
-
