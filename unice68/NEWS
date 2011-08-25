@@ -1,5 +1,11 @@
                           ** unice68 NEWS **
 
+20110825	<ben>
+
+	Release unice 20110825
+	- Add pkg-config support.
+	- Autotools up-to-date.
+
 
 20090117	<ben>
 
