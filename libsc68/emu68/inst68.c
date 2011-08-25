@@ -46,6 +46,8 @@ void exception68(emu68_t * const emu68, const int vector, const int level)
     /* Those are specific to EMU68 */
     switch (vector) {
     case HWBREAK_VECTOR:
+      /* $$$ TODO: inplement emu68 breakpoint */
+
     case HWTRACE_VECTOR:
       break;
     default:

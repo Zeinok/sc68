@@ -9,7 +9,6 @@ dnl#
 dnl# $Id$
 dnl#
 
-
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
@@ -17,11 +16,11 @@ dnl#
 AC_INIT(
   [libsc68],
   [3.0.0],
-  [SC68_EMAIL],,
-  [SC68_URL])
+  [benjihan -4t- users.sourceforge -d0t- net],,
+  [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([api68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 check-news])
+AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
 AC_CONFIG_HEADERS([config.h])
 
 AC_USE_SYSTEM_EXTENSIONS
@@ -37,6 +36,9 @@ SC68_OPTIONS
 SC68_TOOLS
 SC68_CHECKS
 SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
+
+AC_SUBST([SC68_URL])
+AC_SUBST([SC68_EMAIL])
 
 # ,----------------------------------------------------------------------.
 # | Optional features                                                    |
@@ -119,6 +121,7 @@ AC_CONFIG_FILES([
     io68/Makefile
     libsc68-${VERSION}.ebuild:libsc68.ebuild.in
     libsc68.spec
+    libsc68.pc
     sc68-config])
 AC_OUTPUT
 

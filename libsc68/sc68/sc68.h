@@ -433,7 +433,7 @@ SC68_API
  *   function. If loop is -1 the default music loop is used. If loop
  *   is 0 does an infinite loop.
  *
- * @param  sc68    sc68 instance.
+ * @param  sc68   sc68 instance.
  * @param  track  track number [-1:read current, 0:set disk default]
  * @param  loop   number of loop [-1:default 0:infinite]
  *

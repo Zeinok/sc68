@@ -51,7 +51,7 @@ typedef  int64_t s64;      /**< Must be a    signed 64 bit integer. */
 
 /** @} */
 
-#ifndef INT68_BITS 
+#ifndef INT68_BITS
 
 /* Commonly used int (should be fastest at least 32 bit type). */
 typedef  int_fast32_t int68_t;     /**< fast   signed integer type. */

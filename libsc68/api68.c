@@ -1211,8 +1211,8 @@ int sc68_process(sc68_t * sc68, void * buf16st, int n)
         status = emu68_interrupt(sc68->emu68, sc68->mix.cycleperpass);
       }
       if (status != EMU68_NRM) {
-        sc68_error_add(sc68, "abnormal 68K status in play -- pass %u -- code %d\n",
-                       sc68->mix.pass_cnt, status);
+        sc68_error_add(sc68, "libsc68: abnormal 68K status %d (%s) in play pass %u",
+                       status, emu68_status_name(status), sc68->mix.pass_cnt);
         return SC68_MIX_ERROR;
       }
 

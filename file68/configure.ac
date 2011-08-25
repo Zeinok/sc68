@@ -9,7 +9,6 @@ dnl#
 dnl# $Id$
 dnl#
 
-
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
@@ -17,12 +16,12 @@ dnl#
 AC_INIT(
   [file68],
   [3.0.0],
-  [SC68_EMAIL],
+  [benjihan -4t- users.sourceforge -d0t- net],
   [sc68-libfile68],
-  [SC68_URL])
+  [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([src/file68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 check-news])
+AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
 AC_CONFIG_HEADERS([config.h])
 
 AC_USE_SYSTEM_EXTENSIONS
@@ -150,7 +149,7 @@ file68_shared_path='-DFILE68_SHARED_PATH=\"$(sc68datadir)\"'
 if test X[$]ac_sys_native_win32 = Xyes; then
   file68_shared_path='-DFILE68_SHARED_PATH=0'
 fi
-SC68_ADD_FLAG(PKG_LIB_EFLAGS,[$file68_shared_path])
+SC68_ADD_FLAG(PAC_LIB_EFLAGS,[$file68_shared_path])
 
 # ,----------------------------------------------------------------------.
 # | Standard functions                                                   |
@@ -194,6 +193,7 @@ AC_CONFIG_FILES([
     file68-${VERSION}.ebuild:file68.ebuild.in
     file68-config
     file68.spec
+    file68.pc
     package.texi])
 AC_OUTPUT
 

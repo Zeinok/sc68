@@ -1,4 +1,5 @@
 # ,----------------------------------------------------------------------.
+# |                                                                      |
 # |  file68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
 # |                 (C) 2007-2009 Benjamin Gerard                        |
@@ -46,6 +47,13 @@ otherheaders=\
  $(null)
 
 myheaders = $(apiheaders) $(otherheaders)
+
+# ,----------------------------------------------------------------------.
+# | pkg-config                                                           |
+# `----------------------------------------------------------------------'
+
+pkgconfigdir   = $(libdir)/pkgconfig
+pkgconfig_DATA = file68.pc
 
 # ,----------------------------------------------------------------------.
 # | script binary                                                        |

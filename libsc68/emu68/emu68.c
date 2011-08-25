@@ -413,19 +413,17 @@ const char * emu68_status_name(enum emu68_status_e status)
 int emu68_step(emu68_t * const emu68)
 {
   int rc = EMU68_ERR;
-
   if (emu68) {
     switch (emu68->status) {
-
     case EMU68_NRM:
       emu68->framechk = 0;
     case EMU68_BRK:
       emu68->status = EMU68_NRM;
-      loop68(emu68);
+      /* loop68(emu68); */
+      controlled_step68(emu68);
     case EMU68_STP:
       rc = emu68->status;
       break;
-
     default:
       assert(!"unexpected value for emu68_t::status");
       break;

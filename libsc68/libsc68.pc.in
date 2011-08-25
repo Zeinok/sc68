@@ -1,0 +1,24 @@
+# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
+#
+# pkg-config file for libsc68
+#
+# (C) 2011 Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
+#
+# Distributed under the term of the GPL3+
+#
+# $Id: sc68_tools.m4 143 2011-08-10 01:05:27Z benjihan $
+
+version=@PACKAGE_VERSION@
+email=@PACKAGE_BUGREPORT@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: @PACKAGE@
+Description: @PACKAGE_SHORTDESC@
+Version: ${version}
+URL: @PACKAGE_URL@
+Requires: file68 >= @PACKAGE_VERSION@
+Libs: -L${libdir} -lfile68
+Cflags: -I@includedir@
