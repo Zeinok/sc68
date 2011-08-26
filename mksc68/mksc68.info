@@ -1,53 +1,53 @@
-This is ../../../../sc68/debug68/debug68.info, produced by makeinfo
-version 4.13 from ../../../../sc68/debug68/debug68.texi.
+This is /home/ben/Devel/sc68/sc68/mksc68/mksc68.info, produced by
+makeinfo version 4.13 from /home/ben/Devel/sc68/sc68/mksc68/mksc68.texi.
 
 INFO-DIR-SECTION sc68 - /|\ Atari ST and C= Amiga music player
 START-INFO-DIR-ENTRY
-* debug68: (debug68).           Command line toolbox for sc68 files
+* mksc68: (mksc68).           Command line toolbox for sc68 files
 END-INFO-DIR-ENTRY
 
-   This is Edition 20090117 of `The `debug68' Manual', for `debug68'
-version 20090117, last updated 11 February 2009.
+   This is Edition 20090925 of `The `mksc68' Manual', for `mksc68'
+version 20090925, last updated 27 August 2011.
 
-Copyright (C) 1998-2009 Benjamin Gerard
+Copyright (C) 2010-2011 Benjamin Gerard
 
    Permission is granted to make and distribute verbatim copies of this
 manual upon condition that the  provided the copyright notice and this
 permission notice are preserved on all copies.
 
 
-File: debug68.info,  Node: Top,  Next: debug68 Program,  Prev: (dir),  Up: (dir)
+File: mksc68.info,  Node: Top,  Next: mksc68 Program,  Prev: (dir),  Up: (dir)
 
-`debug68': get debug68 file information
-***************************************
+`mksc68': create and modify sc68 files
+**************************************
 
-The `debug68' is used to play Atari ST and Amiga music files.
+The `mksc68' is used to create or modify sc68 music files.
 
 * Menu:
 
-* debug68 Program::             The `debug68' Program
-* Options Summary::             Options Summary
+* mksc68 Program::             The `mksc68' Program
+* Options Summary::            Options Summary
 
-    manual for debug68 version 20090117 edited on 11 February 2009
+      manual for mksc68 version 20090925 edited on 27 August 2011
 
 
-File: debug68.info,  Node: debug68 Program,  Next: Options Summary,  Prev: Top,  Up: Top
+File: mksc68.info,  Node: mksc68 Program,  Next: Options Summary,  Prev: Top,  Up: Top
 
-The `debug68' Program
-=====================
+The `mksc68' Program
+====================
 
 Description
 ===========
 
-`debug68' is a program to play debug68 music file.
+`mksc68' is a program to play mksc68 music file.
 
 Synopsis
 ========
 
-     `debug68 [OPTION] [--] <URI>'
+     `mksc68 [OPTION] [--] <URI>'
 
 
-File: debug68.info,  Node: Options Summary,  Prev: debug68 Program,  Up: Top
+File: mksc68.info,  Node: Options Summary,  Prev: mksc68 Program,  Up: Top
 
 Options Summary
 ===============
@@ -65,9 +65,6 @@ Informationnal Options
 ``--version''
      Display build date and exit.
 
-``--debug-list''
-     Display debug features and exit.
-
 General Options
 ---------------
 
@@ -79,33 +76,14 @@ General Options
 ``--output=<output-uri>''
      Set output. Default is stdout.
 
-debug68 Engine Options
-----------------------
-
-``--debug68-no-debug''
-     Disable all debug output ($DEBUG68_NO_DEBUG).
-
-``--debug68-debug=features''
-     Set debug features ($DEBUG68_DEBUG). Currently features is a
-     number which bit match a feature as given by `--debug-list'.
-
-``--debug68-data=path''
-     Set shared resource path (prior to `DEBUG68_DATA').
-
-``--debug68-user=path''
-     Set user resource path (prior to `DEBUG68_USER').
-
-``--debug68-music=path''
-     Set local music path (prior to `DEBUG68_MUSIC').
-
-``--debug68-rmusic=path''
-     Set remote music path (prior to `DEBUG68_RMUSIC').
+sc68 Engine Options
+-------------------
 
 
 
 Tag Table:
-Node: Top649
-Node: debug68 Program1056
-Node: Options Summary1326
+Node: Top657
+Node: mksc68 Program1053
+Node: Options Summary1316
 
 End Tag Table
