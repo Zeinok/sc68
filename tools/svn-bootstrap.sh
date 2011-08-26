@@ -98,7 +98,7 @@ mkdir -p m4 && testdir m4 fatal
 
 # Bootstrap all sub-directories.
 dirs="as68 desa68 file68 info68 unice68 file68 sourcer68 libsc68"
-dirs="$dirs sc68 debug68 sc68-doc"
+dirs="$dirs sc68 debug68 sc68-audacious sc68-doc"
 for dir in ${dirs}; do
     bootstrap_dir $dir "$@" || err=$((err+1))
 done

@@ -16,10 +16,10 @@ dnl#
 AC_INIT(
   [sc68-ng],
   [20090117],
-  [SC68_EMAIL],,
-  [SC68_URL])
+  [benjihan -4t- users.sourceforge -d0t- net],,
+  [http://sc68.atari.org])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 check-news])
+AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
@@ -72,6 +72,10 @@ SC68_ENABLE_PACKAGE([libsc68],[sc68 engine],[[$]enable_sc68_all])
 SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[[$]enable_sc68_all])
 SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_sc68_all])
 
+# PLUGINS
+if [$]pkgconfig audacious --exists; then enable_audacious=yes; else enable_audacious=no; fi
+SC68_ENABLE_PACKAGE([sc68-audacious],[sc68 plugin for audacious],[$enable_audacious])
+
 # DOC
 SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])
 
@@ -117,6 +121,10 @@ fi
 
 if test Xyes = X"${enable_sc68}"
 then AC_CONFIG_SUBDIRS([sc68])
+fi
+
+if test Xyes = X"${enable_sc68_audacious}"
+then AC_CONFIG_SUBDIRS([sc68-audacious])
 fi
 
 if test Xyes = X"${enable_mksc68}"

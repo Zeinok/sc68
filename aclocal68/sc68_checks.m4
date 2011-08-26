@@ -9,7 +9,7 @@ dnl#
 dnl# $Id$
 dnl#
 
-# serial 20090921
+# serial 20110824
 
 # SC68_CHECKS()
 # -------------
@@ -32,7 +32,7 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
         [fvisibility=yes],
         [fvisibility=no])
       if test [$]fvisibility = yes; then
-        SC68_ADD_FLAG(PKG_LIB_CFLAGS,[-fvisibility=hidden])
+        SC68_ADD_FLAG(PAC_LIB_CFLAGS,[-fvisibility=hidden])
       fi
     fi
     
@@ -40,28 +40,28 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
     # -----------------------------------
     AC_FOREACH([FLAG],
       [-std=${CSTD-c99} -pedantic -Wall],
-      [AX_CHECK_COMPILER_FLAGS(FLAG,SC68_ADD_FLAG(PKG_ALL_CFLAGS,FLAG))])
+      [AX_CHECK_COMPILER_FLAGS(FLAG,SC68_ADD_FLAG(PAC_ALL_CFLAGS,FLAG))])
 
     # --enable-debug
     if test X[$]enable_sc68_debug = Xyes; then
       AC_FOREACH([FLAG],
         [-g -O0],
-        [AX_CHECK_COMPILER_FLAGS(FLAG,[SC68_ADD_FLAG(PKG_ALL_CFLAGS,FLAG)])])
+        [AX_CHECK_COMPILER_FLAGS(FLAG,[SC68_ADD_FLAG(PAC_ALL_CFLAGS,FLAG)])])
     fi
 
     # --enable-all-static
     if test X[$]enable_sc68_static = Xyes; then
       AC_ENABLE_STATIC
       AC_DISABLE_SHARED
-      SC68_ADD_FLAG(PKG_ALL_LFLAGS,[-all-static])
-      SC68_ADD_FLAGS(PKG_ALL_CFLAG,[-static])
+      SC68_ADD_FLAG(PAC_ALL_LFLAGS,[-all-static])
+      SC68_ADD_FLAGS(PAC_ALL_CFLAG,[-static])
     fi
 
     # libtool shared library needs -no-undefined
     AC_MSG_CHECKING([whether shared library need -no-undefined])
     if test X[$]ac_sys_platform_win32 = Xyes; then
       AC_MSG_RESULT([yes])
-      SC68_ADD_FLAG(PKG_LIB_LFLAGS,[-no-undefined])
+      SC68_ADD_FLAG(PAC_LIB_LFLAGS,[-no-undefined])
     else
       AC_MSG_RESULT([no])
     fi
@@ -72,19 +72,19 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
     AC_HEADER_ASSERT
 
     # PUP_FLAGS : common for all (both libraries and programms)
-    AC_SUBST(PKG_ALL_CFLAGS)
-    AC_SUBST(PKG_ALL_EFLAGS)
-    AC_SUBST(PKG_ALL_LFLAGS)
+    AC_SUBST(PAC_ALL_CFLAGS)
+    AC_SUBST(PAC_ALL_EFLAGS)
+    AC_SUBST(PAC_ALL_LFLAGS)
 
     # LIBPUP_FLAGS : for building libraries
-    AC_SUBST(PKG_LIB_CFLAGS)
-    AC_SUBST(PKG_LIB_EFLAGS)
-    AC_SUBST(PKG_LIB_LFLAGS)
+    AC_SUBST(PAC_LIB_CFLAGS)
+    AC_SUBST(PAC_LIB_EFLAGS)
+    AC_SUBST(PAC_LIB_LFLAGS)
 
     # BINPUP_FLAGS : for building programms
-    AC_SUBST(PKG_BIN_CFLAGS)
-    AC_SUBST(PKG_BIN_EFLAGS)
-    AC_SUBST(PKG_BIN_LFLAGS)
+    AC_SUBST(PAC_BIN_CFLAGS)
+    AC_SUBST(PAC_BIN_EFLAGS)
+    AC_SUBST(PAC_BIN_LFLAGS)
 
     # PACKAGE_FLAGS : for others to compile/link against us
     AC_SUBST([PACKAGE_CFLAGS])

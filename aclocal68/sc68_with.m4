@@ -191,6 +191,7 @@ m4_define([DO_SC68_PACKAGE],[
               _$1_src='[$](top_srcdir)/../'"[$]_$1_dbn"
             fi
 	    _$1_inc="-I[$]_$1_src"
+            _$1_lib="-l$1"   # $$$ Or not ...
           fi
 
  	  AC_MSG_RESULT([$]has_$1)

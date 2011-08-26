@@ -7,9 +7,8 @@ dnl#
 dnl# Distribued under the term of the GPL3+
 dnl#
 dnl# $Id$
-dnl#
 
-# serial 20100306
+# serial 20110824
 
 # SC68_PACKAGE([DESC])
 # --------------------
@@ -20,18 +19,18 @@ AC_DEFUN_ONCE([SC68_PACKAGE],[
     [PACKAGE_INFOCAT='sc68 - /|\ Atari ST and C= Amiga music player']
     AC_SUBST([PACKAGE_INFOCAT])
     m4_define([PKG],AS_TR_CPP(AC_PACKAGE_NAME))
-    m4_define([PKG_ALL_CFLAGS],[ALL_CFLAGS])
-    m4_define([PKG_LIB_CFLAGS],[LIB_CFLAGS])
-    m4_define([PKG_BIN_CFLAGS],[BIN_CFLAGS])
-    m4_define([PKG_ALL_EFLAGS],[ALL_EFLAGS])
-    m4_define([PKG_LIB_EFLAGS],[LIB_EFLAGS])
-    m4_define([PKG_BIN_EFLAGS],[BIN_EFLAGS])
-    m4_define([PKG_ALL_LFLAGS],[ALL_LFLAGS])
-    m4_define([PKG_LIB_LFLAGS],[LIB_LFLAGS])
-    m4_define([PKG_BIN_LFLAGS],[BIN_LFLAGS])
-    PKG_ALL_CFLAGS=''; PKG_BIN_CFLAGS=''; PKG_LIB_CFLAGS=''; PACKAGE_CFLAGS=''
-    PKG_ALL_EFLAGS=''; PKG_BIN_EFLAGS=''; PKG_LIB_EFLAGS=''; PACKAGE_EFLAGS=''
-    PKG_ALL_LFLAGS=''; PKG_BIN_LFLAGS=''; PKG_LIB_LFLAGS=''; PACKAGE_LFLAGS=''
+    m4_define([PAC_ALL_CFLAGS],[ALL_CFLAGS])
+    m4_define([PAC_LIB_CFLAGS],[LIB_CFLAGS])
+    m4_define([PAC_BIN_CFLAGS],[BIN_CFLAGS])
+    m4_define([PAC_ALL_EFLAGS],[ALL_EFLAGS])
+    m4_define([PAC_LIB_EFLAGS],[LIB_EFLAGS])
+    m4_define([PAC_BIN_EFLAGS],[BIN_EFLAGS])
+    m4_define([PAC_ALL_LFLAGS],[ALL_LFLAGS])
+    m4_define([PAC_LIB_LFLAGS],[LIB_LFLAGS])
+    m4_define([PAC_BIN_LFLAGS],[BIN_LFLAGS])
+    PAC_ALL_CFLAGS=''; PAC_BIN_CFLAGS=''; PAC_LIB_CFLAGS=''; PACKAGE_CFLAGS=''
+    PAC_ALL_EFLAGS=''; PAC_BIN_EFLAGS=''; PAC_LIB_EFLAGS=''; PACKAGE_EFLAGS=''
+    PAC_ALL_LFLAGS=''; PAC_BIN_LFLAGS=''; PAC_LIB_LFLAGS=''; PACKAGE_LFLAGS=''
     ])
 
 dnl# ----------------------------------------------------------------------
