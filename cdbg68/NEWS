@@ -1,0 +1,6 @@
+                         ** cdbg68 - NEWS **
+
+2009-06-18
+
+        Creation of cdbg68: a sc68 sub-project for a curses 68K
+        debugger as a replacement for the old debug68 program.
