@@ -15,7 +15,7 @@ dnl#
 
 AC_INIT(
   [mksc68],
-  [20090925],
+  [20110827],
   [benjihan -4t- users.sourceforge -d0t- net],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([mksc68.c])
