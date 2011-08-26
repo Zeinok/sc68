@@ -9,7 +9,6 @@ dnl#
 dnl# $Id: configure.ac,v 1.3 2007/01/12 09:43:07 benjihan Exp $
 dnl#
 
-
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
@@ -17,11 +16,11 @@ dnl#
 AC_INIT(
   [sc68-doc],
   [20090110],
-  [SC68_EMAIL],,
-  [SC68_URL])
+  [benjihan -4t- users.sourceforge -d0t- net],,
+  [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68_doc.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 check-news])
+AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
 AM_MAINTAINER_MODE
 
 # ,----------------------------------------------------------------------.

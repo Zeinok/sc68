@@ -16,12 +16,12 @@ dnl#
 AC_INIT(
   [sc68],
   [3.0.0],
-  [SC68_EMAIL],
+  [benjihan -4t- users.sourceforge -d0t- net],
   [sc68-cli],
-  [SC68_URL])
+  [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 check-news])
+AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])

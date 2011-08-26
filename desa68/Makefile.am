@@ -2,7 +2,7 @@
 # |                                                                      |
 # |  desa68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |                 (C) 2006-2009 Benjamin Gerard                        |
+# |                 (C) 2006-2011 Benjamin Gerard                        |
 # |          <benjihan -4t- users.sourceforge -d0t- net>                 |
 # |                                                                      |
 # `----------------------------------------------------------------------'
@@ -19,7 +19,7 @@ LFLAGS                = -avoid-version $(NOINSTALL)
 # | pkg-config                                                           |
 # `----------------------------------------------------------------------'
 
-pkgconfigdir = $(libdir)/pkgconfig
+pkgconfigdir   = $(libdir)/pkgconfig
 pkgconfig_DATA = desa68.pc
 
 # ,----------------------------------------------------------------------.

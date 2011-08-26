@@ -7,6 +7,7 @@ dnl#
 dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
 dnl#
 dnl# $Id$
+dnl#
 
 # ,----------------------------------------------------------------------.
 # | Autotools and Package                                                |
@@ -18,10 +19,9 @@ AC_INIT(
   [benjihan -4t- users.sourceforge -d0t- net],
   [sc68-libdesa68],
   [http://sc68.atari.org])
-
 AC_CONFIG_SRCDIR([desa68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 check-news])
+AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])

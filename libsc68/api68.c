@@ -1,6 +1,6 @@
 /*
  *                            sc68 - API
- *            Copyright (C) 2001-2010 Ben(jamin) Gerard
+ *            Copyright (C) 2001-2011 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
@@ -943,7 +943,7 @@ static int apply_change_track(sc68_t * sc68)
 
   /* Install TOS trap emulator */
   if (1 && !m->hwflags.bit.amiga) {
-    sc68_debug(sc68," -> Load TOS trap emulator @%$06x-%$06x\n",
+    sc68_debug(sc68," -> Load TOS trap emulator @$%06x-$%06x\n",
                TRAP_ADDR,TRAP_ADDR+sizeof(trap_func)-1);
     emu68_memput(sc68->emu68,TRAP_ADDR,trap_func, sizeof(trap_func));
     sc68->emu68->reg.a[7] = sc68->emu68->memmsk+1-16;

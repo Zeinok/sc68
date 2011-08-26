@@ -2,9 +2,9 @@ Name:		@PACKAGE_NAME@
 Group:		TODO
 Version:	@VERSION@
 Release:	1
-Copyright:	GPL-2
-Summary:	68k disassembker library
-URL:		@SC68URL@/
+Copyright:	GPL-3
+Summary:	@PACKAGE_SHORTDESC@
+URL:		@PACKAGE_URL@/
 Source:		%{name}-%{version}.tar.gz
 Buildroot:	%{_tmppath}/%{name}-root
 

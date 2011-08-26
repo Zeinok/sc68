@@ -1,5 +1,12 @@
 			  ** desa68 NEWS **
 
+20110825	<ben>
+
+	Release desa68 20110825
+
+	- Autotools up-to-date.
+	- Add pkg-config support.
+
 20090117	<ben>
 
 	autotools up-to-date. MsVC project file removed.

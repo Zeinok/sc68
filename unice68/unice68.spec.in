@@ -3,7 +3,7 @@ Group:		/System/Utilities/Archiving/Compression
 Version:	@VERSION@
 Release:	1
 Copyright:	GPL-3
-Summary:	ice depacker
+Summary:	@PACKAGE_SHORTDESC@
 URL:		@PACKAGE_URL@/
 Source:		%{name}-%{version}.tar.gz
 Buildroot:	%{_tmppath}/%{name}-root

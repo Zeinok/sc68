@@ -1,12 +1,12 @@
+# Time-stamp: <2011-08-23 02:56:07 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |    sc68 -- Makefile.am -- Use with automake to produce Makefile.in   |
 # |                                                                      |
-# |                 (C) 2007-2009 Benjamin Gerard                        |
-# |          <benjihan -4t- users.sourceforge -d0t- net>                 |
+# |                  (C) 2007-2011 Benjamin Gerard                       |
+# |           <benjihan -4t- users.sourceforge -d0t- net>                |
 # |                                                                      |
 # `----------------------------------------------------------------------'
-# $Id$
 # @configure_input@
 
 SUBDIRS              = $(subdirs)
@@ -30,11 +30,9 @@ else
 SC68_LA =
 endif
 
-
 bin_PROGRAMS         = sc68
 sc68_SOURCES         = sc68.c
 sc68_LDADD           = $(SC68_LA)
-
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |
