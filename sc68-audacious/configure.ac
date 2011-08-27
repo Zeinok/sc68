@@ -39,10 +39,10 @@ SC68_WITH([sc68],[yes],[sc68_version],[sc68/sc68.h],[libsc68])
 SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
 
 AC_ARG_WITH(
-  [plugin-dir],
-  [AS_HELP_STRING([--with-plugin-dir],
+  [audacious-dir],
+  [AS_HELP_STRING([--with-audacious-dir],
       [install in audacious user plugin @<:@default=no@:>@])],
-  [],[with_plugin_dir=no])
+  [],[with_audacious_dir=no])
 
 AC_MSG_CHECKING([for pkg-config audacious module])
 if ! [$]pkgconfig --exists audacious; then
@@ -70,10 +70,10 @@ else
   AC_MSG_RESULT([no])
 fi
 
-if test x"$with_plugin_dir" = xno; then
-  with_plugin_dir=[$]([$]pkgconfig audacious --variable=input_plugin_dir)
+if test x"$with_audacious_dir" = xno; then
+  with_audacious_dir=[$]([$]pkgconfig audacious --variable=input_plugin_dir)
 fi
-AC_SUBST([PLUGINDIR],[$]with_plugin_dir)
+AC_SUBST([PLUGINDIR],[$]with_audacious_dir)
 
 aud_cflags=[$]([$]pkgconfig audacious --cflags)
 aud_lflags=[$]([$]pkgconfig audacious --libs)
@@ -107,7 +107,7 @@ AC_MSG_NOTICE([|   release-mode        : $enable_sc68_release])
 AC_MSG_NOTICE([|   static-mode         : $enable_sc68_static])
 AC_MSG_NOTICE([|   file68 headers      : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
-AC_MSG_NOTICE([|   plugin-dir          : $with_plugin_dir])
+AC_MSG_NOTICE([|   plugin-dir          : $with_audacious_dir])
 AC_MSG_NOTICE([+-----------------------])
 
 dnl#
