@@ -6,8 +6,8 @@ START-INFO-DIR-ENTRY
 * mksc68: (mksc68).           Command line toolbox for sc68 files
 END-INFO-DIR-ENTRY
 
-   This is Edition 20090925 of `The `mksc68' Manual', for `mksc68'
-version 20090925, last updated 27 August 2011.
+   This is Edition 20110827 of `The `mksc68' Manual', for `mksc68'
+version 20110827, last updated 27 August 2011.
 
 Copyright (C) 2010-2011 Benjamin Gerard
 
@@ -28,7 +28,7 @@ The `mksc68' is used to create or modify sc68 music files.
 * mksc68 Program::             The `mksc68' Program
 * Options Summary::            Options Summary
 
-      manual for mksc68 version 20090925 edited on 27 August 2011
+      manual for mksc68 version 20110827 edited on 27 August 2011
 
 
 File: mksc68.info,  Node: mksc68 Program,  Next: Options Summary,  Prev: Top,  Up: Top

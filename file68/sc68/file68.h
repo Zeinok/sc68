@@ -29,6 +29,12 @@
  */
 
 /**
+ * SC68 (not IANA) official mime-type.
+ * @see file68_idstr
+ */
+#define SC68_MIMETYPE "audio/x-sc68"
+
+/**
  * SC68 file identification string definition.
  * @see file68_idstr
  */

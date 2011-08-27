@@ -519,6 +519,10 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
  *  @{
  */
 
+/** Get official sc68 mime-type.
+ * @retval  "audio/x-sc68"
+ */
+const char * sc68_mimetype(void);
 
 #ifdef _FILE68_ISTREAM68_H_
 SC68_API

@@ -104,7 +104,7 @@ static Tuple * tuple_from_track(const gchar * filename,
     tuple_associate_string(tu, FIELD_CODEC,    NULL, "sc68");
     tuple_associate_string(tu, FIELD_QUALITY,  NULL, "sequenced");
     tuple_associate_string(tu, FIELD_GENRE,    NULL, "soundchip");
-    tuple_associate_string(tu, FIELD_MIMETYPE, NULL, "audio/sc68");
+    tuple_associate_string(tu, FIELD_MIMETYPE, NULL, "audio/x-sc68");
     if ( !sc68_music_info(sc68, &di,     0, disk))
       tuple_associate_string(tu, FIELD_ALBUM,    NULL, di.title);
     if (!sc68_music_info(sc68, &ti, track, disk)) {

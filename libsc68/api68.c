@@ -1799,3 +1799,7 @@ void ** sc68_cookie_ptr(sc68_t * sc68)
     : 0
     ;
 }
+
+const char * sc68_mimetype(void) {
+  return SC68_MIMETYPE;
+}
