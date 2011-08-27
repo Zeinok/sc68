@@ -1,4 +1,4 @@
-# Time-stamp: <2011-08-26 09:41:54 ben>
+# Time-stamp: <2011-08-27 11:01:33 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # | sc68aud -- Makefile.am -- Use with automake to produce Makefile.in   |
@@ -32,11 +32,8 @@ else
 SC68_LA = $(sc68_lib) $(file68_lib)
 endif
 
-lib_LTLIBRARIES        = libsc68aud.la
-libsc68aud_la_SOURCES  = sc68-audacious.c
-libsc68aud_la_LIBADD   = $(SC68_LA)
-
-# libsc68aud_la_CFLAGS   = $(ALL_CFLAGS) $(LIB_CFLAGS)
-# libsc68aud_la_CPPFLAGS = $(ALL_EFLAGS) $(LIB_EFLAGS)
-# libsc68aud_la_LDFLAGS  = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
-LFLAGS                 = -avoid-version $(NOINSTALL)
+lib_LTLIBRARIES            = libsc68aud.la
+libsc68aud_la_SOURCES      = sc68-audacious.c
+libsc68aud_la_LIBADD       = $(SC68_LA)
+libsc68aud_la_LIBTOOLFLAGS = --tag=disable-static
+LFLAGS                     = -avoid-version $(NOINSTALL)
