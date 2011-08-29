@@ -9,7 +9,7 @@
 
 /* $Id: string68.h 18 2009-01-25 03:39:15Z benjihan $ */
 
-/* Copyright (C) 1998-2010 Benjamin Gerard */
+/* Copyright (C) 1998-2011 Benjamin Gerard */
 
 #ifndef _FILE68_OPTION68_H_
 #define _FILE68_OPTION68_H_

@@ -1,11 +1,11 @@
 /*
- *                 option68 - cli options functions
+ *                  option68 - cli options functions
  *
- *            Copyright (C) 2001-2011 Ben(jamin) Gerard
+ *              Copyright (C) 2001-2011 Ben(jamin) Gerard
  *
- *                   <benjihan -4t- sourceforge>
+ *                     <benjihan -4t- sourceforge>
  *
- * Time-stamp: <2011-08-29 10:16:11 ben>
+ * Time-stamp: <2011-08-29 13:59:43 ben>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -22,8 +22,6 @@
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-/* $Id: init68.c 13 2009-01-22 01:45:25Z benjihan $ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -48,7 +46,8 @@ static inline int opt_isset(const option68_t * opt)
   return opt->has_arg < 0;
 }
 
-static inline void opt_free_str(option68_t * opt) {
+static inline void opt_free_str(option68_t * opt)
+{
   if (opt->has_arg == ~option68_STR) {
     free68((void *) opt->val.str);
     opt->val.str = 0;
@@ -208,9 +207,8 @@ int option68_parse(int argc, char ** argv, int reset)
   option68_t * opt;
 
   /* Reset options */
-  if (reset) {
+  if (reset)
     option68_unset_all();
-  }
 
   /* Parse arguments */
   for (i=n=1; i<argc; ++i) {
@@ -255,7 +253,6 @@ int option68_parse(int argc, char ** argv, int reset)
       if (*arg != 0 && *arg != '=') {
         continue;               /* name does not match (incomplet) */
       }
-
 
       if (0 == *arg) {
         if (opttype == option68_BOL) {
@@ -311,7 +308,13 @@ int option68_init(void)
 
 void option68_shutdown(void)
 {
+  option68_t * opt, * nxt;
+
   option68_unset_all();
+  for (nxt=opts; opt=nxt;) {
+    nxt = opt->next;
+    opt->next = 0;
+  }
   opts = 0;
 }
 
@@ -395,9 +398,7 @@ char * mygetenv(const char *name, const char * prefix, int prefix_len)
 
 const char * option68_getenv(option68_t * opt, int set)
 {
-  const char * val;
-
-  val = opt
+  const char * val = opt
     ? mygetenv(opt->name, opt->prefix, opt->prefix_len)
     : 0
     ;
@@ -405,7 +406,7 @@ const char * option68_getenv(option68_t * opt, int set)
   if (val && set) {
     switch (opt_type(opt)) {
     case option68_STR: opt_set_str(opt,val); break;
-    case option68_BOL: if (!val) val = "yes";
+    case option68_BOL: /* if (!val) val = "yes"; */
     case option68_INT: opt_set_strtol(opt,val); break;
     }
   }

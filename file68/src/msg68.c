@@ -1,7 +1,11 @@
 /*
- *                      file68 - debug message
- *            Copyright (C) 2001-2009 Ben(jamin) Gerard
- *           <benjihan -4t- users.sourceforge -d0t- net>
+ *                        file68 - debug message
+ *
+ *              Copyright (C) 2001-2011 Ben(jamin) Gerard
+ *
+ *                     <benjihan -4t- sourceforge>
+ *
+ * Time-stamp: <2011-08-29 13:59:14 ben>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -18,8 +22,6 @@
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -40,10 +42,10 @@ static int       curcat = msg68_DEBUG; /* Current category. */
 static unsigned int msg68_bitmsk =
 #if defined(DEBUGMSG_MASK)
   DEBUGMSG_MASK
-#elif defined(DEBUG_FILE68)
+#elif defined(DEBUG)
   ~0
-#elif defined(NDEBUG_FILE68)
-  (1<<msg68_CRITICAL)|(1<<msg68_ERROR)|(1<<msg68_INFO)
+#elif defined(NDEBUG)
+  (1<<msg68_CRITICAL)|(1<<msg68_ERROR)|(1<<msg68_WARNING)
 #else
   (1<<msg68_CRITICAL)|(1<<msg68_ERROR)|(1<<msg68_WARNING)|(1<<msg68_INFO)
 #endif
@@ -125,7 +127,7 @@ void msg68(const int bit, const char * fmt, ...)
 
 void msg68_trace(const char * fmt, ...)
 {
-  va_list list; 
+  va_list list;
   va_start(list, fmt);
   msg68_va(msg68_TRACE, fmt, list);
   va_end(list);
@@ -141,7 +143,7 @@ void msg68x_trace(void * userdata, const char * fmt, ...)
 
 void msg68_debug(const char * fmt, ...)
 {
-  va_list list; 
+  va_list list;
   va_start(list, fmt);
   msg68_va(msg68_DEBUG, fmt, list);
   va_end(list);
