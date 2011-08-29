@@ -672,8 +672,8 @@ void sc68_shutdown(void)
   sc68_debug(0,"libsc68: shutdowning\n");
   if (sc68_init_flag) {
     sc68_init_flag = 0;
-    config68_shutdown();
     file68_shutdown();
+    config68_shutdown();          /* always after file68_shutdown() */
   }
   sc68_debug(0,"libsc68: shutdowned -- %s\n",ok_int(0));
 }
