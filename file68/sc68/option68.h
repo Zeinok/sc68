@@ -54,7 +54,7 @@ struct option68_s {
   const char   * cat;     /**< Category name.                            */
   const char   * desc;    /**< Short description.                        */
   union {
-    const char * str;      /**< Value for string argument.               */
+    char       * str;      /**< Value for string argument.               */
     int          num;      /**< Value for integer argument.              */
   }              val;      /**< Melted value.                            */
 

@@ -122,6 +122,9 @@ int file68_init(int argc, char **argv)
   }
   init = 3;
 
+  /* Options */
+  option68_init();
+
   /* Zlib */
   istream68_z_init();
 
@@ -136,9 +139,6 @@ int file68_init(int argc, char **argv)
 
   /* Loader */
   file68_o_init();
-
-  /* Options */
-  option68_init();
 
   option68_append(opts,sizeof(opts)/sizeof(*opts));
   argc = option68_parse(argc, argv, 1);
@@ -183,15 +183,30 @@ int file68_init(int argc, char **argv)
     /* Setup new data path */
     if (option68_isset(opt)) {
       rsc68_set_share(opt->val.str);
+#if 0 /* not needed anynore since option68 properly alloc strings */
       if (opt->val.str == tmp)
         option68_unset(opt);    /* Must release tmp ! */
+#endif
     }
 
   }
 
-  /* Get user path from registry (prior to HOME) */
-  opt=option68_get("home", 0);
+  /* Get user path  */
+  opt = option68_get("home", 0);
   if (opt) {
+
+    /* Get user path from HOME */
+    if (!option68_isset(opt)) {
+      const char path[] = "/.sc68";
+      const char * env = mygetenv("HOME");
+      if(env && strlen(env)+sizeof(path) < sizeof(tmp)) {
+        strncpy(tmp,env,sizeof(tmp));
+        strcat68(tmp,path,sizeof(tmp));
+        /* $$$ We should test if this directory actually exists */
+        option68_set(opt,tmp);
+      }
+    }
+
 
     /* Get user path from registry */
     if (!option68_isset(opt)) {
@@ -206,17 +221,6 @@ int file68_init(int argc, char **argv)
       }
     }
 
-    /* Get user path from HOME */
-    if (!option68_isset(opt)) {
-      const char path[] = "/.sc68";
-      const char * env = mygetenv("HOME");
-      if(env && strlen(env)+sizeof(path) < sizeof(tmp)) {
-        strncpy(tmp,env,sizeof(tmp));
-        strcat68(tmp,path,sizeof(tmp));
-        /* $$$ We should test if this directory actually exists */
-        option68_set(opt,tmp);
-      }
-    }
 
     /* Setup new user path */
     if (option68_isset(opt)) {
