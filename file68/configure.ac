@@ -83,10 +83,12 @@ SC68_WITH([curl],[no],[],[curl/curl.h],[curl68])
 # Registry68 support
 # ------------------
 if test X"[$]enable_reg" = Xcheck; then
-  AC_CHECK_HEADERS([windows.h],
-    [AC_CHECK_HEADERS([winreg.h],
-        [enable_reg=yes],[],
-        [#include <windows.h>])])
+  if test X"[$]ac_sys_native_win32" = Xyes; then
+    AC_CHECK_HEADERS([windows.h],
+      [AC_CHECK_HEADERS([winreg.h],
+          [enable_reg=yes],[],
+          [#include <windows.h>])])
+  fi
 fi
 if test X"[$]enable_reg" = Xyes; then
   AC_DEFINE([USE_REGISTRY68],[1],[Using Windows registry])
