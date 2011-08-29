@@ -26,6 +26,20 @@ fatal() {
     exit 127
 }
 
+# $1:tool  $2:what-if-not
+testtool() {
+    local tool="$1"
+    msg "Checking for tool '${tool}'"
+    if ! which "$tool" >/dev/null 2>/dev/null; then
+	if [ -n "$2" ]; then
+	    error "$2"
+	else
+	    error "missing '${tool}'"
+	fi
+	return 1
+    fi
+}
+
 # $1: file  $2: action
 testfile() {
     local file="$1" action="$2"
@@ -109,3 +123,8 @@ fi
 
 # No error runs autoreconf to create missing files.
 autoreconf -vifs
+
+# Test some required tools
+testtool help2man    "missing help2man -- install package 'help2man'"
+testtool texinfo2man "missing textinfo2man -- compile and install 'tools/texinfo2man.c'"
+testtool od
