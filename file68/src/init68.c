@@ -1,7 +1,11 @@
 /*
- *                init68 - initialization functions
- *            Copyright (C) 2001-2010 Ben(jamin) Gerard
- *           <benjihan -4t- users.sourceforge -d0t- net>
+ *                  init68 - initialization functions
+ *
+ *              Copyright (C) 2001-2011 Ben(jamin) Gerard
+ *
+ *                     <benjihan -4t- sourceforge>
+ *
+ * Time-stamp: <2011-08-29 14:08:19 ben>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -18,8 +22,6 @@
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -45,8 +47,8 @@ static volatile int init;
 void istream68_ao_shutdown(void); /* defined in istream68_ao.c */
 int istream68_z_init(void);       /* defined in istream68_z.c  */
 void istream68_z_shutdown(void);  /* defined in istream68_z.c  */
-int option68_init(void);          /* defined int option68.c    */
-void option68_shutdown(void);     /* defined void option68.c   */
+int option68_init(void);          /* defined in option68.c     */
+void option68_shutdown(void);     /* defined in option68.c     */
 int file68_o_init(void);          /* defined in file68.c       */
 void file68_o_shutdown(void);     /* defined in file68.c       */
 int istream68_ao_init(void);      /* defined in istream68_ao.c */
