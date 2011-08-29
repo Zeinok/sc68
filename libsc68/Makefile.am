@@ -59,9 +59,12 @@ pkgincludedir      = $(includedir)/sc68
 # ,----------------------------------------------------------------------.
 # | Assemble and transform TOS trap emulator                             |
 # `----------------------------------------------------------------------'
-trap68: $(srcdir)/sc68/trap68.h
+trap68 trap68.h sc68/trap68.h: $(srcdir)/sc68/trap68.h
 
 $(srcdir)/sc68/trap68.h: $(srcdir)/trapfunc.s
-	e=false; $(as68) -p $< -o trapfunc.bin && $(hexdump) -v -e '1/1 "0x%02x,\n" ' trapfunc.bin >$@ && e=true; rm trapfunc.bin; $$e
+	e=false; $(as68) -p $< -o trapfunc.bin >/dev/null && \
+	od -vtu1 trapfunc.bin | \
+	sed 's/^[0-9]* *//g; s/\([0-9]\)\([[:space:]]\{1,\}\|$$\)/\1,/g' >$@ && \
+	e=true; rm -f trapfunc.bin; $$e
 
 MAINTAINERCLEANFILES = $(srcdir)/sc68/trap68.h
