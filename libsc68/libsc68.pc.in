@@ -20,5 +20,5 @@ Description: @PACKAGE_SHORTDESC@
 Version: ${version}
 URL: @PACKAGE_URL@
 Requires: file68 >= @PACKAGE_VERSION@
-Libs: -L${libdir} -lfile68
+Libs: -L${libdir} -lsc68
 Cflags: -I@includedir@
