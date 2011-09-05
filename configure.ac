@@ -76,6 +76,9 @@ SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_sc68_all])
 if [$]pkgconfig audacious --exists; then enable_audacious=yes; else enable_audacious=no; fi
 SC68_ENABLE_PACKAGE([sc68-audacious],[sc68 plugin for audacious],[$enable_audacious])
 
+if [$]pkgconfig gstreamer-0.10 --exists; then enable_sc68_gst=yes; else enable_sc68_gst=no; fi
+SC68_ENABLE_PACKAGE([sc68-gst],[sc68 plugin for gstreamer (0.10)],[[$]enable_sc68_gst])
+
 # DOC
 SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])
 
@@ -125,6 +128,10 @@ fi
 
 if test Xyes = X"${enable_sc68_audacious}"
 then AC_CONFIG_SUBDIRS([sc68-audacious])
+fi
+
+if test Xyes = X"${enable_sc68_gst}"
+then AC_CONFIG_SUBDIRS([sc68-gst])
 fi
 
 if test Xyes = X"${enable_mksc68}"

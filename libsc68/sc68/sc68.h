@@ -494,19 +494,19 @@ int sc68_seek(sc68_t * sc68, int time_ms, int * is_seeking);
 SC68_API
 /** Get disk/track information.
  *
- * @param  sc68   sc68 instance
+ * @param  sc68  sc68 instance
  * @param  info  track/disk information structure to be filled.
  * @param  track track number (-1:current/default 0:disk-info).
- * @param  disk  disk to get information from (0 means API disk).
+ * @param  disk  disk to get information from (0 for current disk).
  *
  * @return error code
  * @retval 0  Success.
  * @retval -1 Failure.
  *
- * @warning API disk informations are valid as soon as the disk is loaded and
- *          must not be used after api_load() or api_close() function call.
- *          If disk was given the information are valid until the disk is
- *          freed.
+ * @warning API disk informations are valid as soon as the disk is
+ *          loaded and must not be used after api_load() or
+ *          api_close() function call.  If disk was given the
+ *          information are valid until the disk is freed.
  *
  */
 int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
