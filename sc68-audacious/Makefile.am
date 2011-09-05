@@ -1,4 +1,4 @@
-# Time-stamp: <2011-08-27 23:32:52 ben>
+# Time-stamp: <2011-09-05 22:39:38 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # | sc68aud -- Makefile.am -- Use with automake to produce Makefile.in   |
@@ -11,9 +11,6 @@
 
 SUBDIRS              = $(subdirs)
 ACLOCAL_AMFLAGS      = -I m4 --install
-
-libdir               = @PLUGINDIR@
-
 AM_CFLAGS            = $(ALL_CFLAGS) $(LIB_CFLAGS) $(BIN_CFLAGS)
 AM_CPPFLAGS          = $(ALL_EFLAGS) $(LIB_EFLAGS) $(BIN_EFLAGS) $(EFLAGS)
 AM_LDFLAGS           = $(ALL_LFLAGS) $(LIB_LFLAGS) $(BIN_LFLAGS) $(LFLAGS)
@@ -32,7 +29,7 @@ else
 SC68_LA = $(sc68_lib) $(file68_lib)
 endif
 
-lib_LTLIBRARIES            = libsc68aud.la
+plugin_LTLIBRARIES         = libsc68aud.la
 libsc68aud_la_SOURCES      = sc68-audacious.c
 libsc68aud_la_LIBADD       = $(SC68_LA)
 libsc68aud_la_LIBTOOLFLAGS = --tag=disable-static

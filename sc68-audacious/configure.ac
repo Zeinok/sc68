@@ -30,7 +30,7 @@ LT_INIT([win32-dll])
 # | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
-SC68_PACKAGE([Atari ST and Amiga audacious plugin.])
+SC68_PACKAGE([Atari ST and Amiga audio plugin for audacious.])
 SC68_SYSTEM
 SC68_OPTIONS
 SC68_TOOLS
@@ -71,9 +71,11 @@ else
 fi
 
 if test x"$with_audacious_dir" = xno; then
-  with_audacious_dir=[$]([$]pkgconfig audacious --variable=input_plugin_dir)
+  with_audacious_dir=`[$]pkgconfig audacious --variable=input_plugin_dir`
+elif test x"$with_audacious_dir" = xuser; then
+  with_audacious_dir=$HOME/.local/share/audacious/Plugins
 fi
-AC_SUBST([PLUGINDIR],[$]with_audacious_dir)
+AC_SUBST([plugindir],[$]with_audacious_dir)
 
 aud_cflags=[$]([$]pkgconfig audacious --cflags)
 aud_lflags=[$]([$]pkgconfig audacious --libs)
