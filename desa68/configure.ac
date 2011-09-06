@@ -4,7 +4,7 @@ dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
 dnl# Configuration script for desa68
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
+dnl# by Benjamin Gerard <benjihan -4t- sourceforge>
 dnl#
 dnl# $Id$
 dnl#
@@ -16,12 +16,12 @@ dnl#
 AC_INIT(
   [desa68],
   [20110825],
-  [benjihan -4t- users.sourceforge -d0t- net],
-  [sc68-libdesa68],
+  [benjihan -4t- sourceforge],
+  [libdesa68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([desa68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.10 silent-rules color-tests dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
@@ -44,8 +44,8 @@ AX_CHECK_COMPILER_FLAGS([-Wno-multichar],
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([
-    desa68.spec
-    desa68-${VERSION}.ebuild:desa68.ebuild.in
+    libdesa68.spec
+    libdesa68-${VERSION}.ebuild:libdesa68.ebuild.in
     desa68.pc
     Makefile])
 AC_OUTPUT
