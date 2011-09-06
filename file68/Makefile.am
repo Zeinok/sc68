@@ -2,8 +2,9 @@
 # |                                                                      |
 # |  file68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |                 (C) 2007-2009 Benjamin Gerard                        |
-# |          <benjihan -4t- users.sourceforge -d0t- net>                 |
+# |                 (C) 2007-2011 Benjamin Gerard                        |
+# |                                                                      |
+# |            <http://sourceforge.net/users/benjihan>                   |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
@@ -56,12 +57,6 @@ pkgconfigdir   = $(libdir)/pkgconfig
 pkgconfig_DATA = file68.pc
 
 # ,----------------------------------------------------------------------.
-# | script binary                                                        |
-# `----------------------------------------------------------------------'
-
-bin_SCRIPTS          = file68-config
-
-# ,----------------------------------------------------------------------.
 # | Libtool library                                                      |
 # `----------------------------------------------------------------------'
 
@@ -84,17 +79,3 @@ libfile68_la_LIBADD  = $(UNICE68_LA)
 
 pkginclude_HEADERS   = $(apiheaders)
 pkgincludedir        = $(includedir)/sc68
-
-# ,----------------------------------------------------------------------.
-# | Documentation                                                        |
-# `----------------------------------------------------------------------'
-
-dist_man_MANS        = file68-config.1
-MAINTAINERCLEANFILES = $(srcdir)/file68-config.1
-
-HELP2MAN             = $(help2man)
-fail                 = { test -e '$@' && rm '$@'; test a = b; }
-
-$(srcdir)/file68-config.1: ./file68-config.in $(srcdir)/Makefile.am
-	$(HELP2MAN) -N  -m 'sc68-tools' '$(SHELL) ./file68-config' -o '$@'\
-	|| $(fail)

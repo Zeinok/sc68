@@ -4,7 +4,7 @@ dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
 dnl# Configuration script for file68
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
+dnl# by Benjamin Gerard <https://sourceforge.net/users/benjihan>
 dnl#
 dnl# $Id$
 dnl#
@@ -16,12 +16,12 @@ dnl#
 AC_INIT(
   [file68],
   [3.0.0],
-  [benjihan -4t- users.sourceforge -d0t- net],
-  [sc68-libfile68],
+  [benjihan -4t- sourceforge],
+  [libfile68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([src/file68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.10 silent-rules color-tests dist-bzip2])
 AC_CONFIG_HEADERS([config.h])
 
 AC_USE_SYSTEM_EXTENSIONS
@@ -192,9 +192,8 @@ fi
 AC_CONFIG_FILES([
     Makefile
     data68/Makefile
-    file68-${VERSION}.ebuild:file68.ebuild.in
-    file68-config
-    file68.spec
+    libfile68-${VERSION}.ebuild:libfile68.ebuild.in
+    libfile68.spec
     file68.pc
     package.texi])
 AC_OUTPUT
