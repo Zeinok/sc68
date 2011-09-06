@@ -4,7 +4,7 @@ dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
 dnl# Configuration script for sc68 gstreamer plugin
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
+dnl# by Benjamin Gerard <benjihan -4t- sourceforge>
 dnl#
 dnl# $Id: configure.ac 134 2010-03-09 19:00:25Z benjihan $
 dnl#
@@ -16,7 +16,7 @@ dnl#
 AC_INIT(
   [sc68-gst],
   [0.1.0],
-  [benjihan -4t- users.sourceforge -d0t- net],
+  [benjihan -4t- sourceforge],
   [sc68-audacious],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([gstsc68.c])
@@ -64,8 +64,6 @@ for p in gstreamer gstreamer-base gstreamer-controller; do
   fi
 done
 gst_ver=`[$]pkgconfig gstreamer-[$]gst_rel --modversion`
-
-echo with_gst_plugin_dir=[$]with_gst_plugin_dir
 
 if test x"$with_gst_plugin_dir" = xno; then
   with_gst_plugin_dir=`[$]pkgconfig gstreamer-[$]gst_rel --variable=pluginsdir`
