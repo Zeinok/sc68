@@ -2,8 +2,9 @@
 # |                                                                      |
 # |  libsc68 -- Makefile.am -- Use with automake to produce Makefile.in  |
 # |                                                                      |
-# |                 (C) 2007-2009 Benjamin Gerard                        |
-# |          <benjihan -4t- users.sourceforge -d0t- net>                 |
+# |                 (C) 2007-2011 Benjamin Gerard                        |
+# |                                                                      |
+# |            <https://sourceforge.net/users/benjihan>                  |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
@@ -17,12 +18,6 @@ AM_CPPFLAGS     = $(ALL_EFLAGS) $(LIB_EFLAGS) $(EFLAGS)
 AM_LDFLAGS      = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
 EFLAGS          = -DSC68_EXPORT=1 -I$(srcdir)/sc68 $(file68_inc)
 LFLAGS          = -version-info 3:0:0
-
-# ,----------------------------------------------------------------------.
-# | script binary                                                        |
-# `----------------------------------------------------------------------'
-
-bin_SCRIPTS        = sc68-config
 
 # ,----------------------------------------------------------------------.
 # | pkg-config                                                           |
@@ -63,7 +58,7 @@ trap68 trap68.h sc68/trap68.h: $(srcdir)/sc68/trap68.h
 
 $(srcdir)/sc68/trap68.h: $(srcdir)/trapfunc.s
 	e=false; $(as68) -p $< -o trapfunc.bin >/dev/null && \
-	od -vtu1 trapfunc.bin | \
+	$(od) -vtu1 trapfunc.bin | \
 	sed 's/^[0-9]* *//g; s/\([0-9]\)\([[:space:]]\{1,\}\|$$\)/\1,/g' >$@ && \
 	e=true; rm -f trapfunc.bin; $$e
 
