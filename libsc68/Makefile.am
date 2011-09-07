@@ -24,7 +24,7 @@ LFLAGS          = -version-info 3:0:0
 # `----------------------------------------------------------------------'
 
 pkgconfigdir   = $(libdir)/pkgconfig
-pkgconfig_DATA = libsc68.pc
+pkgconfig_DATA = sc68.pc
 
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |
@@ -47,7 +47,7 @@ libsc68_la_LIBADD  = io68/libio68.la emu68/libemu68.la $(FILE68_LA)
 # | Installed headers                                                    |
 # `----------------------------------------------------------------------'
 
-noinst_HEADERS     = sc68/conf68.h sc68/mixer68.h sc68/trap68.h
+noinst_HEADERS     = sc68/conf68.h sc68/mixer68.h sc68/trap68.h trapfunc.s
 pkginclude_HEADERS = sc68/sc68.h
 pkgincludedir      = $(includedir)/sc68
 

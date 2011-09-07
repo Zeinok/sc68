@@ -1,11 +1,11 @@
 # ,----------------------------------------------------------------------.
 # |   io68 -- Makefile.am -- Use with automake to produce configure.in   | 
 # |                                                                      |
-# |                 (C) 1998-2009 Benjamin Gerard                        |
+# |                 (C) 1998-2011 Benjamin Gerard                        |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# $Id$
+# Time-stamp: <2011-09-07 16:52:01 ben>
 
 ACLOCAL_AMFLAGS    = -I ../m4 --install
 AM_CFLAGS          = $(ALL_CFLAGS) $(LIB_CFLAGS)
@@ -19,7 +19,8 @@ mysources=\
 myheaders=\
  default_option68.h io68.h io68_api.h mfp_io.h mfpemul.h mw_io.h	\
  mwemul.h paula_io.h paulaemul.h shifter_io.h ym_blep.h ym_dump.h	\
- ym_fixed_vol.h ym_io.h ym_puls.h ymemul.h ymout1c5bit.h ymoutorg.h
+ ym_fixed_vol.h ym_io.h ym_puls.h ymemul.h ymout1c5bit.h ymoutorg.h	\
+ ymout2k9.h
 
 srcextra=\
  ym_atarist_table.c ym_linear_table.c

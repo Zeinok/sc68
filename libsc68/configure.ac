@@ -83,7 +83,7 @@ esac
 if test "x-$YM_ENGINE" != "x-x"; then
   AC_DEFINE_UNQUOTED([YM_ENGINE],[$YM_ENGINE],[set default YM engine])
 else
-  with_ym_engine='auto-select (should be pulse)'
+  with_ym_engine='auto-select (should be blep)'
 fi
 
 # ,----------------------------------------------------------------------.
@@ -121,7 +121,7 @@ AC_CONFIG_FILES([
     io68/Makefile
     libsc68-${VERSION}.ebuild:libsc68.ebuild.in
     libsc68.spec
-    libsc68.pc])
+    sc68.pc])
 AC_OUTPUT
 
 # ,----------------------------------------------------------------------.

@@ -2,7 +2,7 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2007-2009 Benjamin Gerard
+dnl# (C) 2009-2011 Benjamin Gerard <https://sourceforge.net/users/benjihan>
 dnl#
 dnl# Distributed under the term of the GPL
 dnl#
@@ -239,16 +239,20 @@ m4_define([DO_SC68_PACKAGE],[
               case [$]ac_flags in
                 :) ;;
                 -I*)       _$1_inc="[$]_$1_inc [$]ac_flags" ;;
-                -D* | -U*) _$1_def="[$]_$1_def [$]ac_flags" ;;
+                *)         _$1_def="[$]_$1_def [$]ac_flags" ;;
+                #-D* | -U*) _$1_def="[$]_$1_def [$]ac_flags" ;;
               esac
             done
             _$1_ver=[$]([$]$1_config --version || echo installed)
           fi
-          
+
           if test "x[$]_$1_hdr" = "x-"; then
             has_$1=maybe
           else
+            ac_wp_CPPFLAGS="[$]CPPFLAGS"
+            CPPFLAGS="[$]_$1_inc [$]CPPFLAGS"
             AC_CHECK_HEADERS([$][_$1_hdr],[has_$1=maybe])
+            CPPFLAGS="[$]ac_wp_CPPFLAGS"
           fi
           
           if test "x[$]has_$1" = "xmaybe"; then
@@ -256,7 +260,7 @@ m4_define([DO_SC68_PACKAGE],[
               x- | x+) has_$1=yes ;;
               *)
                 AC_SEARCH_LIBS(
-                  [[$]_$1_fct],
+                  [[$]_$1_fctxxx],
                   [$2],
                   [has_$1=yes; _$1_lib="$(echo [$]_$1_lib -l$2)"],
                   [has_$1=no],
@@ -264,7 +268,6 @@ m4_define([DO_SC68_PACKAGE],[
                 ;;
             esac
           fi      
-	  AC_MSG_RESULT([$]has_$1)
 	  ;;
         
 	*)
