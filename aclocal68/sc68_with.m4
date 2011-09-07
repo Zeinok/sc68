@@ -216,7 +216,7 @@ m4_define([DO_SC68_PACKAGE],[
 	  AC_MSG_CHECKING([for pkg-config $2 module])
           if [$]pkgconfig --exists "$2"; then
             # use pkg-config
-            if test "x[$]{_$1_fct}" != "x+"; then
+            if test "x[$]_$1_fct" != 'x+'; then
               _$1_lib=[$]([$]pkgconfig "$2" --libs-only-l)
               _$1_ldf=[$]([$]pkgconfig "$2" --libs-only-L)
             fi
@@ -238,21 +238,24 @@ m4_define([DO_SC68_PACKAGE],[
             for ac_flags in : [$]([$]$1_config --cflags); do
               case [$]ac_flags in
                 :) ;;
-                -I*)       _$1_inc="[$]_$1_inc [$]ac_flags" ;;
-                *)         _$1_def="[$]_$1_def [$]ac_flags" ;;
+                -I*) _$1_inc="[$]_$1_inc [$]ac_flags" ;;
+                *)   _$1_def="[$]_$1_def [$]ac_flags" ;;
                 #-D* | -U*) _$1_def="[$]_$1_def [$]ac_flags" ;;
               esac
             done
             _$1_ver=[$]([$]$1_config --version || echo installed)
           fi
 
+          for ac_wp_var in CPPFLAGS CFLAGS LDFLAGS LIBS; do
+            eval ac_wp_[$]ac_wp_var=\"[\$][$]ac_wp_var\"
+          done
+          CPPFLAGS="[$]_$1_def [$]_$1_inc [$]CPPFLAGS"
+          LDFLAGS="[$]_$1_ldf [$]LDFLAGS"
+
           if test "x[$]_$1_hdr" = "x-"; then
             has_$1=maybe
           else
-            ac_wp_CPPFLAGS="[$]CPPFLAGS"
-            CPPFLAGS="[$]_$1_inc [$]CPPFLAGS"
             AC_CHECK_HEADERS([$][_$1_hdr],[has_$1=maybe])
-            CPPFLAGS="[$]ac_wp_CPPFLAGS"
           fi
           
           if test "x[$]has_$1" = "xmaybe"; then
@@ -260,14 +263,22 @@ m4_define([DO_SC68_PACKAGE],[
               x- | x+) has_$1=yes ;;
               *)
                 AC_SEARCH_LIBS(
-                  [[$]_$1_fctxxx],
+                  [[$]_$1_fct],
                   [$2],
                   [has_$1=yes; _$1_lib="$(echo [$]_$1_lib -l$2)"],
                   [has_$1=no],
                   [[$]_$1_lib])
                 ;;
             esac
-          fi      
+          fi
+          
+          for ac_wp_var in CPPFLAGS CFLAGS LDFLAGS LIBS; do
+            eval [$]ac_wp_var=\"[\$]ac_wp_[$]ac_wp_var\"
+          done
+
+          PAC_BIN_EFLAGS="[$]_$1_inc [$]PAC_BIN_EFLAGS"
+          PAC_BIN_CFLAGS="[$]_$1_def [$]PAC_BIN_CFLAGS"
+          PAC_BIN_LFLAGS="[$]_$1_ldf [$]_$1_lib [$]PAC_BIN_LFLAGS"
 	  ;;
         
 	*)
@@ -290,12 +301,14 @@ m4_define([DO_SC68_PACKAGE],[
 
     if test "x[$]has_$1" = "xyes"; then
       AC_DEFINE([USE_]$3,[1],[Using $2 library])
+      AC_SUBST($1[_abs])
       AC_SUBST($1[_def])
       AC_SUBST($1[_dir])
       AC_SUBST($1[_inc])
+      AC_SUBST($1[_ldf])
       AC_SUBST($1[_lib])
       AC_SUBST($1[_src])
-      AC_SUBST($1[_abs])
+      AC_SUBST($1[_ver])
     fi
     #DUMP_SC68_PACKAGE_VARS([$1],[ END ])
   ])
