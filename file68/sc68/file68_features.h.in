@@ -1,0 +1,26 @@
+/**
+ * @ingroup  file68_lib
+ * @file     sc68/file68_features.h
+ * @author   Benjamin Gerard
+ * @date     2011-09-09
+ * @brief    Features this build supports.
+ *
+ */
+/* Copyright (C) 1998-2011 Benjamin Gerard */
+
+#ifndef _FILE68_FEATURES_H_
+#define _FILE68_FEATURES_H_
+
+/** Defined if file68 supports !ice depacker (via unice68) */
+#undef FILE68_UNICE68
+
+/** Defined if file68 supports deflate (via zlib). */
+#undef FILE68_Z
+
+/** Defined if file68 supports audio (via libao). */
+#undef FILE68_AO
+
+/** Defined if file68 supports remote files (via libcurl). */
+#undef FILE68_CURL
+
+#endif
