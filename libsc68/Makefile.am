@@ -1,23 +1,21 @@
+# Time-stamp: <2011-09-10 04:52:29 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# |  libsc68 -- Makefile.am -- Use with automake to produce Makefile.in  |
+# | libsc68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
 # |                 (C) 2007-2011 Benjamin Gerard                        |
 # |                                                                      |
-# |            <https://sourceforge.net/users/benjihan>                  |
+# |            <http://sourceforge.net/users/benjihan>                   |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# $Id$
 
 SUBDIRS         = io68 emu68 $(subdirs)
 ACLOCAL_AMFLAGS = -I m4 --install
 
 AM_CFLAGS       = $(ALL_CFLAGS) $(LIB_CFLAGS)
-AM_CPPFLAGS     = $(ALL_EFLAGS) $(LIB_EFLAGS) $(EFLAGS)
-AM_LDFLAGS      = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
-EFLAGS          = -DSC68_EXPORT=1 -I$(srcdir)/sc68 $(file68_inc)
-LFLAGS          = -version-info 3:0:0
+AM_CPPFLAGS     = -DSC68_EXPORT=1 -I$(srcdir)/sc68 $(file68_inc)
+AM_LDFLAGS      = $(ALL_LFLAGS) $(LIB_LFLAGS) -version-info 3:0:0
 
 # ,----------------------------------------------------------------------.
 # | pkg-config                                                           |

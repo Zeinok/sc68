@@ -4,9 +4,7 @@ dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
 dnl# Configuration script for file68
 dnl#
-dnl# by Benjamin Gerard <https://sourceforge.net/users/benjihan>
-dnl#
-dnl# $Id$
+dnl# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 
 # ,----------------------------------------------------------------------.
@@ -15,14 +13,14 @@ dnl#
 
 AC_INIT(
   [file68],
-  [3.0.0],
+  [3.0.0a],
   [benjihan -4t- sourceforge],
   [libfile68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([src/file68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.10 silent-rules color-tests dist-bzip2])
-AC_CONFIG_HEADERS([config.h])
+AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-bzip2])
+AC_CONFIG_HEADERS([config.h sc68/file68_features.h])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
@@ -74,6 +72,9 @@ AC_ARG_ENABLE(
 # ,----------------------------------------------------------------------.
 # | External libraries                                                   |
 # `----------------------------------------------------------------------'
+
+PAC_CFLAGS="-I[$]includedir"
+PAC_LFLAGS="-L[$]libdir -lfile68"
 
 SC68_WITH([unice68])
 SC68_WITH([z],[no],[gzdopen],[zlib.h],[zlib68])
@@ -151,7 +152,7 @@ file68_shared_path='-DFILE68_SHARED_PATH=\"$(sc68datadir)\"'
 if test X[$]ac_sys_native_win32 = Xyes; then
   file68_shared_path='-DFILE68_SHARED_PATH=0'
 fi
-SC68_ADD_FLAG(PAC_LIB_EFLAGS,[$file68_shared_path])
+SC68_ADD_FLAG(LIB_CFLAGS,[$file68_shared_path])
 
 # ,----------------------------------------------------------------------.
 # | Standard functions                                                   |
@@ -163,27 +164,31 @@ AC_CHECK_FUNCS([malloc free sleep usleep vsprintf vsnprintf getenv])
 # | Package config                                                       |
 # `----------------------------------------------------------------------'
 
-SC68_ADD_FLAGS([PACKAGE_LFLAGS],[$LDFLAGS $LIBS])
-
+file68_features=''
 if test X[$]has_curl = Xyes; then
-  SC68_ADD_FLAGS([PACKAGE_EFLAGS],[-DFILE68_CURL])
-  SC68_ADD_FLAGS([PACKAGE_LFLAGS],[$]curl_lib)
+  file68_features='curl'
+  AC_DEFINE([FILE68_CURL],1,[Defined if file68 supports remote files (via libcurl)])
 fi
 
 if test X[$]has_ao = Xyes; then
-  SC68_ADD_FLAGS([PACKAGE_EFLAGS],[-DFILE68_AO])
-  SC68_ADD_FLAGS([PACKAGE_LFLAGS],[$]ao_lib)
+  AC_DEFINE([FILE68_AO],1,[Defined if file68 supports audio (via libao)])
+  if test -z "[$]file68_features"; then file68_features="ao";
+  else file68_features="[$]file68_features,ao"; fi
 fi
 
 if test X[$]has_z = Xyes; then
-  SC68_ADD_FLAGS([PACKAGE_EFLAGS],[-DFILE68_Z])
-  SC68_ADD_FLAGS([PACKAGE_LFLAGS],[$]z_lib)
+  AC_DEFINE([FILE68_Z],[1],[Defined if file68 supports deflate (via zlib)])
+  if test -z "[$]file68_features"; then file68_features="z";
+  else file68_features="[$]file68_features,z"; fi
 fi
 
 if test X[$]has_unice68 = Xyes; then
-  SC68_ADD_FLAGS([PACKAGE_EFLAGS],[-DFILE68_UNICE68])
-  SC68_ADD_FLAGS([PACKAGE_LFLAGS],[$]unice68_lib)
+  AC_DEFINE([FILE68_UNICE68],[1],[Defined if file68 supports !ice depacker (via unice68)])
+  if test -z "[$]file68_features"; then file68_features="ice";
+  else file68_features="[$]file68_features,ice"; fi
 fi
+
+AC_SUBST([file68_features])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
@@ -220,5 +225,5 @@ AC_MSG_NOTICE([|   sc68 data dir       : $sc68datadir])
 AC_MSG_NOTICE([+----------------------])
 
 dnl#
-dnl# End of "$Id$".
+dnl# End of file68/configure.ac
 dnl#

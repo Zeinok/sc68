@@ -4,9 +4,7 @@ dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
 dnl# Configuration script for unice68
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- sourcefourge>
-dnl#
-dnl# $Id$
+dnl# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 
 # ,----------------------------------------------------------------------.
@@ -15,12 +13,12 @@ dnl#
 
 AC_INIT(
   [unice68],
-  [20110825],
-  [benjihan -4t- sourcefourge],,
+  [20110909],
+  [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([unice68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.10 silent-rules color-tests dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
@@ -34,6 +32,9 @@ SC68_SYSTEM
 SC68_OPTIONS
 SC68_TOOLS
 SC68_CHECKS
+
+PAC_CFLAGS="-I[$]includedir"
+PAC_LFLAGS="-L[$]libdir -lunice68"
 
 # ,----------------------------------------------------------------------.
 # | Optionnal features                                                   |
@@ -76,5 +77,5 @@ AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])
 
 dnl#
-dnl# End of "$Id$".
+dnl# End of unice68/configure.ac
 dnl#

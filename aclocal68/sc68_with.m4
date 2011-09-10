@@ -2,14 +2,12 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2011 Benjamin Gerard <https://sourceforge.net/users/benjihan>
+dnl# (C) 2009-2011 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 dnl# Distributed under the term of the GPL
 dnl#
-dnl# $Id$
-dnl#
 
-# serial 20090125
+# serial 20110910 sc68_with.m4
 
 # DUMP_SC68_PACKAGE_VARS
 # ----------------------
@@ -21,31 +19,38 @@ m4_define([DUMP_SC68_PACKAGE_VARS],[
  --  $1_has=[$]has_$1
  --  $1_req=[$]$1_req
  --  $1_ver=[$]$1_ver
+ --  $1_org=[$]$1_org
  --  $1_fct=[$]$1_fct
  --  $1_hdr=[$]$1_hdr
+ --  $1_ccf=[$]$1_ccf
  --  $1_def=[$]$1_def
  --  $1_inc=[$]$1_inc
- --  $1_lib=[$]$1_lib
  --  $1_ldf=[$]$1_ldf
  --  $1_src=[$]$1_src
  --  $1_abs=[$]$1_abs
  --  $1_dir=[$]$1_dir
  --  $1_dbn=[$]$1_dbn
- --  PACKAGE_EFLAGS=[$]PACKAGE_EFLAGS
- --  PACKAGE_LFLAGS=[$]PACKAGE_LFLAGS
+ --  $1_pkg=[$]$1_pkg
+ --  LIB_CFLAGS=[$]LIB_CFLAGS
+ --  LIB_LFLAGS=[$]LIB_LFLAGS
+ --  BIN_CFLAGS=[$]BIN_CFLAGS
+ --  BIN_LFLAGS=[$]BIN_LFLAGS
+ --  ALL_CFLAGS=[$]ALL_CFLAGS
+ --  ALL_LFLAGS=[$]ALL_LFLAGS
  --  LIBS=[$]LIBS
 ======================================================================
 EOF
-  ])
+    ])
 
 
 # UNSET_SC68_PACKAGE_VARS
 # -----------------------
 # $1:var name
 m4_define([UNSET_SC68_PACKAGE_VARS],[
-    unset $1_req $1_ver $1_fct $1_hdr $1_def $1_inc
-    unset $1_lib $1_ldf $1_src $1_abs $1_dir $1_dbn
-  ])
+    unset $1_req $1_ver $1_fct $1_hdr $1_def
+    unset $1_inc $1_ccf $1_ldf $1_src $1_abs
+    unset $1_dir $1_dbn $1_pkg $1_org
+    ])
 
 # COPY_SC68_PACKAGE_VARS
 # ----------------------
@@ -55,10 +60,12 @@ m4_define([COPY_SC68_PACKAGE_VARS],[
     $1_req="[$]$2_req"; $1_ver="[$]$2_ver"
     $1_fct="[$]$2_fct"; $1_hdr="[$]$2_hdr"
     $1_def="[$]$2_def"; $1_inc="[$]$2_inc"
-    $1_lib="[$]$2_lib"; $1_ldf="[$]$2_ldf"
+    $1_ccf="[$]$2_ccf"; $1_ldf="[$]$2_ldf"
     $1_src="[$]$2_src"; $1_abs="[$]$2_abs"
     $1_dir="[$]$2_dir"; $1_dbn="[$]$2_dbn"
-  ])
+    $1_pkg="[$]$2_pkg"; $1_org="[$]$2_org"
+
+    ])
 
 # RESET_SC68_PACKAGE_VARS
 # -----------------------
@@ -71,17 +78,19 @@ m4_define([RESET_SC68_PACKAGE_VARS],[
     has_$1="no"                 # package found yes/no ?
     $1_req="$2"                 # required yes/no ?
     $1_ver="n/a"                # package version
-    $1_def=""                   # package extra cpp definitions (-D)
-    $1_inc=""                   # package extra include paths (-I)
-    $1_ldf=""                   # package extra library paths (-L)
-    $1_lib=""                   # package extra libraries (-l)
+    $1_org="n/a"                # package origine (how it was detected)
+    $1_ccf=""                   # package cflags
+    $1_def=""                   # package cppflags define (-D -U)
+    $1_inc=""                   # package cppflags include (-I)
+    $1_ldf=""                   # package extra library paths (-L -l)
     $1_src=""                   # package source (rel. to build)
     $1_abs=""                   # package source absolute
     $1_dir=""                   # package build (rel. to build)
     $1_fct="m4_default([$3],[$1_version])" # function to search
     $1_hdr="m4_default([$4],[$1.h])"       # header to search
     $1_dbn="m4_default([$5],[$1])"         # dir basename
-  ])
+    $1_pkg="$1"                            # package name (eg for pkg-config)
+    ])
 
 
 # DO_SC68_PACKAGE
@@ -114,6 +123,7 @@ m4_define([DO_SC68_PACKAGE],[
     
     # Reset all package_vars
     RESET_SC68_PACKAGE_VARS([$1],[$4],[$5],[$6],[$7])
+    $1_pkg="$2"
 
     # Verify --with-<package>-sources directory
     if test "x-[$]{with_$1_sources-set}" != "x-set"; then
@@ -162,17 +172,18 @@ m4_define([DO_SC68_PACKAGE],[
 
     while test [$]# -gt 0; do
       COPY_SC68_PACKAGE_VARS([_$1],[$1])
-
+      _$1_org="[$]1"
+ 
       case "x-[$]1" in
         
         # YES or NO: no check; assuming everything is configured.
 	x-no | x-yes)
-          has_$1="[$]1"; break ;;
+          has_$1="[$]1"; _$1_org='set'; break ;;
 
         # bundle: source package inside source tree; SRCDIR/PACKAGE
 	x-bundle | x-source)
   	  _$1_ver="[$]1"
- 	  AC_MSG_CHECKING([for [$]_$1_ver $2])
+  	  AC_MSG_CHECKING([for [$]_$1_ver $2])
           _$1_src="[$]srcdir/../[$]_$1_dbn"
           test "x-[$]_$1_ver" = "x-bundle" &&
           _$1_src="[$]srcdir/[$]_$1_dbn"
@@ -190,8 +201,8 @@ m4_define([DO_SC68_PACKAGE],[
               _$1_dir='[$](top_builddir)/../'"[$]_$1_dbn"
               _$1_src='[$](top_srcdir)/../'"[$]_$1_dbn"
             fi
-	    _$1_inc="-I[$]_$1_src"
-            _$1_lib="-l$1"   # $$$ Or not ...
+	    _$1_ccf="-I[$]_$1_src"
+            #_$1_ldf="-l$1"   # $$$ Or not ...
           fi
 
  	  AC_MSG_RESULT([$]has_$1)
@@ -200,7 +211,7 @@ m4_define([DO_SC68_PACKAGE],[
             ac_wp_CPPFLAGS="[$]CPPFLAGS"
             CPPFLAGS="-I[$]_$1_abs [$]CPPFLAGS"
             AC_CHECK_HEADERS([[$]_$1_hdr],[has_$1=yes],[has_$1=no])
-            CPPFLAGS="[$]ac_wp_CPPFLAGS"
+            CPPFLAGS="[$]ac_wp_CPPFLAGS"; unset ac_wp_CPPFLAGS
           fi
           
           if test "x-[$]has_$1" = "x-yes" &&
@@ -213,44 +224,90 @@ m4_define([DO_SC68_PACKAGE],[
         # system: installed package
         x-system)
           AC_PATH_PROG([pkgconfig],["pkg-config"],["false"])
+          unset _$1_pkg
 	  AC_MSG_CHECKING([for pkg-config $2 module])
-          if [$]pkgconfig --exists "$2"; then
-            # use pkg-config
-            if test "x[$]_$1_fct" != 'x+'; then
-              _$1_lib=[$]([$]pkgconfig "$2" --libs-only-l)
-              _$1_ldf=[$]([$]pkgconfig "$2" --libs-only-L)
-            fi
-            _$1_inc=[$]([$]pkgconfig "$2" --cflags-only-I)
-            _$1_def=[$]([$]pkgconfig "$2" --cflags-only-other)
-            _$1_ver=[$]([$]pkgconfig "$2" --modversion||echo installed)
-            AC_MSG_RESULT([yes ([$]_$1_ver)])
-          else
-            # use config script
+          if ! [$]pkgconfig --exists "$2"; then
             AC_MSG_RESULT([no])
-            AC_PATH_PROG([$1_config],["$2-config"],["false"])
-            for ac_flags in : [$]([$]$1_config --libs); do
-              case [$]ac_flags in
-                :) ;;
-                -l*) _$1_lib="[$]_$1_lib [$]ac_flags" ;;
-                -L*) _$1_ldf="[$]_$1_ldf [$]ac_flags" ;; 
-              esac
-            done
-            for ac_flags in : [$]([$]$1_config --cflags); do
-              case [$]ac_flags in
-                :) ;;
-                -I*) _$1_inc="[$]_$1_inc [$]ac_flags" ;;
-                *)   _$1_def="[$]_$1_def [$]ac_flags" ;;
-                #-D* | -U*) _$1_def="[$]_$1_def [$]ac_flags" ;;
-              esac
-            done
-            _$1_ver=[$]([$]$1_config --version || echo installed)
+	    AC_MSG_CHECKING([for pkg-config lib$2 module])
+            if ! [$]pkgconfig --exists "lib$2"; then
+              AC_MSG_RESULT([no])
+	      AC_MSG_CHECKING([for pkg-config $2lib module])
+              if ! [$]pkgconfig --exists "$2lib"; then
+                AC_MSG_RESULT([no])
+              else
+                _$1_pkg=$2lib
+              fi
+            else
+              _$1_pkg=lib$2
+            fi
+          else
+            _$1_pkg=$2
           fi
+
+          if test s[$]{_$1_pkg+et} = set; then
+            # use pkg-config
+            _$1_org='pkg-config'
+            _$1_ver=[$]([$]pkgconfig "[$]_$1_pkg" --modversion||echo installed)
+            _$1_ccf=[$]([$]pkgconfig "[$]_$1_pkg" --cflags)
+            if test "x[$]_$1_fct" != 'x+'; then
+              _$1_ldf=[$]([$]pkgconfig "[$]_$1_pkg" --libs)
+            fi
+            AC_MSG_RESULT([yes ([$]_$1_ver)])
+            $1_config=false
+          fi
+          if test s[$]{$1_config+et} != set; then
+            AC_PATH_PROG([$1_config],["$2-config"],["false"])
+            if test "[$]$1_config" != false; then
+              _$1_pkg="$2"
+            else
+              unset $1_config
+            fi
+          fi
+          if test s[$]{$1_config+et} != set; then
+            AC_PATH_PROG([$1_config],["lib$2-config"],["false"])
+            if test "[$]$1_config" != false; then
+              _$1_pkg="lib$2"
+            else
+              unset $1_config
+            fi
+          fi
+          if test s[$]{$1_config+et} != set; then
+            AC_PATH_PROG([$1_config],["$2lib-config"],["false"])
+            if test "[$]$1_config" != false; then
+              _$1_pkg="$2lib"
+            fi
+          fi
+
+          if test "[$]{$1_config}" != false; then
+            _$1_org='config-script'
+            _$1_ver=[$]([$]$1_config --version || echo installed)
+            _$1_ccf="[$]_$1_ccf [$]([$]$1_config --cflags)"
+            if test "x[$]_$1_fct" != 'x+'; then
+              _$1_ldf="[$]_$1_ldf [$]([$]$1_config --libs)"
+            fi
+          fi
+
+          for ac_wp_var in : [$]_$1_ccf; do
+            case [$]ac_wp_var in
+              :) ;;
+              -I* )       _$1_inc="[$]_$1_inc [$]ac_wp_var" ;;
+              -D* | -U*)  _$1_def="[$]_$1_def [$]ac_wp_var" ;;
+            esac
+          done; unset ac_wp_var
+          _$1_inc=[$](echo [$]_$1_inc)
+          _$1_def=[$](echo [$]_$1_def)
 
           for ac_wp_var in CPPFLAGS CFLAGS LDFLAGS LIBS; do
             eval ac_wp_[$]ac_wp_var=\"[\$][$]ac_wp_var\"
-          done
+          done; unset ac_wp_var
+
+          for ac_wp_var in : [$]_$1_ldf; do
+            case [$]ac_wp_var in
+              -L*)
+                LDFLAGS="[$]LDFLAGS [$]ac_wp_var";;
+            esac
+          done; unset ac_wp_var
           CPPFLAGS="[$]_$1_def [$]_$1_inc [$]CPPFLAGS"
-          LDFLAGS="[$]_$1_ldf [$]LDFLAGS"
 
           if test "x[$]_$1_hdr" = "x-"; then
             has_$1=maybe
@@ -265,27 +322,24 @@ m4_define([DO_SC68_PACKAGE],[
                 AC_SEARCH_LIBS(
                   [[$]_$1_fct],
                   [$2],
-                  [has_$1=yes; _$1_lib="$(echo [$]_$1_lib -l$2)"],
+                  [has_$1=yes; SC68_ADD_FLAG($1_ldf,-l$2)],
                   [has_$1=no],
-                  [[$]_$1_lib])
+                  [])
                 ;;
             esac
           fi
-          
+
+          # ??? Should we restore LIBS ?
           for ac_wp_var in CPPFLAGS CFLAGS LDFLAGS LIBS; do
             eval [$]ac_wp_var=\"[\$]ac_wp_[$]ac_wp_var\"
-          done
-
-          PAC_BIN_EFLAGS="[$]_$1_inc [$]PAC_BIN_EFLAGS"
-          PAC_BIN_CFLAGS="[$]_$1_def [$]PAC_BIN_CFLAGS"
-          PAC_BIN_LFLAGS="[$]_$1_ldf [$]_$1_lib [$]PAC_BIN_LFLAGS"
+          done; unset ac_wp_var
 	  ;;
         
 	*)
           ;;
       esac
       
-      if test "x[$]{has_$1}" = "xyes"; then
+      if test "x[$]{has_$1}" = 'xyes'; then
         COPY_SC68_PACKAGE_VARS([$1],[_$1])
         break
       fi
@@ -293,8 +347,30 @@ m4_define([DO_SC68_PACKAGE],[
     done
     UNSET_SC68_PACKAGE_VARS([_$1])
     
-    AS_IF([test "[$]{$1_req}x[$]{has_$1}" = "yesxno"],
-      [AC_MSG_ERROR([unable to configure a required package ... $1])])
+    if test "x[$]has_$1" = 'xyes'; then
+      case x-"[$]$1_org" in
+        x-yes)
+          ;;
+        x-bundle | x-source)
+          SC68_ADD_FLAGS([ALL_CFLAGS],[$]$1_ccf)
+          ;;
+        x-system | x-config-script)
+          SC68_ADD_FLAGS([ALL_CFLAGS],[$]$1_ccf)
+          SC68_ADD_FLAGS([ALL_LFLAGS],[$]$1_ldf)
+          SC68_ADD_FLAGS([PAC_LFLAGS],[$]$1_ldf)
+          ;;
+        x-pkg-config)
+          SC68_ADD_FLAGS([ALL_CFLAGS],[$]$1_ccf)
+          SC68_ADD_FLAGS([ALL_LFLAGS],[$]$1_ldf)
+          SC68_ADD_FLAG([PAC_REQUIRES],[$]$1_pkg)
+          ;;
+        *)
+          AC_MSG_ERROR([Internal error: invalid value for $1_org '[$]$1_org'])
+          ;;
+      esac
+    elif test "x[$]$1_req" = 'xyes'; then
+      AC_MSG_ERROR([unable to configure a required package ... $1])
+    fi
     
     AM_CONDITIONAL([SOURCE_]$3,
       [test "x[$]$1_src" != "x" && test "x[$]_$1_fct" != "x+"])
@@ -306,13 +382,12 @@ m4_define([DO_SC68_PACKAGE],[
       AC_SUBST($1[_dir])
       AC_SUBST($1[_inc])
       AC_SUBST($1[_ldf])
-      AC_SUBST($1[_lib])
+      AC_SUBST($1[_ccf])
       AC_SUBST($1[_src])
       AC_SUBST($1[_ver])
     fi
-    #DUMP_SC68_PACKAGE_VARS([$1],[ END ])
-  ])
-
+    dnl # DUMP_SC68_PACKAGE_VARS([$1],[ END ])
+    ])
 
 
 # SC68_WITH([PACKAGE],[REQ],[FUNC],[HEADER],[DIRNAME])
@@ -328,7 +403,7 @@ AC_DEFUN([SC68_WITH],
       m4_strip([$3]),
       m4_strip([$4]),
       m4_strip([$5]))
-  ])
+    ])
 
 # SC68_WITH_HEADER([PACKAGE],[REQ],[HEADER],[DIRNAME])
 # ----------------------------------------------------
@@ -343,11 +418,11 @@ AC_DEFUN([SC68_WITH_HEADER],
       [+],
       m4_strip([$3]),
       m4_strip([$4]))
-  ])
+    ])
 
 
 dnl# ----------------------------------------------------------------------
 dnl#
-dnl# End Of $Id$
+dnl# End Of sc68_with.m4
 dnl#
 dnl# ----------------------------------------------------------------------

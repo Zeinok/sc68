@@ -1,15 +1,14 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
+dnl# Time-stamp: <2011-09-08 13:20:17 ben>
+dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2007-2009 Benjamin Gerard
+dnl# (C) 2009-2011 Benjamin Gerard
 dnl#
-dnl# Distributed under the term of the GPL
-dnl#
-dnl# $Id$
-dnl#
+dnl# Distribued under the term of the GPL3+
 
-# serial 20090304
+# serial 20110908 sc68_enable_debug.m4
 
 # SC68_ENABLE_DEBUG([DEBUG-ACTION],[NO-DEBUG-ACTION],
 #                   [RELEASE-ACTION],[NO-RELEASE-ACTION])
@@ -69,6 +68,6 @@ AC_DEFUN_ONCE([SC68_ENABLE_DEBUG],[
 
 dnl# ----------------------------------------------------------------------
 dnl#
-dnl# End Of $Id$
+dnl# End Of sc68_enable_debug.m4
 dnl#
 dnl# ----------------------------------------------------------------------

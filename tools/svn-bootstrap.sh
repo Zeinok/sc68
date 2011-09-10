@@ -51,6 +51,17 @@ testfile() {
     return 0
 }
 
+# $1: file  $2: action
+testlink() {
+    local file="$1" action="$2"
+    msg "Checking for symbolic link '${file}'"
+    if ! test -f "${file}" && ! test -h "${file}"; then
+	${action:-error} "Missing symbolic link '${file}'"
+	return 1
+    fi
+    return 0
+}
+
 # $1: dir  $2: action
 testdir() {
     local dir="$1" action="$2"
@@ -64,37 +75,68 @@ testdir() {
 
 # $1: source  $2: destination
 ln_or_cp() {
+    msg "Linking '$1' -> '$2'"
     $ln_s "$1" "$2" ||
     $cp_r "$1" "$2"
 }
 
 # $1: dir  $2: --force
 bootstrap_dir() {
-    local dir="$1" m4file=ac_package_extra.m4 force=''
+    local dir="$1" m4file=ac_package_extra.m4 force='' 
+    local test skip obj src lnk dst
+
+    msg "Bootstrapping directory '${dir}'"
 
     test "$2" = '--force' && force='yes'
 
     testfile "${dir}/../m4/${m4file}" || return 1
     testfile "${dir}/configure.ac"    || return 1
     testfile "${dir}/Makefile.am"     || return 1
+    testfile "${dir}/../AUTHORS"       || return 1
     
-    if test -e "${dir}/m4"; then
-	if testdir "${dir}/m4" 2>/dev/null; then
-	    if test -z "$force"; then
-		msg "Directory '${dir}/m4' already exists; skipping"
-		return 0
-	    fi
+    for obj in m4 AUTHORS README; do
+	test=false
+	dst="${dir}/${obj}"
+	if test -e "${dir}/${obj}-${dir}"; then
+	    src="${dir}/${obj}-${dir}"
+	    lnk="${obj}-${dir}"
+	elif test -e "${obj}"; then
+	    src="${obj}"
+	    lnk="../${obj}"
 	else
-	    error "'${dir}/m4' exists but is not a valid"
-	    return 1
+	    fatal "'${obj}' is missing in action"
 	fi
-    fi
-    ( cd "${dir}" && ln_or_cp ../m4 m4 )
+	
+	if test -e "${dst}"; then
+	    if test -d "${src}"; then
+		test=testdir
+		if ! test -d "${dst}"; then
+		    fatal "'${dst}' exists but is not a directory"
+		fi
+	    elif test -f "${src}"; then
+		test=testfile
+		if ! test -f "${dst}"; then
+		    fatal "'${dst}' exists but is not a file"
+		elif ! diff "${dst}" "${src}" >/dev/null 2>/dev/null
+		then
+		    if test x$force = xyes; then
+			rm -- "${dst}"
+		    else
+			fatal "'${dst}' exists but differs (--force to overwrite)"
+		    fi
+		fi
+	    else
+		fatal "'${src}' exists but is neither a file or a directory"
+	    fi
+	fi
+
+	test -e "${dst}" || ( cd "${dir}" && ln_or_cp "${lnk}" "${obj}" )
+	$test "${dst}" fatal
+    done
+    return 0;
 }
 
 ######################################################################
-
-err=0
 
 # Test for aclocal68 directory
 testdir aclocal68 fatal
@@ -113,12 +155,13 @@ mkdir -p m4 && testdir m4 fatal
 # Bootstrap all sub-directories.
 dirs="as68 desa68 file68 info68 unice68 file68 sourcer68 libsc68"
 dirs="$dirs sc68 cdbg68 mksc68 sc68-gst sc68-audacious sc68-doc"
+err=0
 for dir in ${dirs}; do
-    bootstrap_dir $dir "$@" || err=$((err+1))
+    bootstrap_dir ${dir} "$@" || err=$((err+1))
 done
 
 if test ${err} -ne 0; then
-    fatal "$err error(s): Not running autoreconf"
+    fatal "${err} error(s): Not running autoreconf"
 fi
 
 # No error runs autoreconf to create missing files.

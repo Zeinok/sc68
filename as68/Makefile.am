@@ -1,18 +1,18 @@
+# Time-stamp: <2011-09-10 04:43:27 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# |      as68 -- Makefile.am -- Use automake to create Makefile.in       |
+# |   as68 -- Makefile.am -- Use with automake to produce Makefile.in    | 
 # |                                                                      |
-# |            Copyright (C) 1998-2009 Benjamin Gerard                   |
-# |          <benjihan -4t- users.sourceforge -d0t- net>                 |
+# |                 (C) 1998-2011 Benjamin Gerard                        |
+# |                                                                      |
+# |             <http://sourceforge.net/users/benjihan>                  |
 # |                                                                      |
 # `----------------------------------------------------------------------'
-# $Id$
+# @configure_input@
 
 ACLOCAL_AMFLAGS      = -I m4 --install
 AM_CFLAGS            = $(ALL_CFLAGS) $(BIN_CFLAGS)
-AM_CPPFLAGS          = $(ALL_EFLAGS) $(BIN_EFLAGS) $(EFLAGS)
 AM_LDFLAGS           = $(ALL_LFLAGS) $(BIN_LFLAGS)
-EFLAGS               =
 
 # ,----------------------------------------------------------------------.
 # | Program                                                              |

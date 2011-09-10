@@ -1,12 +1,10 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
-dnl#
+dnl# 
 dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
 dnl# Configuration script for sc68-ng
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
-dnl#
-dnl# $Id: configure.ac,v 1.3 2007/01/12 09:43:07 benjihan Exp $
+dnl# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 
 # ,----------------------------------------------------------------------.
@@ -16,10 +14,10 @@ dnl#
 AC_INIT(
   [sc68-ng],
   [20090117],
-  [benjihan -4t- users.sourceforge -d0t- net],,
+  [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
+AM_INIT_AUTOMAKE([gnu 1.11 silent-rules check-news dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
@@ -73,11 +71,11 @@ SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[[$]enable_sc68_all])
 SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_sc68_all])
 
 # PLUGINS
-if [$]pkgconfig audacious --exists; then enable_audacious=yes; else enable_audacious=no; fi
-SC68_ENABLE_PACKAGE([sc68-audacious],[sc68 plugin for audacious],[$enable_audacious])
+if [$]pkgconfig audacious --exists; then def_audacious=yes; else def_audacious=no; fi
+SC68_ENABLE_PACKAGE([sc68-audacious],[sc68 plugin for audacious],[$def_audacious])
 
-if [$]pkgconfig gstreamer-0.10 --exists; then enable_sc68_gst=yes; else enable_sc68_gst=no; fi
-SC68_ENABLE_PACKAGE([sc68-gst],[sc68 plugin for gstreamer (0.10)],[[$]enable_sc68_gst])
+if [$]pkgconfig gstreamer-0.10 --exists; then def_sc68_gst=yes; else def_sc68_gst=no; fi
+SC68_ENABLE_PACKAGE([sc68-gst],[sc68 plugin for gstreamer (0.10)],[[$]def_sc68_gst])
 
 # DOC
 SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])
@@ -172,5 +170,5 @@ AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])
 
 dnl#
-dnl# End of "$Id$".
+dnl# End of sc68-ng/configure.ac
 dnl#

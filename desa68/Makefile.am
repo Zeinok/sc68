@@ -1,16 +1,17 @@
+# Time-stamp: <2011-09-10 04:38:56 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# |  desa68 -- Makefile.am -- Use with automake to produce configure.in  |
+# |  desa68 -- Makefile.am -- Use with automake to produce Makefile.in   | 
 # |                                                                      |
-# |                 (C) 2006-2011 Benjamin Gerard                        |
-# |          <benjihan -4t- users.sourceforge -d0t- net>                 |
+# |                 (C) 2007-2011 Benjamin Gerard                        |
+# |                                                                      |
+# |             <http://sourceforge.net/users/benjihan>                  |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# $Id$
 
 ACLOCAL_AMFLAGS       = -I m4 --install
-AM_CPPFLAGS           = $(ALL_EFLAGS) $(LIB_EFLAGS) -DDESA68_EXPORT=1
+AM_CPPFLAGS           = -DDESA68_EXPORT=1
 AM_CFLAGS             = $(ALL_CFLAGS) $(LIB_CFLAGS)
 AM_LDFLAGS            = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
 LFLAGS                = -avoid-version $(NOINSTALL)

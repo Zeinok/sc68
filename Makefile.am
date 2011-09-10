@@ -2,9 +2,9 @@
 # |                                                                      |
 # | sc68-ng -- Makefile.am -- Use with automake to produce configure.in  | 
 # |                                                                      |
-# |	       Copyright (C) 2007-2009 Benjamin Gerard                   |
+# |	       Copyright (C) 2007-2011 Benjamin Gerard                   |
 # |                                                                      |
-# |          <benjihan -4t- users.sourceforge -d0t- net>                 |
+# |            <https://sourceforge.net/users/benjihan>                  |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@

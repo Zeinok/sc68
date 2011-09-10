@@ -1,12 +1,10 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
-dnl#
+dnl# 
 dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
-dnl# Configuration script for libsc68
+dnl# Configuration script for sc68
 dnl#
-dnl# by Benjamin Gerard <https://sourceforge.net/users/benjihan>
-dnl#
-dnl# $Id$
+dnl# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 
 # ,----------------------------------------------------------------------.
@@ -30,12 +28,18 @@ LT_INIT([win32-dll])
 # | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
+
 SC68_PACKAGE([sc68 engine library.])
 SC68_SYSTEM
 SC68_OPTIONS
 SC68_TOOLS
 SC68_CHECKS
-SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
+
+PAC_CFLAGS="-I[$]includedir"
+PAC_LFLAGS="-L[$]libdir -lsc68"
+
+dnl # SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
+SC68_WITH([file68],[yes],[],[sc68/file68.h])
 
 AC_SUBST([SC68_URL])
 AC_SUBST([SC68_EMAIL])
@@ -109,9 +113,6 @@ AC_TYPE_UNSIGNED_LONG_LONG_INT
 
 AC_CHECK_FUNCS([malloc free vsprintf vsnprintf getenv strtol])
 
-SC68_ADD_FLAGS([PACKAGE_LFLAGS],[$]file68_lib)
-SC68_ADD_FLAGS([PACKAGE_LFLAGS],[$LDFLAGS $LIBS])
-
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
@@ -140,5 +141,5 @@ AC_MSG_NOTICE([|   default YM engine   : $with_ym_engine])
 AC_MSG_NOTICE([+-----------------------])
 
 dnl#
-dnl# End of "$Id$".
+dnl# End of libsc68/configure.ac
 dnl#

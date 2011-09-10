@@ -1,3 +1,4 @@
+# Time-stamp: <2011-09-10 04:49:43 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  file68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -8,17 +9,13 @@
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# $Id$
 
 SUBDIRS         = data68 $(subdirs)
 ACLOCAL_AMFLAGS = -I m4 --install
 
 AM_CFLAGS       = $(ALL_CFLAGS) $(LIB_CFLAGS)
-AM_CPPFLAGS     = $(ALL_EFLAGS) $(LIB_EFLAGS) $(EFLAGS)
-AM_LDFLAGS      = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
-
-EFLAGS          = -DFILE68_EXPORT=1 -I$(top_srcdir)/sc68 $(unice68_inc)
-LFLAGS          = -version-info 3:0:0
+AM_LDFLAGS      = $(ALL_LFLAGS) $(LIB_LFLAGS) -version-info 3:0:0
+AM_CPPFLAGS     = -DFILE68_EXPORT=1 -I$(top_srcdir)/sc68 $(unice68_inc)
 
 sdir=src
 hdir=sc68
@@ -34,11 +31,11 @@ mysources=\
  $(sdir)/rsc68.c $(sdir)/string68.c $(sdir)/url68.c $(null)
 
 apiheaders=\
- $(hdir)/alloc68.h $(hdir)/audio68.h $(hdir)/error68.h		\
- $(hdir)/file68.h $(hdir)/file68_api.h $(hdir)/init68.h		\
- $(hdir)/istream68.h $(hdir)/istream68_def.h $(hdir)/msg68.h	\
- $(hdir)/option68.h $(hdir)/registry68.h $(hdir)/rsc68.h	\
- $(hdir)/string68.h $(hdir)/url68.h $(null)
+ $(hdir)/alloc68.h $(hdir)/audio68.h $(hdir)/error68.h			\
+ $(hdir)/file68.h $(hdir)/file68_api.h $(hdir)/init68.h			\
+ $(hdir)/istream68.h $(hdir)/istream68_def.h $(hdir)/msg68.h		\
+ $(hdir)/option68.h $(hdir)/registry68.h $(hdir)/rsc68.h		\
+ $(hdir)/string68.h $(hdir)/url68.h $(hdir)/file68_features.h $(null)
 
 otherheaders=\
  $(hdir)/gzip68.h $(hdir)/ice68.h $(hdir)/istream68_ao.h		\

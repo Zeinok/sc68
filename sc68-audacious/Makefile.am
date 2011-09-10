@@ -1,10 +1,11 @@
-# Time-stamp: <2011-09-05 22:39:38 ben>
+# Time-stamp: <2011-09-10 13:44:03 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# | sc68aud -- Makefile.am -- Use with automake to produce Makefile.in   |
+# |  sc68aud -- Makefile.am -- Use with automake to produce Makefile.in  | 
 # |                                                                      |
-# |                  (C) 2007-2011 Benjamin Gerard                       |
-# |           <benjihan -4t- users.sourceforge -d0t- net>                |
+# |                 (C) 2010-2011 Benjamin Gerard                        |
+# |                                                                      |
+# |             <http://sourceforge.net/users/benjihan>                  |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
@@ -12,9 +13,8 @@
 SUBDIRS              = $(subdirs)
 ACLOCAL_AMFLAGS      = -I m4 --install
 AM_CFLAGS            = $(ALL_CFLAGS) $(LIB_CFLAGS) $(BIN_CFLAGS)
-AM_CPPFLAGS          = $(ALL_EFLAGS) $(LIB_EFLAGS) $(BIN_EFLAGS) $(EFLAGS)
+AM_CPPFLAGS          = $(sc68_inc) $(file68_inc)
 AM_LDFLAGS           = $(ALL_LFLAGS) $(LIB_LFLAGS) $(BIN_LFLAGS) $(LFLAGS)
-EFLAGS               = $(sc68_inc) $(file68_inc)
 
 # ,----------------------------------------------------------------------.
 # | Libtool program                                                      |

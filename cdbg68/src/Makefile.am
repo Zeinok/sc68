@@ -1,20 +1,19 @@
+# Time-stamp: <2011-09-10 14:00:13 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# |  cgdb68 -- Makefile.am -- Use with automake to produce Makefile.in   |
+# |  cdbg68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |            Copyright (C) 2006-2009 Benjamin Gerard                   |
-# |          <benjihan -4t- users.sourceforge -d0t- net>                 |
+# |                 (C) 2009-2011 Benjamin Gerard                        |
+# |                                                                      |
+# |            <http://sourceforge.net/users/benjihan>                   |
 # |                                                                      |
 # `----------------------------------------------------------------------'
-# $Id: Makefile.am 102 2009-03-14 17:21:58Z benjihan $
 # @configure_input@
 
 ACLOCAL_AMFLAGS = -I m4 --install
-
 AM_CFLAGS       = $(ALL_CFLAGS) $(BIN_CFLAGS)
-AM_CPPFLAGS     = $(ALL_EFLAGS) $(BIN_EFLAGS) $(EFLAGS)
 AM_LDFLAGS      = $(ALL_LFLAGS) $(BIN_LFLAGS)
-EFLAGS          = $(sc68_inc) $(file68_inc) $(desa68_inc)
+AM_CPPFLAGS     = $(sc68_inc) $(file68_inc) $(desa68_inc)
 
 # ,----------------------------------------------------------------------.
 # | Libtool program                                                      |

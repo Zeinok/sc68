@@ -15,15 +15,16 @@
 
 @SET_MAKE@
 
+# Time-stamp: <2011-09-10 14:00:13 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# |  cgdb68 -- Makefile.am -- Use with automake to produce Makefile.in   |
+# |  cdbg68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |            Copyright (C) 2006-2009 Benjamin Gerard                   |
-# |          <benjihan -4t- users.sourceforge -d0t- net>                 |
+# |                 (C) 2009-2011 Benjamin Gerard                        |
+# |                                                                      |
+# |            <http://sourceforge.net/users/benjihan>                   |
 # |                                                                      |
 # `----------------------------------------------------------------------'
-# $Id: Makefile.am 102 2009-03-14 17:21:58Z benjihan $
 # @configure_input@
 
 
@@ -118,7 +119,6 @@ CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ALL_CFLAGS = @ALL_CFLAGS@
-ALL_EFLAGS = @ALL_EFLAGS@
 ALL_LFLAGS = @ALL_LFLAGS@
 AMTAR = @AMTAR@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
@@ -129,7 +129,6 @@ AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
 BIN_CFLAGS = @BIN_CFLAGS@
-BIN_EFLAGS = @BIN_EFLAGS@
 BIN_LFLAGS = @BIN_LFLAGS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -161,7 +160,6 @@ LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
 LIB_CFLAGS = @LIB_CFLAGS@
-LIB_EFLAGS = @LIB_EFLAGS@
 LIB_LFLAGS = @LIB_LFLAGS@
 LIPO = @LIPO@
 LN_S = @LN_S@
@@ -176,11 +174,8 @@ OTOOL = @OTOOL@
 OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
-PACKAGE_CFLAGS = @PACKAGE_CFLAGS@
 PACKAGE_DESC = @PACKAGE_DESC@
-PACKAGE_EFLAGS = @PACKAGE_EFLAGS@
 PACKAGE_INFOCAT = @PACKAGE_INFOCAT@
-PACKAGE_LFLAGS = @PACKAGE_LFLAGS@
 PACKAGE_NAME = @PACKAGE_NAME@
 PACKAGE_SHORTDESC = @PACKAGE_SHORTDESC@
 PACKAGE_STRING = @PACKAGE_STRING@
@@ -188,6 +183,10 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERNUM = @PACKAGE_VERNUM@
 PACKAGE_VERSION = @PACKAGE_VERSION@
+PAC_CFLAGS = @PAC_CFLAGS@
+PAC_CONFLICTS = @PAC_CONFLICTS@
+PAC_LFLAGS = @PAC_LFLAGS@
+PAC_REQUIRES = @PAC_REQUIRES@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
 SED = @SED@
@@ -217,22 +216,26 @@ builddir = @builddir@
 datadir = @datadir@
 datarootdir = @datarootdir@
 desa68_abs = @desa68_abs@
+desa68_ccf = @desa68_ccf@
 desa68_config = @desa68_config@
 desa68_def = @desa68_def@
 desa68_dir = @desa68_dir@
 desa68_inc = @desa68_inc@
-desa68_lib = @desa68_lib@
+desa68_ldf = @desa68_ldf@
 desa68_src = @desa68_src@
+desa68_ver = @desa68_ver@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 file68_abs = @file68_abs@
+file68_ccf = @file68_ccf@
 file68_config = @file68_config@
 file68_def = @file68_def@
 file68_dir = @file68_dir@
 file68_inc = @file68_inc@
-file68_lib = @file68_lib@
+file68_ldf = @file68_ldf@
 file68_src = @file68_src@
+file68_ver = @file68_ver@
 help2man = @help2man@
 host = @host@
 host_alias = @host_alias@
@@ -259,12 +262,14 @@ program_transform_name = @program_transform_name@
 psdir = @psdir@
 sbindir = @sbindir@
 sc68_abs = @sc68_abs@
+sc68_ccf = @sc68_ccf@
 sc68_config = @sc68_config@
 sc68_def = @sc68_def@
 sc68_dir = @sc68_dir@
 sc68_inc = @sc68_inc@
-sc68_lib = @sc68_lib@
+sc68_ldf = @sc68_ldf@
 sc68_src = @sc68_src@
+sc68_ver = @sc68_ver@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 subdirs = @subdirs@
@@ -276,9 +281,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 ACLOCAL_AMFLAGS = -I m4 --install
 AM_CFLAGS = $(ALL_CFLAGS) $(BIN_CFLAGS)
-AM_CPPFLAGS = $(ALL_EFLAGS) $(BIN_EFLAGS) $(EFLAGS)
 AM_LDFLAGS = $(ALL_LFLAGS) $(BIN_LFLAGS)
-EFLAGS = $(sc68_inc) $(file68_inc) $(desa68_inc)
+AM_CPPFLAGS = $(sc68_inc) $(file68_inc) $(desa68_inc)
 @SOURCE_DESA68_FALSE@DESA68_LA = 
 
 # ,----------------------------------------------------------------------.

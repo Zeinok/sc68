@@ -1,13 +1,14 @@
-dnl# -*- m4 -*-
+dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
+dnl#
+dnl# Time-stamp: <2011-09-08 13:14:37 ben>
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2007 Benjamin Gerard <benjihan [at] users.sourceforge [dot] net>
+dnl# (C) 2009-2011 Benjamin Gerard
 dnl#
-dnl# Distribued under the term of the GPL
-dnl#
-dnl# $Id$
-dnl#
+dnl# Distribued under the term of the GPL3+
+
+# serial 20110908 cc_visibility_attribut.m4
 
 # AC_C_VISIBILITY_ATTRIBUT([RESULT-VAR = ac_c_visibility_attribut])
 # -----------------------------------------------------------------
@@ -30,8 +31,8 @@ AC_DEFUN_ONCE([AC_C_VISIBILITY_ATTRIBUT],
   ifelse([$1], ,[ac_c_visibility_attribut],[$1])="$ac_test_res",
 ])
 
-dnl# ########################################################################
+dnl# ----------------------------------------------------------------------
 dnl#
-dnl# End Of $Id$
+dnl# End Of cc_visibility_attribut.m4
 dnl#
-dnl# ########################################################################
+dnl# ----------------------------------------------------------------------

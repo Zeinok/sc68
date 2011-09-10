@@ -1,12 +1,14 @@
-dnl# -*- m4 -*-
+dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# sc68 - autoconf macros
+dnl# Time-stamp: <2011-09-08 13:15:49 ben>
 dnl#
-dnl# by Benjamin Gerard <ben [at] sashipa [dot] com>
+dnl# autoconf macros
 dnl#
-dnl# $Id$
+dnl# (C) 2009-2011 Benjamin Gerard
 dnl#
+dnl# Distribued under the term of the GPL3+
 
+# serial 20110908 cc_fvisibility.m4
 
 # AC_C_FVISIBILITY([VISIBILITY = hidden])
 # ---------------------------------------
@@ -26,9 +28,8 @@ AC_MSG_RESULT($ac_cv_fvisibility)
 )
 ])
 
-
-dnl# ########################################################################
+dnl# ----------------------------------------------------------------------
 dnl#
-dnl# End Of $Id$
+dnl# End Of cc_fvisibility.m4
 dnl#
-dnl# ########################################################################
+dnl# ----------------------------------------------------------------------

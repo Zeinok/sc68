@@ -1,16 +1,18 @@
+# Time-stamp: <2011-09-10 13:54:58 ben>
 # ,----------------------------------------------------------------------.
-# |   io68 -- Makefile.am -- Use with automake to produce configure.in   | 
+# |                                                                      |
+# |   io68 -- Makefile.am -- Use with automake to produce configure.in   |
 # |                                                                      |
 # |                 (C) 1998-2011 Benjamin Gerard                        |
 # |                                                                      |
+# |            <http://sourceforge.net/users/benjihan>                   |
+# |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# Time-stamp: <2011-09-07 16:52:01 ben>
 
 ACLOCAL_AMFLAGS    = -I ../m4 --install
 AM_CFLAGS          = $(ALL_CFLAGS) $(LIB_CFLAGS)
-AM_CPPFLAGS        = $(ALL_EFLAGS) $(LIB_EFLAGS) $(EFLAGS)
-EFLAGS             = -I$(top_srcdir) $(file68_inc) -DIO68_EXPORT
+AM_CPPFLAGS        = -I$(top_srcdir) $(file68_inc) -DIO68_EXPORT
 
 mysources=\
  io68.c mfp_io.c mfpemul.c mw_io.c mwemul.c paula_io.c paulaemul.c	\

@@ -1,13 +1,14 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
+dnl# Time-stamp: <2011-09-08 13:21:29 ben>
+dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2011 Benjamin Gerard <benjihan -4t- sourceforge>
+dnl# (C) 2009-2011 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
-dnl#
 
-# serial 20110829
+# serial 20110908 sc68_system.m4
 
 # SC68_SYSTEM()
 # -------------
@@ -37,6 +38,6 @@ AC_DEFUN_ONCE([SC68_SYSTEM],[
 
 dnl# ----------------------------------------------------------------------
 dnl#
-dnl# End Of $Id$
+dnl# End Of sc68_system.m4
 dnl#
 dnl# ----------------------------------------------------------------------

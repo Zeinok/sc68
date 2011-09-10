@@ -1,16 +1,18 @@
+# Time-stamp: <2011-09-10 13:54:00 ben>
 # ,----------------------------------------------------------------------.
-# |  emu68 -- Makefile.am -- Use with automake to produce configure.in   | 
 # |                                                                      |
-# |                 (C) 1998-2009 Benjamin Gerard                        |
+# |  emu68 -- Makefile.am -- Use with automake to produce configure.in   |
+# |                                                                      |
+# |                 (C) 1998-2011 Benjamin Gerard                        |
+# |                                                                      |
+# |            <http://sourceforge.net/users/benjihan>                   |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# $Id$
 
 ACLOCAL_AMFLAGS    = -I ../m4 --install
 AM_CFLAGS          = $(ALL_CFLAGS) $(LIB_CFLAGS)
-AM_CPPFLAGS        = $(ALL_EFLAGS) $(LIB_EFLAGS) $(EFLAGS)
-EFLAGS             = -I$(top_srcdir) $(file68_inc) -DEMU68_EXPORT $(MONO)
+AM_CPPFLAGS        = -I$(top_srcdir) $(file68_inc) -DEMU68_EXPORT $(MONO)
 
 if emu68_monolitic
 MONO               = -DEMU68_MONOLITIC

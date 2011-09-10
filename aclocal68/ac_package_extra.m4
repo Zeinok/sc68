@@ -1,15 +1,14 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
+dnl# Time-stamp: <2011-09-09 13:56:04 ben>
+dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2007 Benjamin Gerard <benjihan [at] users.sourceforge [dot] net>
+dnl# (C) 2009-2011 Benjamin Gerard
 dnl#
-dnl# Distribued under the term of the GPL
-dnl#
-dnl# $Id$
-dnl#
+dnl# Distribued under the term of the GPL3+
 
-# serial 20100306
+# serial 20110909 ac_package_extra.m4
 
 # AC_PACKAGE_INFO([DESCRIPTION])
 # ------------------------------
@@ -31,7 +30,7 @@ AC_DEFUN_ONCE([AC_PACKAGE_INFO],[
         ])
     m4_ifval([AC_PACKAGE_VERSION],
       [
-        m4_define([AX_PACKAGE_VERNUM],patsubst(AC_PACKAGE_VERSION,[[.]],[]))
+        m4_define([AX_PACKAGE_VERNUM],patsubst(AC_PACKAGE_VERSION,[[^0-9]],[]))
         AC_DEFINE_UNQUOTED(
 	  [PACKAGE_VERNUM],
 	  [AX_PACKAGE_VERNUM],
@@ -40,8 +39,8 @@ AC_DEFUN_ONCE([AC_PACKAGE_INFO],[
         ])
     ])
 
-dnl# ########################################################################
+dnl# ----------------------------------------------------------------------
 dnl#
-dnl# End Of $Id$
+dnl# End Of ac_package_extra.m4
 dnl#
-dnl# ########################################################################
+dnl# ----------------------------------------------------------------------

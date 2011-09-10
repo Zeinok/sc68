@@ -1,15 +1,14 @@
-yesdnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
+dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
+dnl#
+dnl# Time-stamp: <2011-09-08 17:06:46 ben>
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009 Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
+dnl# (C) 2009-2011 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
-dnl#
-dnl# $Id$
-dnl#
 
-# serial 20090305
+# serial 20110908 sc68_add_flag.m4
 
 # SC68_ADD_FLAG([VAR],[FLAG])
 # ---------------------------
@@ -20,10 +19,11 @@ AC_DEFUN([SC68_ADD_FLAG],[
     else
       for sc68_add_flag in [$]$1 ; do
         test X"[$]sc68_add_flag" = X"$2" && break
-      done
+      done;
       if test [$]? -ne 0; then
         $1="[$]$1 $2"
       fi
+      unset sc68_add_flag
     fi
   ])
 
@@ -40,6 +40,6 @@ AC_DEFUN([SC68_ADD_FLAGS],[
 
 dnl# ----------------------------------------------------------------------
 dnl#
-dnl# End Of $Id$
+dnl# End Of sc68_add_flag.m4
 dnl#
 dnl# ----------------------------------------------------------------------

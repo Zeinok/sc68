@@ -4,7 +4,7 @@ dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
 dnl# Configuration script for as68
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
+dnl# by Benjamin Gerard <benjihan -4t- sourceforge>
 dnl#
 dnl# $Id$
 dnl#
@@ -16,11 +16,11 @@ dnl#
 AC_INIT(
   [as68],
   [20090117],
-  [benjihan -4t- users.sourceforge -d0t- net],,
+  [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([as68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.10 silent-rules color-tests dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])

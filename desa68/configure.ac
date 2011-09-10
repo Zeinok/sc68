@@ -4,9 +4,7 @@ dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
 dnl# Configuration script for desa68
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- sourceforge>
-dnl#
-dnl# $Id$
+dnl# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 
 # ,----------------------------------------------------------------------.
@@ -15,13 +13,13 @@ dnl#
 
 AC_INIT(
   [desa68],
-  [20110825],
+  [20110909],
   [benjihan -4t- sourceforge],
   [libdesa68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([desa68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.10 silent-rules color-tests dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
@@ -37,7 +35,10 @@ SC68_TOOLS
 SC68_CHECKS
 
 AX_CHECK_COMPILER_FLAGS([-Wno-multichar],
-  SC68_ADD_FLAG(PAC_ALL_CFLAGS,[-Wno-multichar]))
+  SC68_ADD_FLAG(ALL_CFLAGS,[-Wno-multichar]))
+
+PAC_CFLAGS="-I[$]includedir"
+PAC_LFLAGS="-L[$]libdir -ldesa68"
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
@@ -61,5 +62,5 @@ AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])
 
 dnl#
-dnl# End of "$Id$".
+dnl# End of desa68/configure.ac
 dnl#
