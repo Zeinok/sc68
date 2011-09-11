@@ -1,4 +1,4 @@
-# Time-stamp: <2011-09-10 04:52:29 ben>
+# Time-stamp: <2011-09-11 01:07:59 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # | libsc68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -52,7 +52,9 @@ pkgincludedir      = $(includedir)/sc68
 # ,----------------------------------------------------------------------.
 # | Assemble and transform TOS trap emulator                             |
 # `----------------------------------------------------------------------'
-trap68 trap68.h sc68/trap68.h: $(srcdir)/sc68/trap68.h
+
+$(builddir)/api68.lo: $(srcdir)/sc68/trap68.h
+trap68: $(srcdir)/sc68/trap68.h
 
 $(srcdir)/sc68/trap68.h: $(srcdir)/trapfunc.s
 	e=false; $(as68) -p $< -o trapfunc.bin >/dev/null && \
