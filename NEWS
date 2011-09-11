@@ -1,8 +1,24 @@
                       ** sc68 project - NEWS **
 
 
-20090117	<ben>
+3.0.0a  <ben>
 
-        Autotools up-to-date.
+        This is an alpha version. Some things might change before the
+        official release.
 
-	New package, new engine ... Have fun !
+        This is the first version of sc68 new generation. This is
+        where is new NEWS file start.
+
+        Change in the API without backward compatibility but portage
+        should be easy.
+
+        The new BLEP YM-2149 engine is used by default. It has a
+        better sound rendering. Old engine has been improved too and
+        enhanced by user selectable filters.
+
+        Add project for various back-end specially for gstreamer which
+        should allow sc68 files to be played with most modern Linux
+        players.
+
+        New tools for creating (mksc68) and debugging (cdbg68) sc68
+        files replacing the good old debug68.

@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [libsc68],
-  [3.0.0],
+  [3.0.0a],
   [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([api68.c])
