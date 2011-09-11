@@ -4,9 +4,7 @@ dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
 dnl# Configuration script for sc68-doc
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
-dnl#
-dnl# $Id: configure.ac,v 1.3 2007/01/12 09:43:07 benjihan Exp $
+dnl# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 
 # ,----------------------------------------------------------------------.
@@ -16,11 +14,11 @@ dnl#
 AC_INIT(
   [sc68-doc],
   [20090110],
-  [benjihan -4t- users.sourceforge -d0t- net],,
+  [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68_doc.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-bzip2])
 AM_MAINTAINER_MODE
 
 # ,----------------------------------------------------------------------.
@@ -78,5 +76,5 @@ AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])
 
 dnl#
-dnl# End of "$Id: configure.ac,v 1.2 2006/12/25 22:36:49 benjihan Exp $".
+dnl# End of sc68-doc/configure.ac
 dnl#

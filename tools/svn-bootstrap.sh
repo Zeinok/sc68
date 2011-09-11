@@ -138,6 +138,11 @@ bootstrap_dir() {
 
 ######################################################################
 
+# Test some required tools
+testtool help2man    "missing help2man -- install package 'help2man'"
+testtool texinfo2man "missing textinfo2man -- compile and install 'tools/texinfo2man.c'"
+testtool od
+
 # Test for aclocal68 directory
 testdir aclocal68 fatal
 
@@ -167,7 +172,3 @@ fi
 # No error runs autoreconf to create missing files.
 autoreconf -vifs
 
-# Test some required tools
-testtool help2man    "missing help2man -- install package 'help2man'"
-testtool texinfo2man "missing textinfo2man -- compile and install 'tools/texinfo2man.c'"
-testtool od

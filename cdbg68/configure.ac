@@ -4,9 +4,7 @@ dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
 dnl# Configuration script for cdbg68
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
-dnl#
-dnl# $Id: configure.ac 102 2009-03-14 17:21:58Z benjihan $
+dnl# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 
 # ,----------------------------------------------------------------------.
@@ -16,11 +14,11 @@ dnl#
 AC_INIT(
   [cdbg68],
   [20090618],
-  [benjihan -4t- users.sourceforge -d0t- net],,
+  [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([src/cdbg68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news color-tests dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
@@ -83,5 +81,5 @@ AC_MSG_NOTICE([|   sc68                : $has_sc68 ($sc68_ver)])
 AC_MSG_NOTICE([+-----------------------])
 
 dnl#
-dnl# End of "$Id: configure.ac 102 2009-03-14 17:21:58Z benjihan $".
+dnl# End of cdbg68/configure.ac
 dnl#
