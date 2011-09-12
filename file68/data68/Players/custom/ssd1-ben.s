@@ -32,13 +32,10 @@
 
 ;;; sc68 version with pattern break fix
 		
-	org	$8000
-
 ; sc68 header
- 	bra	init_music
- 	bra	exit_player
- 	bra	my_replay_music
-
+ 	;; bra	init_music
+ 	;; bra	exit_player
+ 	;; bra	my_replay_music
 ; lopp:	
 ; 	nop
 ; 	bsr	music+4

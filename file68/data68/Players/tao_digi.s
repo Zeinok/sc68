@@ -1,8 +1,13 @@
+;;; sc68 wrapper for Tao's digi player
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:20:12 ben>
+;;; 
+
 	bra	init
 	bra	player+12
 	bra	player+8
-
-;inst:	move.l	$800.w,a2
 
 init:
 	lea	player(pc),a2

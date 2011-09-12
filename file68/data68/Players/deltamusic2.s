@@ -1,8 +1,5 @@
-
 ;	Delta Music 2 replay routine
 ;	adapted for sc68 by Gerald Schnabel <gschnabel@gmx.de>
-
-	org	$8000
 
 	bra.w	deltamusic_init
 	rts

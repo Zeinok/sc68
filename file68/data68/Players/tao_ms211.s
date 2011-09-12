@@ -1,3 +1,10 @@
+;;; sc68 wrapper for Tao's ms211
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:21:21 ben>
+;;; 
+
 	bra	init
 	bra	player+12
 	bra	player+8

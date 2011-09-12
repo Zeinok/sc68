@@ -1,7 +1,11 @@
-; sc68 wrapper for timer-C replay
-; Emulate timer C replay
-; by Ben(jamin) Gerard <ben@sashipa.com>
+;;; sc68 wrapper for timer-C replay (emulate timer C replay)
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:28:22 ben>
+;;; 
 
+	
 ;	bra	init
 ;	bra	m+4
 ;	bra	m+8
@@ -28,11 +32,11 @@
 	bclr	#5,$fffffa09.w
 	bclr	#5,$fffffa15.w
 	move.l	$114.w,d7
-	beq.s		.notimer
-	pea			.ok(pc)
-	move		sr,-(a7)
+	beq.s	.notimer
+	pea	.ok(pc)
+	move	sr,-(a7)
 	move.l	d7,a6
-	move		#$2600,sr
+	move	#$2600,sr
 	jmp	(a6)	
 .ok
 	rts	

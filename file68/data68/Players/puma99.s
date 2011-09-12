@@ -1,3 +1,10 @@
+;;; sc68 wrapper for PUMA 0.99
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:09:18 ben>
+;;; 
+	
 ;	нннннннннннннннннннннннннннннннннннннннннннн
 ;      PumaTracker V0.99 Replay-Routine
 ;	нннннннннннннннннннннннннннннннннннннннннннн
@@ -6,9 +13,8 @@
 ;These kinda modules can be useful for intros coz' a module can't exceed
 ;8Kb and that replay-routine is fuck'n fast.
 
-
 ;
-; relocatable version by BeN / SasHipA-DeV
+; relocatable version by ben
 ;
 
 ; ----------------------------

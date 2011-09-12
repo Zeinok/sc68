@@ -1,16 +1,11 @@
-;
-; relocatable version
-; by BeN / SasHipA - Dev
-;
+;;; futur composer PIC and unified version
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 14:53:22 ben>
+;;; 
 
-;*********************************************************
-;**  Amiga FUTURE COMPOSER  »» V1.4 ««  Replay routine  **
-;*********************************************************
-;
-; Compatibility V1.0 - V1.3 by BeN / SasHipA - Dev
-;
-; a0 = address of module
-;
+;;; a0 = address of module
 
 	bra	init_music
 	bra 	end_music

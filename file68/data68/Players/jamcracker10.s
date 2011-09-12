@@ -17,7 +17,7 @@
 ;* Don't forget to save any important registers
 ;* because I don't care
 
-	org	$8000
+	include "lib/org.s"
 
 	bra	pp_init
 	bra	pp_end

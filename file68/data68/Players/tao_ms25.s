@@ -1,7 +1,10 @@
-; sc68 wrapper for 
-; Tao MS 25 replay.
-; by Ben(jamin~) Gerard <ben@sashipa.com>
-;
+;;; sc68 wrapper for Tao's ms25
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:22:21 ben>
+;;; 
+
 	bra		init
 	bra		player+12
 	move	sr,-(a7)	; Player set IPL 7 when writting YM

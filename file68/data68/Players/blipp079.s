@@ -1,8 +1,11 @@
-; blippblop079 sc68 wrapper
-; by ben(jamin) gerard <ben@sashipa.com>
-;
-; Play a .TUN file [fourCC = 'Elof']
-
+;;; blippblop079 sc68 wrapper
+;;; 
+;;; by Benjamin Gerard
+;;;
+;;; Play a .TUN file [fourCC = 'Elof']
+;;;
+;;; Time-stamp: <2011-09-12 14:44:54 ben>
+	
 	bra	m+0
 	rts
 	rts

@@ -1,6 +1,9 @@
-; musmon1 wrapper for sc68
-; by Ben(jamin) Gerard <ben@sashipa.com>
-;
+;;; sc68 wrapper for musmon1
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:04:02 ben>
+;;; 
 
 	bra		init
 	bra		kill

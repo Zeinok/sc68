@@ -1,7 +1,11 @@
-; Quartet rout from DIGISYNTH - MindBomb - TLB
-; sc68 wrapper by Ben(jamin) Gerard <ben@sashipa.com>
-;
-	ORG	$8000
+;;; sc68 wrapper for Quartet (DIGISYNTH - MindBomb - TLB)
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:10:47 ben>
+;;; 
+
+	include "lib/org.s"
 
 	bra		Init
 	bra		Kill

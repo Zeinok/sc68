@@ -1,8 +1,9 @@
-; 
-; PSG1 replay for sc68
-;
-; Ripped and adapted by Benjamin Gerard <ben@sashipa.com>
-;
+;;; sc68 wrapper for PSG1 
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:07:52 ben>
+;;; 
 
 	BRA Init
 	BRA Exit

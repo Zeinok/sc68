@@ -10,7 +10,7 @@
 
 
 ; **************************** demonstration irq ******************************
-	org	$8000
+	include "lib/org.s"
 
 	bra	begin
 	bra	mt_end

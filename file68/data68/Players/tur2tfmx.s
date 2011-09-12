@@ -1,6 +1,9 @@
-;
-; TFMX player from turrican 2
-;
+;;; sc68 wrapper for turrican2's special TFMX
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:31:24 ben>
+;;; 
 	
 ; a0 = coso-tfmx file 
 ; d0 = six in file 

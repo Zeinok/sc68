@@ -1,9 +1,9 @@
-;
-; sc68 wrapper for
-; MIDI replay from Cartoon
-;
-; by Ben(jamin) Gerard <ben@sashipa.com>
-; 
+;;; sc68 wrapper for midi replay (from cartoon)
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:01:26 ben>
+;;; 
 
 ; sc68 'MIDI' file format 
 ;

@@ -1,6 +1,10 @@
-; sc68 wrapper for tao ms27 player
-; by Ben(jamin) Gerard <ben@sashipa.com>
-;
+;;; sc68 wrapper for Tao's ms27
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:22:55 ben>
+;;; 
+
 	bra	init
 	bra	kill
 	bra	player+4

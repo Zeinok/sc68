@@ -1,6 +1,9 @@
-;
-; WOD ... replay patch by BeN / SasHipA - DEv
-;
+;;; sc68 wrapper for wings of Death special TFMX
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:32:06 ben>
+;;; 
 
 ; a0 = coso tfmx
 ; d0 = song
@@ -24,5 +27,3 @@ rep:
 	incbin	"org/wodtfmx"
 	even
 	dc.w	0
-
-

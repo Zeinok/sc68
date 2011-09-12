@@ -1,6 +1,11 @@
-; sc68 wrapper for jam-hpn player (big demo)
-;
+;;; sc68 wrapper for jam-hpn player (big demo)
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 14:55:13 ben>
+;;; 
 
+	
 OFFSET:     =$be
 
 start:
@@ -57,10 +62,8 @@ init:
   
   rts
 
-  INCLUDE "custom/TosReloc.s"
+  include "lib/TosReloc.s"
 replay:
 truereplay: = *+$4b8
 	INCBIN  "org/hpn.jam"	
-;   INCBIN  "org/jam/hpn.jam"
-;   ds.b    128*1024
   print  replay-start

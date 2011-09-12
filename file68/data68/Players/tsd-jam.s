@@ -1,5 +1,10 @@
-; sc68 wrapper for jam-tsd player (tao MS30)
-;
+;;; sc68 wrapper for JAM-TSD (Tao's ms30)
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:39:40 ben>
+;;; 
+
 
 OFFSET:     =$ac
 SelectOut:  =replay+$528-OFFSET
@@ -155,7 +160,7 @@ init:
   
   rts
 
-  INCLUDE "custom/TosReloc.s"
+  INCLUDE "lib/TosReloc.s"
 replay:
 truereplay: = *+$4b8
   INCBIN  "org/jam/tsd.jam"

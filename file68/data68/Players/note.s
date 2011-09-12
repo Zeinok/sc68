@@ -1,6 +1,11 @@
-;
-; Hippel Fullscreen Replay
-;
+;;; sc68 wrapper for Hippel Fullscreen Replay
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:06:47 ben>
+;;; 
+
+				;
 ; 8 bytes / frame
 ;
 

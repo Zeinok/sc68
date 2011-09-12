@@ -1,6 +1,10 @@
-;
-; MMME SID original version
-;
+;;; sc68 wrapper for MMME+SID original version
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:03:19 ben>
+;;; 
+
 	bra	init
 	bra	rep+4
 	bra.s	rep+8

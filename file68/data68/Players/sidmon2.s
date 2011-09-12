@@ -1,8 +1,7 @@
-
 ;	SIDMon 2 replay routine
 ;	adapted for sc68 by Gerald Schnabel <gschnabel@gmx.de>
 
-	org	$8000
+	include "lib/org.s"
 
 	bra.w	initmuzak
 	rts

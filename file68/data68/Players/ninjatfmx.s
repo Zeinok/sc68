@@ -1,7 +1,10 @@
-;
-; Ninja remix DIGI
-;
-;
+;;; sc68 wrapper for ninja remix TFMX
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:05:19 ben>
+;;; 
+
 ; entry:
 ;  a0 = buffer dc.l spl-coso ... coso ... spl
 ;

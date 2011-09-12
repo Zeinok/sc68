@@ -1,6 +1,10 @@
-; musmon2 wrapper for sc68
-; by Ben(jamin) Gerard <ben@sashipa.com>
-;
+;;; sc68 wrapper for musmon2
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:04:24 ben>
+;;; 
+
 	bra			init
 	bra			kill
 	move.l	_zic(pc),d0

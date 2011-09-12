@@ -1,6 +1,10 @@
-;
-; MMME original version
-;
+;;; sc68 wrapper for MMME original version
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:02:36 ben>
+;;; 
+
 	bra	init
 	bra	rep+4
 	bra.s	rep+8

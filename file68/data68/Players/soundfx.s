@@ -1,8 +1,7 @@
-
 ;	SoundFX replay routine
 ;	adapted for sc68 by Gerald Schnabel <gschnabel@gmx.de>
 
-	org	$8000
+	include "lib/org.s"
 
 	bra.w	fx_init
 	bra.w	fx_stop

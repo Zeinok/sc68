@@ -1,7 +1,9 @@
-;
-; TSD TFMX 2
-;
-
+;;; sc68 wrapper for TSD TFMX 2
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:28:57 ben>
+;;; 
 	bra	init
 	bra	rep+4
 	bra	rep+8

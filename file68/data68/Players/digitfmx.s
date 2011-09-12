@@ -1,3 +1,7 @@
+;;; digitfmx wrapper for sc68
+;;; 
+;;; Time-stamp: <2011-09-12 14:51:38 ben>
+;;; 
 	bra	init
 	bra	replay+12
 	bra.s	replay

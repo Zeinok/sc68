@@ -1,3 +1,10 @@
+;;; sc68 wrapper for TFMX ST (Chris Huelsbeck version ?)
+;;;
+;;; by Benjamin Gerard
+;;; 
+;;; Time-stamp: <2011-09-12 15:26:59 ben>
+;;; 
+
 	bra	init
 	bra	MUS+$28
 	bra	MUS+$24

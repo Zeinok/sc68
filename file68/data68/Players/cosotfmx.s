@@ -1,6 +1,5 @@
-;
-; COSO - TFMX original
-;
+;;; COSO - TFMX original - for sc68
+;;; 
 	bra	init
 	bra	rep+4
 	bra.s	rep+8
@@ -11,4 +10,3 @@ rep:
 	incbin	"org/cosotfmx"
 	even
 	dc.l	0
-	

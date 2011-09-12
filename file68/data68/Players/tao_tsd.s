@@ -2,8 +2,8 @@
 ;*   JAM   TaoSid-Plugin     Version 1.00 (+FASTRAM)          rev 21.04.2000 *
 ;*****************************************************************************
 ; sc68 modified version by Ben(jamin) Gerard
-; Time-stamp: <2011-08-17 06:40:14 ben>
-; Init-Stamp: <2001-12-30 05:07:00 ben>
+; Time-stamp: <2011-09-12 15:23:26 ben>
+; Init-stamp: <2001-12-30 05:07:00 ben>
 
 DMA_VALUE     = 0 ;[0:50066 1:25033 2:12516.5 3:6258.25]
 DMA_FREQUENCY = 50066>>DMA_VALUE
