@@ -4,9 +4,7 @@ dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
 dnl# Configuration script for as68
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- sourceforge>
-dnl#
-dnl# $Id$
+dnl# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 
 # ,----------------------------------------------------------------------.
@@ -62,5 +60,5 @@ AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])
 
 dnl#
-dnl# End of "$Id$".
+dnl# End of as68/configure.ac
 dnl#

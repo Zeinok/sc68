@@ -19,7 +19,7 @@ AC_INIT(
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([src/file68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.10 silent-rules dist-bzip2])
 AC_CONFIG_HEADERS([config.h sc68/file68_features.h])
 
 AC_USE_SYSTEM_EXTENSIONS

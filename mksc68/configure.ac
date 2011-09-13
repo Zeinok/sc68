@@ -18,7 +18,7 @@ AC_INIT(
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([mksc68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.10 silent-rules dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
@@ -32,6 +32,7 @@ SC68_SYSTEM
 SC68_OPTIONS
 SC68_TOOLS
 SC68_CHECKS
+SC68_THREADS
 SC68_WITH([sc68],[yes],[sc68_version],[sc68/sc68.h],[libsc68])
 SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
 

@@ -2,11 +2,9 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
-dnl# Configuration script for sc68 audacious plugin
+dnl# Configuration script for sc68-audacious
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
-dnl#
-dnl# $Id: configure.ac 134 2010-03-09 19:00:25Z benjihan $
+dnl# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 
 # ,----------------------------------------------------------------------.

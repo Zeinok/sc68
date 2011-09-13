@@ -2,7 +2,7 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl# 
 dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
-dnl# Configuration script for sc68
+dnl# Configuration script for libsc68
 dnl#
 dnl# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#

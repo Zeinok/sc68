@@ -17,7 +17,7 @@ AC_INIT(
   [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.11 silent-rules check-news dist-bzip2])
+AM_INIT_AUTOMAKE([gnu 1.10 silent-rules check-news dist-bzip2])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])

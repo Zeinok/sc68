@@ -2,11 +2,9 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# the "configure" script is made from this by running GNU "autoconf"
 dnl#
-dnl# Configuration script for sc68 gstreamer plugin
+dnl# Configuration script for sc68-gst
 dnl#
-dnl# by Benjamin Gerard <benjihan -4t- sourceforge>
-dnl#
-dnl# $Id: configure.ac 134 2010-03-09 19:00:25Z benjihan $
+dnl# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 
 # ,----------------------------------------------------------------------.
@@ -107,5 +105,5 @@ AC_MSG_NOTICE([|   plugin-dir          : $with_gst_plugin_dir])
 AC_MSG_NOTICE([+-----------------------])
 
 dnl#
-dnl# End of "$Id: configure.ac 134 2010-03-09 19:00:25Z benjihan $".
+dnl# End of ac68-gst/configure.ac
 dnl#
