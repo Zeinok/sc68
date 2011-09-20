@@ -1,6 +1,6 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2011-09-10 04:37:08 ben>
+dnl# Time-stamp: <2011-09-18 17:33:05 ben>
 dnl#
 dnl# autoconf macros
 dnl#
@@ -8,7 +8,7 @@ dnl# (C) 2009-2011 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20110909 sc68_checks.m4
+# serial 20110918 sc68_checks.m4
 
 # SC68_CHECKS()
 # -------------
@@ -56,16 +56,14 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
       SC68_ADD_FLAGS(ALL_CFLAG,[-static])
     fi
 
-    dnl # ??? DEPRECATED ??? libtoolize seems to do the job anyway
-    dnl ##########################################################
-    dnl # libtool shared library needs -no-undefined
-    dnl # AC_MSG_CHECKING([whether shared library need -no-undefined])
-    dnl # if test X[$]ac_sys_platform_win32 = Xyes; then
-    dnl #  AC_MSG_RESULT([yes])
-    dnl #  SC68_ADD_FLAG(LIB_LFLAGS,[-no-undefined])
-    dnl #else
-    dnl #  AC_MSG_RESULT([no])
-    dnl #fi
+    # libtool shared library needs -no-undefined
+    AC_MSG_CHECKING([whether shared library need -no-undefined])
+    if test X[$]ac_sys_platform_win32 = Xyes; then
+      AC_MSG_RESULT([yes])
+      SC68_ADD_FLAG(LIB_LFLAGS,[-no-undefined])
+    else
+      AC_MSG_RESULT([no])
+    fi
 
     # How to handle assert and add --enable-assert
     AC_CHECK_HEADERS([limits.h])

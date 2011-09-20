@@ -1,6 +1,6 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2011-09-08 13:21:29 ben>
+dnl# Time-stamp: <2011-09-18 17:32:43 ben>
 dnl#
 dnl# autoconf macros
 dnl#
@@ -8,7 +8,7 @@ dnl# (C) 2009-2011 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20110908 sc68_system.m4
+# serial 20110918 sc68_system.m4
 
 # SC68_SYSTEM()
 # -------------
@@ -29,8 +29,8 @@ AC_DEFUN_ONCE([SC68_SYSTEM],[
     # build for native win32 platform (w/o un*x style layout)
     AC_MSG_CHECKING([for native win32 platform])
     ac_sys_native_win32=no
-    case "[$]host" in
-      *-mingw*)
+    case x-"[$]host_os" in
+      x-mingw32 | x-win32)
         ac_sys_native_win32=yes ;;
     esac
     AC_MSG_RESULT([$ac_sys_native_win32])

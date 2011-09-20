@@ -3,22 +3,22 @@
 
 3.0.0a  <ben>
 
-        This is an alpha version. Some things might change before the
+        This is an alpha version. Things might change before the
         official release.
 
         This is the first version of sc68 new generation. This is
-        where is new NEWS file start.
+        a fresh version of this NEWS file.
 
-        Change in the API without backward compatibility but portage
-        should be easy.
+        There has been changes in API without backward compatibility
+        but portage should be easy.
 
         The new BLEP YM-2149 engine is used by default. It has a
-        better sound rendering. Old engine has been improved too and
-        enhanced by user selectable filters.
+        better sound rendering. Old (pulse) engine has been improved
+        too and enhanced by a set of user selectable filters.
 
-        Add project for various back-end specially for gstreamer which
-        should allow sc68 files to be played with most modern Linux
-        players.
+        Add projects for various back-end specially for gstreamer
+        which should allow sc68 files to be played with most modern
+        Linux players.
 
         New tools for creating (mksc68) and debugging (cdbg68) sc68
         files replacing the good old debug68.

@@ -7,7 +7,7 @@ dnl#
 dnl# Distributed under the term of the GPL
 dnl#
 
-# serial 20110910 sc68_with.m4
+# serial 20110919 sc68_with.m4
 
 # DUMP_SC68_PACKAGE_VARS
 # ----------------------
@@ -64,7 +64,6 @@ m4_define([COPY_SC68_PACKAGE_VARS],[
     $1_src="[$]$2_src"; $1_abs="[$]$2_abs"
     $1_dir="[$]$2_dir"; $1_dbn="[$]$2_dbn"
     $1_pkg="[$]$2_pkg"; $1_org="[$]$2_org"
-
     ])
 
 # RESET_SC68_PACKAGE_VARS
@@ -172,8 +171,9 @@ m4_define([DO_SC68_PACKAGE],[
 
     while test [$]# -gt 0; do
       COPY_SC68_PACKAGE_VARS([_$1],[$1])
+      has_$1=no 
       _$1_org="[$]1"
- 
+
       case "x-[$]1" in
         
         # YES or NO: no check; assuming everything is configured.
@@ -341,6 +341,8 @@ m4_define([DO_SC68_PACKAGE],[
       
       if test "x[$]{has_$1}" = 'xyes'; then
         COPY_SC68_PACKAGE_VARS([$1],[_$1])
+        break
+      elif test "x[$]1" = 'xno'; then
         break
       fi
       shift
