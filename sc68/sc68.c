@@ -1,26 +1,28 @@
 /*
- *    sc68 - atari st and amiga music emulator - command line player
+ * @file    sc68.c
+ * @brief   command line player
+ * @author  http://sourceforge.net/users/benjihan
  *
- *            Copyright (C) 2001-2009 Ben(jamin) Gerard
- *           <benjihan -4t- users.sourceforge -d0t- net>
+ * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * Time-stamp: <2011-10-15 15:48:25 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the  GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-/* $Id$ */
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
@@ -30,7 +32,6 @@
 /* need this before sc68.h to have all features defined. */
 #include <sc68/istream68.h>
 #include <sc68/msg68.h>
-#include <sc68/init68.h>
 #include <sc68/option68.h>
 #include <sc68/url68.h>
 
@@ -169,7 +170,7 @@ static int print_version(void)
      "There is NO WARRANTY, to the extent permitted by law.\n"
      "\n"
      "Written by Benjamin Gerard <" PACKAGE_BUGREPORT ">"
-     );
+      );
   return 0;
 }
 
@@ -189,7 +190,7 @@ print_option(void * data,
 /* Callback for message category printing. */
 static void
 print_cat(void * data,
-              const int bit, const char * name, const char * desc)
+          const int bit, const char * name, const char * desc)
 {
   const char * fmt = "%02d | %-10s | %-40s | %-3s\n";
   const int mask = (msg68_cat_filter(0,0) >> bit) & 1;
@@ -209,48 +210,48 @@ static int print_usage(void)
 {
   puts
     (
-     "Usage: sc68 [OPTION ...] <URI>\n"
-     "\n"
-     "  An /!\\ Atari ST and C= Amiga music player.\n"
-     "\n"
-     "Options:\n"
-     "  -h --help           Print this message and exit\n"
-     "  -v --version        Print sc68 version x.y.z and licence and exit\n"
-     "  -D --debug-list     Print debug categories and exit\n"
-     "  -v --verbose        Print more info\n"
-     "  -q --quiet          Do not display music info\n"
-     "  -r --rate=<val>     Sampling rate (in hz)\n"
-     "  -t --track=<val>    Choose track to play [\"all\"|\"def\"|track-#]\n"
-     "  -l --loop=<val>     Track loop [\"def\"|\"inf\"|loop-#]\n"
-     "  -o --output=<URI>   Set output\n"
-     "  -c --stdout         Output raw to stdout (--output=stdout://)\n"
-     "  -n --null           No output (--output=null://)\n"
-     "  -w --wav            Riff Wav output. Use in combination with -o.\n"
-     );
+      "Usage: sc68 [OPTION ...] <URI>\n"
+      "\n"
+      "  An /!\\ Atari ST and C= Amiga music player.\n"
+      "\n"
+      "Options:\n"
+      "  -h --help           Print this message and exit\n"
+      "  -v --version        Print sc68 version x.y.z and licence and exit\n"
+      "  -D --debug-list     Print debug categories and exit\n"
+      "  -v --verbose        Print more info\n"
+      "  -q --quiet          Do not display music info\n"
+      "  -r --rate=<val>     Sampling rate (in hz)\n"
+      "  -t --track=<val>    Choose track to play [\"all\"|\"def\"|track-#]\n"
+      "  -l --loop=<val>     Track loop [\"def\"|\"inf\"|loop-#]\n"
+      "  -o --output=<URI>   Set output\n"
+      "  -c --stdout         Output raw to stdout (--output=stdout://)\n"
+      "  -n --null           No output (--output=null://)\n"
+      "  -w --wav            Riff Wav output. Use in combination with -o.\n"
+      );
 
   option68_help(stdout,print_option);
 
   puts
     (
-     "\n"
-     "URI:\n"
-     "  stdin://<name>      Standard input\n"
-     "  stdout://<name>     Standard output\n"
-     "  sterr://<name>      Standard error\n"
-     "  null://<name>       Null/Zero\n"
-     "  <path> or file://path\n"
-     "   or local://path    Local file\n"
-     "  http://path or ftp://path\n"
-     "   or others          Remote protocol (see curl)\n"
-     "  sc68://author/hw/title[/:track[:loop:[time]]]\n"
-     "                      Access sc68 music database. The music file is\n"
-     "                      searched in `sc68-music' music path, then in\n"
-     "                      `sc68-rmusic' music path.\n"
-     "\n"
-     "Copyright (C) 1998-2009 Benjamin Gerard\n"
-     "Visit <" PACKAGE_URL ">\n"
-     "Report bugs to <" PACKAGE_BUGREPORT ">"
-     );
+      "\n"
+      "URI:\n"
+      "  stdin://<name>      Standard input\n"
+      "  stdout://<name>     Standard output\n"
+      "  sterr://<name>      Standard error\n"
+      "  null://<name>       Null/Zero\n"
+      "  <path> or file://path\n"
+      "   or local://path    Local file\n"
+      "  http://path or ftp://path\n"
+      "   or others          Remote protocol (see curl)\n"
+      "  sc68://author/hw/title[/:track[:loop:[time]]]\n"
+      "                      Access sc68 music database. The music file is\n"
+      "                      searched in `sc68-music' music path, then in\n"
+      "                      `sc68-rmusic' music path.\n"
+      "\n"
+      "Copyright (C) 1998-2009 Benjamin Gerard\n"
+      "Visit <" PACKAGE_URL ">\n"
+      "Report bugs to <" PACKAGE_BUGREPORT ">"
+      );
   return 1;
 }
 
@@ -300,26 +301,51 @@ static void spool_error_message(sc68_t * sc68)
 
 static void DisplayInfo(int track)
 {
-  sc68_music_info_t info;
-  if (!sc68_music_info(sc68,&info,track,0)) {
-    Print("Track      : %d/%d\n",info.track, info.tracks);
-    Print("Title      : %s\n",info.title);
-    Print("Author     : %s\n",info.author);
-    Print("Composer   : %s\n",info.composer);
-    Print("Ripper     : %s\n",info.ripper);
-    Print("Converter  : %s\n",info.converter);
-    Print("Replay     : %s\n",info.replay);
-    Print("Hardware   : %s\n",info.hwname);
-    Print("Start time : %u:%02u\n",
-         info.start_ms/60000u, (info.start_ms/1000u)%60u);
-    Print("Duration   : %s\n", info.time);
+  sc68_music_info_t Info, * info = &Info;
+
+  if (!sc68_music_info(sc68,track,info,0)) {
+    int j, len = 11;
+
+    Print("%-*s : %s %s\n", len, "Disk"   , info->dsk.time, info->album);
+    Print("%-*s : %s %s\n", len, "Track"  , info->trk.time, info->title);
+    Print("%-*s : %s\n",    len, "Artist" , info->artist);
+
+    Print("Disk tags:\n");
+    for (j=0; j<info->dsk.tags; ++j)
+      Print("* %c%-*s : %s\n",
+            toupper(*info->dsk.tag[j].key),
+            len-3,
+            info->dsk.tag[j].key+1,
+            info->dsk.tag[j].val);
+
+    Print("Tracks tags:\n");
+    for (j=0; j<info->trk.tags; ++j)
+      Print("* %c%-*s : %s\n",
+            toupper(*info->trk.tag[j].key),
+            len-3,
+            info->trk.tag[j].key+1,
+            info->trk.tag[j].val);
   }
+}
+
+static char * codestr(int code) {
+  static char s[8];
+  if (code == SC68_ERROR)
+    return "ERROR";
+  s[0] = (code & SC68_IDLE )   ? 'I' : 'i';
+  s[1] = (code & SC68_CHANGE ) ? 'C' : 'c';
+  s[2] = (code & SC68_LOOP )   ? 'L' : 'l';
+  s[3] = (code & SC68_END )    ? 'E' : 'e';
+  s[4] = (code & SC68_SEEK )   ? 'S' : 's';
+  s[5] = 0;
+  return s;
 }
 
 /* track:  0:all -1:default */
 static int PlayLoop(istream68_t * out, int track, int loop)
 {
-  static char buffer[512 * 4];
+  static char buffer[512 << 2];
+  const int max = sizeof(buffer) >> 2;
   int all = 0;
   int code;
 
@@ -348,33 +374,39 @@ static int PlayLoop(istream68_t * out, int track, int loop)
 
   /* Update return code (load the track) */
   code = sc68_process(sc68, 0, 0);
-  if (!(code & SC68_END) && (code & SC68_CHANGE)) {
+  Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n", 0, 0, 0, codestr(code), code);
+  if (code != SC68_ERROR)
     DisplayInfo(-1);
-  }
 
   while ( ! (code & SC68_END) ) {
-    code = sc68_process(sc68, buffer, sizeof(buffer) >> 2);
-    if (code == SC68_MIX_ERROR) {
+    static int pass;
+    int n = max;
+
+    memset(buffer,0,max);    /* $$$ TEMP looking for unintialized data detection */
+
+    code = sc68_process(sc68, buffer, &n);
+    if (++pass < 10 || n != max || (code & ~SC68_IDLE) )
+      Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n", pass, n, max, codestr(code), code);
+
+    if (code == SC68_ERROR)
       break;
-    }
-    if (code & SC68_LOOP) {
+
+    if (code & SC68_LOOP)
       Debug("Loop: #%d\n", sc68_play(sc68, -1, 1));
-    }
 
     if (code & SC68_CHANGE) {
-      if (!all) {
+      if (!all)
         break;
-      }
-      DisplayInfo(-1);
+      else
+        DisplayInfo(-1);
     }
 
+    /* if (n > 0) */
     /* Send audio PCM to stdout. */
-    if (istream68_write(out, buffer, sizeof(buffer)) != sizeof(buffer)) {
+    if (istream68_write(out, buffer, n<<2) != (n<<2))
       return -1;
-    }
   }
-
-  return -(code == SC68_MIX_ERROR);
+  return -(code == SC68_ERROR);
 }
 
 /* Build output URI for wav output */
@@ -410,7 +442,6 @@ static char * build_output_uri(char * inname, char * outname)
   strcpy(namebuf+sizeof(prefix)-1, outname);
   if (ext)
     strcpy(myext(namebuf),ext);
-
 
   return namebuf;
 }
@@ -522,18 +553,21 @@ int main(int argc, char *argv[])
   };
 #else
   fprintf(stderr,"sc68: getopt() need to be implemented\n");
-  return -1;
+  err = -1;
+  goto error;
 #endif
   i = optind;
 
   /* Special program mode for --help --version and --debug-list */
 
   if (opt_help) {
-    return print_usage();
+    err = print_usage();
+    goto exit;
   }
 
   if (opt_vers) {
-    return print_version();
+    err = print_version();
+    goto exit;
   }
 
   if (opt_verb < msg68_CRITICAL) opt_verb = msg68_CRITICAL;
@@ -541,7 +575,8 @@ int main(int argc, char *argv[])
   msg68_cat_level(opt_verb);
 
   if (opt_list) {
-    return print_cats();
+    err = print_cats();
+    goto exit;
   }
 
 
@@ -648,13 +683,13 @@ int main(int argc, char *argv[])
   Debug("sc68: Exit Playloop normally\n");
   err = 0;
 
- error:
+error:
   if (err) {
     spool_error_message(sc68);
   }
+exit:
   istream68_destroy(out);
   free(namebuf);
-
   sc68_destroy(sc68);
   sc68_shutdown();
 

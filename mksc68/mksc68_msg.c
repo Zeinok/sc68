@@ -74,7 +74,7 @@ void msg_callback(const int bit, void *data, const char *fmt, va_list list)
     fprintf(out,"%s: ", cmd_cur());
   assert(fmt);
   vfprintf(out,fmt,list);
-} 
+}
 
 #ifndef MKSC68_O
 # ifdef DEBUG

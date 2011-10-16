@@ -1,4 +1,13 @@
-/* $Id$ */
+/**
+ * @ingroup  mksc68_prg
+ * @file     mksc68_str.h
+ * @author   Benjamin Gerard
+ * @date     2009-01-01
+ * @brief    Various string functions.
+ *
+ */
+
+/* Copyright (C) 1998-2011 Benjamin Gerard */
 
 #ifndef _MKSC68_STR_H_
 #define _MKSC68_STR_H_

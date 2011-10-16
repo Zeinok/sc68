@@ -1,6 +1,28 @@
-/* $Id$ */
-
-/* Time-stamp: <2009-10-11 19:58:30 ben>  */
+/*
+ * @file    mksc68_cmd_tag.c
+ * @brief   the "tag" command
+ * @author  http://sourceforge.net/users/benjihan
+ *
+ * Copyright (C) 1998-2011 Benjamin Gerard
+ *
+ * Time-stamp: <2011-10-10 18:04:54 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
@@ -30,11 +52,16 @@ static const opt_t longopts[] = {
 static
 int purge_all_tags(void)
 {
-  int t;
+  const int max = tag_max();
+  int    t,i;
   if (!dsk_has_disk())
     return -1;
   for (t = dsk_get_tracks(); t >= 0; --t)
-    dsk_tag_clr(t);
+    for (i=0; i<max; ++i) {
+      const char * key, * val;
+      tag_enum(t,i,&key,&val);
+      tag_set(t, key, 0);
+    }
   return 0;
 }
 
@@ -55,17 +82,20 @@ int list_all_tags(void)
       printf("%-*s ... alias for %s\n", l, var, bis);
     }
   }
+
   return 0;
 }
 
 static
 void view_tags(int trk, int argc, char ** argv)
 {
+  const int max = tag_max();
   const char * var, * val;
-  void * hdl
-    = dsk_tag_lst(trk);
-  while (hdl) {
-    hdl = dsk_tag_nxt(hdl, &var, &val);
+  int i;
+
+  for (i=0; i<max; ++i) {
+    if (tag_enum(trk, i, &var, &val) < 0)
+      continue;
     if (!argc)
       printf("%02d:%-12s \"%s\"\n", trk, var, val);
     else {
@@ -102,7 +132,7 @@ int run_tag(cmd_t * cmd, int argc, char ** argv)
     case 'D':                           /* --delete    */
       action = val;
       break;
-      
+
     case 'd':
       disktarget = 1;
       break;
@@ -190,12 +220,12 @@ int run_tag(cmd_t * cmd, int argc, char ** argv)
       }
     }
     break;
-    
+
   default:
     assert(!!"invalid action" );
     return -1;
   }
-  
+
 error:
   return ret;
 }
@@ -204,17 +234,16 @@ cmd_t cmd_tag = {
   /* run */ run_tag,
   /* com */ "tag",
   /* alt */ 0,
-  /* use */ "[OPTION ...] [--] NAME [VALUE]",
-  /* des */ "get or set meta-tag information.",
+  /* use */ "[opts] [tag [val] ...]",
+  /* des */ "meta-tag manipulation.",
   /* hlp */
 
-  "The `tag' command gets or sets meta-tag information. Tags are\n"
-  "associated either to the whole disk or to specific tracks.\n"
+  "The `tag' command manipulates meta-tags. Tags are associated\n"
+  "either to the whole disk or to specific tracks.\n"
   "It is allowed to address both by using a `-d' and `-t' switches.\n"
   "\n"
-
-  "OPTION\n"
-  "   -l --list        list all well-known tags and exit.\n"
+  "OPTIONS\n"
+  "   -l --list        display a list of well-known tags and exit.\n"
   "   -d --disk        select disk tag.\n"
   "   -t\n"
   "   --tracks=TRACKS  select tracks tag.\n"
@@ -222,6 +251,5 @@ cmd_t cmd_tag = {
   "   -D --del         delete specified tags.\n"
   "   -P --purge       delete all tags (disk and tracks).\n"
   "\n"
-  "TRACKS := N[-N][,N[-N]]* N:=[0-9]+ (0 is the last track)\n"
-
+  "TRACKS := N[-N][,N[-N]]* N:=[0-9]+ (0 is the last track)"
 };

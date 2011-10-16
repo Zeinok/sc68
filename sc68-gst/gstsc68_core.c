@@ -2,7 +2,7 @@
  * GStreamer
  * Copyright (C) 2005 Thomas Vander Stichele <thomas@apestaart.org>
  * Copyright (C) 2005 Ronald S. Bultje <rbultje@ronald.bitfreak.net>
- * Copyright (C) 2011 Benjamin Gerard <benjihan -4t- sourceforge>
+ * Copyright (C) 2011 Benjamin Gerard <http://sourceforge.net/users/benjihan>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -49,6 +49,7 @@
 #include "gstsc68.h"
 #include <stdlib.h>
 #include <string.h>
+#include <glib-object.h>
 
 static gboolean is_init = FALSE;
 
@@ -126,6 +127,7 @@ void gst_sc68_shutdown_engine(Gstsc68 * filter)
   if (sc68) {
     gst_sc68_report_error(filter);      /* flush sc68 instance errors */
     filter->sc68 = NULL;
+    memset(&filter->info,0,sizeof(filter->info));
     sc68_destroy(sc68);
   }
   filter->code = SC68_ERROR;
@@ -148,19 +150,20 @@ gboolean gst_sc68_load_mem(Gstsc68 * filter, void * data , int size)
     return FALSE;
   }
 
-  if (sc68_music_info(filter->sc68,&filter->dskinfo,0,0)) {
+
+  if (sc68_music_info(filter->sc68, -1, &filter->info, 0)) {
     GST_ERROR_OBJECT(filter, "failed to retrieve disk info");
     gst_sc68_report_error(filter);
     return FALSE;
   }
 
   GST_DEBUG("disk loaded: %s %s - %s",
-            filter->dskinfo.time,
-            filter->dskinfo.author,
-            filter->dskinfo.title);
+            filter->info.dsk.time,
+            filter->info.artist,
+            filter->info.album);
 
   track = filter->prop.track;
-  if (track < -1 || track > filter->dskinfo.tracks) {
+  if (track < -1 || track > filter->info.tracks) {
     GST_DEBUG("track #%02d out of range -> using default", track);
     track = -1;
   }
@@ -187,7 +190,7 @@ gboolean gst_sc68_load_mem(Gstsc68 * filter, void * data , int size)
     return FALSE;
   }
 
-  filter->trkinfo.track = 0;         /* force reload info  */
+  filter->info.trk.track = 0;           /* force reload info  */
   gst_sc68_onchangetrack(filter);
 
   return TRUE;
@@ -239,10 +242,27 @@ gboolean gst_sc68_caps(Gstsc68 * filter)
   return !!filter->bufcaps;
 }
 
+static int tag_get(sc68_cinfo_t * cinfo, const char * key, GValue * val)
+{
+  int i;
+  for (i=0; i<cinfo->tags; ++i) {
+    if (!strcmp(key, cinfo->tag[i].key)) {
+      g_value_set_static_string(val, cinfo->tag[i].val);
+      return 1;
+    }
+  }
+  return 0;
+}
+
 gboolean gst_sc68_onchangetrack(Gstsc68 * filter)
 {
   GstTagList * tags = NULL;
   int track, pos_ms;
+  GValue val;
+
+  memset(&val,0,sizeof(val));
+  g_value_init(&val, G_TYPE_STRING);
+
 
   track = sc68_play(filter->sc68, -1, 0);
   if (track == -1) {
@@ -250,8 +270,8 @@ gboolean gst_sc68_onchangetrack(Gstsc68 * filter)
     gst_sc68_report_error(filter);
     return FALSE;
   }
-  if (track > 0 && track != filter->trkinfo.track) {
-    if (sc68_music_info(filter->sc68, &filter->trkinfo, -1, 0)) {
+  if (track > 0 && track != filter->info.trk.track) {
+    if (sc68_music_info(filter->sc68, -1, &filter->info , 0)) {
       GST_ERROR_OBJECT(filter, "failed to retrieve current trax info");
       gst_sc68_report_error(filter);
       return FALSE;
@@ -262,18 +282,18 @@ gboolean gst_sc68_onchangetrack(Gstsc68 * filter)
       gst_sc68_report_error(filter);
       return FALSE;
     }
-    filter->position_ns = gst_sc68_mstons(pos_ms-filter->trkinfo.start_ms);
-    filter->duration_ns = gst_sc68_mstons(filter->trkinfo.time_ms);
+    filter->position_ns = gst_sc68_mstons(pos_ms - filter->info.start_ms);
+    filter->duration_ns = gst_sc68_mstons(filter->info.trk.time_ms);
 
     filter->buffer_frames =
-      (filter->prop.rate + filter->trkinfo.rate - 1) / filter->trkinfo.rate;
+      (filter->prop.rate + filter->info.rate - 1) / filter->info.rate;
 
     GST_DEBUG("trax loaded: %s %s - %s replay %s (%dhz) -> %d spf, [%lld .. %lld], ",
-              filter->trkinfo.time,
-              filter->trkinfo.author,
-              filter->trkinfo.title,
-              filter->trkinfo.replay,
-              filter->trkinfo.rate,
+              filter->info.trk.time,
+              filter->info.artist,
+              filter->info.title,
+              filter->info.replay,
+              filter->info.rate,
               filter->buffer_frames,
               filter->position_ns,
               filter->duration_ns);
@@ -289,24 +309,53 @@ gboolean gst_sc68_onchangetrack(Gstsc68 * filter)
                          ));
 
     tags =
-      gst_tag_list_new_full(GST_TAG_ALBUM,        filter->dskinfo.title,
-                            GST_TAG_ALBUM_ARTIST, filter->dskinfo.author,
-                            GST_TAG_TITLE,        filter->trkinfo.title,
-                            GST_TAG_ARTIST,       filter->trkinfo.author,
-                            GST_TAG_GENRE,        filter->trkinfo.hw.amiga ? "Amiga Chiptune" : "Atari-ST Chiptune",
+      gst_tag_list_new_full(GST_TAG_ALBUM,        filter->info.album,
+                            GST_TAG_TITLE,        filter->info.title,
+                            GST_TAG_ARTIST,       filter->info.artist,
                             GST_TAG_DURATION,     filter->duration_ns,
-                            GST_TAG_TRACK_NUMBER, filter->trkinfo.track,
-                            GST_TAG_TRACK_COUNT,  filter->trkinfo.tracks,
-                            GST_TAG_HOMEPAGE,     "http://sc68.atari.org/",
-                            GST_TAG_COMPOSER,     filter->trkinfo.composer,
+                            GST_TAG_TRACK_NUMBER, filter->info.trk.track,
+                            GST_TAG_TRACK_COUNT,  filter->info.tracks,
+                            GST_TAG_HOMEPAGE,     PACKAGE_URL,
                             GST_TAG_AUDIO_CODEC,  "sc68",
                             NULL);
     if (!tags) {
       GST_ERROR_OBJECT(filter,"could not create tag list");
       return FALSE;
     }
+
+    if (tag_get(&filter->info.dsk,"aka",&val))
+      gst_tag_list_add_value(tags, GST_TAG_MERGE_REPLACE, GST_TAG_ALBUM_ARTIST, &val);
+    else if (tag_get(&filter->info.dsk,"artist",&val))
+      gst_tag_list_add_value(tags, GST_TAG_MERGE_REPLACE, GST_TAG_ALBUM_ARTIST, &val);
+
+    if (tag_get(&filter->info.trk,"aka",&val))
+      gst_tag_list_add_value(tags, GST_TAG_MERGE_PREPEND, GST_TAG_ARTIST, &val);
+
+    if (tag_get(&filter->info.dsk,"artist",&val))
+      gst_tag_list_add_value(tags, GST_TAG_MERGE_REPLACE, GST_TAG_ALBUM_ARTIST, &val);
+
+    /* if (tag_get(&filter->info.dsk,"format",&val)) */
+    /*   gst_tag_list_add_value(tags, GST_TAG_MERGE_REPLACE, GST_TAG_ ); */
+
+    if (tag_get(&filter->info.trk,"genre",&val))
+      gst_tag_list_add_value(tags, GST_TAG_MERGE_REPLACE, GST_TAG_GENRE, &val);
+
+    /* if (tag_get(&filter->info.dsk,"converter",&val)) */
+    /*   gst_tag_list_add_value(tags, GST_TAG_MERGE_REPLACE, GST_TAG_ENCODED_BY); */
+    /* else if (tag_get(&filter->info.trk,"converter",&val)) */
+    /*   gst_tag_list_add_value(tags, GST_TAG_MERGE_REPLACE, GST_TAG_ENCODED_BY); */
+
+    if (tag_get(&filter->info.trk,"composer",&val))
+      gst_tag_list_add_value(tags, GST_TAG_MERGE_REPLACE, GST_TAG_COMPOSER, &val);
+    else if (tag_get(&filter->info.dsk,"composer",&val))
+      gst_tag_list_add_value(tags, GST_TAG_MERGE_REPLACE, GST_TAG_COMPOSER, &val);
+
+    if (tag_get(&filter->info.dsk,"comment",&val))
+      gst_tag_list_add_value(tags, GST_TAG_MERGE_REPLACE, GST_TAG_COMMENT, &val);
+    if (tag_get(&filter->info.trk,"comment",&val))
+      gst_tag_list_add_value(tags, GST_TAG_MERGE_APPEND, GST_TAG_COMMENT, &val);
+
     gst_element_found_tags(&filter->element, tags);
-    /* gst_tag_list_free(tags); */
   }
 
   return TRUE;

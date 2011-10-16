@@ -103,8 +103,7 @@ struct _Gstsc68
 
   /* sc68 engine */
   sc68_t   * sc68;                      /* sc68 engine instance  */
-  sc68_music_info_t dskinfo;            /* current disk info     */
-  sc68_music_info_t trkinfo;            /* current track info    */
+  sc68_music_info_t info;               /* current info          */
 
   guint64    samples;                   /* sample counter        */
   guint      buffer_frames;

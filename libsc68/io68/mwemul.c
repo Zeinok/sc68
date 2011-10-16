@@ -382,7 +382,7 @@ int mw_command(mw_t * const mw)
     ;
 
   if (!ctrl) {
-    TRACE68(mw_cat,"microwire: address -- not found\n");
+    TRACE68(mw_cat,"%s","microwire: address -- not found\n");
     return -1;
   } else {
     const uint_t addr = ( data >> 14 ) & 3;
@@ -402,7 +402,7 @@ int mw_command(mw_t * const mw)
     TRACE68(mw_cat,"microwire: command -- %04o\n", cmd);
     return command_dispatcher(mw, cmd);
   } else {
-    TRACE68(mw_cat,"microwire: command -- not found\n");
+    TRACE68(mw_cat,"%s","microwire: command -- not found\n");
   }
 
   return -1;

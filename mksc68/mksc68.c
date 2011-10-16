@@ -1,24 +1,27 @@
 /*
- *                      mksc68 - sc68 maker
+ * @file    mksc68.c
+ * @brief   sc68 maker program
+ * @author  http://sourceforge.net/users/benjihan
  *
- *            Copyright (C) 1998-2009 Ben(jamin) Gerard
- *           <benjihan -4t- users.sourceforge -d0t- net>
+ * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * Time-stamp: <2011-10-10 18:01:54 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the  GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id: sc68.c 57 2009-01-31 18:24:54Z benjihan $
  */
 
 /* generated config include */
@@ -43,27 +46,6 @@
 #include "mksc68_opt.h"
 
 #include "sc68/sc68.h"
-
-/* #include "sc68/error68.h" */
-/* #include "sc68/file68.h" */
-/* #include "sc68/alloc68.h" */
-/* #include "sc68/istream68.h" */
-/* #include "sc68/istream68_file.h" */
-/* #include "sc68/string68.h" */
-/* #include "sc68/rsc68.h" */
-/* #include "sc68/init68.h" */
-/* #include "sc68/msg68.h" */
-
-/* #include "debug68_error.h" */
-/* #include "debug68_cli.h" */
-/* #include "debug68_debugcom.h" */
-/* #include "debug68_io.h" */
-
-/* #include "emu68/struct68.h" */
-/* #include "emu68/emu68.h" */
-/* #include "emu68/ioplug68.h" */
-/* #include "emu68/mem68.h" */
-/* #include "desa68.h" */
 
 static int exit_code;                   /* last command exit code */
 static int exit_flag;                   /* break interpreter loop */
@@ -105,7 +87,7 @@ static int print_version(void)
 
 static void cmd_list(const cmd_t * cmd)
 {
-  int coml = 8, coma = 3, comu = 30;
+  int coml = 8, coma = 3, comu = 25;
   printf("%-*s %-*s %-*s : %s.\n",
          coml, cmd->com,
          coma, cmd->alt?cmd->alt:"",
@@ -207,12 +189,12 @@ static int run_error(cmd_t * me, int argc, char ** argv)
 }
 
 extern cmd_t cmd_new, cmd_load, cmd_play, cmd_stop, cmd_debug, cmd_tag;
-extern cmd_t cmd_time;
+extern cmd_t cmd_time, cmd_save;
 static cmd_t
 cmd_exit = {
   run_exit, "exit",  "x", "[exit-code]",   "Exit command interpreter" },
 cmd_help = {
-  run_help, "help",  "?", "[command ...]", "Print command(s) usage",
+  run_help, "help",  "?", "[cmd ...]", "Print command(s) usage",
   "Without argument prints a short description of all commands.\n"
   "Else prints a complete usage for all given commands.\n"
   "Returns the number of error (unknown command).\n"
@@ -231,8 +213,9 @@ static cmd_t *commands[] = {
   &cmd_stop,
   &cmd_play,
 
-  &cmd_load,
   &cmd_new,
+  &cmd_load,
+  &cmd_save,
 
   &cmd_tag,
 
@@ -250,188 +233,8 @@ static int add_commands(void)
   return -!!err;
 }
 
-/* static unsigned int ms_to_sec(unsigned int ms) */
-/* { */
-/*   return (ms+999u) / 1000u; */
-/* } */
 
-/* static const unsigned int atarist_clock = (8010613u&~3u); */
-
-/* static unsigned int frames_to_ms(unsigned int frames, unsigned int cpf) */
-/* { */
-/*   u64 ms; */
-
-/*   ms =  frames; /\* total frames. *\/ */
-/*   ms *= cpf;    /\* total cycles. *\/ */
-/*   ms *= 1000; */
-/*   ms /= atarist_clock; */
-
-/*   return (unsigned int) ms; */
-/* } */
-
-/* static unsigned int ms_to_frames(unsigned int ms, unsigned int cpf) */
-/* { */
-/*   u64 fr; */
-
-/*   fr =  ms;    /\* total ms *\/ */
-/*   fr *= atarist_clock; */
-/*   fr /= 1000u; /\* total cycles *\/ */
-/*   fr /= cpf; */
-
-/*   return (unsigned int) fr; */
-/* } */
-
-/* static unsigned int cycle_per_frame(unsigned int frq) */
-/* { */
-/*   if (!frq) { */
-/*     frq = 50; */
-/*   } */
-/*   if (frq == 50) { */
-/*     return 160256; */
-/*   } else if (frq == 60) { */
-/*     /\* $$$ Can't remember the exact number of cycle for 60Hz VBL *\/ */
-/*   } */
-/*   return atarist_clock / frq; */
-/* } */
-
-/* /\* load external replay file *\/ */
-/* static u8 * load_external_replay(istream68_t * is, int *psize) */
-/* { */
-/*   int size; */
-/*   u8 *buf = 0; */
-/*   const char * reason = NULL; */
-/*   const char * fname  = istream68_filename(is); */
-
-/*   size = istream68_length(is); */
-
-/*   dmsg("load_external_replay: '%s' %d bytes\n", fname, size); */
-/*   if (size == -1) { */
-/*     reason = "can't stat file size"; */
-/*     goto error; */
-/*   } */
-
-/*   buf = alloc68(size); */
-/*   if (!buf) { */
-/*     reason = "memory allocation failure"; */
-/*     goto error; */
-/*   } */
-
-/*   if (istream68_read(is, buf, size) != size) { */
-/*     reason = "read error"; */
-/*     goto error; */
-/*   } */
-
-/*   dmsg("load_external_replay: '%s' loaded\n", fname); */
-/*   goto ok; */
-/* error: */
-/*   size = 0; */
-/*   free68(buf); */
-/*   buf = 0; */
-/*   msg68_error("load_external_replay: '%s' (%s)\n", fname, reason); */
-/* ok: */
-/*   *psize = size; */
-/*   return buf; */
-/* } */
-
-/* static char *check_a_name(char *name) */
-/* { */
-/*   int i; */
-/*   static char *list[][2] = */
-/*     { */
-/*       { "Max", "Jochen Hippel (Mad Max)" }, */
-/*       { "Mad Max", "Jochen Hippel (Mad Max)" }, */
-
-/*       { "Count Zero", "Nic Alderton (Count Zero)" }, */
-/*       { "CZ", "Nic Alderton (Count Zero)" }, */
-/*       { "Nick Alderton (Count Zero)", "Nic Alderton (Count Zero)" }, */
-/*       { "C.Z.", "Nic Alderton (Count Zero)" }, */
-/*       { "C.Z", "Nic Alderton (Count Zero)" }, */
-
-/*       { "Big Alec", "Gunnar Gaubatz (Big Alec)" }, */
-/*       { "B.A.", "Gunnar Gaubatz (Big Alec)" }, */
-/*       { "B.A", "Gunnar Gaubatz (Big Alec)" }, */
-/*       { "G. Gaubatz (Big Alec)", "Gunnar Gaubatz (Big Alec)" }, */
-
-/*       { "Lap", "Emmanuel Larry (Lap)" }, */
-
-/*       { "Docland", "Cyril Payet (Doclands)" }, */
-/*       { "Doclands", "Cyril Payet (Doclands)" }, */
-/*       { "Cyril Payet (Docland)", "Cyril Payet (Doclands)" }, */
-
-/*       { "Jess", "J.S. Gerard (Jess)" }, */
-
-/*       { "Lotus", "Laurens Tummers (Lotus)" }, */
-
-/*       { "JMP","John M. Phillips" }, */
-/*       { "J.M.P","John M. Phillips" }, */
-/*       { "J.M.P.","John M. Phillips" }, */
-
-
-/*       { 0, 0 } */
-/*     }; */
-
-/*   if (name) { */
-/*     for(i=0; list[i][0]; i++) { */
-/*       if (!strcmp68(name,list[i][0])) { */
-/*         name = list[i][1]; */
-/*         break; */
-/*       } */
-/*     } */
-/*   } */
-/*   return name; */
-/* } */
-
-/* Some stupid checks */
 #if 0
-static int checknames(void)
-{
-  int i;
-  if (!disk) {
-    return 0;
-  }
-  for (i=0; i<disk->nb_six; i++) {
-    disk->mus[i].author   = check_a_name(disk->mus[i].author);
-    disk->mus[i].composer = check_a_name(disk->mus[i].composer);
-  }
-  return 0;
-}
-
-static int checkdisk(void)
-{
-  int err = !disk
-    ? derr(-1, "no disk loaded")
-    : 0
-    ;
-  return err;
-}
-
-static int checktrack(int track)
-{
-  for (;;) {
-    if (checkdisk() < 0) {
-      track = -1;
-      break;
-    }
-    if (!disk->nb_six) {
-      track = derr(-1,"disk has no track");
-      break;
-    }
-
-    if (track < 0 || track >= disk->nb_six) {
-      track = derr(-1,"file corrupted; track #%d out of range [0..%d]",
-                   track, disk->nb_six-1);
-      break;
-    }
-    if (disk->default_six < 0) {
-      disk->default_six = 0;
-    } else if (disk->default_six >= disk->nb_six) {
-      disk->default_six = disk->nb_six-1;
-    }
-    break;
-  }
-  return track;
-}
-
 /* Display various track info depending on level
  *  level 1 : track No, music name
  *  level 2 : author, composer

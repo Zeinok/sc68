@@ -7,8 +7,6 @@
  *
  */
 
-/* $Id: string68.h 18 2009-01-25 03:39:15Z benjihan $ */
-
 /* Copyright (C) 1998-2011 Benjamin Gerard */
 
 #ifndef _FILE68_OPTION68_H_
@@ -19,19 +17,22 @@
 #endif
 
 /**
- *  @defgroup  file68_option  Options manipulation
- *  @ingroup   file68_lib
+ * @defgroup  file68_option  Options manipulation
+ * @ingroup   file68_lib
  *
- *    Provides command line options manipulation functions.
+ *   Provides command line options manipulation functions.
  *
- *  @{
+ * @{
  */
 
-/** option argument types. */
+/**
+ * option argument types.
+ */
 enum option68_e {
   option68_BOL = 0,             /**< Boolean (set or unset). */
   option68_STR = 1,             /**< String value.           */
-  option68_INT = 2              /**< Intrger value.          */
+  option68_INT = 2,             /**< Integer value.          */
+  option68_ERR = -1             /**< Errorcode.              */
 };
 
 /**
@@ -54,17 +55,20 @@ struct option68_s {
   const char   * cat;     /**< Category name.                            */
   const char   * desc;    /**< Short description.                        */
   union {
-    char       * str;      /**< Value for string argument.               */
-    int          num;      /**< Value for integer argument.              */
-  }              val;      /**< Melted value.                            */
+    char       * str;     /**< Value for string argument.                */
+    int          num;     /**< Value for integer argument.               */
+  }              val;     /**< Melted value.                             */
 
-  /** @name internals
-   *  @{
+  /**
+   * @name internals
+   * @{
    */
-  int prefix_len;      /**< length of option68_t::prefix */
-  int name_len;        /**< length of option68_t::name   */
-  option68_t   * next; /**< Chain to next option.        */
-  /**@}*/
+  int          prefix_len; /**< length of option68_t::prefix.            */
+  int          name_len;   /**< length of option68_t::name.              */
+  option68_t * next;       /**< Chain to next option.                    */
+  /**
+   * @}
+   */
 };
 
 FILE68_API
@@ -101,13 +105,22 @@ int option68_parse(int argc, char ** argv, int reset);
 
 FILE68_API
 /**
+ * Get option type.
+ *
+ * @param   opt      option
+ * @return  one of option68_e value
+ * @retval  option68_ERR on error
+ */
+int option68_type(const option68_t * opt);
+
+FILE68_API
+/**
  * Get option by name.
  *
  * @param   key      argument count
  * @param   setonly  only if option has been set
  * @return  option
  * @retval  0        not found
- *
  */
 option68_t * option68_get(const char * key, const int setonly);
 
@@ -162,7 +175,7 @@ FILE68_API
 const char * option68_getenv(option68_t * opt, const int set);
 
 /**
- *  @}
+ * @}
  */
 
 #endif /* #ifndef _FILE68_OPTION68_H_ */

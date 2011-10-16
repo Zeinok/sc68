@@ -1,6 +1,28 @@
-/* $Id$ */
-
-/* Time-stamp: <2009-10-07 18:07:53 ben>  */
+/*
+ * @file    mksc68_cmd_dbg.c
+ * @brief   the "debug" command
+ * @author  http://sourceforge.net/users/benjihan
+ *
+ * Copyright (C) 1998-2011 Benjamin Gerard
+ *
+ * Time-stamp: <2011-10-10 18:29:15 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
@@ -51,7 +73,6 @@ int run_debug(cmd_t * cmd, int argc, char ** argv)
   char * tok = 0;
   const char * delim = "|,:/";
   int command = 0;
-  int bits = 0;
 
   opt_create_short(shortopts, longopts);
 
@@ -70,7 +91,9 @@ int run_debug(cmd_t * cmd, int argc, char ** argv)
     case 'l':                       /* --lst */
       print_cats();
       break;
-    case 'c': case 's':
+    case 'c': case 's': {
+      int bits = 0; /* msg68_cat_filter(0, 0); */
+
       command = val;
       for (tok=strtok(optarg,delim); tok; tok=strtok(0,delim)) {
         msgdbg("token for '%c' '%s'\n",val,tok);
@@ -91,7 +114,7 @@ int run_debug(cmd_t * cmd, int argc, char ** argv)
       } else {
         msg68_cat_filter(0, bits);
       }
-      break;
+    } break;
     case '?':                       /* Unknown or missing parameter */
       goto error;
     default:
@@ -114,16 +137,16 @@ cmd_t cmd_debug = {
   /* run */ run_debug,
   /* com */ "debug",
   /* alt */ "dbg",
-  /* use */ "COMMAND [COMMAND ...]",
+  /* use */ "[cmd ...]",
   /* des */ "change debug level",
   /* hlp */
   "The `debug' command control debug and message verbosity.\n"
   "Multiple commands are executed sequencially in given order.\n"
   "\n"
-  "COMMAND\n"
+  "COMMANDS\n"
   "   -l --lst      list existing category.\n"
   "   -s --set=CAT  coma `,' separed list of category to activate.\n"
   "   -c --clr=CAT  coma `,' separed list of category to deactivate.\n"
   "\n"
-  "CAT := ALL|CAT1[,CAT2]*\n"
+  "CAT := ALL|CAT1[,CAT2]*"
 };

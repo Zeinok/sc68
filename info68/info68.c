@@ -1,23 +1,26 @@
 /*
- *                info68 - get sc68 file information
- *             Copyright (C) 2001-2009 Benjamin Gerard
- *           <benjihan -4t- users.sourceforge -d0t- net>
+ * @file    info68.c
+ * @brief   program to retrieve information from sc68 files
+ * @author  http://sourceforge.net/users/benjihan
  *
- * This  program is  free software:  you can  redistribute  it and/or
- * modify it  under the  terms of the  GNU General Public  License as
+ * Copyright (C) 1998-2011 Benjamin Gerard
+ *
+ * Time-stamp: <2011-10-13 17:31:11 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
- * This program  is distributed in the  hope that it  will be useful,
- * but  WITHOUT ANY WARRANTY;  without even  the implied  warranty of
- * MERCHANTABILITY or FITNESS FOR  A PARTICULAR PURPOSE.  See the GNU
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have received a  copy of the GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
- * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
+ * If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -30,7 +33,6 @@
 #include <sc68/alloc68.h>
 #include <sc68/file68.h>
 #include <sc68/string68.h>
-#include <sc68/init68.h>
 #include <sc68/msg68.h>
 #include <sc68/url68.h>
 #include <sc68/option68.h>
@@ -92,7 +94,8 @@ static int display_help(void)
      "  --                  Break option parsing\n"
      "  -h --help           Display this message and exit\n"
      "  -V --version        Display version and exit\n"
-     "  -o --output=<URI>   Change output to file (- is stdout)\n");
+     "  -o --output=<URI>   Change output to file (- is stdout)\n"
+     "  -A --all            Display all information and tags\n");
 
   option68_help(stdout,print_option);
 
@@ -148,6 +151,13 @@ static int display_help(void)
      "    `%%'         display %\n"
      "    `%0'         display null char\n"
      "    `%L'         display a newline character\n");
+
+  puts
+    ("  tag-commands:\n"
+     "\n"
+     "    `%{tag}'     display named-tag.\n"
+     "                 Use uppercase first letter to address disk tag\n"
+     "                 and lowercase to address current track tag\n");
 
   puts
     ("URI:\n"
@@ -209,28 +219,29 @@ static const char * HWflags(const hwflags68_t f)
   return flags;
 }
 
-static void Putc(istream68_t *out, const int c)
+static void PutC(istream68_t *out, const int c)
 {
   istream68_putc(out, c);
 }
 
-static void Puts(istream68_t *out, const char *s)
+static void PutS(istream68_t *out, const char *s)
 {
-  istream68_puts(out, s);
+  if (s)
+    istream68_puts(out, s);
 }
 
 static void PutI(istream68_t *out, int v)
 {
   char buffer[64];
   sprintf(buffer,"%d",v);
-  Puts(out, buffer);
+  PutS(out, buffer);
 }
 
 static void PutX(istream68_t *out, int v)
 {
   char buffer[64];
   sprintf(buffer,"%x",v);
-  Puts(out, buffer);
+  PutS(out, buffer);
 }
 
 static int ReadTrackNumber(char **ps, int max)
@@ -300,12 +311,12 @@ static int ReadTrackList(char **trackList, int max, int *from, int *to)
 
 int main(int argc, char ** argv)
 {
-  int i;
+  int  i, opt_all = 0, code = 127;
   /*   hwflags68_t diskHW; */
   disk68_t *d = 0;
   int curTrack, toTrack;
   char *trackList;
-  istream68_t *out = 0;
+  istream68_t * out = 0;
   const char * inname  = 0;
   const char * outname = "stdout://";
 
@@ -313,12 +324,13 @@ int main(int argc, char ** argv)
   argc = file68_init(argc, argv);
   if (argc < 0) {
     error("info68: file68 initialisation failed.\n");
-    return -1;
+    goto exit;
   }
 
   if (argc < 2) {
     error("info68: missing argument. Try --help.\n");
-    return 1;
+    code = 1;
+    goto finish;
   }
 
   /* Scan options ...  */
@@ -330,10 +342,13 @@ int main(int argc, char ** argv)
       return display_help();
     } else if (!strcmp(argv[i],"--version") || !strcmp(argv[i],"-V")) {
       return display_version();
+    } else if (!strcmp(argv[i],"--all") || !strcmp(argv[i],"-A")) {
+      opt_all = 1;
     } else if ((!strcmp(argv[i], "-o") || !strcmp(argv[i],"--output"))) {
       if (++i >= argc) {
         error("info69: option `%s' missing argument.\n", argv[i-1]);
-        return 2;
+        code = 2;
+        goto finish;
       }
       outname = argv[i];
     } else if (argv[i] == strstr(argv[i],"--output=")) {
@@ -345,7 +360,8 @@ int main(int argc, char ** argv)
 
   if (i >= argc) {
     error ("info68: missing input file.\n");
-    return 2;
+    code = 3;
+    goto finish;
   }
   inname = argv[i];
 
@@ -353,32 +369,66 @@ int main(int argc, char ** argv)
   if (istream68_open(out)) {
     error ("info68: error opening output (%s).\n",
            out ? istream68_filename(out) : outname);
-    return 2;
+    code = 4;
+    goto finish;
   }
 
   /* Load input file */
   d = file68_load_url(inname);
   if (!d) {
-    return file_error(inname);
+    code = 5;
+    file_error(inname);
+    goto finish;
+  }
+
+  if (opt_all) {
+    int i, j;
+    const char * key, * val;
+
+    PutS(out,"file: ");     PutS(out,inname);     PutC(out,'\n');
+    PutS(out,"tracks: ");   PutI(out,d->nb_mus);  PutC(out,'\n');
+    PutS(out,"default: ");  PutI(out,d->def_mus); PutC(out,'\n');
+    PutS(out,"time_ms: ");  PutI(out,d->time_ms); PutC(out,'\n');
+    PutS(out,"hardware: "); PutS(out,HWflags(d->hwflags)); PutC(out,'\n');
+    for (j=0; !file68_tag_enum(d, 0, j, &key, &val); ++j) {
+      PutS(out,key); PutS(out,": "); PutS(out,val); PutC(out,'\n');
+    }
+
+    for (i=1; i<=d->nb_mus; ++i) {
+      music68_t *m = d->mus+(i-1);
+      PutS(out,"track: ");    PutI(out,i);          PutC(out,'\n');
+      PutS(out,"remap: ");    PutI(out,m->track);   PutC(out,'\n');
+      PutS(out,"loop: ");     PutI(out,m->loop);    PutC(out,'\n');
+      PutS(out,"timems: ");   PutI(out,m->time_ms); PutC(out,'\n');
+      PutS(out,"frames: ");   PutI(out,m->frames);  PutC(out,'\n');
+      PutS(out,"rate: ");     PutI(out,m->frq);     PutC(out,'\n');
+      PutS(out,"hardware: "); PutS(out,HWflags(m->hwflags)); PutC(out,'\n');
+      for (j=0; !file68_tag_enum(d, i, j, &key, &val); ++j) {
+        PutS(out,key); PutS(out,": "); PutS(out,val); PutC(out,'\n');
+      }
+    }
+    code = 0;
+    goto finish;
   }
 
   /* Setup variable */
   trackList = 0;
-  toTrack = curTrack = d->default_six;
+  toTrack = curTrack = d->def_mus;
 
   /* Main loop */
   for (++i; i<argc; ++i) {
     if (!trackList && argv[i][0] == '-' && isdigit(argv[i][1])) {
       int res;
       trackList = argv[i]+1;
-      res = ReadTrackList(&trackList, d->nb_six, &curTrack , &toTrack);
+      res = ReadTrackList(&trackList, d->nb_mus, &curTrack , &toTrack);
       if (res < 0) {
         return tracklist_error(trackList);
       } else if (!res) {
         /* This can't be coz we check that almost one digit was there above */
         error("info68: %s(%d) : Internal bug error;"
               " program should not reach this point\n", __FILE__, __LINE__);
-        return 0x666;
+        code = 66;
+        goto finish;
       }
       continue;
     }
@@ -393,7 +443,7 @@ int main(int argc, char ** argv)
         if (!esc) {
           /* Not escaped */
           if(esc = (c=='%'), !esc) {
-            Putc(out,c);
+            PutC(out,c);
           }
         } else {
           /* Escaped */
@@ -402,45 +452,45 @@ int main(int argc, char ** argv)
 
             /* SPECIAL commands */
           case 'L':
-            Putc(out,'\n');
+            PutC(out,'\n');
             break;
           case '%':
-            Putc(out,'%');
+            PutC(out,'%');
             break;
           case '0':
-            Putc(out,'\0');
+            PutC(out,'\0');
             break;
 
             /* DISK commands */
           case '#':
-            PutI(out,d->nb_six);
+            PutI(out,d->nb_mus);
             break;
           case '?':
-            PutI(out,d->default_six+1);
+            PutI(out,d->def_mus+1);
             break;
           case 'N':
-            Puts(out,d->name);
+            PutS(out,d->tags.tag.title.val);
             break;
           case 'A':
-            Puts(out,d->mus[d->default_six].author);
+            PutS(out,d->tags.tag.artist.val);
             break;
           case 'C':
-            Puts(out,d->mus[d->default_six].composer);
+            PutS(out,file68_tag_get(d,0,TAG68_COMPOSER));
             break;
           case 'P':
-            Puts(out,d->mus[d->default_six].ripper);
+            PutS(out,file68_tag_get(d,0,TAG68_RIPPER));
             break;
           case 'V':
-            Puts(out,d->mus[d->default_six].converter);
+            PutS(out,file68_tag_get(d,0,TAG68_CONVERTER));
             break;
           case 'T':
             PutI(out,d->time_ms/1000u);
             break;
           case 'Y':
-            Puts(out,strtime68(0, d->nb_six, d->time_ms/1000u));
+            PutS(out,strtime68(0, d->nb_mus, d->time_ms/1000u));
             break;
           case 'H':
-            Puts(out,HWflags(d->hwflags));
+            PutS(out,HWflags(d->hwflags));
             break;
 
             /* TRACK Commands */
@@ -448,31 +498,31 @@ int main(int argc, char ** argv)
             PutI(out,curTrack+1);
             break;
           case 'n':
-            Puts(out,m->name);
+            PutS(out,m->tags.tag.title.val);
             break;
           case 'a':
-            Puts(out,m->author);
+            PutS(out,m->tags.tag.artist.val);
             break;
           case 'c':
-            Puts(out,m->composer);
+            PutS(out,file68_tag_get(d,curTrack+1,TAG68_COMPOSER));
             break;
           case 'p':
-            Puts(out,m->ripper);
+            PutS(out,file68_tag_get(d,curTrack+1,TAG68_RIPPER));
             break;
           case 'v':
-            Puts(out,m->converter);
+            PutS(out,file68_tag_get(d,curTrack+1,TAG68_CONVERTER));
             break;
           case 'r':
-            Puts(out,m->replay ? m->replay : "built-in");
+            PutS(out, m->replay ? m->replay : "built-in");
             break;
           case 't':
             PutI(out,m->time_ms/1000u);
             break;
           case 'y':
-            Puts(out,strtime68(0, curTrack+1, m->time_ms/1000u));
+            PutS(out,strtime68(0, curTrack+1, m->time_ms/1000u));
             break;
           case 'h':
-            Puts(out, HWflags(m->hwflags));
+            PutS(out, HWflags(m->hwflags));
             break;
           case 'f':
             PutI(out,m->frq);
@@ -480,29 +530,44 @@ int main(int argc, char ** argv)
           case '@':
             PutX(out,m->a0);
             break;
-
+          case '{': {
+            char * key = s+1, * end;
+            const char * val;
+            if (end = strchr(key,'}'), end) {
+              *end = 0;
+              val = file68_tag_get(d, isupper(*key) ? 0 : curTrack, key);
+              if (val) PutS(out,val);
+              *end = '}';
+              s = end;
+              break;
+            }
+          }
           default:
-            Putc(out,'%');
-            Putc(out,c);
+            PutC(out,'%');
+            PutC(out,c);
           } /* switch */
         } /* if else */
       } /* for */
 
         /* Get next track. */
       if (++curTrack > toTrack) {
-        int res = ReadTrackList(&trackList, d->nb_six, &curTrack , &toTrack);
+        int res = ReadTrackList(&trackList, d->nb_mus, &curTrack , &toTrack);
         if (res < 0) {
           return tracklist_error(trackList);
         } else if (!res) {
-          toTrack = curTrack = d->default_six;
+          toTrack = curTrack = d->def_mus;
           break;
         }
       }
     } /* while track */
   } /* while arg */
 
+  code = 0;
+finish:
   istream68_destroy(out);
   free68(d);
+  file68_shutdown();
 
-  return 0;
+exit:
+  return code;
 }

@@ -1,4 +1,13 @@
-/* $Id$ */
+/**
+ * @ingroup  mksc68_prg
+ * @file     mksc68/mksc68_opt.h
+ * @author   Benjamin Gerard
+ * @date     2009-01-01
+ * @brief    command line options
+ *
+ */
+
+/* Copyright (C) 1998-2011 Benjamin Gerard */
 
 #ifndef _MKSC68_OPT_H_
 #define _MKSC68_OPT_H_

@@ -2,7 +2,7 @@
  * @ingroup   emu68_lib
  * @file      emu68/struct68.h
  * @author    Benjamin Gerard
- * @date      13/03/1999
+ * @date      1999-03-13
  * @brief     Struture definitions header.
  *
  */

@@ -50,8 +50,16 @@ AC_ARG_ENABLE(
       [enable all sub-packages @<:@default=no@:>@])],
   [],[enable_sc68_all="check"])
 
+AC_ARG_ENABLE(
+  [sc68-plugin],
+  [AS_HELP_STRING(
+      [--enable-sc68-plugin],
+      [enable plugin-packages @<:@default=no@:>@])],
+  [],[enable_sc68_plugin="check"])
+
 AS_CASE(["x$enable_sc68_all"],
-  [xno|xyes],[enable_sc68_tools="$enable_sc68_all"],
+  [xno|xyes],
+  [enable_sc68_tools="$enable_sc68_all";enable_sc68_plugin="$enable_sc68_all"],
   [enable_sc68_all="check"])
 
 # Dev Tools
@@ -71,11 +79,16 @@ SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[[$]enable_sc68_all])
 SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_sc68_all])
 
 # PLUGINS
-if [$]pkgconfig audacious --exists; then def_audacious=yes; else def_audacious=no; fi
+def_audacious=no;def_sc68_gst=no
+AS_CASE(["x$enable_sc68_plugin"],
+  [xno|xyes],
+  [def_audacious=$enable_sc68_plugin;def_sc68_gst=$enable_sc68_plugin],
+  [
+    $pkgconfig audacious --exists && def_audacious=check
+    $pkgconfig gstreamer-0.10 --exists && def_sc68_gst=check
+  ])
 SC68_ENABLE_PACKAGE([sc68-audacious],[sc68 plugin for audacious],[$def_audacious])
-
-if [$]pkgconfig gstreamer-0.10 --exists; then def_sc68_gst=yes; else def_sc68_gst=no; fi
-SC68_ENABLE_PACKAGE([sc68-gst],[sc68 plugin for gstreamer (0.10)],[[$]def_sc68_gst])
+SC68_ENABLE_PACKAGE([sc68-gst],[sc68 plugin for gstreamer (0.10)],[$def_sc68_gst])
 
 # DOC
 SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])

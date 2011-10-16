@@ -1,6 +1,28 @@
-/* $Id$ */
-
-/* Time-stamp: <2009-10-08 19:10:33 ben>  */
+/*
+ * @file    mksc68_cmd_load.c
+ * @brief   the "load" command
+ * @author  http://sourceforge.net/users/benjihan
+ *
+ * Copyright (C) 1998-2011 Benjamin Gerard
+ *
+ * Time-stamp: <2011-10-10 18:25:00 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
@@ -19,7 +41,7 @@ static const opt_t longopts[] = {
 };
 
 
-static 
+static
 int run_load(cmd_t * cmd, int argc, char ** argv)
 {
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
@@ -50,8 +72,8 @@ int run_load(cmd_t * cmd, int argc, char ** argv)
   if (i < argc) {
     filename = argv[i++];
   }
-    
-  if (i < argc) 
+
+  if (i < argc)
     msgwrn("%d extra parameters ignored\n", argc-i);
 
   if (force) {
@@ -70,12 +92,12 @@ cmd_t cmd_load = {
   /* run */ run_load,
   /* com */ "load",
   /* alt */ "ld",
-  /* use */ "[OPTION ...] [--] [URL]",
+  /* use */ "[opts] <url>",
   /* des */ "load a new disk",
   /* hlp */
-  "Load or merge a disk.\n"
+  "The `load' command loads or merges a disk.\n"
   "\n"
-  "OPTION\n"
+  "OPTIONS\n"
   "   -f --force   force a new disk creation.\n"
-  "   -a --add     merge current and loaded disks.\n"
+  "   -a --add     merge current and loaded disks."
 };

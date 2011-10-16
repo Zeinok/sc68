@@ -1,8 +1,8 @@
 /*
- * GStreamer
+ * GStreamer - sc68 decoder element
  * Copyright (C) 2005 Thomas Vander Stichele <thomas@apestaart.org>
  * Copyright (C) 2005 Ronald S. Bultje <rbultje@ronald.bitfreak.net>
- * Copyright (C) 2011 Benjamin Gerard <benjihan -4t- sourceforge>
+ * Copyright (C) 2011 Benjamin Gerard <http://sourceforge.net/users/benjihan>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -62,10 +62,6 @@
 #include <string.h>
 #include "gstsc68.h"
 
-static gchar *exts[] = {
-  "sc68", "sc68.gz", "sndh", "snd", NULL
-};
-
 GST_DEBUG_CATEGORY(gst_sc68_debug);
 
 /* Player status */
@@ -103,7 +99,7 @@ enum {
 #endif
 };
 
-GST_BOILERPLATE(Gstsc68, gst_sc68, GstElement, GST_TYPE_ELEMENT);
+GST_BOILERPLATE(Gstsc68, gst_sc68, GstElement, GST_TYPE_ELEMENT)
 
 /***********************************************************************
  * Function declaration
@@ -126,7 +122,7 @@ static gboolean      gst_sc68_activate_pull(GstPad * pad, gboolean active);
 static GstFlowReturn gst_sc68_get_range    (GstPad * pad, guint64 offset,
                                             guint length, GstBuffer **buffer);
 static gboolean      gst_sc68_check_get_range(GstPad * pad);
-static void          gst_sc68_typefind     (GstTypeFind * tf, gpointer data);
+//static void          gst_sc68_typefind     (GstTypeFind * tf, gpointer data);
 
 /***********************************************************************
  * PAD TEMPLATES
@@ -168,7 +164,7 @@ static void gst_sc68_base_init(gpointer gclass)
     /* longname       */ "SC68 Audio Decoder",
     /* classification */ "Decoder/Audio",
     /* description    */ "Atari ST and Amiga audio decoder based on sc68 engine",
-    /* author         */ "Benjamin Gerard <benjihan -4t- sourceforge>");
+    /* author         */ "Benjamin Gerard <http://sourceforge.net/users/benjihan>");
   gst_element_class_add_pad_template(
     element_class,gst_static_pad_template_get(&sink_factory));
   gst_element_class_add_pad_template(
@@ -184,10 +180,10 @@ static void gst_sc68_base_init(gpointer gclass)
 static void gst_sc68_class_init(Gstsc68Class * klass)
 {
   GObjectClass    * gobject_class     = (GObjectClass    *) klass;
-//  GstElementClass * gstelement_class  = (GstElementClass *) klass;
 
-  /* Install class properties */
-
+  /****************************
+   * Install class properties *
+   ****************************/
   gobject_class->set_property = gst_sc68_set_property;
   gobject_class->get_property = gst_sc68_get_property;
 
@@ -230,6 +226,10 @@ static void gst_sc68_class_init(Gstsc68Class * klass)
       1, 99, 1,                          /* min/max/def */
       G_PARAM_READABLE)
     );
+
+  /*****************************
+   * Install private meta-tags *
+   *****************************/
 
   /* gst_tag_register ("ripper", GST_TAG_FLAG_META, */
   /*                G_TYPE_STRING, */
@@ -304,8 +304,7 @@ static void gst_sc68_init(Gstsc68 * filter, Gstsc68Class * gclass)
   filter->filebuf = 0;
   filter->filemax = 0;
   filter->fileptr = 0;
-  memset(&filter->dskinfo, 0, sizeof(filter->dskinfo));
-  memset(&filter->trkinfo, 0, sizeof(filter->trkinfo));
+  memset(&filter->info,0,sizeof(filter->info));
 
   filter->prop.track = 0;
   filter->prop.loop  = -1;
@@ -396,7 +395,7 @@ static gboolean gst_sc68_task_play(Gstsc68 * filter)
   gboolean res;
 
   GstBuffer *buf = NULL/* , * meta = NULL, * wbuf = NULL */;
-  int frames;
+  int frames, n;
   GstFlowReturn flow;
   GstClockTime stamp   = gst_util_get_timestamp();
   /* GstClockTime elapsed = stamp - filter->stamp; */
@@ -414,9 +413,9 @@ static gboolean gst_sc68_task_play(Gstsc68 * filter)
     /* } */
 
     GST_BUFFER_OFFSET   (buf) = filter->samples;
-    GST_BUFFER_TIMESTAMP(buf) = GST_CLOCK_TIME_NONE; // $$$ TODO
-    GST_BUFFER_DURATION (buf) = GST_CLOCK_TIME_NONE; // $$$ TODO
-    frames = GST_BUFFER_SIZE(buf) >> 2;
+    GST_BUFFER_TIMESTAMP(buf) = GST_CLOCK_TIME_NONE; // $$$ TODO or not ?
+    GST_BUFFER_DURATION (buf) = GST_CLOCK_TIME_NONE; // $$$ TODO or not ?
+    n = frames = GST_BUFFER_SIZE(buf) >> 2;
 
     /* if (!gst_buffer_is_writable(buf)) { */
     /*   gst_buffer_unref(buf); */
@@ -425,11 +424,11 @@ static gboolean gst_sc68_task_play(Gstsc68 * filter)
     /*   goto exit; */
     /* } */
 
-    filter->code = sc68_process(filter->sc68,  GST_BUFFER_DATA(buf), frames);
+    filter->code = sc68_process(filter->sc68,  GST_BUFFER_DATA(buf), &n);
     res = filter->code != SC68_ERROR;
     if (res) {
       int is_seeking;
-      filter->samples += frames;
+      filter->samples += n;
       filter->position_ns = gst_sc68_mstons(sc68_seek(filter->sc68, -1, &is_seeking));
       flow = gst_pad_push(filter->srcpad, buf);
       if (flow != GST_FLOW_OK) {
@@ -724,20 +723,22 @@ static gboolean gst_sc68_event(GstPad *pad, GstEvent *event)
       /* Load sc68 disk here */
       err = sc68_load_mem(filter->sc68,filter->filebuf,filter->fileptr);
       if (!err) {
-        sc68_music_info(filter->sc68,&filter->dskinfo,0,0);
-        GST_DEBUG("<%s> disk loaded: %s %s - %s",
-                  gst_pad_get_name(pad),
-                  filter->dskinfo.time,
-                  filter->dskinfo.author,
-                  filter->dskinfo.title);
+
+        /* filter->dskinfo = sc68_music_info(filter->sc68,0,0); */
+        /* GST_DEBUG("<%s> disk loaded: %s %s - %s", */
+        /*           gst_pad_get_name(pad), */
+        /*           filter->dskinfo.time, */
+        /*           filter->dskinfo.author, */
+        /*           filter->dskinfo.title); */
         /* */
         filter->code = sc68_process(filter->sc68, 0, 0);
-        sc68_music_info(filter->sc68,&filter->trkinfo, -1,0);
-        GST_DEBUG("<%s> trak loaded: %s %s - %s ",
-                  gst_pad_get_name(pad),
-                  filter->trkinfo.time,
-                  filter->trkinfo.author,
-                  filter->trkinfo.title);
+
+
+        /* GST_DEBUG("<%s> trak loaded: %s %s - %s ", */
+        /*           gst_pad_get_name(pad), */
+        /*           filter->trkinfo.time, */
+        /*           filter->trkinfo.author, */
+        /*           filter->trkinfo.title); */
 
         /* if (!gst_pad_start_task(filter->srcpad, gst_sc68_task, filter)) { */
         /*   GST_DEBUG("start task failed"); */
@@ -843,7 +844,7 @@ static void gst_sc68_get_property(GObject * object, guint prop_id,
   } break;
 
   case PROP_TRACKS:
-    g_value_set_int(value, filter->dskinfo.tracks);
+    g_value_set_int(value, filter->info.tracks);
     break;
 
   case PROP_SPLRATE:
@@ -938,40 +939,6 @@ static GstFlowReturn gst_sc68_srcchain (GstPad * pad, GstBuffer * buf)
 #endif
 
 /***********************************************************************
- * TYPE DETECTION
- ***********************************************************************/
-static void gst_sc68_typefind(GstTypeFind *tf, gpointer cookie)
-{
-  guint8 * data = gst_type_find_peek(tf, 0, 32);
-  guint score = 0;
-  if (data) {
-    /* Official sc68 file headers. */
-    if (!memcmp(data, "SC68/02",8) || !memcmp(data, "SC68 Mus",8))
-      score = GST_TYPE_FIND_MAXIMUM;
-    /* ice! are likely sndh files. */
-    else if (!memcmp(data, "ice!",4))
-      score = GST_TYPE_FIND_LIKELY;
-    /* gzip might be sc68 ... gzip filter would be much better */
-    else if (!memcmp(data, "gzip",4))
-      score = (GST_TYPE_FIND_MINIMUM+GST_TYPE_FIND_POSSIBLE) >> 1;
-    /* raw sndh (experimental) */
-    else if ( (data[0] == 0x4e && (data[1] == 0x75 || data[1] == 0x71)) ||
-              (data[0] == 0x60 ) ) {
-      int i;
-      for (i=6; i<28; ++i)
-        if (!memcmp(data+i, "SNDH", 4) || !memcmp(data+i, "sndh", 4)) {
-          score = GST_TYPE_FIND_LIKELY;
-          break;
-        }
-    }
-  }
-  if (score)
-    gst_type_find_suggest(tf, score,
-                          gst_caps_new_simple(SC68_MIMETYPE, NULL));
-}
-
-
-/***********************************************************************
  * PLUGIN INIT
  *
  * called as soon as the plugin is loaded
@@ -980,44 +947,26 @@ static void gst_sc68_typefind(GstTypeFind *tf, gpointer cookie)
  ***********************************************************************/
 static gboolean gst_plugin_init (GstPlugin * plugin)
 {
-  gboolean result;
-  const GstCaps * caps;
-
-  /* Add a debug category */
+  /* Add a debug category. */
   GST_DEBUG_CATEGORY_INIT(gst_sc68_debug, "sc68", 0, "sc68 music player");
 
-  /* Register our file type detection. */
-  caps = gst_caps_new_simple(SC68_MIMETYPE, NULL);
-  result =
-    gst_type_find_register(
-      plugin,                           /* plugin             */
-      "sc68typefind",                   /* ??? name, for what */
-      GST_RANK_PRIMARY,                 /* rank               */
-      gst_sc68_typefind,                /* find function      */
-      exts,                             /* extension list     */
-      caps,                             /* possible caps      */
-      NULL,                             /* data (cookie)      */
-      NULL                              /* Destroy notify     */
-      );
-  if (!result)
-    goto error;
-
+#if USE_TYPEFINDER
+  /* Add a dependency to our type finder. */
+  gst_plugin_add_dependency_simple(
+    plugin,             /* Plugin   */
+    NULL,               /* Env vars */
+    NULL,               /* Path     */
+    "libgstsc68-tf.so", /* Name ?  */
+    GST_PLUGIN_DEPENDENCY_FLAG_NONE);
+#endif
   /* Register our element */
-  result =
+  return
     gst_element_register(plugin, "sc68", GST_RANK_PRIMARY, GST_TYPE_SC68);
-
-error:
-  return result;
 }
-
 
 /***********************************************************************
  * PLUGIN DEFINITION FOR REGISTRATION
  ***********************************************************************/
-
-#ifndef PACKAGE
-# error "PACKAGE not defined"
-#endif
 
 GST_PLUGIN_DEFINE (
   GST_VERSION_MAJOR,
@@ -1028,5 +977,5 @@ GST_PLUGIN_DEFINE (
   VERSION,
   "LGPL",
   "sc68-gst",
-  "http://sc68.atari.org/sc68-gst/"
+  PACKAGE_URL "/" PACKAGE_NAME
   )

@@ -1,24 +1,25 @@
 /*
- *                  init68 - initialization functions
+ * @file    init68.c
+ * @brief   library initialization
+ * @author  http://sourceforge.net/users/benjihan
  *
- *              Copyright (C) 2001-2011 Ben(jamin) Gerard
+ * Copyright (C) 2001-2011 Benjamin Gerard
  *
- *                     <benjihan -4t- sourceforge>
+ * Time-stamp: <2011-10-03 11:16:36 ben>
  *
- * Time-stamp: <2011-08-29 14:08:19 ben>
- *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the  GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
@@ -28,7 +29,7 @@
 #endif
 
 #include "file68_api.h"
-#include "init68.h"
+/* #include "init68.h" */
 #include "option68.h"
 
 #include "msg68.h"
@@ -44,14 +45,14 @@
 
 static volatile int init;
 
-void istream68_ao_shutdown(void); /* defined in istream68_ao.c */
-int istream68_z_init(void);       /* defined in istream68_z.c  */
-void istream68_z_shutdown(void);  /* defined in istream68_z.c  */
-int option68_init(void);          /* defined in option68.c     */
-void option68_shutdown(void);     /* defined in option68.c     */
-int file68_o_init(void);          /* defined in file68.c       */
-void file68_o_shutdown(void);     /* defined in file68.c       */
-int istream68_ao_init(void);      /* defined in istream68_ao.c */
+void istream68_ao_shutdown(void);  /* defined in istream68_ao.c */
+int  istream68_z_init(void);       /* defined in istream68_z.c  */
+void istream68_z_shutdown(void);   /* defined in istream68_z.c  */
+int  option68_init(void);          /* defined in option68.c     */
+void option68_shutdown(void);      /* defined in option68.c     */
+int  file68_loader_init(void);     /* defined in file68.c       */
+void file68_loader_shutdown(void); /* defined in file68.c       */
+int  istream68_ao_init(void);      /* defined in istream68_ao.c */
 
 static char * mygetenv(const char *name)
 {
@@ -140,7 +141,7 @@ int file68_init(int argc, char **argv)
   rsc68_init();
 
   /* Loader */
-  file68_o_init();
+  file68_loader_init();
 
   option68_append(opts,sizeof(opts)/sizeof(*opts));
   argc = option68_parse(argc, argv, 1);
@@ -246,7 +247,7 @@ int file68_init(int argc, char **argv)
   }
 
   init = 1;
- out_no_init:
+out_no_init:
   return argc;
 }
 
@@ -259,7 +260,7 @@ void file68_shutdown(void)
     option68_shutdown();
 
     /* Loader */
-    file68_o_shutdown();
+    file68_loader_shutdown();
 
     /* Shutdown resource */
     rsc68_shutdown();
@@ -275,4 +276,14 @@ void file68_shutdown(void)
 
     init = 0;
   }
+}
+
+int file68_version(void)
+{
+  return PACKAGE_VERNUM;
+}
+
+const char * file68_versionstr()
+{
+  return PACKAGE_STRING;
 }

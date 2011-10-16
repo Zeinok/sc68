@@ -7,9 +7,7 @@
  *
  */
 
-/* $Id$ */
-
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2011 Benjamin Gerard */
 
 #ifndef _IO68_H_
 #define _IO68_H_

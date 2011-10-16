@@ -1,8 +1,28 @@
-/**
+/*
+ * @file    lines68.c
+ * @brief   The whole 68k emulator in a single file.
+ * @author  http://sourceforge.net/users/benjihan
+ *
+ * Copyright (C) 2001-2011 Benjamin Gerard
+ *
+ * Time-stamp: <2011-10-12 16:52:55 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -16,6 +36,10 @@
 /* Monolitic build: remove all forced inlines */
 # undef  inline
 # define inline
+
+#if defined(__GNUC__) && (__GNUC__*100+__GNUC_MINOR__ >= 402)
+ #pragma GCC diagnostic ignored "-Wunused-function"
+#endif
 
 # include "lines68.h"
 # include "lines/line0.c"

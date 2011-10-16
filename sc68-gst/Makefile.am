@@ -1,4 +1,4 @@
-# Time-stamp: <2011-09-10 13:52:24 ben>
+# Time-stamp: <2011-10-13 12:28:06 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # | gstsc68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -29,9 +29,20 @@ else
 SC68_LA = $(sc68_lib) $(file68_lib)
 endif
 
-plugin_LTLIBRARIES         = libgstsc68.la
+if TYPEFIND_SC68
+more_ltlib                 = libgstsc68-tf.la
+libgstsc68_tf_la_SOURCES   = gstsc68_typefind.c
+use_typefinder             = 1
+else
+more_ltlib                 =
+use_typefinder             = 0
+endif
+
+plugin_LTLIBRARIES         = libgstsc68.la $(more_ltlib)
 libgstsc68_la_SOURCES      = gstsc68.c gstsc68_core.c
-noinst_HEADERS             = gstsc68.h
+libgstsc68_la_CPPFLAGS     = -DUSE_TYPEFINDER=$(use_typefinder) -DPLUGINDIR=\"$(plugindir)\"
 libgstsc68_la_LIBADD       = $(SC68_LA)
-libgstsc68_la_LIBTOOLFLAGS = --tag=disable-static
+noinst_HEADERS             = gstsc68.h
+
+LIBTOOLFLAGS               = --tag=disable-static
 LFLAGS                     = -module -avoid-version -export-symbols-regex [_]*\(gst_\|Gst\|GST_\).* $(NOINSTALL)

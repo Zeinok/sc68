@@ -1,24 +1,25 @@
 /*
- *                        file68 - debug message
+ * @file    msg68.c
+ * @brief   message logging
+ * @author  http://sourceforge.net/users/benjihan
  *
- *              Copyright (C) 2001-2011 Ben(jamin) Gerard
+ * Copyright (C) 2001-2011 Benjamin Gerard
  *
- *                     <benjihan -4t- sourceforge>
+ * Time-stamp: <2011-10-07 08:17:07 ben>
  *
- * Time-stamp: <2011-08-29 13:59:14 ben>
- *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the  GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
@@ -32,7 +33,9 @@
 
 static msg68_t   output = 0;           /* Output function.  */
 static void    * cookie = 0;           /* User data.        */
+#if 0
 static int       curcat = msg68_DEBUG; /* Current category. */
+#endif
 
 /** Default message filter mask.
  *
@@ -84,10 +87,14 @@ void * msg68_set_cookie(void * userdata)
 void msg68x_va(int bit, void * cookie, const char * fmt, va_list list)
 {
   if (output) {
+#if 0
     const int category = (bit == msg68_CURRENT)
       ? curcat
       : bit
       ;
+#else
+    const int category = bit;
+#endif
 
     switch (category) {
     case msg68_NEVER:
@@ -96,7 +103,7 @@ void msg68x_va(int bit, void * cookie, const char * fmt, va_list list)
       if ( ! ( msg68_bitmsk & ( 1 << category ) ) )
         break;
       if ( category > msg68_TRACE &&
-          ! ( msg68_bitmsk & ( 1 << msg68_TRACE ) ) )
+           ! ( msg68_bitmsk & ( 1 << msg68_TRACE ) ) )
         break;
     case msg68_ALWAYS:
       output(category, cookie, fmt, list);
@@ -220,6 +227,7 @@ void msg68x_critical(void * userdata, const char * fmt, ...)
   va_end(list);
 }
 
+#if 0
 void msg68_current(const char * fmt, ...)
 {
   va_list list;
@@ -234,6 +242,7 @@ void msg68x_current(void * userdata, const char * fmt, ...)
   msg68x_va(msg68_CURRENT, userdata, fmt, list);
   va_end(list);
 }
+#endif
 
 void msg68_always(const char * fmt, ...)
 {
@@ -318,6 +327,7 @@ void msg68_cat_free(const int category)
 }
 
 /* Get/Set current category. */
+#if 0
 int msg68_cat_current(const int category)
 {
   int old = curcat;
@@ -329,6 +339,7 @@ int msg68_cat_current(const int category)
   }
   return old;
 }
+#endif
 
 /* Set all predefined categories mask according to given level. */
 int msg68_cat_level(const int category)
@@ -344,7 +355,7 @@ int msg68_cat_level(const int category)
 
 /* Get info on category */
 int msg68_cat_info(const int category, const char **pname,
-                       const char **pdesc, int *pnext)
+                   const char **pdesc, int *pnext)
 {
   int ret = -1, next = category;
   if (is_valid_category(category)) {

@@ -664,7 +664,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
  */
 void ym_cleanup(ym_t * const ym)
 {
-  TRACE68(ym_cat,"ym-2149: cleanup\n");
+  TRACE68(ym_cat,"%s","ym-2149: cleanup\n");
   if (ym && ym->cb_cleanup) {
     ym->cb_cleanup(ym);
   }

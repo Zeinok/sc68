@@ -1,24 +1,25 @@
 /*
- *                  option68 - cli options functions
+ * @file    option68.c
+ * @brief   command line options
+ * @author  http://sourceforge.net/users/benjihan
  *
- *              Copyright (C) 2001-2011 Ben(jamin) Gerard
+ * Copyright (C) 2001-2011 Benjamin Gerard
  *
- *                     <benjihan -4t- sourceforge>
+ * Time-stamp: <2011-10-14 20:49:25 ben>
  *
- * Time-stamp: <2011-08-29 13:59:43 ben>
- *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the  GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
@@ -142,6 +143,11 @@ static option68_t * opt_of(const char * key)
   option68_t * opt;
   FOREACH_OPT(opt) if (!strcmp68(key, opt->name)) break;
   return opt;
+}
+
+int option68_type(const option68_t * opt)
+{
+  return opt ? opt_type(opt) : option68_ERR;
 }
 
 int option68_unset(option68_t * opt)
@@ -280,7 +286,7 @@ int option68_parse(int argc, char ** argv, int reset)
     if (opt) continue;
 
     /* Not our option; keep it */
-    keep_it:
+ keep_it:
     argv[n++] = argv[i];
 
   }
@@ -311,7 +317,7 @@ void option68_shutdown(void)
   option68_t * opt, * nxt;
 
   option68_unset_all();
-  for (nxt=opts; opt=nxt;) {
+  for (nxt=opts; (opt=nxt); ) {
     nxt = opt->next;
     opt->next = 0;
   }

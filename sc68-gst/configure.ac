@@ -14,8 +14,7 @@ dnl#
 AC_INIT(
   [sc68-gst],
   [0.1.0],
-  [benjihan -4t- sourceforge],
-  [sc68-audacious],
+  [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([gstsc68.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -82,6 +81,9 @@ if test -n "[$]gst_lflags"; then
   SC68_ADD_FLAGS([LIB_LFLAGS],[$]gst_lflags)
 fi
 
+enable_gst_typefinder='yes'
+AM_CONDITIONAL([TYPEFIND_SC68],[test "x${enable_gst_typefinder}" = 'xyes'])
+
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
@@ -102,6 +104,7 @@ AC_MSG_NOTICE([|   file68 headers      : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
 AC_MSG_NOTICE([|   gstreamer           : $gst_rel ($gst_ver)])
 AC_MSG_NOTICE([|   plugin-dir          : $with_gst_plugin_dir])
+AC_MSG_NOTICE([|   gst type finder     : $enable_gst_typefinder])
 AC_MSG_NOTICE([+-----------------------])
 
 dnl#

@@ -1,4 +1,28 @@
-/* $Id$ */
+/*
+ * @file    mksc68_tag.c
+ * @brief   metatag definitions
+ * @author  http://sourceforge.net/users/benjihan
+ *
+ * Copyright (C) 1998-2011 Benjamin Gerard
+ *
+ * Time-stamp: <2011-10-10 18:28:14 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
@@ -7,6 +31,10 @@
 
 #include "mksc68_tag.h"
 #include "mksc68_msg.h"
+#include "mksc68_dsk.h"
+
+#include <sc68/tag68.h>
+#include <sc68/file68.h>
 
 #include <ctype.h>
 #include <string.h>
@@ -17,16 +45,26 @@ static struct tag_std {
   int alias;                            /* is alias           */
   const char * des;                     /* tag description    */
 } stdtags[] = {
-  { 0, 0},                              /*  */
-  { "artist",    0, 0 },
-  { "author",    1, "artist" },
-  { "composer",  0, 0 },
-  { "title",     0, 0 },
-  { "track",     0, 0 },
-  { "tracks",    0, 0 },
-  { "ripper",    0, 0 },
-  { "converter", 0, 0 },
-  { "comment",   0, 0 },
+  { 0, 0, 0 },                              /* ???  */
+  { TAG68_TITLE      ,0, "a name for is track or album" },
+  { TAG68_ARTIST     ,0, "who wrote is track or album" },
+  { TAG68_GENRE      ,0, "kind of music (track only, auto)" },
+  { TAG68_FORMAT     ,0, "file format (album only, auto)"   },
+  { TAG68_AKA        ,0, "scene alias for the artist" },
+  { TAG68_COMMENT    ,0, "tell me something special about it" },
+  { TAG68_COPYRIGHT  ,0, "copyright owner" },
+  { TAG68_IMAGE      ,0, "URI of an illustration for this track/album" },
+  { TAG68_RATE       ,0, "replay rate" },
+  { TAG68_REPLAY     ,0, "replay routine been usde by this track" },
+  { TAG68_RIPPER     ,0, "who rips the music from its original environment" },
+  { TAG68_YEAR       ,0, "year (yyyy)" },
+  { TAG68_COMPOSER   ,0, "original composer or author if this is a remake" },
+  { TAG68_CONVERTER  ,0, "who converts the track to this format" },
+
+  /* Aliases */
+  { "author"     ,1, TAG68_ARTIST },
+  { "album"      ,1, TAG68_TITLE  },
+
 };
 
 static
@@ -71,121 +109,71 @@ int tag_std(int i, const char ** var, const char ** des)
   return stdtags[i].alias;
 }
 
-static
-tag_t * tag_find(tag_t * head, const char * var)
+int tag_max(void)
 {
-  tag_t * tag;
-  for (tag=head; tag && strcmp(tag->var,var); tag = tag->nxt)
-    ;
-  return tag;
+  return TAG68_ID_MAX;
 }
 
-static
-int tag_valid_var(const char * var)
+int tag_enum(int trk, int idx, const char ** var, const char ** val)
 {
-  int i,l;
+  return file68_tag_enum(dsk_get_disk(), trk, idx, var, val);
+}
 
-  if (!var) return 0;
-  if (!isalpha(var[0])) {
-    msgerr("tag name must begin by an alpha char\n");
-    return 0;
+const char * tag_get(int trk, const char * var)
+{
+  return file68_tag_get(dsk_get_disk(), trk, var);
+}
+
+const char * tag_set(int trk, const char * var, const char * val)
+{
+  return file68_tag_set(dsk_get_disk(), trk, var, val);
+}
+
+void tag_del(int trk, const char * var)
+{
+  tag_set(trk, var, 0);
+}
+
+void tag_clr(int trk, const char * var)
+{
+  tag_set(trk, var, "");
+}
+
+static void tag_do_trk(int trk, const char * newval)
+{
+  const int max = TAG68_ID_MAX;
+  void * d = dsk_get_disk();
+  int i;
+  for (i=0; i<max; ++i) {
+    const char * key, * val;
+    file68_tag_enum(d, trk, i, &key, &val);
+    file68_tag_set (d, trk, key, newval);
   }
-  for (i = 1; i < l; ++i) {
-    if (var[i] != '_' && !isalnum(var[i])) {
-      msgerr("tag name char must be letter digit or underscore\n");
-      return 0;
-    }
-  }
-  return 1;
 }
 
-static int tag_valid_val(const char * val)
+void tag_del_trk(int trk)
 {
-  /* TODO: test valid encoding */
-  return val && val[0];
+  tag_do_trk(trk, 0);
 }
 
-tag_t * tag_get(tag_t ** head, const char * var)
+void tag_clr_trk(int trk)
 {
-  tag_t * tag;
-  assert(head);
-  assert(var);
-  tag = tag_find(*head, var);
-  return tag;
+  tag_do_trk(trk, "");
 }
 
-static inline void detach(tag_t ** head, tag_t * tag)
+static void tag_do_all(const char * val)
 {
-  if ( ( *( !tag->prv ? head : &tag->prv->nxt ) = tag->nxt ) != 0 )
-    tag->nxt->prv = tag->prv;
+  int t;
+  for (t = dsk_get_tracks(); t >= 0; --t)
+    tag_do_trk(t,val);
 }
 
-static inline void attach(tag_t ** head, tag_t * tag)
+void tag_clr_all(void)
 {
-  tag->prv = 0;
-  tag->nxt = *head;
-  *head    = tag;
+  tag_do_all("");
 }
 
-tag_t * tag_set(tag_t ** head, const char * var, const char * val)
+void tag_del_all(void)
 {
-  tag_t * tag;
-  assert(head);
-  assert(var);
-  assert(strlen(var));
-
-  /* $$$ tag-name validity check */
-  tag = tag_find(*head,var);
-  if (tag) {
-    /* tag exists. */
-    if (!val) {
-      /* have to destroy it. */
-      free(tag->var); free(tag->val);
-      detach(head, tag);
-      free(tag);
-      tag = 0;
-    } else if (strcmp(val,tag->val)) {
-      /* only update if value is different. */
-      char * newval = strdup(val);
-      if (newval) {
-        free(tag->val);
-        tag->val = newval;
-      } else {
-        tag = 0;
-      }
-    }
-  } else if (val && tag_valid_var(var) && tag_valid_val(val))  {
-    /* tag does not exit and have to be created */
-    tag = malloc(sizeof(*tag));
-    if (tag) {
-      tag->var = strdup(var);
-      tag->val = strdup(val);
-      if (tag->var && tag->val) {
-        attach(head, tag);
-      } else {
-        free(tag->var); free(tag->val); free(tag);
-        tag = 0;
-      }
-    }
-  }
-
-  return tag;
-}
-
-void tag_del(tag_t ** head, const char * tag)
-{
-  tag_set(head, tag, 0);
-}
-
-void tag_clr(tag_t ** head)
-{
-  tag_t * tag, * nxt;
-  assert(head);
-  for (tag=*head; tag; tag=nxt) {
-    nxt = tag->nxt;
-    free(tag->var);
-    free(tag->val);
-    free(tag);
-  }
-  *head = 0;
+  tag_do_all(0);
 }

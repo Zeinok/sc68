@@ -1,6 +1,28 @@
-/* $Id$ */
-
-/* Time-stamp: <2009-10-07 18:07:53 ben>  */
+/*
+ * @file    mksc68_cmd_new.c
+ * @brief   the "new" command
+ * @author  http://sourceforge.net/users/benjihan
+ *
+ * Copyright (C) 1998-2011 Benjamin Gerard
+ *
+ * Time-stamp: <2011-10-11 08:36:49 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
@@ -45,9 +67,8 @@ int run_new(cmd_t * cmd, int argc, char ** argv)
   }
   i = optind;
 
-  if (i < argc) {
+  if (i < argc)
     diskname = argv[i++];
-  }
 
   if (i < argc)
     msgwrn("%d extra parameters ignored\n", argc-i);
@@ -67,11 +88,11 @@ cmd_t cmd_new = {
   /* run */ run_new,
   /* com */ "new",
   /* alt */ "n",
-  /* use */ "[OPTION ...] [--] [NAME]",
+  /* use */ "[opts] [name]",
   /* des */ "create a new disk",
   /* hlp */
-  "Create a brand new disk.\n"
+  "The `new' creates a brand new disk.\n"
   "\n"
-  "OPTION\n"
-  "   -f --force   force a new disk creation.\n"
+  "OPTIONS\n"
+  "   -f --force   force a new disk creation."
 };

@@ -1,4 +1,4 @@
-# Time-stamp: <2011-09-10 14:01:18 ben>
+# Time-stamp: <2011-10-09 12:21:12 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  mksc68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -41,7 +41,7 @@ endif
 sources = mksc68.c mksc68_opt.c mksc68_msg.c mksc68_cmd.c mksc68_cli.c	\
 mksc68_dsk.c mksc68_str.c mksc68_tag.c mksc68_emu.c mksc68_cmd_new.c	\
 mksc68_cmd_load.c mksc68_cmd_play.c mksc68_cmd_time.c mksc68_cmd_tag.c	\
-mksc68_cmd_dbg.c
+mksc68_cmd_dbg.c mksc68_cmd_save.c
 header  =
 
 bin_PROGRAMS         = mksc68

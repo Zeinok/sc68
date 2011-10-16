@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [sc68-doc],
-  [20090110],
+  [2011112],
   [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68_doc.h])
@@ -49,7 +49,7 @@ AS_IF([test "x[$]doxygen" = xfalse],
 INPUTS='$(srcdir)'
 m4_foreach_w([dir],[
     sc68-doc/sc68_doc.h as68/as68_doc.h info68/info68_doc.h
-    sourcer68/sourcer68_doc.h debug68/debug68_doc.h sc68/sc68_doc.h 
+    sourcer68/sourcer68_doc.h mksc68/mksc68_doc.h sc68/sc68_doc.h 
     desa68 unice68 file68 libsc68],[
     AC_MSG_CHECKING([whether dir exists])
     AS_IF([test -e "${srcdir}/../dir"],

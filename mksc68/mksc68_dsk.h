@@ -1,4 +1,11 @@
-/* $Id$ */
+/**
+ * @ingroup  mksc68_prg
+ * @file     mksc68/mksc68_dsk.h
+ * @author   Benjamin Gerard
+ * @date     2009-01-01
+ * @brief    disk function
+ *
+ */
 
 #ifndef _MKSC68_DSK_H_
 #define _MKSC68_DSK_H_

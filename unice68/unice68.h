@@ -7,9 +7,8 @@
  *
  */
 
-/* Copyright (C) 1998-2010 Benjamin Gerard */
-
-/* $Id$ */
+/* Copyright (C) 1998-2011 Benjamin Gerard
+ * <http://sourceforge.net/users/benjihan> */
 
 #ifndef _UNICE68_H_
 #define _UNICE68_H_

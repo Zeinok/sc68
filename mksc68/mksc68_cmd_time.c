@@ -1,6 +1,28 @@
-/* $Id$ */
-
-/* Time-stamp: <2009-10-17 06:02:10 ben>  */
+/*
+ * @file    mksc68_cmd_time.c
+ * @brief   the "time" command
+ * @author  http://sourceforge.net/users/benjihan
+ *
+ * Copyright (C) 1998-2011 Benjamin Gerard
+ *
+ * Time-stamp: <2011-10-16 01:26:59 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
@@ -297,9 +319,9 @@ static void timemeasure_init(measureinfo_t * mi)
 
 static void timemeasure_run(measureinfo_t * mi)
 {
-  int32_t buf[32];
-  const int slice = sizeof(buf)/sizeof(*buf);
-  int code;
+  int8_t buf[32 << 2];
+  const int slice = sizeof(buf) >> 2;
+  int code, n;
   int i,lst=0;
   unsigned acu;
   unsigned frm_cnt;           /* frame counter                      */
@@ -317,7 +339,6 @@ static void timemeasure_run(measureinfo_t * mi)
 
   mi->isplaying = 1;
   mi->code      = -1;
-
 
   msgdbg("time-measure: run [track:%d max:%d stp:%d sil:%d spr:%u hz:%u]\n",
          mi->track, mi->max_ms, mi->stp_ms, mi->sil_ms,
@@ -345,11 +366,12 @@ static void timemeasure_run(measureinfo_t * mi)
          (unsigned) frm_stp, mi->stp_ms,
          (unsigned) sil_max, mi->sil_ms);
 
-  while ( code = sc68_process(mi->sc68,buf,slice),
-          code != SC68_ERROR ) {
+  while (n = slice,
+         code = sc68_process(mi->sc68,buf,&n),
+         code != SC68_ERROR ) {
 
     /* Compute the sum of deltas for silence detection */
-    for (acu=i=0; i<slice; ++i) {
+    for (acu=i=0; i<n; ++i) {
       const int val
         = ( (int)(s16)buf[i] ) + ( (int)(s16)(buf[i]>>16) );
       const int dif = val - lst;
@@ -593,15 +615,15 @@ cmd_t cmd_time = {
   /* run */ run_time,
   /* com */ "time",
   /* alt */ 0,
-  /* use */ "[OPTION ...]]",
+  /* use */ "[opts]",
   /* des */ "Autodetect track duration",
   /* hlp */
-  "Autodetect and update tracks duration.\n"
+  "The `time' command run sc68 music emulator in a special way that allows\n"
+  "to autodetect track duration.\n"
   "\n"
-  "OPTION\n"
-  "   -t --tracks=TRACKS  List of tracks (def:current).\n"
+  "OPTIONS\n"
+  "   -t --tracks=TRACKS  List of tracks (default is current track).\n"
   "   -s --silent=MS      Duration for silent detection (0:disable).\n"
   "   -M --max-time=MS    Maximum time.\n"
-  "   -p --pass-time=MS   Search pass duration.\n"
-  "\n"
+  "   -p --pass-time=MS   Search pass duration."
 };
