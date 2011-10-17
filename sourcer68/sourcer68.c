@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-17 20:47:40 ben>
+ * Time-stamp: <2011-10-17 20:56:51 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -604,7 +604,7 @@ static void FileHeader(char *fname, int *entries)
   printf(
     "\n"
     ";\n"
-    "; sourcer68 - Copyright (C) 2001-2003 Benjamin Gerard\n"
+    "; sourcer68 - Copyright (C) 1998-2011 Benjamin Gerard\n"
     ";\n");
 }
 
@@ -1016,7 +1016,7 @@ static int print_version(void)
   puts
     (PACKAGE_STRING "\n"
      "\n"
-     "Copyright (C) 2001-2009 Benjamin Gerard.\n"
+     "Copyright (C) 1998-2011 Benjamin Gerard.\n"
      "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
      "This is free software: you are free to change and redistribute it.\n"
      "There is NO WARRANTY, to the extent permitted by law.\n"
@@ -1092,7 +1092,7 @@ static int print_usage(void)
       "  and parenthesis '()'. Operators are '+-/*&|^<>' with '<' and '>' for\n"
       "  shifting. Warning: NO PRECEDENCE !!!.\n"
       "\n"
-      "Copyright (C) 2001-2009 Benjamin Gerard\n"
+      "Copyright (C) 2001-2011 Benjamin Gerard\n"
       "\n"
       "Report bugs to <benjihan -4t- users.sourceforge -d0t- net>"
       );
@@ -1196,10 +1196,9 @@ int main(int argc, char **argv)
     if (!d) {
       return SpoolError(4);
     }
-    m = d->mus+(d->default_six%(unsigned)d->nb_six);
+    m = d->mus+(d->def_mus%(unsigned)d->nb_mus);
     debugmsg("sourcer68: sc68 using default music %d/%d\n",
-             d->default_six,d->nb_six);
-
+             d->def_mus,d->nb_mus);
 
     if (m->replay) {
       debugmsg("sourcer68: sc68 use external replay '%s'\n",
