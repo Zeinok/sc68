@@ -522,9 +522,9 @@ SC68_API
 /**
  * Get disk/track information.
  *
+ * @param  info  pointer to a sc68_music_info_t struct to be fill.
  * @param  sc68  sc68 instance
  * @param  track track number (-1 or 0:current/default).
- * @param  info  pointer to a sc68_music_info_t struct to be fill.
  * @param  disk  disk to get information from (0 for current disk).
  *
  * @return error code
@@ -532,8 +532,8 @@ SC68_API
  * @retval -1  Failure.
  *
  */
-int sc68_music_info(sc68_t * sc68, int track,
-                    sc68_music_info_t * info, sc68_disk_t disk);
+int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info,
+                    int track, sc68_disk_t disk);
 
 /**
  * @}

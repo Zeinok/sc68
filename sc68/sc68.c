@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-15 15:48:25 ben>
+ * Time-stamp: <2011-10-17 02:30:22 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -303,7 +303,7 @@ static void DisplayInfo(int track)
 {
   sc68_music_info_t Info, * info = &Info;
 
-  if (!sc68_music_info(sc68,track,info,0)) {
+  if (!sc68_music_info(sc68,info,track,0)) {
     int j, len = 11;
 
     Print("%-*s : %s %s\n", len, "Disk"   , info->dsk.time, info->album);

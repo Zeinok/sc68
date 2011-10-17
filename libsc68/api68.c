@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-16 01:11:05 ben>
+ * Time-stamp: <2011-10-17 02:20:36 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -1135,7 +1135,7 @@ static int apply_change_track(sc68_t * sc68)
   sc68->track         = track;
 
   /* Setup internal info struct */
-  if (sc68_music_info(sc68, track, &sc68->info, 0))
+  if (sc68_music_info(sc68, &sc68->info, track, 0))
     return SC68_ERROR;
   sc68_debug(sc68, "New track: %s %s - %s - %s\n",
              sc68->info.trk.time,
@@ -1598,7 +1598,7 @@ int sc68_seek(sc68_t * sc68, int time_ms, int * is_seeking)
   }
 }
 
-int sc68_music_info(sc68_t * sc68, int track, sc68_music_info_t * info, sc68_disk_t disk)
+int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track, sc68_disk_t disk)
 {
   disk68_t  * d;
   music68_t * m;
