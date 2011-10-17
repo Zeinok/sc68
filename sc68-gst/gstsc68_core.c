@@ -149,19 +149,6 @@ gboolean gst_sc68_load_mem(Gstsc68 * filter, void * data , int size)
     gst_sc68_report_error(filter);
     return FALSE;
   }
-
-
-  if (sc68_music_info(filter->sc68, -1, &filter->info, 0)) {
-    GST_ERROR_OBJECT(filter, "failed to retrieve disk info");
-    gst_sc68_report_error(filter);
-    return FALSE;
-  }
-
-  GST_DEBUG("disk loaded: %s %s - %s",
-            filter->info.dsk.time,
-            filter->info.artist,
-            filter->info.album);
-
   track = filter->prop.track;
   if (track < -1 || track > filter->info.tracks) {
     GST_DEBUG("track #%02d out of range -> using default", track);
@@ -263,15 +250,15 @@ gboolean gst_sc68_onchangetrack(Gstsc68 * filter)
   memset(&val,0,sizeof(val));
   g_value_init(&val, G_TYPE_STRING);
 
-
   track = sc68_play(filter->sc68, -1, 0);
   if (track == -1) {
     GST_ERROR_OBJECT(filter, "failed to retrieve current trax number");
     gst_sc68_report_error(filter);
     return FALSE;
   }
+
   if (track > 0 && track != filter->info.trk.track) {
-    if (sc68_music_info(filter->sc68, -1, &filter->info , 0)) {
+    if (sc68_music_info(filter->sc68, &filter->info, -1 , 0)) {
       GST_ERROR_OBJECT(filter, "failed to retrieve current trax info");
       gst_sc68_report_error(filter);
       return FALSE;
