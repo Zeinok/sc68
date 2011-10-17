@@ -1,25 +1,28 @@
 /*
- *                    sourcer68 - 68000 sourcer
- *             Copyright (C) 2001-2009 Benjamin Gerard
+ * @file    sourcer68.c
+ * @brief   a 68K sourcer program
+ * @author  http://sourceforge.net/users/benjihan
  *
- *  This program is free software; you can redistribute it and/or
- *  modify it under the terms of the GNU General Public License as
- *  published by the Free Software Foundation; either version 2 of the
- *  License, or (at your option) any later version.
+ * Copyright (C) 1998-2011 Benjamin Gerard
  *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- *  General Public License for more details.
+ * Time-stamp: <2011-10-17 20:47:40 ben>
  *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
- *  02111-1307 USA
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-/* $Id$ */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,7 +38,6 @@
 
 #ifdef USE_FILE68
 # include <sc68/file68_api.h>
-# include <sc68/init68.h>
 # include <sc68/error68.h>
 # include <sc68/alloc68.h>
 # include <sc68/file68.h>
@@ -1072,6 +1074,7 @@ static int print_usage(void)
 #endif
   puts
     (
+      "\n"
       "  ENTRY-LIST := ENTRY|RANGE(,ENTRY|RANGE ...)\n"
       "\n"
       "  It consist on a coma ',' separated list of ENTRY or RANGE.\n"
