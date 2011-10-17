@@ -1,5 +1,5 @@
 /*
- * GStreamer - sc68 decoder element
+ * GStreamer - sc68 typefinder plugin
  * Copyright (C) 2005 Thomas Vander Stichele <thomas@apestaart.org>
  * Copyright (C) 2005 Ronald S. Bultje <rbultje@ronald.bitfreak.net>
  * Copyright (C) 2011 Benjamin Gerard <http://sourceforge.net/users/benjihan>

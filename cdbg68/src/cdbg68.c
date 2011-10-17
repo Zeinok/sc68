@@ -1,25 +1,27 @@
 /*
- *                     cdbg68 - sc68 debugger
+ * @file    cdbg68.c
+ * @brief   a 68K curses debugger program
+ * @author  http://sourceforge.net/users/benjihan
  *
- *            Copyright (C) 2001-2011 Ben(jamin) Gerard
- *           <benjihan -4t- users.sourceforge -d0t- net>
- *               Time-stamp: <2011-08-19 02:44:17 ben>
+ * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * Time-stamp: <2011-10-18 00:45:54 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the  GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id: sc68.c 57 2009-01-31 18:24:54Z benjihan $
  */
 
 /* generated config include */
@@ -86,8 +88,7 @@ sc68_t   * sc68;
 emu68_t  * emu68;
 io68_t  ** ios68;
 
-sc68_music_info_t diskinfo;
-sc68_music_info_t trackinfo;
+sc68_music_info_t musinfo;
 
 void sc68_emulators(sc68_t * sc68, emu68_t  ** p_emu68, io68_t  *** p_ios68);
 
@@ -246,24 +247,21 @@ int LoadSc68(const char * url, int track)
 
   err = sc68_load_url(sc68, url);
   if ( ! err )
-    err = sc68_music_info(sc68, &diskinfo, 0, 0);
-  if ( ! err)
-    err = sc68_music_info(sc68, &trackinfo, track, 0);
+    err = sc68_music_info(sc68, &musinfo, track, 0);
 
   if ( ! err ) {
-    if ( ! strcmp( trackinfo.title, diskinfo.title ) ) {
+    if ( ! strcmp( musinfo.title, musinfo.album ) ) {
       sta_set("loaded: [%02d] %s - %s",
-              trackinfo.track,
-              trackinfo.author, trackinfo.title);
+              musinfo.trk.track,
+              musinfo.artist, musinfo.title);
     } else {
       sta_set("loaded: [%02d] %s - %s - %s",
-              trackinfo.track,
-              trackinfo.author, diskinfo.title, trackinfo.title);
+              musinfo.trk.track,
+              musinfo.artist, musinfo.album, musinfo.title);
     }
-
     err = sc68_play(sc68, track, -1);
     if ( ! err )
-      err = -( sc68_process(sc68, 0, 0 ) == SC68_MIX_ERROR );
+      err = -( sc68_process(sc68, 0, 0 ) == SC68_ERROR );
   }
 
   if ( err ) {
@@ -274,8 +272,8 @@ int LoadSc68(const char * url, int track)
     sta_set("failed! %s",url);
   }
 
-  dis_set(trackinfo.addr);
-  mem_set(trackinfo.addr);
+  dis_set(musinfo.addr);
+  mem_set(musinfo.addr);
   reg_set();
 
   return err;
