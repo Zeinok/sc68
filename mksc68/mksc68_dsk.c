@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-10 17:34:39 ben>
+ * Time-stamp: <2011-10-18 02:17:08 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -143,7 +143,7 @@ int dsk_merge(const char * url)
   return -1;
 }
 
-int dsk_save(const char * url, int gzip, int version)
+int dsk_save(const char * url, int version, int gzip)
 {
   int err;
 
@@ -158,7 +158,7 @@ int dsk_save(const char * url, int gzip, int version)
   if (!is_valid_disk())
     return -1;
 
-  err = file68_save_url(url, dsk_get_disk(), gzip, version);
+  err = file68_save_url(url, dsk_get_disk(), version, gzip);
   if (!err) {
     dsk.modified = 0;
     msginf("disk saved\n");

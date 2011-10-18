@@ -15,7 +15,7 @@
 EXTERN68 int dsk_new(const char * name);
 EXTERN68 int dsk_load(const char * url, int merge);
 EXTERN68 int dsk_merge(const char * url);
-EXTERN68 int dsk_save(const char * url, int gzip, int version);
+EXTERN68 int dsk_save(const char * url, int version, int gzip);
 EXTERN68 int dsk_kill(void);
 
 EXTERN68 int    dsk_has_disk(void);

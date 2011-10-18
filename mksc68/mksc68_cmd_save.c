@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-10 18:26:44 ben>
+ * Time-stamp: <2011-10-18 02:15:48 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -81,7 +81,7 @@ int run_save(cmd_t * cmd, int argc, char ** argv)
   if (i < argc)
     msgwrn("%d extra parameters ignored\n", argc-i);
 
-  ret = dsk_save(filename, gzip, version);
+  ret = dsk_save(filename, version, gzip);
 
 error:
   return ret;
