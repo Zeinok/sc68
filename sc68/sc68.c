@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-17 02:30:22 ben>
+ * Time-stamp: <2011-10-22 21:12:58 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -309,6 +309,8 @@ static void DisplayInfo(int track)
     Print("%-*s : %s %s\n", len, "Disk"   , info->dsk.time, info->album);
     Print("%-*s : %s %s\n", len, "Track"  , info->trk.time, info->title);
     Print("%-*s : %s\n",    len, "Artist" , info->artist);
+    Print("%-*s : %02u:%02u,%02u\n", len, "Loop-Len",
+          info->loop_ms / 60000u, info->loop_ms / 1000u % 60u, info->loop_ms % 1000u / 100);
 
     Print("Disk tags:\n");
     for (j=0; j<info->dsk.tags; ++j)

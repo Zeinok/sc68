@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-16 01:26:59 ben>
+ * Time-stamp: <2011-10-23 04:07:48 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -111,9 +111,9 @@ struct measureinfo_s {
   unsigned int replayhz;                /* replay rate (in hz)   */
   unsigned int location;                /* memory start address  */
 
-  unsigned int max_ms;                  /* maximum search time */
+  unsigned int max_ms;                  /* maximum search time    */
   unsigned int stp_ms;                  /* search depth increment */
-  unsigned int sil_ms;                  /* length of silence */
+  unsigned int sil_ms;                  /* length of silence      */
 
   /* results */
   addr68_t minaddr;     /* lower memory location used by htis track */
@@ -492,12 +492,11 @@ int time_measure(measureinfo_t * mi, int trk,
   int ret = -1;
   int tracks = dsk_get_tracks();
 
-  assert(mi);
-  assert(trk > 0 && trk <= tracks);
-
-
   msgdbg("time_measure() trk:%d, stp:%d, max:%d sil:%d\n",
          trk, stp_ms, max_ms, sil_ms );
+
+  assert(mi);
+  assert(trk > 0 && trk <= tracks);
 
   if (trk <= 0 || trk > tracks) {
     msgerr("track #%02 out of range\n", trk);

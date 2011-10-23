@@ -158,7 +158,7 @@ SC68_ADD_FLAG(LIB_CFLAGS,[$file68_shared_path])
 # | Standard functions                                                   |
 # `----------------------------------------------------------------------'
 
-AC_CHECK_FUNCS([malloc free sleep usleep vsprintf vsnprintf getenv])
+AC_CHECK_FUNCS([malloc free sleep usleep vsprintf vsnprintf getenv fsync fdatasync])
 
 # ,----------------------------------------------------------------------.
 # | Package config                                                       |

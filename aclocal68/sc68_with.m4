@@ -214,11 +214,6 @@ m4_define([DO_SC68_PACKAGE],[
             CPPFLAGS="[$]ac_wp_CPPFLAGS"; unset ac_wp_CPPFLAGS
           fi
           
-          if test "x-[$]has_$1" = "x-yes" &&
-            test "x-[$]_$1_ver" = "x-bundle" &&
-            test "x[$]_$1_fct" != "x+"; then
-            AC_CONFIG_SUBDIRS([$1])
-          fi
  	  ;;
         
         # system: installed package
@@ -355,6 +350,13 @@ m4_define([DO_SC68_PACKAGE],[
           ;;
         x-bundle | x-source)
           SC68_ADD_FLAGS([ALL_CFLAGS],[$]$1_ccf)
+          if test "x[$]$1_fct" != "x+"; then
+            if test "x-[$]$1_org" = "x-bundle"; then
+              AC_CONFIG_SUBDIRS([$2])
+            else
+              SC68_ADD_FLAG([PAC_REQUIRES],[$2])
+            fi
+          fi
           ;;
         x-system | x-config-script)
           SC68_ADD_FLAGS([ALL_CFLAGS],[$]$1_ccf)

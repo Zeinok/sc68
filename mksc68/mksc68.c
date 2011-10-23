@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-10 18:01:54 ben>
+ * Time-stamp: <2011-10-23 03:38:48 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -46,6 +46,8 @@
 #include "mksc68_opt.h"
 
 #include "sc68/sc68.h"
+
+int is_interactive = 0;                 /* running in a terminal? */
 
 static int exit_code;                   /* last command exit code */
 static int exit_flag;                   /* break interpreter loop */
@@ -611,7 +613,7 @@ static int prepare_reg68(void)
   /* Must be call because of some _DEBUG test */
   emu68_reset(emu68);
 
-  /* Clear 68 K mem */
+  /* Clear 68K mem */
   emu68_memset(emu68, 0, 0, 0);
   emu68_poke(emu68,0,0x4e);
   emu68_poke(emu68,1,0x73);
@@ -773,9 +775,10 @@ static char * prompt(void)
   int has = dsk_has_disk();
   int trk = dsk_trk_get_current();
 
-  dsktitle = dsk_tag_get(0,"title");
-  if (has && !dsktitle)
-    dsktitle = "unamed disk";
+  if (!has)
+    dsktitle = 0;
+  else if(dsktitle = tag_get(0,"title"), !dsktitle)
+    dsktitle ="unamed";
 
   if (trk <= 0) {
     ret = dsktitle
@@ -783,7 +786,7 @@ static char * prompt(void)
       : cli_prompt("mksc68>")
       ;
   } else {
-    trktitle = dsk_tag_get(trk,"title");
+    trktitle = tag_get(trk,"title");
     if (dsktitle && trktitle && strcmp(dsktitle,trktitle))
       ret = cli_prompt("(%02d - %s - %s)>", trk, dsktitle, trktitle);
     else
@@ -805,6 +808,8 @@ static int interactive(void)
   int    argc;
 
   msgdbg("mksc68 is going interactive\n");
+  is_interactive = 1;
+
   while (!exit_flag) {
     prompt();
     argc = cli_read(argv, 32);
