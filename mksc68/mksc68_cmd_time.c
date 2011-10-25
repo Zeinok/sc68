@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-23 04:07:48 ben>
+ * Time-stamp: <2011-10-25 08:18:23 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -64,15 +64,22 @@ static const opt_t longopts[] = {
 };
 
 
-static const unsigned int atarist_clk = (8010613u&~3u);
+#ifndef EMU68_ATARIST_CLOCK
+# define EMU68_ATARIST_CLOCK (8010613u&~3u)
+#endif
+static const unsigned int atarist_clk = EMU68_ATARIST_CLOCK;
 
 static unsigned int cycle_per_frame(unsigned int hz, unsigned int clk)
 {
-  if (!hz || hz == 50)
-    return 160256;
-  else if (hz == 60)
+  if (!hz)
+    hz = 50u;
+  if (clk)
+    clk = atarist_clk;
+  return
+    ( hz % 50u == 0 && clk == atarist_clk)
+    ? 160256u * 50u / hz
+    : clk / hz
     ;
-  return (clk ? clk : atarist_clk) / hz;
 }
 
 static unsigned int fr2ms(unsigned int fr, unsigned int cpf, unsigned int clk)
@@ -107,33 +114,39 @@ struct measureinfo_s {
   emu68_t     * emu68;      /* emu68 instance.   */
   io68_t     ** ios68;      /* other chip.       */
 
-  unsigned int sampling;                /* sampling rate (in hz) */
-  unsigned int replayhz;                /* replay rate (in hz)   */
-  unsigned int location;                /* memory start address  */
+  unsigned sampling;        /* sampling rate (in hz) */
+  unsigned replayhz;        /* replay rate (in hz)   */
+  unsigned location;        /* memory start address  */
 
-  unsigned int max_ms;                  /* maximum search time    */
-  unsigned int stp_ms;                  /* search depth increment */
-  unsigned int sil_ms;                  /* length of silence      */
+  unsigned startfr;         /* starting frame (loop)  */
+  unsigned startms;         /* corrsponding ms        */
+
+  unsigned max_ms;          /* maximum search time    */
+  unsigned stp_ms;          /* search depth increment */
+  unsigned sil_ms;          /* length of silence      */
 
   /* results */
   addr68_t minaddr;     /* lower memory location used by htis track */
   addr68_t maxaddr;     /* upper memory location used by htis track */
   unsigned frames;      /* last frame of the music.                 */
+  unsigned timems;      /* corresponding time in ms                 */
+  unsigned loopfr;                      /* loop duration in frames */
+  unsigned loopms;                      /* correponding time in ms */
 
   unsigned curfrm;      /* current frame counter.                   */
 
-  unsigned int ym:1;              /* YM used by this music          */
-  unsigned int mw:1;              /* mw used by this music          */
-  unsigned int ta:1;              /* MFP Timer-A used by this track */
-  unsigned int tb:1;              /* MFP Timer-B used by this track */
-  unsigned int tc:1;              /* MFP Timer-C used by this track */
-  unsigned int td:1;              /* MFP Timer-D used by this track */
-  unsigned int pl:1;              /* Amiga/Paulaused by this track  */
+  unsigned ym:1;              /* YM used by this music          */
+  unsigned mw:1;              /* mw used by this music          */
+  unsigned ta:1;              /* MFP Timer-A used by this track */
+  unsigned tb:1;              /* MFP Timer-B used by this track */
+  unsigned tc:1;              /* MFP Timer-C used by this track */
+  unsigned td:1;              /* MFP Timer-D used by this track */
+  unsigned pl:1;              /* Amiga/Paulaused by this track  */
 
   struct {
-    unsigned int cnt;
-    unsigned int fst;
-    unsigned int lst;
+    unsigned cnt;
+    unsigned fst;
+    unsigned lst;
   } vector[260];
 
 };
@@ -150,7 +163,6 @@ enum timer_e {
 static const char * vectorname(int vector)
 {
   static char tmp[64];
-
 
   switch (vector) {
   case HWBREAK_VECTOR:  return "hardware breakpoint";
@@ -316,9 +328,9 @@ static void timemeasure_init(measureinfo_t * mi)
 }
 
 
-
 static void timemeasure_run(measureinfo_t * mi)
 {
+  char   str[256];
   int8_t buf[32 << 2];
   const int slice = sizeof(buf) >> 2;
   int code, n;
@@ -344,27 +356,44 @@ static void timemeasure_run(measureinfo_t * mi)
          mi->track, mi->max_ms, mi->stp_ms, mi->sil_ms,
          mi->sampling, mi->replayhz);
 
+  cpf = cycle_per_frame( mi->replayhz, mi->emu68->clock );
+
   frm_cnt = 0;
+  if (mi->startfr) {
+    mi->startms = fr2ms(mi->startfr, cpf, mi->emu68->clock);
+    msgdbg("time-measure: now measuring loop, skipping %u frames (%s)\n",
+           mi->startfr, str_timefmt(str+0x00,0x20, mi->startms));
+    while (n = slice,
+           code = sc68_process(mi->sc68,buf,&n),
+           code != SC68_ERROR ) {
+      if (code & SC68_IDLE)
+        continue;
+      if (++frm_cnt == mi->startfr)
+        break;
+    }
+    emu68_chkset(mi->emu68, 0, 0, 0);   /* reset memory access flags */
+    msgdbg("time-measure: %u frames skipped\n", frm_cnt);
+  }
+
   sil_len = 0;
   sil_val = 20 * slice * 2;
   sil_frm = sil_nop;
 
-  cpf = cycle_per_frame( mi->replayhz, mi->emu68->clock );
 
   sil_max = ms2fr(mi->sil_ms, cpf, mi->emu68->clock);
-  frm_max = ms2fr(mi->max_ms, cpf, mi->emu68->clock);
+  frm_max = frm_cnt + ms2fr(mi->max_ms, cpf, mi->emu68->clock);
   frm_stp = ms2fr(mi->stp_ms, cpf, mi->emu68->clock);
-  frm_lim = frm_stp;
+  frm_lim = frm_cnt + frm_stp;
   upd_frm = sil_nop;
   updated = 0;
 
   msgdbg("time search:\n"
-         " max: %u fr, %u ms\n"
-         " stp: %u fr, %u ms\n"
-         " sil: %u fr, %u ms\n",
-         (unsigned) frm_max, mi->max_ms,
-         (unsigned) frm_stp, mi->stp_ms,
-         (unsigned) sil_max, mi->sil_ms);
+         " max: %u fr, %s\n"
+         " stp: %u fr, %s\n"
+         " sil: %u fr, %s\n",
+         (unsigned) frm_max, str_timefmt(str+0x00,0x20,mi->max_ms),
+         (unsigned) frm_stp, str_timefmt(str+0x20,0x20,mi->stp_ms),
+         (unsigned) sil_max, str_timefmt(str+0x40,0x20,mi->sil_ms));
 
   while (n = slice,
          code = sc68_process(mi->sc68,buf,&n),
@@ -384,9 +413,9 @@ static void timemeasure_run(measureinfo_t * mi)
         unsigned int sil_lll = frm_cnt - sil_frm;
         if (sil_lll > sil_len ) {
           sil_len = sil_lll;
-          msgdbg("silence length: %u frames (%u ms) at frame %u (%u ms)\n",
-                 sil_len, fr2ms(sil_len, cpf, mi->emu68->clock),
-                 sil_frm, fr2ms(sil_frm, cpf, mi->emu68->clock) );
+          msgdbg("silence length: %u frames (%s) at frame %u (%s)\n",
+                 sil_len, str_timefmt(str+0x00,0x20,fr2ms(sil_len, cpf, mi->emu68->clock)),
+                 sil_frm, str_timefmt(str+0x00,0x20,fr2ms(sil_frm, cpf, mi->emu68->clock)));
         }
       }
       sil_frm = sil_nop;                /* Not silent slice */
@@ -395,9 +424,11 @@ static void timemeasure_run(measureinfo_t * mi)
 
     if ( sil_frm != sil_nop && frm_cnt - sil_frm > sil_max ) {
       /* silence detected !!! */
-      msgdbg("silence detected at frame %u (%u ms)\n",
-             (unsigned) sil_frm, fr2ms(sil_frm, cpf, mi->emu68->clock));
+      msgdbg("silence detected at frame %u (%s)\n",
+             (unsigned) sil_frm,
+             str_timefmt(str+0x00,0x20,fr2ms(sil_frm, cpf, mi->emu68->clock)));
       mi->frames = sil_frm;
+      mi->loopfr = ~0;
       break;
     }
 
@@ -408,8 +439,9 @@ static void timemeasure_run(measureinfo_t * mi)
       /* something as change here */
       upd_frm = frm_cnt;
       updated = 1;
-      msgdbg("update detected at frame %d (%u ms)\n",
-             (unsigned) upd_frm, fr2ms(upd_frm, cpf, mi->emu68->clock));
+      /* msgdbg("update detected at frame %d (%s)\n", */
+      /*        (unsigned) upd_frm, */
+      /*        str_timefmt(str+0x00,0x200,fr2ms(upd_frm, cpf, mi->emu68->clock))); */
     }
 
     /* That was a new frame. Let's do the memory access checking trick. */
@@ -423,14 +455,15 @@ static void timemeasure_run(measureinfo_t * mi)
     if ( frm_cnt > frm_lim ) {
       if ( !updated && upd_frm != sil_nop ) {
         /* found something */
-        msgdbg("end of track detected at frame %u (%u ms)\n",
+        msgdbg("end of track detected at frame %u (%s)\n",
                upd_frm,
-               fr2ms(upd_frm, cpf, mi->emu68->clock));
+               str_timefmt(str+0x00,0x20,fr2ms(upd_frm, cpf, mi->emu68->clock)));
         mi->frames = upd_frm;
         break;
       } else {
-        msgdbg("unable to detect end of track at frame %u (%u ms)\n",
-               frm_lim, fr2ms(frm_lim, cpf, mi->emu68->clock));
+        msgdbg("unable to detect end of track at frame %u (%s)\n",
+               frm_lim,
+               str_timefmt(str+0x00,0x20,fr2ms(frm_lim, cpf, mi->emu68->clock)));
         frm_lim += frm_stp;
         updated = 0;
       }
@@ -453,8 +486,29 @@ static void timemeasure_run(measureinfo_t * mi)
              i, vectorname(i),
              mi->vector[i].cnt, mi->vector[i].fst, mi->vector[i].lst);
 
-  if (mi->frames)
-    mi->code = 0;
+  if (mi->frames) {
+    unsigned frames, timems;
+
+    frames = mi->frames - mi->startfr;
+    timems = fr2ms(frames, cpf, mi->emu68->clock);
+
+    if (!mi->startfr) {
+      mi->frames = frames;
+      mi->timems = timems;
+      if (mi->loopfr == ~0) {
+        mi->loopfr = mi->loopms = 0;
+      } else {
+        mi->loopfr = mi->frames;
+        mi->loopms = mi->timems;
+      }
+    } else {
+      mi->frames = mi->startfr;
+      mi->timems = mi->startms;
+      mi->loopfr = frames;
+      mi->loopms = timems;
+    }
+    mi->code   = 0;
+  }
 
 }
 
@@ -478,8 +532,19 @@ static void * time_thread(void * userdata)
   assert( mi == &measureinfo );
 
   timemeasure_init(mi);
-  if (!mi->code) timemeasure_run(mi);
+  if (!mi->code)
+    timemeasure_run(mi);
   timemeasure_end(mi);
+
+  if (!mi->code && mi->loopfr) {
+    unsigned startfr = mi->frames;
+    timemeasure_init(mi);
+    if (!mi->code) {
+      mi->startfr = startfr;
+      timemeasure_run(mi);
+    }
+    timemeasure_end(mi);
+  }
 
   return mi;
 }
@@ -487,7 +552,7 @@ static void * time_thread(void * userdata)
 
 static
 int time_measure(measureinfo_t * mi, int trk,
-                 int stp_ms, int max_ms, int sil_ms )
+                 int stp_ms, int max_ms, int sil_ms)
 {
   int ret = -1;
   int tracks = dsk_get_tracks();
@@ -522,6 +587,44 @@ int time_measure(measureinfo_t * mi, int trk,
   pthread_join(mi->thread, 0);
   msgdbg("time-measure thread ended with: %d\n", mi->code);
   ret = mi->code;
+  if (!ret) {
+    disk68_t  * d = dsk_get_disk();
+    music68_t * m = d->mus+trk-1;
+    char      str[32];
+
+    m->frames  = mi->frames;
+    m->time_ms = mi->timems;
+    m->loop_fr = mi->loopfr;
+    m->loop_ms = mi->loopms;
+    m->hwflags.all           = 0;
+    m->hwflags.bit.ym        = mi->ym;
+    m->hwflags.bit.ste       = mi->mw;
+    m->hwflags.bit.amiga     = mi->pl;
+    m->hwflags.bit.stechoice = 0;
+    m->hwflags.bit.timers    = 1;
+    m->hwflags.bit.timera    = mi->ta;
+    m->hwflags.bit.timerb    = mi->tb;
+    m->hwflags.bit.timerc    = mi->tb;
+    m->hwflags.bit.timerd    = mi->tc;
+
+    /* mi->minaddr; */
+    /* mi->maxaddr; */
+
+    msginf("%02u - %s (%s) - %s%s%s%s%s%s\n",
+           trk,
+           str_timefmt(str+0x00,0x20, m->time_ms),
+           m->loop_ms ? str_timefmt(str+0x20,0x20, m->loop_ms) : "no loop",
+           m->hwflags.bit.ym     ? "Ym"   : "",
+           m->hwflags.bit.amiga  ? "AGA"  : "",
+           m->hwflags.bit.ste    ? ",STE" : "",
+           m->hwflags.bit.timera ? ",TA"  : "",
+           m->hwflags.bit.timerb ? ",TB"  : "",
+           m->hwflags.bit.timerc ? ",TC"  : "",
+           m->hwflags.bit.timerd ? ",TD"  : "");
+
+
+
+  }
   memset(mi,0,sizeof(*mi));
 
 error:

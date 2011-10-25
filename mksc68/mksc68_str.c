@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-09 10:48:09 ben>
+ * Time-stamp: <2011-10-25 07:09:47 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -237,4 +237,28 @@ int str_time_range(const char ** ptr_time, int * from, int * to)
     }
   }
   return - (ret != 1);
+}
+
+char * str_timefmt(char * buf, int len, unsigned int ms)
+{
+  char tmp[64];
+  int n, h, m, s;
+
+  h = (ms / 3600000u) % 24u;
+  ms %= 3600000u;
+  m = ms / 60000u;
+  ms %= 60000u;
+  s = ms / 1000u;
+  ms %= 1000u;
+  ms /= 10u;
+
+  if (h)
+    n = snprintf(tmp, sizeof(tmp), "%02uh%02u'%02u\"%02u", h,m,s,ms);
+  else
+    n = snprintf(tmp, sizeof(tmp), "%02u:%02u,%02u",m,s,ms);
+  n = n < len ? n : len-1;
+  strncpy(buf, tmp, n);
+  buf[n] = 0;
+
+  return buf;
 }

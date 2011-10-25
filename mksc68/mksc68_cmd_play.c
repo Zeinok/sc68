@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-16 03:01:20 ben>
+ * Time-stamp: <2011-10-25 07:49:51 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -48,6 +48,7 @@
 
 
 static const opt_t longopts[] = {
+  {"loop",     1,0,'l'},                  /* loop play        */
   {"seek",     1,0,'s'},                  /* seek to position */
   {"to",       1,0,'t'},                  /* stop time        */
   {"fg",       0,0,'f'},                  /* foreground play  */
@@ -208,7 +209,7 @@ int dsk_play(int trk, int loop, int start, int len, int bg)
 
   memset(&playinfo,0,sizeof(playinfo));
   playinfo.track = trk;
-  playinfo.loop  = 1;
+  playinfo.loop  = loop;
   if ( pthread_create(&playinfo.thread, 0, play_thread, &playinfo) ) {
     msgerr("error creating play thread\n");
     goto error;
@@ -233,7 +234,7 @@ static
 int run_play(cmd_t * cmd, int argc, char ** argv)
 {
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
-  int ret = -1, i, track, tracks, bg = 1;
+  int ret = -1, i, loop=-1, track, tracks, bg = 1;
   const char * str;
   int seek_mode, seek, dur_mode, duration;
 
@@ -246,6 +247,16 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
 
     switch (val) {
     case  -1: break;                    /* Scan finish */
+
+    case 'l':                           /* --loop      */
+      str = optarg;
+      if (!strcmp68(str,"def"))
+        loop = -1;
+      else if (!strcmp68(str,"inf"))
+        loop = 0;
+      else
+        loop = strtol(str,0,0);
+      break;
 
     case 'f':                           /* --fg        */
       bg = 0; break;
@@ -311,7 +322,7 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
   if (i < argc)
     msgwrn("%d extra parameters ignored\n", argc-i);
 
-  ret =  dsk_play(track, 1, seek, duration, bg);
+  ret =  dsk_play(track, loop, seek, duration, bg);
 
 error:
   return ret;
@@ -327,6 +338,7 @@ cmd_t cmd_play = {
   "The `play' command plays a track.\n"
   "\n"
   "OPTIONS\n"
+  "   -l --loop=N       Number odf loop (0:inf -1:def)\n"
   "   -s --seek=POS     Seek to this position.\n"
   "   -t --to=POS       End position.\n"
   "   -f --fg           Foreground play.\n"
