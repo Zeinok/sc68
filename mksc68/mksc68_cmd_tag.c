@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-10 18:04:54 ben>
+ * Time-stamp: <2011-10-31 04:43:57 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -235,7 +235,7 @@ cmd_t cmd_tag = {
   /* com */ "tag",
   /* alt */ 0,
   /* use */ "[opts] [tag [val] ...]",
-  /* des */ "meta-tag manipulation.",
+  /* des */ "meta-tag manipulation",
   /* hlp */
 
   "The `tag' command manipulates meta-tags. Tags are associated\n"

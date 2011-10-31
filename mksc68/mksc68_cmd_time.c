@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-25 08:18:23 ben>
+ * Time-stamp: <2011-10-31 07:17:12 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -71,10 +71,8 @@ static const unsigned int atarist_clk = EMU68_ATARIST_CLOCK;
 
 static unsigned int cycle_per_frame(unsigned int hz, unsigned int clk)
 {
-  if (!hz)
-    hz = 50u;
-  if (clk)
-    clk = atarist_clk;
+  hz  = hz  ? hz  : 50u;
+  clk = clk ? clk : atarist_clk;
   return
     ( hz % 50u == 0 && clk == atarist_clk)
     ? 160256u * 50u / hz
@@ -82,24 +80,94 @@ static unsigned int cycle_per_frame(unsigned int hz, unsigned int clk)
     ;
 }
 
-static unsigned int fr2ms(unsigned int fr, unsigned int cpf, unsigned int clk)
+unsigned int fr2ms(unsigned int fr, unsigned int cpf_or_hz, unsigned int clk)
 {
   uint64_t ms;
-  ms =  fr;                                  /* total frames. */
-  ms *= cpf ? cpf : cycle_per_frame(0, clk); /* total cycles. */
-  ms *= 1000;
-  ms /= clk ? clk : atarist_clk;
+  unsigned cpf;
+  clk = clk ? clk : atarist_clk;
+  cpf = (cpf_or_hz <= 1000u)
+    ? cycle_per_frame(cpf_or_hz, clk)
+    : cpf_or_hz
+    ;
+
+  ms  = fr;                             /* total frames. */
+  ms *= cpf;                            /* total cycles. */
+  ms *= 1000u;                          /* result in ms  */
+  ms += clk >> 1;
+  ms /= clk;
+
   return (unsigned int) ms;
 }
 
-static unsigned int ms2fr(unsigned int ms, unsigned int cpf, unsigned int clk)
+static unsigned int ms2fr(unsigned int ms, unsigned int cpf_or_hz, unsigned int clk)
 {
   uint64_t fr;
-  fr  = ms;                             /* number of millisecond */
-  fr *= clk ? clk : atarist_clk;        /* number of millicycle  */
-  fr /= 1000u;                          /* number of cycle       */
-  fr /= cpf;                            /* number of frame       */
+  unsigned cpf;
+  clk = clk ? clk : atarist_clk;
+  cpf = (cpf_or_hz <= 1000u)
+    ? cycle_per_frame(cpf_or_hz, clk)
+    : cpf_or_hz
+    ;
+
+  fr   = ms;                             /* number of millisecond */
+  fr  *= clk;                            /* number of millicycle  */
+  cpf *= 1000u;
+  fr  += cpf >> 1;
+  fr  /= cpf;                            /* number of milliframe  */
+
   return (unsigned int) fr;
+}
+
+typedef struct
+{
+  io68_t   io;
+  unsigned r;
+  unsigned w;
+  unsigned a;
+  io68_t * pio;
+} time_io_t;
+
+static void time_rb(io68_t * pio) {
+  time_io_t * ti = (time_io_t *)pio;
+  ++ti->r;
+  ++ti->a;
+  ti->pio->r_byte(ti->pio);
+}
+
+static void time_rw(io68_t * pio) {
+  time_io_t * ti = (time_io_t *)pio;
+  ++ti->r;
+  ++ti->a;
+  ti->pio->r_word(ti->pio);
+}
+
+static void time_rl(io68_t * pio) {
+  time_io_t * ti = (time_io_t *)pio;
+  ++ti->r;
+  ++ti->a;
+  ti->pio->r_long(ti->pio);
+}
+
+
+static void time_wb(io68_t * pio) {
+  time_io_t * ti = (time_io_t *)pio;
+  ++ti->w;
+  ++ti->a;
+  ti->pio->w_byte(ti->pio);
+}
+
+static void time_ww(io68_t * pio) {
+  time_io_t * ti = (time_io_t *)pio;
+  ++ti->w;
+  ++ti->a;
+  ti->pio->w_word(ti->pio);
+}
+
+static void time_wl(io68_t * pio) {
+  time_io_t * ti = (time_io_t *)pio;
+  ++ti->w;
+  ++ti->a;
+  ti->pio->w_long(ti->pio);
 }
 
 typedef struct measureinfo_s measureinfo_t;
@@ -143,6 +211,8 @@ struct measureinfo_s {
   unsigned td:1;              /* MFP Timer-D used by this track */
   unsigned pl:1;              /* Amiga/Paulaused by this track  */
 
+  time_io_t timeios[5];
+
   struct {
     unsigned cnt;
     unsigned fst;
@@ -152,6 +222,14 @@ struct measureinfo_s {
 };
 
 static measureinfo_t measureinfo;
+
+enum {
+  YM = 0,
+  MW,
+  SHIFTER,
+  PAULA,
+  MFP
+};
 
 enum timer_e {
   TIMER_D = 0X110>>2,
@@ -283,8 +361,98 @@ static void access_range(measureinfo_t * mi)
               (i&15)==15 ? '\n' : ' ');
     }
   }
+}
 
+/* Timers use */
+static void access_timers(measureinfo_t * mi)
+{
+  mi->ta = mi->vector[TIMER_A].cnt > 0;
+  mi->tb = mi->vector[TIMER_B].cnt > 0;
+  mi->tc = mi->vector[TIMER_C].cnt > 0;
+  mi->td = mi->vector[TIMER_D].cnt > 0;
+}
 
+/* IO chip access */
+static void access_ios(measureinfo_t * mi)
+{
+  mi->ym = mi->timeios[YM].a    > 0;
+  mi->pl = mi->timeios[PAULA].a > 0;
+  mi->mw = mi->timeios[MW].a    > 0;
+}
+
+static int hook_ios(measureinfo_t * mi)
+{
+  int i;
+
+  for (i=0; i<5; ++i) {
+    io68_t    * pio = mi->ios68[i], * mio;
+    int        line = (pio->addr_lo>>8) & 0xFF;
+    time_io_t * ti  = mi->timeios+i;
+
+    mio = mi->emu68->mapped_io[line];
+    ti->pio = mio;                      /* legacy mapped io */
+    ti->r = ti->w = 0;                  /* reset counters   */
+
+    /* create new hooked io */
+    snprintf(ti->io.name,sizeof(ti->io.name),"H: %s", mio->name);
+    ti->io.addr_lo = pio->addr_lo;
+    ti->io.addr_hi = pio->addr_hi;
+
+    ti->io.r_byte = time_rb;            /* hook memory access handler */
+    ti->io.r_word = time_rw;
+    ti->io.r_long = time_rl;
+    ti->io.w_byte = time_wb;
+    ti->io.w_word = time_ww;
+    ti->io.w_long = time_wl;
+    ti->io.emu68  = mi->emu68;
+
+    if ( mi->emu68->mapped_io[line] == pio )
+      msgdbg("hook io #%d '%-20s' addr:$%06x-%06x line:%02x\n",
+             i, ti->io.name, pio->addr_lo & 0xFFFFFF , pio->addr_hi & 0xFFFFFF, line);
+    else
+      msgdbg("hook ?? #%d '%-20s' addr:$%06x-%06x line:%02x\n",
+             i, ti->io.name, mio->addr_lo & 0xFFFFFF , mio->addr_hi & 0xFFFFFF, line);
+
+    mi->emu68->mapped_io[line] = &ti->io;
+  }
+  return 0;
+}
+
+static int unhook_ios(measureinfo_t * mi)
+{
+  int i;
+
+  for (i=0; i<5; ++i) {
+    io68_t    * pio = mi->ios68[i];
+    int        line = (pio->addr_lo>>8) & 0xFF;
+    time_io_t * ti  = mi->timeios+i;
+
+    msgdbg("unhook io #%d '%s' addr:$%06x-%06x line:%02x, counts:%u (%u/%u)\n",
+           i, ti->io.name, ti->io.addr_lo & 0xFFFFFF , ti->io.addr_hi & 0xFFFFFF,
+           line, ti->r+ti->w, ti->r, ti->w);
+    if (mi->emu68->mapped_io[line] != &ti->io) {
+      io68_t * mio = mi->emu68->mapped_io[line];
+      io68_t * tio = &ti->io;
+
+      msgerr("%p != %p\n"
+             "i:%d\n"
+             "line:%02x\n"
+             "pio: %p '%s' addr:$%06x-%06x\n"
+             "tio: %p '%s' addr:$%06x-%06x\n"
+             "mio: %p '%s' addr:$%06x-%06x\n"
+             ,
+             mi->emu68->mapped_io[line], &ti->io,
+             i,
+             line,
+             pio, pio->name, pio->addr_lo, pio->addr_hi,
+             tio, tio->name, tio->addr_lo, tio->addr_hi,
+             mio, mio->name, mio->addr_lo, mio->addr_hi );
+    }
+
+    assert(mi->emu68->mapped_io[line] == &ti->io);
+    mi->emu68->mapped_io[line] = ti->pio;
+  }
+  return 0;
 }
 
 static void timemeasure_init(measureinfo_t * mi)
@@ -319,6 +487,9 @@ static void timemeasure_init(measureinfo_t * mi)
   if (sc68_process(mi->sc68,0,0) == SC68_ERROR)
     return;
 
+  if (hook_ios(mi))
+    return;
+
   sampling = sc68_sampling_rate(mi->sc68, SC68_SPR_QUERY);
   if (sampling <= 0)
     return;
@@ -336,6 +507,7 @@ static void timemeasure_run(measureinfo_t * mi)
   int code, n;
   int i,lst=0;
   unsigned acu;
+
   unsigned frm_cnt;           /* frame counter                      */
   unsigned frm_max;           /* maximum frame to try to detect end */
   unsigned frm_lim;           /* frame limit for this pass          */
@@ -368,6 +540,10 @@ static void timemeasure_run(measureinfo_t * mi)
            code != SC68_ERROR ) {
       if (code & SC68_IDLE)
         continue;
+      if (code & (SC68_CHANGE|SC68_END))
+        msgwrn("sc68_process() returns an wrong return code (%x) at frame %u (%s)\n",
+               code, frm_cnt, str_timefmt(str,32,fr2ms(frm_cnt, cpf, mi->emu68->clock)));
+      assert( (code & (SC68_CHANGE|SC68_END)) == 0 );
       if (++frm_cnt == mi->startfr)
         break;
     }
@@ -378,7 +554,6 @@ static void timemeasure_run(measureinfo_t * mi)
   sil_len = 0;
   sil_val = 20 * slice * 2;
   sil_frm = sil_nop;
-
 
   sil_max = ms2fr(mi->sil_ms, cpf, mi->emu68->clock);
   frm_max = frm_cnt + ms2fr(mi->max_ms, cpf, mi->emu68->clock);
@@ -398,6 +573,11 @@ static void timemeasure_run(measureinfo_t * mi)
   while (n = slice,
          code = sc68_process(mi->sc68,buf,&n),
          code != SC68_ERROR ) {
+
+    if (code & (SC68_CHANGE|SC68_END))
+      msgwrn("sc68_process() returns an wrong return code (%x) at frame %u (%s)\n",
+             code, frm_cnt, str_timefmt(str,32,fr2ms(frm_cnt, cpf, mi->emu68->clock)));
+    assert( (code & (SC68_CHANGE|SC68_END)) == 0 );
 
     /* Compute the sum of deltas for silence detection */
     for (acu=i=0; i<n; ++i) {
@@ -470,21 +650,20 @@ static void timemeasure_run(measureinfo_t * mi)
     }
   }
 
-  /* memory access */
-  access_range(mi);
+  /* Don't want to do this while computing loops */
+  if (!mi->startms) {
+    /* memory access */
+    access_range(mi);
+    access_timers(mi);
+    access_ios(mi);
 
-  /* timers use */
-  mi->ta = mi->vector[TIMER_A].cnt > 0;
-  mi->tb = mi->vector[TIMER_B].cnt > 0;
-  mi->tc = mi->vector[TIMER_C].cnt > 0;
-  mi->td = mi->vector[TIMER_D].cnt > 0;
-
-  /* Display interrupt vectors */
-  for (i=0; i<sizeof(mi->vector)/sizeof(*mi->vector); ++i)
-    if (mi->vector[i].cnt)
-      msginf("vector #%03d \"%s\" triggered %d times fist:%u last:%u\n",
-             i, vectorname(i),
-             mi->vector[i].cnt, mi->vector[i].fst, mi->vector[i].lst);
+    /* Display interrupt vectors */
+    for (i=0; i<sizeof(mi->vector)/sizeof(*mi->vector); ++i)
+      if (mi->vector[i].cnt)
+        msginf("vector #%03d \"%s\" triggered %d times fist:%u last:%u\n",
+               i, vectorname(i),
+               mi->vector[i].cnt, mi->vector[i].fst, mi->vector[i].lst);
+  }
 
   if (mi->frames) {
     unsigned frames, timems;
@@ -492,21 +671,30 @@ static void timemeasure_run(measureinfo_t * mi)
     frames = mi->frames - mi->startfr;
     timems = fr2ms(frames, cpf, mi->emu68->clock);
 
+    msgdbg("this pass -- %u fr (%s)\n",
+           frames, str_timefmt(str, 32, timems));
+
     if (!mi->startfr) {
       mi->frames = frames;
       mi->timems = timems;
       if (mi->loopfr == ~0) {
+        msgdbg("silence was detected, set loop length to 0\n");
         mi->loopfr = mi->loopms = 0;
       } else {
         mi->loopfr = mi->frames;
         mi->loopms = mi->timems;
       }
     } else {
+      msgdbg("2nd pass set time and loop to %ufr (%s)\n",
+             mi->startfr, str_timefmt(str, 32, mi->startms));
       mi->frames = mi->startfr;
       mi->timems = mi->startms;
       mi->loopfr = frames;
       mi->loopms = timems;
     }
+    msgdbg("set time: %ufr (%s) -- loop: %u fr (%s)\n",
+           mi->frames, str_timefmt(str, 32, mi->timems),
+           mi->loopfr, str_timefmt(str, 32, mi->loopms) );
     mi->code   = 0;
   }
 
@@ -517,6 +705,7 @@ static void timemeasure_end(measureinfo_t * mi)
   mi->isplaying = 3;
   if (mi->sc68) {
     sc68_t * sc68 = mi->sc68;
+    unhook_ios(mi);
     mi->sc68  = 0;
     mi->emu68 = 0;
     mi->ios68 = 0;
@@ -592,10 +781,14 @@ int time_measure(measureinfo_t * mi, int trk,
     music68_t * m = d->mus+trk-1;
     char      str[32];
 
-    m->frames  = mi->frames;
-    m->time_ms = mi->timems;
-    m->loop_fr = mi->loopfr;
-    m->loop_ms = mi->loopms;
+    m->first_fr = mi->frames;
+    m->first_ms = mi->timems;
+    m->loops    = 1;
+    m->loops_fr = mi->loopfr;
+    m->loops_ms = mi->loopms;
+    m->total_fr = m->first_fr + (m->loops-1) * m->loops_fr;
+    m->total_ms = fr2ms(m->total_fr, m->frq, 0);
+
     m->hwflags.all           = 0;
     m->hwflags.bit.ym        = mi->ym;
     m->hwflags.bit.ste       = mi->mw;
@@ -610,19 +803,19 @@ int time_measure(measureinfo_t * mi, int trk,
     /* mi->minaddr; */
     /* mi->maxaddr; */
 
-    msginf("%02u - %s (%s) - %s%s%s%s%s%s\n",
+    msginf("%02u - %s + %d x %s => %s [%s%s%s%s%s%s]\n",
            trk,
-           str_timefmt(str+0x00,0x20, m->time_ms),
-           m->loop_ms ? str_timefmt(str+0x20,0x20, m->loop_ms) : "no loop",
+           str_timefmt(str+0x00,0x20, m->first_ms),
+           m->loops-1,
+           m->loops_ms ? str_timefmt(str+0x20,0x20, m->loops_ms) : "no loop",
+           str_timefmt(str+0x40,0x20, m->total_ms),
            m->hwflags.bit.ym     ? "Ym"   : "",
            m->hwflags.bit.amiga  ? "AGA"  : "",
-           m->hwflags.bit.ste    ? ",STE" : "",
-           m->hwflags.bit.timera ? ",TA"  : "",
-           m->hwflags.bit.timerb ? ",TB"  : "",
-           m->hwflags.bit.timerc ? ",TC"  : "",
-           m->hwflags.bit.timerd ? ",TD"  : "");
-
-
+           m->hwflags.bit.ste    ? ",STe" : "",
+           m->hwflags.bit.timera ? ",Ta"  : "",
+           m->hwflags.bit.timerb ? ",Tb"  : "",
+           m->hwflags.bit.timerc ? ",Tc"  : "",
+           m->hwflags.bit.timerd ? ",Td"  : "");
 
   }
   memset(mi,0,sizeof(*mi));
@@ -708,6 +901,7 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
       for (track = a; !ret && track <= b; ++track)
         ret = time_measure(&measureinfo, a, stp_ms, max_ms, sil_ms);
   }
+  dsk_validate();
 
 error:
   return ret;

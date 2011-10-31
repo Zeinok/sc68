@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-24 22:10:45 ben>
+ * Time-stamp: <2011-10-31 07:46:58 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -158,6 +158,9 @@ int dsk_save(const char * url, int version, int gzip)
   if (!is_valid_disk())
     return -1;
 
+  if (dsk_validate())
+    return -1;
+
   err = file68_save_url(url, dsk_get_disk(), version, gzip);
   if (!err) {
     dsk.modified = 0;
@@ -230,6 +233,38 @@ int dsk_kill(void)
 
   free(dsk.filename);
   dsk.filename = 0;
+
+  return 0;
+}
+
+extern unsigned int fr2ms(unsigned int fr, unsigned int cpf_or_hz, unsigned int clk);
+
+static unsigned int fr_to_ms(unsigned int fr, unsigned int hz)
+{
+  return fr2ms(fr,hz,0);
+}
+
+int dsk_validate(void)
+{
+  int t;
+
+  if (!is_valid_disk())
+    return -1;
+
+  /* Validate time and loop */
+  dsk.disk->time_ms = 0;
+  dsk.disk->hwflags.all = 0;
+  for (t = 0; t < dsk.disk->nb_mus; ++t) {
+    music68_t * m = dsk.disk->mus + t;
+    m->loops    = ( m->loops > 0 ) ? m->loops : 1;
+    m->first_ms = fr_to_ms(m->first_fr, m->frq);
+    m->loops_ms = fr_to_ms(m->loops_fr, m->frq);
+    m->total_fr = m->first_fr + (m->loops-1) * m->loops_fr;
+    m->total_ms = fr_to_ms(m->total_fr, m->frq);
+    m->start_ms = dsk.disk->time_ms;
+    dsk.disk->time_ms += m->total_ms;
+    dsk.disk->hwflags.all |= m->hwflags.all;
+  }
 
   return 0;
 }

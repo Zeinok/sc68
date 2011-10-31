@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-25 07:49:51 ben>
+ * Time-stamp: <2011-10-31 04:43:41 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -44,6 +44,7 @@
 #include "sc68/file68.h"
 #include "sc68/alloc68.h"
 #include "sc68/istream68.h"
+#include "sc68/string68.h"
 #include "sc68/sc68.h"
 
 
@@ -70,7 +71,7 @@ static playinfo_t playinfo;             /* unique playinfo */
 static void play_info(playinfo_t * pi)
 {
   sc68_music_info_t info;
-  if (!sc68_music_info(pi->sc68,-1,&info,0)) {
+  if (!sc68_music_info(pi->sc68,&info,-1,0)) {
     int i, len = 11;
     msginf("%-*s : %d/%d\n",  len, "Track",   info.trk.track, info.tracks);
     msginf("%-*s : %s\n",     len, "Album",   info.album);
@@ -333,7 +334,7 @@ cmd_t cmd_play = {
   /* com */ "play",
   /* alt */ 0,
   /* use */ "[opts] [track]",
-  /* des */ "play a track.",
+  /* des */ "play a track",
   /* hlp */
   "The `play' command plays a track.\n"
   "\n"

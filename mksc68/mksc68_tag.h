@@ -26,5 +26,4 @@ EXTERN68 void    tag_del_all(void);
 EXTERN68 const char * tag_get(int trk, const char * var);
 EXTERN68 const char * tag_set(int trk, const char * var, const char * val);
 
-
 #endif /* ifndef _MKSC68_TAG_H_ */

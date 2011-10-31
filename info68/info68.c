@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-13 17:31:11 ben>
+ * Time-stamp: <2011-10-31 03:43:23 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -209,13 +209,16 @@ static int display_version(void)
   return 0;
 }
 
-
 static const char * HWflags(const hwflags68_t f)
 {
-  static char flags[] = "YSA";
-  flags[0] = f.bit.ym    ? 'Y' : 'y';
-  flags[1] = f.bit.ste   ? 'S' : 's';
-  flags[2] = f.bit.amiga ? 'A' : 'a';
+  static char flags[] = "YSA0";
+  flags[0] = f.bit.ym     ? 'Y' : 'y';
+  flags[1] = f.bit.ste    ? 'S' : 's';
+  flags[2] = f.bit.amiga  ? 'A' : 'a';
+  flags[3] = f.bit.timers
+    ?'0'+f.bit.timera+(f.bit.timerb<<1)+(f.bit.timerc<<2)+(f.bit.timerd<<3)
+    : 0
+    ;
   return flags;
 }
 
@@ -388,7 +391,7 @@ int main(int argc, char ** argv)
     PutS(out,"file: ");     PutS(out,inname);     PutC(out,'\n');
     PutS(out,"tracks: ");   PutI(out,d->nb_mus);  PutC(out,'\n');
     PutS(out,"default: ");  PutI(out,d->def_mus); PutC(out,'\n');
-    PutS(out,"time_ms: ");  PutI(out,d->time_ms); PutC(out,'\n');
+    PutS(out,"time-ms: ");  PutI(out,d->time_ms); PutC(out,'\n');
     PutS(out,"hardware: "); PutS(out,HWflags(d->hwflags)); PutC(out,'\n');
     for (j=0; !file68_tag_enum(d, 0, j, &key, &val); ++j) {
       PutS(out,key); PutS(out,": "); PutS(out,val); PutC(out,'\n');
@@ -396,12 +399,15 @@ int main(int argc, char ** argv)
 
     for (i=1; i<=d->nb_mus; ++i) {
       music68_t *m = d->mus+(i-1);
-      PutS(out,"track: ");    PutI(out,i);          PutC(out,'\n');
-      PutS(out,"remap: ");    PutI(out,m->track);   PutC(out,'\n');
-      PutS(out,"loop: ");     PutI(out,m->loop);    PutC(out,'\n');
-      PutS(out,"timems: ");   PutI(out,m->time_ms); PutC(out,'\n');
-      PutS(out,"frames: ");   PutI(out,m->frames);  PutC(out,'\n');
-      PutS(out,"rate: ");     PutI(out,m->frq);     PutC(out,'\n');
+      PutS(out,"track: ");    PutI(out,i);           PutC(out,'\n');
+      PutS(out,"remap: ");    PutI(out,m->track);    PutC(out,'\n');
+      PutS(out,"loops: ");    PutI(out,m->loops);    PutC(out,'\n');
+      PutS(out,"time-ms: ");   PutI(out,m->first_ms); PutC(out,'\n');
+      PutS(out,"time-fr: ");   PutI(out,m->first_fr); PutC(out,'\n');
+      PutS(out,"loop-ms: ");   PutI(out,m->loops_ms); PutC(out,'\n');
+      PutS(out,"loop-fr: ");   PutI(out,m->loops_fr); PutC(out,'\n');
+
+      PutS(out,"rate: ");     PutI(out,m->frq);      PutC(out,'\n');
       PutS(out,"hardware: "); PutS(out,HWflags(m->hwflags)); PutC(out,'\n');
       for (j=0; !file68_tag_enum(d, i, j, &key, &val); ++j) {
         PutS(out,key); PutS(out,": "); PutS(out,val); PutC(out,'\n');
@@ -516,10 +522,10 @@ int main(int argc, char ** argv)
             PutS(out, m->replay ? m->replay : "built-in");
             break;
           case 't':
-            PutI(out,m->time_ms/1000u);
+            PutI(out,m->first_ms/1000u);
             break;
           case 'y':
-            PutS(out,strtime68(0, curTrack+1, m->time_ms/1000u));
+            PutS(out,strtime68(0, curTrack+1, m->first_ms/1000u));
             break;
           case 'h':
             PutS(out, HWflags(m->hwflags));

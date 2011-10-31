@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-17 18:42:05 ben>
+ * Time-stamp: <2011-10-30 02:02:12 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -35,7 +35,7 @@ static gint64   seek_value = -1;
 
 #ifdef DEBUG
 static void dmsg(const int bit, sc68_t * sc68, const char *fmt, va_list list) {
-  fprintf(stderr, "-- %02d -- %p :: ", bit, sc68);
+  fprintf(stderr, "-- %02d -- %p :: ", bit, (void*)sc68);
   vfprintf(stderr, fmt, list);
   if (fmt[strlen(fmt)-1] != '\n')
     fprintf(stderr, "\n");

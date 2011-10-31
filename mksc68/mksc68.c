@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-23 03:38:48 ben>
+ * Time-stamp: <2011-10-28 22:54:25 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -36,7 +36,6 @@
 #include <ctype.h>
 #include <errno.h>
 
-
 #include "mksc68_cli.h"
 #include "mksc68_cmd.h"
 #include "mksc68_dsk.h"
@@ -44,6 +43,7 @@
 #include "mksc68_eva.h"
 #include "mksc68_msg.h"
 #include "mksc68_opt.h"
+#include "mksc68_tag.h"
 
 #include "sc68/sc68.h"
 
@@ -191,7 +191,7 @@ static int run_error(cmd_t * me, int argc, char ** argv)
 }
 
 extern cmd_t cmd_new, cmd_load, cmd_play, cmd_stop, cmd_debug, cmd_tag;
-extern cmd_t cmd_time, cmd_save;
+extern cmd_t cmd_time, cmd_save, cmd_info;
 static cmd_t
 cmd_exit = {
   run_exit, "exit",  "x", "[exit-code]",   "Exit command interpreter" },
@@ -219,6 +219,7 @@ static cmd_t *commands[] = {
   &cmd_load,
   &cmd_save,
 
+  &cmd_info,
   &cmd_tag,
 
   &cmd_exit,
