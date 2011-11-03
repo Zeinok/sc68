@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-31 07:17:12 ben>
+ * Time-stamp: <2011-11-03 13:34:42 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -56,6 +56,7 @@
 #define PASS_TIME    (3 * 60 * 1000)    /*  */
 
 static const opt_t longopts[] = {
+  { "help",       0, 0, 'h' },
   { "tracks",     1, 0, 't' },          /* track-list              */
   { "max-time",   1, 0, 'M' },          /* max search time         */
   { "pass-time",  1, 0, 'p' },          /* search pass time        */
@@ -779,7 +780,7 @@ int time_measure(measureinfo_t * mi, int trk,
   if (!ret) {
     disk68_t  * d = dsk_get_disk();
     music68_t * m = d->mus+trk-1;
-    char      str[32];
+    char      s1[32],s2[32],s3[32];
 
     m->first_fr = mi->frames;
     m->first_ms = mi->timems;
@@ -805,10 +806,10 @@ int time_measure(measureinfo_t * mi, int trk,
 
     msginf("%02u - %s + %d x %s => %s [%s%s%s%s%s%s]\n",
            trk,
-           str_timefmt(str+0x00,0x20, m->first_ms),
+           str_timefmt(s1,sizeof(s1),m->first_ms),
            m->loops-1,
-           m->loops_ms ? str_timefmt(str+0x20,0x20, m->loops_ms) : "no loop",
-           str_timefmt(str+0x40,0x20, m->total_ms),
+           m->loops_ms ? str_timefmt(s2,sizeof(s2),m->loops_ms) : "no loop",
+           str_timefmt(s3,sizeof(s3),m->total_ms),
            m->hwflags.bit.ym     ? "Ym"   : "",
            m->hwflags.bit.amiga  ? "AGA"  : "",
            m->hwflags.bit.ste    ? ",STe" : "",
@@ -844,6 +845,8 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
 
     switch (val) {
     case  -1: break;                    /* Scan finish */
+    case 'h':                           /* --help */
+      help(argv[0]); return 0;
 
     case 't':                           /* --tracks    */
       if (tracklist) {
@@ -897,9 +900,13 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
     ret = time_measure(&measureinfo, track, stp_ms, max_ms, sil_ms);
   } else {
     ret = 0;
-    while (!ret && str_tracklist(&tracklist, &a, &b) > 0 )
-      for (track = a; !ret && track <= b; ++track)
+    while (!ret && str_tracklist(&tracklist, &a, &b) > 0 ) {
+      msgdbg("time: %d to %d\n",a,b);
+      for (; !ret && a <= b; ++a) {
         ret = time_measure(&measureinfo, a, stp_ms, max_ms, sil_ms);
+        msgdbg("time #%d -> %d\n",a,ret);
+      }
+    }
   }
   dsk_validate();
 

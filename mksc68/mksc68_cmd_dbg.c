@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-10 18:29:15 ben>
+ * Time-stamp: <2011-11-03 13:34:28 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -34,16 +34,20 @@
 #include "mksc68_opt.h"
 
 #include "sc68/msg68.h"
+#include "sc68/string68.h"
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 static const opt_t longopts[] = {
-  {"list",  0, 0, 'l'},
-  {"lst",   0, 0, 'l'},
-  {"set",   1, 0, 's'},
-  {"clr"  , 1, 0, 'c'},
-  {"clear", 1, 0, 'c'},
+  { "help",       0, 0, 'h' },
+  /* {"list",  0, 0, 'l'}, */
+  /* {"lst",   0, 0, 'l'}, */
+  /* {"set",   1, 0, 's'}, */
+  /* {"clr"  , 1, 0, 'c'}, */
+  /* {"clear", 1, 0, 'c'}, */
   {0,0,0,0}
 };
 
@@ -70,16 +74,9 @@ int run_debug(cmd_t * cmd, int argc, char ** argv)
 {
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
   int ret = -1, i;
-  char * tok = 0;
-  const char * delim = "|,:/";
-  int command = 0;
 
   opt_create_short(shortopts, longopts);
 
-  if (argc == 1) {
-    print_cats();
-    return 0;
-  }
 
   while (1) {
     int longindex;
@@ -88,33 +85,11 @@ int run_debug(cmd_t * cmd, int argc, char ** argv)
 
     switch (val) {
     case  -1: break;                /* Scan finish */
-    case 'l':                       /* --lst */
-      print_cats();
-      break;
-    case 'c': case 's': {
-      int bits = 0; /* msg68_cat_filter(0, 0); */
-
-      command = val;
-      for (tok=strtok(optarg,delim); tok; tok=strtok(0,delim)) {
-        msgdbg("token for '%c' '%s'\n",val,tok);
-        if (!strcasecmp(tok,"all")) {
-          bits = -1;
-        } else {
-          int bit = msg68_cat_bit(tok);
-          if (bit < 0) {
-            msgwrn("unknown categorie \"%s\". Try --list.\n",tok);
-          } else {
-            bits |= 1 << bit;
-          }
-        }
-      }
-      msgdbg("bits for '%c' := %08X\n",val,bits);
-      if (val == 'c') {
-        msg68_cat_filter(bits, 0);
-      } else {
-        msg68_cat_filter(0, bits);
-      }
-    } break;
+    case 'h':                       /* --help */
+      help(argv[0]); return 0;
+    /* case 'l':                       /\* --lst *\/ */
+    /*   print_cats(); */
+    /*   break; */
     case '?':                       /* Unknown or missing parameter */
       goto error;
     default:
@@ -125,8 +100,45 @@ int run_debug(cmd_t * cmd, int argc, char ** argv)
   }
   i = optind;
 
-  if (i < argc)
-    msgwrn("%d extra parameters ignored\n", argc-i);
+  if (i == argc) {
+    print_cats();
+    return 0;
+  }
+
+  for (; i<argc; ++i) {
+    const char * delim = "+-~=";
+    char * arg = argv[i];
+    int op, bits = 0;
+
+    op = strchr(delim, *arg) ? *arg++ : '+';
+    for (arg = strtok(arg,","); arg; arg = strtok(0, ",")) {
+      if (!strcmp68(arg,"all"))
+        bits = -1;
+      else if (arg[0] == '#' && isdigit(arg[1]))
+        bits |= 1 << strtol(arg+1,0,0);
+      else if (isdigit(arg[0]))
+        bits |= strtol(arg,0,0);
+      else if (*arg) {
+        int bit = msg68_cat_bit(arg);
+        if (bit < 0) {
+          msgwrn("unknown category \"%s\". Try --list.\n",arg);
+        } else {
+          bits |= 1 << bit;
+        }
+      }
+    }
+
+    switch (op) {
+    case '=':
+      bits = msg68_cat_filter(~0, bits); break;
+    case '-': case '~':
+      bits = msg68_cat_filter(bits, 0); break;
+    case '+':
+      bits = msg68_cat_filter(0, bits); break;
+    default:
+      msgwrn("invalid operator '%c'\n",op);
+    }
+  }
 
   ret = 0;
 error:
@@ -137,16 +149,20 @@ cmd_t cmd_debug = {
   /* run */ run_debug,
   /* com */ "debug",
   /* alt */ "dbg",
-  /* use */ "[cmd ...]",
+  /* use */ "[cats ...]",
   /* des */ "change debug level",
   /* hlp */
   "The `debug' command control debug and message verbosity.\n"
-  "Multiple commands are executed sequencially in given order.\n"
+  "Multiple expressions are evaluated sequencially in given order.\n"
+  "If no argument is given the command display the list of existing\n"
+  "debug categories and their current status.\n"
   "\n"
-  "COMMANDS\n"
-  "   -l --lst      list existing category.\n"
-  "   -s --set=CAT  coma `,' separed list of category to activate.\n"
-  "   -c --clr=CAT  coma `,' separed list of category to deactivate.\n"
-  "\n"
-  "CAT := ALL|CAT1[,CAT2]*"
+  "CATS := a `,' (comma) separated list of categories (CAT) optionally\n"
+  "         prefixed by an operator (OP).\n"
+  "CAT  := a category-name OR a number OR a bit-number (prefixed by `#')\n"
+  "OP   := `+' (plus) | `~' (tilde) | `-' (minus) | `,' (coma)\n"
+  " `+' set the specified categories (OR) (default)\n"
+  " `~' clear the specified categories (NAND)\n"
+  " `-' as `~' (beware of option parsing)\n"
+  " `,' set ONLY the specified categories and clear others (SET)\n"
 };

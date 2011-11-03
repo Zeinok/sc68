@@ -171,6 +171,10 @@ if test X[$]has_curl = Xyes; then
 fi
 
 if test X[$]has_ao = Xyes; then
+  save_LIBS="[$]LIBS"
+  LIBS="[$]ao_ldf [$]LIBS"
+  AC_CHECK_FUNCS([ao_file_extension])
+  LIBS="[$]save_LIBS"
   AC_DEFINE([FILE68_AO],1,[Defined if file68 supports audio (via libao)])
   if test -z "[$]file68_features"; then file68_features="ao";
   else file68_features="[$]file68_features,ao"; fi

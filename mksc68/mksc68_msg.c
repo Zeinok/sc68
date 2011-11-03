@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-23 03:34:55 ben>
+ * Time-stamp: <2011-11-01 22:04:36 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -88,6 +88,19 @@ void msginf(const char * fmt, ...)
   va_list list;
   va_start(list, fmt);
   msginf_va(fmt, list);
+  va_end(list);
+}
+
+void msgnot_va(const char * fmt, va_list list)
+{
+  msg68_va(msg68_NOTICE, fmt, list);
+}
+
+void msgnot(const char * fmt, ...)
+{
+  va_list list;
+  va_start(list, fmt);
+  msgnot_va(fmt, list);
   va_end(list);
 }
 

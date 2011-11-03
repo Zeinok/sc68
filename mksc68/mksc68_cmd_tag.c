@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-31 04:43:57 ben>
+ * Time-stamp: <2011-11-03 13:35:19 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -40,6 +40,7 @@
 #include <stdio.h>
 
 static const opt_t longopts[] = {
+  { "help",       0, 0, 'h' },
   { "list",       0, 0, 'l' },
   { "view",       0, 0, 'v' },
   { "disk",       0, 0, 'd' },
@@ -125,7 +126,8 @@ int run_tag(cmd_t * cmd, int argc, char ** argv)
 
     switch (val) {
     case  -1: break;                    /* Scan finish */
-
+    case 'h':                           /* --help */
+      help(argv[0]); return 0;
     case 'P':                           /* --purge     */
     case 'l':                           /* --list      */
     case 'v':                           /* --view      */

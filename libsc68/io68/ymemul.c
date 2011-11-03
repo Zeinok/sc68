@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-27 11:44:49 ben>
+ * Time-stamp: <2011-11-01 01:33:35 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -425,7 +425,7 @@ int ym_engine(ym_t * const ym, int engine)
       msg68_notice("ym-2149: default engine -- *%s*\n",
                  ym_engine_name(engine));
     } else {
-      engine = ym->engine;
+      ym->engine = engine;
     }
     break;
   }

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-30 19:57:59 ben>
+ * Time-stamp: <2011-11-01 07:05:22 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -77,7 +77,7 @@ const char file68_idstr_v1[56] = SC68_IDSTR;
 const char file68_idstr_v2[8]  = SC68_IDSTR_V2;
 const char file68_mimestr[]    = SC68_MIMETYPE;
 
-#define DEF_TRACK_MS (150*1000u)        /* 2"30' */
+#define DEF_TRACK_MS (120*1000u)        /* 2"00' */
 
 #ifndef DEBUG_FILE68_O
 # define DEBUG_FILE68_O 0

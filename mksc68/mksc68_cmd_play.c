@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-31 04:43:41 ben>
+ * Time-stamp: <2011-11-03 13:39:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -49,11 +49,12 @@
 
 
 static const opt_t longopts[] = {
-  {"loop",     1,0,'l'},                  /* loop play        */
-  {"seek",     1,0,'s'},                  /* seek to position */
-  {"to",       1,0,'t'},                  /* stop time        */
-  {"fg",       0,0,'f'},                  /* foreground play  */
-  {0,0,0,0}
+  { "help",     0, 0, 'h' },            /* help             */
+  { "loop",     1, 0, 'l' },            /* loop play        */
+  { "seek",     1, 0, 's' },            /* seek to position */
+  { "to",       1, 0, 't' },            /* stop time        */
+  { "fg",       0, 0, 'f' },            /* foreground play  */
+  { 0,0,0,0 }
 };
 
 typedef struct {
@@ -163,15 +164,9 @@ static void * play_thread(void * userdata)
 {
   playinfo_t * pi = (playinfo_t *) userdata;
   assert( pi == &playinfo );
-
-  msgdbg("play: enter thread\n");
   play_init(pi);
-  msgdbg("play: init -- %d\n",pi->code);
   if (!pi->code) play_run(pi);
-  msgdbg("play: end -- %d\n",pi->code);
   play_end(pi);
-  msgdbg("play: leave thread\n");
-
   return pi;
 }
 
@@ -189,7 +184,7 @@ int dsk_stop(void)
     pthread_join(playinfo.thread, 0);
     err = playinfo.code;
   } else {
-    msgerr("not playing\n");
+    msgnot("not playing\n");
   }
   return err;
 }
@@ -199,13 +194,11 @@ int dsk_play(int trk, int loop, int start, int len, int bg)
   int err = -1;
 /*   int tracks = dsk_get_tracks(); */
 
-  msgdbg("play track:%d loop:%d start:%d length:%d bg:%d\n",
+  msgdbg("play [track:%d loop:%d start:%d length:%d bg:%d]\n",
          trk, loop, start, len, bg);
 
   if (playinfo.isplaying) {
-    msgdbg("already playing: stop resqueted\n");
     dsk_stop();
-    msgdbg("stop completed\n");
   }
 
   memset(&playinfo,0,sizeof(playinfo));
@@ -217,10 +210,8 @@ int dsk_play(int trk, int loop, int start, int len, int bg)
   }
 
   if (!bg) {
-    msgdbg("play: waiting for play thread to end\n");
     pthread_join(playinfo.thread, 0);
     err = playinfo.code;
-    msgdbg("play: play thread released with code %d\n", err);
   } else {
     msginf("play: playing in background (use `stop' command to stop)\n");
     err = 0;
@@ -235,7 +226,7 @@ static
 int run_play(cmd_t * cmd, int argc, char ** argv)
 {
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
-  int ret = -1, i, loop=-1, track, tracks, bg = 1;
+  int ret = -1, i, loop = -1, track, tracks, bg = 1;
   const char * str;
   int seek_mode, seek, dur_mode, duration;
 
@@ -248,6 +239,9 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
 
     switch (val) {
     case  -1: break;                    /* Scan finish */
+
+    case 'h':                           /* --help */
+      help(argv[0]); return 0;
 
     case 'l':                           /* --loop      */
       str = optarg;
@@ -355,8 +349,15 @@ cmd_t cmd_play = {
 static
 int run_stop(cmd_t * cmd, int argc, char ** argv)
 {
-  if (argc > 1)
+  if (argc > 1) {
+    int i;
+    for (i=1; i<argc; ++i)
+      if (!strcmp(argv[i],"--help") || !strcmp(argv[i],"-h")) {
+        help(argv[0]);
+        return 0;
+      }
     msgwrn("%d extra parameters ignored\n", argc-1);
+  }
   return
     dsk_stop();
 }

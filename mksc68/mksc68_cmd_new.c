@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-11 08:36:49 ben>
+ * Time-stamp: <2011-11-03 13:33:56 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -35,7 +35,8 @@
 #include "mksc68_dsk.h"
 
 static const opt_t longopts[] = {
-  {"force",       0, 0, 'f'},
+  { "help",       0, 0, 'h' },
+  { "force",      0, 0, 'f' },
   {0,0,0,0}
 };
 
@@ -56,6 +57,8 @@ int run_new(cmd_t * cmd, int argc, char ** argv)
 
     switch (val) {
     case  -1: break;                /* Scan finish */
+    case 'h':                       /* --help */
+      help(argv[0]); return 0;
     case 'f': force = 1; break;     /* --force     */
     case '?':                       /* Unknown or missing parameter */
       goto error;

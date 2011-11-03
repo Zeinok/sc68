@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-15 16:52:56 ben>
+ * Time-stamp: <2011-11-03 12:56:14 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -87,7 +87,7 @@ unsigned int audio68_sampling_rate(const unsigned int rate)
       f = 96000u;
     }
     istream68_ao_defaut_rate = f;
-    msg68_info("audio68: sampling rate -- *%uhz*\n", f);
+    msg68_notice("audio68: sampling rate -- *%uhz*\n", f);
   }
   return f;
 }
@@ -110,12 +110,12 @@ static int init_aolib(void)
   int err = -1;
 
   if (init) {
-    msg68_critical("libao68: init -- *%s*\n","already done");
+    msg68_critical("libao68: *%s*\n","already done");
   } else {
     ao_initialize();
     err = 0;
     init = 1;
-    TRACE68(ao68_cat,"libao68: init -- *%s*\n","initialized");
+    TRACE68(ao68_cat,"libao68: *%s*\n","initialized");
   }
   return err;
 }
@@ -151,16 +151,16 @@ static const char * isao_name(istream68_t * istream)
 static void dump_ao_info(const int id, const ao_info * info, const int full)
 {
   if (info) {
-    msg68_debug(
+    TRACE68(ao68_cat,
       "\n"
       "libao68: ao_driver #%02d\n"
-      "libao68: -------------\n"
-      "libao68:   type    : %s\n"
-      "libao68:   name    : %s\n"
-      "libao68:   short   : %s\n"
-      "libao68:   author  : %s\n"
-      "libao68:   comment : %s\n"
-      "libao68:   prio    : %d\n",
+      "         ,------------\n"
+      "         | type    : %s\n"
+      "         | name    : %s\n"
+      "         | short   : %s\n"
+      "         | author  : %s\n"
+      "         | comment : %s\n"
+      "         | prio    : %d\n",
       id, info->type==AO_TYPE_LIVE?"live":"file",
       strnevernull68(info->name),
       strnevernull68(info->short_name),
@@ -168,10 +168,10 @@ static void dump_ao_info(const int id, const ao_info * info, const int full)
       strnevernull68(info->comment),info->priority);
     if (full) {
       int i;
-      msg68_debug("libao68:   options : %d\n", info->option_count);
-      for (i=0; i<info->option_count; ++i) {
-        msg68_debug("libao68:             - %s\n",info->options[i]);
-      }
+      TRACE68(ao68_cat, "         | options : %d --", info->option_count);
+      for (i=0; i<info->option_count; ++i)
+        TRACE68(ao68_cat, " %s",info->options[i]);
+      TRACE68(ao68_cat, "%c",'\n');
     }
   }
 }
@@ -180,7 +180,7 @@ static int isao_open(istream68_t * istream)
 {
   istream68_ao_t * is = (istream68_ao_t *)istream;
   int err = -1;
-  ao_info * info;
+  ao_info * info = 0;
   char * url;
 
   TRACE68(ao68_cat,"libao68: open -- '%s'\n", istream68_filename(istream));
@@ -197,8 +197,7 @@ static int isao_open(istream68_t * istream)
       char * key = url;
       char * val = s2+1;
       *s2 = 0;
-
-      TRACE68(ao68_cat,"libao68: open -- key[%s]='%s'\n", key, val);
+      TRACE68(ao68_cat,"libao68: open -- have a key -- [%s]='%s'\n", key, val);
       if (!strcmp68(key,"output")) {
         if (s) *s = '/';
         s = 0;
@@ -219,8 +218,8 @@ static int isao_open(istream68_t * istream)
         while (*val>='0' && *val<='9') frq = frq*10 + *val++ - '0';
         if (frq > 0) {
           TRACE68(ao68_cat,"libao68: open -- *SAMPLING-RATE* %d\n",frq);
-          is->ao.format.rate = frq; 
-       }
+          is->ao.format.rate = frq;
+        }
       } else if (!strcmp68(key,"format")) {
         while(*val) {
           switch (*val++) {
@@ -260,13 +259,22 @@ static int isao_open(istream68_t * istream)
           case 'F': /* float  */
             msg68_warning("libao68: open -- ignoring *%s* request\n","FLOAT");
             break;
-        } /* switch */
+          } /* switch */
         } /* while */
       } else {
-        /* Unknown options -> append to driver */
-        int res = ao_append_option(&is->ao.options, key, val); res = res;
-        TRACE68(ao68_cat,"libao68: open -- append option [%s]='%s' => [%s]\n",
-                key, val, strok68(!res));
+        int i = 0;
+        if (!info)
+          msg68_warning("libao68: consider setting driver before options -- [%s]='%s'\n", key, val);
+        else
+          for (; i<info->option_count && strcmp68(info->options[i],key); ++i)
+            ;
+        if (!info || i<info->option_count) {
+          int res = ao_append_option(&is->ao.options, key, val);
+          TRACE68(ao68_cat, "libao68: add options [%s]='%s' -- *%s*\n",
+                  key, val, strok68(!res));
+        } else
+          msg68_warning("libao68: ignore invalid option for driver '%s' -- [%s]='%s'\n",
+                        info->short_name, key, val);
       }
       *s2 = '=';
     } else {
@@ -325,6 +333,16 @@ static int isao_open(istream68_t * istream)
             "libao68: open -- default *FILENAME* '%s'\n", is->outname);
   }
 
+  if (is->ao.options) {
+    int i;
+    ao_option * o;
+    TRACE68(ao68_cat,"%s\n", "libao68: options summary:");
+    for (i=1, o=is->ao.options; o; o=o->next, ++i) {
+      TRACE68(ao68_cat,
+              "libao68:  - #%d %-12s = '%s'\n", i, o->key, o->value);
+    }
+  }
+
   is->ao.device =
     (info->type==AO_TYPE_LIVE)
     ? ao_open_live(is->ao.driver_id, &is->ao.format, is->ao.options)
@@ -336,10 +354,10 @@ static int isao_open(istream68_t * istream)
   }
 
   if (info->type == AO_TYPE_LIVE) {
-    msg68_info("libao68: live driver -- *%s*\n", info->short_name);
+    msg68_notice("libao68: live driver -- *%s*\n", info->short_name);
   } else {
-    msg68_info("libao68: file driver -- *%s* -- '%s''\n",
-               info->short_name, is->outname);
+    msg68_notice("libao68: file driver -- *%s* -- '%s''\n",
+                 info->short_name, is->outname);
   }
 
   is->count = 0;

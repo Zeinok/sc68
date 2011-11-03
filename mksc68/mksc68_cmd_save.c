@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-18 02:15:48 ben>
+ * Time-stamp: <2011-11-03 13:33:20 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -37,8 +37,9 @@
 #include "mksc68_opt.h"
 
 static const opt_t longopts[] = {
-  {"gzip",    1, 0, 'z'},
-  {0,0,0,0}
+  { "help",    0, 0, 'h' },
+  { "gzip",    1, 0, 'z' },
+  { 0,0,0,0 }
 };
 
 
@@ -58,6 +59,8 @@ int run_save(cmd_t * cmd, int argc, char ** argv)
 
     switch (val) {
     case  -1: break;                /* Scan finish  */
+    case 'h':                       /* --help */
+      help(argv[0]); return 0;
     case 'z':                       /* --gzip=[0-9] */
       if (!isdigit(*optarg) || optarg[1]) {
         msgerr("invalid compression level \"%s\"\n", optarg);

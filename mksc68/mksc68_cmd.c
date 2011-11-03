@@ -1,3 +1,30 @@
+/*
+ * @file    mksc68_cmd.c
+ * @brief   command factory and exec
+ * @author  http://sourceforge.net/users/benjihan
+ *
+ * Copyright (C) 1998-2011 Benjamin Gerard
+ *
+ * Time-stamp: <2011-11-03 13:30:01 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
+/* generated config include */
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -29,7 +56,7 @@ int cmd_add(cmd_t * cmd)
   }
   if (!cmd->hlp) cmd->hlp = cmd->des;
   cmd->nxt = head;
-  head = cmd; 
+  head = cmd;
   msgdbg("command '%s' added\n", cmd->com);
   return 0;
 }
@@ -47,14 +74,11 @@ int cmd_run(int argc, char ** argv)
   int err = 0;
 
   if (argc >= 1) {
-/*     msgdbg("run: looking for command [%s]\n", argv[0]); */
     for (cmd=head;
          cmd && strcmp(argv[0],cmd->com) &&
            (!cmd->alt || strcmp(argv[0],cmd->alt));
          cmd=cmd->nxt)
       ;
-/*       msgdbg("run: not '%s' nxt:%p\n", cmd->com, cmd->nxt); */
-    
     if (!cmd) {
       running_cmd = 0;
       msgerr("%s: command not found\n", argv[0]);

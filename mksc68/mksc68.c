@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-28 22:54:25 ben>
+ * Time-stamp: <2011-11-03 13:19:08 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -65,7 +65,7 @@ static int print_usage(void)
      "  -v --verbose        Increase verbosity level\n"
      "  -q --quiet          Decrease verbosity level\n"
      "\n"
-     "Copyright (C) 1998-2009 Benjamin Gerard\n"
+     "Copyright (C) 1998-2011 Benjamin Gerard\n"
      "Visit <" PACKAGE_URL ">\n"
      "Report bugs to <" PACKAGE_BUGREPORT ">");
   return 1;
@@ -77,7 +77,7 @@ static int print_version(void)
   puts
     (PACKAGE_STRING "\n"
      "\n"
-     "Copyright (C) 1998-2009 Benjamin Gerard.\n"
+     "Copyright (C) 1998-2011 Benjamin Gerard.\n"
      "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
      "This is free software: you are free to change and redistribute it.\n"
      "There is NO WARRANTY, to the extent permitted by law.\n"
@@ -173,6 +173,12 @@ static int run_help(cmd_t * me, int argc, char ** argv)
   return code;
 }
 
+void help(char *com)
+{
+  char * argv[2] = { "help", com };
+  run_help(0, 2, argv);
+}
+
 static int run_echo(cmd_t * me, int argc, char ** argv)
 {
   int i;
@@ -197,12 +203,13 @@ cmd_exit = {
   run_exit, "exit",  "x", "[exit-code]",   "Exit command interpreter" },
 cmd_help = {
   run_help, "help",  "?", "[cmd ...]", "Print command(s) usage",
-  "Without argument prints a short description of all commands.\n"
+  "The `help' command prints command list or usage.\n"
+  "Without argument it prints the command list with a short description.\n"
   "Else prints a complete usage for all given commands.\n"
-  "Returns the number of error (unknown command).\n"
+  "Returns the number of error (unknown commands).\n"
 },
 cmd_echo = {
-  run_echo, "echo",  "p", "[...]",       "Print argument",          },
+  run_echo, "echo",  "p", "[...]",       "The `echo' command",          },
 cmd_error = {
   run_error, "error",   0, "[...]",       "Print error message"     };
 

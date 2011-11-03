@@ -2,13 +2,11 @@
  * @ingroup   mksc68_prg
  * @file      mksc68_cli.h
  * @author    Benjamin Gerard
- * @date      1999/06/06
+ * @date      2011/11/01
  * @brief     mksc68 command line header.
  */
 
-/* $Id: SC68debug_cli.h,v 2.0 2003/08/21 04:58:35 benjihan Exp $ */
-
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2011 Benjamin Gerard */
 
 #ifndef _MKSC68_CLI_H_
 #define _MKSC68_CLI_H_
@@ -35,12 +33,12 @@ int cli_read(char * argv[], int max);
 
 EXTERN68
 /** Set command line prompt.
- */ 
+ */
 char * cli_prompt(const char * fmt, ...);
 
 EXTERN68
 /** Release prompt et command line buffers.
- */ 
+ */
 void cli_release(void);
 
 #endif /* #ifndef _MKSC68_CLI_H_ */

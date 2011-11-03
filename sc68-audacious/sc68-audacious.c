@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-30 02:02:12 ben>
+ * Time-stamp: <2011-11-03 01:53:10 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -211,7 +211,7 @@ gboolean plg_play(InputPlayback * playback,
   sc68_t * sc68 = 0;
   void   * mem = 0;
   int len, rate;
-  int track;
+  int track = 1;
   int myfile = 0;
   gchar * newfile = 0;
   Tuple *tu = 0;
@@ -246,6 +246,7 @@ gboolean plg_play(InputPlayback * playback,
   /* Currently load the file in memory. Would be better to support
    * audacious VFS with stream68.
    */
+  len = 0;                              /* GCC warning ... */
   mem = read_file(file, &len);
   if (myfile) {
     vfs_fclose(file);

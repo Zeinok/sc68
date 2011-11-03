@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-27 12:29:07 ben>
+ * Time-stamp: <2011-11-03 13:00:01 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -33,9 +33,6 @@
 
 static msg68_t   output = 0;           /* Output function.  */
 static void    * cookie = 0;           /* User data.        */
-#if 0
-static int       curcat = msg68_DEBUG; /* Current category. */
-#endif
 
 /** Default message filter mask.
  *
