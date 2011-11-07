@@ -1,7 +1,11 @@
 /*
- *                       sc68 - ICE! depacker
- *             Copyright (C) 1998-2011 Benjamin Gerard
- *             <http://sourceforge.net/users/benjihan>
+ * @file    info68.c
+ * @brief   program to depack ICE! packed files
+ * @author  http://sourceforge.net/users/benjihan
+ *
+ * Copyright (C) 1998-2011 Benjamin Gerard
+ *
+ * Time-stamp: <2011-11-07 12:56:02 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -21,7 +25,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-# include "config.h"
+# include <config.h>
 #endif
 #ifndef PACKAGE_NAME
 # define PACKAGE_NAME "unice68"
@@ -40,6 +44,8 @@
 #include <errno.h>
 
 static int verbose = 0;
+static int opt_cat = 0;
+static int opt_tst = 0;
 
 /* Message levels */
 enum {
@@ -77,10 +83,12 @@ static int print_usage(void)
       "\n"
       "  -v --verbose   Be more verbose (multiple use possible)\n"
       "  -q --quiet     Be less verbose (multiple use possible)\n"
+      "  -c --cat       Output input file as is if not ICE! packed\n"
+      "  -t --test      Test if input is a valid ICE! packed file\n"
       "  -h --help      Print this message and exit\n"
       "  -V --version   Print version and copyright and exit\n"
       "\n"
-      "Copyright (C) 2003-2009 Benjamin Gerard\n"
+      "Copyright (C) 2003-2011 Benjamin Gerard\n"
       "\n"
       "Visit <" PACKAGE_URL ">\n"
       "Report bugs to <" PACKAGE_BUGREPORT ">\n",
@@ -95,7 +103,7 @@ static int print_version(void)
   puts
     (
       "\n"
-      "Copyright (C) 2001-2009 Benjamin Gerard.\n"
+      "Copyright (C) 1998-2011 Benjamin Gerard.\n"
       "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
       "This is free software: you are free to change and redistribute it.\n"
       "There is NO WARRANTY, to the extent permitted by law.\n"
@@ -107,9 +115,9 @@ static int print_version(void)
 
 int main(int argc, char *argv[])
 {
-  int csize, dsize, i, n;
+  int csize = 0, dsize = -1, i, n;
   void * buffer = 0, * depack = 0;
-  int err = 255;
+  int err = 255, hread;
   FILE * in = 0, * out = 0;
   const char * fin=0, *fout=0;
   char header[12];
@@ -131,11 +139,15 @@ int main(int argc, char *argv[])
       if (!strcmp(arg,"help")) {
         c = 'h';
       } else if (!strcmp(arg,"version")) {
-        c ='V';
+        c = 'V';
       } else if (!strcmp(arg,"verbose")) {
         c = 'v';
       } else if (!strcmp(arg,"quiet")) {
         c = 'q';
+      } else if (!strcmp(arg,"cat")) {
+        c = 'c';
+      } else if (!strcmp(arg,"test")) {
+        c = 't';
       } else {
         fprintf(stderr,"unice68: Invalid option `--%s'.\n", arg);
         return 255;
@@ -150,6 +162,8 @@ int main(int argc, char *argv[])
       case 'V': return print_version();
       case 'v': ++verbose; break;
       case 'q': --verbose; break;
+      case 'c': opt_cat = 1; break;
+      case 't': opt_tst = 1; break;
       default:
         fprintf(stderr,"unice68: Invalid option `-%c'.\n", c);
         return 255;
@@ -188,62 +202,72 @@ int main(int argc, char *argv[])
     goto error;
   }
 
-  err = (int)fread (header, 1, sizeof(header), in);
+  err = (int) fread(header, 1, sizeof(header), in);
   if (err == -1) {
     perror(argv[0]);
     goto error;
   }
+  hread = err;
 
   if (err < sizeof(header)) {
-    fprintf(stderr, "unice68: Not enought byte to be a valid ice file.\n");
-    goto error;
-  }
-  csize = 0;
-  dsize = unice68_depacked_size(header, &csize);
-  if (dsize == -1) {
-    fprintf(stderr, "unice68: Not a valid ice file : missing magic.\n");
-    goto error;
-  }
-  if (csize < 0 || dsize < 0) {
-    fprintf(stderr, "weird sizes: %d/%d.\n", csize,dsize);
-    goto error;
-  }
-
-  message(N,"ICE! compressed:%d uncompressed:%d ratio:%d%%\n",
-          csize,dsize,(csize+50)*100/dsize);
-
-  buffer = malloc(csize+sizeof(header));
-  if (!buffer) {
-    perror(argv[0]);
-    goto error;
-  }
-
-  memcpy(buffer, header, sizeof(header));
-  message(D,"reading %d bytes from `%s' ... ", csize, fin);
-  err = (int) fread((char *)buffer + sizeof(header) , 1, csize, in);
-  message(D,"%s\n", err != csize ? "failed :(" : "success :)");
-
-  if (err != csize) {
-    if (err == -1) {
-      perror(argv[0]);
+    if (!opt_cat) {
+      fprintf(stderr, "unice68: Not enought byte to be a valid ice file.\n");
+      goto error;
+    }
+  } else {
+    csize = 0;
+    dsize = unice68_depacked_size(header, &csize);
+    if (dsize == -1) {
+      if (!opt_cat) {
+        fprintf(stderr, "unice68: Not a valid ice file : missing magic.\n");
+        goto error;
+      }
+    } else if (csize < 0 || dsize < 0) {
+      fprintf(stderr, "weird sizes: %d/%d.\n", csize,dsize);
       goto error;
     } else {
-      fprintf(stderr, "unice68: Read error get %d bytes on %d requested\n",
-              err, csize);
-      err = 2;
-      goto error;
+      message(N,"ICE! compressed:%d uncompressed:%d ratio:%d%%\n",
+              csize,dsize,(csize+50)*100/dsize);
     }
   }
 
-  depack = malloc(dsize);
-  if (!depack) {
-    perror(argv[0]);
-    err = 255;
+  if (opt_tst) {
+    err = dsize == -1;
     goto error;
   }
-  message(D,"%d bytes output buffer allocated, running depacker ... ", dsize);
-  err = unice68_depacker(depack, buffer);
-  message(D,"%s\n",err ? "failed :(" : "success :)");
+
+  if (dsize != -1) {
+    buffer = malloc(csize+sizeof(header));
+    if (!buffer) {
+      perror(argv[0]);
+      goto error;
+    }
+    memcpy(buffer, header, sizeof(header));
+    message(D,"reading %d bytes from `%s' ... ", csize, fin);
+    err = (int) fread((char *)buffer + sizeof(header) , 1, csize, in);
+    message(D,"%s\n", err != csize ? "failed :(" : "success :)");
+    if (err != csize) {
+      if (err == -1) {
+        perror(argv[0]);
+        goto error;
+      } else {
+        fprintf(stderr, "unice68: Read error get %d bytes on %d requested\n",
+                err, csize);
+        err = 2;
+        goto error;
+      }
+    }
+    depack = malloc(dsize);
+    if (!depack) {
+      perror(argv[0]);
+      err = 255;
+      goto error;
+    }
+    message(D,"%d bytes output buffer allocated, running depacker ... ", dsize);
+    err = unice68_depacker(depack, buffer);
+    message(D,"%s\n",err ? "failed :(" : "success :)");
+  } else
+    err = -!opt_cat;
 
   if (!err) {
     if (!fout || !strcmp(fout,"-")) {
@@ -258,8 +282,30 @@ int main(int argc, char *argv[])
       perror(argv[0]);
       goto error;
     }
-    message(D,"writing %d bytes into output file `%s' ... ", dsize, fout);
-    err = (int) fwrite(depack, 1, dsize, out);
+    if (dsize == -1) {
+      /* write what we have already read for header */
+      err = (int) fwrite(header, 1, hread, out);
+      message(D,"writing %d bytes into output file `%s' ... ", hread, fout);
+      message(D,"%s\n", err != hread ? "failed :(" : "success :)");
+      message(D,"writing remaining data into output file `%s' ... ", fout);
+      err = err != hread;
+      while (!err && !feof(in)) {
+        static char buffer[4096];
+        const int max = sizeof(buffer);
+        int len = (int) fread(buffer, 1, max, in);
+        if (len == -1) {
+          err = 1;
+        } else {
+          err = (int) fwrite(buffer,1,len, out);
+          err = (err != len);
+        }
+      }
+      if (!err)
+        err = dsize; /* don't trigger error later */
+    } else {
+      message(D,"writing %d bytes into output file `%s' ... ", dsize, fout);
+      err = (int) fwrite(depack, 1, dsize, out);
+    }
     message(D,"%s\n", err != dsize ? "failed :(" : "success :)");
     if (err != dsize) {
       err = -1;
