@@ -46,6 +46,27 @@ FILE68_API
 int strcmp68(const char *a, const char *b);
 
 FILE68_API
+/** Compare two string (case insensitive, size limited).
+ *
+ *    The strcmp68() function compares the two strings a and b,
+ *    ignoring the case of the characters. It returns an integer less than,
+ *    equal to, or greater than zero if a is found, respectively, to be less
+ *    than, to match, or be greater than b.
+ *
+ *  @param  a  First string to compare
+ *  @param  b  String to compare with
+ *  @param max Strings max length
+ *
+ *  @return  Integer result of the two string compare. The difference
+ *           between last tested characters of a and b.
+ *  @retval  0   a and b are equal
+ *  @retval  <0  a is less than b
+ *  @retval  >0  a is greater than b
+ */
+int strncmp68(const char *a, const char *b, int max);
+
+
+FILE68_API
 /** Concatenate two strings.
  *
  *    The strcat68() function appends the b string to the a string

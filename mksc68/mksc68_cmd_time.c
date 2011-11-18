@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-11-03 13:34:42 ben>
+ * Time-stamp: <2011-11-07 12:08:15 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -197,23 +197,19 @@ struct measureinfo_s {
   /* results */
   addr68_t minaddr;     /* lower memory location used by htis track */
   addr68_t maxaddr;     /* upper memory location used by htis track */
-  unsigned frames;      /* last frame of the music.                 */
+  unsigned frames;      /* last frame of the music                  */
   unsigned timems;      /* corresponding time in ms                 */
-  unsigned loopfr;                      /* loop duration in frames */
-  unsigned loopms;                      /* correponding time in ms */
-
-  unsigned curfrm;      /* current frame counter.                   */
-
-  unsigned ym:1;              /* YM used by this music          */
-  unsigned mw:1;              /* mw used by this music          */
-  unsigned ta:1;              /* MFP Timer-A used by this track */
-  unsigned tb:1;              /* MFP Timer-B used by this track */
-  unsigned tc:1;              /* MFP Timer-C used by this track */
-  unsigned td:1;              /* MFP Timer-D used by this track */
-  unsigned pl:1;              /* Amiga/Paulaused by this track  */
-
-  time_io_t timeios[5];
-
+  unsigned loopfr;      /* loop duration in frames                  */
+  unsigned loopms;      /* correponding time in ms                  */
+  unsigned curfrm;      /* current frame counter                    */
+  unsigned ym:1;        /* YM used by this music                    */
+  unsigned mw:1;        /* mw used by this music                    */
+  unsigned ta:1;        /* MFP Timer-A used by this track           */
+  unsigned tb:1;        /* MFP Timer-B used by this track           */
+  unsigned tc:1;        /* MFP Timer-C used by this track           */
+  unsigned td:1;        /* MFP Timer-D used by this track           */
+  unsigned pl:1;        /* Amiga/Paulaused by this track            */
+  time_io_t timeios[5]; /* hooked IOs                               */
   struct {
     unsigned cnt;
     unsigned fst;
@@ -233,10 +229,10 @@ enum {
 };
 
 enum timer_e {
-  TIMER_D = 0X110>>2,
-  TIMER_C = 0X114>>2,
-  TIMER_B = 0X120>>2,
-  TIMER_A = 0X134>>2,
+  TIMER_A = 0X134 >> 2,
+  TIMER_B = 0X120 >> 2,
+  TIMER_C = 0X114 >> 2,
+  TIMER_D = 0X110 >> 2
 };
 
 static const char * vectorname(int vector)
@@ -265,10 +261,10 @@ static const char * vectorname(int vector)
   case SPURIOUS_VECTOR: return "spurious interrupt";
 
     /* Not always true, depends on MFP VR register bits 4-7 */
-  case TIMER_D:         return "MFP timer-D";
-  case TIMER_C:         return "MFP timer-C";
-  case TIMER_B:         return "MFP timer-B";
   case TIMER_A:         return "MFP timer-A";
+  case TIMER_B:         return "MFP timer-B";
+  case TIMER_C:         return "MFP timer-C";
+  case TIMER_D:         return "MFP timer-D";
 
   default:
     if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
@@ -291,11 +287,8 @@ static int timemeasure_hdl(emu68_t* const emu68, int vector, void * cookie)
   if (vector >= 0 && vector < sizeof(mi->vector)/sizeof(*mi->vector)) {
     if (!mi->vector[vector].cnt ++)
       mi->vector[vector].fst = mi->curfrm;
-    else
-      mi->vector[vector].lst = mi->curfrm;
+    mi->vector[vector].lst = mi->curfrm;
   }
-
-/*   msgdbg("exception: vector=%02X\n",vector); */
   return 0;                             /* 0:continue in normal mode */
 }
 
@@ -744,11 +737,14 @@ static
 int time_measure(measureinfo_t * mi, int trk,
                  int stp_ms, int max_ms, int sil_ms)
 {
-  int ret = -1;
+  int ret = -1, err;
   int tracks = dsk_get_tracks();
+  struct timespec ts;
+  ts.tv_sec  = 180;
+  ts.tv_nsec = 0;
 
-  msgdbg("time_measure() trk:%d, stp:%d, max:%d sil:%d\n",
-         trk, stp_ms, max_ms, sil_ms );
+  msgdbg("time_measure() trk:%d, stp:%dms, max:%dms sil:%dms, time-out:%d\"\n",
+         trk, stp_ms, max_ms, sil_ms, ts.tv_sec);
 
   assert(mi);
   assert(trk > 0 && trk <= tracks);
@@ -773,10 +769,21 @@ int time_measure(measureinfo_t * mi, int trk,
     msgerr("failed to create time thread\n");
     goto error;
   }
-  msgdbg("time-measure thread created ... Waiting\n");
-  pthread_join(mi->thread, 0);
-  msgdbg("time-measure thread ended with: %d\n", mi->code);
-  ret = mi->code;
+
+#if 1 /* def HAVE_PTHREAD_TIMEDJOIN_NP */
+  msgdbg("time-measure thread created ... Waiting for %d seconds\n", ts.tv_sec);
+  ts.tv_sec += time(0);
+  err = pthread_timedjoin_np(mi->thread, 0, &ts);
+  if (err == ETIMEDOUT) {
+    msgdbg("time-measure thread time-out, canceling\n");
+    err = pthread_cancel(mi->thread);
+  }
+#else
+  msgdbg("time-measure thread created ... Waiting for %d seconds\n", ts.tv_sec);
+  err = pthread_join(mi->thread, 0);
+#endif
+  msgdbg("time-measure thread ended with: %d, %d\n", err, mi->code);
+  ret = err ? -1 : mi->code;
   if (!ret) {
     disk68_t  * d = dsk_get_disk();
     music68_t * m = d->mus+trk-1;
@@ -789,6 +796,8 @@ int time_measure(measureinfo_t * mi, int trk,
     m->loops_ms = mi->loopms;
     m->total_fr = m->first_fr + (m->loops-1) * m->loops_fr;
     m->total_ms = fr2ms(m->total_fr, m->frq, 0);
+    m->has.time = 1;
+    m->has.loop = 1;
 
     m->hwflags.all           = 0;
     m->hwflags.bit.ym        = mi->ym;
@@ -798,13 +807,13 @@ int time_measure(measureinfo_t * mi, int trk,
     m->hwflags.bit.timers    = 1;
     m->hwflags.bit.timera    = mi->ta;
     m->hwflags.bit.timerb    = mi->tb;
-    m->hwflags.bit.timerc    = mi->tb;
-    m->hwflags.bit.timerd    = mi->tc;
+    m->hwflags.bit.timerc    = mi->tc;
+    m->hwflags.bit.timerd    = mi->td;
 
     /* mi->minaddr; */
     /* mi->maxaddr; */
 
-    msginf("%02u - %s + %d x %s => %s [%s%s%s%s%s%s]\n",
+    msginf("%02u - %s + %d x %s => %s [%s%s%s%s%s%s%s]\n",
            trk,
            str_timefmt(s1,sizeof(s1),m->first_ms),
            m->loops-1,

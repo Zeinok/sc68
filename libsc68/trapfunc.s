@@ -102,6 +102,12 @@ trap_illegal:
 gemdos:
 	open
 	move.l	#$DEAD0D05,d1
+
+	cmp.w	#$09,d0
+	beq.s	cconws
+	
+	cmp.w	#$20,d0
+	beq.s	super
 	
 	cmp.w	#$30,d0
 	beq.s	sversion
@@ -115,6 +121,65 @@ gemdos:
 	move.l	#$DEAD0D05,d1
 	illegal
 
+;;; ======================================================================
+;;; cconws(string.l)
+;;; trap #1 function 09 ($09)
+;;; 
+;;; @param  string   pointer to string to display
+;;; @retval >0       number of char written
+;;; @retval 0        on error
+cconws:
+	move.l	(a6)+,a0		; string.l
+	moveq	#0,d0
+.loop:
+	addq.w	#1,d0
+	beq.s	.done			; string too long
+	tst.b	(a0)+
+	bne.s	.loop
+.done:
+	return_d0
+	close
+	
+	
+;;; ======================================================================
+;;; super(stack.l)
+;;; trap #1 function 32 ($20)
+;;; 
+;;; @param  stack   0:superuser mode, 1:query state, >1 restore user mode
+;;; @retval >1           old stack value to be restored by later call
+;;; @retval SUP_USER(0)  on read-state and state is user mode
+;;; @retval SUP_SUPER(1) on read-state and state is super-user mode
+
+SUP_USER    = 0		      ; query return code for user mode
+SUP_SUPER   = 1		      ; query return code for superuser mode
+SUP_SET     = 0		      ; query code to set superuser mode
+SUP_INQUIRE = 1		      ; query current mode
+	
+super:
+	move.l	(a6)+,d0		; stack.l
+	beq.s	.sup_set		; stack.l == 0 : set user
+	cmp.l	#1,d0
+	beq.s	.sup_inquire		; stack.l == 1 : inquire current mode
+
+;;; restore user mode and superuser stack
+	moveq	#0,d0
+	beq.s	.done
+	
+;;; inquire current mode
+.sup_inquire:
+	move.w	sr,d0
+	and.w 	#$2000,d0
+	sne	d0
+	and.w	#SUP_SUPER,d0
+	beq.s	.done
+
+;;; set superuser mode (this is not the real deal but we don't care much)
+.sup_set:
+	moveq	#SUP_SUPER,d0
+	
+.done:	
+	return_d0
+	close
 	
 ;;; ======================================================================
 ;;; sversion()

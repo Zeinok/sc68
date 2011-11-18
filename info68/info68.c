@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-31 03:43:23 ben>
+ * Time-stamp: <2011-11-07 14:52:27 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -128,7 +128,8 @@ static int display_help(void)
      "    `%V'         default track converter name\n"
      "    `%T'         disk time in sec\n"
      "    `%Y'         formated disk time. Format \"TT MM:SS\"\n"
-     "    `%H'         all tracks ORed hardware flags (see %h)\n");
+     "    `%H'         all tracks ORed hardware flags (see %h)\n"
+     "    `%F'         file format (sc68 or sndh)\n");
   puts
     ("  track-commands:\n"
      "\n"
@@ -145,6 +146,7 @@ static int display_help(void)
      "    `%@'         load address (in hexdecimal)\n"
      "    `%h'         hardware flags [YSA] uppercase means activated\n"
      "                   Y:YM-2149,  S:STE  A:Amiga\n");
+
   puts
     ("  misc-commands:\n"
      "\n"
@@ -187,7 +189,9 @@ static int display_help(void)
      "  > 6/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #6\n");
 
   puts
-    ("Visit <" PACKAGE_URL ">\n"
+    ("Copyright (C) 1998-2011 Benjamin Gerard\n"
+     "\n"
+     "Visit <" PACKAGE_URL ">\n"
      "Report bugs to <" PACKAGE_BUGREPORT ">");
 
   return 1;
@@ -199,7 +203,7 @@ static int display_version(void)
   puts
     (PACKAGE_STRING "\n"
      "\n"
-     "Copyright (C) 2001-2009 Benjamin Gerard.\n"
+     "Copyright (C) 1998-2011 Benjamin Gerard.\n"
      "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
      "This is free software: you are free to change and redistribute it.\n"
      "There is NO WARRANTY, to the extent permitted by law.\n"
@@ -216,8 +220,8 @@ static const char * HWflags(const hwflags68_t f)
   flags[1] = f.bit.ste    ? 'S' : 's';
   flags[2] = f.bit.amiga  ? 'A' : 'a';
   flags[3] = f.bit.timers
-    ?'0'+f.bit.timera+(f.bit.timerb<<1)+(f.bit.timerc<<2)+(f.bit.timerd<<3)
-    : 0
+    ? '0'+f.bit.timera+(f.bit.timerb<<1)+(f.bit.timerc<<2)+(f.bit.timerd<<3)
+    : '.'
     ;
   return flags;
 }
@@ -498,6 +502,9 @@ int main(int argc, char ** argv)
           case 'H':
             PutS(out,HWflags(d->hwflags));
             break;
+          case 'F':
+            PutS(out,file68_tag_get(d,0,TAG68_FORMAT));
+            break;
 
             /* TRACK Commands */
           case '&':
@@ -548,9 +555,9 @@ int main(int argc, char ** argv)
               break;
             }
           }
-          default:
-            PutC(out,'%');
-            PutC(out,c);
+            /* default: */
+            /* PutC(out,'%'); */
+            /* PutC(out,c); */
           } /* switch */
         } /* if else */
       } /* for */

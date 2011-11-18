@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-11-03 13:19:08 ben>
+ * Time-stamp: <2011-11-04 06:56:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

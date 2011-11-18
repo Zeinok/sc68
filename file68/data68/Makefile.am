@@ -31,12 +31,12 @@ config_files = sc68.cfg
 sample_files = Sample/About-Intro.sc68
 replay_files =\
  Replay/aenigmatica.bin Replay/alteredbeast.bin Replay/armalyte.bin	\
- Replay/bendaglish.deli.bin Replay/big.bin Replay/blipblop.bin		\
- Replay/blipp079.bin Replay/bs22.bin Replay/cabal.bin			\
- Replay/chipmon2.bin Replay/cosotfmx.bin Replay/crapman1.bin		\
- Replay/crapman2.bin Replay/deltamusic1.bin Replay/deltamusic2.bin	\
- Replay/digitfmx.bin Replay/dmu.bin Replay/dwaga.bin			\
- Replay/dyter07.bin Replay/elf.bin Replay/fc13_14.bin			\
+ Replay/asidifier.bin Replay/bendaglish.deli.bin Replay/big.bin		\
+ Replay/blipblop.bin Replay/blipp079.bin Replay/bs22.bin		\
+ Replay/cabal.bin Replay/chipmon2.bin Replay/cosotfmx.bin		\
+ Replay/crapman1.bin Replay/crapman2.bin Replay/deltamusic1.bin		\
+ Replay/deltamusic2.bin Replay/digitfmx.bin Replay/dmu.bin		\
+ Replay/dwaga.bin Replay/dyter07.bin Replay/elf.bin Replay/fc13_14.bin	\
  Replay/fireice.bin Replay/fred.bin Replay/gemx.bin			\
  Replay/harlequin.bin Replay/hippel-coso_note.deli.bin			\
  Replay/hpn-jam.bin Replay/huelsbeck.bin Replay/huntforredoct.bin	\

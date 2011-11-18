@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-11-01 01:33:35 ben>
+ * Time-stamp: <2011-11-05 11:39:38 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -178,7 +178,7 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 static ym_parms_t default_parms;
 
 /* Max output level for volume tables. */
-static const int output_level = 0xDEAD;
+static const int output_level = 0xCAFE;
 
 /* Command line options */
 static const char prefix[] = "sc68-";

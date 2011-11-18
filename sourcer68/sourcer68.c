@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-17 20:56:51 ben>
+ * Time-stamp: <2011-11-05 05:10:24 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -46,6 +46,8 @@
 # include <sc68/option68.h>
 static int sourcer68_cat = -1;
 static int no_sc68 = 0;
+#else
+# define SC68_LOADADDR 0x10000
 #endif
 
 static void debugmsg_va(const char * fmt, va_list list)
@@ -1041,7 +1043,7 @@ static void print_option(void * data,
 
 static int print_usage(void)
 {
-  puts
+  printf
     (
       "Usage: source68 [OPTIONS] <input>\n"
       ""
@@ -1059,10 +1061,11 @@ static int print_usage(void)
       "  --reloc=[yes|no|auto]  TOS relocation (default:auto).\n"
       "  --entry=[ENTRY-LIST]   Set disassembly entry points (default:+0)\n"
       "  --tab=[STRING]         Set tabulation string\n"
-      "  --org=[ADDR]           Load address (default:0x8000)\n"
+      "  --org=[ADDR]           Load address (default:$%x)\n"
       "  --opcode               Print opcodes\n"
       "  --ascii                Convert immediat to ASCII\n"
-      "  --no-symbol            Disable symbol in disassembly output\n"
+      "  --no-symbol            Disable symbol in disassembly output\n",
+      SC68_LOADADDR
       );
 
 #ifdef USE_FILE68
@@ -1119,7 +1122,7 @@ int main(int argc, char **argv)
   int tosreloc = TOS_RELOC_AUTO;
   char *entry="+0";
   int *entries = 0;
-  int org = 0x8000;
+  int org = SC68_LOADADDR;
 
 #ifdef USE_FILE68
   argc = file68_init(argc, argv);
