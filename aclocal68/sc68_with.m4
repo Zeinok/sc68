@@ -37,6 +37,10 @@ m4_define([DUMP_SC68_PACKAGE_VARS],[
  --  BIN_LFLAGS=[$]BIN_LFLAGS
  --  ALL_CFLAGS=[$]ALL_CFLAGS
  --  ALL_LFLAGS=[$]ALL_LFLAGS
+ --  PAC_REQUIRES=[$]PAC_REQUIRES
+ --  PAC_CONFLICTS=[$]PAC_CONFLICTS
+ --  PAC_CFLAGS=[$]PAC_CONFLICTS
+ --  PAC_LFLAGS=[$]PAC_LFLAGS
  --  LIBS=[$]LIBS
 ======================================================================
 EOF
@@ -317,7 +321,7 @@ m4_define([DO_SC68_PACKAGE],[
                 AC_SEARCH_LIBS(
                   [[$]_$1_fct],
                   [$2],
-                  [has_$1=yes; SC68_ADD_FLAG($1_ldf,-l$2)],
+                  [has_$1=yes; SC68_ADD_FLAG(_$1_ldf,-l$2)],
                   [has_$1=no],
                   [])
                 ;;
@@ -343,6 +347,9 @@ m4_define([DO_SC68_PACKAGE],[
       shift
     done
     UNSET_SC68_PACKAGE_VARS([_$1])
+
+    DUMP_SC68_PACKAGE_VARS([$1],[ MID ])
+
     
     if test "x[$]has_$1" = 'xyes'; then
       case x-"[$]$1_org" in
