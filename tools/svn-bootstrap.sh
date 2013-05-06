@@ -8,7 +8,9 @@
 me="svn-bootstrap.sh"
 ln_s="ln -sf --"
 cp_r="cp -R --"
- 
+vifs="-vifs"
+linking="Linking"
+
 # Display informationnal message
 msg() {
     echo "$@"
@@ -25,6 +27,29 @@ fatal() {
     error "$@"
     exit 127
 }
+
+while [ $# -gt 0 ]; do
+    case x"$1" in
+	x-h|x--usage|x--help)
+	    cat <<EOF
+Usage: $me [no-links]
+
+  Setup autotools and others required steps to setup sc68 source tree.
+
+EOF
+	    exit 0
+	    ;;
+	xno-link* | xnl)
+	    ln_s="${cp_r}"
+	    vifs="-vif"
+	    linking="Copying"
+	    ;;
+	*)
+	    fatal "invalid argument -- '$1'"
+	    ;;
+    esac
+    shift
+done    
 
 # $1:tool  $2:what-if-not
 testtool() {
@@ -75,7 +100,7 @@ testdir() {
 
 # $1: source  $2: destination
 ln_or_cp() {
-    msg "Linking '$1' -> '$2'"
+    msg "${linking} '$1' -> '$2'"
     $ln_s "$1" "$2" ||
     $cp_r "$1" "$2"
 }
@@ -170,5 +195,4 @@ if test ${err} -ne 0; then
 fi
 
 # No error runs autoreconf to create missing files.
-autoreconf -vifs
-
+autoreconf ${vifs}
