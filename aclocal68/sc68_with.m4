@@ -7,7 +7,7 @@ dnl#
 dnl# Distributed under the term of the GPL
 dnl#
 
-# serial 20110919 sc68_with.m4
+# serial 20130507 sc68_with.m4
 
 # DUMP_SC68_PACKAGE_VARS
 # ----------------------
@@ -254,6 +254,7 @@ m4_define([DO_SC68_PACKAGE],[
             AC_MSG_RESULT([yes ([$]_$1_ver)])
             $1_config=false
           fi
+
           if test s[$]{$1_config+et} != set; then
             AC_PATH_PROG([$1_config],["$2-config"],["false"])
             if test "[$]$1_config" != false; then
@@ -300,12 +301,20 @@ m4_define([DO_SC68_PACKAGE],[
             eval ac_wp_[$]ac_wp_var=\"[\$][$]ac_wp_var\"
           done; unset ac_wp_var
 
+          _$1_lib=''
           for ac_wp_var in : [$]_$1_ldf; do
             case [$]ac_wp_var in
               -L*)
                 LDFLAGS="[$]LDFLAGS [$]ac_wp_var";;
+              -l$2)
+                ;;
+              -l*)
+                _$1_lib="[$]_$1_lib [$]ac_wp_var"
+                ;;
             esac
           done; unset ac_wp_var
+          _$1_lib=[$](echo [$]_$1_lib)
+
           CPPFLAGS="[$]_$1_def [$]_$1_inc [$]CPPFLAGS"
 
           if test "x[$]_$1_hdr" = "x-"; then
@@ -323,7 +332,7 @@ m4_define([DO_SC68_PACKAGE],[
                   [$2],
                   [has_$1=yes; SC68_ADD_FLAG(_$1_ldf,-l$2)],
                   [has_$1=no],
-                  [])
+                  [[$]_$1_lib])
                 ;;
             esac
           fi
@@ -347,9 +356,6 @@ m4_define([DO_SC68_PACKAGE],[
       shift
     done
     UNSET_SC68_PACKAGE_VARS([_$1])
-
-    DUMP_SC68_PACKAGE_VARS([$1],[ MID ])
-
     
     if test "x[$]has_$1" = 'xyes'; then
       case x-"[$]$1_org" in
