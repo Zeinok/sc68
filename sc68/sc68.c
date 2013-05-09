@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-31 09:04:55 ben>
+ * Time-stamp: <2013-05-10 00:06:44 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -315,7 +315,7 @@ static void DisplayInfo(int track)
     Print("Disk tags:\n");
     for (j=0; j<info->dsk.tags; ++j)
       Print("* %c%-*s : %s\n",
-            toupper(*info->dsk.tag[j].key),
+            toupper((int)*info->dsk.tag[j].key),
             len-3,
             info->dsk.tag[j].key+1,
             info->dsk.tag[j].val);
@@ -323,7 +323,7 @@ static void DisplayInfo(int track)
     Print("Tracks tags:\n");
     for (j=0; j<info->trk.tags; ++j)
       Print("* %c%-*s : %s\n",
-            toupper(*info->trk.tag[j].key),
+            toupper((int)*info->trk.tag[j].key),
             len-3,
             info->trk.tag[j].key+1,
             info->trk.tag[j].val);
@@ -370,15 +370,14 @@ static int PlayLoop(istream68_t * out, int track, int loop)
   Debug(" all    : %s\n",all?"yes":"no");
 
   /* Set track. */
-  sc68_play(sc68, track, loop);
-
-  /* DisplayInfo(-1); */
-
-  /* Update return code (load the track) */
-  code = sc68_process(sc68, 0, 0);
-  Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n", 0, 0, 0, codestr(code), code);
-  if (code != SC68_ERROR)
-    DisplayInfo(-1);
+  code = sc68_play(sc68, track, loop);
+  if (code != SC68_ERROR) {
+    /* Update return code (load the track) */
+    code = sc68_process(sc68, 0, 0);
+    Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n", 0, 0, 0, codestr(code), code);
+    if (code != SC68_ERROR)
+      DisplayInfo(-1);
+  }
 
   while ( ! (code & SC68_END) ) {
     static int pass;
