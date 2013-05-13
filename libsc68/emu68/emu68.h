@@ -4,12 +4,10 @@
  * @author    Benjamin Gerard
  * @date      1999/03/13
  * @brief     68K emulator header.
- *
  */
+/* Time-stamp: <2013-05-13 02:06:57 ben> */
 
-/* $Id$ */
-
-/* Copyright (C) 1998-2010 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _EMU68_EMU68_H_
 #define _EMU68_EMU68_H_
