@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-11-07 12:08:15 ben>
+ * Time-stamp: <2013-05-13 01:39:34 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -770,7 +770,7 @@ int time_measure(measureinfo_t * mi, int trk,
     goto error;
   }
 
-#if 1 /* def HAVE_PTHREAD_TIMEDJOIN_NP */
+#ifdef HAVE_PTHREAD_TIMEDJOIN_NP
   msgdbg("time-measure thread created ... Waiting for %d seconds\n", ts.tv_sec);
   ts.tv_sec += time(0);
   err = pthread_timedjoin_np(mi->thread, 0, &ts);
