@@ -2085,7 +2085,8 @@ int main(int na, char **a)
       first = 0;
     }
 
-    outf("/* Line %X: %s */\n\n", l, line_name[l]);
+    if (l<16)
+      outf("/* Line %X: %s */\n\n", l, line_name[l]);
 
     for ( i=0; i<64; i++ ) {
       switch (l) {
