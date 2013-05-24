@@ -1,6 +1,6 @@
 /*
  *          gen68 - "emu68" 68k instruction code generator
- *            Copyright (C) 1999-2009 Ben(jamin) Gerard
+ *            Copyright (C) 1999-2013 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
@@ -17,12 +17,10 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id$
- *
  */
 
-/* Time-stamp: <2009-06-12 07:20:25 ben> */
-static const char modifdate[] = "2009-06-12 07:20:25";
+/* Time-stamp: <2013-05-25 00:26:49 ben> */
+static const char modifdate[] = "2013-05-25 00:26:49"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -97,7 +95,7 @@ static int Usage(void)
     " - <prefix>line<X>.c for lines 0 to F\n"
     " - <prefix>table.c for function table\n"
     "\n"
-    "Copyright (C) 1999-2009 Benjamin Gerard\n"
+    "Copyright (C) 1999-2013 Benjamin Gerard\n"
     );
   return 1;
 }
@@ -186,7 +184,7 @@ static void print_fileheader(const char * name)
 {
   outf("/* %s - EMU68 generated code by\n"
        " * gen68 %s\n"
-       " * Copyright (C) 1998-2009 Benjamin Gerard\n"
+       " * Copyright (C) 1998-2013 Benjamin Gerard\n"
        " *\n"
        " * %cId$\n"
        " */\n"
@@ -1735,9 +1733,9 @@ static void gene_implicit(char * s, int sz, int flags)
       outf("( b >> %s );\n",  d);
     }
   } outf(TAB"} else {\n"); {
-    OUTF_ASSERT(TAB2,"mode != 1");
     outf(TAB2"/* %s.%c <Ae> */\n", s, C);
     outf(TAB2"const addr68_t addr = get_ea%c68[mode](emu68,reg0);\n", c);
+    OUTF_ASSERT(TAB2,"mode != 1");
     if ( ! (flags & 1) ) {
       outf(TAB2"b = read_%c(addr) << %s;\n", C, d);
     }
