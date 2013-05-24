@@ -20,7 +20,7 @@
  */
 
 /* Time-stamp: <2013-05-25 00:26:49 ben> */
-static const char modifdate[] = "2013-05-25 00:26:49"
+static const char modifdate[] = "2013-05-25 00:26:49";
 
 #include <stdio.h>
 #include <stdlib.h>
