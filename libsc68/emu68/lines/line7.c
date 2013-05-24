@@ -1,6 +1,6 @@
 /* line7.c - EMU68 generated code by
- * gen68 2009-06-12 07:20:25
- * Copyright (C) 1998-2009 Benjamin Gerard
+ * gen68 2013-05-25 00:26:49
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
  * $Id$
  */
