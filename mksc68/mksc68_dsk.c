@@ -3,9 +3,9 @@
  * @brief   disk functions.
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-11-01 22:10:42 ben>
+ * Time-stamp: <2013-05-31 19:16:00 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -102,12 +102,12 @@ static int is_valid_track(int trk)
   return 1;
 }
 
-int dsk_load(const char * url, int merge)
+int dsk_load(const char * url, int merge, int force)
 {
   int ret = -1;
   disk68_t * newdisk = 0;
 
-  if (!merge && dsk.modified) {
+  if (!force && !merge && dsk.modified) {
     msgerr("modified data (save or try --force)\n");
     goto error;
   }
@@ -120,11 +120,11 @@ int dsk_load(const char * url, int merge)
 
   if (!merge) {
     dsk_kill();
-    dsk.filename = strdup(url);
+    dsk.filename = strdup68(url);
     dsk.disk = newdisk;
     newdisk  = 0;
     dsk.cur_trk = dsk.disk->def_mus;
-
+    dsk.modified = 0;
   } else {
     msgerr("not implemented\n");
     goto error;
@@ -186,7 +186,7 @@ static int dsk_alloc(int extra)
   return 0;
 }
 
-int dsk_new(const char * name)
+int dsk_new(const char * name, int force)
 {
   static int cnt = 0;
   char tmp[16];
@@ -199,7 +199,7 @@ int dsk_new(const char * name)
   }
 
   msgdbg("creating new disk: %s\n", n);
-  if (dsk.modified) {
+  if (dsk.modified && !force) {
     msgerr("modified data (save or try --force)\n");
     return -1;
   }
@@ -237,7 +237,7 @@ int dsk_kill(void)
   return 0;
 }
 
-extern unsigned int fr2ms(unsigned int fr, unsigned int cpf_or_hz, unsigned int clk);
+extern unsigned int fr2ms(unsigned int, unsigned int, unsigned int);
 
 static unsigned int fr_to_ms(unsigned int fr, unsigned int hz)
 {
@@ -291,8 +291,35 @@ static const char * tostr(int v)
   return tmp;
 }
 
+
+/* Does this memory belongs to the disk data ? */
+static int is_disk_data(const disk68_t * const mb, const void * const _s)
+{
+  const char * const s = (const char *) _s;
+  return (mb && s >= mb->data && s < mb->data+mb->datasz);
+}
+
+static void free_replay(disk68_t * const mb, char ** _s)
+{
+  if (!is_disk_data(mb, *_s))
+    free(*_s);
+  *_s = 0;
+}
+
 static const char * set_trk_tag(int trk, const char * var, const char * val)
 {
+  if (trk > 0 && !strcmp(TAG68_REPLAY,var)) {
+    if (!val || !val[0]) {
+      msginf("track #%02d replay has been deleted\n", trk);
+      free_replay(dsk.disk, &dsk.disk->mus[trk-1].replay);
+    } else if (strcmp(val, dsk.disk->mus[trk-1].replay)) {
+      free_replay(dsk.disk, &dsk.disk->mus[trk-1].replay);
+      dsk.disk->mus[trk-1].replay = strdup68(val);
+      msginf("track #%02d replay has changed to -- '%s'\n",
+             trk, dsk.disk->mus[trk-1].replay);
+    }
+    return dsk.disk->mus[trk-1].replay;
+  }
   return tag_set(trk, var, val);
 }
 

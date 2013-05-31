@@ -1,6 +1,13 @@
-/* $Id: SC68debug_eval.h,v 2.0 2003/08/21 04:58:35 benjihan Exp $ */
+/**
+ * @ingroup  mksc68_eva
+ * @file     mksc68/mksc68_eva.h
+ * @author   Benjamin Gerard
+ * @date     2009-01-01
+ * @brief    expression eval
+ *
+ */
 
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _MKSC68_EVA_H_
 #define _MKSC68_EVA_H_

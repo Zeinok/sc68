@@ -3,9 +3,9 @@
  * @brief   various string functions
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-10-25 07:09:47 ben>
+ * Time-stamp: <2013-05-31 19:13:09 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

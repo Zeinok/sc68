@@ -3,9 +3,9 @@
  * @brief   the "load" command
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-11-03 13:31:26 ben>
+ * Time-stamp: <2013-05-31 19:16:48 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -80,12 +80,7 @@ int run_load(cmd_t * cmd, int argc, char ** argv)
   if (i < argc)
     msgwrn("%d extra parameters ignored\n", argc-i);
 
-  if (force) {
-    msgdbg("forcing new disk\n");
-    dsk_kill();
-  }
-
-  ret = dsk_load(filename, merge);
+  ret = dsk_load(filename, merge, force);
 
 
 error:

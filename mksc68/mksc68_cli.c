@@ -1,7 +1,7 @@
 /*
  *                      mksc68 - command line
  *
- *            Copyright (C) 1998-2009 Ben(jamin) Gerard
+ *            Copyright (C) 1998-2013 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
@@ -18,7 +18,6 @@
  * along with this program.
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id: sc68.c 57 2009-01-31 18:24:54Z benjihan $
  */
 
 #ifdef _HAVE_CONFIG_H_
@@ -167,7 +166,7 @@ int cli_read(char * argv[], int max)
   if (!cli) {
     return -1;
   }
-  
+
   /* Add to history before word parsing. */
   add_history(cli);
 

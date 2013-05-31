@@ -1,12 +1,12 @@
 /**
- * @ingroup   mksc68_prg
- * @file      mksc68_cli.h
- * @author    Benjamin Gerard
- * @date      2011/11/01
- * @brief     mksc68 command line header.
+ * @ingroup  mksc68_prg
+ * @file     mksc68_cli.h
+ * @author   Benjamin Gerard
+ * @date     2011-11-01
+ * @brief    mksc68 command line header.
  */
 
-/* Copyright (C) 1998-2011 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _MKSC68_CLI_H_
 #define _MKSC68_CLI_H_

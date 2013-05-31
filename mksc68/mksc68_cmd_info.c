@@ -3,9 +3,9 @@
  * @brief   the "info" command
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-11-03 13:34:17 ben>
+ * Time-stamp: <2013-05-31 01:01:03 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

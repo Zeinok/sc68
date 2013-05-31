@@ -1,6 +1,13 @@
-/* $Id$ */
+/**
+ * @ingroup  mksc68_prg
+ * @file     mksc68/mksc68_emu.h
+ * @author   Benjamin Gerard
+ * @date     2009-01-01
+ * @brief    sc68 emulator header.
+ *
+ */
 
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _MKSC68_EMU_H_
 #define _MKSC68_EMU_H_

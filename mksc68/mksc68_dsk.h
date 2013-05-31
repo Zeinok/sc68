@@ -7,13 +7,15 @@
  *
  */
 
+/* Copyright (C) 1998-2013 Benjamin Gerard */
+
 #ifndef _MKSC68_DSK_H_
 #define _MKSC68_DSK_H_
 
 #include "mksc68_def.h"
 
-EXTERN68 int dsk_new(const char * name);
-EXTERN68 int dsk_load(const char * url, int merge);
+EXTERN68 int dsk_new(const char * name, int force);
+EXTERN68 int dsk_load(const char * url, int merge, int force);
 EXTERN68 int dsk_merge(const char * url);
 EXTERN68 int dsk_save(const char * url, int version, int gzip);
 EXTERN68 int dsk_kill(void);

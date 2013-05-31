@@ -1,12 +1,12 @@
 /**
- * @ingroup   mksc68_prg
- * @file      mksc68_msg.h
- * @author    Benjamin Gerard
- * @date      2011/11/01
- * @brief     message output header.
+ * @ingroup  mksc68_prg
+ * @file     mksc68_msg.h
+ * @author   Benjamin Gerard
+ * @date     2011-11-01
+ * @brief    message output header.
  */
 
-/* Copyright (C) 1998-2011 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _MKSC68_MSG_H_
 #define _MKSC68_MSG_H_

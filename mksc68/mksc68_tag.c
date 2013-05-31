@@ -3,9 +3,9 @@
  * @brief   metatag definitions
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-10-27 13:21:02 ben>
+ * Time-stamp: <2013-05-31 19:12:50 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -55,7 +55,7 @@ static struct tag_std {
   { TAG68_COPYRIGHT  ,0, "copyright owner" },
   { TAG68_IMAGE      ,0, "URI of an illustration for this track/album" },
   { TAG68_RATE       ,0, "replay rate" },
-  { TAG68_REPLAY     ,0, "replay routine been usde by this track" },
+  { TAG68_REPLAY     ,0, "replay routine been used by this track" },
   { TAG68_RIPPER     ,0, "who rips the music from its original environment" },
   { TAG68_YEAR       ,0, "year (yyyy)" },
   { TAG68_COMPOSER   ,0, "original composer or author if this is a remake" },

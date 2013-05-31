@@ -3,9 +3,9 @@
  * @brief   sc68 maker program
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-11-04 06:56:18 ben>
+ * Time-stamp: <2013-05-31 19:21:36 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -65,7 +65,7 @@ static int print_usage(void)
      "  -v --verbose        Increase verbosity level\n"
      "  -q --quiet          Decrease verbosity level\n"
      "\n"
-     "Copyright (C) 1998-2011 Benjamin Gerard\n"
+     "Copyright (C) 1998-2013 Benjamin Gerard\n"
      "Visit <" PACKAGE_URL ">\n"
      "Report bugs to <" PACKAGE_BUGREPORT ">");
   return 1;
@@ -77,7 +77,7 @@ static int print_version(void)
   puts
     (PACKAGE_STRING "\n"
      "\n"
-     "Copyright (C) 1998-2011 Benjamin Gerard.\n"
+     "Copyright (C) 1998-2013 Benjamin Gerard.\n"
      "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
      "This is free software: you are free to change and redistribute it.\n"
      "There is NO WARRANTY, to the extent permitted by law.\n"

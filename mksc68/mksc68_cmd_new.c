@@ -3,9 +3,9 @@
  * @brief   the "new" command
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-11-03 13:33:56 ben>
+ * Time-stamp: <2013-05-31 00:56:28 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -76,12 +76,7 @@ int run_new(cmd_t * cmd, int argc, char ** argv)
   if (i < argc)
     msgwrn("%d extra parameters ignored\n", argc-i);
 
-  if (force) {
-    msgdbg("forcing new disk\n");
-    dsk_kill();
-  }
-
-  ret = dsk_new(diskname);
+  ret = dsk_new(diskname, force);
 
 error:
   return ret;
