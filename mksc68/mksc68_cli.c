@@ -33,17 +33,29 @@
 
 #include "mksc68_cli.h"
 #include "mksc68_msg.h"
+#include "mksc68_cmd.h"
+
+#include <sc68/string68.h>
 
 #ifdef HAVE_READLINE_READLINE_H
 # include <readline/readline.h>
-#else
-# undef HAVE_READLINE_HISTORY_H
-/* A very simple readline() replacement */
+# include <readline/history.h>
+#endif
+
+
+#ifndef HAVE_READLINE_READLINE_H
+
+/* A very simple replacement functions. */
+
+static void initialize_readline(void) {}
+static void add_history(const char *s) {}
+
 static char * readline (const char * prompt)
 {
   char tmp[1024], *s;
   if (prompt) {
     fputs(prompt, stdout);
+    fflush(stdout);
   }
   errno = 0;
   s = fgets(tmp, sizeof(tmp)-1, stdin);
@@ -53,23 +65,76 @@ static char * readline (const char * prompt)
   } else if (errno) {
     msgerr("readline: %s\n", strerror(errno));
   }
-
   return s;
 }
-#endif
 
-#ifdef HAVE_READLINE_HISTORY_H
-# include <readline/history.h>
-#else
-/* ... an even more simple add_history() replacement */
-static void add_history(const char *s) {}
+#else /* readline: the real deal */
+
+// static int idx; /* completiom index */
+static cmd_t * cmd;
+static int alt = 0;
+
+static char * command_generator(const char *text, int state)
+{
+  static int len;
+
+  if (!state) {
+    cmd = cmd_lst();
+    alt = 0;
+    len = strlen (text);
+  }
+
+  while (cmd) {
+    cmd_t * c = cmd;
+    cmd = cmd->nxt;
+    if (!cmd && !alt) {
+      cmd = cmd_lst();
+      alt = 1;
+    }
+    if (!alt && ! strncmp68(c->com, text, len))
+      return strdup68(c->com);
+    else if (alt && ! strncmp68(c->alt, text, len))
+      return strdup68(c->alt);
+  }
+  return 0;
+
+}
+
+static char ** mksc68_completion(const char * text, int start, int end)
+{
+  char ** matches = 0;
+
+  rl_sort_completion_matches = 1;
+
+  if (!start) {
+    matches = rl_completion_matches (text, command_generator);
+  }
+
+  rl_filename_completion_desired = 1;
+  rl_filename_quoting_desired    = 1;
+
+  return matches;
+}
+
+
+static void initialize_readline(void)
+{
+  rl_readline_name = "mksc68"; /* allow specific parsing of .inputrc  */
+  rl_attempted_completion_function = mksc68_completion;
+  rl_basic_quote_characters      = "";
+  rl_basic_word_break_characters = " ";    /* break between words */
+  rl_completer_quote_characters  = "\"";   /* char used to quote  */
+  rl_filename_quote_characters   = " ";    /* what needs to be quoted */
+}
+
 #endif
 
 static char * cli, * prompt;
 
+
 static char * killspace(char *s)
 {
-  while (isspace(*s)) s++;
+  while (isspace((int)*s)) s++;
   return s;
 }
 
@@ -92,15 +157,15 @@ char * word(char * word, char ** wordstart)
         --word;
         break;
       } else if (esc == '\\') {
-        /* backslashed */
+/* backslashed */
         esc = 0;
         start[len++] = c;
       } else if (esc == '"') {
-      /* quoted string */
-      if (c != '"')
-        start[len++] = c;
-      else
-        esc = 0;
+/* quoted string */
+        if (c != '"')
+          start[len++] = c;
+        else
+          esc = 0;
       } else if (c == '\\' || c == '"') {
         esc = c;
       } else if (!isspace(c)) {
@@ -161,14 +226,21 @@ char * cli_prompt(const char * fmt, ...)
 
 int cli_read(char * argv[], int max)
 {
+  char * strip;
+
+  initialize_readline();
+
   free(cli);
   cli = readline(prompt);
   if (!cli) {
     return -1;
   }
 
-  /* Add to history before word parsing. */
-  add_history(cli);
+  strip = killspace(cli);
+  if (*strip) {
+/* Add to history before word parsing. */
+    add_history(strip);
+  }
 
   return
     dispatch_word(argv, max, cli);
