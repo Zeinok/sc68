@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-22 15:31:06 ben>
+ * Time-stamp: <2013-05-29 06:49:34 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -275,7 +275,7 @@ int68_t mfp_get_tdr(mfp_t * const mfp, const int timer, const bogoc68_t bogoc)
    INDETERMINATE value is loaded into the main counter.
 
 */
-void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, bogoc68_t bogoc)
+void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
 {
   mfp_timer_t * const  ptimer = &mfp->timers[timer&3];
   const uint_t old_tdr = ptimer->tdr_res;
@@ -339,6 +339,8 @@ void mfp_put_tcr(mfp_t * const mfp,
       TRACE68(mfp_cat,
             "mfp: timer-%c -- mode not supported --  %02x\n",
             timer_def[timer].letter,(int)(u8)v);
+
+      assert( !!"mfp mode not supported" );
     }
     mfp_put_tcr_bogo(mfp->timers+timer, v&7, bogoc);
   } else {

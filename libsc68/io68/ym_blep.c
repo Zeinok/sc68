@@ -25,9 +25,9 @@
 #endif
 
 #ifdef HAVE_CONFIG_OPTION68_H
-# include <config_option68.h>
+# include "config_option68.h"
 #else
-# include <default_option68.h>
+# include "default_option68.h"
 #endif
 
 #include "ymemul.h"
@@ -289,7 +289,7 @@ static int mix_to_buffer(ym_t * const ym, cycle68_t cycles, s32 *output)
 {
   ym_blep_t *orig = &ym->emu.blep;
 
-  assert(cycles >= 0);
+ // assert(cycles >= 0);
 
   u32 len = 0;
   while (cycles) {
@@ -424,10 +424,14 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
   len += mix_to_buffer(ym, ymcycles - currcycle, output + len);
 
   /* Reset all access lists. */
-  ym_waccess_list_t * const regs_n = &ym->noi_regs;
-  ym_waccess_list_t * const regs_e = &ym->env_regs;
-  ym_waccess_list_t * const regs_t = &ym->ton_regs;
-  regs_n->head = regs_n->tail = regs_e->head = regs_e->tail = regs_t->head = regs_t->tail = 0;
+
+  //ym_waccess_list_t * const regs_n = &ym->noi_regs;
+  //ym_waccess_list_t * const regs_e = &ym->env_regs;
+  //ym_waccess_list_t * const regs_t = &ym->ton_regs;
+
+  ym->noi_regs.head = ym->noi_regs.tail =
+	  ym->env_regs.head = ym->env_regs.tail =
+	  ym->ton_regs.head = ym->ton_regs.tail = 0;
 
   /* Set free ptr to start of list */
   ym->waccess = ym->static_waccess;
@@ -455,7 +459,7 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
 }
 
 /* Get required length of buffer at run(s32 *output) (number of frames). */
-static int buffersize(const ym_t const * ym, const cycle68_t ymcycles)
+static int buffersize(const ym_t * const ym, const cycle68_t ymcycles)
 {
   return MAX_MIXBUF;
 }

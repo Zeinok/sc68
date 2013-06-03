@@ -1,4 +1,4 @@
-# Time-stamp: <2011-10-13 12:28:06 ben>
+# Time-stamp: <2013-05-14 11:44:22 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # | gstsc68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -45,4 +45,4 @@ libgstsc68_la_LIBADD       = $(SC68_LA)
 noinst_HEADERS             = gstsc68.h
 
 LIBTOOLFLAGS               = --tag=disable-static
-LFLAGS                     = -module -avoid-version -export-symbols-regex [_]*\(gst_\|Gst\|GST_\).* $(NOINSTALL)
+LFLAGS                     = -shared -module -avoid-version -export-symbols-regex [_]*\(gst_\|Gst\|GST_\).* $(NOINSTALL)

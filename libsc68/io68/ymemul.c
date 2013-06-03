@@ -29,9 +29,9 @@
 #endif
 
 #ifdef HAVE_CONFIG_OPTION68_H
-# include <config_option68.h>
+# include "config_option68.h"
 #else
-# include <default_option68.h>
+# include "default_option68.h"
 #endif
 
 #include "ymemul.h"
@@ -522,8 +522,9 @@ int ym_volume_model(ym_t * const ym, int model)
  * `-----------------------------------------------------------------'
  */
 
-int ym_sampling_rate(ym_t * const ym, int hz)
+int ym_sampling_rate(ym_t * const ym, const int chz)
 {
+  int hz = chz;
   switch (hz) {
 
   case YM_VOL_QUERY:
@@ -676,7 +677,7 @@ void ym_cleanup(ym_t * const ym)
 
 /** Get required output buffer size.
  */
-uint68_t ym_buffersize(const ym_t const * ym, const cycle68_t ymcycles)
+uint68_t ym_buffersize(const ym_t * const ym, const cycle68_t ymcycles)
 {
   return ym->cb_buffersize(ym,ymcycles);
 }

@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (C) 1998-2011 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _SC68_SC68_H_
 #define _SC68_SC68_H_
@@ -537,6 +537,41 @@ SC68_API
 int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info,
                     int track, sc68_disk_t disk);
 
+SC68_API
+/**
+ * Get disk/track meta tag.
+ *
+ * @param  sc68  sc68 instance
+ * @param  tag   tag to look for (tag68_t::key must be set).
+ * @param  track track number (0:disk tags, -1:current/default).
+ * @param  disk  disk to get information from (0 for current disk).
+ *
+ * @return error code
+ * @retval  0  Success.
+ * @retval -1  Failure.
+ *
+ */
+int sc68_tag_get(sc68_t * sc68, sc68_tag_t * tag,
+                 int track, sc68_disk_t disk);
+
+SC68_API
+/**
+ * Get disk/track meta tag.
+ *
+ * @param  sc68  sc68 instance
+ * @param  tag   result tag.
+ * @param  track track number (0:disk tags, -1:current/default).
+ * @param  idx   index of the metatag.
+ * @param  disk  disk to get information from (0 for current disk).
+ *
+ * @return error code
+ * @retval  0  Success.
+ * @retval -1  Failure.
+ *
+ */
+int sc68_tag_enum(sc68_t * sc68, sc68_tag_t * tag,
+                  int track, int idx, sc68_disk_t disk);
+
 /**
  * @}
  */
@@ -547,6 +582,7 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info,
  *  @{
  */
 
+SC68_API
 /**
  * Get official sc68 mime-type.
  * @retval  "audio/x-sc68"

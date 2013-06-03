@@ -3,9 +3,9 @@
  * @brief   sc68 API
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-11-15 16:12:38 ben>
+ * Time-stamp: <2013-05-31 07:40:17 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -178,7 +178,7 @@ extern int config68_option_count;      /* conf68.c */
 static int dbg68k;
 static const char not_available[] = SC68_NOFILENAME;
 
-static inline const char * ok_int(const int const err) {
+static inline const char * ok_int(const int err) {
   return !err ? "success" : "failure";
 }
 
@@ -188,7 +188,7 @@ static const char * sc68_name_not_null(sc68_t * sc68)
 }
 
 #ifndef HAVE_STPCPY
-static char *stpcpy(char *dst, const char *src) {
+static char *stpcpy(char *dst, const char * src) {
   char c;
   while (c = *src++, c)
     *dst++ = c;
@@ -214,8 +214,8 @@ static int init_emu68(sc68_t * const sc68, int * argc, char ** argv)
   int err;
 
   /* Initialize emu68 */
-  sc68_debug(sc68,"libsc68: initialise 68k emulator <%p,%s>\n",
-             sc68,sc68_name_not_null(sc68));
+  sc68_debug(sc68,"libsc68: initialise 68k emulator <%s>\n",
+             sc68_name_not_null(sc68));
   err = emu68_init(argc, argv);
   if (err) {
     sc68_error_add(sc68, "libsc68: failed to initialise 68k emulator");
@@ -247,8 +247,8 @@ static void safe_emu68_destroy(emu68_t **pemu)
 
 static void safe_destroy(sc68_t * sc68)
 {
-  sc68_debug(sc68,"libsc68: safe destroy <%p,%s>\n",
-             sc68,sc68_name_not_null(sc68));
+  sc68_debug(sc68,"libsc68: safe destroy <%s>\n",
+             sc68_name_not_null(sc68));
   sc68_debug(sc68,"libsc68: - unplug all\n");
   emu68_ioplug_unplug_all(sc68->emu68);
   sc68_debug(sc68,"libsc68: - destroy io\n");
@@ -301,7 +301,7 @@ static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
   }
   if (vector <= 48)
   sc68_debug(sc68,
-             "libsc68: 68k interruption -- emu68<%p,%s> sc68<%p,%s>\n"
+             "libsc68: 68k interruption -- emu68<%s> sc68<%s>\n"
              "         vector : %02x\n"
              "         type   : %s\n"
              "         pc:%08x sr:%04x\n"
@@ -309,7 +309,7 @@ static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
              "         d4:%08x d5:%08x d6:%08x d7:%08x\n"
              "         a0:%08x a1:%08x a2:%08x a3:%08x\n"
              "         a4:%08x a5:%08x a6:%08x a7:%08x\n",
-             emu68, emu68->name, sc68, sc68->name,
+             /*emu68, */emu68->name, /*sc68, */sc68->name,
              vector, irqname, pc, sr,
              emu68->reg.d[0], emu68->reg.d[1],
              emu68->reg.d[2], emu68->reg.d[3],
@@ -759,7 +759,7 @@ sc68_t * sc68_create(sc68_create_t * create)
 
 void sc68_destroy(sc68_t * sc68)
 {
-  sc68_debug(sc68,"libsc68: destroy sc68<%p,%s>\n", sc68, sc68_name_not_null(sc68));
+  sc68_debug(sc68,"libsc68: destroy sc68<%s>\n", sc68_name_not_null(sc68));
   if (sc68) {
     sc68_free(sc68->mix.buffer);
     sc68_close(sc68);
@@ -768,7 +768,7 @@ void sc68_destroy(sc68_t * sc68)
     safe_destroy(sc68);
     sc68_free(sc68);
   }
-  sc68_debug(sc68,"libsc68: sc68<%p> destroyed\n", sc68);
+  sc68_debug(sc68,"libsc68: sc68<> destroyed\n"/*, sc68*/);
 }
 
 const char * sc68_name(sc68_t * sc68)
@@ -996,7 +996,7 @@ static int run_music_init(sc68_t * sc68, music68_t * m, int a0, int a6)
       | ( ('A'+m->has.asid_tB) << 16 )
       | ( ('A'+m->has.asid_tC) <<  8 )
       | ( ('A'+m->has.asid_tX) <<  0 );
-    
+
   sc68->emu68->reg.a[7] = sc68->emu68->memmsk+1-16;
   sc68->emu68->reg.pc   = sc68->playaddr;
   sc68->emu68->reg.sr   = 0x2300;
@@ -1637,7 +1637,7 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track, sc68_dis
   info->trk.ym     = m->hwflags.bit.ym;
   info->trk.ste    = m->hwflags.bit.ste;
   info->trk.amiga  = m->hwflags.bit.amiga;
-  info->trk.hw      = hwtable[info->trk.ym+(info->trk.ste<<1)+(info->trk.amiga<<2)];
+  info->trk.hw     = hwtable[info->trk.ym+(info->trk.ste<<1)+(info->trk.amiga<<2)];
 
   info->trk.tags   = file68_tag_count(d, track);
   info->trk.tag    = (sc68_tag_t *) m->tags.array;
@@ -1648,6 +1648,45 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track, sc68_dis
 
   return 0;
 }
+
+
+int sc68_tag_get(sc68_t * sc68, sc68_tag_t * tag, int track,
+                 sc68_disk_t disk)
+{
+  disk68_t  * d;
+
+  /* If disk is given use it, else use sc68 disk. */
+  d = disk ? disk : (sc68 ? sc68->disk : 0);
+  if (!d || !tag)
+    return -1;
+
+  /* Asking for current or default track */
+  if (track == -1)
+    track = (disk || !sc68->track) ? d->def_mus+1 : sc68->track;
+
+  tag->val = (char *) file68_tag_get(d, track, tag->key);
+  return -!tag->val;
+}
+
+int sc68_tag_enum(sc68_t * sc68, sc68_tag_t * tag, int track, int idx,
+                 sc68_disk_t disk)
+{
+  disk68_t  * d;
+
+  /* If disk is given use it, else use sc68 disk. */
+  d = disk ? disk : (sc68 ? sc68->disk : 0);
+  if (!d || !tag)
+    return -1;
+
+  /* Asking for current or default track */
+  if (track == -1)
+    track = (disk || !sc68->track) ? d->def_mus+1 : sc68->track;
+
+  return file68_tag_enum(d, track, idx,
+                         (const char **)&tag->key,
+                         (const char **)&tag->val);
+}
+
 
 #if 0
 sc68_music_info_t * sc68_music_info(sc68_t * sc68, int track, sc68_disk_t disk)

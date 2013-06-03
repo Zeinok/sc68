@@ -50,7 +50,7 @@ EMU68_EXTERN
  *  @return        nornmalized result
  *  @retval        d + s + c
  */
-int68_t add68(emu68_t * const emu68, int68_t s, int68_t d, int68_t c);
+int68_t add68(emu68_t * const emu68, const int68_t s, int68_t d, int68_t c);
 
 EMU68_EXTERN
 /** 68K SUB/X instruction.
@@ -65,7 +65,7 @@ EMU68_EXTERN
  *  @return        nornmalized result
  *  @retval        d - s - c
  */
-int68_t sub68(emu68_t * const emu68, int68_t s, int68_t d, int68_t c);
+int68_t sub68(emu68_t * const emu68, const int68_t s, int68_t d, int68_t c);
 
 EMU68_EXTERN
 /** 68K CMP instruction.
@@ -77,7 +77,7 @@ EMU68_EXTERN
  *  @param  s      normalized source operand
  *  @param  d      normalized destination operand
  */
-void cmp68(emu68_t * const emu68, int68_t s, int68_t d);
+void cmp68(emu68_t * const emu68, const int68_t s, int68_t d);
 
 EMU68_EXTERN
 /** 68k NEG/X instruction.
@@ -105,7 +105,7 @@ EMU68_EXTERN
  *  @return        normalized long result
  *  @retval        d * s
  */
-int68_t muls68(emu68_t * const emu68, int68_t s, int68_t d);
+int68_t muls68(emu68_t * const emu68, const int68_t s, int68_t d);
 
 EMU68_EXTERN
 /** 68K MULU instruction.
@@ -119,7 +119,7 @@ EMU68_EXTERN
  *  @return        normalized long result
  *  @retval        d * s
  */
-int68_t mulu68(emu68_t * const emu68, uint68_t s, uint68_t d);
+int68_t mulu68(emu68_t * const emu68, const uint68_t s, uint68_t d);
 
 EMU68_EXTERN
 /** 68K DIVS instruction.
@@ -136,7 +136,7 @@ EMU68_EXTERN
  *  @retval        MSW:d%s LSW:d/s
  *  @retval        unchanged d in case of overflow
  */
-int68_t divs68(emu68_t * const emu68, int68_t s, int68_t d);
+int68_t divs68(emu68_t * const emu68, const int68_t s, int68_t d);
 
 EMU68_EXTERN
 /** 68K DIVU instruction.
@@ -153,7 +153,7 @@ EMU68_EXTERN
  *  @retval        MSW:d%s LSW:d/s
  *  @retval        unchanged d in case of overflow
  */
-int68_t divu68(emu68_t * const emu68, uint68_t s, uint68_t d);
+int68_t divu68(emu68_t * const emu68, const uint68_t s, uint68_t d);
 
 EMU68_EXTERN
 /** 68K CLR instruction.
@@ -187,7 +187,7 @@ EMU68_EXTERN
  *  @return        normalized result
  *  @retval        d & s
 */
-int68_t and68(emu68_t * const emu68, int68_t s, int68_t d);
+int68_t and68(emu68_t * const emu68, const int68_t s, int68_t d);
 
 EMU68_EXTERN
 /** 68K OR instruction.
@@ -201,7 +201,7 @@ EMU68_EXTERN
  *  @return        normalized result
  *  @retval        d | s
 */
-int68_t orr68(emu68_t * const emu68, int68_t s, int68_t d);
+int68_t orr68(emu68_t * const emu68, const int68_t s, int68_t d);
 
 EMU68_EXTERN
 /** 68K EOR instruction.
@@ -215,7 +215,7 @@ EMU68_EXTERN
  *  @return        normalized result
  *  @retval        d ^ s
 */
-int68_t eor68(emu68_t * const emu68, int68_t s, int68_t d);
+int68_t eor68(emu68_t * const emu68, const int68_t s, int68_t d);
 
 EMU68_EXTERN
 /** 68K NOT instruction.
@@ -612,7 +612,7 @@ EMU68_EXTERN
  *  @return        result
  *  @retval        s,10 + d,10 + X
  */
-int68_t abcd68(emu68_t * const emu68, int68_t s, int68_t d);
+int68_t abcd68(emu68_t * const emu68, const int68_t s, int68_t d);
 
 EMU68_EXTERN
 /** Substract Binary Coded Decimal with extend.
@@ -625,7 +625,7 @@ EMU68_EXTERN
  *  @return        result
  *  @retval        d,10 - s,10 - X
  */
-int68_t sbcd68(emu68_t * const emu68, int68_t s, int68_t d);
+int68_t sbcd68(emu68_t * const emu68, const int68_t s, int68_t d);
 
 /** @} */
 

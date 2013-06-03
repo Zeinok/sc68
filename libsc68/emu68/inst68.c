@@ -106,37 +106,37 @@ void linef68(emu68_t * const emu68)
 
 #include "inl68_arithmetic.h"
 
-int68_t add68(emu68_t * const emu68, int68_t s, int68_t d, int68_t c)
+int68_t add68(emu68_t * const emu68, const int68_t s, int68_t d, int68_t c)
 {
   return inl_add68(emu68, s, d, c);
 }
 
-int68_t sub68(emu68_t * const emu68, int68_t s, int68_t d, int68_t c)
+int68_t sub68(emu68_t * const emu68, const int68_t s, int68_t d, int68_t c)
 {
   return inl_sub68(emu68, s, d, c);
 }
 
-void cmp68(emu68_t * const emu68, int68_t s, int68_t d)
+void cmp68(emu68_t * const emu68, const int68_t s, int68_t d)
 {
   inl_cmp68(emu68, s, d);
 }
 
-int68_t muls68(emu68_t * const emu68, int68_t s, int68_t d)
+int68_t muls68(emu68_t * const emu68, const int68_t s, int68_t d)
 {
   return inl_muls68(emu68, s, d);
 }
 
-int68_t mulu68(emu68_t * const emu68, uint68_t s, uint68_t d)
+int68_t mulu68(emu68_t * const emu68, const uint68_t s, uint68_t d)
 {
   return inl_mulu68(emu68, s, d);
 }
 
-int68_t divs68(emu68_t * const emu68, int68_t s, int68_t d)
+int68_t divs68(emu68_t * const emu68, const int68_t s, int68_t d)
 {
   return inl_divs68(emu68, s, d);
 }
 
-int68_t divu68(emu68_t * const emu68, uint68_t s, uint68_t d)
+int68_t divu68(emu68_t * const emu68, const uint68_t s, uint68_t d)
 {
   return inl_divu68(emu68, s, d);
 }
@@ -173,7 +173,7 @@ int68_t eor68(emu68_t * const emu68, const int68_t s, int68_t d)
   return inl_eor68(emu68, s, d);
 }
 
-int68_t not68(emu68_t * const emu68, const int68_t d)
+int68_t not68(emu68_t * const emu68, int68_t d)
 {
   return inl_not68(emu68, d);
 }
@@ -264,12 +264,12 @@ int68_t bchg68(emu68_t * const emu68, const int68_t v, const int bit)
 
 #include "inl68_bcd.h"
 
-int68_t abcd68(emu68_t * const emu68, int68_t a, int68_t b)
+int68_t abcd68(emu68_t * const emu68, const int68_t a, int68_t b)
 {
   return inl_abcd68(emu68, a, b);
 }
 
-int68_t sbcd68(emu68_t * const emu68, int68_t a, int68_t b)
+int68_t sbcd68(emu68_t * const emu68, const int68_t a, int68_t b)
 {
   return inl_sbcd68(emu68, a, b);
 }
@@ -362,7 +362,7 @@ void tst68(emu68_t * const emu68, const int68_t a)
   inl_tst68(emu68, a);
 }
 
-int68_t tas68(emu68_t * const emu68, int68_t d)
+int68_t tas68(emu68_t * const emu68, const int68_t d)
 {
   return inl_tas68(emu68, d);
 }

@@ -363,7 +363,7 @@ static gboolean gst_sc68_task_load(Gstsc68 * filter)
   gst_query_parse_segment(q, &seg_rate, &seg_fmt, &seg_start, &seg_stop);
   if (seg_fmt != GST_FORMAT_BYTES || seg_start != 0 || seg_stop < 256) {
     GST_ERROR_OBJECT(filter, "invalid segment <%s> <%d-%d>",
-                     gst_format_get_name(seg_fmt),    seg_start,seg_stop);
+                     gst_format_get_name(seg_fmt),    (int)seg_start,(int)seg_stop);
     goto exit;
   }
   if (!gst_pad_check_pull_range(filter->sinkpad)) {

@@ -278,9 +278,9 @@ static inline void _write_EAL(emu68_t * const emu68,
  *  @{
  */
 EMU68_EXTERN
-int68_t mem68_nextw(emu68_t * emu68);  /**< Decode word and update PC */
+int68_t mem68_nextw(emu68_t * const emu68);  /**< Decode word and update PC */
 EMU68_EXTERN
-int68_t mem68_nextl(emu68_t * emu68);  /**< Decode long and update PC */
+int68_t mem68_nextl(emu68_t * const emu68);  /**< Decode long and update PC */
 
 /** mem68_nextw() convenience macro */
 #define get_nextw() mem68_nextw(emu68)
@@ -293,18 +293,22 @@ int68_t mem68_nextl(emu68_t * emu68);  /**< Decode long and update PC */
 /** @name Stack access.
  *  @{
  */
-EMU68_EXTERN void mem68_pushl(emu68_t * emu68, int68_t v);  /**< Push long */
-EMU68_EXTERN void mem68_pushw(emu68_t * emu68, int68_t v);  /**< Push word */
-EMU68_EXTERN int68_t mem68_popl(emu68_t * emu68);           /**< Pop long  */
-EMU68_EXTERN int68_t mem68_popw(emu68_t * emu68);           /**< Pop word  */
+/** Push long. */
+EMU68_EXTERN void mem68_pushl(emu68_t * const emu68, const int68_t v);
+/**< Push word. */
+EMU68_EXTERN void mem68_pushw(emu68_t * const emu68, const int68_t v);
+/**< Pop long.  */
+EMU68_EXTERN int68_t mem68_popl(emu68_t * const emu68);
+/**< Pop word.  */
+EMU68_EXTERN int68_t mem68_popw(emu68_t * const emu68);
 
-/** mem68_pushl() convenience macro */
+/** mem68_pushl() convenience macro. */
 #define pushl(V) mem68_pushl(emu68,(V));
-/** mem68_pushw() convenience macro */
+/** mem68_pushw() convenience macro. */
 #define pushw(V) mem68_pushw(emu68,(V));
-/** mem68_popl() convenience macro */
+/** mem68_popl() convenience macro. */
 #define popl() mem68_popl(emu68);
-/** mem68_popw() convenience macro */
+/** mem68_popw() convenience macro. */
 #define popw() mem68_popw(emu68);
 
 /** @} */

@@ -63,7 +63,7 @@ int68_t inl_lsr68(emu68_t * const emu68, uint68_t d, int s, const int l)
   } else {
     const uint68_t m = NRM_MSK(l);
     d >>= s;
-    ccr = -( ( d >> ( SIGN_BIT - l ) ) & 1 ) & ( SR_X | SR_C ); /* X & C */
+    ccr = -(int)( ( d >> ( SIGN_BIT - l ) ) & 1 ) & ( SR_X | SR_C ); /* X & C */
     d = ( d >> 1 ) & m;
   }
   ccr |= -!d & SR_Z;                              /* Z */
@@ -130,7 +130,7 @@ int68_t inl_rol68(emu68_t * const emu68, uint68_t d, int s, const int l)
     const uint68_t m = NRM_MSK(l);
     inl_addcycle68(emu68, 2*s);
     d    = ( ( d << ( s & l ) ) | ( d >> ( -s & l ) ) ) & m;
-    ccr |= -( ( d >> (SIGN_FIX - l) ) & 1 ) & SR_C; /* C is LSB */
+    ccr |= -(int)( ( d >> (SIGN_FIX - l) ) & 1 ) & SR_C; /* C is LSB */
   }
   ccr |= -!d & SR_Z;                              /* Z */
   ccr |= ( d >> ( SIGN_BIT - SR_N_BIT ) ) & SR_N; /* N */

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-11-07 14:52:27 ben>
+ * Time-stamp: <2013-06-03 08:07:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -254,7 +254,7 @@ static void PutX(istream68_t *out, int v)
 static int ReadTrackNumber(char **ps, int max)
 {
   int n;
-  if (!isdigit(**ps)) {
+  if (!isdigit((int)**ps)) {
     return -1;
   }
   n = strtol(*ps, ps, 10);
@@ -427,7 +427,7 @@ int main(int argc, char ** argv)
 
   /* Main loop */
   for (++i; i<argc; ++i) {
-    if (!trackList && argv[i][0] == '-' && isdigit(argv[i][1])) {
+    if (!trackList && argv[i][0] == '-' && isdigit((int)argv[i][1])) {
       int res;
       trackList = argv[i]+1;
       res = ReadTrackList(&trackList, d->nb_mus, &curTrack , &toTrack);
@@ -548,7 +548,7 @@ int main(int argc, char ** argv)
             const char * val;
             if (end = strchr(key,'}'), end) {
               *end = 0;
-              val = file68_tag_get(d, isupper(*key) ? 0 : curTrack, key);
+              val = file68_tag_get(d, isupper((int)*key) ? 0 : curTrack, key);
               if (val) PutS(out,val);
               *end = '}';
               s = end;

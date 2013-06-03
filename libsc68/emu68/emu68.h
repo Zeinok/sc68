@@ -5,7 +5,7 @@
  * @date      1999/03/13
  * @brief     68K emulator header.
  */
-/* Time-stamp: <2013-05-13 02:06:57 ben> */
+/* Time-stamp: <2013-05-25 02:01:05 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -182,7 +182,7 @@ EMU68_API
  *  @param  io     pointer to the only io that could possibly interrupt
  *  @return        pointer to previous interrupt IO
  */
-io68_t * emu68_set_interrupt_io(emu68_t * const emu68, io68_t * io);
+io68_t * emu68_set_interrupt_io(emu68_t * const emu68, io68_t * const io);
 
 EMU68_API
 /**

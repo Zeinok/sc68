@@ -24,7 +24,7 @@ void inl_tst68(emu68_t * const emu68, const int68_t a)
 }
 
 static inline
-int68_t inl_tas68(emu68_t * const emu68, int68_t d)
+int68_t inl_tas68(emu68_t * const emu68, const int68_t d)
 {
   inl_tst68(emu68, d << BYTE_FIX);
   return d | 0x80;

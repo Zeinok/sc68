@@ -74,7 +74,7 @@ void emu68_ioplug_destroy_all(emu68_t * const emu68)
  *
  *  return 0 if IO successfully unplugged
  */
-int emu68_ioplug_unplug(emu68_t * const emu68, io68_t *this_io)
+int emu68_ioplug_unplug(emu68_t * const emu68, io68_t * const this_io)
 {
   io68_t *io,**pio;
 

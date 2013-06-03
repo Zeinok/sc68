@@ -29,9 +29,9 @@
 #endif
 
 #ifdef HAVE_CONFIG_OPTION68_H
-# include <config_option68.h>
+# include "config_option68.h"
 #else
-# include <default_option68.h>
+# include "default_option68.h"
 #endif
 
 
@@ -1085,7 +1085,7 @@ int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
 
 
 static
-int buffersize(const ym_t const * ym, const cycle68_t ymcycles)
+int buffersize(const ym_t * const ym, const cycle68_t ymcycles)
 {
   return ((ymcycles+7u) >> 3);
 }

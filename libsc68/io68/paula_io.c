@@ -187,7 +187,7 @@ static inline void stop_DMA(paula_t * const paula, const int bit)
 }
 
 /* Reload paula internal register with current value */
-static void reload(paulav_t * v, const u8 * p, const int fix)
+static void reload(paulav_t * const v, const u8 * const p, const int fix)
 {
   plct_t len;
 

@@ -45,7 +45,7 @@ void mwio_shutdown(void);
 
 IO68_EXTERN
 /** Create a microwire plugin instance. */
-io68_t * mwio_create(emu68_t * emu68, mw_parms_t * const parms);
+io68_t * mwio_create(emu68_t * const emu68, mw_parms_t * const parms);
 
 IO68_EXTERN
 /** Get/Set sampling rate.

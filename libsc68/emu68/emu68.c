@@ -52,7 +52,7 @@ EMU68_EXTERN linefunc68_t *line_func[1024];
 /*  Set new interrupt IO
  *  return previous pointer
  */
-io68_t * emu68_set_interrupt_io(emu68_t * emu68, io68_t * io)
+io68_t * emu68_set_interrupt_io(emu68_t * const emu68, io68_t * const io)
 {
   io68_t * oldio = 0;
   if (emu68) {
@@ -176,7 +176,7 @@ u8 * emu68_memptr(emu68_t * const emu68, addr68_t dst, uint68_t sz)
   u8 * ptr = 0;
   if (emu68) {
     addr68_t end = (dst+sz)&MEMMSK68;
-    if (sz > MEMMSK68+1) {
+	if (sz > (uint68_t) MEMMSK68+1) {
       emu68_error_add(emu68,
                       "Not enough 68K memory ($%X>=$%X)",sz,emu68->memmsk);
     } else if (end < dst) {

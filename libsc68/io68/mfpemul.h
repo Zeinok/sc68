@@ -308,7 +308,7 @@ IO68_EXTERN
  *  @retval  0  Success
  *  @retval -1  Failure
  */
-int mfp_reset(mfp_t * const mfp, bogoc68_t bogoc);
+int mfp_reset(mfp_t * const mfp, const bogoc68_t bogoc);
 
 IO68_EXTERN
 /** Destroy mfp instance.
@@ -365,7 +365,7 @@ IO68_EXTERN
  *  @retval 0 no pending interruption.
  *
  */
-interrupt68_t * mfp_interrupt(mfp_t * const mfp, bogoc68_t bogoc);
+interrupt68_t * mfp_interrupt(mfp_t * const mfp, const bogoc68_t bogoc);
 
 IO68_EXTERN
 /** Get cycle for the next MFP interruption.

@@ -29,9 +29,9 @@
 #endif
 
 #ifdef HAVE_CONFIG_OPTION68_H
-# include <config_option68.h>
+# include "config_option68.h"
 #else
-# include <default_option68.h>
+# include "default_option68.h"
 #endif
 
 #include "io68/paulaemul.h"
