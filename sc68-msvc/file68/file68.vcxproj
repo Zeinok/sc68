@@ -1,0 +1,158 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\file68\src\endian68.c" />
+    <ClCompile Include="..\..\file68\src\error68.c" />
+    <ClCompile Include="..\..\file68\src\file68.c" />
+    <ClCompile Include="..\..\file68\src\gzip68.c" />
+    <ClCompile Include="..\..\file68\src\ice68.c" />
+    <ClCompile Include="..\..\file68\src\init68.c" />
+    <ClCompile Include="..\..\file68\src\istream68.c" />
+    <ClCompile Include="..\..\file68\src\istream68_ao.c" />
+    <ClCompile Include="..\..\file68\src\istream68_curl.c" />
+    <ClCompile Include="..\..\file68\src\istream68_fd.c" />
+    <ClCompile Include="..\..\file68\src\istream68_file.c" />
+    <ClCompile Include="..\..\file68\src\istream68_mem.c" />
+    <ClCompile Include="..\..\file68\src\istream68_null.c" />
+    <ClCompile Include="..\..\file68\src\istream68_z.c" />
+    <ClCompile Include="..\..\file68\src\msg68.c" />
+    <ClCompile Include="..\..\file68\src\option68.c" />
+    <ClCompile Include="..\..\file68\src\registry68.c" />
+    <ClCompile Include="..\..\file68\src\rsc68.c" />
+    <ClCompile Include="..\..\file68\src\string68.c" />
+    <ClCompile Include="..\..\file68\src\timedb68.c" />
+    <ClCompile Include="..\..\file68\src\url68.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\file68\sc68\alloc68.h" />
+    <ClInclude Include="..\..\file68\sc68\audio68.h" />
+    <ClInclude Include="..\..\file68\sc68\chunk68.h" />
+    <ClInclude Include="..\..\file68\sc68\endian68.h" />
+    <ClInclude Include="..\..\file68\sc68\error68.h" />
+    <ClInclude Include="..\..\file68\sc68\file68.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_api.h" />
+    <ClInclude Include="..\..\file68\sc68\gzip68.h" />
+    <ClInclude Include="..\..\file68\sc68\ice68.h" />
+    <ClInclude Include="..\..\file68\sc68\istream68.h" />
+    <ClInclude Include="..\..\file68\sc68\istream68_ao.h" />
+    <ClInclude Include="..\..\file68\sc68\istream68_curl.h" />
+    <ClInclude Include="..\..\file68\sc68\istream68_def.h" />
+    <ClInclude Include="..\..\file68\sc68\istream68_fd.h" />
+    <ClInclude Include="..\..\file68\sc68\istream68_file.h" />
+    <ClInclude Include="..\..\file68\sc68\istream68_mem.h" />
+    <ClInclude Include="..\..\file68\sc68\istream68_null.h" />
+    <ClInclude Include="..\..\file68\sc68\istream68_z.h" />
+    <ClInclude Include="..\..\file68\sc68\msg68.h" />
+    <ClInclude Include="..\..\file68\sc68\option68.h" />
+    <ClInclude Include="..\..\file68\sc68\registry68.h" />
+    <ClInclude Include="..\..\file68\sc68\rsc68.h" />
+    <ClInclude Include="..\..\file68\sc68\string68.h" />
+    <ClInclude Include="..\..\file68\sc68\tag68.h" />
+    <ClInclude Include="..\..\file68\sc68\url68.h" />
+    <ClInclude Include="..\..\file68\src\timedb.inc.h" />
+    <ClInclude Include="..\zlib\zconf.h" />
+    <ClInclude Include="..\zlib\zlib.h" />
+    <ClInclude Include="config.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="..\zlib\zlib-mt.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\zlib\README.txt" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{65AF7FE8-8C9E-43D7-9C84-43140F89F0D5}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>file68</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)/..;$(ProjectDir)/../zlib;$(ProjectDir)/../../file68/sc68;$(ProjectDir)/../../unice68</AdditionalIncludeDirectories>
+      <ExceptionHandling>false</ExceptionHandling>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <CompileAsManaged>false</CompileAsManaged>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <StringPooling>false</StringPooling>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <FloatingPointExceptions>true</FloatingPointExceptions>
+      <CreateHotpatchableImage>false</CreateHotpatchableImage>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <OpenMPSupport>false</OpenMPSupport>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)/..;$(ProjectDir)/../zlib;$(ProjectDir)/../../file68/sc68;$(ProjectDir)/../../unice68</AdditionalIncludeDirectories>
+      <ExceptionHandling>false</ExceptionHandling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <StringPooling>true</StringPooling>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FloatingPointExceptions>false</FloatingPointExceptions>
+      <CreateHotpatchableImage>false</CreateHotpatchableImage>
+      <RuntimeTypeInfo>false</RuntimeTypeInfo>
+      <OpenMPSupport>false</OpenMPSupport>
+      <CompileAs>CompileAsC</CompileAs>
+      <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
