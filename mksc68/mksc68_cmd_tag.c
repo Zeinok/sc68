@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-31 19:17:49 ben>
+ * Time-stamp: <2013-06-03 08:01:59 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -38,6 +38,8 @@
 
 #include <string.h>
 #include <stdio.h>
+
+#include <sc68/tag68.h>
 
 static const opt_t longopts[] = {
   { "help",       0, 0, 'h' },
@@ -88,23 +90,51 @@ int list_all_tags(void)
 }
 
 static
+const char * special_tags[] = {
+  TAG68_REPLAY, TAG68_RATE, TAG68_LENGTH, TAG68_FRAMES, TAG68_HASH, TAG68_URI
+};
+
+static
+const int special_count = sizeof(special_tags) / sizeof(*special_tags);
+
+
+static
 void view_tags(int trk, int argc, char ** argv)
 {
   const int max = tag_max();
   const char * var, * val;
   int i;
+  const char * fmt = "%02d:%-12s \"%s\"\n";
 
   for (i=0; i<max; ++i) {
     if (tag_enum(trk, i, &var, &val) < 0)
       continue;
     if (!argc)
-      printf("%02d:%-12s \"%s\"\n", trk, var, val);
+      printf(fmt, trk, var, val);
     else {
       int i;
       for (i=0; i<argc; ++i) {
         if (!strcmp(argv[i],var)) {
-          printf("%02d:%-12s \"%s\"\n", trk, var, val);
+          printf(fmt, trk, var, val);
           break;
+        }
+      }
+    }
+  }
+  /* handle internal tags */
+  for (i=0; i<special_count; ++i) {
+    var = special_tags[i];
+    val = dsk_tag_get(trk, var);
+    if (val) {
+      if (!argc) {
+        printf(fmt, trk, var, val);
+      } else {
+        int i;
+        for (i=0; i<argc; ++i) {
+          if (!strcmp(argv[i],var)) {
+            printf(fmt, trk, var, val);
+            break;
+          }
         }
       }
     }

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-31 19:12:50 ben>
+ * Time-stamp: <2013-06-03 08:10:20 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -60,10 +60,15 @@ static struct tag_std {
   { TAG68_YEAR       ,0, "year (yyyy)" },
   { TAG68_COMPOSER   ,0, "original composer or author if this is a remake" },
   { TAG68_CONVERTER  ,0, "who converts the track to this format" },
+  { TAG68_LENGTH     ,0, "duration in milliseconds" },
+  { TAG68_FRAMES     ,0, "duration in frames" },
+  { TAG68_HASH       ,0, "file content hash code" },
+  { TAG68_URI        ,0, "URI or path for this file" },
 
   /* Aliases */
-  { "author"     ,1, TAG68_ARTIST },
-  { "album"      ,1, TAG68_TITLE  },
+  { "author"         ,1, TAG68_ARTIST },
+  { "album"          ,1, TAG68_TITLE  },
+  { TAG68_DURATION   ,1,TAG68_LENGTH },
 
 };
 

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-31 19:17:01 ben>
+ * Time-stamp: <2013-06-02 22:01:32 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -87,7 +87,7 @@ static void play_info(playinfo_t * pi)
       msginf("Disk tags:\n");
       for (i=2; i<info.dsk.tags; ++i)
         msginf("%c%-*s : %s\n",
-               toupper(*info.dsk.tag[i].key),
+               toupper((int) *info.dsk.tag[i].key),
                len-1,
                info.dsk.tag[i].key+1,
                info.dsk.tag[i].val);
@@ -97,7 +97,7 @@ static void play_info(playinfo_t * pi)
       msginf("Track tags:\n");
       for (i=2; i<info.trk.tags; ++i)
         msginf("%c%-*s : %s\n",
-               toupper(*info.trk.tag[i].key),
+               toupper((int) *info.trk.tag[i].key),
                len-1,
                info.trk.tag[i].key+1,
                info.trk.tag[i].val);

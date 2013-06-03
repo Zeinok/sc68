@@ -1,21 +1,25 @@
 /*
- *                      mksc68 - command line
+ * @file    mksc68_cli.c
+ * @brief   command line functions.
+ * @author  http://sourceforge.net/users/benjihan
  *
- *            Copyright (C) 1998-2013 Ben(jamin) Gerard
- *           <benjihan -4t- users.sourceforge -d0t- net>
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * Time-stamp: <2013-06-02 21:17:22 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the  GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
@@ -191,14 +195,12 @@ int dispatch_word(char ** here, int max, char *str)
     str = word(str, &start);
     if (!start) break;
     assert (i < 512);
-/*     msgdbg("arg[%2d]=%s\n", i, start); */
     if (i < max) {
       here[i] = start;
     } else {
       msgwrn("skipping arg[%2d] (%s)\n", i, start);
     }
   }
-/*   msgdbg("cli: %d args\n", i); */
   return i;
 }
 
@@ -238,7 +240,6 @@ int cli_read(char * argv[], int max)
 
   strip = killspace(cli);
   if (*strip) {
-/* Add to history before word parsing. */
     add_history(strip);
   }
 

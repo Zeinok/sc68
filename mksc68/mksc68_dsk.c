@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-31 19:16:00 ben>
+ * Time-stamp: <2013-06-03 08:01:53 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -280,6 +280,42 @@ const char * dsk_tag_get(int trk, const char * var)
   if (trk && !is_valid_track(trk))
     return 0;
   val = tag_get(trk, var);
+  if (!val) {
+    static char str[64];
+    const int max = sizeof(str)-1;
+    music68_t * m = dsk.disk->mus + trk - 1;
+
+    if ( ! strcmp (var, TAG68_REPLAY) && trk) {
+      val = m->replay;
+    }
+    else if ( ! strcmp (var, TAG68_HASH) && !trk) {
+      snprintf(str, max, "%08x", (uint32_t) dsk.disk->hash);
+      val = str;
+    }
+    else if ( ! strcmp (var, TAG68_FRAMES) && trk) {
+      snprintf(str, max, "%u", m->total_fr);
+      val = str;
+    }
+    else if ( ! strcmp (var, TAG68_LENGTH)) {
+      unsigned int ms = !trk
+        ? dsk.disk->time_ms
+        : m->total_ms
+        ;
+      /* unsigned int h, m , s; */
+      /* h = ms / 3600000u; */
+      /* m = ms % 3600000u / 60000u; */
+      /* s = ms % 60000u / 1000u; */
+      /* ms %= 1000u; */
+      snprintf(str, max, "%u", ms);
+      val = str;
+    }
+    else if ( ! strcmp (var, TAG68_RATE) && trk) {
+      snprintf(str, max, "%u", m->frq);
+      val = str;
+    } else if ( ! strcmp (var, TAG68_URI) && !trk) {
+      val = dsk.filename;
+    }
+  }
   return val;
 }
 

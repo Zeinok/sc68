@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-31 01:01:03 ben>
+ * Time-stamp: <2013-06-02 22:01:50 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -60,7 +60,7 @@ static void pinf(const char * label, const char * value)
 {
   const int ll = 11;                    /* label length */
   if (label && *label && value)
-    msginf("%c%-*s : %s\n", toupper(label[0]), ll-1, label+1, value);
+    msginf("%c%-*s : %s\n", toupper((int) label[0]), ll-1, label+1, value);
 }
 
 static void iinf(const char * label, int value)
