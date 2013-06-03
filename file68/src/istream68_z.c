@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-15 16:34:25 ben>
+ * Time-stamp: <2013-05-24 21:51:26 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -29,6 +29,7 @@
 #endif
 #include "file68_api.h"
 #include "istream68_z.h"
+#include "msg68.h"
 
 /** Default gzip option. */
 const istream68_z_option_t istream68_z_default_option = {
@@ -42,7 +43,6 @@ const istream68_z_option_t istream68_z_default_option = {
 
 #include "istream68_def.h"
 #include "alloc68.h"
-#include "msg68.h"
 #include "string68.h"
 
 #include <zlib.h>

@@ -3,9 +3,9 @@
  * @brief   load and save sc68 stream
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-11-21 19:59:29 ben>
+ * Time-stamp: <2013-06-03 07:40:51 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -47,6 +47,7 @@
 #include "gzip68.h"
 #include "ice68.h"
 #include "url68.h"
+#include "timedb68.h"
 
 #ifndef u64
 # ifdef HAVE_STDINT_H
@@ -66,6 +67,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdio.h>
+#include <assert.h>
 
 int aSIDify = 0;                        /* 0:off, 1:safe, 2:force */
 
@@ -76,9 +78,9 @@ int aSIDify = 0;                        /* 0:off, 1:safe, 2:force */
 #define sc68_cc FOURCC('S','C','6','8')
 
 /* SC68 file identifier strings */
-const char file68_idstr_v1[56] = SC68_IDSTR;
-const char file68_idstr_v2[8]  = SC68_IDSTR_V2;
-const char file68_mimestr[]    = SC68_MIMETYPE;
+const char file68_idstr_v1[] = SC68_IDSTR;
+const char file68_idstr_v2[] = SC68_IDSTR_V2;
+const char file68_mimestr[]  = SC68_MIMETYPE;
 #define MAX_TRACK_LP 4          /* maximum number of guessed loop allowed                */
 #define MIN_TRACK_MS (45*1000u) /* below this value, force a few loops                   */
 #define DEF_TRACK_MS (90*1000u) /* time we use as default if track contains no such info */
@@ -296,16 +298,35 @@ static int sndh_is_magic(const char *buffer, int max)
   return i;
 }
 
+static
+int isread(istream68_t * const is, void * data, int len, int * hptr)
+{
+  int read = istream68_read(is, data, len);
+  if (read > 0 && hptr) {
+    int h = *hptr, n = read;
+    uint8_t * k = (uint8_t *) data;
+    do {
+      h += *k++;
+      h += h << 10;
+      h ^= h >> 6;
+    } while (--n);
+    *hptr = h;
+  }
+  return read;
+}
+
+
 /* Ensure enough data in id buffer;
  *  retval  0      on error
  *  retval  count  on success
  */
 static inline
-int ensure_header(istream68_t * const is, char *id, int have, int need)
+int ensure_header(istream68_t * const is, char *id,
+                  int have, int need, int * hptr)
 {
   if (have < need) {
     int miss = need - have;
-    int read = istream68_read(is, id+have, miss);
+    int read = isread(is, id+have, miss, hptr);
     if (read != miss) {
       /* msg68_error("not a sc68 file (%s)\n", read==-1?"read error":"eof"); */
       have = 0;
@@ -322,7 +343,7 @@ int ensure_header(istream68_t * const is, char *id, int have, int need)
  * or -ice_cc if may be iced
  * or -sndh_cc if may be sndh
  */
-static int read_header(istream68_t * const is)
+static int read_header(istream68_t * const is, int * hptr)
 {
   char id[256];
   const int idv1_req = sizeof(file68_idstr_v1);
@@ -331,14 +352,17 @@ static int read_header(istream68_t * const is)
   int have = 0;
   const char * missing_id = "not a sc68 file (no magic)";
 
+  assert( idv1_req == 56 );
+  assert( idv2_req ==  8 );
+
   /* Read ID v2 string */
-  if(have = ensure_header(is, id, have, idv2_req), !have) {
+  if(have = ensure_header(is, id, have, idv2_req, hptr), !have) {
     return -1;
   }
 
   if (!memcmp(id, file68_idstr_v1, idv2_req)) {
     /* looks like idv1; need more bytes to confirm */
-    if (have = ensure_header(is, id, have, idv1_req), !have) {
+    if (have = ensure_header(is, id, have, idv1_req, hptr), !have) {
       return -1;
     }
     if (memcmp(id, file68_idstr_v1, idv1_req)) {
@@ -348,7 +372,7 @@ static int read_header(istream68_t * const is)
   } else if (!memcmp(id, file68_idstr_v2, idv2_req)) {
     TRACE68(file68_cat,"file68: found %s signature\n","SC68_v2");
   } else {
-    if (have = ensure_header(is, id, have, sndh_req), !have) {
+    if (have = ensure_header(is, id, have, sndh_req, hptr), !have) {
       return -1;
     }
     if (gzip68_is_magic(id)) {
@@ -370,13 +394,13 @@ static int read_header(istream68_t * const is)
   }
 
   /* Check 1st chunk */
-  if (istream68_read(is, id, 4) != 4
+  if (isread(is, id, 4, hptr) != 4
       || memcmp(id, CH68_CHUNK CH68_BASE, 4)) {
     return error68("file68: not sc68 file -- missing base chunk");
   }
 
   /* Get base chunk : file total size */
-  if (istream68_read(is, id, 4) != 4
+  if (isread(is, id, 4, hptr) != 4
       || (have = LPeek(id), have <= 8)) {
     return error68("file68: not sc68 file -- weird base chunk size");
   }
@@ -432,7 +456,8 @@ static int guess_artist_alias(disk68_t * mb, tagset68_t * tags)
         s[-1] = 0;
         *e = 0;
         id = set_customtag(mb, tags, tagstr.aka, s+1);
-        TRACE68(file68_cat,"file68 guessed AKA '%s' from '%s' tag-id:%d\n", s+1, artist, id);
+        TRACE68(file68_cat,"file68 guessed AKA '%s' from '%s' tag-id:%d\n",
+                s+1, artist, id);
       }
     }
   }
@@ -449,6 +474,7 @@ static int valid(disk68_t * mb)
   int i, pdatasz = 0;
   void * pdata   = 0;
   char * title, * artist, * aalias;
+  int is_sndh = mb->tags.tag.genre.val == tagstr.sndh;
 
   if (mb->nb_mus <= 0)
     return error68("file68: disk has no track");
@@ -498,6 +524,22 @@ static int valid(disk68_t * mb)
       if ( !(m->has.time = m->first_ms > 0) )
         m->first_ms = DEF_TRACK_MS;
       m->first_fr = ms_to_fr(m->first_ms, m->frq);
+    }
+
+    if (is_sndh && !m->has.time) {
+      unsigned int frames;
+
+      /* TODO: check sndh time */
+      msg68_notice("searching track #%02d/%08x/%08x in sndh timedb\n",
+                   i+1, mb->hash,mb->hash & ~31);
+      if (-1 != timedb68_get(mb->hash, i, &frames, 0)) {
+        m->has.time = 1;
+        m->first_fr = frames;
+        m->first_ms = fr_to_ms(m->first_fr, m->frq);
+        msg68_notice("found track #%02d/%08x in sndh timedb -- %d ms (%d frames)\n",
+                     i+1, mb->hash, m->first_ms, m->first_fr);
+      }
+
     }
 
     if (m->has.loop) {
@@ -716,7 +758,7 @@ int file68_verify(istream68_t * is)
     goto error;
   }
 
-  res = read_header(is);
+  res = read_header(is, 0);
 
   /* Verify tells it is a gzip file, so we may give it a try. */
   if (res < 0) {
@@ -1020,11 +1062,11 @@ static int sndh_info(disk68_t * mb, int len)
         if (i < len-2 && j < SC68_MAX_TRACK)
           mb->mus[j].first_ms = 1000u *
             ( ( ( (unsigned char) b[i]) << 8 ) | (unsigned char) b[i+1] );
-	TRACE68(file68_cat,
-		"file68: sndh -- TIME #%02 -- 0x%02X%02X (%c%c) -- %u ms\n",
-		j+1, (unsigned char)b[i], (unsigned char)b[i+1],
-		isgraph(b[i])?b[i]:'.',	isgraph(b[i+1])?b[i+1]:'.',
-		mb->mus[j].first_ms);
+        TRACE68(file68_cat,
+                "file68: sndh -- TIME #%02 -- 0x%02X%02X (%c%c) -- %u ms\n",
+                j+1, (unsigned char)b[i], (unsigned char)b[i+1],
+                isgraph((int)b[i])?b[i]:'.', isgraph((int)b[i+1])?b[i+1]:'.',
+                mb->mus[j].first_ms);
         i += 2;
       }
 
@@ -1093,7 +1135,7 @@ static int sndh_info(disk68_t * mb, int len)
           /* HAXXX: using name can help determine STE needs */
           if (p == &mb->tags.tag.title.val)
             steonly = 0
-              || !!strstr(mb->tags.tag.title.val,"STE only") 
+              || !!strstr(mb->tags.tag.title.val,"STE only")
               || !!strstr(mb->tags.tag.title.val,"(STe)")
               || !!strstr(mb->tags.tag.title.val,"(STE)")
               ;
@@ -1191,7 +1233,8 @@ const char * file68_tag_get(const disk68_t * mb, int track, const char * key)
   return val;
 }
 
-const char * file68_tag_set(disk68_t * mb, int track, const char * key, const char * val)
+const char * file68_tag_set(disk68_t * mb, int track,
+                            const char * key, const char * val)
 {
   const char * ret = 0;
 
@@ -1232,11 +1275,14 @@ void file68_free(disk68_t * disk)
     free_tags(disk, &disk->tags);
 
     for (i=0; i<max; ++i) {
+      free_string(disk, disk->mus[i].replay);
       free_tags(disk, &disk->mus[i].tags);
       if (disk->mus[i].data) {
         int j;
         free_string(disk, disk->mus[i].data);
         for (j=max-1; j>=i; --j) {
+          if (disk->mus[j].replay == disk->mus[i].replay)
+            disk->mus[j].replay = 0;
           if ( disk->mus[j].data == disk->mus[i].data )
             disk->mus[j].data   = 0;
           disk->mus[j].datasz = 0;
@@ -1289,12 +1335,14 @@ disk68_t * file68_new(int extra)
   return d;
 }
 
+
 /* Load , allocate memory and valid struct for SC68 music
  */
 disk68_t * file68_load(istream68_t * is)
 {
   disk68_t *mb = 0;
   int len;
+  int hash = 0, *h = &hash;
   int chk_size;
   int opened = 0;
   music68_t *cursix;
@@ -1306,7 +1354,7 @@ disk68_t * file68_load(istream68_t * is)
   fname = strnevernull68(fname);
 
   /* Read header and get data length. */
-  if (len = read_header(is), len < 0) {
+  if (len = read_header(is, h), len < 0) {
     /* Verify tells it is a gzip or unice file, so we may give it a try.
      */
     if (1) {
@@ -1349,7 +1397,7 @@ disk68_t * file68_load(istream68_t * is)
           break;
         }
         mb->tags.tag.genre.val = tagstr.sndh;
-        if (istream68_read(is, mb->data, len) != len) {
+        if (isread(is, mb->data, len, h) != len) {
           break;
         }
         if (sndh_info(mb, len)) {
@@ -1378,7 +1426,7 @@ disk68_t * file68_load(istream68_t * is)
   }
   mb->tags.tag.genre.val = tagstr.sc68;
 
-  if (istream68_read(is, mb->data, len) != len) {
+  if (isread(is, mb->data, len, h) != len) {
     errorstr = "read data";
     goto error;
   }
@@ -1558,6 +1606,7 @@ disk68_t * file68_load(istream68_t * is)
   }
 
 validate:
+  mb->hash = hash;
   if (valid(mb)) {
     errorstr = "validation test";
     goto error;
@@ -1567,6 +1616,7 @@ already_valid:
   if (opened) {
     istream68_close(is);
   }
+
   return mb;
 
 error:
@@ -1577,6 +1627,8 @@ error:
   msg68_error("file68: load '%s' failed [%s]\n", fname, errorstr ? errorstr : "no reason");
   return 0;
 }
+
+
 
 static int get_version(const int version) {
   return version == 2 ? 2 : 1;

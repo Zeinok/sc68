@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-02 16:04:51 ben>
+ * Time-stamp: <2013-05-24 22:07:24 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -69,7 +69,7 @@ static const char * keyhdlname(const registry68_key_t key)
   return keys[i].name;
 }
 
-static const char * keyname(const enum registry68_key_e const key)
+static const char * keyname(const enum registry68_key_e key)
 {
   return keys
     [(unsigned int)key >= (unsigned int)REGISTRY68_LST
@@ -78,7 +78,7 @@ static const char * keyname(const enum registry68_key_e const key)
       ] . name;
 }
 
-static HKEY keyhandle(const enum registry68_key_e const key)
+static HKEY keyhandle(const enum registry68_key_e key)
 {
   return keys
     [(unsigned int)key >= (unsigned int)REGISTRY68_LST

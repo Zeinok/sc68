@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-15 16:18:03 ben>
+ * Time-stamp: <2013-05-24 22:43:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -191,7 +191,8 @@ istream68_t * istream68_null_create(const char * name)
  * still exist but it always returns error.
  */
 
-#include "file68/istream68_null.h"
+#include "istream68_null.h"
+#include "msg68.h"
 
 istream68_t * istream68_null_create(const char * name)
 {

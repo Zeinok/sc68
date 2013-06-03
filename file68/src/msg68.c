@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-11-03 13:00:01 ben>
+ * Time-stamp: <2013-05-24 22:05:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -114,7 +114,7 @@ void msg68_va(int bit, const char * fmt, va_list list)
   msg68x_va(bit, cookie, fmt, list);
 }
 
-void msg68(const int bit, const char * fmt, ...)
+void msg68(int bit, const char * fmt, ...)
 {
   va_list list;
   va_start(list, fmt);
@@ -283,7 +283,7 @@ int msg68_cat_bit(const char * name)
 }
 
 /* Create/Modify a category. */
-int msg68_cat(const char * name, const char * desc, const int masked)
+int msg68_cat(const char * name, const char * desc, int masked)
 {
   int i = msg68_NEVER;
 
@@ -307,7 +307,7 @@ int msg68_cat(const char * name, const char * desc, const int masked)
 }
 
 /* Free/Destroy a debug category. */
-void msg68_cat_free(const int category)
+void msg68_cat_free(int category)
 {
   if (is_valid_category(category) && category > msg68_TRACE) {
     cat_bits[category].bit = -1;
@@ -316,7 +316,7 @@ void msg68_cat_free(const int category)
 }
 
 /* Set all predefined categories mask according to given level. */
-int msg68_cat_level(const int category)
+int msg68_cat_level(int category)
 {
   int ret = -(category < msg68_CRITICAL || category > msg68_TRACE);
   if (!ret) {
@@ -328,7 +328,7 @@ int msg68_cat_level(const int category)
 }
 
 /* Get info on category */
-int msg68_cat_info(const int category, const char **pname,
+int msg68_cat_info(int category, const char **pname,
                    const char **pdesc, int *pnext)
 {
   int ret = -1, next = category;

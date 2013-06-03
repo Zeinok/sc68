@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (C) 1998-2011 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_FILE68_H_
 #define _FILE68_FILE68_H_
@@ -44,6 +44,10 @@
  * @see file68_identifier()
  */
 #define SC68_IDSTR_V2 "SC68 M2"
+
+/* Old V2 never use except for experiental files ... 
+#define SC68_IDSTR_V2 "SC68\0\002\377\251\337\353\321"
+*/
 
 #define SC68_NOFILENAME "n/a"   /**< SC68 unknown filename or author.      */
 #define SC68_LOADADDR   0x10000 /**< Default load address in 68K memory.    */
@@ -130,8 +134,8 @@ typedef struct {
   char        *replay;   /**< External replay name.                   */
   hwflags68_t  hwflags;  /**< Hardware and features.                  */
   tagset68_t   tags;     /**< Meta data.                              */
-  unsigned int datasz;   /**< data size in bytes. */
-  char        *data;     /**< Music data.         */
+  unsigned int datasz;   /**< data size in bytes.                     */
+  char        *data;     /**< Music data.                             */
 } music68_t;
 
 
@@ -152,6 +156,7 @@ typedef struct {
   int          nb_asid;     /**< Number of aSID track append.            */
   unsigned int time_ms;     /**< Total time for all tracks in ms.        */
   hwflags68_t  hwflags;     /**< All tracks flags ORed.                  */
+  int          hash;        /**< Caclulated hash (for sndh timedb).      */
   tagset68_t   tags;        /**< Meta tags for the disk (album)          */
   music68_t    mus[SC68_MAX_TRACK]; /**< Information for each music.     */
   unsigned int datasz;      /**< data size in byte.                      */

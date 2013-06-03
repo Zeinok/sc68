@@ -65,11 +65,16 @@ typedef union {
 #define TAG68_AKA        "aka"
 #define TAG68_COMPOSER   "composer"
 #define TAG68_CONVERTER  "converter"
+#define TAG68_LENGTH     "length"
+#define TAG68_FRAMES     "frames"
+#define TAG68_HASH       "hash"
+#define TAG68_URI        "uri"
 
 /* Aliases tags */
 #define TAG68_ALBUM      TAG68_TITLE
 #define TAG68_AUTHOR     TAG68_ARTIST
 #define TAG68_ALIAS      TAG68_TAG
+#define TAG68_DURATION   TAG68_LENGTH
 
 /**
  * @}

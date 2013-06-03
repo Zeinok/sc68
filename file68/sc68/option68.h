@@ -122,7 +122,7 @@ FILE68_API
  * @return  option
  * @retval  0        not found
  */
-option68_t * option68_get(const char * key, const int setonly);
+option68_t * option68_get(const char * key, int setonly);
 
 FILE68_API
 /**
@@ -172,7 +172,7 @@ FILE68_API
  * @param   set  enable option set at the same time
  * @retval  0    on error (or envvar does not exist)
  */
-const char * option68_getenv(option68_t * opt, const int set);
+const char * option68_getenv(option68_t * opt, int set);
 
 /**
  * @}

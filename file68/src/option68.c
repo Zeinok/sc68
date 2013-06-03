@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-14 20:49:25 ben>
+ * Time-stamp: <2013-05-24 22:16:27 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -351,7 +351,7 @@ int option68_append(option68_t * options, int n)
   return 0;
 }
 
-option68_t * option68_get(const char * key, const int onlyset)
+option68_t * option68_get(const char * key, int onlyset)
 {
   option68_t * opt = 0;
   if (key && (opt = opt_of(key)) && onlyset && !opt_isset(opt)) {

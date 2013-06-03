@@ -677,10 +677,10 @@ int rsc68_init(void)
     rsc68_set_music(FILE68_MUSIC_PATH);
     rsc68_set_remote_music(FILE68_RMUSIC_PATH);
 
-    TRACE68(rsc68_cat,"rsc68: shared-data = '%s'\n",share_path);
-    TRACE68(rsc68_cat,"rsc68: user_path   = '%s'\n",user_path);
-    TRACE68(rsc68_cat,"rsc68: lmusic_path = '%s'\n",lmusic_path);
-    TRACE68(rsc68_cat,"rsc68: rmusic_path = '%s'\n",rmusic_path);
+    TRACE68(rsc68_cat,"rsc68: shared-data = '%s'\n",strnevernull68(share_path));
+    TRACE68(rsc68_cat,"rsc68: user_path   = '%s'\n",strnevernull68(user_path));
+    TRACE68(rsc68_cat,"rsc68: lmusic_path = '%s'\n",strnevernull68(lmusic_path));
+    TRACE68(rsc68_cat,"rsc68: rmusic_path = '%s'\n",strnevernull68(rmusic_path));
 
     init = 1;
     err = 0;
