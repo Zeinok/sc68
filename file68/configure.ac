@@ -211,6 +211,8 @@ AC_OUTPUT
 # | Summary                                                              |
 # `----------------------------------------------------------------------'
 
+SC68_DUMPVARS
+
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])

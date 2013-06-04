@@ -1,6 +1,6 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2011-09-08 13:21:09 ben>
+dnl# Time-stamp: <2013-06-04 19:27:23 ben>
 dnl#
 dnl# autoconf macros
 dnl#
@@ -17,6 +17,7 @@ AC_DEFUN_ONCE([SC68_OPTIONS],[
     [#]m4_default(m4_strip([$1]),[debug] [all-static])
     SC68_ENABLE_DEBUG
     SC68_ENABLE_ALLSTATIC
+    SC68_ENABLE_DUMPVARS
 
     case X"[$]enable_sc68_debug" in
       Xyes);;
