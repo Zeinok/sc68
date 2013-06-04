@@ -3,9 +3,9 @@
  * @brief   resource functions
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-10-12 13:22:58 ben>
+ * Time-stamp: <2013-06-04 06:20:20 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

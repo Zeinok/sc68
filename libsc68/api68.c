@@ -678,7 +678,7 @@ void sc68_shutdown(void)
 
 sc68_t * sc68_create(sc68_create_t * create)
 {
-  const int log2mem = 0;
+  /*const int log2mem = 0;*/
   sc68_t *sc68 = 0;
   sc68_create_t dummy_create;
 
@@ -720,7 +720,7 @@ sc68_t * sc68_create(sc68_create_t * create)
   }
 
   /* Create 68k emulator and pals. */
-  if (init68k(sc68, log2mem, create->emu68_debug || dbg68k)) {
+  if (init68k(sc68, create->log2mem, create->emu68_debug || dbg68k)) {
     goto error;
   }
 

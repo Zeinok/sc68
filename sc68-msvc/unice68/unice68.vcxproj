@@ -47,7 +47,7 @@
       <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)/..</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <CompileAsManaged>false</CompileAsManaged>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
       <StringPooling>false</StringPooling>
       <ExceptionHandling>false</ExceptionHandling>

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-05-24 22:07:24 ben>
+ * Time-stamp: <2013-06-04 04:35:16 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -221,7 +221,7 @@ int registry68_gets(registry68_key_t rootkey,
                     const char * kname_cst, char *kdata, int kdatasz)
 {
   DWORD vtype;
-  HKEY hkey;
+  HKEY hkey = HKEY_INVALID;
   int len;
   LONG hres;
   char * name, kname[1024], error[256];
@@ -265,6 +265,8 @@ int registry68_gets(registry68_key_t rootkey,
 
   if (rGetRegistryKey((HKEY)rootkey, kname, &hkey)) {
     SetSystemError(error, sizeof(error)-1);
+    kdata = 0;
+    hres = ERROR_FILE_NOT_FOUND;
   } else {
     hres =
       RegQueryValueEx(hkey,             /* handle to key to query            */

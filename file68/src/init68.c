@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2012-01-28 16:45:05 ben>
+ * Time-stamp: <2013-06-04 04:51:28 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -111,6 +111,14 @@ static option68_t opts[] = {
   { option68_STR,prefix,"asid"    ,rsccat,"create aSID tracks [no*|safe|force]" }
 };
 
+static char * convert_backslash(char * s) {
+  int i;
+  for (i=0; s[i]; ++i)
+    if (s[i] == '\\')
+      s[i] = '/';
+  return s;
+}
+
 int file68_init(int argc, char **argv)
 {
   char tmp[1024];
@@ -212,29 +220,39 @@ int file68_init(int argc, char **argv)
   opt = option68_get("home", 0);
   if (opt) {
 
-    /* Get user path from HOME */
+    /* Get user path from HOME (usually not defined for win32 platform) */
     if (!option68_isset(opt)) {
       const char path[] = "/.sc68";
       const char * env = mygetenv("HOME");
+
       if(env && strlen(env)+sizeof(path) < sizeof(tmp)) {
         strncpy(tmp,env,sizeof(tmp));
         strcat68(tmp,path,sizeof(tmp));
-        /* $$$ We should test if this directory actually exists */
-        option68_set(opt,tmp);
+        option68_set(opt,convert_backslash(tmp));
       }
     }
-
 
     /* Get user path from registry */
     if (!option68_isset(opt)) {
       char * e;
       const char path[] = "sc68";
+
       e = get_reg_path(registry68_rootkey(REGISTRY68_CUK),
                        "Volatile Environment/APPDATA",
                        tmp, sizeof(tmp));
       if (e && (e+sizeof(path) < tmp+sizeof(tmp))) {
         memcpy(e, path, sizeof(path));
-        option68_set(opt,tmp);
+        option68_set(opt,convert_backslash(tmp));
+      } else {
+        /* Get user from win32 env */
+        const char * drv = mygetenv("HOMEDRIVE");
+        const char * env = mygetenv("HOMEPATH");
+        if (drv && env && strlen(drv)+strlen(env)+sizeof(path) < sizeof(tmp)) {
+          strncpy(tmp,drv,sizeof(tmp));
+          strcat68(tmp,env,sizeof(tmp));
+          strcat68(tmp,path,sizeof(tmp));
+          option68_set(opt,convert_backslash(tmp));
+        }
       }
     }
 

@@ -7,9 +7,7 @@
  *
  */
 
-/* $Id$ */
-
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_RSC68_H_
 #define _FILE68_RSC68_H_
@@ -17,7 +15,8 @@
 #include "istream68.h"
 
 
-/** @defgroup  file68_rsc  Resource access
+/**
+ *  @defgroup  file68_rsc  Resource access
  *  @ingroup   file68_lib
  *
  *    Provides resource access functions.
@@ -25,7 +24,9 @@
  *  @{
  */
 
-/** Resource type. */
+/**
+ * Resource type.
+ */
 typedef enum
 {
   rsc68_replay,       /**< 68000 external replay.           */
@@ -51,14 +52,17 @@ typedef struct {
   } data;
 } rsc68_info_t;
 
-/** Resource handle function type. */
+/**
+ *  Resource handle function type.
+ */
 typedef istream68_t * (*rsc68_handler_t)(rsc68_t type,
                                          const char * name,
                                          int mode,
                                          rsc68_info_t * info);
 
 FILE68_API
-/** Initialize resource.
+/**
+ *  Initialize resource.
  *
  *    Initialized internal data and reset all pathes to
  *    default.
@@ -69,7 +73,8 @@ FILE68_API
 int rsc68_init(void);
 
 FILE68_API
-/** Shutdown resource.
+/**
+ *  Shutdown resource.
  *
  *    Clean up and free all pathes.
  *
@@ -77,7 +82,8 @@ FILE68_API
 void rsc68_shutdown(void);
 
 FILE68_API
-/** Set shared resource path.
+/**
+ *  Set shared resource path.
  *
  *    The rsc68_set_share() function set the shared resource
  *    path. The path will be duplicate by SC68strdup(). If path is
@@ -92,7 +98,8 @@ FILE68_API
 const char * rsc68_set_share(const char *path);
 
 FILE68_API
-/** Set user resource path.
+/**
+ *  Set user resource path.
  *
  *    The rsc68_set_user() function set the user resource path. The
  *    path will be duplicate by SC68strdup(). If path is null the
@@ -106,7 +113,8 @@ FILE68_API
 const char * rsc68_set_user(const char *path);
 
 FILE68_API
-/** Set sc68 local music database path.
+/**
+ *  Set sc68 local music database path.
  *
  *    The rsc68_set_music() function set the local music database
  *    path. The path will be duplicate by SC68strdup(). If path is
@@ -120,7 +128,8 @@ FILE68_API
 const char * rsc68_set_music(const char *path);
 
 FILE68_API
-/** Set sc68 remote music database path.
+/**
+ *  Set sc68 remote music database path.
  *
  *    The rsc68_set_remote_music() function set the remote music
  *    database path. The path will be duplicate by SC68strdup(). If
@@ -134,7 +143,8 @@ FILE68_API
 const char * rsc68_set_remote_music(const char *path);
 
 FILE68_API
-/** Get resource pathes.
+/**
+ *  Get resource pathes.
  *
  *  @param  share   Get the shared resource path (0 to ignore).
  *  @param  user    Get the user resource path (0 to ignore).
@@ -147,7 +157,8 @@ void rsc68_get_path(const char ** share,
                     const char ** rmusic);
 
 FILE68_API
-/** Set/Get resource handler.
+/**
+ *  Set/Get resource handler.
  *
  *    The rsc68_set_handler() function set the current resource
  *    handler.  If 0 is given as fct parameter the function does not
@@ -176,7 +187,8 @@ FILE68_API
 rsc68_handler_t rsc68_set_handler(rsc68_handler_t fct);
 
 FILE68_API
-/** Open a resource in given mode.
+/**
+ *  Open a resource in given mode.
  *
  *    The function rsc68_open() function opens an istream68_t to
  *    access a resource.
@@ -195,7 +207,8 @@ istream68_t * rsc68_open(rsc68_t type, const char *name, int mode,
  rsc68_info_t * info);
 
 FILE68_API
-/** Open a resource URL in given mode.
+/**
+ *  Open a resource URL in given mode.
  *
  *   @param  url     Any valid rsc68://type/ URL
  *   @param  mode    1:read-access, 2:write-access.
@@ -210,7 +223,8 @@ istream68_t * rsc68_open_url(const char *url, int mode,
                              rsc68_info_t * info);
 
 FILE68_API
-/** Create a resource from URL in given mode.
+/**
+ *  Create a resource from URL in given mode.
  *
  *   @param  url     Any valid rsc68://type/ URL
  *   @param  mode    1:read-access, 2:write-access.
@@ -226,7 +240,8 @@ istream68_t * rsc68_create_url(const char *url, int mode,
 
 
 FILE68_API
-/** Get music parameters from string.
+/**
+ *  Get music parameters from string.
  *
  *   The rsc68_get_music_params() function parses the str string and
  *   stores track loop and time in the info struct. If it successes the

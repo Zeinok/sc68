@@ -1065,7 +1065,7 @@ static int sndh_info(disk68_t * mb, int len)
         TRACE68(file68_cat,
                 "file68: sndh -- TIME #%02 -- 0x%02X%02X (%c%c) -- %u ms\n",
                 j+1, (unsigned char)b[i], (unsigned char)b[i+1],
-                isgraph((int)b[i])?b[i]:'.', isgraph((int)b[i+1])?b[i+1]:'.',
+                isgraph((int)(unsigned char)b[i])?b[i]:'.', isgraph((int)(unsigned char)b[i+1])?b[i+1]:'.',
                 mb->mus[j].first_ms);
         i += 2;
       }

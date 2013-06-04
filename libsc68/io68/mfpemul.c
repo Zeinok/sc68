@@ -329,18 +329,15 @@ void mfp_put_tcr(mfp_t * const mfp,
                  int timer, int68_t v, const bogoc68_t bogoc)
 {
   timer &= 3;
-
   if (timer < TIMER_C) {
     /* Timer A or B */
     mfp->map[0x19+2*timer] = v;
-    /* $$$ Event mode + Pulse mode not emulate */
+    /* $$$ Event mode + Pulse mode is NOT simulate yet ! */
     if (v&0x10) {
-
       TRACE68(mfp_cat,
             "mfp: timer-%c -- mode not supported --  %02x\n",
             timer_def[timer].letter,(int)(u8)v);
-
-      assert( !!"mfp mode not supported" );
+      assert(0 == "mfp mode not supported");
     }
     mfp_put_tcr_bogo(mfp->timers+timer, v&7, bogoc);
   } else {
