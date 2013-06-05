@@ -1,9 +1,9 @@
-# Time-stamp: <2011-10-27 13:44:29 ben>
+# Time-stamp: <2013-06-05 07:04:49 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  mksc68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |                 (C) 2009-2011 Benjamin Gerard                        |
+# |                 (C) 2009-2013 Benjamin Gerard                        |
 # |                                                                      |
 # |            <http://sourceforge.net/users/benjihan>                   |
 # |                                                                      |
@@ -38,6 +38,15 @@ else
 SC68_LA =
 endif
 
+if SOURCE_FILE68
+FILE68_LA = $(file68_dir)/libfile68.la
+@SET_MAKE@
+$(file68_dir)/libfile68.la:
+	cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libfile68.la
+else
+FILE68_LA =
+endif
+
 sources = mksc68.c mksc68_opt.c mksc68_msg.c mksc68_cmd.c mksc68_cli.c	\
 mksc68_dsk.c mksc68_str.c mksc68_tag.c mksc68_emu.c mksc68_cmd_new.c	\
 mksc68_cmd_load.c mksc68_cmd_play.c mksc68_cmd_time.c mksc68_cmd_tag.c	\
@@ -46,7 +55,7 @@ header  =
 
 bin_PROGRAMS         = mksc68
 mksc68_SOURCES       = $(sources) $(headers)
-mksc68_LDADD         = $(SC68_LA) $(DESA68_LA)
+mksc68_LDADD         = $(SC68_LA) $(FILE68_LA) $(DESA68_LA)
 noinst_HEADERS       = mksc68_doc.h
 
 # ,----------------------------------------------------------------------.
