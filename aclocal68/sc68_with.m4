@@ -41,7 +41,11 @@ m4_define([DUMP_SC68_PACKAGE_VARS],[
  --  PAC_CONFLICTS=[$]PAC_CONFLICTS
  --  PAC_CFLAGS=[$]PAC_CONFLICTS
  --  PAC_LFLAGS=[$]PAC_LFLAGS
+ -- 
  --  LIBS=[$]LIBS
+ --  LDFLAGS=[$]LDFLAGS
+ --  CFLAGS=[$]CFLAGS
+ --  CPPFLAGS=[$]CPPFLAGS
 ======================================================================
 EOF
     ])
@@ -403,7 +407,9 @@ m4_define([DO_SC68_PACKAGE],[
       AC_SUBST($1[_src])
       AC_SUBST($1[_ver])
     fi
-    dnl # DUMP_SC68_PACKAGE_VARS([$1],[ END ])
+    if test X[$]enable_sc68_dumpvars = Xyes; then
+      DUMP_SC68_PACKAGE_VARS([$1],[ END ])
+    fi
     ])
 
 
