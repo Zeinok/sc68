@@ -1,4 +1,4 @@
-# Time-stamp: <2011-09-10 13:58:44 ben>
+# Time-stamp: <2013-06-05 05:48:24 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |    sc68 -- Makefile.am -- Use with automake to produce Makefile.in   |
@@ -29,9 +29,18 @@ else
 SC68_LA =
 endif
 
+if SOURCE_FILE68
+FILE68_LA = $(file68_dir)/libfile68.la
+@SET_MAKE@
+$(file68_dir)/libfile68.la:
+	cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libfile68.la
+else
+FILE68_LA =
+endif
+
 bin_PROGRAMS         = sc68
 sc68_SOURCES         = sc68.c
-sc68_LDADD           = $(SC68_LA)
+sc68_LDADD           = $(SC68_LA) $(FILE68_LA)
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |

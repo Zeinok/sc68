@@ -1,9 +1,9 @@
-# Time-stamp: <2011-09-11 01:07:59 ben>
+# Time-stamp: <2013-06-05 05:47:33 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # | libsc68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |                 (C) 2007-2011 Benjamin Gerard                        |
+# |                 (C) 2007-2013 Benjamin Gerard                        |
 # |                                                                      |
 # |            <http://sourceforge.net/users/benjihan>                   |
 # |                                                                      |

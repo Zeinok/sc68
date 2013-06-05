@@ -19,6 +19,7 @@ AC_INIT(
 AC_CONFIG_SRCDIR([unice68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign 1.10 silent-rules dist-bzip2])
+AC_CONFIG_HEADERS([config.h])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])

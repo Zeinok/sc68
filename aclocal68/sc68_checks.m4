@@ -1,14 +1,14 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2011-09-18 17:33:05 ben>
+dnl# Time-stamp: <2013-06-05 03:02:50 ben>
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2011 Benjamin Gerard
+dnl# (C) 2009-2013 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20110918 sc68_checks.m4
+# serial 20130605 sc68_checks.m4
 
 # SC68_CHECKS()
 # -------------
@@ -43,9 +43,16 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
 
     # --enable-debug
     if test X[$]enable_sc68_debug = Xyes; then
-      AC_FOREACH([FLAG],
-        [-g -O0],
-        [AX_CHECK_COMPILER_FLAGS(FLAG,[SC68_ADD_FLAG(ALL_CFLAGS,FLAG)])])
+      if test X[$]GCC = Xyes; then
+        :
+      fi
+    fi
+
+    # --enable-release
+    if test X[$]enable_sc68_release = Xyes; then
+      if test X[$]GCC = Xyes; then
+        :
+      fi
     fi
 
     # --enable-all-static
