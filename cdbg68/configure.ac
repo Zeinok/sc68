@@ -42,14 +42,7 @@ SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
 # ,----------------------------------------------------------------------.
 # | extra libraries                                                      |
 # `----------------------------------------------------------------------'
-AC_SEARCH_LIBS(
-  [initscr],
-  [ncurses],
-  [AC_CHECK_HEADERS(
-      [curses.h locale.h],
-      [],
-      [AC_MSG_ERROR([Unable to locate ncurses headers.])])],
-  [AC_MSG_ERROR([Unable to locate ncurses compatible library.])])
+SC68_WITH([ncurses],[yes],[curses_version],[curses.h])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |

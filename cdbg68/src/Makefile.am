@@ -1,9 +1,9 @@
-# Time-stamp: <2011-09-10 14:00:13 ben>
+# Time-stamp: <2013-06-06 04:50:16 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  cdbg68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |                 (C) 2009-2011 Benjamin Gerard                        |
+# |                 (C) 2009-2013 Benjamin Gerard                        |
 # |                                                                      |
 # |            <http://sourceforge.net/users/benjihan>                   |
 # |                                                                      |
@@ -37,7 +37,16 @@ else
 SC68_LA =
 endif
 
+if SOURCE_FILE68
+FILE68_LA = $(file68_dir)/libfile68.la
+@SET_MAKE@
+$(file68_dir)/libfile68.la:
+	cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libfile68.la
+else
+FILE68_LA =
+endif
+
 bin_PROGRAMS   = cdbg68
 cdbg68_SOURCES = cdbg68.c register.c status.c disa.c mem.c cmd.c expr.c
-cdbg68_LDADD   = $(SC68_LA) $(DESA68_LA)
+cdbg68_LDADD   = $(SC68_LA) $(FILE68_LA) $(DESA68_LA)
 noinst_HEADERS = register.h status.h disa.h mem.h cmd.h expr.h

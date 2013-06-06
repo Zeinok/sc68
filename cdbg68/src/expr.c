@@ -1,7 +1,7 @@
 /*
  *                      cdbg68 - sc68 debugger
  *
- *            Copyright (C) 2001-2011 Ben(jamin) Gerard
+ *            Copyright (C) 2001-2013 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
@@ -28,6 +28,8 @@
 
 #include "expr.h"
 
+#include <stdlib.h>
+
 /** Evaluated expression. */
 int expr(int * result, char ** expr) {
   int   v;
@@ -35,4 +37,3 @@ int expr(int * result, char ** expr) {
   *result = v;
   return 0;
 }
-
