@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-03 07:40:51 ben>
+ * Time-stamp: <2013-06-06 07:38:45 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -1505,11 +1505,16 @@ disk68_t * file68_load(istream68_t * is)
     }
     /* Playing time (ms) */
     else if (ISCHK(chk, CH68_TIME)) {
+      int sec;
       if (!cursix) {
         errorstr = chk;
         goto error;
       }
-      cursix->first_ms = LPeek(b) * 1000u;
+      sec = LPeek(b);
+      /* sanity check */
+      if (sec < 0 || sec > 60*60*24)
+        sec = 0;
+      cursix->first_ms = sec * 1000u;
     }
     /* Playing time (frames) */
     else if (ISCHK(chk, CH68_FRAME)) {
@@ -1534,8 +1539,9 @@ disk68_t * file68_load(istream68_t * is)
         goto error;
       }
       cursix->loops = LPeek(b);
-      TRACE68(file68_cat, "file68: read track #%02d loop of -- *%d*\n",
-              mb->nb_mus,cursix->loops);
+      /* force sanity */
+      if (cursix->loops < 0)
+        cursix->loops = 0;
     }
     /* Loop length */
     else if (ISCHK(chk, CH68_LOOPFR)) {
