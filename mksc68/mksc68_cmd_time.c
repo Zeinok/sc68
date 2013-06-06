@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:40:46 ben>
+ * Time-stamp: <2013-06-06 07:50:49 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -594,7 +594,7 @@ static void timemeasure_run(measureinfo_t * mi)
     } else if ( sil_frm == sil_nop )
       sil_frm = frm_cnt;
 
-    if ( sil_frm != sil_nop && frm_cnt - sil_frm > sil_max ) {
+    if ( sil_max > 0 && sil_frm != sil_nop && frm_cnt - sil_frm > sil_max ) {
       /* silence detected !!! */
       msgdbg("silence detected at frame %u (%s)\n",
              (unsigned) sil_frm,
