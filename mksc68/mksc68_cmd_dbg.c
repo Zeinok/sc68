@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-31 19:16:36 ben>
+ * Time-stamp: <2013-06-05 23:42:53 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,15 +26,15 @@
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+# include "config.h"
 #endif
 
 #include "mksc68_cmd.h"
 #include "mksc68_msg.h"
 #include "mksc68_opt.h"
 
-#include "sc68/msg68.h"
-#include "sc68/string68.h"
+#include <sc68/msg68.h>
+#include <sc68/string68.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -114,9 +114,9 @@ int run_debug(cmd_t * cmd, int argc, char ** argv)
     for (arg = strtok(arg,","); arg; arg = strtok(0, ",")) {
       if (!strcmp68(arg,"all"))
         bits = -1;
-      else if (arg[0] == '#' && isdigit(arg[1]))
+      else if (arg[0] == '#' && isdigit((int)arg[1]))
         bits |= 1 << strtol(arg+1,0,0);
-      else if (isdigit(arg[0]))
+      else if (isdigit((int)arg[0]))
         bits |= strtol(arg,0,0);
       else if (*arg) {
         int bit = msg68_cat_bit(arg);

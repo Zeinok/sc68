@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-02 22:01:50 ben>
+ * Time-stamp: <2013-06-05 23:42:26 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,12 +26,7 @@
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
-
-/* generated config include */
-#ifdef HAVE_CONFIG_H
-# include <config.h>
+# include "config.h"
 #endif
 
 #include "mksc68_cmd.h"

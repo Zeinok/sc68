@@ -5,7 +5,7 @@
  * @date      1999/03/13
  * @brief     68K emulator header.
  */
-/* Time-stamp: <2013-05-25 02:01:05 ben> */
+/* Time-stamp: <2013-06-06 06:14:03 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -487,11 +487,13 @@ int emu68_interrupt(emu68_t * const emu68, cycle68_t cycles);
  *  @{
  */
 
+EMU68_API
 /**
  * Kill all existing breakpoints.
  */
 void emu68_bp_delall(emu68_t * const emu68);
 
+EMU68_API
 /**
  *  Delete a existing breakpoint.
  *
@@ -500,6 +502,7 @@ void emu68_bp_delall(emu68_t * const emu68);
  */
 void emu68_bp_del(emu68_t * const emu68, int id);
 
+EMU68_API
 /**
  *  Set/Create a breakpoint.
  *
@@ -514,6 +517,7 @@ void emu68_bp_del(emu68_t * const emu68, int id);
 int emu68_bp_set(emu68_t * const emu68, int id,
                  addr68_t addr, uint68_t count, uint68_t reset);
 
+EMU68_API
 /**
  *  Find breakpoint.
  *

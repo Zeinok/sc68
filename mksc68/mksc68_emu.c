@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-31 19:19:53 ben>
+ * Time-stamp: <2013-06-05 23:39:36 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,21 +26,18 @@
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+#include "config.h"
 #endif
-
 
 #include "mksc68_emu.h"
 #include "mksc68_msg.h"
+#include <sc68/sc68.h>
+#include <emu68/emu68.h>
+#include <io68/io68.h>
 
 #include <assert.h>
-/* #include <stdlib.h> */
-/* #include <stdio.h> */
 #include <string.h>
 
-#include "sc68/sc68.h"
-#include "emu68/emu68.h"
-#include "io68/io68.h"
 
 sc68_t   * sc68;
 emu68_t  * emu68;

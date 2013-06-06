@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-03 08:01:59 ben>
+ * Time-stamp: <2013-06-05 23:40:58 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,7 +26,7 @@
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+#include "config.h"
 #endif
 
 #include "mksc68_cmd.h"
@@ -36,10 +36,10 @@
 #include "mksc68_tag.h"
 #include "mksc68_str.h"
 
+#include <sc68/tag68.h>
+
 #include <string.h>
 #include <stdio.h>
-
-#include <sc68/tag68.h>
 
 static const opt_t longopts[] = {
   { "help",       0, 0, 'h' },

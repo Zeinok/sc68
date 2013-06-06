@@ -1,4 +1,3 @@
-/* $Id$ */
 /*
  * @file    mksc68_opt.c
  * @brief   cli option functions
@@ -6,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-11-01 22:04:36 ben>
+ * Time-stamp: <2013-06-05 23:38:31 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,9 +25,8 @@
  */
 
 /* generated config include */
-
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+# include "config.h"
 #endif
 
 #include "mksc68_opt.h"

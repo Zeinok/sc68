@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-31 19:21:36 ben>
+ * Time-stamp: <2013-06-05 23:43:43 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,15 +26,8 @@
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+# include "config.h"
 #endif
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <errno.h>
 
 #include "mksc68_cli.h"
 #include "mksc68_cmd.h"
@@ -45,7 +38,14 @@
 #include "mksc68_opt.h"
 #include "mksc68_tag.h"
 
-#include "sc68/sc68.h"
+#include <sc68/sc68.h>
+
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <errno.h>
 
 int is_interactive = 0;                 /* running in a terminal? */
 

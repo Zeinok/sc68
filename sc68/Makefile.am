@@ -1,9 +1,9 @@
-# Time-stamp: <2013-06-05 05:48:24 ben>
+# Time-stamp: <2013-06-06 04:50:26 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |    sc68 -- Makefile.am -- Use with automake to produce Makefile.in   |
 # |                                                                      |
-# |                  (C) 2007-2011 Benjamin Gerard                       |
+# |                  (C) 2007-2013 Benjamin Gerard                       |
 # |                                                                      |
 # |              <http://sourceforge.net/users/benjihan>                 |
 # |                                                                      |

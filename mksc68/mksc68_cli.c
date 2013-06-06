@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-02 21:17:22 ben>
+ * Time-stamp: <2013-06-05 23:44:43 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -24,9 +24,16 @@
  *
  */
 
-#ifdef _HAVE_CONFIG_H_
-# include <config.h>
+/* generated config include */
+#ifdef HAVE_CONFIG_H
+# include "config.h"
 #endif
+
+#include "mksc68_cli.h"
+#include "mksc68_msg.h"
+#include "mksc68_cmd.h"
+
+#include <sc68/string68.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -35,17 +42,10 @@
 #include <ctype.h>
 #include <errno.h>
 
-#include "mksc68_cli.h"
-#include "mksc68_msg.h"
-#include "mksc68_cmd.h"
-
-#include <sc68/string68.h>
-
 #ifdef HAVE_READLINE_READLINE_H
 # include <readline/readline.h>
 # include <readline/history.h>
 #endif
-
 
 #ifndef HAVE_READLINE_READLINE_H
 

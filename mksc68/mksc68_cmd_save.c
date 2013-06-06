@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-31 19:17:37 ben>
+ * Time-stamp: <2013-06-05 23:41:09 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,15 +26,15 @@
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+#include "config.h"
 #endif
-
-#include <ctype.h>
 
 #include "mksc68_cmd.h"
 #include "mksc68_dsk.h"
 #include "mksc68_msg.h"
 #include "mksc68_opt.h"
+
+#include <ctype.h>
 
 static const opt_t longopts[] = {
   { "help",    0, 0, 'h' },
@@ -62,7 +62,7 @@ int run_save(cmd_t * cmd, int argc, char ** argv)
     case 'h':                       /* --help */
       help(argv[0]); return 0;
     case 'z':                       /* --gzip=[0-9] */
-      if (!isdigit(*optarg) || optarg[1]) {
+      if (!isdigit((int)*optarg) || optarg[1]) {
         msgerr("invalid compression level \"%s\"\n", optarg);
         goto error;
       }

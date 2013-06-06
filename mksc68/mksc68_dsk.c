@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 07:02:09 ben>
+ * Time-stamp: <2013-06-05 23:40:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -26,13 +26,18 @@
 
 /* generated config include */
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+#include "config.h"
 #endif
 
 #include "mksc68_dsk.h"
 #include "mksc68_msg.h"
 #include "mksc68_cmd.h"
 #include "mksc68_tag.h"
+
+#include <sc68/file68.h>
+#include <sc68/alloc68.h>
+#include <sc68/string68.h>
+#include <sc68/sc68.h>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -42,11 +47,6 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdint.h>
-
-#include "sc68/file68.h"
-#include "sc68/alloc68.h"
-#include "sc68/string68.h"
-#include "sc68/sc68.h"
 
 typedef struct dsk_s dsk_t;
 struct dsk_s {
