@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-27 12:13:51 ben>
+ * Time-stamp: <2013-06-06 09:03:17 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -290,6 +290,11 @@ int paula_reset(paula_t * const paula)
     paula->map[i] = 0;
   }
 
+  /* Some musics does not initialize volume (see support-request #4) */
+  for (i=0; i<4; i++) {
+    paula->map[PAULA_VOICE(i)+9] = 64;
+  }
+
   /* reset voices */
   for (i=0; i<4; i++) {
     paula->voice[i].adr   = 0;
@@ -502,20 +507,67 @@ static void clear_buffer(s32 * b, int n)
     } while (--n);
 }
 
+
+#if DEBUG_PL_O == 1
+
+typedef struct {
+  int on;
+  int adr;   /**< current sample counter (<<paula_t::ct_fix). */
+  int start; /**< loop address.                               */
+  int end;   /**< end address (<<paula_t::ct_fix).            */
+  int vol;
+  int per;
+} paulav_dbg_t;
+
+static
+void paula_dbg(paulav_dbg_t * d, paula_t * const paula, int i)
+{
+  paulav_t * const w   = paula->voice+i;
+  u8       * const p   = paula->map+PAULA_VOICE(i);
+  const int     ct_fix = paula->ct_fix;
+
+  d->on   = ((paula->dmacon >> 9) & (paula->dmacon >> i) & 1);
+  d->adr  = w->adr << ct_fix;
+  d->end  = w->end << ct_fix;
+  d->start  = w->start << ct_fix;
+  d->vol = p[9] & 127;
+  if (d->vol >= 64) {
+    d->vol = 64;
+  }
+  d->per = ( p[6] << 8 ) + p[7];
+  if (!d->per) d->per = 1;
+}
+#endif
+
 void paula_mix(paula_t * const paula, s32 * splbuf, int n)
 {
 
   if ( n > 0 ) {
-    int i;
+    int i, b=0;
+#if DEBUG_PL_O == 1
+    paulav_dbg_t d[4];
+#endif
     clear_buffer(splbuf, n);
     for (i=0; i<4; i++) {
       const int right = (i^msw_first)&1;
+#if DEBUG_PL_O == 1
+      paula_dbg(d+i, paula, i);
+#endif
       if ((paula->dmacon >> 9) & (paula->dmacon >> i) & 1) {
         mix_one(paula, i, right, splbuf, n);
+        b += 1 << i;
       }
     }
+#if DEBUG_PL_O == 1
+#define ONE "%c:%06x-%06x->%06x,%04x,%02d"
+    TRACE68(pl_cat,"paula  : %d " ONE " " ONE " " ONE " " ONE "\n",
+            n,
+            d[0].on?'A':'.', d[0].adr, d[0].end, d[0].start, d[0].per,d[0].vol,
+            d[1].on?'A':'.', d[1].adr, d[1].end, d[1].start, d[1].per,d[1].vol,
+            d[2].on?'A':'.', d[2].adr, d[2].end, d[2].start, d[2].per,d[2].vol,
+            d[3].on?'A':'.', d[3].adr, d[3].end, d[3].start, d[3].per,d[3].vol);
+#endif
   }
-
   /* HaxXx: assuming next mix is next frame reset beam V/H position. */
   paula->vhpos = 0;
 }
