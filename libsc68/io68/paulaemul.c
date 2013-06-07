@@ -3,9 +3,9 @@
  * @brief   Paula emulator (Amiga soundchip)
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-06 09:03:17 ben>
+ * Time-stamp: <2013-06-06 09:28:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -537,6 +537,7 @@ void paula_dbg(paulav_dbg_t * d, paula_t * const paula, int i)
   d->per = ( p[6] << 8 ) + p[7];
   if (!d->per) d->per = 1;
 }
+
 #endif
 
 void paula_mix(paula_t * const paula, s32 * splbuf, int n)
@@ -558,15 +559,17 @@ void paula_mix(paula_t * const paula, s32 * splbuf, int n)
         b += 1 << i;
       }
     }
+
 #if DEBUG_PL_O == 1
-#define ONE "%c:%06x-%06x->%06x,%04x,%02d"
+#   define ONE "%c:%06x-%06x->%06x,%04x,%02d"
     TRACE68(pl_cat,"paula  : %d " ONE " " ONE " " ONE " " ONE "\n",
             n,
             d[0].on?'A':'.', d[0].adr, d[0].end, d[0].start, d[0].per,d[0].vol,
-            d[1].on?'A':'.', d[1].adr, d[1].end, d[1].start, d[1].per,d[1].vol,
-            d[2].on?'A':'.', d[2].adr, d[2].end, d[2].start, d[2].per,d[2].vol,
-            d[3].on?'A':'.', d[3].adr, d[3].end, d[3].start, d[3].per,d[3].vol);
+            d[1].on?'B':'.', d[1].adr, d[1].end, d[1].start, d[1].per,d[1].vol,
+            d[2].on?'C':'.', d[2].adr, d[2].end, d[2].start, d[2].per,d[2].vol,
+            d[3].on?'D':'.', d[3].adr, d[3].end, d[3].start, d[3].per,d[3].vol);
 #endif
+
   }
   /* HaxXx: assuming next mix is next frame reset beam V/H position. */
   paula->vhpos = 0;

@@ -69,6 +69,7 @@ typedef union {
 #define TAG68_FRAMES     "frames"
 #define TAG68_HASH       "hash"
 #define TAG68_URI        "uri"
+#define TAG68_HARDWARE   "hardware"
 
 /* Aliases tags */
 #define TAG68_ALBUM      TAG68_TITLE

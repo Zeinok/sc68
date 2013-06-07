@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-03 08:50:34 ben>
+ * Time-stamp: <2013-06-07 15:07:55 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -31,39 +31,62 @@
 
 #include <stdlib.h>
 
-#define FBIT 32
-#define TBIT 5
-#define HBIT (32-TBIT)
+#define HBIT 32                         /* # of bit for hash     */
+#define TBIT 5                          /* # of bit for track    */
+#define WBIT 5                          /* # of bit for hardware */
+#define FBIT (64-HBIT-TBIT-WBIT)        /* # of bit for frames   */
 
-#define TIMEDB_ENTRY(HASH,TRACK,FRAMES) { (HASH)>>TBIT, TRACK , FRAMES }
+#define HFIX (32-HBIT)
+
+#define TIMEDB_ENTRY(HASH,TRACK,FRAMES,FLAGS) \
+  { (HASH)>>HFIX, TRACK, FLAGS, FRAMES }
+#define E_EMPTY { 0,0,0,0 }
+
 
 typedef struct {
-  unsigned int hash   : HBIT;
-  unsigned int track  : TBIT;
-  unsigned int frames : FBIT;
+  unsigned int hash   : HBIT;           /* hash code              */
+  unsigned int track  : TBIT;           /* track number (0-based) */
+  unsigned int flags  : WBIT;           /* see enum               */
+  unsigned int frames : FBIT;           /* length in frames       */
 } dbentry_t;
-
 
 #define HAVE_TIMEDB_INC_H 1
 
 #ifdef HAVE_TIMEDB_INC_H
+
+#define STE TDB_STE
+#define YM  ( TDB_TA + TDB_TB + TDB_TC + TDB_TD )
+#define TA  -TDB_TA
+#define TB  -TDB_TB
+#define TC  -TDB_TC
+#define TD  -TDB_TD
+#define NA  -YM
+
 static dbentry_t db[] = {
 # include "timedb.inc.h"
+  E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,
+  E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,
+  E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,
+  E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,
+  E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,
+  E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,
+  E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,
+  E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,
 };
 # define DB_MAX   (sizeof(db)/sizeof(*db))
-# define DB_COUNT DB_MAX
+# define DB_COUNT DB_MAX-64
 # define DB_SORT  1
 #else
 # define DB_MAX   10000
 # define DB_COUNT 0
-# define DB_SORT  0
+# define DB_SORT  1
 static dbentry_t db[DB_MAX];
 #endif
 
-static int dbcount  = DB_COUNT;
-static int dbmax    = DB_MAX;
-static int dbsort   = DB_SORT;
-static int dbchange = 0;
+static int dbcount  = DB_COUNT;      /* entry count                 */
+static int dbmax    = DB_MAX;        /* max entry                   */
+static int dbsort   = DB_SORT;       /* set if db is sorted         */
+static int dbchange = 0;             /* set if db has been modified */
 
 /* static const char * db_uri="rsc68://timedb"; */
 
@@ -71,9 +94,12 @@ static int cmp(const void * ea, const void *eb)
 {
   const dbentry_t * a = (const dbentry_t *) ea;
   const dbentry_t * b = (const dbentry_t *) eb;
-  int va = a->track | (a->hash << TBIT);
-  int vb = b->track | (b->hash << TBIT);
-  return va - vb;
+  int v;
+
+  v = a->hash - b->hash;
+  if (!v)
+    v = a->track - b->track;
+  return v;
 }
 
 static dbentry_t * search_for(const dbentry_t * key)
@@ -89,31 +115,31 @@ static dbentry_t * search_for(const dbentry_t * key)
 int timedb68_add(int hash, int track, unsigned int frames, int flags)
 {
   dbentry_t e, *s;
-  e.hash   = hash >> TBIT;
+
+  e.hash   = hash >> HFIX;
   e.track  = track;
   e.frames = frames;
+  e.flags  = flags;
 
   s = search_for(&e);
   if (!s && dbcount < dbmax) {
     s = db + dbcount++;
-    s->hash  = hash >> TBIT;
-    s->track = track;
     dbsort = 0;
   }
   if (s)
-    s->frames = frames;
+    *s = e;
   return s - db;
 }
 
 int timedb68_get(int hash, int track, unsigned int * frames, int * flags)
 {
   dbentry_t e, *s;
-  e.hash   = hash >> TBIT;
+  e.hash   = hash >> HFIX;
   e.track  = track;
   s = search_for(&e);
   if (s) {
     if (frames) *frames = s->frames;
-    if (flags)  *flags  = 0;
+    if (flags)  *flags  = s->flags;
     return s - db;
   }
   return -1;

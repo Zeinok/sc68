@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-07 05:24:57 ben>
+ * Time-stamp: <2013-06-07 11:15:27 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -279,23 +279,32 @@ char * str_hardware(char * const buf, int max, int hwbit)
 {
   int i;
   hwflags68_t hw;
+  hw.all = hwbit;
 
-  if (!(hw.all = hwbit)) {
+  i = catflag(buf, 0, max, hw.bit.ym,    "YM");
+  i = catflag(buf, i, max, hw.bit.ste,   "STE");
+  i = catflag(buf, i, max, hw.bit.amiga, "AGA");
+  if (!i)
     i = catflag(buf, 0, max, 1, "NONE");
+
+  if (hw.bit.timers) {
+    i = catflag(buf, i, max, hw.bit.timera, "TA");
+    i = catflag(buf, i, max, hw.bit.timerb, "TB");
+    i = catflag(buf, i, max, hw.bit.timerc, "TC");
+    i = catflag(buf, i, max, hw.bit.timerd, "TD");
   } else {
-    i = catflag(buf, 0, max, hw.bit.ym,    "YM");
-    i = catflag(buf, i, max, hw.bit.ste,   "STE");
-    i = catflag(buf, i, max, hw.bit.amiga, "AGA");
-    if (hw.bit.timers) {
-      i = catflag(buf, i, max, hw.bit.timera, "TA");
-      i = catflag(buf, i, max, hw.bit.timerb, "TB");
-      i = catflag(buf, i, max, hw.bit.timerc, "TC");
-      i = catflag(buf, i, max, hw.bit.timerd, "TD");
-    } else {
-      i = catflag(buf, i, max, 1, "T?");
-    }
+    i = catflag(buf, i, max, 1, "T?");
   }
-  buf[max-1] = 0;
+
+  if (!i) {
+    msgwrn("unexpecteed hardware bit value -- 0x%x\n", hwbit);
+  }
+
+  /* safety fisrt */
+  if (i < max)
+    buf[i] = 0;
+  else
+    buf[max-1] = 0;
+
   return buf;
 }
-

@@ -7,9 +7,9 @@
  *
  */
 
-/* $Id$ */
+/* Time-stamp: <2013-06-06 09:30:08 ben> */
 
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _IO68_PAULAEMUL_H_
 #define _IO68_PAULAEMUL_H_

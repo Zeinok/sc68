@@ -45,13 +45,13 @@
  */
 #define SC68_IDSTR_V2 "SC68 M2"
 
-/* Old V2 never use except for experiental files ... 
+/* Old V2 never use except for experiental files ...
 #define SC68_IDSTR_V2 "SC68\0\002\377\251\337\353\321"
 */
 
 #define SC68_NOFILENAME "n/a"   /**< SC68 unknown filename or author.      */
 #define SC68_LOADADDR   0x10000 /**< Default load address in 68K memory.    */
-#define SC68_MAX_TRACK  99      /**< Maximum track per disk (2 digits max). */
+#define SC68_MAX_TRACK  32      /**< Maximum track per disk (2 digits max). */
 
 
 /**
@@ -144,7 +144,7 @@ typedef struct {
  *
  *  The disk68_t structure is the memory representation for an SC68
  *  disk.  Each SC68 file could several music or tracks, in the limit
- *  of a maximum of 99 tracks per file. Each music is independant, but
+ *  of a maximum of 32 tracks per file. Each music is independant, but
  *  some information, including music data, could be inherit from
  *  previous track. In a general case, tracks are grouped by theme,
  *  that could be a demo or a game.
