@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:38:26 ben>
+ * Time-stamp: <2013-06-07 05:24:57 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -31,6 +31,8 @@
 
 #include "mksc68_dsk.h"
 #include "mksc68_msg.h"
+
+#include <sc68/file68.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -262,3 +264,38 @@ char * str_timefmt(char * buf, int len, unsigned int ms)
 
   return buf;
 }
+
+static int catflag(char * tmp, int i, int max, int bit, const char * l) {
+  if (bit) {
+    if (i && i<max)
+      tmp[i++] = ',';
+    while (i<max && (tmp[i] = *l++))
+      ++i;
+  }
+  return i;
+}
+
+char * str_hardware(char * const buf, int max, int hwbit)
+{
+  int i;
+  hwflags68_t hw;
+
+  if (!(hw.all = hwbit)) {
+    i = catflag(buf, 0, max, 1, "NONE");
+  } else {
+    i = catflag(buf, 0, max, hw.bit.ym,    "YM");
+    i = catflag(buf, i, max, hw.bit.ste,   "STE");
+    i = catflag(buf, i, max, hw.bit.amiga, "AGA");
+    if (hw.bit.timers) {
+      i = catflag(buf, i, max, hw.bit.timera, "TA");
+      i = catflag(buf, i, max, hw.bit.timerb, "TB");
+      i = catflag(buf, i, max, hw.bit.timerc, "TC");
+      i = catflag(buf, i, max, hw.bit.timerd, "TD");
+    } else {
+      i = catflag(buf, i, max, 1, "T?");
+    }
+  }
+  buf[max-1] = 0;
+  return buf;
+}
+

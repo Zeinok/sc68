@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:42:26 ben>
+ * Time-stamp: <2013-06-07 05:22:00 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -71,36 +71,12 @@ static void tinf(const char * label, unsigned int ms)
   pinf(label, str_timefmt(tmp, sizeof(tmp), ms));
 }
 
-static void catflag(char * tmp, int bit, const char * label) {
-  if (bit) {
-    if (*tmp)
-      strcat(tmp,",");
-    strcat(tmp,label);
-  }
-}
-
 static void hinf(const char * label, hwflags68_t hw)
 {
-  char tmp[256]
-    ;
-  *tmp = 0;
-  if (!hw.all)
-    strcpy(tmp,"NONE");
-  else {
-    catflag(tmp, hw.bit.ym,    "YM");
-    catflag(tmp, hw.bit.ste,   "STE");
-    catflag(tmp, hw.bit.amiga, "AGA");
-    if (hw.bit.timers) {
-      catflag(tmp, hw.bit.timera, "TA");
-      catflag(tmp, hw.bit.timerb, "TB");
-      catflag(tmp, hw.bit.timerc, "TC");
-      catflag(tmp, hw.bit.timerd, "TD");
-    } else
-      catflag(tmp, 1, "T?");
-  }
+  char tmp[256];
+  str_hardware(tmp, sizeof(tmp), hw.all);
   pinf(label, tmp);
 }
-
 
 static
 int run_info(cmd_t * cmd, int argc, char ** argv)

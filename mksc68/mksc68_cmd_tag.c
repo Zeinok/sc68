@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:40:58 ben>
+ * Time-stamp: <2013-06-07 05:05:07 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -91,7 +91,9 @@ int list_all_tags(void)
 
 static
 const char * special_tags[] = {
-  TAG68_REPLAY, TAG68_RATE, TAG68_LENGTH, TAG68_FRAMES, TAG68_HASH, TAG68_URI
+  TAG68_REPLAY, TAG68_RATE, TAG68_HARDWARE,
+  TAG68_LENGTH, TAG68_FRAMES,
+  TAG68_HASH, TAG68_URI,
 };
 
 static

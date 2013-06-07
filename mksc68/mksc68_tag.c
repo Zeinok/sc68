@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:34:01 ben>
+ * Time-stamp: <2013-06-07 05:01:04 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -64,11 +64,12 @@ static struct tag_std {
   { TAG68_FRAMES     ,0, "duration in frames" },
   { TAG68_HASH       ,0, "file content hash code" },
   { TAG68_URI        ,0, "URI or path for this file" },
+  { TAG68_HARDWARE   ,0, "hardware used" },
 
   /* Aliases */
   { "author"         ,1, TAG68_ARTIST },
   { "album"          ,1, TAG68_TITLE  },
-  { TAG68_DURATION   ,1,TAG68_LENGTH },
+  { "duration"       ,1, TAG68_LENGTH },
 
 };
 

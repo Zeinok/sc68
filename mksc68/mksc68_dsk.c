@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:40:11 ben>
+ * Time-stamp: <2013-06-07 05:17:56 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -281,6 +281,7 @@ const char * dsk_tag_get(int trk, const char * var)
   if (trk && !is_valid_track(trk))
     return 0;
   val = tag_get(trk, var);
+  /* Some internal tags */
   if (!val) {
     static char str[64];
     const int max = sizeof(str)-1;
@@ -315,6 +316,9 @@ const char * dsk_tag_get(int trk, const char * var)
       val = str;
     } else if ( ! strcmp (var, TAG68_URI) && !trk) {
       val = dsk.filename;
+    }
+    else if ( ! strcmp (var, TAG68_HARDWARE)) {
+      val = str_hardware(str, max, !trk ? dsk.disk->hwflags : m->hwflags);
     }
   }
   return val;
