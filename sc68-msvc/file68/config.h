@@ -1,5 +1,6 @@
 #include "config_msvc.h"
 
+#define USE_REPLAY68 1
 /* debug facilities for file68 */
 /* #undef DEBUG_FILE68 */
 

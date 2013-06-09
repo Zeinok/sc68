@@ -1,3 +1,5 @@
+/* Time-stamp: <2013-06-09 13:03:15 ben> */
+
 /**
  * @ingroup  file68_lib
  * @file     sc68/gzip68.h
@@ -7,9 +9,7 @@
  *
  */
 
-/* $Id$ */
-
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_GZIP68_H_
 #define _FILE68_GZIP68_H_
@@ -18,7 +18,8 @@
 # include "file68_api.h"
 #endif
 
-/** @defgroup  file68_gzip  gzip file support.
+/**
+ *  @defgroup  file68_gzip  gzip file support.
  *  @ingroup   file68_lib
  *
  *    Provides functions for loading and saving gzip file.
@@ -27,7 +28,8 @@
  */
 
 FILE68_EXTERN
-/** Test gzip file header magic header.
+/**
+ *  Test gzip file header magic header.
  *
  *  @param  buffer  Buffer containing at least 3 bytes from gzip header.
  *
@@ -37,7 +39,8 @@ FILE68_EXTERN
 int gzip68_is_magic(const void * buffer);
 
 FILE68_EXTERN
-/** Load an optionnally gzipped file.
+/**
+ *  Load an optionnally gzipped file.
  *
  *    The gzip68_load() function allocates memory and loads the totality of the
  *    given file. If the file is a gzipped file, it will be inflate.
@@ -49,6 +52,20 @@ FILE68_EXTERN
  * @retval 0 on error.
  */
 void * gzip68_load(const char * fname, int * ulen);
+
+FILE68_EXTERN
+/**
+ *  Unzip from and to memory.
+ *
+ * @param  dst   destination buffer
+ * @param  dsize destination buffer size
+ * @param  src   COmpressed buffer
+ * @param  csize compressed buffer size
+ *
+ * @return size of deflated buffer
+ * @retval -1 on error.
+ */
+int gzip68_buffer(void * dst, int dsize, const void * src, int csize);
 
 /**
  *  @}

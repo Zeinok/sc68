@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-09 01:45:19 ben>
+ * Time-stamp: <2013-06-09 13:39:32 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -41,6 +41,7 @@
 #include "istream68_mem.h"
 #include "istream68_z.h"
 #include "msg68.h"
+#include "gzip68.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -460,7 +461,17 @@ static istream68_t * default_open(rsc68_t type, const char *name,
   switch (type) {
   case rsc68_replay:
 
-#ifdef USE_REPLAY68
+#if defined (USE_REPLAY68) && 0
+
+    /* Method using istream to inflate data. Notice that unfortunatly
+     * we can't use a proper Z stream because the replay loader needs
+     * to know the length and istream68_z::length() method does not
+     * have this information before it has inflated the all data. This
+     * is a limitation that could probably be dealt with, at least
+     * with gziped stream as the information is available at the end
+     * of the stream. Also in this particular case the inflate size is
+     * available via the replay68_get() function.
+     */
     if (mode == 1) {
       const void * cdata;
       int csize, dsize;
@@ -491,7 +502,42 @@ static istream68_t * default_open(rsc68_t type, const char *name,
         }
       }
     }
+
+#elif defined (USE_REPLAY68)
+
+    /* Method using gzip68_buffer() is probably faster (less memory
+     * copy) than the previous Z stream one. It still need to allocate
+     * a temporary buffer to store deflated data whereas a proper
+     * istream could have deflated on the fly into the 68k memory
+     * buffer. See previous method comment on that matter.
+     */
+    if (mode == 1) {
+      const void * cdata;
+      void * ddata;
+      int csize, dsize;
+
+      if (!replay68_get(name, &cdata, &csize, &dsize)) {
+        TRACE68(rsc68_cat,"rsc68: found built-in replay -- %s %d %d\n",
+                name, csize, dsize);
+        ddata = alloc68(dsize);
+        if (ddata) {
+          int inflate = gzip68_buffer(ddata, dsize, cdata, csize);
+          if (inflate != dsize) {
+            msg68_error("rsc68: inflated size of built-in replay differs"
+                        " -- %s %d %d\n",name, inflate, dsize);
+            err = -1;
+          } else {
+            is = istream68_mem_create(ddata, dsize, mode|ISTREAM68_SLAVE);
+            if ( (err = -!is) != 0) {
+              free68(ddata);
+            }
+          }
+        }
+      }
+    }
+
 #endif
+
     cv_extra = cv_lower; /* $$$ transform replay name to lower case. */
     break;
 
@@ -730,7 +776,7 @@ int rsc68_init(void)
 void rsc68_shutdown(void)
 {
   if (init) {
-    /* destroy pathes. */
+    /* destroy paths. */
     rsc68_set_share(0);
     rsc68_set_user(0);
     rsc68_set_music(0);

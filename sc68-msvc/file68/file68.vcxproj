@@ -28,6 +28,7 @@
     <ClCompile Include="..\..\file68\src\msg68.c" />
     <ClCompile Include="..\..\file68\src\option68.c" />
     <ClCompile Include="..\..\file68\src\registry68.c" />
+    <ClCompile Include="..\..\file68\src\replay68.c" />
     <ClCompile Include="..\..\file68\src\rsc68.c" />
     <ClCompile Include="..\..\file68\src\string68.c" />
     <ClCompile Include="..\..\file68\src\timedb68.c" />
@@ -59,6 +60,7 @@
     <ClInclude Include="..\..\file68\sc68\string68.h" />
     <ClInclude Include="..\..\file68\sc68\tag68.h" />
     <ClInclude Include="..\..\file68\sc68\url68.h" />
+    <ClInclude Include="..\..\file68\src\replay.inc.h" />
     <ClInclude Include="..\..\file68\src\timedb.inc.h" />
     <ClInclude Include="..\zlib\zconf.h" />
     <ClInclude Include="..\zlib\zlib.h" />

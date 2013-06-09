@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (C) 1998-2011 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_ALLOC68_H_
 #define _FILE68_ALLOC68_H_
