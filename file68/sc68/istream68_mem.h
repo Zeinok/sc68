@@ -1,3 +1,5 @@
+/* Time-stamp: <2013-06-08 23:15:56 ben> */
+
 /**
  * @ingroup  file68_lib
  * @file     sc68/istream68_mem.h
@@ -7,9 +9,7 @@
  *
  */
 
-/* $Id$ */
-
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_ISTREAM68_MEM_H_
 #define _FILE68_ISTREAM68_MEM_H_
@@ -17,7 +17,8 @@
 #include "istream68.h"
 
 
-/** @name     Memory stream
+/**
+ *  @name     Memory stream
  *  @ingroup  file68_istream
  *
  *    Implements istream68_t for memory buffer.
@@ -26,7 +27,11 @@
  */
 
 FILE68_EXTERN
-/** Creates a stream for memory buffer.
+/**
+ *  Creates a stream for memory buffer.
+ *
+ *  If mode is enslaved the destroy callback call the free68()
+ *  function to release the memory buffer addr.
  *
  *  @param  addr     Buffer base address.
  *  @param  len      Buffer length.
@@ -39,7 +44,8 @@ FILE68_EXTERN
  */
 istream68_t * istream68_mem_create(const void * addr, int len, int mode);
 
-/** @} */
-
+/**
+ * @}
+ */
 
 #endif /* #define _FILE68_ISTREAM68_MEM_H_ */

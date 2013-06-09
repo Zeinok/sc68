@@ -47,8 +47,8 @@ static pfc::string_formatter g_get_component_about()
 
 // Declare our component
 DECLARE_COMPONENT_VERSION(
-  "foo_sc68",
-  "0.0.1",
+  "sc68 for foobar2000",
+  "0.3.0",
   g_get_component_about()
 );
 

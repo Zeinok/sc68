@@ -9,14 +9,15 @@
 
 /* $Id$ */
 
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_ISTREAM68_Z_H_
 #define _FILE68_ISTREAM68_Z_H_
 
 #include "istream68.h"
 
-/** @name     Z stream
+/**
+ * @name     Z stream
  *  @ingroup  file68_istream
  *
  *  @anchor zlib
@@ -29,7 +30,9 @@
  *  @{
  */
 
-/** gzip options. */
+/**
+ * gzip options.
+ */
 typedef struct {
   unsigned int gzip:1;     /**< Read/Write gzip file format.                */
   unsigned int level:4;    /**< Compression level [0..9] or -1 for default. */
@@ -37,12 +40,15 @@ typedef struct {
   unsigned int name:1;     /**< Include original name to gzip.              */
 } istream68_z_option_t;
 
-/** Default gzip option. */
+/**
+ * Default gzip option.
+ */
 FILE68_EXTERN
 const istream68_z_option_t istream68_z_default_option;
 
 FILE68_EXTERN
-/** Create a @ref zlib "Z" stream.
+/**
+ *  Create a @ref zlib "Z" stream.
  *
  *  @param  is     Stream to compress/decompress.
  *  @param  mode   bit-0: read access, bit-1: write access.
@@ -54,6 +60,8 @@ FILE68_EXTERN
 istream68_t * istream68_z_create(istream68_t * is, int mode,
                                  const istream68_z_option_t opt);
 
-/** @} */
+/**
+ * @}
+ */
 
 #endif /* #define _FILE68_ISTREAM68_Z_H_ */

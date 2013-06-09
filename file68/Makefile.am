@@ -1,4 +1,4 @@
-# Time-stamp: <2013-06-03 07:13:06 ben>
+# Time-stamp: <2013-06-08 18:49:14 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  file68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -21,6 +21,12 @@ sdir=src
 hdir=sc68
 null=
 
+if REPLAY68
+replay68_c=$(sdir)/replay68.c
+else
+replay68_c=
+endif
+
 mysources = $(sdir)/error68.c $(sdir)/file68.c $(sdir)/gzip68.c	\
  $(sdir)/ice68.c $(sdir)/init68.c $(sdir)/istream68.c		\
  $(sdir)/istream68_ao.c $(sdir)/istream68_curl.c		\
@@ -28,7 +34,7 @@ mysources = $(sdir)/error68.c $(sdir)/file68.c $(sdir)/gzip68.c	\
  $(sdir)/istream68_mem.c $(sdir)/istream68_null.c		\
  $(sdir)/istream68_z.c $(sdir)/msg68.c $(sdir)/option68.c	\
  $(sdir)/registry68.c $(sdir)/rsc68.c $(sdir)/string68.c	\
- $(sdir)/timedb68.c $(sdir)/url68.c $(null)
+ $(sdir)/timedb68.c $(sdir)/url68.c $(replay68_c) $(null)
 
 apiheaders = $(hdir)/alloc68.h $(hdir)/audio68.h $(hdir)/chunk68.h	\
  $(hdir)/endian68.h $(hdir)/error68.h $(hdir)/file68.h			\
@@ -37,10 +43,11 @@ apiheaders = $(hdir)/alloc68.h $(hdir)/audio68.h $(hdir)/chunk68.h	\
  $(hdir)/registry68.h $(hdir)/rsc68.h $(hdir)/string68.h		\
  $(hdir)/tag68.h $(hdir)/url68.h $(hdir)/timedb68.h $(null)
 
-otherheaders = $(hdir)/gzip68.h $(hdir)/ice68.h $(hdir)/istream68_ao.h	\
- $(hdir)/istream68_curl.h $(hdir)/istream68_fd.h			\
- $(hdir)/istream68_file.h $(hdir)/istream68_mem.h			\
- $(hdir)/istream68_null.h $(hdir)/istream68_z.h $(sdir)/timedb.inc.h    \
+otherheaders = $(hdir)/gzip68.h $(hdir)/ice68.h				\
+ $(hdir)/istream68_ao.h $(hdir)/istream68_curl.h			\
+ $(hdir)/istream68_fd.h $(hdir)/istream68_file.h			\
+ $(hdir)/istream68_mem.h $(hdir)/istream68_null.h			\
+ $(hdir)/istream68_z.h $(sdir)/timedb.inc.h $(sdir)/replay.inc.h	\
  $(null)
 
 myheaders = $(apiheaders) $(otherheaders)

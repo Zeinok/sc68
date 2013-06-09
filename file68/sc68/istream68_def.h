@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (C) 1998-2011 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_ISTREAM68_DEF_H_
 #define _FILE68_ISTREAM68_DEF_H_
@@ -46,9 +46,24 @@
 #define ISTREAM68_OPEN_MASK (ISTREAM68_OPEN_READ|ISTREAM68_OPEN_WRITE)
 
 /**
+ * Slave mode bit.
+ */
+#define ISTREAM68_SLAVE_BIT 7
+
+/**
+ * Slave mode value.
+ */
+#define ISTREAM68_SLAVE (1<<ISTREAM68_SLAVE_BIT)
+
+/**
+ * Test SLAVE mode.
+ */
+#define ISTREAM68_IS_SLAVE(V) (((V)>>ISTREAM68_SLAVE_BIT)&1)
+
+/**
  * Test if any open flags is set (returns 0 or 1).
  */
-#define ISTREAM68_IS_OPEN(V) (!!((V)&(ISTREAM68_OPEN_READ|ISTREAM68_OPEN_WRITE)))
+#define ISTREAM68_IS_OPEN(V) (!!((V)&ISTREAM68_OPEN_MASK))
 
 /**
  * Test if READ open flags is set (returns 0 or 1).

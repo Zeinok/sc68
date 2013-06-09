@@ -2,12 +2,12 @@
 # |                                                                      |
 # |   data -- Makefile.am -- Use with automake to produce configure.in   | 
 # |                                                                      |
-# |		    (C) 2007-2009 Benjamin Gerard                        |
+# |		    (C) 2007-2013 Benjamin Gerard                        |
 # | 	     <benjihan -4t- users.sourceforge -d0t- net>                 |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# $Id$
+# Time-stamp: <2013-06-08 13:00:29 ben>
 
 # ,----------------------------------------------------------------------.
 # | data                                                                 |
@@ -29,7 +29,29 @@ endif
 
 config_files = sc68.cfg
 sample_files = Sample/About-Intro.sc68
-replay_files =\
+
+replay_files = Replay/asidifier.bin \
+ Replay/dmu.bin Replay/dwaga.bin Replay/jamcrackerpro.bin		\
+ Replay/lastninja3.bin Replay/mon.bin Replay/tcbtracker.bin		\
+ Replay/aenigmatica.bin Replay/alteredbeast.bin Replay/armalyte.bin	\
+ Replay/blipblop.bin Replay/blipp079.bin Replay/chipmon2.bin		\
+ Replay/cosotfmx.bin Replay/deltamusic1.bin Replay/deltamusic2.bin	\
+ Replay/dyter07.bin Replay/fc13_14.bin Replay/fireice.bin		\
+ Replay/fred.bin Replay/gemx.bin Replay/hpn-jam.bin			\
+ Replay/huntforredoct.bin Replay/lastninjaiii.bin Replay/mcoder.bin	\
+ Replay/midi.bin Replay/mmmesid.bin Replay/musmon1.bin			\
+ Replay/musmon2.bin Replay/ninjatfmx.bin Replay/note.bin		\
+ Replay/page.bin Replay/psgtrackerv2.bin Replay/puma.bin		\
+ Replay/quartet.bin Replay/realms.bin Replay/shadowdancer.bin		\
+ Replay/sidmon1.bin Replay/sidmon2.bin Replay/sndh_ice.bin		\
+ Replay/soundfx.bin Replay/spacegun.bin Replay/ssd1.bin			\
+ Replay/stos.bin Replay/synthiv.bin Replay/tao_digi.bin			\
+ Replay/tao_hubbard.bin Replay/tao_ms211.bin Replay/tao_ms25.bin	\
+ Replay/tao_ms27.bin Replay/tao_tsd.bin Replay/tfmx.bin			\
+ Replay/tfmx_st.bin Replay/timerc.bin Replay/xbiossound.bin
+
+# all replays (including unused)
+allreplay_files =\
  Replay/aenigmatica.bin Replay/alteredbeast.bin Replay/armalyte.bin	\
  Replay/asidifier.bin Replay/bendaglish.deli.bin Replay/big.bin		\
  Replay/blipblop.bin Replay/blipp079.bin Replay/bs22.bin		\
@@ -60,4 +82,3 @@ replay_files =\
  Replay/tfmx_old.bin Replay/tfmx_st.bin Replay/timerc.bin		\
  Replay/toki.bin Replay/tsd1.bin Replay/utopia.bin			\
  Replay/vikingchild.bin Replay/xbiossound.bin Replay/zonewarrior.bin
-

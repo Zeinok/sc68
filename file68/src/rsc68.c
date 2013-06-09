@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-04 06:20:20 ben>
+ * Time-stamp: <2013-06-09 01:45:19 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -34,9 +34,12 @@
 #include "url68.h"
 #include "string68.h"
 #include "alloc68.h"
+#include "istream68_def.h"
 #include "istream68_file.h"
 #include "istream68_fd.h"
 #include "istream68_curl.h"
+#include "istream68_mem.h"
+#include "istream68_z.h"
 #include "msg68.h"
 
 #include <stdarg.h>
@@ -51,6 +54,9 @@
 int rsc68_cat = msg68_DEFAULT;
 
 static volatile int init = 0;
+
+/* in replay68.c */
+int replay68_get(const char * name, const void ** data, int * csize, int * dsize);
 
 /* The resource pathes are context independant consequently
  * each context use the same pathes.
@@ -453,6 +459,39 @@ static istream68_t * default_open(rsc68_t type, const char *name,
   /* Any specific stuff. */
   switch (type) {
   case rsc68_replay:
+
+#ifdef USE_REPLAY68
+    if (mode == 1) {
+      const void * cdata;
+      int csize, dsize;
+      istream68_t * is_in;
+
+      if (!replay68_get(name, &cdata, &csize, &dsize)) {
+        TRACE68(rsc68_cat,"rsc68: found built-in replay -- %s %d %d\n",
+                name, csize, dsize);
+
+        is_in =
+          istream68_z_create(
+            istream68_mem_create(cdata, csize, mode),
+            mode|ISTREAM68_SLAVE,
+            istream68_z_default_option);
+        if (is_in) {
+          is = istream68_mem_create(0, dsize, 3);
+          if (!istream68_open(is_in) && !istream68_open(is)) {
+            int n;
+            while (n = istream68_read(is_in, tmpname, sizeof(tmpname)), n > 0)
+              if (istream68_write(is, tmpname, n) != n) {
+                n = -1;
+                break;
+              }
+            err = -!!n;
+          }
+          istream68_destroy(is_in);
+          istream68_seek_to(is,0);
+        }
+      }
+    }
+#endif
     cv_extra = cv_lower; /* $$$ transform replay name to lower case. */
     break;
 
@@ -470,7 +509,7 @@ static istream68_t * default_open(rsc68_t type, const char *name,
     break;
   }
 
-  for (ipath=0; name && ipath < npath; ++ipath) {
+  for (ipath=0; !is && name && ipath < npath; ++ipath) {
     const char *cpath, * cdir, * cext;
     char *p, *pe, *path;
     int len, l;
@@ -552,7 +591,7 @@ static istream68_t * default_open(rsc68_t type, const char *name,
     info->type = type;
   }
 
-  TRACE68(rsc68_cat, "rsc68: open '%s' => [%s,%s]\n",
+  TRACE68(rsc68_cat, "rsc68: open => [%s,%s]\n",
           strok68(!is), istream68_filename(is));
   return is;
 }
@@ -588,7 +627,7 @@ istream68_t * rsc68_open_url(const char *url, int mode, rsc68_info_t * info)
   char protocol[16];
   istream68_t * is = 0;
 
-  TRACE68(rsc68_cat,"rsc68: open url='%s' mode=%c%c%s)\n",
+  TRACE68(rsc68_cat,"rsc68: open url='%s' mode=%c%c%s\n",
           strnevernull68(url),
           (mode&1) ? 'R' : '.',
           (mode&2) ? 'W' : '.',

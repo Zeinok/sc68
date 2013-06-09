@@ -69,6 +69,12 @@ AC_ARG_ENABLE(
       [windows registry support @<:@default=check@:>@])],
   [],[enable_reg=check])
 
+AC_ARG_ENABLE(
+  [replay-rom],
+  [AS_HELP_STRING([--enable-replay-rom],
+      [add built-in replay (~130kB) @<:@default=no@:>@])],
+  [],[enable_replay_rom=no])
+
 # ,----------------------------------------------------------------------.
 # | External libraries                                                   |
 # `----------------------------------------------------------------------'
@@ -143,6 +149,17 @@ esac
 AC_MSG_CHECKING([whether file68 data to be installed])
 AM_CONDITIONAL([FILE68_DATA],[test X"$enable_file68_data" = Xyes])
 AC_MSG_RESULT([$enable_file68_data ($sc68datadir)])
+
+# Built-in replay rom
+#--------------------
+AC_MSG_CHECKING([whether external replays are built-in])
+AM_CONDITIONAL([REPLAY68],[test x"$enable_replay_rom" = xyes])
+if test x"$enable_replay_rom" = xyes; then
+  AC_DEFINE([USE_REPLAY68],[1],[Built-in replays])
+else
+  enable_replay_rom=no
+fi
+AC_MSG_RESULT([$enable_replay_rom])
 
 # ,----------------------------------------------------------------------.
 # | Specific flags                                                       |
@@ -223,6 +240,7 @@ AC_MSG_NOTICE([|   file-stream         : $enable_file])
 AC_MSG_NOTICE([|   fd-stream           : $enable_fd])
 AC_MSG_NOTICE([|   memory-stream       : $enable_mem])
 AC_MSG_NOTICE([|   windows registry    : $enable_reg])
+AC_MSG_NOTICE([|   built-in replays    : $enable_replay_rom])
 AC_MSG_NOTICE([|   zlib support        : $has_z ($z_ver)])
 AC_MSG_NOTICE([|   curl support        : $has_curl ($curl_ver)])
 AC_MSG_NOTICE([|   ICE! support        : $has_unice68 ($unice68_ver)])

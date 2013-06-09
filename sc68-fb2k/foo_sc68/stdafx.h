@@ -11,3 +11,4 @@
 #include "sc68/sc68.h"
 #include "sc68/tag68.h"
 #include "sc68/msg68.h"
+#include "input_sc68.h"

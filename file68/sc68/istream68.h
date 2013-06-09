@@ -1,3 +1,4 @@
+
 /**
  * @ingroup  file68_lib
  * @file     sc68/istream68.h
@@ -7,9 +8,7 @@
  *
  */
 
-/* $Id$ */
-
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_ISTREAM68_H_
 #define _FILE68_ISTREAM68_H_

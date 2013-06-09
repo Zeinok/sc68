@@ -3,9 +3,9 @@
  * @brief   implements istream68 VFS for gzip
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2001-2011 Benjamin Gerard
+ * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-24 21:51:26 ben>
+ * Time-stamp: <2013-06-09 01:03:07 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -71,6 +71,7 @@ typedef struct {
   istream68_t istream;     /**< istream function.     */
   istream68_t * is;        /**< Wrapped stream.       */
   unsigned int mode:2;     /**< Available open modes. */
+  unsigned int is_slave:1; /**< slave mode.           */
   unsigned int is_err:1;   /**< Last is op failed.    */
   unsigned int is_eof:1;   /**< is EOF.               */
   unsigned int gzip:1;     /**< Gzip stream.          */
@@ -571,7 +572,10 @@ static int isf_close(istream68_t * istream)
       isf->inflate = 0;
     }
 
+    if (isf->is_slave)
+      err |= istream68_close(isf->is);
   }
+
   /* TRACE68(zlib_cat, " => [%s]\n", strok68(err)); */
   /* TRACE68(zlib_cat, "istream_z: close '%s' => [%s]\n", */
   /*         istream68_filename(istream), strok68(err)); */
@@ -598,38 +602,44 @@ static int isf_open(istream68_t * istream)
   isf->write_in = isf->c_stream.next_in  = isf->buffer_in;
   isf->read_out = isf->c_stream.next_out = isf->buffer_out;
 
-  err = 0;
-  switch (isf->mode) {
+  err = (isf->is_slave)
+    ? istream68_open(isf->is)
+    : 0
+    ;
 
-  case ISTREAM68_OPEN_READ:
-    if (isf->gzip) {
-      err = isf_read_gz_header(isf)
-        || inflateInit2(&isf->c_stream, -MAX_WBITS) != Z_OK;
-    } else {
-      err = inflateInit(&isf->c_stream) != Z_OK;
-    }
-    isf->inflate = !err;
+  if (!err) {
+    switch (isf->mode) {
 
-    break;
+    case ISTREAM68_OPEN_READ:
+      if (isf->gzip) {
+        err = isf_read_gz_header(isf)
+          || inflateInit2(&isf->c_stream, -MAX_WBITS) != Z_OK;
+      } else {
+        err = inflateInit(&isf->c_stream) != Z_OK;
+      }
+      isf->inflate = !err;
 
-  case ISTREAM68_OPEN_WRITE: {
-    int level = isf->level;
-    if (level > Z_BEST_COMPRESSION) {
-      level = Z_DEFAULT_COMPRESSION;
+      break;
+
+    case ISTREAM68_OPEN_WRITE: {
+      int level = isf->level;
+      if (level > Z_BEST_COMPRESSION) {
+        level = Z_DEFAULT_COMPRESSION;
+      }
+      if (isf->gzip) {
+        err = Z_OK != deflateInit2(&isf->c_stream, level, Z_DEFLATED,
+                                   -MAX_WBITS, DEF_MEM_LEVEL, isf->strategy)
+          || isf_write_gz_header(isf);
+      } else {
+        err = Z_OK != deflateInit2(&isf->c_stream, level, Z_DEFLATED,
+                                   MAX_WBITS, DEF_MEM_LEVEL, isf->strategy);
+      }
+      isf->deflate = !err;
+      isf->length = 0;
+    } break;
+    default:
+      err = -1;
     }
-    if (isf->gzip) {
-      err = Z_OK != deflateInit2(&isf->c_stream, level, Z_DEFLATED,
-                                 -MAX_WBITS, DEF_MEM_LEVEL, isf->strategy)
-        || isf_write_gz_header(isf);
-    } else {
-      err = Z_OK != deflateInit2(&isf->c_stream, level, Z_DEFLATED,
-                                 MAX_WBITS, DEF_MEM_LEVEL, isf->strategy);
-    }
-    isf->deflate = !err;
-    isf->length = 0;
-  } break;
-  default:
-    err = -1;
   }
 
   if (err) {
@@ -761,6 +771,10 @@ static int isf_seek(istream68_t * istream, int offset)
 
 static void isf_destroy(istream68_t * istream)
 {
+  istream68_z_t * isf = (istream68_z_t *)istream;
+  if (isf->is_slave)
+    istream68_destroy(isf->is);
+
   /* call free handler even with NUL pointer since we
      never know what free68() do. */
   free68(istream);
@@ -802,6 +816,7 @@ istream68_t * istream68_z_create(istream68_t * is, int mode,
   /* Setup */
   isf->is       = is;
   isf->mode     = mode & ISTREAM68_OPEN_MASK;
+  isf->is_slave = mode >> ISTREAM68_SLAVE_BIT;
   isf->length   = -1;
   isf->org_pos  = istream68_tell(is);
   /* Setup gzip option. */

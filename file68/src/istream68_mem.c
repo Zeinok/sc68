@@ -3,9 +3,9 @@
  * @brief   implements istream68 VFS for memory buffer
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2001-2011 Benjamin Gerard
+ * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-24 22:43:05 ben>
+ * Time-stamp: <2013-06-09 01:18:29 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -54,7 +54,7 @@ typedef struct {
    * be allocated to store filename.
    */
   char name[16 + 2 * 2 * sizeof(void*)]; /**< filename (mem://start:end). */
-
+  char internal[4];
 } istream68_mem_t;
 
 static const char * ism_name(istream68_t * istream)
@@ -71,10 +71,10 @@ static int ism_open(istream68_t * istream)
 {
   istream68_mem_t * ism = (istream68_mem_t *)istream;
 
-  if (!ism->mode || ism->open) {
+  if (!ISTREAM68_IS_OPEN(ism->mode) || ism->open) {
     return -1;
   }
-  ism->open = ism->mode;
+  ism->open = ism->mode & ISTREAM68_OPEN_MASK;
   ism->pos = 0;
   return 0;
 }
@@ -178,7 +178,11 @@ static int ism_seek(istream68_t * istream, int offset)
 
 static void ism_destroy(istream68_t * istream)
 {
-  free68(istream);
+  istream68_mem_t * ism = (istream68_mem_t *)istream;
+
+  if (ism && ISTREAM68_IS_SLAVE(ism->mode) && ism->buffer != ism->internal)
+    free68(ism->buffer);
+  free68(ism);
 }
 
 static const istream68_t istream68_mem = {
@@ -192,22 +196,27 @@ static const istream68_t istream68_mem = {
 istream68_t * istream68_mem_create(const void * addr, int len, int mode)
 {
   istream68_mem_t *ism;
+  int size;
 
-  if (len < 0 || (!addr && len)) {
+
+  if (len < 0 /* || (!addr && len) */) {
     return 0;
   }
 
-  ism = calloc68(sizeof(istream68_mem_t));
+  size = sizeof(istream68_mem_t) + (!addr ? len : 0);
+  ism = calloc68(size);
   if (!ism) {
     return 0;
   }
-
+  if (!addr) {
+    addr = ism->internal;
+  }
   ism->istream = istream68_mem;
-  ism->buffer = (char *)addr;
-  ism->size   = len;
-  ism->mode   = mode & (ISTREAM68_OPEN_READ|ISTREAM68_OPEN_WRITE);
-  ism->open   = 0;
-  ism->pos    = 0;
+  ism->buffer  = (char *)addr;
+  ism->size    = len;
+  ism->mode    = mode;
+  ism->open    = 0;
+  ism->pos     = 0;
   sprintf(ism->name,"mem://%p:%p", addr, (char *)addr+len);
 
   return &ism->istream;
