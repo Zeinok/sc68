@@ -230,9 +230,8 @@ m4_define([DO_SC68_PACKAGE],[
         x-system)
           AC_PATH_PROG([pkgconfig],["pkg-config"],["false"])
           unset _$1_pkg
-          pc_flags=''
           if test x"[$]enable_sc68_static" = xyes; then
-            pc_flags='--static'
+            pkgconfig="[$]pkgconfig --static"
           fi
 	  AC_MSG_CHECKING([for pkg-config $2 module])
           if ! [$]pkgconfig --exists "$2"; then
@@ -291,9 +290,9 @@ m4_define([DO_SC68_PACKAGE],[
           if test "[$]{$1_config}" != false; then
             _$1_org='config-script'
             _$1_ver=[$]([$]$1_config --version || echo installed)
-            _$1_ccf="[$]_$1_ccf [$]([$]$1_config [$]pc_flags --cflags)"
+            _$1_ccf="[$]_$1_ccf [$]([$]$1_config --cflags)"
             if test "x[$]_$1_fct" != 'x+'; then
-              _$1_ldf="[$]_$1_ldf [$]([$]$1_config [$]pc_flags --libs)"
+              _$1_ldf="[$]_$1_ldf [$]([$]$1_config --libs)"
             fi
           fi
 
@@ -377,7 +376,7 @@ m4_define([DO_SC68_PACKAGE],[
     dnl #
     dnl # !!! THIS WHOLE THING IS A MESS WE NEED TO SORT OUT SOMETIME !!!
 
-    if test "X[$]HAS_$1" = 'xyes'; then
+    if test "x[$]has_$1" = 'xyes'; then
       case x-"[$]$1_org" in
         x-yes)
           ;;
