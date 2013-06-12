@@ -1,6 +1,6 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2013-06-05 03:02:50 ben>
+dnl# Time-stamp: <2013-06-12 11:42:14 ben>
 dnl#
 dnl# autoconf macros
 dnl#
@@ -8,7 +8,7 @@ dnl# (C) 2009-2013 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20130605 sc68_checks.m4
+# serial 20130612 sc68_checks.m4
 
 # SC68_CHECKS()
 # -------------
@@ -93,6 +93,8 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
     AC_SUBST([PAC_CFLAGS])
     AC_SUBST([PAC_LFLAGS])
     AC_SUBST([PAC_REQUIRES])
+    AC_SUBST([PAC_PRIVREQ])
+    AC_SUBST([PAC_PRIVLIB])
     AC_SUBST([PAC_CONFLICTS])
     
     # help tracking libtool dependencies

@@ -1,6 +1,6 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2013-06-04 20:28:43 ben>
+dnl# Time-stamp: <2013-06-12 12:22:05 ben>
 dnl#
 dnl# autoconf macros
 dnl#
@@ -8,7 +8,7 @@ dnl# (C) 2009-2013 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20130604 sc68_enable_dumpvars.m4
+# serial 20130612 sc68_enable_dumpvars.m4
 
 # SC68_ENABLE_DUMPVARS()
 # -----------------------------------------------------------------
@@ -56,7 +56,9 @@ AC_DEFUN_ONCE([SC68_DUMPVARS],[
         [BIN_LFLAGS] \
         [PAC_CFLAGS] \
         [PAC_LFLAGS] \
+        [PAC_PRIVLIB] \
         [PAC_REQUIRES] \
+        [PAC_PRIVREQ] \
         [PAC_CONFLICTS]
       do
         printf "| %-13s = %s\n" "[$]my_dv" "$(eval echo '[$]'[$]my_dv)"

@@ -1,14 +1,14 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2011-09-10 04:40:56 ben>
+dnl# Time-stamp: <2013-06-12 11:47:28 ben>
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2011 Benjamin Gerard
+dnl# (C) 2009-2013 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20110910 sc68_package.m4
+# serial 20130612 sc68_package.m4
 
 # SC68_PACKAGE([DESC])
 # --------------------
@@ -21,7 +21,7 @@ AC_DEFUN_ONCE([SC68_PACKAGE],[
     m4_define([PKG],AS_TR_CPP(AC_PACKAGE_NAME))
     ALL_CFLAGS=''; BIN_CFLAGS=''; LIB_CFLAGS=''; PAC_CFLAGS=''
     ALL_LFLAGS=''; BIN_LFLAGS=''; LIB_LFLAGS=''; PAC_LFLAGS=''
-    PAC_REQUIRES=''; PAC_CONFLICTS=''
+    PAC_REQUIRES=''; PAC_CONFLICTS=''; PAC_PRIVLIB=''; PAC_PRIVREQ=''
     ])
 
 dnl# ----------------------------------------------------------------------

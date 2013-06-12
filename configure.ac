@@ -44,23 +44,28 @@ AC_ARG_ENABLE(
   [],[enable_sc68_tools=no])
 
 AC_ARG_ENABLE(
-  [sc68-all],
-  [AS_HELP_STRING(
-      [--enable-sc68-all],
-      [enable all sub-packages @<:@default=no@:>@])],
-  [],[enable_sc68_all="check"])
-
-AC_ARG_ENABLE(
   [sc68-plugin],
   [AS_HELP_STRING(
       [--enable-sc68-plugin],
       [enable plugin-packages @<:@default=no@:>@])],
   [],[enable_sc68_plugin="check"])
 
+AC_ARG_ENABLE(
+  [sc68-all],
+  [AS_HELP_STRING(
+      [--enable-sc68-all],
+      [enable all sub-packages @<:@default=no@:>@])],
+  [],[enable_sc68_all="check"])
+
 AS_CASE(["x$enable_sc68_all"],
   [xno|xyes],
-  [enable_sc68_tools="$enable_sc68_all";enable_sc68_plugin="$enable_sc68_all"],
+  [
+    enable_sc68_tools="[$]enable_sc68_all"
+    enable_sc68_plugin="[$]enable_sc68_all"
+    ],
   [enable_sc68_all="check"])
+enable_sc68_cli="[$]enable_sc68_all"
+enable_sc68_lib="[$]enable_sc68_all"
 
 # Dev Tools
 SC68_ENABLE_PACKAGE([as68],[68k macro assembler],[[$]enable_sc68_tools])
@@ -70,13 +75,13 @@ SC68_ENABLE_PACKAGE([cdbg68],[68k curses debugger],[[$]enable_sc68_tools])
 SC68_ENABLE_PACKAGE([desa68],[68k disassembler library],[[$]enable_sc68_tools])
 
 # API Libraries
-SC68_ENABLE_PACKAGE([unice68],[ice depacker support],[[$]enable_sc68_all])
-SC68_ENABLE_PACKAGE([file68],[file68 library],[[$]enable_sc68_all])
-SC68_ENABLE_PACKAGE([libsc68],[sc68 engine],[[$]enable_sc68_all])
+SC68_ENABLE_PACKAGE([unice68],[ice depacker support],[[$]enable_sc68_lib])
+SC68_ENABLE_PACKAGE([file68],[file68 library],[[$]enable_sc68_lib])
+SC68_ENABLE_PACKAGE([libsc68],[sc68 engine],[[$]enable_sc68_lib])
 
 # CLI programs
-SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[[$]enable_sc68_all])
-SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_sc68_all])
+SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[[$]enable_sc68_cli])
+SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_sc68_cli])
 
 # PLUGINS
 def_audacious=no;def_sc68_gst=no

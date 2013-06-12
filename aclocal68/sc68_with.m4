@@ -38,9 +38,11 @@ m4_define([DUMP_SC68_PACKAGE_VARS],[
  --  ALL_CFLAGS=[$]ALL_CFLAGS
  --  ALL_LFLAGS=[$]ALL_LFLAGS
  --  PAC_REQUIRES=[$]PAC_REQUIRES
+ --  PAC_PRIVREQ=[$]PAC_PRIVREQ
  --  PAC_CONFLICTS=[$]PAC_CONFLICTS
  --  PAC_CFLAGS=[$]PAC_CONFLICTS
  --  PAC_LFLAGS=[$]PAC_LFLAGS
+ --  PAC_PRIVLIB=[$]PAC_PRIVLIB
  -- 
  --  LIBS=[$]LIBS
  --  LDFLAGS=[$]LDFLAGS
@@ -228,6 +230,10 @@ m4_define([DO_SC68_PACKAGE],[
         x-system)
           AC_PATH_PROG([pkgconfig],["pkg-config"],["false"])
           unset _$1_pkg
+          pc_flags=''
+          if test x"[$]enable_sc68_static" = xyes; then
+            pc_flags='--static'
+          fi
 	  AC_MSG_CHECKING([for pkg-config $2 module])
           if ! [$]pkgconfig --exists "$2"; then
             AC_MSG_RESULT([no])
@@ -285,9 +291,9 @@ m4_define([DO_SC68_PACKAGE],[
           if test "[$]{$1_config}" != false; then
             _$1_org='config-script'
             _$1_ver=[$]([$]$1_config --version || echo installed)
-            _$1_ccf="[$]_$1_ccf [$]([$]$1_config --cflags)"
+            _$1_ccf="[$]_$1_ccf [$]([$]$1_config [$]pc_flags --cflags)"
             if test "x[$]_$1_fct" != 'x+'; then
-              _$1_ldf="[$]_$1_ldf [$]([$]$1_config --libs)"
+              _$1_ldf="[$]_$1_ldf [$]([$]$1_config [$]pc_flags --libs)"
             fi
           fi
 
@@ -361,7 +367,17 @@ m4_define([DO_SC68_PACKAGE],[
     done
     UNSET_SC68_PACKAGE_VARS([_$1])
     
-    if test "x[$]has_$1" = 'xyes'; then
+    dnl # TODO: PAC_PRIVREQ and PAC_PRIVLIB are used for private
+    dnl #       library in pkgconfig files:
+    dnl #
+    dnl #       Libraries which are not exposed through our library,
+    dnl #       but are needed in the case of static linking. This
+    dnl #       differs from Requires.private: in that it references
+    dnl #       libraries that do not have package files installed.
+    dnl #
+    dnl # !!! THIS WHOLE THING IS A MESS WE NEED TO SORT OUT SOMETIME !!!
+
+    if test "X[$]HAS_$1" = 'xyes'; then
       case x-"[$]$1_org" in
         x-yes)
           ;;
