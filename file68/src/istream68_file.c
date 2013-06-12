@@ -3,9 +3,9 @@
  * @brief   implements istream68 VFS for FILE
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2001-2011 Benjamin Gerard
+ * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-24 22:40:16 ben>
+ * Time-stamp: <2013-06-11 10:39:33 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -239,8 +239,7 @@ istream68_t * istream68_file_create(const char * fname, int mode)
 
 #include "msg68.h"
 
-istream68_t * istream68_file_create(context68_t * context,
-                                    const char * fname, int mode)
+istream68_t * istream68_file_create(const char * fname, int mode)
 {
   msg68_error("file68: create -- *NOT SUPPORTED*");
   return 0;
