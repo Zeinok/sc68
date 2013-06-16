@@ -225,7 +225,7 @@ typedef struct {
   char * album;          /**< Points to album's title tag.       */
   char * title;          /**< Points to track's title tag.       */
   char * artist;         /**< Points to track's artist tag.      */
-} sc68_music_info_t;
+} sc68_music_info_t, sc68_minfo_t;
 
 
 /**

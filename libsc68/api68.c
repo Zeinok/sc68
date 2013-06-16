@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-31 07:40:17 ben>
+ * Time-stamp: <2013-06-14 22:12:28 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -121,6 +121,10 @@ struct _sc68_s {
   struct {
     unsigned int def_ms;      /**< default time in ms.                   */
     unsigned int length_ms;   /**< current track length in ms.           */
+
+    /* $$$ TEMP : fix start_ms and loop bug */
+    unsigned int save_ms;
+
     unsigned int elapsed_ms;  /**< number of elapsed ms.                 */
     unsigned int total;       /**< total sec so far.                     */
     unsigned int total_ms;    /**< total ms correction.                  */
@@ -873,6 +877,8 @@ static void stop_track(sc68_t * sc68)
   sc68->time.total_ms  += sc68->time.elapsed_ms % 1000u;
   sc68->time.total     += sc68->time.total_ms / 1000u;
   sc68->time.total_ms  %= 1000u;
+
+  sc68->time.save_ms   += sc68->time.elapsed_ms;
   sc68->time.elapsed_ms = 0;
   sc68->time.length_ms  = 0;
 
@@ -1086,6 +1092,11 @@ static int change_track(sc68_t * sc68, int track)
   sc68_debug(sc68," -> first pass ms   : %u\n", m->first_ms);
   sc68_debug(sc68," -> loops pass ms   : %u\n", m->loops_ms);
   sc68_debug(sc68," -> total ms        : %u\n", sc68->time.length_ms);
+
+  /* $$$$ fix start time on the fly because it is broken ! */
+  m->start_ms = sc68->time.save_ms;
+
+  sc68_debug(sc68," -> start ms        : %u\n", m->start_ms);
 
   sc68_debug(sc68," -> first frames    : %u\n", m->first_fr);
   sc68_debug(sc68," -> loops frames    : %u\n", m->loops_fr);
@@ -1524,7 +1535,11 @@ int sc68_seek(sc68_t * sc68, int time_ms, int * is_seeking)
       return -1;
     } else {
       int loop = loop_total(sc68->loop_to, sc68->mus->loops);
-      return (sc68->mus->start_ms * loop) + sc68->time.elapsed_ms;
+
+      /* $$$ TEMP always this mess */
+      return sc68->time.save_ms + sc68->time.elapsed_ms;
+
+      /* return (sc68->mus->start_ms * loop) + sc68->time.elapsed_ms; */
     }
   } else {
     return -1;
@@ -1576,7 +1591,8 @@ int sc68_seek(sc68_t * sc68, int time_ms, int * is_seeking)
   }
 }
 
-int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track, sc68_disk_t disk)
+int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
+                    sc68_disk_t disk)
 {
   disk68_t  * d;
   music68_t * m;
