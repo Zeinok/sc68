@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-06-03 08:07:37 ben>
+ * Time-stamp: <2013-06-18 16:27:24 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -404,7 +404,7 @@ int main(int argc, char ** argv)
     for (i=1; i<=d->nb_mus; ++i) {
       music68_t *m = d->mus+(i-1);
       PutS(out,"track: ");    PutI(out,i);           PutC(out,'\n');
-      PutS(out,"remap: ");    PutI(out,m->track);    PutC(out,'\n');
+      // PutS(out,"remap: ");    PutI(out,m->track);    PutC(out,'\n');
       PutS(out,"loops: ");    PutI(out,m->loops);    PutC(out,'\n');
       PutS(out,"time-ms: ");   PutI(out,m->first_ms); PutC(out,'\n');
       PutS(out,"time-fr: ");   PutI(out,m->first_fr); PutC(out,'\n');

@@ -73,7 +73,6 @@ enum  {
  * @}
  */
 
-
 /**
  * @}
  */
@@ -107,15 +106,17 @@ typedef struct {
   unsigned int d0;       /**< D0 value to init this music.            */
   unsigned int a0;       /**< A0 Loading address. @see SC68_LOADADDR. */
   unsigned int frq;      /**< Frequency in Hz (default:50).           */
-  unsigned int start_ms; /**< Start time in ms from disk 1st track.   */
-  unsigned int total_ms; /**< Total time in ms (first+loops).         */
-  unsigned int total_fr; /**< Total time in frames.                   */
+
+//  unsigned int start_ms; /**< Start time in ms from disk 1st track.   */
+//  unsigned int total_ms; /**< Total time in ms (first+loops).         */
+//  unsigned int total_fr; /**< Total time in frames.                   */
+
   unsigned int first_ms; /**< First loop duration in ms.              */
   unsigned int first_fr; /**< First loop duration in frames.          */
   unsigned int loops_ms; /**< Loop duration in ms (0:no loop).        */
   unsigned int loops_fr; /**< Loop duration in frames (0:no loop).    */
-  int          loops;    /**< Default number of loop (0:infinite).    */
-  int          track;    /**< Track remapping number (0:default).     */
+  int          loops;    /**< Default number of loop (-1:infinite).   */
+//  int          track;    /**< Track remapping number (0:default).     */
 
   struct {
     unsigned   sfx  : 1; /**< Track is a sound-fx not a music.        */
@@ -123,7 +124,7 @@ typedef struct {
     unsigned   time : 1; /**< Track has time info.                    */
     unsigned   loop : 1; /**< Track has loop info.                    */
 
-    unsigned asid_trk : 8; /**< 0:not asid, >0: original track.       */
+    unsigned asid_trk : 6; /**< 0:not asid, >0: original track.       */
     unsigned asid_tA  : 2; /**< timer used for YM channel-A.          */
     unsigned asid_tB  : 2; /**< timer used for YM channel-B.          */
     unsigned asid_tC  : 2; /**< timer used for YM channel-C.          */
@@ -153,11 +154,16 @@ typedef struct {
 typedef struct {
   int          def_mus;     /**< Preferred default music (default is 0). */
   int          nb_mus;      /**< Number of music track in file.          */
-  int          nb_asid;     /**< Number of aSID track append.            */
+  int          nb_asid;     /**< Number of supplemental aSID tracks.     */
   unsigned int time_ms;     /**< Total time for all tracks in ms.        */
   hwflags68_t  hwflags;     /**< All tracks flags ORed.                  */
   int          hash;        /**< Caclulated hash (for sndh timedb).      */
   tagset68_t   tags;        /**< Meta tags for the disk (album)          */
+
+  unsigned int force_track; /**< Forced track.                           */
+  int          force_loops; /**< Forced loops (>0, -1:infinite).         */
+  unsigned int force_ms;    /**< Forced time in ms.                      */
+
   music68_t    mus[SC68_MAX_TRACK]; /**< Information for each music.     */
   unsigned int datasz;      /**< data size in byte.                      */
   char        *data;        /**< points to data.                         */
@@ -182,7 +188,7 @@ FILE68_API
  * @retval -1     on error
  * @retval >=0    number of tag (in fact it should always be >= 3)
  */
-int file68_tag_count(disk68_t * mb, int track);
+int file68_tag_count(const disk68_t * mb, int track);
 
 FILE68_API
 /**

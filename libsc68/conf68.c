@@ -3,9 +3,9 @@
  * @brief   sc68 config file
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-10-06 14:23:19 ben>
+ * Time-stamp: <2013-06-18 17:05:48 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -87,10 +87,11 @@ struct _config68_s {
 
 
 /* Defines for the config default values. */
-#define AMIGA_BLEND      0x5000     /* Amiga default blending factor. */
-#define DEFAULT_TIME     (3*60)     /* Track default time in second.  */
-#define FORCE_TRACK      1          /* 0:no forced track              */
-#define SKIP_TIME        4          /* Skip music time in sec.        */
+#define AMIGA_BLEND     0x5000      /* Amiga default blending factor. */
+#define DEFAULT_TIME    (3*60)      /* Track default time in second.  */
+#define FORCE_TRACK     0           /* 0:no forced track.             */
+#define FORCE_LOOP      0           /* 0:no forced loop.              */
+#define SKIP_TIME       0           /* Skip music time in sec.        */
 #define MAX_TIME        (24*60*60)  /* 1 day should be enought.       */
 #define DEFAULT_SEEKSPD 0x0F00      /* << 8 */
 #define MAX_SEEKSPD     0x1F00
@@ -111,16 +112,15 @@ static const config68_entry_t conftab[] = {
     "Amiga left/right voices blending factor {32768:center}",
     {0},{65535},{AMIGA_BLEND}
   },
-
   { 0,                          /* could be export but is it useful */
     "force-track", CONFIG68_INT,
     "override default track {0:off}",
-    {0}, {99}, {FORCE_TRACK}
+    {0}, {SC68_MAX_TRACK}, {FORCE_TRACK}
   },
   { 0,                          /* could be export but is it useful */
     "force-loop", CONFIG68_INT,
-    "override default loop {-1:off 0:inf}",
-    {-1}, {100}, {-1}
+    "override default loop {0:off -1:inf}",
+    {-1}, {100}, {FORCE_LOOP}
   },
   { 1,
     "skip-time", CONFIG68_INT,
@@ -132,11 +132,11 @@ static const config68_entry_t conftab[] = {
     "default track time (in second)",
     {0}, {MAX_TIME}, {DEFAULT_TIME}
   },
-  { 0,                          /* could be export but is it useful */
-    "seek-speed", CONFIG68_INT,
-    "seek speed factor {0:OFF 256:1 512:2 ...}",
-    {0}, {MAX_SEEKSPD}, {DEFAULT_SEEKSPD}
-  },
+  /* { 0,                          /\* could be export but is it useful *\/ */
+  /*   "seek-speed", CONFIG68_INT, */
+  /*   "seek speed factor {0:OFF 256:1 512:2 ...}", */
+  /*   {0}, {MAX_SEEKSPD}, {DEFAULT_SEEKSPD} */
+  /* }, */
   { 0,
     "total-time", CONFIG68_INT,
     "total playing time since first launch",
@@ -733,12 +733,12 @@ int config68_default(config68_t * conf)
   return config68_valid(conf);
 }
 
-config68_t * config68_create(int size)
+config68_t * config68_create(const char * appname, int size)
 {
   config68_t * c;
   int i,j;
 
-  TRACE68(config68_cat, "config68: create size=%d\n",size);
+  TRACE68(config68_cat, "config68: create '%s' size=%d\n", appname, size);
 
   if (size < nconfig) {
     size = nconfig;

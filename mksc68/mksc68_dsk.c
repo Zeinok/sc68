@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-07 11:16:37 ben>
+ * Time-stamp: <2013-06-18 18:44:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -33,6 +33,7 @@
 #include "mksc68_msg.h"
 #include "mksc68_cmd.h"
 #include "mksc68_tag.h"
+#include "mksc68_str.h"
 
 #include <sc68/file68.h>
 #include <sc68/alloc68.h>
@@ -260,10 +261,10 @@ int dsk_validate(void)
     m->loops    = ( m->loops > 0 ) ? m->loops : 1;
     m->first_ms = fr_to_ms(m->first_fr, m->frq);
     m->loops_ms = fr_to_ms(m->loops_fr, m->frq);
-    m->total_fr = m->first_fr + (m->loops-1) * m->loops_fr;
-    m->total_ms = fr_to_ms(m->total_fr, m->frq);
-    m->start_ms = dsk.disk->time_ms;
-    dsk.disk->time_ms += m->total_ms;
+    // m->total_fr = m->first_fr + (m->loops-1) * m->loops_fr;
+    // m->total_ms = fr_to_ms(m->total_fr, m->frq);
+    // m->start_ms = dsk.disk->time_ms;
+    dsk.disk->time_ms += m->first_ms;
     dsk.disk->hwflags.all |= m->hwflags.all;
   }
 
@@ -295,13 +296,15 @@ const char * dsk_tag_get(int trk, const char * var)
       val = str;
     }
     else if ( ! strcmp (var, TAG68_FRAMES) && trk) {
-      snprintf(str, max, "%u", m->total_fr);
+      snprintf(str, max, "%u", m->first_fr);
       val = str;
     }
+/* $$$ TODO: add loop-length and loop count */
+
     else if ( ! strcmp (var, TAG68_LENGTH)) {
       unsigned int ms = !trk
         ? dsk.disk->time_ms
-        : m->total_ms
+        : m->first_ms
         ;
       /* unsigned int h, m , s; */
       /* h = ms / 3600000u; */

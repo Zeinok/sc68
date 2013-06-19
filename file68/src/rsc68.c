@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-09 13:39:32 ben>
+ * Time-stamp: <2013-06-18 21:39:05 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -317,7 +317,7 @@ const char * rsc68_get_music_params(rsc68_info_t *info, const char *name)
 
   if (name) c = *name;
   if (!c || c == ':') {
-    int i, tinfo[3] = { -1, -1, -1 };
+    int i, tinfo[3] = { 0, 0, 0 };
 
     for (i=0; i<3 && c == ':'; ++i) {
       c = *++name;
@@ -337,9 +337,9 @@ const char * rsc68_get_music_params(rsc68_info_t *info, const char *name)
 
     if (info) {
       info->type = rsc68_music;
-      info->data.music.track = tinfo[0];
-      info->data.music.loop  = tinfo[1];
-      info->data.music.time  = tinfo[2];
+      info->data.music.track   = tinfo[0];
+      info->data.music.loops   = tinfo[1];
+      info->data.music.time_ms = tinfo[2] * 1000;
     }
   }
 

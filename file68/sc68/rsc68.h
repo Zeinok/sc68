@@ -45,9 +45,9 @@ typedef struct {
   union {
     /** rsc68_music resource information. */
     struct {
-      int track; /**< Force this track (-1:n/a).              */
-      int loop;  /**< Force track(s) default loop (-1:n/a).   */
-      int time;  /**< Force track(s) time in second (-1:n/a). */
+      int track;     /**< Force this track.                 */
+      int loops;     /**< Force track(s) default loop.      */
+      int time_ms;   /**< Force track(s) time in second.    */
     } music;
   } data;
 } rsc68_info_t;

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-07 05:23:41 ben>
+ * Time-stamp: <2013-06-18 18:46:09 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -786,14 +786,16 @@ int time_measure(measureinfo_t * mi, int trk,
     disk68_t  * d = dsk_get_disk();
     music68_t * m = d->mus+trk-1;
     char      s1[32],s2[32],s3[32],s4[32];
+    unsigned int total_fr, total_ms;
+
 
     m->first_fr = mi->frames;
     m->first_ms = mi->timems;
     m->loops    = 1;
     m->loops_fr = mi->loopfr;
     m->loops_ms = mi->loopms;
-    m->total_fr = m->first_fr + (m->loops-1) * m->loops_fr;
-    m->total_ms = fr2ms(m->total_fr, m->frq, 0);
+    /* m-> */total_fr = m->first_fr + (m->loops-1) * m->loops_fr;
+    /* m-> */total_ms = fr2ms(/* m-> */total_fr, m->frq, 0);
     m->has.time = 1;
     m->has.loop = 1;
 
@@ -816,7 +818,7 @@ int time_measure(measureinfo_t * mi, int trk,
            str_timefmt(s1,sizeof(s1),m->first_ms),
            m->loops-1,
            m->loops_ms ? str_timefmt(s2,sizeof(s2),m->loops_ms) : "no loop",
-           str_timefmt(s3,sizeof(s3),m->total_ms),
+           str_timefmt(s3,sizeof(s3),/* m-> */total_ms),
            str_hardware(s4,sizeof(s4),m->hwflags.all)
       );
   }

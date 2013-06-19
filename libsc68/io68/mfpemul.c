@@ -3,9 +3,9 @@
  * @brief   MFP 68901 emulator (Atari ST timers)
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-29 06:49:34 ben>
+ * Time-stamp: <2013-06-17 13:06:40 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -153,7 +153,9 @@ int timer_get_tdr(const mfp_timer_t * const ptimer, const bogoc68_t bogoc)
 static inline
 void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
 {
+#ifdef DEBUG
   uint_t          frq = timerfrq(ptimer->tdr_res); /* old frequency       */
+#endif
   const bogoc68_t cti = ptimer->cti - bogoc;       /* cycles to interrupt */
   const uint_t    psw = prediv_width[ptimer->tcr]; /* cycles count-down   */
   const uint_t    cnt = cti/psw;                   /* count-down          */
@@ -278,7 +280,9 @@ int68_t mfp_get_tdr(mfp_t * const mfp, const int timer, const bogoc68_t bogoc)
 void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
 {
   mfp_timer_t * const  ptimer = &mfp->timers[timer&3];
+#if defined(DEBUG)
   const uint_t old_tdr = ptimer->tdr_res;
+#endif
 
   /* Interrupt when count down to 0 so 0 is 256 */
   v  = (u8)v; v += (!v)<<8;
@@ -289,17 +293,20 @@ void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
     TRACE68(mfp_cat,
           "mfp: timer-%c -- reload TDR @%u -- %u\n",
           ptimer->def.letter, bogoc, ptimer->tdr_res);
-  } else if (ptimer->tcr && v != old_tdr) {
+  }
+#if defined(DEBUG)
+  else if (ptimer->tcr && v != old_tdr) {
     uint_t old_frq = timerfrq(old_tdr);
     TRACE68(mfp_cat,
-          "mfp: timer-%c -- change @%u cti:%u psw:%u(%u) cpp:%u"
-          " -- %u(%u) -> %u(%u)hz\n",
-          ptimer->def.letter, bogoc, ptimer->cti,
-          prediv_width[ptimer->tcr], ptimer->tcr,
-          cpp(ptimer->tdr_res),
-          old_frq,old_tdr,
-          timerfrq(ptimer->tdr_res), ptimer->tdr_res);
+            "mfp: timer-%c -- change @%u cti:%u psw:%u(%u) cpp:%u"
+            " -- %u(%u) -> %u(%u)hz\n",
+            ptimer->def.letter, bogoc, ptimer->cti,
+            prediv_width[ptimer->tcr], ptimer->tcr,
+            cpp(ptimer->tdr_res),
+            old_frq,old_tdr,
+            timerfrq(ptimer->tdr_res), ptimer->tdr_res);
   }
+#endif
 }
 
 /* Write Timer Control Register

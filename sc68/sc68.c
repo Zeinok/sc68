@@ -3,9 +3,9 @@
  * @brief   command line player
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-05-10 00:06:44 ben>
+ * Time-stamp: <2013-06-19 00:18:59 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -310,7 +310,9 @@ static void DisplayInfo(int track)
     Print("%-*s : %s %s\n", len, "Track"  , info->trk.time, info->title);
     Print("%-*s : %s\n",    len, "Artist" , info->artist);
     Print("%-*s : %02u:%02u,%02u\n", len, "Loop-Len",
-          info->loop_ms / 60000u, info->loop_ms / 1000u % 60u, info->loop_ms % 1000u / 100);
+          info->loop_ms / 60000u,
+          info->loop_ms / 1000u % 60u,
+          info->loop_ms % 1000u / 100);
 
     Print("Disk tags:\n");
     for (j=0; j<info->dsk.tags; ++j)
@@ -357,13 +359,21 @@ static int PlayLoop(istream68_t * out, int track, int loop)
         " output : '%s'\n",
         track,loop,istream68_filename(out));
 
-  if (track == -1) {
+  if (loop == 0) {
+    Debug("PlayLoop: default loop resquested\n");
+    loop = SC68_DEF_LOOP;
+  } else if (loop == -1) {
+    Debug("PlayLoop: infinite loop resquested\n");
+    loop = SC68_INF_LOOP;
+  }
+
+  if (track == 0) {
     Debug("PlayLoop: default track resquested\n");
-    track = 0;
-  } else if (track == 0) {
+    track = SC68_DEF_TRACK;
+  } else if (track == -1) {
     Debug("PlayLoop: all tracks requested\n");
     track = 1;
-    all = 1;
+    all   = 1;
   } else {
     Debug("PlayLoop: track #%d resquested\n",track);
   }
@@ -374,7 +384,8 @@ static int PlayLoop(istream68_t * out, int track, int loop)
   if (code != SC68_ERROR) {
     /* Update return code (load the track) */
     code = sc68_process(sc68, 0, 0);
-    Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n", 0, 0, 0, codestr(code), code);
+    Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n",
+          0, 0, 0, codestr(code), code);
     if (code != SC68_ERROR)
       DisplayInfo(-1);
   }
@@ -383,17 +394,15 @@ static int PlayLoop(istream68_t * out, int track, int loop)
     static int pass;
     int n = max;
 
-    memset(buffer,0,max);    /* $$$ TEMP looking for unintialized data detection */
-
     code = sc68_process(sc68, buffer, &n);
-    if (++pass < 10 || n != max || (code & ~SC68_IDLE) )
-      Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n", pass, n, max, codestr(code), code);
+    /* if (++pass < 10 || n != max || (code & ~SC68_IDLE) ) */
+    /*   Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n", pass, n, max, codestr(code), code); */
 
     if (code == SC68_ERROR)
       break;
 
     if (code & SC68_LOOP)
-      Debug("Loop: #%d\n", sc68_play(sc68, -1, 1));
+      Debug("Loop: #%d\n", sc68_play(sc68, SC68_GET_TRACK, SC68_GET_LOOP));
 
     if (code & SC68_CHANGE) {
       if (!all)
@@ -455,8 +464,8 @@ int main(int argc, char *argv[])
   const char * rates   = "def";
 
   int i,j;
-  int track = -1;
-  int loop  = -1;
+  int track = 0;
+  int loop  = 0;
   int rate  = 0;
   int err   = 1;
   sc68_init_t init68;
@@ -625,18 +634,18 @@ int main(int argc, char *argv[])
 
   /* Parse --track= */
   if (!strcmp(tracks,"def")) {
-    track = -1;
-  } else if (!strcmp(tracks,"all")) {
     track = 0;
+  } else if (!strcmp(tracks,"all")) {
+    track = -1;
   } else {
     track = strtol(tracks,0,10);
   }
 
   /* Parse --loop= */
   if (!strcmp(loops,"def")) {
-    loop = -1;
-  } else if (!strcmp(loops,"inf")) {
     loop = 0;
+  } else if (!strcmp(loops,"inf")) {
+    loop = -1;
   } else {
     loop = strtol(loops,0,0);
   }

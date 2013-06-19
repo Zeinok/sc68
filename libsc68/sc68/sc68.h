@@ -251,6 +251,27 @@ enum sc68_spr_e {
 };
 
 /**
+ * sc68_seek() parameters.
+ */
+enum sc68_seek_e {
+  SC68_SEEK_QUERY  = -1, /**< Query position instead of seeking.     */
+  SC68_SEEK_TRACK  = 0,  /**< Seek time value are relative to track. */
+  SC68_SEEK_DISK   = 1   /**< Seek time value are relative to disk.  */
+};
+
+/**
+ * sc68_play() parameters.
+ */
+enum sc68_play_e {
+  SC68_DEF_TRACK  =  0,  /**< track value for the default track.  */
+  SC68_DEF_LOOP   =  0,  /**< loop value for the default loop.    */
+  SC68_INF_LOOP   = -1,  /**< loop value for infinite loop.       */
+  SC68_GET_TRACK  = -1,  /**< track value for query track or loop. */
+  SC68_GET_LOOP   = -1   /**< loop value for query loop instead of track. */
+};
+
+
+/**
  * @name API control functions.
  *  @{
  */
@@ -445,29 +466,36 @@ SC68_API
  *
  *   The sc68_play() function get or set current track.
  *
- *   If track == -1 and loop == 0 the function returns the current
- *   track or 0 if none.
+ *   If track == SC68_GET_TRACK (-1) and loop != SC68_GET_LOOP the
+ *   function returns the current track or 0 if none.
  *
- *   If track == -1 and loop != 0 the function returns the current
- *   loop counter.
+ *   If track == SC68_GET_TRACK (-1) and loop == SC68_GET_LOOP the
+ *   returns the current loop counter.
  *
- *   If track >= 0 the function will test the requested track
- *   number. If it is 0, the disk default track will be use. If the
- *   track is out of range, the function fails and returns -1 else it
- *   returns 0.  To avoid multi-threading issus the track is not
- *   changed directly but a change-track event is posted. This event
- *   will be processed at the next call to the sc68_process()
- *   function. If loop is -1 the default music loop is used. If loop
- *   is 0 does an infinite loop.
+ *   Forced track and loop values while disk loading (see sc68_uri)
+ *   are prior to the track and loop parameters.
+ *
+ *   If track == SC68_DEF_TRACK, the disk default trackis used unless
+ *   config "force-track" is non zero.
+ *
+ *   If loop == SC68_LOOP_DEF, the default number of loop is used
+ *   unless config "force-loop" is non zero.
+ *
+ *   To avoid multi-threading issues the track is not changed directly
+ *   but a change-track event is posted. This event will be processed
+ *   at the next call to the sc68_process() function.
  *
  * @param  sc68   sc68 instance.
- * @param  track  track number [-1:read current, 0:set disk default]
- * @param  loop   number of loop [-1:default 0:infinite]
+ * @param  track  track number (see sc68_play_e)
+ * @param  loop   number of loop (see sc68_play_e)
  *
  * @return error code or track number.
- * @retval 0  Success or no current track
- * @retval >0 Current track
+ * @retval 0  Success or no current track or loop counter
+ * @retval >0 Current track or loop counter
  * @retval -1 Failure.
+ *
+ * @see sc68_play_e
+ * @see sc68_uri
  *
  */
 int sc68_play(sc68_t * sc68, int track, int loop);
@@ -494,8 +522,8 @@ SC68_API
  *
  *    The sc68_seek() functions get or set the current play position.
  *
- *    If time_ms == -1 the function returns the current play position
- *    or -1 if not currently playing.
+ *    If time_ms == SC68_SEEK_QUERY the function returns the current
+ *    play position or -1 if not currently playing.
  *
  *    If time_ms >= 0 the function tries to seek to the given position.
  *    If time_ms is out of range the function returns -1.
@@ -508,17 +536,18 @@ SC68_API
  *    (not the goal position).
  *
  * @param  sc68        sc68 instance.
- * @param  time_ms     new time position in ms (-1:read current time).
+ * @param  orgin       Origin of time (SC68_SEEK_TRACK or SC68_SEEK_DISK)
+ * @param  time_ms     new time position in ms or SC68_SEEK_QUERY to query.
  * @param  is_seeking  Fill with current seek status (0:not seeking 1:seeking)
  *
  * @return  Current play position (in ms)
  * @retval  >0  Success
  * @retval  -1  Failure
  *
- * @bug  Time position calculation may be broken if tracks have different
- *       loop values. But it should not happen very often.
+ * @bug  Seeking is currently disabled. Query still work.
+ *
  */
-int sc68_seek(sc68_t * sc68, int time_ms, int * is_seeking);
+int sc68_seek(sc68_t * sc68, int origin, int time_ms, int * is_seeking);
 
 SC68_API
 /**

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-07 05:22:00 ben>
+ * Time-stamp: <2013-06-18 18:56:32 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -171,7 +171,8 @@ int run_info(cmd_t * cmd, int argc, char ** argv)
         tinf("length",   mus->first_ms);
         iinf("loops",    mus->loops);
         tinf("loop-len", mus->loops_ms);
-        tinf("total",    mus->total_ms);
+        tinf("total",    mus->first_ms +
+             ((mus->loops>0) ? mus->loops-1 : 0) * mus->loops_ms);;
       }
     }
   }

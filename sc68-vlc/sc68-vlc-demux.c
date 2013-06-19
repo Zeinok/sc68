@@ -1,4 +1,4 @@
-/* Time-stamp: <2013-06-15 22:47:12 ben> */
+/* Time-stamp: <2013-06-17 00:55:12 ben> */
 
 /* Minimal version */
 
@@ -94,14 +94,15 @@ static int Demux  ( demux_t * );
 static int Control( demux_t *, int, va_list );
 
 struct demux_sys_t {
+#ifdef DEBUG
   char              name[16];     /* sc68 instance name                      */
+#endif
   sc68_t          * sc68;         /* sc68 emulator instance                  */
   int               pcm_per_loop; /* PCM per sound rendering loop            */
   int               sample_rate;  /* Sample rate in hz                       */
   int               allin1;       /* 0:track by track                        */
   es_out_id_t     * es;           /* Elementary Stream                       */
   date_t            pts;
-//  vlc_meta_t      * meta;         /* Meta data                               */
   sc68_minfo_t      info;         /* Current track info                      */
   input_title_t   * titles[SC68_MAX_TRACK];
   sc68_cinfo_t      infos[SC68_MAX_TRACK];
@@ -126,9 +127,6 @@ static void sys_shutdown(demux_t * p_demux)
     p_demux->p_sys = 0;
     if (!p_sys)
       return;
-
-    /* if (p_sys->meta) */
-    /*   vlc_meta_Delete(p_sys->meta); */
 
     for (i=0; i<SC68_MAX_TRACK; ++i)
       if (p_sys->titles[i])
@@ -165,9 +163,9 @@ static meta_lut_t meta_lut[] = {
 };
 
 
-const char * meta_lut2[] = {
-  [vlc_meta_ArtworkURL] = TAG68_IMAGE,
-};
+/* const char * meta_lut2[] = { */
+/*   [vlc_meta_ArtworkURL] = TAG68_IMAGE, */
+/* }; */
 
 
 static void meta_lut_sort(void)
@@ -300,22 +298,23 @@ static int Open(vlc_object_t * p_this)
   /* assert(!p_demux->sc68); */
 
   /* Check if we are dealing with a sc68 file */
-  if (stream_Peek(p_demux->s, &p_peek, 4) < 4) {
+  if (stream_Peek(p_demux->s, &p_peek, 16) < 16) {
     goto exit;
   }
 
   /* Fast check for our files ... */
   /* TODO: Gzip                   */
   if (!memcmp(p_peek, "SC68", 4)) {
-    sc68_debug(0, "SC68 4cc detected");
     /* msg_Dbg(p_demux,"SC68 4cc detected"); */
   } else if (!memcmp(p_peek, "ICE!", 4)) {
-    sc68_debug(0, "ICE! 4cc detected");
     /* msg_Dbg(p_demux,"ICE! 4cc detected"); */
   } else if (!memcmp(p_peek+12, "SNDH", 4)) {
-    sc68_debug(0, "SNDH 4cc detected");
     /* msg_Dbg(p_demux,"SNDH 4cc detected"); */
+  } else if (!memcmp(p_peek, "\037\213\010", 3)) {
+    /* msg_Dbg(p_demux,"GZIP detected"); */
   } else {
+    msg_Dbg(p_demux,"Not sc68 ? '%02x-%02x-%02x-%02x' ?",
+            p_peek[0], p_peek[1], p_peek[2], p_peek[3]);
     goto exit;
   }
 
@@ -325,38 +324,33 @@ static int Open(vlc_object_t * p_this)
 
   /* Create sc68 instance */
   memset(&create68,0,sizeof(create68));
+#ifdef DEBUG
   memcpy(p_demux->p_sys->name,"vlc68#",6);
   p_demux->p_sys->name[6] = '0' +  id / 100 % 10;
   p_demux->p_sys->name[7] = '0' +  id / 10 % 10;
   p_demux->p_sys->name[8] = '0' +  id % 10;
   create68.name = p_demux->p_sys->name;
-
+#endif
   p_demux->p_sys->sc68 = sc68_create(&create68);
   if (!p_demux->p_sys->sc68)
     goto error;
-  sc68_debug(p_demux->p_sys->sc68,"Open: sc68 instance created");
 
+  /* Set sc68 cookie */
+  *(sc68_cookie_ptr(p_demux->p_sys->sc68)) = p_demux;
 
   /* Load and prepare sc68 file */
   stream68 = istream68_vlc_create(p_demux->s);
-  sc68_debug(0," Open: sc68 instance istream created -- %s",
-             stream68?"OK":"FAILED");
-
-  if (!stream68)
+  if (unlikely(!stream68))
     goto error;
   if (sc68_load(p_demux->p_sys->sc68, stream68))
     goto error;
-  sc68_debug(p_demux->p_sys->sc68," Open: sc68 loaded");
 
   /* Play all track from first for now */
   if (sc68_play(p_demux->p_sys->sc68, 1, -1) == -1)
     goto error;
-  sc68_debug(p_demux->p_sys->sc68," Open: sc68 played");
   if (sc68_process(p_demux->p_sys->sc68, 0, 0) == SC68_ERROR)
     goto error;
-  sc68_debug(p_demux->p_sys->sc68," Open: sc68 process");
   p_demux->p_sys->sample_rate = sc68_sampling_rate(p_demux->p_sys->sc68,0);
-  sc68_debug(p_demux->p_sys->sc68," Open: srate=%d",p_demux->p_sys->sample_rate);
 
   /* Set track info */
   if (!sc68_music_info(p_demux->p_sys->sc68, &info, 1, 0)) {
@@ -425,8 +419,6 @@ error:
   }
 
 exit:
-  sc68_debug(0,"} Open() => [%d]", err);
-
   return err;
 }
 
@@ -436,7 +428,6 @@ exit:
 static void Close( vlc_object_t * p_this )
 {
   demux_t        *p_demux = (demux_t*)p_this;
-  sc68_debug(0,"Close: {}");
   sys_shutdown(p_demux);
 }
 
@@ -451,15 +442,8 @@ static int Demux( demux_t *p_demux )
   demux_sys_t *p_sys   = p_demux->p_sys;
   block_t     *p_block = 0;
 
-  /* sc68_debug(p_sys->sc68,"Demux: {"); */
-
-  /* ms = sc68_seek(p_sys->sc68,-1,0); */
-  /* if (unlikely(ms == -1)) */
-  /*   return 0; */
-
   p_block = block_Alloc(p_sys->pcm_per_loop << 2);
   if (unlikely(!p_block)) {
-    /* sc68_debug(p_sys->sc68,"} Demux: block alloc -- 0"); */
     return 0;
   }
 
@@ -467,8 +451,6 @@ static int Demux( demux_t *p_demux )
   code = sc68_process(p_sys->sc68,  p_block->p_buffer, &pcm_per_loop);
   if (code == SC68_ERROR) {
     block_Release(p_block);
-    /* sc68_debug(p_sys->sc68,"} Demux: sc68 process -- 0"); */
-    /* Should return -1 here ? some other demuxer don't */
     return 0;
   }
 
@@ -478,7 +460,6 @@ static int Demux( demux_t *p_demux )
     p_block->i_nb_samples = pcm_per_loop;
     p_block->i_dts        = VLC_TS_0 + date_Get (&p_sys->pts);
     p_block->i_pts        = p_block->i_dts;
-    /* p_block->i_length     =  */
 
     /* set PCR */
     es_out_Control( p_demux->out, ES_OUT_SET_PCR, p_block->i_pts );
@@ -487,12 +468,13 @@ static int Demux( demux_t *p_demux )
   }
 
   if (code & SC68_LOOP) {
-    sc68_debug(p_sys->sc68, "Loop #%d", sc68_play(p_sys->sc68, -1, -1));
+    /* Nothing to do really */
   }
+
   if (code & SC68_CHANGE) {
     TrackInfo(p_demux);
     p_demux->info.i_title  = p_sys->info.trk.track-1;
-    p_demux->info.i_update = INPUT_UPDATE_TITLE;
+    p_demux->info.i_update = INPUT_UPDATE_TITLE | INPUT_UPDATE_META;
   }
 
   /* sc68_debug(p_sys->sc68,"} Demux: => [%d]", (code & SC68_END) ? 0 : 1); */
@@ -514,7 +496,7 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
 
   case DEMUX_GET_META: {
     vlc_meta_t *p_meta = (vlc_meta_t *)va_arg(args, vlc_meta_t*);
-    if (TrackInfo(p_demux) >=0 && 
+    if (TrackInfo(p_demux) >=0 &&
         p_meta == TrackMeta(p_demux, p_meta, -1))
       return VLC_SUCCESS;
   } break;
@@ -532,6 +514,7 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
     *pi64 =  (int64_t) (p_sys->allin1
                         ? p_sys->info.dsk.time_ms
                         : p_sys->info.trk.time_ms) * 1000;
+    /* *pi64 =  (int64_t) p_sys->info.dsk.time_ms * 1000; */
     return VLC_SUCCESS;
   } break;
 
@@ -598,7 +581,6 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
       break;
     p_demux->info.i_title  = track;
     p_demux->info.i_update = INPUT_UPDATE_TITLE;
-    msg_Dbg( p_demux, "set title #%i", track);
     return VLC_SUCCESS;
   } break;
   }
@@ -608,12 +590,11 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
 
 static void msg(const int bit, void *userdata, const char *fmt, va_list list)
 {
-#if 0
-  void ** sc68_cookie = sc68_cookie_ptr(userdata);
-  demux_t * p_demux = (demux_t *) (sc68_cookie ? (*sc68_cookie) : 0);
-  vlc_object_t * vlc_object = VLC_OBJECT(p_demux);
+#if 1
+  demux_t * p_demux = (demux_t *) *sc68_cookie_ptr(userdata);
 
-  if (vlc_object) {
+  if (p_demux) {
+    vlc_object_t * vlc_object = VLC_OBJECT(p_demux);
     int level;
     switch (bit) {
     case  msg68_CRITICAL: case  msg68_ERROR:
