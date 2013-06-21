@@ -3,9 +3,9 @@
  * @brief   emu68 main API
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-10-28 22:45:13 ben>
+ * Time-stamp: <2013-06-21 02:51:27 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

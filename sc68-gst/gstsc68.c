@@ -427,15 +427,18 @@ static gboolean gst_sc68_task_play(Gstsc68 * filter)
     filter->code = sc68_process(filter->sc68,  GST_BUFFER_DATA(buf), &n);
     res = filter->code != SC68_ERROR;
     if (res) {
-      int is_seeking;
+      int is_seeking, ms;
       filter->samples += n;
-      filter->position_ns = gst_sc68_mstons(sc68_seek(filter->sc68, -1, &is_seeking));
+      /* $$$ Check dis SC68_SEEK_DISK ? SC68_SEEK_TRAKC */
+      ms = sc68_seek(filter->sc68, SC68_SEEK_PLAY ,SC68_SEEK_QUERY, &is_seeking);
+      filter->position_ns = gst_sc68_mstons(ms);
       flow = gst_pad_push(filter->srcpad, buf);
       if (flow != GST_FLOW_OK) {
         res = FALSE;
         gst_buffer_unref(buf);
         GST_ERROR_OBJECT(filter, "pad <%s> push buffer failed [%s]",
-                         gst_pad_get_name(filter->srcpad), gst_flow_get_name(flow));
+                         gst_pad_get_name(filter->srcpad),
+                         gst_flow_get_name(flow));
       }
     }
   }

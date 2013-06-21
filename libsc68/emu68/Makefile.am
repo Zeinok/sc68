@@ -1,4 +1,4 @@
-# Time-stamp: <2011-09-10 13:54:00 ben>
+# Time-stamp: <2013-06-21 03:33:41 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  emu68 -- Makefile.am -- Use with automake to produce configure.in   |
@@ -25,7 +25,7 @@ alternatesources   = $(monoliticsources)
 endif
 
 commonsources=\
- emu68.c error68.c getea68.c inst68.c ioplug68.c mem68.c
+ emu68.c error68.c gdbstub68.c getea68.c inst68.c ioplug68.c mem68.c 
 
 monoliticsources=\
  lines68.c
@@ -39,8 +39,9 @@ mysources=\
  $(commonsources) $(linesources)
 
 myheaders=\
- assert68.h cc68.h emu68.h emu68_api.h error68.h excep68.h inst68.h	\
- ioplug68.h macro68.h mem68.h srdef68.h struct68.h type68.h lines68.h
+ assert68.h cc68.h emu68.h emu68_api.h error68.h excep68.h	\
+ gdbstub68.h inst68.h ioplug68.h macro68.h mem68.h srdef68.h	\
+ struct68.h type68.h lines68.h
 
 myinlines=\
 inl68_arithmetic.h inl68_bcd.h inl68_bitmanip.h inl68_datamove.h	\

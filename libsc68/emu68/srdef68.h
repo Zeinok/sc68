@@ -4,18 +4,17 @@
  * @author    Benjamin Gerard
  * @date      1999/13/03
  * @brief     Status Register (SR) definition header.
- *
  */
+/* Time-stamp: <2013-06-21 02:47:45 ben> */
 
-/* $Id$ */
-
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _EMU68_SRDEF68_H_
 #define _EMU68_SRDEF68_H_
 
-/** @defgroup  emu68_lib_srdef  Status Register (SR) definitions
- *  @ingroup   emu68_lib
+/**
+ * @defgroup  emu68_lib_srdef  Status Register (SR) definitions
+ * @ingroup   emu68_lib
  *
  *   68K status register definitions.
  *   The SR is composed of condition code register (CCR) located in
@@ -31,8 +30,9 @@
  * @{
  */
 
-/** @name  SR bit definitions.
- *  @{
+/**
+ * @name  SR bit definitions.
+ * @{
  */
 
 enum {
@@ -57,47 +57,56 @@ enum {
   SR_T = (1<<SR_T_BIT)  /**< Trace value.          */,
 };
 
-/** @} */
-
-
-/** @name  SR manipulations.
- *  @{
+/**
+ * @}
  */
 
-/** Get CCR value.
- *  @param  SR  current SR value
- *  @return CCR value
- *  @retval SR&255
+
+/**
+ * @name  SR manipulations.
+ * @{
+ */
+
+/**
+ * Get CCR value.
+ * @param  SR  current SR value
+ * @return CCR value
+ * @retval SR&255
  */
 #define GET_CCR(SR) ( (u8) (SR) )
 
-/** Set CCR in SR value.
- *  @param  SR  current SR value
- *  @param  CCR ccr value [0..255]
- *  @return new SR value
- *  @retval (SR&~255)|CCR
+/**
+ * Set CCR in SR value.
+ * @param  SR  current SR value
+ * @param  CCR ccr value [0..255]
+ * @return new SR value
+ * @retval (SR&~255)|CCR
  */
 #define SET_CCR(SR,CCR) (SR) = ( ( (SR) & ~255 ) | (CCR) )
 
-/** Get IPL in SR value.
- *  @param  SR  current SR value
- *  @return IPL value
- *  @retval (SR>>SR_I_BIT)&7
+/**
+ * Get IPL in SR value.
+ * @param  SR  current SR value
+ * @return IPL value
+ * @retval (SR>>SR_I_BIT)&7
  */
 #define GET_IPL(SR) ( ( (SR) >> SR_I_BIT ) & 7 )
 
-/** Change IPL value of SR.
- *  @param  SR   current SR value
- *  @param  IPL  new IPL value [0..7]
- *  @return new SR value
- *  @retval ((SR)&~SR_I)|((IPL)<<SR_IPL_BIT)
+/**
+ * Change IPL value of SR.
+ * @param  SR   current SR value
+ * @param  IPL  new IPL value [0..7]
+ * @return new SR value
+ * @retval ((SR)&~SR_I)|((IPL)<<SR_IPL_BIT)
  */
 #define SET_IPL(SR,IPL) (SR) = ( ( (SR) & ~SR_I ) | ( (IPL) << SR_I_BIT ) )
 
-/** @} */
+/**
+ * @}
+ */
 
 /**
- *  @}
+ * @}
  */
 
 #endif /* #ifndef _EMU68_SRDEF68_H_ */

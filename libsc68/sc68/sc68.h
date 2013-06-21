@@ -256,7 +256,7 @@ enum sc68_spr_e {
 enum sc68_seek_e {
   SC68_SEEK_QUERY  = -1, /**< Query position instead of seeking.     */
   SC68_SEEK_TRACK  = 0,  /**< Seek time value are relative to track. */
-  SC68_SEEK_DISK   = 1   /**< Seek time value are relative to disk.  */
+  SC68_SEEK_PLAY   = 1   /**< Seek time value are relative to play.  */
 };
 
 /**

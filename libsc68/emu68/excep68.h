@@ -4,22 +4,22 @@
  * @author    Benjamin Gerard
  * @date      1999/13/03
  * @brief     68k exception and interruption definition header.
- *
  */
+/* Time-stamp: <2013-06-21 01:06:16 ben> */
 
-/* $Id$ */
-
-/* Copyright (C) 1998-2010 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _EMU68_EXCEP68_H_
 #define _EMU68_EXCEP68_H_
 
-/** @addtogroup  emu68_lib
- *  @{
+/**
+ * @addtogroup  emu68_lib
+ *
+ * @{
  */
 
 /**
- *   @name  68k exceptions and interruptions
+ * @name  68k exceptions and interruptions
  *
  *   68K interruptions are defined by a vector and a level. The
  *   interrupt vector is a long word stored in memory at vector
@@ -59,10 +59,12 @@ enum {
 /** Nth interrupt auto vector address. */
 #define AUTO_VECTOR(N)   ( ( (N) & 07 ) + SPURIOUS_VECTOR )
 
-/** @} */
+/**
+ * @}
+ */
 
 /**
- *  @}
+ * @}
  */
 
 #endif /* #ifndef _EMU68_EXCEP68_H_ */

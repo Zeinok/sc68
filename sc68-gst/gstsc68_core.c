@@ -263,7 +263,7 @@ gboolean gst_sc68_onchangetrack(Gstsc68 * filter)
       gst_sc68_report_error(filter);
       return FALSE;
     }
-    pos_ms = sc68_seek(filter->sc68, -1, 0);
+    pos_ms = sc68_seek(filter->sc68, SC68_SEEK_PLAY, SC68_SEEK_QUERY, 0);
     if (pos_ms == -1) {
       GST_ERROR_OBJECT(filter, "failed to retrieve position");
       gst_sc68_report_error(filter);
