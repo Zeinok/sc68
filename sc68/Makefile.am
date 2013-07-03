@@ -1,4 +1,4 @@
-# Time-stamp: <2013-06-06 04:50:26 ben>
+# Time-stamp: <2013-06-23 16:49:13 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |    sc68 -- Makefile.am -- Use with automake to produce Makefile.in   |
@@ -24,7 +24,7 @@ if SOURCE_SC68
 SC68_LA = $(sc68_dir)/libsc68.la
 @SET_MAKE@
 $(sc68_dir)/libsc68.la:
-	cd "$(sc68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libsc68.la
+	$(MAKE) -C "$(sc68_dir)" $(AM_MAKEFLAGS)
 else
 SC68_LA =
 endif
@@ -33,7 +33,7 @@ if SOURCE_FILE68
 FILE68_LA = $(file68_dir)/libfile68.la
 @SET_MAKE@
 $(file68_dir)/libfile68.la:
-	cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libfile68.la
+	$(MAKE) -C "$(file68_dir)" $(AM_MAKEFLAGS)
 else
 FILE68_LA =
 endif

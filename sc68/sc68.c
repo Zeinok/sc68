@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-19 00:18:59 ben>
+ * Time-stamp: <2013-06-23 16:57:43 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -109,6 +109,7 @@ sc68_debug_cb(const int bit, sc68_t * sc68, const char *fmt, va_list list)
     ;
 
   vfprintf(out,fmt,list);
+  fflush(out);
 }
 
 /* Debug message. */
@@ -391,12 +392,16 @@ static int PlayLoop(istream68_t * out, int track, int loop)
   }
 
   while ( ! (code & SC68_END) ) {
-    static int pass;
     int n = max;
 
     code = sc68_process(sc68, buffer, &n);
-    /* if (++pass < 10 || n != max || (code & ~SC68_IDLE) ) */
-    /*   Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n", pass, n, max, codestr(code), code); */
+
+    if (0) {
+      static int pass;
+      if (++pass < 10 || n != max || (code & ~SC68_IDLE) )
+        Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n",
+              pass, n, max, codestr(code), code);
+    }
 
     if (code == SC68_ERROR)
       break;
