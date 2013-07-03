@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [desa68],
-  [20110909],
+  [20130703],
   [benjihan -4t- sourceforge],
   [libdesa68],
   [http://sc68.atari.org])

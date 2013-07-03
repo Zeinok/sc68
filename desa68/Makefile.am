@@ -1,9 +1,9 @@
-# Time-stamp: <2011-09-10 04:38:56 ben>
+# Time-stamp: <2013-07-03 02:16:25 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  desa68 -- Makefile.am -- Use with automake to produce Makefile.in   | 
 # |                                                                      |
-# |                 (C) 2007-2011 Benjamin Gerard                        |
+# |                 (C) 2007-2013 Benjamin Gerard                        |
 # |                                                                      |
 # |             <http://sourceforge.net/users/benjihan>                  |
 # |                                                                      |

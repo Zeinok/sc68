@@ -2,7 +2,7 @@
                                            
                   desa68 is part of the sc68 project
                        
-               (C) Copyright 1998-2011 Benjamin Gerard
+               (C) Copyright 1998-2013 Benjamin Gerard
 
 
   desa68 is  a 68000 disassembler library with  enhanced features that
@@ -14,4 +14,4 @@
   as symbol.
 
   A  good sample  is may  be found  in the  sourcer68  directory. This
-  library is also used by the cdbg68 program.
+  library is also used by the cdbg68 (discontinued) program.
