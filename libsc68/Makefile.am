@@ -1,4 +1,4 @@
-# Time-stamp: <2013-06-21 16:50:20 ben>
+# Time-stamp: <2013-07-03 05:14:15 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # | libsc68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -38,7 +38,7 @@ FILE68_LA =
 endif
 
 lib_LTLIBRARIES    = libsc68.la
-libsc68_la_SOURCES = api68.c conf68.c mixer68.c libsc68.c rsp68.c
+libsc68_la_SOURCES = api68.c conf68.c mixer68.c libsc68.c
 libsc68_la_LIBADD  = io68/libio68.la emu68/libemu68.la $(FILE68_LA)
 
 # ,----------------------------------------------------------------------.
@@ -46,7 +46,7 @@ libsc68_la_LIBADD  = io68/libio68.la emu68/libemu68.la $(FILE68_LA)
 # `----------------------------------------------------------------------'
 
 noinst_HEADERS     = \
-sc68/conf68.h sc68/mixer68.h sc68/trap68.h trapfunc.s sc68/rsp68.h
+sc68/conf68.h sc68/mixer68.h sc68/trap68.h trapfunc.s
 
 pkginclude_HEADERS = sc68/sc68.h
 pkgincludedir      = $(includedir)/sc68

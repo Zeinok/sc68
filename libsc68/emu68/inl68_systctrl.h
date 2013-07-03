@@ -4,12 +4,10 @@
  * @author    Benjamin Gerard
  * @date      2009/05/18
  * @brief     68k system control operation inlines.
- *
  */
+/* Time-stamp: <2013-07-03 04:54:36 ben>  */
 
-/* $Id: inst68.h 102 2009-03-14 17:21:58Z benjihan $ */
-
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _INL68_SYSTCTRL_H_
 #define _INL68_SYSTCTRL_H_

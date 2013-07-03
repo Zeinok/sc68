@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-23 16:54:21 ben>
+ * Time-stamp: <2013-07-03 05:20:22 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -40,7 +40,6 @@
 
 #include "mixer68.h"
 #include "conf68.h"
-#include "rsp68.h"
 #include "emu68/emu68.h"
 #include "emu68/excep68.h"
 #include "emu68/ioplug68.h"
@@ -113,9 +112,6 @@ struct _sc68_s {
 
   unsigned int   playaddr;    /**< Current play address in 68 memory.    */
   int            seek_to;     /**< Seek to this time (-1:n/a)            */
-
-
-  rsp68_t      * rsp;         /**< Remote Serial Protocol server.        */
 
 
   /* $$$ MUST REMOVE CONFIG FROM INSTANCE ... */
@@ -339,56 +335,6 @@ static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
     return 1;                   /* Request execution break  */
   return 0;                     /* Continue execution normally */
 }
-
-#ifdef USE_GDBSTUB68
-
-static int gdb_access(emu68_t * const emu68, int v)
-{
-  static int has_failed;
-
-  sc68_t * sc68 = emu68_get_cookie(emu68);
-  int ret;
-
-  static char inp[512], out[512];
-  static int i, o;
-
-  assert(sc68);
-
-  if (has_failed)
-    return -1;
-
-  ret = rsp68_access(sc68->rsp, v);
-  if (ret == -1)
-    has_failed = 1;
-
-
-  if (ret == -1 || v == -1) {
-    if (o) {
-      out[o] = 0;
-      o = 0;
-//      sc68_debug(sc68, "out:= [%s]\n", out);
-    }
-    inp[i++] = ret;
-    if (i >= 512) i = 511;
-  }
-
-  if (ret == -1 || v != -1) {
-    if (i) {
-      inp[i] = 0;
-      i = 0;
-//      sc68_debug(sc68, "inp:= [%s]\n", inp);
-    }
-    out[o++] = v;
-    if (o >= 512) o = 511;
-  }
-
-//  sc68_debug(sc68, "libsc68: gdb access -- *%d*\n", v);
-//  sc68_debug(sc68, "libsc68: gdb access -- [%d]\n", ret);
-
-  return ret;
-}
-
-#endif
 
 static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
 {
@@ -671,11 +617,10 @@ int sc68_init(sc68_init_t * init)
 
   static option68_t debug_options[] = {
     {
-      option68_INT, "sc68-","dbg68k","debug",
-      "run 68K in debug mode {bit#0:trace and exception, bit#1:RSP server}"
+      option68_BOL, "sc68-","dbg68k","debug",
+      "run 68K in debug mode"
     }
   };
-
 
   if (sc68_init_flag) {
     err = sc68_error_add(0, "libsc68: already initialized");
@@ -760,9 +705,6 @@ int sc68_init(sc68_init_t * init)
   opt    = option68_get("dbg68k", 1);
   dbg68k = opt ? opt->val.num : 0;
 
-  /* Init RSP server. */
-  rsp68_init();
-
   sc68_init_flag = !err;
 
   if (err) {
@@ -778,7 +720,6 @@ void sc68_shutdown(void)
   sc68_debug(0,"libsc68: shutdowning\n");
   if (sc68_init_flag) {
     sc68_init_flag = 0;
-    rsp68_shutdown();
     file68_shutdown();
     config68_shutdown();          /* always after file68_shutdown() */
   }
@@ -830,10 +771,6 @@ sc68_t * sc68_create(sc68_create_t * create)
 
   /* Create RSP server if needed */
   sc68_debug(sc68, "libsc68: debug mode -- %d\n", create->emu68_debug | dbg68k);
-  if ( ( create->emu68_debug | dbg68k) & 2 ) {
-    sc68->rsp = rsp68_create( "rsp://tcp4/127.0.0.1:6800" );
-    sc68_debug(sc68, "%s -- %p\n","RSP server created", sc68->rsp);
-  }
 
   /* Create 68k emulator and pals. */
   if (init68k(sc68, create->log2mem, create->emu68_debug | dbg68k)) {
@@ -882,7 +819,6 @@ void sc68_destroy(sc68_t * sc68)
     sc68_close(sc68);
     sc68_config_save(sc68);
     config68_destroy(sc68->config); sc68->config = 0;
-    rsp68_destroy(sc68->rsp);
     safe_destroy(sc68);
     sc68_free(sc68);
   }

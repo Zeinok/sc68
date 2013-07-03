@@ -7,8 +7,6 @@
  *
  */
 
-/* $Id$ */
-
 #ifndef _EMU68_INL_EXCEPTION68_H_
 #define _EMU68_INL_EXCEPTION68_H_
 

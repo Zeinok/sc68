@@ -5,7 +5,7 @@
  * @date      1999-03-13
  * @brief     Struture definitions header.
  */
-/* Time-stamp: <2013-06-21 01:09:16 ben> */
+/* Time-stamp: <2013-07-03 04:52:33 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -204,8 +204,6 @@ struct emu68_s {
 
   emu68_bp_t breakpoints[16];           /**< Hardware breakpoints.  */
 
-  struct emu68_gdb_s * gdb; /**< gdb stub. */
-
   /* Onboard memory. */
   addr68_t memmsk;     /**< Onboard memory mask (2^log2mem-1).      */
   int      log2mem;    /**< Onboard memory buffer size (2^log2mem). */
@@ -229,7 +227,7 @@ void inl_addcycle68(emu68_t * const emu68, const cycle68_t n)
 #endif
 }
 
-#ifndef CUSTOM_ALLOC
+#ifndef emu68_alloc
 # include <stdlib.h>
 # define emu68_alloc(size) malloc(size)
 # define emu68_free(size)  free(size)

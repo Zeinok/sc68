@@ -1,11 +1,11 @@
 /*
- * @file    lines68.c
+ * @file    emu68/lines68.c
  * @brief   The whole 68k emulator in a single file.
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2001-2011 Benjamin Gerard
+ * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-10-12 16:52:55 ben>
+ * Time-stamp: <2013-07-03 05:03:58 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

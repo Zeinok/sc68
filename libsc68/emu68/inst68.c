@@ -1,25 +1,28 @@
 /*
- *               emu68 - 68000 instructions emulation
- *             Copyright (C) 2001-2009 Benjamin Gerard
- *           <benjihan -4t- users.sourceforge -d0t- net>
+ * @file    emu68/inst68.c
+ * @brief   68000 instructions emulation
+ * @author  http://sourceforge.net/users/benjihan
  *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * Copyright (C) 1998-2013 Benjamin Gerard
+ *
+ * Time-stamp: <2013-07-03 04:57:08 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the  GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-/* $Id$ */
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -46,12 +49,10 @@ void exception68(emu68_t * const emu68, const int vector, const int level)
     /* Those are specific to EMU68 */
     switch (vector) {
     case HWBREAK_VECTOR:
-      /* $$$ TODO: inplement emu68 breakpoint */
-
     case HWTRACE_VECTOR:
       break;
     default:
-      assert(!"invalid eception vector");
+      assert(!"invalid exception vector");
     }
   } else {
     int savesr = REG68.sr;
@@ -79,19 +80,6 @@ void exception68(emu68_t * const emu68, const int vector, const int level)
       emu68->status = EMU68_NRM;        /* Back to normal mode */
     }
   }
-
-  /* $$$ Just a try. still have to figure how this will work with
-   *     emu68::handler; should it be run before or after ?
-   */
-#ifdef USE_GDBSTUB68
-  if (emu68->gdb) {
-    int ret = emu68_gdbstub_handle(emu68, vector);
-    if (ret == EMU68_ERR) {
-      emu68->status = ret;
-      return;
-    }
-  }
-#endif
 
   if (emu68->handler && emu68->handler(emu68, vector, emu68->cookie) ) {
     emu68->status = EMU68_BRK;        /* User forced exit */

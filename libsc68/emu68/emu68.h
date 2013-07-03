@@ -5,7 +5,7 @@
  * @date      1999/03/13
  * @brief     68K emulator header.
  */
-/* Time-stamp: <2013-06-24 20:08:49 ben> */
+/* Time-stamp: <2013-07-03 05:08:43 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -19,7 +19,6 @@
 #include "cc68.h"
 #include "srdef68.h"
 #include "mem68.h"
-#include "gdbstub68.h"
 
 /**
  * @defgroup  emu68_lib  68k emulator library

@@ -1,10 +1,28 @@
 /*
- *                           emu68 - crc32
+ * @file    emu68/crc32.c
+ * @brief   compute a crc32
+ * @author  Original implementation by Gary S. Brown
  *
- *             Original implemantation by Gary S. Brown
+ * Copyright (C) 1998-2013 Benjamin Gerard
+ *
+ * Time-stamp: <2013-07-03 05:04:22 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
  */
-
-/* $Id: emu68.c 116 2009-06-18 14:09:54Z benjihan $ */
 
 static u32 crc32_tab[] = {
       0x00000000L, 0x77073096L, 0xee0e612cL, 0x990951baL, 0x076dc419L,
@@ -64,7 +82,7 @@ static u32 crc32_tab[] = {
 static uint68_t crc32(uint68_t crc32val, const u8 * s, int68_t len)
 {
   const u8 * e = s + len;
-  
+
   while ( s < e ) {
     crc32val =
       crc32_tab[(crc32val ^ *s++) & 0xff] ^
