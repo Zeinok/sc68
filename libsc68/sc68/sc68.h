@@ -175,7 +175,10 @@ typedef struct {
   /** 68k memory size (2^log2mem). */
   int log2mem;
 
-  /** Run  68k emulator in debug mode (enable memory access trace). */
+  /** Run  68k emulator in debug mode.
+   *  bit #0: enable hardware trace and exception handler.
+   *  bit #1: enable rsp server (gdb)
+   */
   int emu68_debug;
 
   /** User private data. */

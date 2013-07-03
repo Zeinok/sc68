@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-21 02:51:27 ben>
+ * Time-stamp: <2013-06-24 18:00:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -202,7 +202,7 @@ u8 * emu68_chkptr(emu68_t * const emu68, addr68_t dst, uint68_t sz)
 int emu68_peek(emu68_t * const emu68, addr68_t addr)
 {
   return emu68
-    ? emu68->mem[addr&MEMMSK68]
+    ? emu68->mem[addr & MEMMSK68]
     : -1
     ;
 }
@@ -210,7 +210,7 @@ int emu68_peek(emu68_t * const emu68, addr68_t addr)
 int emu68_chkpeek(emu68_t * const emu68, addr68_t addr)
 {
   return (emu68 && emu68->chk)
-    ? emu68->chk[addr&MEMMSK68]
+    ? emu68->chk[addr & MEMMSK68]
     : -1
     ;
 }
@@ -233,7 +233,7 @@ int emu68_chkpoke(emu68_t * const emu68, addr68_t addr, int68_t v)
 
 /*  Write memory block to 68K on board memory
  */
-int emu68_memput(emu68_t * const emu68, addr68_t dst, u8 *src, uint68_t sz)
+int emu68_memput(emu68_t * const emu68, addr68_t dst, const u8 *src, uint68_t sz)
 {
   u8 * ptr = emu68_memptr(emu68,dst,sz);
   if (ptr) {

@@ -2,9 +2,18 @@
 # include "config.h"
 #endif
 
+#if defined(USE_GDBSTUB68)
+
 #include "gdbstub68.h"
 #include "emu68.h"
 #include "excep68.h"
+
+#include <string.h>
+
+/* $$$ DEBUG */
+#if defined (DEBUG)
+#include <stdio.h>
+#endif
 
 static const char hexchars[]="0123456789abcdef";
 
@@ -134,59 +143,88 @@ static u8 * recv_packet(emu68_t * const emu68)
 {
   /* u8   *buffer = emu68->gdb.remcomInBuffer; */
   u8   checksum, xmitcsum;
-  int  ch;
+  int  ch, i;
 
-  while (1) {
+  /* wait around for the start character, ignore all other characters */
 
-    /* wait around for the start character, ignore all other characters */
-    while (ch = get_char(emu68), ch >= 0 && ch != '$')
-      ;
+resync:
+  i = -1;
+  do {
+    ++i;
+    ch = get_char(emu68);
+    if (ch < 0)
+      return 0;
+    if (ch != '$')
+      fprintf(stderr, "recv - sync -- get '%c' instead of '$' pos #%d\n",ch,i);
+  } while (ch != '$');
+  fprintf(stderr, "recv - synced at pos #%d\n",i);
 
- retry:
-    checksum = 0;
-    xmitcsum = -1;
+retry:
+  checksum = 0;
+  xmitcsum = -1;
+  emu68->gdb->inp.cnt = 0;
 
-    emu68->gdb->inp.cnt    = 0;
+  emu68->gdb->inp.buf[0] = 0;
+  emu68->gdb->inp.buf[1] = 0;
+  emu68->gdb->inp.buf[2] = 0;
+  emu68->gdb->inp.buf[3] = 0;
 
-    /* now, read until a # or end of buffer is found */
-    while (emu68->gdb->inp.cnt < emu68->gdb->inp.max-1) {
-      ch = get_char(emu68);
-      if (ch == '$')
-        goto retry;
-      if (ch == '#')
-        break;
-      checksum = checksum + ch;
-      emu68->gdb->inp.buf[emu68->gdb->inp.cnt++] = ch;
+  do {
+    ch = get_char(emu68);
+    if (ch < 0)
+      return 0;
+    if (ch == '$') {
+      fprintf(stderr, "recv - got a '$' at pos %d -- retry\n",
+              emu68->gdb->inp.cnt);
+      goto retry;
     }
-    emu68->gdb->inp.buf[emu68->gdb->inp.cnt] = 0;
+    if (ch == '#')
+      break;
+    checksum = checksum + ch;
+    emu68->gdb->inp.buf[emu68->gdb->inp.cnt++] = ch;
+  } while (emu68->gdb->inp.cnt < emu68->gdb->inp.max-1);
 
-    if (ch == '#') {
-      ch = get_char(emu68);
-      if(ch < 0); /* $$$ TODO: error handling */
+  emu68->gdb->inp.buf[emu68->gdb->inp.cnt] = 0;
+  fprintf(stderr,"recv - got [%s]+'%c'\n",emu68->gdb->inp.buf,ch);
 
-      xmitcsum = hex (ch) << 4;
-      ch = get_char (emu68);
-      if(ch < 0); /* $$$ TODO: error handling */
-      xmitcsum += hex (ch);
+  if (ch != '#')                        /* Overflow ! */
+    return 0;
 
-      if (checksum != xmitcsum) {
-        /* failed checksum */
-        if (0 > put_char (emu68, '-')); /* $$$ TODO: error handling */
-      } else {
-        /* successful transfer */
-        if (0 > put_char (emu68, '+')); /* $$$ TODO: error handling */
-        /* if a sequence char is present, reply the sequence ID */
+  ch = get_char(emu68);
+  if(ch < 0)
+    return 0;
+  xmitcsum = hex (ch) << 4;
+  ch = get_char (emu68);
+  if(ch < 0)
+    return 0;
+  xmitcsum += hex (ch);
 
-        if (emu68->gdb->inp.buf[2] == ':') {
-          if (0 > put_char (emu68, emu68->gdb->inp.buf[0]));
-          if (0 > put_char (emu68, emu68->gdb->inp.buf[1]));
-          return emu68->gdb->inp.buf + 3;
-        }
-        return emu68->gdb->inp.buf;
-      }
-    }
+  fprintf(stderr,"recv - xmitsum(%02x) (%02x) chksum\n",
+          xmitcsum,checksum);
+
+  if (checksum != xmitcsum) {
+    /* failed checksum */
+    if (put_char(emu68, '-') < 0)
+      return 0;
+    goto resync;
   }
+
+  /* successful transfer */
+  if (put_char(emu68, '+') < 0)
+    return 0;
+
+  /* if a sequence char is present, reply the sequence ID */
+  if (emu68->gdb->inp.buf[2] == ':') {
+    fprintf(stderr, "recv - got SEQ-ID !\n");
+    if (put_char (emu68, emu68->gdb->inp.buf[0]) < 0)
+      return 0;
+    if (put_char (emu68, emu68->gdb->inp.buf[1]) < 0)
+      return 0;
+    return emu68->gdb->inp.buf + 3;
+  }
+  return emu68->gdb->inp.buf;
 }
+
 
 /**
  * Send the packet in buffer.
@@ -196,41 +234,60 @@ static u8 * recv_packet(emu68_t * const emu68)
  */
 static int send_packet(emu68_t * const emu68)
 {
-  int ch, err = 0;
+  int ch;
+  u8  checksum, * out;
+
+
+  fprintf(stderr,"send - [%s]\n", emu68->gdb->out.buf);
+
+  if (!*emu68->gdb->out.buf) {
+    /* don't wait for reply on that ! */
+    return 0;
+  }
+
 
   /*  $<packet info>#<checksum>. */
-  do {
-    u8  checksum;
-    int idx;
+retry:
+  if (put_char (emu68, '$') < 0)
+    return -1;
 
-    if (0 > put_char (emu68, '$')) {
-      ++err; break;
-    }
+  checksum = 0;
+  out = emu68->gdb->out.buf;
 
-    for ( checksum = 0, idx = 0;
-          (ch = emu68->gdb->out.buf[idx]), ch > 0;
-          checksum += ch, ++idx ) {
-      if (0 > put_char(emu68, ch)) {
-        ch = -1;
-        break;
-      }
-    }
-    if (ch < 0) {
-      ++err; break;
-    }
+  while (ch = *out++, ch) {
+    checksum += ch;
+    if (put_char(emu68, ch) < 0)
+      return -1;
+  }
 
-    if (0
-        || 0 > put_char(emu68, '#')
-        || 0 > put_char(emu68, hexchars[checksum >> 4])
-        || 0 > put_char(emu68, hexchars[checksum & 15])) {
-      ++err; break;
-    }
-    if (ch = get_char(emu68), ch < 0) {
-      ++err; break;
-    }
-  } while (ch != '+');
+  if (0
+      || 0 > put_char(emu68, '#')
+      || 0 > put_char(emu68, hexchars[checksum >> 4])
+      || 0 > put_char(emu68, hexchars[checksum & 15]))
+    return -1;
 
-  return -!!err;
+  if (!*emu68->gdb->out.buf) {
+    /* don't wait for reply on that ! */
+    return 0;
+  }
+
+  if (ch = get_char(emu68), ch < 0)
+    return -1;
+
+  if (ch == '+') {
+    fprintf(stderr,"send - ack - [%s] %02X\n", emu68->gdb->out.buf, checksum);
+    return 0;
+  }
+
+  goto retry;
+
+  if (ch == '-') {
+    fprintf(stderr,"send - try - [%s]\n", emu68->gdb->out.buf);
+    goto retry;
+  }
+
+  fprintf(stderr,"send - err - [%s] -> '%c'\n", emu68->gdb->out.buf, ch);
+  return -1;
 }
 
 
@@ -238,6 +295,7 @@ static int send_packet(emu68_t * const emu68)
    translate this number into a unix compatible signal value */
 static int computeSignal (int exceptionVector)
 {
+
   static const int vector2signal[] = {
     -1, /* 00 reset sp vector */
     -1, /* 01 reset pc vector */
@@ -278,11 +336,14 @@ int emu68_gdbstub_handle(emu68_t * const emu68, int exceptionVector)
 
   /* reply to host that an exception has occurred */
   sigval = computeSignal(exceptionVector);
+  if (sigval == -1)
+    sigval = 4;
 
-  emu68->gdb->out.buf[0] = 'S';
-  emu68->gdb->out.buf[1] = hexchars[sigval >> 4];
-  emu68->gdb->out.buf[2] = hexchars[sigval % 16];
-  emu68->gdb->out.buf[3] = 0;
+  out = emu68->gdb->out.buf;
+  *out++ = 'S';
+  *out++ = hexchars[sigval >> 4];
+  *out++ = hexchars[sigval &  15];
+  *out  = 0;
 
   if (-1 == send_packet(emu68))
     return EMU68_ERR;                   /* $$$ Or may be not ? */
@@ -293,6 +354,9 @@ int emu68_gdbstub_handle(emu68_t * const emu68, int exceptionVector)
     emu68->gdb->out.buf[0] = 0;
     out = emu68->gdb->out.buf;
     inp = recv_packet(emu68);
+    if (!inp)
+      return EMU68_ERR;
+
     switch (*inp++) {
 
     case '?':
@@ -408,6 +472,39 @@ int emu68_gdbstub_handle(emu68_t * const emu68, int exceptionVector)
 
     } break;
 
+    case 'H': {
+      /* H op thread-id : set thread operation*/
+      int op;
+      const u8 * id;
+
+      op = *inp++;
+      id = inp;
+      switch (op) {
+      case 'c':
+        /* continue */
+        *out++ = 'O'; *out++ = 'K'; *out = 0;
+        break;
+      default:
+        *out++ = 'E'; *out++ = '0'; *out++ = '1'; *out = 0;
+      }
+    } break;
+
+    case 'q': {
+      /* q name params : general query */
+
+      fprintf(stderr, "Query -- '%s'\n",inp);
+      if (!strcmp((char*)inp,"C")) {
+        /* current thread-id */
+        *out++ = 'Q'; *out++ = 'C'; *out++ = '1'; *out = 0;
+        break;
+      } else if (!strcmp((char*)inp,"Offsets")) {
+        strcpy((char*)out, "Text=0;Data=0");
+        break;
+      }
+      *out++ = 'E'; *out++ = '1'; *out++ = '1'; *out = 0;
+    } break;
+
+
     case 'k':
       /* k -- kill the program */
       status = EMU68_STP;
@@ -415,10 +512,12 @@ int emu68_gdbstub_handle(emu68_t * const emu68, int exceptionVector)
     }
 
     /* reply to the request */
-    if (out > emu68->gdb->out.buf)
-      if (send_packet(emu68) < 0)
-        return EMU68_ERR;
+    /* if (out > emu68->gdb->out.buf) */
+    if (send_packet(emu68) < 0)
+      return EMU68_ERR;
   }
 
   return status;
 }
+
+#endif /* defined(USE_GDBSTUB68) */

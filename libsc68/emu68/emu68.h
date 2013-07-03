@@ -5,7 +5,7 @@
  * @date      1999/03/13
  * @brief     68K emulator header.
  */
-/* Time-stamp: <2013-06-21 02:50:42 ben> */
+/* Time-stamp: <2013-06-24 20:08:49 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -351,7 +351,7 @@ EMU68_API
  * @see emu68_memvalid()
  */
 int emu68_memput(emu68_t * const emu68,
-                 addr68_t dst, u8 * src, uint68_t sz);
+                 addr68_t dst, const u8 * src, uint68_t sz);
 
 EMU68_API
 /**
@@ -468,10 +468,11 @@ EMU68_API
 /**
  * Execute until RTS (Return To Subroutine).
  *
- * @param  emu68  emulator instance
+ * @param  emu68           emulator instance
+ * @param  instrunctions   max instruction to execute (0:no limit)
  * @return @ref emu68_status_e "execution status"
  */
-int emu68_finish(emu68_t * const emu68, cycle68_t cycles);
+int emu68_finish(emu68_t * const emu68, uint68_t instructions);
 
 EMU68_API
 /**

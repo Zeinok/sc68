@@ -5,11 +5,12 @@
  * @date      2013/06/20
  * @brief     68K gdbstub header.
  */
-/* Time-stamp: <2013-06-21 03:31:39 ben> */
+/* Time-stamp: <2013-06-23 16:51:51 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _EMU68_GDBSTUB68_H_
+#if !defined(_EMU68_GDBSTUB68_H_) && defined(USE_GDBSTUB68)
+
 #define _EMU68_GDBSTUB68_H_
 
 #include "emu68_api.h"

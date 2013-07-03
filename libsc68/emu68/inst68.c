@@ -79,9 +79,24 @@ void exception68(emu68_t * const emu68, const int vector, const int level)
       emu68->status = EMU68_NRM;        /* Back to normal mode */
     }
   }
+
+  /* $$$ Just a try. still have to figure how this will work with
+   *     emu68::handler; should it be run before or after ?
+   */
+#ifdef USE_GDBSTUB68
+  if (emu68->gdb) {
+    int ret = emu68_gdbstub_handle(emu68, vector);
+    if (ret == EMU68_ERR) {
+      emu68->status = ret;
+      return;
+    }
+  }
+#endif
+
   if (emu68->handler && emu68->handler(emu68, vector, emu68->cookie) ) {
     emu68->status = EMU68_BRK;        /* User forced exit */
   }
+
 }
 
 void buserror68(emu68_t * const emu68, const int addr, const int mode)
