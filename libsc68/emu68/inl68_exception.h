@@ -4,8 +4,10 @@
  * @brief     68k exception header.
  * @date      2009/05/08
  * @author    Benjamin Gerard
- *
  */
+/* Time-stamp: <2013-07-07 19:30:48 ben>  */
+
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _EMU68_INL_EXCEPTION68_H_
 #define _EMU68_INL_EXCEPTION68_H_

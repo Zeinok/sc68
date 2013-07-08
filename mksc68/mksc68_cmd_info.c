@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-18 18:56:32 ben>
+ * Time-stamp: <2013-07-08 08:09:27 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -124,7 +124,8 @@ int run_info(cmd_t * cmd, int argc, char ** argv)
       break;
 
     case 'l':
-      longinfo = 1;
+      longinfo = 1;                     /* $$$ TODO ? */
+      longinfo = longinfo;
       break;
 
     case '?':                       /* Unknown or missing parameter */
@@ -137,6 +138,8 @@ int run_info(cmd_t * cmd, int argc, char ** argv)
     if (val == -1) break;
   }
   i = optind;
+  if (i < argc)
+    msgwrn("%d extra parameters ignored\n", argc-i);
 
   if (!spec || alltarget) {
     disktarget = 1;

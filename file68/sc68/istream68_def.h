@@ -4,8 +4,8 @@
  * @author   Benjamin Gerard
  * @date     2003-08-08
  * @brief    Generic stream definition header.
- *
  */
+/* Time-stamp: <2013-07-08 07:50:30 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -15,13 +15,13 @@
 #include "istream68.h"
 
 /**
- *  @name     Open modes
- *  @ingroup  file68_istream
- *  @{
+ * @name     Open modes
+ * @ingroup  file68_istream
+ * @{
  */
 
 /**
- *Read open mode bit.
+ * Read open mode bit.
  */
 #define ISTREAM68_OPEN_READ_BIT 0
 
@@ -80,9 +80,9 @@
  */
 
 /**
- *  @name     Stream function prototypes.
- *  @ingroup  file68_istream
- *  @{
+ * @name     Stream function prototypes.
+ * @ingroup  file68_istream
+ * @{
  */
 typedef const char * (* istream68_name_t) (istream68_t *);
 typedef int  (* istream68_open_t)    (istream68_t *);
@@ -99,11 +99,11 @@ typedef void (* istream68_destroy_t) (istream68_t *);
  */
 
 /**
- *  Generic stream structure.
+ * Generic stream structure.
  *
- *     Set of functions needed to handle a stream.
+ *   Set of functions needed to handle a stream.
  *
- *  @ingroup  file68_istream
+ * @ingroup  file68_istream
  */
 struct _istream68_t {
   istream68_name_t    name;    /**< Get stream name.        */

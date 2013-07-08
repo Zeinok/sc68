@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-15 16:33:45 ben>
+ * Time-stamp: <2013-07-07 18:13:03 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -156,10 +156,10 @@ static const char * isf_name(istream68_t * istream)
 static size_t isf_read_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   istream68_curl_t * isf = (istream68_curl_t *)stream;
-  int bytes, org_bytes, pos;
+  int bytes, org_bytes/* , pos */;
 
   bytes = org_bytes = (int)(size * nmemb);
-  pos = isf->curl_pos;
+  /* pos = isf->curl_pos; */
 
   isf->has_read = 1;
   if (!bytes) {

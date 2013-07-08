@@ -4,12 +4,10 @@
  * @author    Benjamin Gerard
  * @date      2009/05/18
  * @brief     68k binary coded decimal arithmetic inlines.
- *
  */
+/* Time-stamp: <2013-07-07 19:13:49 ben>  */
 
-/* $Id: inst68.h 102 2009-03-14 17:21:58Z benjihan $ */
-
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _INL68_BCD_H_
 #define _INL68_BCD_H_
@@ -50,13 +48,13 @@ int inl_sbcd68(emu68_t * const emu68, int a, int b)
   if ( r & 0x80 ) {
     r -= 0x60;
     x |= SR_C|SR_X;
-  }    
+  }
 
   a = (u8)r;
   if (a) x &= ~SR_Z;
   x |= (a&0x80) >> (7-SR_N_BIT);
   x |= (b&(~a)&0x80) >> (7-SR_V_BIT);
-  
+
   SET_CCR(REG68.sr,x);
 
   return a;

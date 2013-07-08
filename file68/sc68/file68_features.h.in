@@ -4,9 +4,10 @@
  * @author   Benjamin Gerard
  * @date     2011-09-09
  * @brief    Features this build supports.
- *
  */
-/* Copyright (C) 1998-2011 Benjamin Gerard */
+/* Time-stamp: <2013-07-08 07:55:30 ben> */
+
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_FEATURES_H_
 #define _FILE68_FEATURES_H_

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-03 05:06:54 ben>
+ * Time-stamp: <2013-07-08 10:18:39 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -41,6 +41,7 @@
 
 #include "inl68_exception.h"
 #include <string.h>
+#include <stdio.h>
 
 EMU68_EXTERN linefunc68_t *line_func[1024];
 
@@ -136,34 +137,44 @@ emu68_handler_t emu68_get_handler(emu68_t * const emu68)
     ;
 }
 
-const char * emu68_exception_name(unsigned int vector)
+const char * emu68_exception_name(unsigned int vector, char * buf)
 {
-  const char * ret = 0;
+  static char tmp[16];
+  if (!buf) buf = tmp;
 
   static const char * xtra_names[] = {
-    "hw-brkp", "hw-trace", "hw-halt"
+    "hw-trace", "hw-halt", "hw-stop"
   };
+
   static const char * xcpt_names[] = {
-    "reset", "reset_pc", "bus-error", "addr-error",
+    "reset-sp", "reset-pc", "bus-error", "addr-error",
     "illegal", "0-divide", "chk", "trapv", "privv",
     "trace", "linea", "linef"
   };
-  static const char * trap_names[] = {
-    "trap#0", "trap#1", "trap#2", "trap#3",
-    "trap#4", "trap#5", "trap#6", "trap#7",
-    "trap#8", "trap#9", "trap#A", "trap#B",
-    "trap#C", "trap#D", "trap#E", "trap#F",
-  };
-  if (vector >= 0x100) {
+
+  if (vector < 0x100) {
+    /* 68k standard vectors */
+    if (vector < sizeof(xcpt_names)/sizeof(*xcpt_names))
+      strcpy(buf,xcpt_names[vector]);
+    else if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15))
+      sprintf(buf,"trap-#%x",vector-TRAP_VECTOR_0);
+    else
+      sprintf(buf,"other-#%02x",vector);
+  } else if (vector >= 0x200) {
+    sprintf(buf,"invalid-#%x", vector);
+  } else {
+    /* emu68 special unoffical vectors */
     vector -= 0x100;
-    if (vector < sizeof(xtra_names)/sizeof(*xtra_names))
-      ret = xtra_names[vector];
-  } else if (vector < sizeof(xcpt_names)/sizeof(*xcpt_names)) {
-    ret = xcpt_names[vector];
-  } else if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
-    ret = trap_names[vector-TRAP_VECTOR_0];
+    if (vector < 0x20)
+      sprintf(buf,"hw-brkp-#%02x",vector);
+    else {
+      if (vector-0x20 < sizeof(xtra_names)/sizeof(*xtra_names))
+        strcpy(buf,xtra_names[vector-0x20]);
+      else
+        sprintf(buf,"special-#%02x",vector);
+    }
   }
-  return ret;
+  return buf;
 }
 
 /* ,-----------------------------------------------------------------.
@@ -176,7 +187,7 @@ u8 * emu68_memptr(emu68_t * const emu68, addr68_t dst, uint68_t sz)
   u8 * ptr = 0;
   if (emu68) {
     addr68_t end = (dst+sz)&MEMMSK68;
-	if (sz > (uint68_t) MEMMSK68+1) {
+        if (sz > (uint68_t) MEMMSK68+1) {
       emu68_error_add(emu68,
                       "Not enough 68K memory ($%X>=$%X)",sz,emu68->memmsk);
     } else if (end < dst) {
@@ -363,6 +374,14 @@ static void chkframe(emu68_t * const emu68, addr68_t addr, const int flags)
   }
 }
 
+static inline int valid_bp(const unsigned int id) {
+  return id < 31u;
+}
+
+static inline int free_bp(const emu68_t * const emu68, const int id) {
+  return !emu68->breakpoints[id].count;
+}
+
 /* Run a single step emulation with all pogramm controls. */
 static inline int controlled_step68(emu68_t * const emu68)
 {
@@ -370,15 +389,32 @@ static inline int controlled_step68(emu68_t * const emu68)
 
   /* Running in debug mode. */
   if (emu68->chk) {
+    int id;
+    addr68_t addr;
      /* HardWare TRACE exception */
     exception68(emu68, HWTRACE_VECTOR, -1);
     if (emu68->status != EMU68_NRM)
       return emu68->status;
-     /* HardWare BREAKPOINT exception */
-    if (emu68->chk[ REG68.pc & MEMMSK68 ] & EMU68_B) {
-      exception68(emu68, HWBREAK_VECTOR, -1);
-      if (emu68->status != EMU68_NRM)
-        return emu68->status;
+
+     /* HardWare BREAKPOINT exception: the memory is flaged with a
+      *  breakpoint number and that breakpoint is active.
+      */
+
+    addr = REG68.pc & MEMMSK68;
+    id = (emu68->chk[addr] >> 3) - 1;
+    if (valid_bp(id) && emu68->breakpoints[id].count) {
+      assert( addr == emu68->breakpoints[id].addr );
+      if (! --emu68->breakpoints[id].count ) {
+        /* breakpoint count reachs 0, it is an actual break:
+         * - run the appropriate exception
+         * - reset the breakpoint; delete it if neccessary
+         * */
+        exception68(emu68, HWBREAK_VECTOR+id, -1);
+        if (! (emu68->breakpoints[id].count = emu68->breakpoints[id].reset))
+          emu68->chk[addr] &= EMU68_A;
+        if (emu68->status != EMU68_NRM)
+          return emu68->status;
+      }
     }
     chkframe(emu68, REG68.pc, EMU68_X);
   }
@@ -406,10 +442,14 @@ const char * emu68_status_name(enum emu68_status_e status)
   switch (status) {
   case EMU68_ERR: return "error";
   case EMU68_NRM: return "ok";
-  case EMU68_STP: return "halt";
+  case EMU68_STP: return "stop";
+  case EMU68_HLT: return "halt";
   case EMU68_BRK: return "break";
   case EMU68_XCT: return "exception";
   }
+
+  assert(!"unknown emu68 status");
+
   return "unknown";
 }
 
@@ -425,9 +465,10 @@ int emu68_step(emu68_t * const emu68)
       emu68->status = EMU68_NRM;
       /* loop68(emu68); */
       controlled_step68(emu68);
-    case EMU68_STP:
+    case EMU68_STP: case EMU68_HLT:
       rc = emu68->status;
       break;
+
     default:
       assert(!"unexpected value for emu68_t::status");
       break;
@@ -443,7 +484,6 @@ int emu68_continue(emu68_t * const emu68)
 
   if (emu68) {
     switch (emu68->status) {
-
     case EMU68_NRM:
       /* Nothing to continue: error */
       break;
@@ -451,7 +491,7 @@ int emu68_continue(emu68_t * const emu68)
     case EMU68_BRK:
       emu68->status = EMU68_NRM;
       controlled_step68(emu68);
-    case EMU68_STP:
+    case EMU68_STP: case EMU68_HLT:
       rc = emu68->status;
       break;
 
@@ -485,7 +525,7 @@ int emu68_finish(emu68_t * const emu68, uint68_t instructions)
   return emu68->status;
 }
 
-/* Execute one instruction. */
+/* Execute interruptions. */
 int emu68_interrupt(emu68_t * const emu68, cycle68_t cycleperpass)
 {
 
@@ -755,7 +795,7 @@ int emu68_debugmode(emu68_t * const emu68)
 static void bp_reset(emu68_t * const emu68)
 {
   int id;
-  for ( id=0; id<16; ++id ) {
+  for ( id=0; valid_bp(id); ++id ) {
     emu68->breakpoints[id].addr  = 0;
     emu68->breakpoints[id].count = 0;
     emu68->breakpoints[id].reset = 0;
@@ -765,17 +805,17 @@ static void bp_reset(emu68_t * const emu68)
 void emu68_bp_delall(emu68_t * const emu68)
 {
   int id;
-  for ( id=0; id<16; ++id ) {
+  for ( id=0; valid_bp(id); ++id ) {
     emu68_bp_del(emu68, id);
   }
 }
 
 void emu68_bp_del(emu68_t * const emu68, int id)
 {
-  if (emu68 && (unsigned int)id<16u) {
-    if (emu68->chk && emu68->breakpoints[id].count ) {
+  if (emu68 && valid_bp(id)) {
+    if (emu68->chk && !free_bp(emu68,id)) {
       const addr68_t addr = emu68->breakpoints[id].addr & MEMMSK68;
-      emu68->chk[addr] &= ~(EMU68_B|EMU68_M);
+      emu68->chk[addr] &= EMU68_A;
     }
     emu68->breakpoints[id].addr  = 0;
     emu68->breakpoints[id].count = 0;
@@ -790,14 +830,14 @@ int emu68_bp_set(emu68_t * const emu68, int id,
     id = -1;
   } else {
     if ( id == -1 )
-      for ( id=0; id<16 && emu68->breakpoints[id].count; ++id)
+      for ( id=0; valid_bp(id) && !free_bp(emu68,id); ++id)
         ;
-    if ( (unsigned int) id < 16u) {
+    if ( valid_bp(id) ) {
       emu68->breakpoints[id].addr  = addr &= MEMMSK68;
       emu68->breakpoints[id].count = count;
       emu68->breakpoints[id].reset = reset;
       if (emu68->chk)
-        emu68->chk[addr] = (emu68->chk[addr] & ~EMU68_M) | EMU68_B | (id<<4);
+        emu68->chk[addr] = (emu68->chk[addr] & EMU68_A) | ((id+1)<<3);
     } else {
       id = -1;
     }
@@ -810,8 +850,8 @@ int emu68_bp_find(emu68_t * const emu68, addr68_t addr)
   int id = -1;
   if (emu68) {
     int i;
-    for ( i=0; i<16; ++i ) {
-      if (emu68->breakpoints[i].count &&
+    for ( i=0; valid_bp(i); ++i ) {
+      if ( !free_bp(emu68, i) &&
           !( (emu68->breakpoints[i].addr ^ addr) & MEMMSK68 ) ) {
         id = i;
         break;

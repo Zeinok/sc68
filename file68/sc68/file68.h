@@ -4,8 +4,8 @@
  * @author   Benjamin Gerard
  * @date     1998-09-03
  * @brief    Music file header.
- *
  */
+/* Time-stamp: <2013-07-08 07:56:49 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 

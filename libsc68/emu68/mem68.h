@@ -5,7 +5,7 @@
  * @date      1999/03/13
  * @brief     68k memory and IO manager header.
  */
-/* Time-stamp: <2013-06-20 21:44:12 ben> */
+/* Time-stamp: <2013-07-08 00:22:23 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -66,8 +66,7 @@ enum {
   EMU68_R = 0x01,  /**< Memory location has been read           */
   EMU68_W = 0x02,  /**< Memory location has been written        */
   EMU68_X = 0x04,  /**< Memory location has been executed       */
-  EMU68_B = 0x08,  /**< Memory location has emulator-breakpoint */
-  EMU68_M = 0xF0   /**< Breakpoint number                       */
+  EMU68_A = EMU68_R|EMU68_W|EMU68_X, /** All memory access bits */
 };
 
 /**

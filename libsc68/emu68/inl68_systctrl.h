@@ -5,7 +5,7 @@
  * @date      2009/05/18
  * @brief     68k system control operation inlines.
  */
-/* Time-stamp: <2013-07-03 04:54:36 ben>  */
+/* Time-stamp: <2013-07-08 06:38:30 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -30,10 +30,18 @@ void inl_eortosr68(emu68_t * const emu68, int68_t v)
   emu68->reg.sr ^= v;
 }
 
+/**
+ * @TODO  Implement reset instruction which is supposed to reset
+ *        external chips.
+ */
 static inline
 void inl_reset68(emu68_t * const emu68)
 {
-  /* $$$ TODO */
+  if ( emu68->reg.sr & SR_S ) {
+    /* */
+  } else {
+    exception68(emu68, PRIVV_VECTOR, -1);
+  }
 }
 
 static inline
@@ -43,6 +51,7 @@ void inl_stop68(emu68_t * const emu68)
   if ( emu68->reg.sr & SR_S ) {
     emu68->reg.sr = sr;
     emu68->status = EMU68_STP;
+    exception68(emu68, HWSTOP_VECTOR, -1);
   } else {
     exception68(emu68, PRIVV_VECTOR, -1);
   }

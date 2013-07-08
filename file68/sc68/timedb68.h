@@ -4,10 +4,8 @@
  * @author   Benjamin Gerard
  * @date     2013-05-30
  * @brief    music duration database header.
- *
  */
-
-/* Time-stamp: <2013-06-07 10:25:20 ben> */
+/* Time-stamp: <2013-07-08 07:36:55 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 

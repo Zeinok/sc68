@@ -4,51 +4,51 @@
  * @author   Benjamin Gerard
  * @date     2003-08-08
  * @brief    File descriptor stream header.
- *
  */
+/* Time-stamp: <2013-07-08 07:49:46 ben> */
 
-/* $Id$ */
-
-/* Copyright (C) 1998-2007 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_ISTREAM68_FD_H_
 #define _FILE68_ISTREAM68_FD_H_
 
 #include "istream68.h"
 
-/** @name     File descriptor stream
- *  @ingroup  file68_istream
+/**
+ * @name     File descriptor stream
+ * @ingroup  file68_istream
  *
- *    Implements istream68_t for "unix like" file descriptor.
+ *   Implements istream68_t for "unix like" file descriptor.
  *
- *  @{
+ * @{
  */
 
 FILE68_EXTERN
-/** Creates a stream for "UNIX" file descriptor.
+/**
+ * Creates a stream for "UNIX" file descriptor.
  *
- *  If fd parameters is not -1, it is used to as file descriptor for
- *  the stream and fname is used for naming the stream. Else the file
- *  is open as a regular file with fname as path.
+ *   If fd parameters is not -1, it is used to as file descriptor for
+ *   the stream and fname is used for naming the stream. Else the file
+ *   is open as a regular file with fname as path.
  *
- *  @param  fname  path of file or 0.
- *  @param  fd     file decriptor or -1.
- *  @param  mode   bit-0: read access, bit-1: write access.
+ * @param  fname  path of file or 0.
+ * @param  fd     file decriptor or -1.
+ * @param  mode   bit-0: read access, bit-1: write access.
  *
- *  @return stream
- *  @retval 0 on error
+ * @return stream
+ * @retval 0 on error
  *
- *  @note     filename is internally copied.
- *  @note     Even if fd is given the istream68_open() must be call.
- *  @warning  When opening a stream with an already opened descriptor the
- *            mode should match the real open mode but since no tests are
- *            performed before calling r/w access, it should not failed in
- *            case of wrong access on given mode.
+ * @note     filename is internally copied.
+ * @note     Even if fd is given the istream68_open() must be call.
+ * @warning  When opening a stream with an already opened descriptor the
+ *           mode should match the real open mode but since no tests are
+ *           performed before calling r/w access, it should not failed in
+ *           case of wrong access on given mode.
  */
 istream68_t * istream68_fd_create(const char * fname, int fd, int mode);
 
 /**
- *  @}
+ * @}
  */
 
 #endif /* #define _FILE68_ISTREAM68_FD_H_ */

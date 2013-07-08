@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-03 05:20:22 ben>
+ * Time-stamp: <2013-07-08 09:02:24 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -285,55 +285,63 @@ static u32 Lpeek(emu68_t* const emu68, addr68_t  addr)
 
 static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
 {
-  sc68_t     * sc68 = cookie;
-  const char * irqname;
-  u32 sr, pc;
+  sc68_t* sc68 = cookie;
+  char    irqname[32];
+  u32     sr, pc;
 
+  /* store last interruption */
   sc68->irq.pc     = emu68->reg.pc;
   sc68->irq.vector = vector;
 
+  /* exit this one really fast as it happens every single
+   * instruction. */
   if ( vector == HWTRACE_VECTOR )
     return 0;
 
-  irqname = emu68_exception_name(vector);
-  if (!irqname) irqname = "?";
-  if ( vector < 256 ) {
+  emu68_exception_name(vector,irqname);
+  if ( vector < 0x100 ) {
+    /* normal vectors, get sr and pc from the stack */
     sr = Wpeek(emu68, emu68->reg.a[7]);
     pc = Lpeek(emu68, emu68->reg.a[7]+2);
     sc68->irq.pc = pc;
   } else {
-    sr = pc = 0;
+    /* special emu68 vectors, just grab cpu's reg as-is */
+    sr = emu68->reg.sr;
+    pc = emu68->reg.pc;
   }
-  if (vector <= 48)
-  sc68_debug(sc68,
-             "libsc68: 68k interruption -- emu68<%s> sc68<%s>\n"
-             "         vector : %02x\n"
-             "         type   : %s\n"
-             "         pc:%08x sr:%04x\n"
-             "         d0:%08x d1:%08x d2:%08x d3:%08x\n"
-             "         d4:%08x d5:%08x d6:%08x d7:%08x\n"
-             "         a0:%08x a1:%08x a2:%08x a3:%08x\n"
-             "         a4:%08x a5:%08x a6:%08x a7:%08x\n",
-             /*emu68, */emu68->name, /*sc68, */sc68->name,
-             vector, irqname, pc, sr,
-             emu68->reg.d[0], emu68->reg.d[1],
-             emu68->reg.d[2], emu68->reg.d[3],
-             emu68->reg.d[4], emu68->reg.d[5],
-             emu68->reg.d[6], emu68->reg.d[7],
-             emu68->reg.a[0], emu68->reg.a[1],
-             emu68->reg.a[2], emu68->reg.a[3],
-             emu68->reg.a[4], emu68->reg.a[5],
-             emu68->reg.a[6], emu68->reg.a[7]);
 
-  if ( vector >= 32 && vector < 48 ) {
+  /* dump classical exceptions */
+  if (vector <= TRAP_VECTOR(15))
+    sc68_debug(sc68,
+               "libsc68: 68k interruption -- emu68<%s> sc68<%s>\n"
+               "         vector : %02x\n"
+               "         type   : %s\n"
+               "         pc:%08x sr:%04x\n"
+               "         d0:%08x d1:%08x d2:%08x d3:%08x\n"
+               "         d4:%08x d5:%08x d6:%08x d7:%08x\n"
+               "         a0:%08x a1:%08x a2:%08x a3:%08x\n"
+               "         a4:%08x a5:%08x a6:%08x a7:%08x\n",
+               /*emu68, */emu68->name, /*sc68, */sc68->name,
+               vector, irqname, pc, sr,
+               emu68->reg.d[0], emu68->reg.d[1],
+               emu68->reg.d[2], emu68->reg.d[3],
+               emu68->reg.d[4], emu68->reg.d[5],
+               emu68->reg.d[6], emu68->reg.d[7],
+               emu68->reg.a[0], emu68->reg.a[1],
+               emu68->reg.a[2], emu68->reg.a[3],
+               emu68->reg.a[4], emu68->reg.a[5],
+               emu68->reg.a[6], emu68->reg.a[7]);
+
+  /* If it's a trap, let's dump GEMDOS function number too. */
+  if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
     int cmd = Wpeek(emu68, emu68->reg.a[7]+6);
     sc68_debug(sc68,
                "         trap #%x func:%02d ($%04X)\n",
                vector-32, cmd, cmd);
   }
-  if (vector < 32)
-    return 1;                   /* Request execution break  */
-  return 0;                     /* Continue execution normally */
+
+  /* Break for everything but traps */
+  return vector < TRAP_VECTOR(0) || vector > TRAP_VECTOR(15);
 }
 
 static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)

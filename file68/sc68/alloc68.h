@@ -4,38 +4,39 @@
  * @author   Benjamin Gerard
  * @date     2003-04-11
  * @brief    Dynamic memory management header.
- *
  */
+/* Time-stamp: <2013-07-08 08:03:01 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_ALLOC68_H_
 #define _FILE68_ALLOC68_H_
 
-/** @defgroup  file68_alloc  Dynamic memory management
- *  @ingroup   file68_lib
+/**
+ * @defgroup  file68_alloc  Dynamic memory management
+ * @ingroup   file68_lib
  *
- *    Provides dynamic memory management functions. All dynamically
- *    allocated buffer in the file68 library should use this set of
- *    function. Anyway it is possible that some third party library
- *    do not use them. The default allocator should be standard
- *    malloc() and free() function unless it has been specified
- *    at compile time.
+ *   Provides dynamic memory management functions. All dynamically
+ *   allocated buffer in the file68 library should use this set of
+ *   function. Anyway it is possible that some third party library do
+ *   not use them. The default allocator should be standard malloc()
+ *   and free() function unless it has been specified at compile time.
  *
- *    @warning  the alloc/free handlers work together. It should be change
- *              only when no allocated buffers remains unless the new
- *              functions use the same real memory manager.
+ *   @warning  the alloc/free handlers work together. It should be change
+ *             only when no allocated buffers remains unless the new
+ *             functions use the same real memory manager.
  *
- *    @warning  Use these functions with care in multi-thread context.
- *              Basically the function should be set once before the
- *              application goes multi-thread.
+ *   @warning  Use these functions with care in multi-thread context.
+ *             Basically the function should be set once before the
+ *             application goes multi-thread.
  *
- *  @{
+ * @{
  */
 
 #ifndef alloc68
 #include <stdlib.h>
-/** Allocate dynamic memory.
+/**
+ * Allocate dynamic memory.
  *
  *   The alloc68() function calls user defined dynamic memory
  *   allocation handler.
@@ -54,7 +55,8 @@
 
 #ifndef calloc68
 #include <stdlib.h>
-/** Allocate and clean dynamic memory.
+/**
+ * Allocate and clean dynamic memory.
  *
  *   The calloc68() function calls user defined dynamic memory
  *   allocation handler and fills memory buffer with 0.
@@ -73,7 +75,8 @@
 
 #ifndef free68
 #include <stdlib.h>
-/** Free dynamic memory.
+/**
+ * Free dynamic memory.
  *
  *   The free68() function calls user defined dynamic memory
  *   free handler.
@@ -92,7 +95,7 @@
 #endif
 
 /**
- *  @}
+ * @}
  */
 
 #endif /* #define _FILE68_ALLOC68_H_ */

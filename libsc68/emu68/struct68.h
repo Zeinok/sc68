@@ -5,7 +5,7 @@
  * @date      1999-03-13
  * @brief     Struture definitions header.
  */
-/* Time-stamp: <2013-07-03 04:52:33 ben> */
+/* Time-stamp: <2013-07-08 06:56:28 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -202,7 +202,7 @@ struct emu68_s {
   int      framechk;        /**< ORed chk change for current frame. */
   u8     * chk;             /**< Access-Control-Memory buffer.      */
 
-  emu68_bp_t breakpoints[16];           /**< Hardware breakpoints.  */
+  emu68_bp_t breakpoints[31];           /**< Hardware breakpoints.  */
 
   /* Onboard memory. */
   addr68_t memmsk;     /**< Onboard memory mask (2^log2mem-1).      */

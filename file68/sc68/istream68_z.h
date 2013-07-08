@@ -4,10 +4,8 @@
  * @author   Benjamin Gerard
  * @date     2003-10-06
  * @brief    Zlib stream header.
- *
  */
-
-/* $Id$ */
+/* Time-stamp: <2013-07-08 07:46:52 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -18,16 +16,16 @@
 
 /**
  * @name     Z stream
- *  @ingroup  file68_istream
+ * @ingroup  file68_istream
  *
- *  @anchor zlib
+ * @anchor zlib
  *
- *    Implements istream68_t for Z library.
- *    Z is a famous compression/decompression library. For more informations
- *    see <a href="http://www.gzip.org">gzip website</a>.
+ *   Implements istream68_t for Z library.  Z is a famous
+ *   compression/decompression library. For more informations see
+ *   <a href="http://www.gzip.org">gzip website</a>.
  *
- *  @todo      deflate (compression) mode.
- *  @{
+ * @todo      deflate (compression) mode.
+ * @{
  */
 
 /**
@@ -48,14 +46,14 @@ const istream68_z_option_t istream68_z_default_option;
 
 FILE68_EXTERN
 /**
- *  Create a @ref zlib "Z" stream.
+ * Create a @ref zlib "Z" stream.
  *
- *  @param  is     Stream to compress/decompress.
- *  @param  mode   bit-0: read access, bit-1: write access.
- *  @param  opt    gzip options.
+ * @param  is     Stream to compress/decompress.
+ * @param  mode   bit-0: read access, bit-1: write access.
+ * @param  opt    gzip options.
  *
- *  @return stream
- *  @retval 0 on error
+ * @return stream
+ * @retval 0 on error
  */
 istream68_t * istream68_z_create(istream68_t * is, int mode,
                                  const istream68_z_option_t opt);

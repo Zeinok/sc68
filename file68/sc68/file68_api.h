@@ -4,24 +4,22 @@
  * @author   Benjamin Gerard
  * @date     2007-02-25
  * @brief    Symbol exportation header.
- *
  */
+/* Time-stamp: <2013-07-08 07:56:35 ben> */
 
-/* $Id$ */
-
-/* Copyright (C) 1998-2009 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_FILE68_API_H_
 #define _FILE68_FILE68_API_H_
 
 /**
- *  @defgroup file68_lib file68 library
- *  @ingroup  api68
+ * @defgroup file68_lib file68 library
+ * @ingroup  api68
  *
- *  file68 is a library to manipulate sc68 files and access sc68
- *  resources and much more.
+ *   file68 is a library to manipulate sc68 files and access sc68
+ *   resources and much more.
  *
- *  @{
+ * @{
  */
 
 #ifndef FILE68_EXTERN
@@ -53,14 +51,16 @@
 # endif
 #endif
 
-/** Decorate symbols exported for public. */
+/**
+ * Decorate symbols exported for public.
+*/
 #ifndef FILE68_API
 #define FILE68_API FILE68_EXTERN
 #error "FILE68_API should be defined"
 #endif
 
 /**
- *  @}
+ * @}
  */
 
 #endif /* ifndef _FILE68_FILE68_API_H_ */

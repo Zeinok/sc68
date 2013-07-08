@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-03 04:57:08 ben>
+ * Time-stamp: <2013-07-07 19:53:36 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -45,16 +45,7 @@
 
 void exception68(emu68_t * const emu68, const int vector, const int level)
 {
-  if ( vector & 0x100 ) {
-    /* Those are specific to EMU68 */
-    switch (vector) {
-    case HWBREAK_VECTOR:
-    case HWTRACE_VECTOR:
-      break;
-    default:
-      assert(!"invalid exception vector");
-    }
-  } else {
+  if ( vector < 0x100 ) {
     int savesr = REG68.sr;
     int savest = emu68->status;
 
@@ -65,7 +56,10 @@ void exception68(emu68_t * const emu68, const int vector, const int level)
     if ( savest == EMU68_XCT &&
          ( vector == BUSERR_VECTOR || vector == ADRERR_VECTOR ) ) {
       /* Double fault ! */
-      emu68->status = EMU68_ERR;        /* Halt processor */
+      emu68->status = EMU68_HLT;        /* Halt processor */
+      /* Let user know. */
+      if (emu68->handler)
+        emu68->handler(emu68, HWHALT_VECTOR, emu68->cookie);
     } else if ( vector == RESET_VECTOR ) {
       REG68.sr  |= SR_I;
       REG68.a[7] = read_L(RESET_SP_VECTOR << 2);

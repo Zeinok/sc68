@@ -5,7 +5,7 @@
  * @date      1999/13/03
  * @brief     68k exception and interruption definition header.
  */
-/* Time-stamp: <2013-06-21 01:06:16 ben> */
+/* Time-stamp: <2013-07-07 19:08:30 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -32,26 +32,29 @@
  */
 
 enum {
-  HWBREAK_VECTOR  = 0x100, /**< Report Hardware Breakpoint.             */
-  HWTRACE_VECTOR  = 0x101, /**< Report Hardware TRACE.                  */
-  HWHALT_VECTOR   = 0x102, /**< Report processor halted.                */
-
-  RESET_VECTOR    = 0x000, /**< External (hardware) Reset.              */
-  RESET_SP_VECTOR = 0x000, /**< Initial Interrupt Stack Pointer.        */
-  RESET_PC_VECTOR = 0x001, /**< Initial Program Counter.                */
+  /* Virtual private vectors. */
+  HWBREAK_VECTOR  = 0x100, /**< 1st hardware breakpoint, next follow.   */
+  HWTRACE_VECTOR  = 0x120, /**< Report hardware trace.                  */
+  HWHALT_VECTOR   = 0x121, /**< Report processor halted.                */
+  HWSTOP_VECTOR   = 0x122, /**< Report processor suspended (stop).      */
+  /* Real 68k vectors. */
+  RESET_VECTOR    = 0x000, /**< External (hardware) reset.              */
+  RESET_SP_VECTOR = 0x000, /**< Initial interrupt stack pointer.        */
+  RESET_PC_VECTOR = 0x001, /**< Initial program counter.                */
   BUSERR_VECTOR   = 0x002, /**< Access fault vector address.            */
   ADRERR_VECTOR   = 0x003, /**< Access error vector address.            */
   ILLEGAL_VECTOR  = 0x004, /**< Illegal instruction vector address.     */
   DIVIDE_VECTOR   = 0x005, /**< Integer divide by zero.                 */
   CHK_VECTOR      = 0x006, /**< Chk/Chk2 instructions vector address.   */
   TRAPV_VECTOR    = 0x007, /**< F/TRAP/V/cc istructions vector address. */
-  PRIVV_VECTOR    = 0x008, /**< Privilege Violation vector address.     */
-  TRACE_VECTOR    = 0x009, /**< TRACE vector address.                   */
-  LINEA_VECTOR    = 0x00A, /**< LINEA vector address.                   */
-  LINEF_VECTOR    = 0x00B, /**< LINEF vector address.                   */
-  SPURIOUS_VECTOR = 0x018, /**< Spurious Interrupt vector address.      */
-  TRAP_VECTOR_0   = 0x020, /**< TRAP #N vector address.                 */
+  PRIVV_VECTOR    = 0x008, /**< Privilege violation vector address.     */
+  TRACE_VECTOR    = 0x009, /**< Trace vector address.                   */
+  LINEA_VECTOR    = 0x00A, /**< Linea vector address.                   */
+  LINEF_VECTOR    = 0x00B, /**< Linef vector address.                   */
+  SPURIOUS_VECTOR = 0x018, /**< Spurious interrupt vector address.      */
+  TRAP_VECTOR_0   = 0x020, /**< Trap #n vector address.                 */
 };
+
 
 /** Nth TRAP vector address. */
 #define TRAP_VECTOR(N)   ( ( (N) & 15 ) + TRAP_VECTOR_0 )

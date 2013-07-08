@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-23 16:57:43 ben>
+ * Time-stamp: <2013-07-08 07:31:25 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -37,6 +37,7 @@
 
 /* sc68 includes */
 #include <sc68/sc68.h>
+#include <sc68/string68.h>
 
 /* Standard Includes */
 #ifdef HAVE_STDARG_H
@@ -70,6 +71,7 @@
 #ifdef HAVE_GETOPT_H
 # include <getopt.h>
 #endif
+
 
 #ifdef HAVE_STRUCT_OPTION
 typedef struct option my_option_t;
@@ -626,10 +628,10 @@ int main(int argc, char *argv[])
   }
 
   /* Output message to stdout except it is the output. */
-  if (!strncasecmp(outname,"stdout://",8)) {
+  if (!strncmp68(outname,"stdout://",8)) {
     /* output to stdout; divert stdout message to stderr */
     sc68_debug_data.out = stderr;
-  } else if (!strncasecmp(outname,"stderr://",8)) {
+  } else if (!strncmp68(outname,"stderr://",8)) {
     /* output to stderr; divert stderr message to stdout */
     sc68_debug_data.err = stdout;
   }

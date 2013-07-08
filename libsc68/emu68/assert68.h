@@ -4,10 +4,10 @@
  * @brief     assert feature header.
  * @date      2009/06/12
  * @author    Benjamin Gerard
- *
  */
+/* Time-stamp: <2013-07-08 07:16:13 ben> */
 
-/* $Id$ */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _EMU68_ASSERT68_H_
 #define _EMU68_ASSERT68_H_
@@ -28,7 +28,7 @@
 #ifndef EMU68_BREAK
 # ifndef DEBUG
 #  define EMU68_BREAK 1                 /* NOT debug mode */
-# else 
+# else
 #  define EMU68_BREAK 0                 /*     debug mode */
 # endif
 #endif

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:39:36 ben>
+ * Time-stamp: <2013-07-08 07:22:40 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -84,12 +84,14 @@ void emu_shutdown(void)
 
 int emu_load_sc68(const char * url)
 {
-  sc68_disk_t disk;
+  /* sc68_disk_t disk; */
 
   assert(url);
   assert(sc68);
-  disk = sc68_load_disk_url(url);
 
+/* $$$ WTH ???
+  disk = sc68_load_disk_url(url);
+*/
 
   if (!sc68) {
     return -1;

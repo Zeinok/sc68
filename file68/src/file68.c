@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-19 01:19:15 ben>
+ * Time-stamp: <2013-07-07 19:05:19 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -975,7 +975,7 @@ static int st_isdigit( int c )
 static int sndh_info(disk68_t * mb, int len)
 {
   const int unknowns_max = 8;
-  int i, vbl = 0, frq = 0, time = 0 , musicmon = 0, steonly = 0,
+  int i, vbl = 0, frq = 0, time = 0 , /* musicmon = 0,  */steonly = 0,
     unknowns = 0, fail = 0;
 
   char * b = mb->data;
@@ -1054,7 +1054,7 @@ static int sndh_info(disk68_t * mb, int len)
     } else if (!memcmp(b+i,"MuMo",4)) {
       /* MusicMon ???  */
       msg68_warning("file68: sndh -- what to do with 'MuMo' tag ?\n");
-      musicmon = 1;
+      /* musicmon = 1; */
       i += 4;
     } else if (!memcmp(b+i,"TIME",4)) {
       int j, tracks;
@@ -1892,7 +1892,7 @@ static const char * save_sc68(istream68_t * os, const disk68_t * mb,
   int opened = 0;
 
   const music68_t * mus;
-  char * mname, * aname, * cname, * data;
+  char * mname, * aname, /* * cname, */ * data;
 
   const char * header;
   int headsz;
@@ -1929,7 +1929,7 @@ static const char * save_sc68(istream68_t * os, const disk68_t * mb,
   /* Reset previous value for various string */
   mname = mb->tags.tag.title.val;
   aname = mb->tags.tag.artist.val;
-  cname = data = 0;
+  /* cname =  */data = 0;
   for (mus = mb->mus; mus < mb->mus + mb->nb_mus; mus++) {
     int flags
       = 0

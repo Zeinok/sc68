@@ -71,7 +71,7 @@ void dis_refresh(void)
     const int chk = emu68_chkpeek(emu68, parm.pc);
     int attr;
 
-    switch ( (ispc << 1) + !!( chk & EMU68_B ) ) {
+    switch ( (ispc << 1) + !!( chk & ~EMU68_A ) ) {
 
     case 0:
       attr = COLOR_PAIR(COLOR_WHITE);

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:42:03 ben>
+ * Time-stamp: <2013-07-08 08:10:59 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -259,7 +259,8 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
     case 's':                           /* --seek      */
       str = optarg;
       if (*str == '+' || *str == '-')
-        seek_mode = *str++;
+        seek_mode = *str++; /* $$$ TODO ? */
+      seek_mode = seek_mode;
       if (str_time_stamp(&str, &seek)) {
         msgerr("invalid seek value \"%s\"\n", optarg);
         goto error;
@@ -269,7 +270,8 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
     case 't':                           /* --to        */
       str = optarg;
       if (*str == '+' || *str == '-')
-        dur_mode = *str++;
+        dur_mode = *str++; /* $$$ TODO ? */
+      dur_mode = dur_mode;
       if (str_time_stamp(&str, &duration)) {
         msgerr("invalid duration value \"%s\"\n", optarg);
         goto error;

@@ -5,7 +5,7 @@
  * @date      2009/05/18
  * @brief     68k bit shifting inlines.
  */
-/* Time-stamp: <2013-07-03 04:54:24 ben>  */
+/* Time-stamp: <2013-07-07 19:31:39 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -164,7 +164,7 @@ int68_t inl_roxl68(emu68_t * const emu68, uint68_t d, int s, const int l)
     s %= (l+2);                         /* s := [0 .. l+1] */
     if (--s >= 0) {                     /* s := [0 .. l] */
       uint68_t x, c, r = d;
-      
+
       r <<= s;
       c   = (ccr >> SR_X_BIT) & 1;            /* old X */
       x   = r >> SIGN_BIT;                    /* new X */

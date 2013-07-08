@@ -4,10 +4,10 @@
  * @author   Benjamin Gerard
  * @date     2011-10-03
  * @brief    Metatags definition header file.
- *
  */
+/* Time-stamp: <2013-07-08 07:37:10 ben> */
 
-/* Copyright (C) 1998-2011 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_TAG68_H_
 #define _FILE68_TAG68_H_

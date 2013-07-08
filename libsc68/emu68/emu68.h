@@ -5,7 +5,7 @@
  * @date      1999/03/13
  * @brief     68K emulator header.
  */
-/* Time-stamp: <2013-07-03 05:08:43 ben> */
+/* Time-stamp: <2013-07-08 08:47:02 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -224,14 +224,14 @@ EMU68_API
 /**
  * Get exception name.
  *
- * @param  vector  Eception vector number
- * @return exception name
- * @retval 0  unknown exception (not neccessary invalid)
+ * @param  vector  Exception vector number
+ * @param  buffer  Buffer to store name (0:use internal static buffer)
+ * @return exception name copied in buffer (never nul)
  */
-const char * emu68_exception_name(unsigned int vector);
+const char * emu68_exception_name(unsigned int vector, char * buffer);
 
 /**
- *  @}
+ * @}
  */
 
 
@@ -421,7 +421,9 @@ EMU68_API
  */
 uint68_t emu68_crc32(emu68_t * const emu68);
 
-/** @} */
+/**
+ * @}
+ */
 
 
 /**
@@ -441,8 +443,9 @@ enum emu68_status_e {
   EMU68_ERR  = -1,          /**< Execution failed.            */
   EMU68_NRM  =  0,          /**< Execution finished.          */
   EMU68_STP  =  1,          /**< Execution stopped.           */
-  EMU68_BRK  =  2,          /**< Execution breaked.           */
-  EMU68_XCT  =  3           /**< Execution in exception.      */
+  EMU68_HLT  =  2,          /**< Execution halted.            */
+  EMU68_BRK  =  3,          /**< Execution breaked.           */
+  EMU68_XCT  =  4           /**< Execution in exception.      */
 };
 
 EMU68_API

@@ -4,10 +4,10 @@
  * @author   Benjamin Gerard
  * @date     2009-02-04
  * @brief    Command line option manipulation header.
- *
  */
+/* Time-stamp: <2013-07-08 07:45:55 ben> */
 
-/* Copyright (C) 1998-2011 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _FILE68_OPTION68_H_
 #define _FILE68_OPTION68_H_
@@ -36,7 +36,7 @@ enum option68_e {
 };
 
 /**
- *  Options help display function.
+ * Options help display function.
  *
  *  -# user data
  *  -# option

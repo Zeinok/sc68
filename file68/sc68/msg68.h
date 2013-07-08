@@ -4,8 +4,8 @@
  * @author   Benjamin Gerard
  * @date     2003-08-22
  * @brief    Message header.
- *
  */
+/* Time-stamp: <2013-07-08 07:46:07 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 

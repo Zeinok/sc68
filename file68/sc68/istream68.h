@@ -1,12 +1,11 @@
-
 /**
  * @ingroup  file68_lib
  * @file     sc68/istream68.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
  * @brief    Stream interface header.
- *
  */
+/* Time-stamp: <2013-07-08 07:53:25 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -18,23 +17,26 @@
 #endif
 
 
-/** @defgroup  file68_istream  I/O streams.
- *  @ingroup   file68_lib
+/**
+ * @defgroup  file68_istream  I/O streams.
+ * @ingroup   file68_lib
  *
- *    Provides access functions for generic I/O streams..
+ *   Provides access functions for generic I/O streams..
  *
- *  @{
+ * @{
  */
 
 /* Stream type. */
 typedef struct _istream68_t istream68_t;
 
-/** @name Generic access functions.
- *  @{
+/**
+ * @name Generic access functions.
+ * @{
  */
 
 FILE68_API
-/** Get stream name.
+/**
+ * Get stream name.
  *
  * @param  istream  stream
  *
@@ -44,7 +46,8 @@ FILE68_API
 const char * istream68_filename(istream68_t *istream);
 
 FILE68_API
-/** Open stream.
+/**
+ * Open stream.
  *
  * @param  istream  stream
  *
@@ -55,7 +58,8 @@ FILE68_API
 int istream68_open(istream68_t *istream);
 
 FILE68_API
-/** Close stream.
+/**
+ * Close stream.
  *
  * @param  istream  stream
  *
@@ -66,7 +70,8 @@ FILE68_API
 int istream68_close(istream68_t *istream);
 
 FILE68_API
-/** Read data from stream.
+/**
+ * Read data from stream.
  *
  * @param  istream  stream
  * @param  data     destination buffer
@@ -78,7 +83,8 @@ FILE68_API
 int istream68_read(istream68_t *istream, void * data, int len);
 
 FILE68_API
-/** Write data into stream.
+/**
+ * Write data into stream.
  *
  * @param  istream  stream
  * @param  data     destination buffer
@@ -90,7 +96,8 @@ FILE68_API
 int istream68_write(istream68_t *istream, const void * data, int len);
 
 FILE68_API
-/** Get stream length.
+/**
+ * Get stream length.
  *
  * @param  istream  stream
  *
@@ -100,7 +107,8 @@ FILE68_API
 int istream68_length(istream68_t *istream);
 
 FILE68_API
-/** Get stream current position.
+/**
+ * Get stream current position.
  *
  * @param  istream  stream
  *
@@ -110,7 +118,8 @@ FILE68_API
 int istream68_tell(istream68_t *istream);
 
 FILE68_API
-/** Set stream relative position.
+/**
+ * Set stream relative position.
  *
  * @param  istream  stream
  * @param  offset   displacement from current position
@@ -123,7 +132,8 @@ FILE68_API
 int istream68_seek(istream68_t *istream, int offset);
 
 FILE68_API
-/** Set stream absolute position.
+/**
+ * Set stream absolute position.
  *
  * @param  istream  stream
  * @param  pos      position to reach
@@ -136,7 +146,8 @@ FILE68_API
 int istream68_seek_to(istream68_t *istream, int pos);
 
 FILE68_API
-/** Close and destroy stream.
+/**
+ * Close and destroy stream.
  *
  * @param  istream  stream
  *
@@ -144,7 +155,8 @@ FILE68_API
 void istream68_destroy(istream68_t *istream);
 
 FILE68_API
-/** Read a '\\0' or '\\n' terminated string.
+/**
+ * Read a '\\0' or '\\n' terminated string.
  *
  * @param  istream  stream
  * @param  buffer   destination buffer
@@ -156,7 +168,8 @@ FILE68_API
 int istream68_gets(istream68_t *istream, char * buffer, int max);
 
 FILE68_API
-/** Read next character.
+/**
+ * Read next character.
  *
  * @param  istream  stream
  *
@@ -166,7 +179,8 @@ FILE68_API
 int istream68_getc(istream68_t *istream);
 
 FILE68_API
-/** Write a '\\0' terminated string.
+/**
+ * Write a '\\0' terminated string.
  *
  * @param  istream  stream
  * @param  s        string
@@ -177,7 +191,8 @@ FILE68_API
 int istream68_puts(istream68_t *istream, const char * s);
 
 FILE68_API
-/** Write a character.
+/**
+ * Write a character.
  *
  * @param  istream  stream
  * @param  c        char [0..255]
@@ -188,10 +203,12 @@ FILE68_API
  */
 int istream68_putc(istream68_t *istream, const int c);
 
-/** @} */
+/**
+ * @}
+ */
 
 /**
- *  @}
+ * @}
  */
 
 #endif /* #ifndef _FILE68_ISTREAM68_H_ */
