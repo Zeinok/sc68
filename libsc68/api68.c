@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-08 09:02:24 ben>
+ * Time-stamp: <2013-07-11 21:15:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -991,8 +991,8 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     if ( status != EMU68_NRM ) {
       sc68_debug(sc68,
                  " -> trap init -- ERROR -- status %d (%s)"
-                 " [@%06x %02x]\n",
-                 status, emu68_status_name(status), sc68->irq.pc, sc68->irq.vector);
+                 " [@%06x %02x]\n", status,
+                 emu68_status_name(status), sc68->irq.pc, sc68->irq.vector);
       sc68_error_add(sc68, "libsc68: abnormal 68K status %d (%s) in trap code",
                      status, emu68_status_name(status));
       return SC68_ERROR;
@@ -1060,8 +1060,8 @@ static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
   if ( status != EMU68_NRM ) {
     sc68_debug(sc68,
                " -> music init -- ERROR -- status %d (%s)"
-               " [@%06x %02x]\n",
-               status, emu68_status_name(status), sc68->irq.pc, sc68->irq.vector);
+               " [@%06x %02x]\n", status,
+               emu68_status_name(status), sc68->irq.pc, sc68->irq.vector);
     sc68_error_add(sc68, "libsc68: abnormal 68K status %d (%s) in init code",
                    status, emu68_status_name(status));
     return SC68_ERROR;
@@ -1365,7 +1365,8 @@ int sc68_process(sc68_t * sc68, void * buf16st, int * _n)
         if (status != EMU68_NRM) {
           sc68_error_add(sc68,
                          "libsc68: abnormal 68K status %d (%s) in play pass %u",
-                         status, emu68_status_name(status), sc68->mix.pass_count);
+                         status, emu68_status_name(status),
+                         sc68->mix.pass_count);
           ret = SC68_ERROR;
           break;
         }
@@ -1392,7 +1393,7 @@ int sc68_process(sc68_t * sc68, void * buf16st, int * _n)
             }
             sc68->mix.buflen = err;
           } else {
-            mixer68_fill(sc68->mix.bufptr, sc68->mix.buflen = sc68->mix.bufreq, 0);
+            mixer68_fill(sc68->mix.bufptr, sc68->mix.buflen=sc68->mix.bufreq, 0);
           }
 
           if (sc68->mus->hwflags.bit.ste)

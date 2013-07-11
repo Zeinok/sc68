@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:43:43 ben>
+ * Time-stamp: <2013-07-11 18:24:29 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -32,11 +32,12 @@
 #include "mksc68_cli.h"
 #include "mksc68_cmd.h"
 #include "mksc68_dsk.h"
-#include "mksc68_emu.h"
+//#include "mksc68_emu.h"
 #include "mksc68_eva.h"
 #include "mksc68_msg.h"
 #include "mksc68_opt.h"
 #include "mksc68_tag.h"
+#include "mksc68_gdb.h"
 
 #include <sc68/sc68.h>
 
@@ -197,10 +198,10 @@ static int run_error(cmd_t * me, int argc, char ** argv)
 }
 
 extern cmd_t cmd_new, cmd_load, cmd_play, cmd_stop, cmd_debug, cmd_tag;
-extern cmd_t cmd_time, cmd_save, cmd_info;
+extern cmd_t cmd_time, cmd_save, cmd_info, cmd_gdb;
 static cmd_t
 cmd_exit = {
-  run_exit, "exit",  "x", "[exit-code]",   "Exit command interpreter" },
+  run_exit, "exit",  "x", "[exit-code]",   "exit command interpreter" },
 cmd_help = {
   run_help, "help",  "?", "[cmd ...]", "Print command(s) usage",
   "The `help' command prints command list or usage.\n"
@@ -209,9 +210,9 @@ cmd_help = {
   "Returns the number of error (unknown commands).\n"
 },
 cmd_echo = {
-  run_echo, "echo",  "p", "[...]",       "The `echo' command",          },
+  run_echo, "echo",  "p", "[...]",       "print informative message",          },
 cmd_error = {
-  run_error, "error",   0, "[...]",       "Print error message"     };
+  run_error, "error",   0, "[...]",      "print error message"     };
 
 static cmd_t *commands[] = {
   &cmd_debug,
@@ -221,6 +222,7 @@ static cmd_t *commands[] = {
   &cmd_time,
   &cmd_stop,
   &cmd_play,
+  &cmd_gdb,
 
   &cmd_new,
   &cmd_load,
@@ -892,6 +894,7 @@ int main(int argc, char *argv[])
     if (val == -1) break;
   }
   i = optind;
+  i = i;
 
   if (opt_help) {
     return print_usage();
@@ -905,18 +908,13 @@ int main(int argc, char *argv[])
   if (err = add_commands(), err)
     goto error;
 
-  if (err = emu_init(), err)
-    goto error;
-
-
-
-#if 0
   for (; i<argc; ++i) {
-    dmsg("cli: loaddisk '%s'\n", argv[i]);
-    err = loaddisk(argv[i],1);
+    static char fix[] = "ld\0-a";
+    char * v[3];
+    v[0] = fix; v[1] = fix+3; v[2] = argv[i];
+    err = cmd_run(3, v);
     if (err) goto error;
   }
-#endif
 
   err = interactive();
 

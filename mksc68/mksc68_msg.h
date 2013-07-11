@@ -5,6 +5,7 @@
  * @date     2011-11-01
  * @brief    message output header.
  */
+/* Time-stamp: <2013-07-11 20:58:14 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 

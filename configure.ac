@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [sc68-ng],
-  [3.0.0a],
+  [3.0.0b],
   [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_MACRO_DIR([m4])
@@ -71,7 +71,6 @@ enable_sc68_lib="[$]enable_sc68_all"
 SC68_ENABLE_PACKAGE([as68],[68k macro assembler],[[$]enable_sc68_tools])
 SC68_ENABLE_PACKAGE([sourcer68],[68k sourcer],[[$]enable_sc68_tools])
 SC68_ENABLE_PACKAGE([mksc68],[sc68 toolbox],[[$]enable_sc68_tools])
-SC68_ENABLE_PACKAGE([cdbg68],[68k curses debugger],[[$]enable_sc68_tools])
 SC68_ENABLE_PACKAGE([desa68],[68k disassembler library],[[$]enable_sc68_tools])
 
 # API Libraries
@@ -152,10 +151,6 @@ fi
 
 if test Xyes = X"${enable_mksc68}"
 then AC_CONFIG_SUBDIRS([mksc68])
-fi
-
-if test Xyes = X"${enable_cdbg68}"
-then AC_CONFIG_SUBDIRS([cdbg68])
 fi
 
 if test Xyes = X"${enable_sc68_doc}"

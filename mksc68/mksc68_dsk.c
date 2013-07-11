@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-18 18:44:37 ben>
+ * Time-stamp: <2013-07-11 18:24:13 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -119,6 +119,10 @@ int dsk_load(const char * url, int merge, int force)
     msgerr("failed to load \"%s\"\n",url);
     goto error;
   }
+
+  /* Fix `not implemented' below at least if not a real merge. */
+  if (merge && !has_disk())
+    merge = 0;
 
   if (!merge) {
     dsk_kill();

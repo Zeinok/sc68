@@ -38,7 +38,9 @@ EXTERN68 int  dsk_tag_seti(int trk, const char * var, int val);
 EXTERN68 void dsk_tag_del(int trk, const char * var);
 EXTERN68 void dsk_tag_clr(int trk);
 
-EXTERN68 int dsk_play(int trk, int loop, int start, int len, int bg);
+typedef struct dsk_play_s dsk_play_t;
+
+EXTERN68 int dsk_play(dsk_play_t * params);
 EXTERN68 int dsk_stop(void);
 
 #endif /* ifndef _MKSC68_DSK_H_ */

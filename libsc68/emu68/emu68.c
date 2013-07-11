@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-08 10:18:39 ben>
+ * Time-stamp: <2013-07-11 14:52:33 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -121,11 +121,8 @@ void * emu68_get_cookie(emu68_t * const emu68)
 
 emu68_handler_t emu68_set_handler(emu68_t * const emu68, emu68_handler_t hdl)
 {
-  emu68_handler_t old = 0;
-  if (emu68) {
-    old = emu68->handler;
-    emu68->handler = hdl;
-  }
+  emu68_handler_t old = emu68->handler;
+  emu68->handler = hdl;
   return old;
 }
 

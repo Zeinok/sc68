@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-08 08:10:59 ben>
+ * Time-stamp: <2013-07-11 21:24:19 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -34,12 +34,15 @@
 #include "mksc68_msg.h"
 #include "mksc68_opt.h"
 #include "mksc68_str.h"
+#include "mksc68_gdb.h"
 
 #include <sc68/file68.h>
 #include <sc68/alloc68.h>
 #include <sc68/istream68.h>
-#include <sc68/string68.h>
 #include <sc68/sc68.h>
+#include <emu68/emu68.h>
+#include <emu68/excep68.h>
+#include <io68/io68.h>
 
 #include <stdlib.h>
 #include <string.h>
@@ -47,24 +50,30 @@
 #include <ctype.h>
 #include <pthread.h>
 
+extern void sc68_emulators(sc68_t *, emu68_t **, io68_t ***);
 
 static const opt_t longopts[] = {
   { "help",     0, 0, 'h' },            /* help             */
-  { "loop",     1, 0, 'l' },            /* loop play        */
+  { "loop",     1, 0, 'l' },            /* loopplay        */
   { "seek",     1, 0, 's' },            /* seek to position */
   { "to",       1, 0, 't' },            /* stop time        */
   { "fg",       0, 0, 'f' },            /* foreground play  */
+  { "debug",    0, 0, 'd' },            /* gdb debug mode   */
   { 0,0,0,0 }
 };
 
 typedef struct {
   volatile int  isplaying;
-  sc68_t      * sc68;
-  istream68_t * out;
-  pthread_t     thread;
+  sc68_t      * sc68;       /* sc68 instance.    */
+  emu68_t     * emu68;      /* emu68 instance.   */
+  io68_t     ** ios68;      /* other chip.       */
+  gdb_t       * gdb;        /* gdb instance      */
+  istream68_t * out;        /* audio out stream  */
+  pthread_t     thread;     /* play thread       */
   int           track;
   int           loop;
   int           code;
+  int           debug;
 } playinfo_t;
 
 static playinfo_t playinfo;             /* unique playinfo */
@@ -107,20 +116,60 @@ static void play_info(playinfo_t * pi)
   }
 }
 
+static int play_hdl(emu68_t* const emu68, int vector, void * cookie)
+{
+  playinfo_t * pi = cookie;
+  assert(pi == &playinfo);
+
+  switch (gdb_event(pi->gdb, vector, emu68)) {
+
+  case RUN_EXIT:
+    return 1;
+
+  case RUN_STOP:
+    assert(!"gdb status is stopped but we are not stopped !!!");
+
+  case RUN_SKIP:
+    emu68_set_handler(emu68,0);
+    gdb_destroy(pi->gdb);
+    pi->gdb = 0;
+
+  case RUN_CONT:
+    return 0;
+
+  default:
+    assert(!"unhandled or invalid gdb status");
+    return 0;
+  }
+
+  return -1;
+}
+
 static void play_init(playinfo_t * pi)
 {
+//  const char * outname = pi->debug ? "null://default" : "audio://default";
   const char * outname = "audio://default";
   sc68_create_t create68;
 
   pi->isplaying = 2;
   pi->code      = -1;
   pi->out       = sc68_stream_create(outname, 2);
+  pi->gdb       = 0;
+
   if (!pi->out) return;
   if (istream68_open(pi->out)) return;
 
   memset(&create68,0,sizeof(create68));
-  create68.name = "mksc68-play";
+  create68.name = pi->debug ? "mksc68-debug" : "mksc68-play";
+  create68.emu68_debug = !!pi->debug;
   if ( !(pi->sc68 = sc68_create(&create68) ) ) return;
+  if (pi->debug) {
+    sc68_emulators(pi->sc68, &pi->emu68, &pi->ios68);
+    emu68_set_handler(pi->emu68, play_hdl);
+    emu68_set_cookie(pi->emu68, pi);
+    pi->gdb = gdb_create();
+  }
+
   if ( sc68_open(pi->sc68, (sc68_disk_t) dsk_get_disk() ) ) return;
   if ( sc68_play(pi->sc68, pi->track, pi->loop) < 0 ) return;
   pi->code = -(sc68_process(pi->sc68, 0, 0) == SC68_ERROR);
@@ -155,6 +204,8 @@ static void play_end(playinfo_t * pi)
   pi->isplaying = 3;
   istream68_close(pi->out);
   pi->out = 0;
+  gdb_destroy(pi->gdb);
+  pi->gdb = 0;
   sc68_destroy(pi->sc68);
   pi->sc68 = 0;
   pi->isplaying = 0;
@@ -189,27 +240,33 @@ int dsk_stop(void)
   return err;
 }
 
-int dsk_play(int trk, int loop, int start, int len, int bg)
+struct dsk_play_s {
+  int track, loop, start, len, bg, debug;
+};
+
+
+/* int trk, int loop, int start, int len, int bg, int dbg */
+int dsk_play(dsk_play_t * p)
 {
   int err = -1;
-/*   int tracks = dsk_get_tracks(); */
 
-  msgdbg("play [track:%d loop:%d start:%d length:%d bg:%d]\n",
-         trk, loop, start, len, bg);
+  msgdbg("play [track:%d loop:%d start:%d length:%d bg:%d dbg:%d]\n",
+         p->track, p->loop, p->start, p->len, p->bg, p->debug);
 
   if (playinfo.isplaying) {
     dsk_stop();
   }
 
   memset(&playinfo,0,sizeof(playinfo));
-  playinfo.track = trk;
-  playinfo.loop  = loop;
+  playinfo.track = p->track;
+  playinfo.loop  = p->loop;
+  playinfo.debug = p->debug;
   if ( pthread_create(&playinfo.thread, 0, play_thread, &playinfo) ) {
     msgerr("error creating play thread\n");
     goto error;
   }
 
-  if (!bg) {
+  if (!p->bg) {
     pthread_join(playinfo.thread, 0);
     err = playinfo.code;
   } else {
@@ -226,9 +283,10 @@ static
 int run_play(cmd_t * cmd, int argc, char ** argv)
 {
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
-  int ret = -1, i, loop = -1, track, tracks, bg = 1;
+  int ret = -1, i, loop = SC68_DEF_LOOP, track, tracks, bg = 1, debug = 0;
   const char * str;
-  int seek_mode, seek, dur_mode, duration;
+  int seek_mode = '?', seek = 0, dur_mode = '?', duration = 0;
+  dsk_play_t params;
 
   opt_create_short(shortopts, longopts);
 
@@ -245,11 +303,9 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
 
     case 'l':                           /* --loop      */
       str = optarg;
-      if (!strcmp68(str,"def"))
-        loop = -1;
-      else if (!strcmp68(str,"inf"))
-        loop = 0;
-      else
+      if (!strcmp(str,"inf"))
+        loop = SC68_INF_LOOP;
+      else if (isdigit((int)*str))
         loop = strtol(str,0,0);
       break;
 
@@ -277,6 +333,9 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
         goto error;
       }
       break;
+
+    case 'd':
+      debug = 1; break;
 
     case '?':                       /* Unknown or missing parameter */
       goto error;
@@ -319,7 +378,15 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
   if (i < argc)
     msgwrn("%d extra parameters ignored\n", argc-i);
 
-  ret =  dsk_play(track, loop, seek, duration, bg);
+
+  memset(&params,0,sizeof(params));
+  params.track = track;
+  params.loop  = loop;
+  params.start = seek;
+  params.len   = duration;
+  params.bg    = bg;
+  params.debug = debug;
+  ret =  dsk_play(&params);
 
 error:
   return ret;
@@ -335,10 +402,11 @@ cmd_t cmd_play = {
   "The `play' command plays a track.\n"
   "\n"
   "OPTIONS\n"
-  "   -l --loop=N       Number odf loop (0:inf -1:def)\n"
+  "   -l --loop=N       Number of loop (-1:inf 0:def)\n"
   "   -s --seek=POS     Seek to this position.\n"
   "   -t --to=POS       End position.\n"
   "   -f --fg           Foreground play.\n"
+  "   -d --debug        Debug via gdb.\n"
   "\n"
   "POS := [+|-]ms | [+|-]mm:ss[:ms]\n"
   "  '+' is relative to start position.\n"
@@ -358,7 +426,7 @@ int run_stop(cmd_t * cmd, int argc, char ** argv)
         help(argv[0]);
         return 0;
       }
-    msgwrn("%d extra parameters ignored\n", argc-1);
+    msgwrn("%d extra parameters ignored\n", argc-i);
   }
   return
     dsk_stop();

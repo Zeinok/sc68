@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:34:38 ben>
+ * Time-stamp: <2013-07-11 18:26:45 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -118,6 +118,7 @@ void msg_callback(const int bit, void *data, const char *fmt, va_list list)
   }
   assert(fmt);
   vfprintf(out,fmt,list);
+  fflush(out);
 }
 
 #ifndef MKSC68_O

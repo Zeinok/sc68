@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-08 08:06:49 ben>
+ * Time-stamp: <2013-07-11 21:20:04 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -473,7 +473,7 @@ static void timemeasure_init(measureinfo_t * mi)
   mi->replayhz = disk->mus[mi->track-1].frq;
   mi->location = disk->mus[mi->track-1].a0;
 
-  if (sc68_play(mi->sc68, mi->track, 0) < 0)
+  if (sc68_play(mi->sc68, mi->track, SC68_INF_LOOP) < 0)
     return;
 
   if (sc68_process(mi->sc68,0,0) == SC68_ERROR)

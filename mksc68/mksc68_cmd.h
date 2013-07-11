@@ -4,8 +4,8 @@
  * @author   Benjamin Gerard
  * @date     2009-01-01
  * @brief    commands definition header
- *
  */
+/* Time-stamp: <2013-07-10 17:41:00 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 

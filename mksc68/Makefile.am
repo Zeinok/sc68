@@ -1,4 +1,4 @@
-# Time-stamp: <2013-06-05 07:04:49 ben>
+# Time-stamp: <2013-07-11 13:15:53 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  mksc68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -47,16 +47,20 @@ else
 FILE68_LA =
 endif
 
-sources = mksc68.c mksc68_opt.c mksc68_msg.c mksc68_cmd.c mksc68_cli.c	\
-mksc68_dsk.c mksc68_str.c mksc68_tag.c mksc68_emu.c mksc68_cmd_new.c	\
-mksc68_cmd_load.c mksc68_cmd_play.c mksc68_cmd_time.c mksc68_cmd_tag.c	\
-mksc68_cmd_dbg.c mksc68_cmd_save.c mksc68_cmd_info.c
-header  =
+sources = mksc68.c mksc68_opt.c mksc68_msg.c mksc68_cmd.c		\
+mksc68_cli.c mksc68_dsk.c mksc68_gdb.c mksc68_str.c mksc68_tag.c	\
+mksc68_cmd_new.c mksc68_cmd_load.c mksc68_cmd_play.c			\
+mksc68_cmd_time.c mksc68_cmd_tag.c mksc68_cmd_dbg.c mksc68_cmd_save.c	\
+mksc68_cmd_info.c mksc68_cmd_gdb.c
+
+headers = mksc68_cli.h mksc68_cmd.h mksc68_def.h mksc68_dsk.h		\
+mksc68_eva.h mksc68_gdb.h mksc68_msg.h mksc68_opt.h mksc68_str.h	\
+mksc68_tag.h
 
 bin_PROGRAMS         = mksc68
-mksc68_SOURCES       = $(sources) $(headers)
+mksc68_SOURCES       = $(sources)
 mksc68_LDADD         = $(SC68_LA) $(FILE68_LA) $(DESA68_LA)
-noinst_HEADERS       = mksc68_doc.h
+noinst_HEADERS       = mksc68_doc.h $(headers)
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |
