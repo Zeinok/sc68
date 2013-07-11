@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-11 21:15:37 ben>
+ * Time-stamp: <2013-07-12 00:23:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -135,6 +135,7 @@ struct _sc68_s {
   struct {
     int pc;                   /**< value of PC at last IRQ.              */
     int vector;               /**< what was the last IRQ type.           */
+    int sysfct;               /**< Last gemdos/bios/xbios function       */
   } irq;
 
   /** Mixer info struture. */
@@ -332,16 +333,39 @@ static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
                emu68->reg.a[4], emu68->reg.a[5],
                emu68->reg.a[6], emu68->reg.a[7]);
 
-  /* If it's a trap, let's dump GEMDOS function number too. */
+  /* If it's a trap, let's dump GEMDOS/BIOS/XBIOS function number too. */
+
+
   if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
-    int cmd = Wpeek(emu68, emu68->reg.a[7]+6);
-    sc68_debug(sc68,
-               "         trap #%x func:%02d ($%04X)\n",
-               vector-32, cmd, cmd);
+    const int num = vector-TRAP_VECTOR_0;
+    static const char * type[16] =
+      { 0, "gemdos", 0, 0, 0, 0 , 0, 0, 0, 0 , 0, 0, 0, "bios" , "xbios", 0 };
+
+    if (type[num]) {
+      sc68->irq.sysfct = Wpeek(emu68, emu68->reg.a[7]+6);
+      sc68_debug(sc68,
+                 "          %s %02d ($%04X)\n",
+                 type[vector-TRAP_VECTOR_0], sc68->irq.sysfct, sc68->irq.sysfct);
+      sc68->irq.sysfct |= (num << 16);
+      return 0;                         /* Do not break on know traps */
+    } else {
+      sc68->irq.sysfct = 0;
+    }
+  } else if (vector == ILLEGAL_VECTOR) {
+    if (emu68->reg.d[1] >= 0XDEAD0000 && emu68->reg.d[1] <= 0XDEAD000F) {
+      int num = emu68->reg.d[1] & 15;
+      /* check if last trap number match this magic illegal value */
+      int fct = num == ((sc68->irq.sysfct >> 16) & 0xffff)
+        ? sc68->irq.sysfct & 0xffff
+        : -1
+        ;
+      sc68_error_add(sc68,
+                     "libsc68: trap function not implemented trap-#%d (%d) ($%X)",
+                     emu68->reg.d[1] & 15, fct, fct);
+    }
   }
 
-  /* Break for everything but traps */
-  return vector < TRAP_VECTOR(0) || vector > TRAP_VECTOR(15);
+  return 1; /* Break on exit*/
 }
 
 static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)

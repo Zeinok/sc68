@@ -1,9 +1,11 @@
 ;;; Atari ST GEMDOS and XBIOS emulator
 ;;;
-;;; (C) COPYRIGHT 2011 Benjamin Gerard
+;;; (C) COPYRIGHT 2011-2013 Benjamin Gerard
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
-
+;;;
+;;; Time-stamp: <2013-07-12 00:50:35 ben>
+	
 ;;; Install trap vectors
 ;;; 
 install_trap:
@@ -81,17 +83,17 @@ trap_illegal:
 	illegal
 	move.l	#$DEAD0009,d1
 	illegal
-	move.l	#$DEAD0010,d1
+	move.l	#$DEAD000A,d1
 	illegal
-	move.l	#$DEAD0011,d1
+	move.l	#$DEAD000B,d1
 	illegal
-	move.l	#$DEAD0012,d1
+	move.l	#$DEAD000C,d1
 	illegal
-	move.l	#$DEAD0013,d1
+	move.l	#$DEAD000D,d1
 	illegal
-	move.l	#$DEAD0014,d1
+	move.l	#$DEAD000E,d1
 	illegal
-	move.l	#$DEAD0015,d1
+	move.l	#$DEAD000F,d1
 	illegal
 
 	
@@ -228,7 +230,7 @@ mfree:
 
 xbios:
 	open
-	move.l	#$DEAD0014,d1
+	move.l	#$DEAD000E,d1
 	
 	cmp.w	#$80,d0
 	beq.s	locksnd
