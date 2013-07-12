@@ -5,7 +5,7 @@
  * @date     2011-11-01
  * @brief    message output header.
  */
-/* Time-stamp: <2013-07-11 20:58:14 ben> */
+/* Time-stamp: <2013-07-12 20:56:54 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -35,5 +35,8 @@ EXTERN68
 void msg_callback(const int bit, void *data, const char *fmt, va_list list);
 
 EXTERN68 void msg_init(int level);
+
+EXTERN68 void msg_lock(void);
+EXTERN68 void msg_unlock(void);
 
 #endif /* ifndef _MKSC68_MSG_H_ */

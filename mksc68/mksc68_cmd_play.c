@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-11 21:38:59 ben>
+ * Time-stamp: <2013-07-12 22:34:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -64,6 +64,7 @@ static const opt_t longopts[] = {
 
 typedef struct {
   volatile int  isplaying;
+  volatile int  debug;
   sc68_t      * sc68;       /* sc68 instance.    */
   emu68_t     * emu68;      /* emu68 instance.   */
   io68_t     ** ios68;      /* other chip.       */
@@ -73,7 +74,6 @@ typedef struct {
   int           track;
   int           loop;
   int           code;
-  int           debug;
 } playinfo_t;
 
 static playinfo_t playinfo;             /* unique playinfo */
@@ -238,6 +238,11 @@ int dsk_stop(void)
     msgnot("not playing\n");
   }
   return err;
+}
+
+int dsk_playing(void)
+{
+  return (playinfo.isplaying == 1) + (!!playinfo.debug << 1);
 }
 
 struct dsk_play_s {

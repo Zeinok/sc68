@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-11 18:24:29 ben>
+ * Time-stamp: <2013-07-12 21:24:49 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -48,7 +48,8 @@
 #include <ctype.h>
 #include <errno.h>
 
-int is_interactive = 0;                 /* running in a terminal? */
+int is_interactive   = 0;               /* running in a terminal? */
+int no_readline      = 0;               /* disable readline       */
 
 static int exit_code;                   /* last command exit code */
 static int exit_flag;                   /* break interpreter loop */
@@ -65,6 +66,7 @@ static int print_usage(void)
      "  -V --version        Display sc68 version x.y.z and licence and exit\n"
      "  -v --verbose        Increase verbosity level\n"
      "  -q --quiet          Decrease verbosity level\n"
+     "  -n --no-readline    Don't use readline in interactive mode\n"
      "\n"
      "Copyright (C) 1998-2013 Benjamin Gerard\n"
      "Visit <" PACKAGE_URL ">\n"
@@ -852,10 +854,11 @@ int main(int argc, char *argv[])
   sc68_init_t   init68;
 
   static const opt_t longopts[] = {
-    {"help",       0, 0, 'h'},
-    {"version",    0, 0, 'V'},
-    {"verbose",    0, 0, 'v'},
-    {"quiet",      0, 0, 'q'},
+    {"help",        0, 0, 'h'},
+    {"version",     0, 0, 'V'},
+    {"verbose",     0, 0, 'v'},
+    {"quiet",       0, 0, 'q'},
+    {"no-readline", 0, 0, 'n'},
     {0,0,0,0}
   };
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
@@ -880,11 +883,12 @@ int main(int argc, char *argv[])
       opt_get(argc, argv, shortopts, longopts, &longindex);
 
     switch (val) {
-    case  -1: break;                /* Scan finish */
-    case 'h': opt_help = 1; break;  /* --help      */
-    case 'V': opt_vers = 1; break;  /* --version   */
-    case 'v': opt_verb++;   break;  /* --verbose   */
-    case 'q': opt_verb--;   break;  /* --quiet     */
+    case  -1: break;                    /* Scan finish   */
+    case 'h': opt_help = 1;    break;   /* --help        */
+    case 'V': opt_vers = 1;    break;   /* --version     */
+    case 'v': opt_verb++;      break;   /* --verbose     */
+    case 'q': opt_verb--;      break;   /* --quiet       */
+    case 'n': no_readline = 1; break;   /* --no-readline */
     case '?':                       /* Unknown or missing parameter */
       goto error;
     default:

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-12 02:41:44 ben>
+ * Time-stamp: <2013-07-12 22:21:42 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -70,8 +70,10 @@ if (1) { gdb->run = RUN_##S; gdb->code = -C; gdb->msg = M; } else
 
 /* $$$ FIXME */ extern char *stpcpy(char *dest, const char *src);
 
-static const int default_port = 6800;
-static const int default_addr = 0x7f000001;
+enum {
+  default_port = 6800,
+  default_addr = 0x7f000001
+};
 
 static uint8_t thex[16] = {
   '0','1','2','3','4','5','6','7',
@@ -81,10 +83,12 @@ static uint8_t thex[16] = {
 typedef struct serverinfo_s serverinfo_t;
 
 struct serverinfo_s {
-  uint32_t  addr;
-  uint16_t  port;
-  int       fd;
+  int       fd;                         /* server listening socket */
+  uint32_t  addr;                       /* bound ipv4 address      */
+  uint16_t  port;                       /* bound port              */
 };
+
+serverinfo_t serverinfo = { -1, default_addr, default_port };
 
 struct gdb_s {
   int            fd;                    /* client/server socket        */
@@ -98,8 +102,6 @@ struct gdb_s {
   const char   * msg;                   /* last message                */
   char           buf[1024];             /* buffer for send/recv        */
 };
-
-serverinfo_t serverinfo;
 
 static inline uint8_t Bpeek(emu68_t * const emu68, addr68_t addr)
 {
@@ -134,11 +136,18 @@ static int decode_trap(char * s, int trapnum, emu68_t * emu)
     fct = Wpeek(emu, emu->reg.a[7]+6);
     s += sprintf(s," gemdos(%02x)", fct);
     switch (fct) {
-    case 0x09: s += sprintf(s, " cconws($%x)", Lpeek(emu, emu->reg.a[7]+8)); break;
-    case 0x20: s += sprintf(s, " super($%x)" , Lpeek(emu, emu->reg.a[7]+8)); break;
-    case 0x30: s += sprintf(s, " version()"); break;
-    case 0x48: s += sprintf(s, " malloc(%d)", Lpeek(emu, emu->reg.a[7]+8)); break;
-    case 0x49: s += sprintf(s, " free($%x)",  Lpeek(emu, emu->reg.a[7]+8)); break;
+    case 0x09:
+      s += sprintf(s, " cconws($%x)", Lpeek(emu, emu->reg.a[7]+8));
+      break;
+    case 0x20:
+      s += sprintf(s, " super($%x)" , Lpeek(emu, emu->reg.a[7]+8));
+      break;
+    case 0x30: s += sprintf(s, " version()");
+      break;
+    case 0x48: s += sprintf(s, " malloc(%d)", Lpeek(emu, emu->reg.a[7]+8));
+      break;
+    case 0x49: s += sprintf(s, " free($%x)",  Lpeek(emu, emu->reg.a[7]+8));
+      break;
     default:
       valid = 0;
     }
@@ -948,9 +957,7 @@ int gdb_conf(char * uri)
   int ret = 0;
   uint16_t port = default_port;
   uint32_t addr = default_addr;
-  struct in_addr ia;
-
-  msgdbg("gdb_conf(%s)\n", uri ? uri : "(nul)");
+  /* struct in_addr ia; */
 
   if (uri) {
     char * s = strchr(uri,':');
@@ -985,9 +992,8 @@ int gdb_conf(char * uri)
     serverinfo.addr = addr;
     serverinfo.port = port;
   }
-  ia.s_addr = htonl(serverinfo.addr);
-  msgdbg("server address: %s:%d\n",
-         inet_ntoa(ia),serverinfo.port);
+  /* ia.s_addr = htonl(serverinfo.addr); */
+
   return ret;
 }
 

@@ -42,5 +42,6 @@ typedef struct dsk_play_s dsk_play_t;
 
 EXTERN68 int dsk_play(dsk_play_t * params);
 EXTERN68 int dsk_stop(void);
+EXTERN68 int dsk_playing(void);
 
 #endif /* ifndef _MKSC68_DSK_H_ */

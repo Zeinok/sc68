@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-11 10:32:08 ben>
+ * Time-stamp: <2013-07-12 22:34:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -82,14 +82,14 @@ int run_gdb(cmd_t * cmd, int argc, char ** argv)
   case 0: {
     unsigned char addr[4];
     int port;
-
     gdb_get_conf(addr, &port);
     msginf("gdb server will listen to %d.%d.%d.%d:%i\n"
            "  *** Run gdb for m68k target\n"
            "  *** To connect gdb to mksc68 type the command:\n"
-           "      > target remote <server>:<port>\n",
-           addr[0],addr[1],addr[2],addr[3], port);
-
+           "      > target remote <server>:<port>\n"
+           "%s",
+           addr[0],addr[1],addr[2],addr[3], port,
+           dsk_playing() & 2 ? "  *** gdb session in progress\n" : "");
     ret = 0;
   } break;
   default:

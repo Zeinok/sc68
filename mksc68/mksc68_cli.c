@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:44:43 ben>
+ * Time-stamp: <2013-07-12 21:40:00 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -47,6 +47,28 @@
 # include <readline/history.h>
 #endif
 
+static char * wo_readline (const char * prompt)
+{
+  char tmp[1024], *s;
+
+  if (prompt) {
+    msg_lock();
+    fputs(prompt, stdout);
+    fflush(stdout);
+    msg_unlock();
+  }
+  errno = 0;
+  s = fgets(tmp, sizeof(tmp)-1, stdin);
+  
+  if (s) {
+    s[sizeof(tmp)-1] = 0;
+    s = strdup(s);
+  } else if (errno) {
+    msgerr("readline: %s\n", strerror(errno));
+  }
+  return s;
+}
+
 #ifndef HAVE_READLINE_READLINE_H
 
 /* A very simple replacement functions. */
@@ -56,20 +78,7 @@ static void add_history(const char *s) {}
 
 static char * readline (const char * prompt)
 {
-  char tmp[1024], *s;
-  if (prompt) {
-    fputs(prompt, stdout);
-    fflush(stdout);
-  }
-  errno = 0;
-  s = fgets(tmp, sizeof(tmp)-1, stdin);
-  if (s) {
-    s[sizeof(tmp)-1] = 0;
-    s = strdup(s);
-  } else if (errno) {
-    msgerr("readline: %s\n", strerror(errno));
-  }
-  return s;
+  return wo_readline(prompt);
 }
 
 #else /* readline: the real deal */
@@ -226,6 +235,10 @@ char * cli_prompt(const char * fmt, ...)
   return prompt = newprompt;
 }
 
+
+/* defined in mksc68.c */
+extern int no_readline, is_interactive;
+
 int cli_read(char * argv[], int max)
 {
   char * strip;
@@ -233,14 +246,20 @@ int cli_read(char * argv[], int max)
   initialize_readline();
 
   free(cli);
-  cli = readline(prompt);
+
+  if (is_interactive && !no_readline)
+    cli = readline(prompt);
+  else
+    cli = wo_readline(is_interactive ? prompt : 0);
   if (!cli) {
     return -1;
   }
 
-  strip = killspace(cli);
-  if (*strip) {
-    add_history(strip);
+  if (is_interactive) {
+    strip = killspace(cli);
+    if (*strip) {
+      add_history(strip);
+    }
   }
 
   return

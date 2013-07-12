@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-11 21:20:04 ben>
+ * Time-stamp: <2013-07-12 21:59:32 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -66,9 +66,9 @@ static const opt_t longopts[] = {
 #ifndef EMU68_ATARIST_CLOCK
 # define EMU68_ATARIST_CLOCK (8010613u&~3u)
 #endif
-static const unsigned int atarist_clk = EMU68_ATARIST_CLOCK;
+static const unsigned atarist_clk = EMU68_ATARIST_CLOCK;
 
-static unsigned int cycle_per_frame(unsigned int hz, unsigned int clk)
+static unsigned cycle_per_frame(unsigned hz, unsigned clk)
 {
   hz  = hz  ? hz  : 50u;
   clk = clk ? clk : atarist_clk;
@@ -79,7 +79,7 @@ static unsigned int cycle_per_frame(unsigned int hz, unsigned int clk)
     ;
 }
 
-unsigned int fr2ms(unsigned int fr, unsigned int cpf_or_hz, unsigned int clk)
+unsigned fr2ms(unsigned fr, unsigned cpf_or_hz, unsigned clk)
 {
   uint64_t ms;
   unsigned cpf;
@@ -95,10 +95,10 @@ unsigned int fr2ms(unsigned int fr, unsigned int cpf_or_hz, unsigned int clk)
   ms += clk >> 1;
   ms /= clk;
 
-  return (unsigned int) ms;
+  return (unsigned) ms;
 }
 
-static unsigned int ms2fr(unsigned int ms, unsigned int cpf_or_hz, unsigned int clk)
+static unsigned ms2fr(unsigned ms, unsigned cpf_or_hz, unsigned clk)
 {
   uint64_t fr;
   unsigned cpf;
@@ -114,7 +114,7 @@ static unsigned int ms2fr(unsigned int ms, unsigned int cpf_or_hz, unsigned int 
   fr  += cpf >> 1;
   fr  /= cpf;                            /* number of milliframe  */
 
-  return (unsigned int) fr;
+  return (unsigned) fr;
 }
 
 typedef struct
@@ -582,7 +582,7 @@ static void timemeasure_run(measureinfo_t * mi)
 
     if ( acu >= sil_val ) {
       if ( sil_frm != sil_nop ) {
-        unsigned int sil_lll = frm_cnt - sil_frm;
+        unsigned sil_lll = frm_cnt - sil_frm;
         if (sil_lll > sil_len ) {
           sil_len = sil_lll;
           msgdbg("silence length: %u frames (%s) at frame %u (%s)\n",
@@ -785,8 +785,8 @@ int time_measure(measureinfo_t * mi, int trk,
   if (!ret) {
     disk68_t  * d = dsk_get_disk();
     music68_t * m = d->mus+trk-1;
-    char      s1[32],s2[32],s3[32],s4[32];
-    unsigned int total_fr, total_ms;
+    char        s1[32],s2[32],s3[32],s4[32];
+    unsigned    total_fr, total_ms;
 
 
     m->first_fr = mi->frames;

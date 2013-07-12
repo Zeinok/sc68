@@ -5,7 +5,7 @@
  * @date      1999/13/03
  * @brief     68k exception and interruption definition header.
  */
-/* Time-stamp: <2013-07-07 19:08:30 ben> */
+/* Time-stamp: <2013-07-12 22:50:09 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -37,6 +37,7 @@ enum {
   HWTRACE_VECTOR  = 0x120, /**< Report hardware trace.                  */
   HWHALT_VECTOR   = 0x121, /**< Report processor halted.                */
   HWSTOP_VECTOR   = 0x122, /**< Report processor suspended (stop).      */
+  PRIVATE_VECTOR  = 0x200, /**< First private vector for users.         */
   /* Real 68k vectors. */
   RESET_VECTOR    = 0x000, /**< External (hardware) reset.              */
   RESET_SP_VECTOR = 0x000, /**< Initial interrupt stack pointer.        */

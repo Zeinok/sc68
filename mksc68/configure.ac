@@ -45,6 +45,12 @@ AC_SEARCH_LIBS([readline],[readline],
   [AC_CHECK_HEADERS([readline/readline.h readline/history.h])])
 
 # ,----------------------------------------------------------------------.
+# | Standard functions                                                   |
+# `----------------------------------------------------------------------'
+
+AC_CHECK_FUNCS([malloc free vsprintf vsnprintf strdup strncasecmp])
+
+# ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 

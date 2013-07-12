@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-11 18:26:45 ben>
+ * Time-stamp: <2013-07-12 21:24:53 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -36,8 +36,11 @@
 #include <string.h>
 #include <sc68/msg68.h>
 
+#include <pthread.h>
 
 static int mksc68_cat = msg68_DEFAULT;
+static pthread_mutex_t msglock = PTHREAD_MUTEX_INITIALIZER;
+
 
 void msgdbg_va(const char * fmt, va_list list)
 {
@@ -117,8 +120,11 @@ void msg_callback(const int bit, void *data, const char *fmt, va_list list)
       fprintf(out,"%s: ", cmd);
   }
   assert(fmt);
+
+  pthread_mutex_lock(&msglock);
   vfprintf(out,fmt,list);
   fflush(out);
+  pthread_mutex_unlock(&msglock);
 }
 
 #ifndef MKSC68_O
@@ -137,4 +143,14 @@ void msg_init(int level)
   msg68_cat_level(level);
   mksc68_cat = msg68_cat("mksc68","sc68 maker",MKSC68_O);
   if (mksc68_cat == -1) mksc68_cat = msg68_DEFAULT;
+}
+
+void msg_lock(void)
+{
+  pthread_mutex_lock(&msglock);
+}
+
+void msg_unlock(void)
+{
+  pthread_mutex_unlock(&msglock);
 }
