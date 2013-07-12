@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-12 00:23:18 ben>
+ * Time-stamp: <2013-07-12 02:10:47 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -297,7 +297,7 @@ static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
   /* exit this one really fast as it happens every single
    * instruction. */
   if ( vector == HWTRACE_VECTOR )
-    return 0;
+    return 0;                           /* don't break */
 
   emu68_exception_name(vector,irqname);
   if ( vector < 0x100 ) {
@@ -344,10 +344,10 @@ static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
     if (type[num]) {
       sc68->irq.sysfct = Wpeek(emu68, emu68->reg.a[7]+6);
       sc68_debug(sc68,
-                 "          %s %02d ($%04X)\n",
+                 "         %s %02d ($%04X)\n",
                  type[vector-TRAP_VECTOR_0], sc68->irq.sysfct, sc68->irq.sysfct);
       sc68->irq.sysfct |= (num << 16);
-      return 0;                         /* Do not break on know traps */
+      return 0;                        /* don't break on know traps */
     } else {
       sc68->irq.sysfct = 0;
     }
@@ -363,9 +363,14 @@ static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
                      "libsc68: trap function not implemented trap-#%d (%d) ($%X)",
                      emu68->reg.d[1] & 15, fct, fct);
     }
+  } else if (vector == 0x134 >> 2 /* Timer-A */ ||
+             vector == 0X120 >> 2 /* Timer-B */ ||
+             vector == 0X114 >> 2 /* Timer-C */ ||
+             vector == 0X110 >> 2 /* Timer-D */ ) {
+    return 0;                  /* Don't break on timer interruption */
   }
 
-  return 1; /* Break on exit*/
+  return 1; /* Break for everythong else */
 }
 
 static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)

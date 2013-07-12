@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-11 14:52:33 ben>
+ * Time-stamp: <2013-07-12 02:06:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -389,7 +389,7 @@ static inline int controlled_step68(emu68_t * const emu68)
     int id;
     addr68_t addr;
      /* HardWare TRACE exception */
-    exception68(emu68, HWTRACE_VECTOR, -1);
+    inl_exception68(emu68, HWTRACE_VECTOR, -1);
     if (emu68->status != EMU68_NRM)
       return emu68->status;
 
@@ -406,7 +406,7 @@ static inline int controlled_step68(emu68_t * const emu68)
          * - run the appropriate exception
          * - reset the breakpoint; delete it if neccessary
          * */
-        exception68(emu68, HWBREAK_VECTOR+id, -1);
+        inl_exception68(emu68, HWBREAK_VECTOR+id, -1);
         if (! (emu68->breakpoints[id].count = emu68->breakpoints[id].reset))
           emu68->chk[addr] &= EMU68_A;
         if (emu68->status != EMU68_NRM)
@@ -543,6 +543,12 @@ int emu68_interrupt(emu68_t * const emu68, cycle68_t cycleperpass)
       emu68->cycle = t->cycle;
       if (t->level > ipl) {
         inl_exception68(emu68, t->vector, t->level);
+        /* $$$ ignore break in interrupt atm as we can't resume
+         * properly
+         */
+        if (emu68->status == EMU68_BRK)
+          emu68->status = EMU68_NRM;
+
         emu68->finish_sp = (addr68_t) REG68.a[7];
         loop68(emu68);
       }
@@ -553,227 +559,6 @@ int emu68_interrupt(emu68_t * const emu68, cycle68_t cycleperpass)
   return emu68->status;
 }
 
-#if 0
-/* Run until RTS level0 occurs
- * and play Interruption for 1 pass.
- * ( Specific SC68 !!! )
- */
-void emu68_level_and_interrupt(emu68_t * const emu68,
-                               cycle68_t cycleperpass)
-{
-  addr68_t stack, pc;
-  cycle68_t cycle;
-  io68_t *io;
-
-  if (!emu68) {
-    return;
-  }
-  stack = REG68.a[7];
-  pc = REG68.pc;
-  REG68.a[7] = stack - 4;
-
-  /* Clear ORed memory access flags ... */
-  emu68->framechk = 0;
-
-  /* Adjust internal IO cycle counter */
-  for (io=emu68->iohead; io; io=io->next) {
-    (io->adjust_cycle)(io,emu68->cycle);
-  }
-  emu68->cycle = 0;
-
-  /* Do until RTS */
-  do {
-    step68(emu68);
-  } while (stack>(addr68_t)REG68.a[7]);
-
-  cycle=0;
-
-  /* Get interrupt IO (MFP) if any */
-  if (emu68->interrupt_io) {
-    interrupt68_t * t;
-    int ipl = (REG68.sr & (7<<SR_I_BIT)) >> SR_I_BIT;
-#ifdef _DEBUG
-    int ipl_lost = 0;
-    int irq_pass = 0;
-#endif
-    /* $$$ HACK: mfp interupt at level 5 */
-    /* $$$ TEMP: FOR DEBUGIN A MUSIC !! */
-    if ( /*1 ||*/ 6 > ipl ) {
-      do {
-
-        /* Spool interrupt */
-        /* Execute mfp interrupt emulation */
-        t = emu68->interrupt_io->interrupt(emu68->interrupt_io, cycleperpass);
-        if (t) {
-#ifdef DEBUG
-          if (t->cycle >= cycleperpass) {
-            *(int *)0 = 0xDEADBEEF;
-          }
-#endif
-
-
-          emu68->cycle=t->cycle;
-          REG68.a[7] = stack; /* $$$ Safety net */
-          REG68.pc = 0x12345678;
-          inl_exception68(emu68,t->vector,t->level);
-          poll_rte(emu68, stack);
-#ifdef _DEBUG
-          if (REG68.pc != 0x12345678) {
-            BREAKPOINT68;
-          }
-          if (REG68.a[7] != stack) {
-            BREAKPOINT68;
-          }
-          if (!(REG68.sr & 0x2000)) {
-            BREAKPOINT68;
-          }
-#endif
-        } else {
-          //          BREAKPOINT68;
-          break; //$$$ ???
-        }
-      } while (t);
-    } else {
-      // ipl masks irq
-#ifdef _DEBUG
-      // This happens sometime
-      //BREAKPOINT68;
-      ipl_lost++;
-#endif
-    }
-  }
-
-  /* Restore A7, PC, and new cycle counter */
-  REG68.a[7]  = stack;
-  REG68.pc    = pc;
-  emu68->cycle = cycleperpass;
-}
-
-/* Run like a JSR at pc, exec interrupt if cycleperpass > 0.
- */
-void emu68_run_rts(emu68_t * const emu68,
-                   addr68_t pc, cycle68_t cycleperpass)
-{
-  addr68_t stack;
-
-  if (!emu68) {
-    return;
-  }
-
-  /* Push current pc .*/
-  stack = REG68.a[7];
-  pushl(REG68.pc);
-  REG68.pc = pc;
-
-  /* Clear ORed memory access flags ... */
-  emu68->framechk = 0;
-
-  /* Adjust internal IO cycle counter & find MFP */
-  if (emu68->cycle) {
-    io68_t *io;
-    for (io=emu68->iohead; io; io=io->next) {
-      (io->adjust_cycle)(io, emu68->cycle);
-    }
-    emu68->cycle = 0;
-  }
-
-  /* Do until RTS */
-  do {
-    step68(emu68);
-  } while (stack > (addr68_t)REG68.a[7]);
-
-  /* Get interrupt IO (MFP) if any */
-  if (cycleperpass && emu68->interrupt_io) {
-    interrupt68_t *t;
-    int ipl = (REG68.sr & (7<<SR_I_BIT)) >> SR_I_BIT;
-    cycle68_t cycle = 0;
-
-    if (6 > ipl ) {
-      cycle68_t fd;
-
-      /* Spool interrupt */
-      while (fd =
-             emu68->interrupt_io->next_interrupt(emu68->interrupt_io,cycle),
-             fd != IO68_NO_INT) {
-        /* ... This must not happen ...  */
-        if( (int)fd < 0 ) {
-          fd = 0;
-        }
-
-        /* ... */
-
-        /* TIME travel to next interruption */
-        cycle += fd;
-
-        if(cycle >= cycleperpass) {
-          /* interrupt after this pass */
-          break;
-        }
-
-        /* Execute mfp interrupt emulation */
-        t = emu68->interrupt_io->interrupt(emu68->interrupt_io,cycle);
-        if (t) {
-          emu68->cycle=cycle;
-          REG68.a[7] = stack; /* $$$ Safety net */
-          inl_exception68(emu68,t->vector,t->level);
-          poll_rte(emu68,stack);
-        }
-      }
-    }
-  }
-  emu68->cycle = cycleperpass;
-}
-
-
-/* Run emulation for given number of cycle
- */
-void emu68_cycle(emu68_t * const emu68, cycle68_t cycleperpass)
-{
-  cycle68_t cycle;
-  io68_t *io;
-
-  /* Clear ORed memory access flags ... */
-  REG68.framechk = 0;
-
-  /* Adjust internal IO cycle counter */
-  for (io=emu68->iohead; io; io=io->next) {
-    (io->adjust_cycle)(io, emu68->cycle);
-  }
-
-  /* Do until RTS */
-  cycle = emu68->cycle = 0;
-  do
-  {
-    /* If not stopped, execute an instruction */
-    if (1/* !REG68.status */) {
-      step68(emu68);
-      cycle += 4;
-    }
-    emu68->cycle = cycle;
-
-    if (emu68->interrupt_io) {
-      interrupt68_t *t;
-      int ipl;
-
-      ipl = (REG68.sr & (7<<SR_I_BIT)) >> SR_I_BIT;
-
-      /* $$$ HACK : mfp interupt at level 5 */
-      if (6 > ipl) {
-        t = emu68->interrupt_io->interrupt(emu68->interrupt_io,cycle);
-        if (t) {
-          inl_exception68(emu68,t->vector,t->level);
-          /* $$$ extra cycle should be added here for exception handle */
-        }
-      }
-    }
-  } while(cycle < cycleperpass);
-
-  // $$$ This is hack : should be "cycle" and handle later
-  cycle = cycleperpass;
-  emu68->cycle = cycle;
-}
-
-#endif
 
 /* Get debug mode.  */
 int emu68_debugmode(emu68_t * const emu68)
