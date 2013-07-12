@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-12 02:36:49 ben>
+ * Time-stamp: <2013-07-12 02:41:44 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -636,7 +636,7 @@ static int rsp_event(gdb_t * const gdb)
 
     case '1':
       /* hardware breakpoint. Unsupported by target according to gdb
-       * whicj is really annoying if you ask me. gdb should not
+       * which is really annoying if you ask me. gdb should not
        * assume such things when conencted to any kind of remote
        * target.
        */
