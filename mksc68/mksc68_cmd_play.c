@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-11 21:24:19 ben>
+ * Time-stamp: <2013-07-11 21:38:59 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -147,8 +147,8 @@ static int play_hdl(emu68_t* const emu68, int vector, void * cookie)
 
 static void play_init(playinfo_t * pi)
 {
-//  const char * outname = pi->debug ? "null://default" : "audio://default";
-  const char * outname = "audio://default";
+  const char * outname = pi->debug ? "null://default" : "audio://default";
+  /* const char * outname = "audio://default"; */
   sc68_create_t create68;
 
   pi->isplaying = 2;

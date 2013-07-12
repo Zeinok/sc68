@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-11 19:58:40 ben>
+ * Time-stamp: <2013-07-12 02:36:49 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -94,6 +94,7 @@ struct gdb_s {
   int            step;                  /* number of step before break */
   int            run;                   /* run mode                    */
   int            vector;                /* last interrupt vector       */
+  int            sigval;                /* last signal                 */
   const char   * msg;                   /* last message                */
   char           buf[1024];             /* buffer for send/recv        */
 };
@@ -125,20 +126,35 @@ struct trap_s {
 };
 
 
-static void decode_trap(char * s, int trapnum, emu68_t * emu)
+static int decode_trap(char * s, int trapnum, emu68_t * emu)
 {
+  int fct, valid = 1;
   switch (trapnum) {
   case 1:
-    sprintf(s," gemdos(%02x)\n", Wpeek(emu, emu->reg.a[7]+6));
+    fct = Wpeek(emu, emu->reg.a[7]+6);
+    s += sprintf(s," gemdos(%02x)", fct);
+    switch (fct) {
+    case 0x09: s += sprintf(s, " cconws($%x)", Lpeek(emu, emu->reg.a[7]+8)); break;
+    case 0x20: s += sprintf(s, " super($%x)" , Lpeek(emu, emu->reg.a[7]+8)); break;
+    case 0x30: s += sprintf(s, " version()"); break;
+    case 0x48: s += sprintf(s, " malloc(%d)", Lpeek(emu, emu->reg.a[7]+8)); break;
+    case 0x49: s += sprintf(s, " free($%x)",  Lpeek(emu, emu->reg.a[7]+8)); break;
+    default:
+      valid = 0;
+    }
     break;
   case 13:
-    sprintf(s," bios(%02x)\n", Wpeek(emu, emu->reg.a[7]+6));
+    sprintf(s," bios(%02x)", Wpeek(emu, emu->reg.a[7]+6));
+    valid = 0;
     break;
   case 14:
-    sprintf(s," xbios(%02x)\n", Wpeek(emu, emu->reg.a[7]+6));
+    sprintf(s," xbios(%02x)", Wpeek(emu, emu->reg.a[7]+6));
+    valid = 0;
   default:
+    valid = 0;
     *s = 0;
   }
+  return valid;
 }
 /* GEMDOS */
 /* static const struct trap_S gemdos[] = { */
@@ -310,10 +326,9 @@ static int rsp_event(gdb_t * const gdb)
     /***********************************************************************
      * ? (why target is halted)
      */
-    msgdbg("COMMAND <WHY?>\n");
-    ptr = stpcpy(buf+1,"S05");
+    /* msgdbg("COMMAND <WHY?>\n"); */
+    ptr = stpcpy(buf+1,"S05");          /* $$$ TODO */
   } break;
-
 
   case 'p': case 'P': {
     /***********************************************************************
@@ -328,7 +343,7 @@ static int rsp_event(gdb_t * const gdb)
       break;
     /* trace("Got reg-num: %d\n", n); */
     if (read) {
-      msgdbg("COMMAND <read-register,%02d>\n", n);
+      /* msgdbg("COMMAND <read-register,%02d>\n", n); */
       /* Register mapping:
          00-07 D0-D7     32-bit
          08-15 A0-A7     32-bit
@@ -387,7 +402,7 @@ static int rsp_event(gdb_t * const gdb)
      */
     int i,j;
 
-    msgdbg("COMMAND <read-general-register>\n");
+    /* msgdbg("COMMAND <read-general-register>\n"); */
     ptr = buf+1;
     for (i=0;i<8;++i)
       for (j=0; j<8; ++j)
@@ -414,7 +429,7 @@ static int rsp_event(gdb_t * const gdb)
       if (!errno && !*ptr) {
         u8 * mem;
         int i,n = (max - buf - 4) >> 1;
-        msgdbg("COMMAND <memory-read,0x%06x,%d>\n", adr,len);
+        /* msgdbg("COMMAND <memory-read,0x%06x,%d>\n", adr,len); */
         if (len > n) {
           len = n;
         }
@@ -649,7 +664,7 @@ static int rsp_event(gdb_t * const gdb)
     int sig  = -1;
 
     if (!*++ptr) {
-      msgdbg("COMMAND <%s>\n", step ? "step" : "continue");
+      /* msgdbg("COMMAND <%s>\n", step ? "step" : "continue"); */
     } else {
       int adr;
       errno = 0;
@@ -706,110 +721,9 @@ fail:
   return -1;
 }
 
-/* $$$ TODO: check this mess */
-static int signalof(int vector) {
-  int sigval;
-
-  switch (vector)    {
-  case HWTRACE_VECTOR:                  /* Hardware TRACE */
-    sigval = 5;
-    break;
-
-  case HWSTOP_VECTOR:                   /* Processor stopped */
-    sigval = 6;
-    break;
-
-  case HWHALT_VECTOR:                   /* Processor halted */
-    sigval = 6;
-    break;
-
-  case 2:
-    sigval = 10;
-    break;                    /* bus error           */
-  case 3:
-    sigval = 10;
-    break;                    /* address error       */
-  case 4:
-    sigval = 4;
-    break;                    /* illegal instruction */
-  case 5:
-    sigval = 8;
-    break;                    /* zero divide         */
-  case 6:
-    sigval = 8;
-    break;                    /* chk instruction     */
-  case 7:
-    sigval = 8;
-    break;                    /* trapv instruction   */
-  case 8:
-    sigval = 11;
-    break;                    /* privilege violation */
-  case 9:
-    sigval = 5;
-    break;                    /* trace trap          */
-  case 10:
-    sigval = 4;
-    break;                    /* line 1010 emulator  */
-  case 11:
-    sigval = 4;
-    break;                    /* line 1111 emulator  */
-
-    /* Coprocessor protocol violation.  Using a standard MMU or FPU
-       this cannot be triggered by software.  Call it a SIGBUS.  */
-  case 13:
-    sigval = 10;
-    break;
-
-  case 31:
-    sigval = 2;
-    break;                    /* interrupt           */
-  case 33:
-    sigval = 5;
-    break;                    /* breakpoint          */
-
-    /* This is a trap #8 instruction.  Apparently it is someone's software
-       convention for some sort of SIGFPE condition.  Whose?  How many
-       people are being screwed by having this code the way it is?
-       Is there a clean solution?  */
-  case 40:
-    sigval = 8;
-    break;                    /* floating point err  */
-
-  case 48:
-    sigval = 8;
-    break;                    /* floating point err  */
-  case 49:
-    sigval = 8;
-    break;                    /* floating point err  */
-  case 50:
-    sigval = 8;
-    break;                    /* zero divide         */
-  case 51:
-    sigval = 8;
-    break;                    /* underflow           */
-  case 52:
-    sigval = 8;
-    break;                    /* operand error       */
-  case 53:
-    sigval = 8;
-    break;                    /* overflow            */
-  case 54:
-    sigval = 8;
-    break;                    /* NAN                 */
-
-  default:
-    if (vector >= HWBREAK_VECTOR && vector < HWBREAK_VECTOR+0x20)
-      sigval = 5;
-    else
-      sigval = 7;             /* "software generated" */
-  }
-
-  return sigval;
-}
-
 int gdb_event(gdb_t * gdb, int vector, void * emu)
 {
-  int  sigval, pc, sr;
+  int  pc, sr;
   char irqname[32], fctname[32];
 
   assert (gdb->run == RUN_CONT);
@@ -818,20 +732,69 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
   if (vector == HWTRACE_VECTOR) {
     if (!gdb->step || --gdb->step)
       return gdb->run;
-    SIGNAL(STOP,5,"trace");
+    gdb->sigval = SIGVAL_TRAP;
+    SIGNAL(STOP,gdb->sigval,"trace");
   }
 
   gdb->emu = emu;
-  sigval = signalof(vector);
   emu68_exception_name(vector,irqname);
+  fctname[0] = 0;
 
   if (vector < 0x100) {
     /***********************************************************************
      * 68k exceptions
      */
+    int sigval = SIGVAL_0;
+
     sr = Wpeek(gdb->emu, gdb->emu->reg.a[7]);
     pc = Lpeek(gdb->emu, gdb->emu->reg.a[7]+2);
-    STATUS(STOP,INT,"68k exception");
+
+    switch (vector) {
+    case BUSERR_VECTOR: case ADRERR_VECTOR:
+      sigval = SIGVAL_BUS; break;
+    case ILLEGAL_VECTOR:
+      /* sc68 trap emulator will set regiter d1 to 0xDEAD000* in case
+       * a trap function is not implemented */
+      sigval = (gdb->emu->reg.d[1] >= 0xDEAD0000 && gdb->emu->reg.d[1] <= 0xDEAD000F)
+        ? SIGVAL_SYS
+        : SIGVAL_ILL
+        ;
+      break;
+    case DIVIDE_VECTOR: case TRAPV_VECTOR:
+      sigval = SIGVAL_FPE; break;
+    case LINEA_VECTOR: case LINEF_VECTOR: case CHK_VECTOR:
+      sigval = SIGVAL_EMT; break;
+    case TRACE_VECTOR:
+      sigval = SIGVAL_TRAP; break;
+    case PRIVV_VECTOR:
+      sigval = SIGVAL_SEGV; break;
+
+      /* Timer interruptions: not always right as it depends on MFP VR
+       * register bits 4-7
+       */
+    case 0X134 >> 2: /* Timer-A */
+      strcpy(fctname," timer-A"); break;
+    case 0X120 >> 2: /* Timer-B */
+      strcpy(fctname," timer-B"); break;
+    case 0X114 >> 2: /* Timer-C */
+      strcpy(fctname," timer-C"); break;
+    case 0X110 >> 2: /* Timer-D */
+      strcpy(fctname," timer-D"); break;
+
+    case SPURIOUS_VECTOR:
+    default:
+      if  (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
+        sigval = decode_trap(fctname, vector-TRAP_VECTOR(0), gdb->emu)
+        ? SIGVAL_TRAP
+        : SIGVAL_SYS
+        ;
+      } else
+        sigval = SIGVAL_TRAP;
+    }
+    gdb->sigval = sigval;
+    if (sigval != SIGVAL_0) {
+      SIGNAL(STOP,sigval,"68k exception");
+    }
   } else {
     /***********************************************************************
      * Private exceptions
@@ -841,46 +804,50 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
 
     if (vector < HWTRACE_VECTOR) {
       /* Got a breakpoint ! */
-      SIGNAL(STOP,5,"breakpoint");
+      gdb->sigval = SIGVAL_TRAP;
+      SIGNAL(STOP,gdb->sigval,"breakpoint");
     } else if (vector == HWHALT_VECTOR) {
-      STATUS(EXIT,HALT,"halted");
+      gdb->sigval = SIGVAL_ABRT;
+      STATUS(EXIT, HALT, "halted");
     } else if (vector == HWSTOP_VECTOR) {
       sprintf (irqname,"stop-#%04x",sr);
-      STATUS(STOP,STOP,"stopped");
+      if ((sr & 0x0700) == 0x0700) {
+        gdb->sigval = SIGVAL_ABRT;
+        STATUS(EXIT, STOP, "stopped");
+      } else {
+        gdb->sigval = SIGVAL_STOP;
+        SIGNAL(STOP, gdb->sigval, "stopped");
+      }
     } else if (vector != HWTRACE_VECTOR) {
       /* Unhamdled special exception */
-      STATUS(STOP,PRIVATE,"private exception");
+      gdb->sigval = SIGVAL_0;
+      SIGNAL(STOP,gdb->sigval,"private exception");
     }
   }
 
-  /* Trap functions */
-  fctname[0] = 0;
-  if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15))
-    decode_trap(fctname, vector-TRAP_VECTOR(0), gdb->emu);
-
-  msgnot("68k exception in <%s>\n"
-         "  vector : %02x (%d)\n"
-         "  type   : %s%s\n"
-         "  from pc:%08x sr:%04x\n"
-         "       pc:%08x sr:%04x\n"
-         "       d0:%08x d1:%08x d2:%08x d3:%08x\n"
-         "       d4:%08x d5:%08x d6:%08x d7:%08x\n"
-         "       a0:%08x a1:%08x a2:%08x a3:%08x\n"
-         "       a4:%08x a5:%08x a6:%08x a7:%08x\n",
-         gdb->emu->name,
-         vector, sigval,
-         irqname, fctname,
-         pc, sr,
-         gdb->emu->reg.pc, gdb->emu->reg.sr,
-         gdb->emu->reg.d[0], gdb->emu->reg.d[1],
-         gdb->emu->reg.d[2], gdb->emu->reg.d[3],
-         gdb->emu->reg.d[4], gdb->emu->reg.d[5],
-         gdb->emu->reg.d[6], gdb->emu->reg.d[7],
-         gdb->emu->reg.a[0], gdb->emu->reg.a[1],
-         gdb->emu->reg.a[2], gdb->emu->reg.a[3],
-         gdb->emu->reg.a[4], gdb->emu->reg.a[5],
-         gdb->emu->reg.a[6], gdb->emu->reg.a[7]);
-
+  if (gdb->run != RUN_CONT)
+    msgnot("68k exception in <%s>\n"
+           "  vector : %02x (%d)\n"
+           "  type   : %s%s\n"
+           "  from pc:%08x sr:%04x\n"
+           "       pc:%08x sr:%04x\n"
+           "       d0:%08x d1:%08x d2:%08x d3:%08x\n"
+           "       d4:%08x d5:%08x d6:%08x d7:%08x\n"
+           "       a0:%08x a1:%08x a2:%08x a3:%08x\n"
+           "       a4:%08x a5:%08x a6:%08x a7:%08x\n",
+           gdb->emu->name,
+           vector, gdb->sigval,
+           irqname, fctname,
+           pc, sr,
+           gdb->emu->reg.pc, gdb->emu->reg.sr,
+           gdb->emu->reg.d[0], gdb->emu->reg.d[1],
+           gdb->emu->reg.d[2], gdb->emu->reg.d[3],
+           gdb->emu->reg.d[4], gdb->emu->reg.d[5],
+           gdb->emu->reg.d[6], gdb->emu->reg.d[7],
+           gdb->emu->reg.a[0], gdb->emu->reg.a[1],
+           gdb->emu->reg.a[2], gdb->emu->reg.a[3],
+           gdb->emu->reg.a[4], gdb->emu->reg.a[5],
+           gdb->emu->reg.a[6], gdb->emu->reg.a[7]);
 
   for (;;) {
     switch (gdb->run) {
@@ -960,8 +927,13 @@ gdb_t * gdb_create(void)
            gdb->server->port);
 
     gdb->fd = accept(gdb->server->fd , 0, 0);
-      if (gdb->fd == -1)
-        goto error;
+
+    /* Don't need that socket anymore */
+    close(gdb->server->fd);
+    gdb->server->fd = -1;
+
+    if (gdb->fd == -1)
+      goto error;
   }
   return gdb;
 

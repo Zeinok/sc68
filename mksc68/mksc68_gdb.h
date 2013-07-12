@@ -5,7 +5,7 @@
  * @date     2013-07-09
  * @brief    gdb server function
  */
-/* Time-stamp: <2013-07-11 19:46:04 ben> */
+/* Time-stamp: <2013-07-12 00:38:37 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -37,6 +37,55 @@ enum {
   CODE_PRIVATE,
 };
 
+#define DEFSIG(NAME,VAL,X,Y) SIGVAL_#NAME = VAL
+
+enum {
+  SIGVAL_0       = 0,  /* Signal 0 */
+  SIGVAL_HUP     = 1,  /* Hangup */
+  SIGVAL_INT     = 2,  /* Interrupt */
+  SIGVAL_QUIT    = 3,  /* Quit */
+  SIGVAL_ILL     = 4,  /* Illegal instruction */
+  SIGVAL_TRAP    = 5,  /* Trace/breakpoint trap */
+  SIGVAL_ABRT    = 6,  /* Aborted */
+  SIGVAL_EMT     = 7,  /* Emulation trap */
+  SIGVAL_FPE     = 8,  /* Arithmetic exception */
+  SIGVAL_KILL    = 9,  /* Killed */
+  SIGVAL_BUS     = 10, /* Bus error */
+  SIGVAL_SEGV    = 11, /* Segmentation fault */
+  SIGVAL_SYS     = 12, /* Bad system call */
+  SIGVAL_PIPE    = 13, /* Broken pipe */
+  SIGVAL_ALRM    = 14, /* Alarm clock */
+  SIGVAL_TERM    = 15, /* Terminated */
+  SIGVAL_URG     = 16, /* Urgent I/O condition */
+  SIGVAL_STOP    = 17, /* Stopped (signal) */
+  SIGVAL_TSTP    = 18, /* Stopped (user) */
+  SIGVAL_CONT    = 19, /* Continued */
+  SIGVAL_CHLD    = 20, /* Child status changed */
+  SIGVAL_TTIN    = 21, /* Stopped (tty input) */
+  SIGVAL_TTOU    = 22, /* Stopped (tty output) */
+  SIGVAL_IO      = 23, /* I/O possible */
+  SIGVAL_XCPU    = 24, /* CPU time limit exceeded */
+  SIGVAL_XFSZ    = 25, /* File size limit exceeded */
+  SIGVAL_VTALRM  = 26, /* Virtual timer expired */
+  SIGVAL_PROF    = 27, /* Profiling timer expired */
+  SIGVAL_WINCH   = 28, /* Window size changed */
+  SIGVAL_LOST    = 29, /* Resource lost */
+  SIGVAL_USR1    = 30, /* User defined signal 1 */
+  SIGVAL_USR2    = 31, /* User defined signal 2 */
+  SIGVAL_PWR     = 32, /* Power fail/restart */
+  SIGVAL_POLL    = 33, /* Pollable event occurred */
+  SIGVAL_WIND    = 34, /* WIND */
+  SIGVAL_PHONE   = 35, /* PHONE */
+  SIGVAL_WAITING = 36, /* Process's LWPs are blocked */
+  SIGVAL_LWP     = 37, /* Signal LWP */
+  SIGVAL_DANGER  = 38, /* Swap space dangerously low */
+  SIGVAL_GRANT   = 39, /* Monitor mode granted */
+  SIGVAL_RETRACT = 40, /*  */
+  SIGVAL_MSG     = 41, /* Monitor mode data available */
+  SIGVAL_SOUND   = 42, /* Sound completed */
+  SIGVAL_SAK     = 43, /* Secure attention */
+  SIGVAL_PRIO    = 44, /* PRIO */
+};
 
 EXTERN68 gdb_t * gdb_create(void);
 EXTERN68 void    gdb_destroy(gdb_t * gdb);
