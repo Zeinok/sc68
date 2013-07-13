@@ -5,7 +5,7 @@
  * @date      2009/05/18
  * @brief     68k system control operation inlines.
  */
-/* Time-stamp: <2013-07-08 06:38:30 ben>  */
+/* Time-stamp: <2013-07-13 12:01:09 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -50,7 +50,7 @@ void inl_stop68(emu68_t * const emu68)
   u16 sr = (u16) get_nextw();
   if ( emu68->reg.sr & SR_S ) {
     emu68->reg.sr = sr;
-    emu68->status = EMU68_STP;
+    emu68->status = EMU68_stp;
     exception68(emu68, HWSTOP_VECTOR, -1);
   } else {
     exception68(emu68, PRIVV_VECTOR, -1);

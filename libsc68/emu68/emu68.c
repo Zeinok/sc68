@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-12 02:06:11 ben>
+ * Time-stamp: <2013-07-14 00:08:21 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -183,13 +183,14 @@ u8 * emu68_memptr(emu68_t * const emu68, addr68_t dst, uint68_t sz)
 {
   u8 * ptr = 0;
   if (emu68) {
-    addr68_t end = (dst+sz)&MEMMSK68;
-        if (sz > (uint68_t) MEMMSK68+1) {
+    const addr68_t top = 0;
+    const addr68_t bot = MEMMSK68+1;
+    addr68_t end = (dst+sz) & MEMMSK68;
+
+    if (end > bot) {
       emu68_error_add(emu68,
-                      "Not enough 68K memory ($%X>=$%X)",sz,emu68->memmsk);
-    } else if (end < dst) {
-      emu68_error_add(emu68,
-                      "68K memory overflow :($%X-%X,$%X)",dst,dst+sz,sz);
+                      "Invalid memory range [$%06x..$%06x] > $%06x",
+                      dst,end,bot);
     } else {
       ptr = emu68->mem + dst;
     }
@@ -429,6 +430,8 @@ static inline int controlled_step68(emu68_t * const emu68)
 static void loop68(emu68_t * const emu68)
 {
   assert( ! (emu68->finish_sp & 1 ) );
+  assert( emu68->status == EMU68_NRM );
+
   while ( controlled_step68(emu68) == EMU68_NRM &&
           emu68->finish_sp >= (addr68_t) REG68.a[7] )
     ;
@@ -439,7 +442,7 @@ const char * emu68_status_name(enum emu68_status_e status)
   switch (status) {
   case EMU68_ERR: return "error";
   case EMU68_NRM: return "ok";
-  case EMU68_STP: return "stop";
+  case EMU68_stp: return "stop";
   case EMU68_HLT: return "halt";
   case EMU68_BRK: return "break";
   case EMU68_XCT: return "exception";
@@ -451,18 +454,19 @@ const char * emu68_status_name(enum emu68_status_e status)
 }
 
 /* Execute one instruction. */
-int emu68_step(emu68_t * const emu68)
+int emu68_step(emu68_t * const emu68, int newframe)
 {
   int rc = EMU68_ERR;
   if (emu68) {
     switch (emu68->status) {
     case EMU68_NRM:
-      emu68->framechk = 0;
+      if (newframe)
+        emu68->framechk = 0;
     case EMU68_BRK:
       emu68->status = EMU68_NRM;
-      /* loop68(emu68); */
       controlled_step68(emu68);
-    case EMU68_STP: case EMU68_HLT:
+    case EMU68_stp:
+    case EMU68_HLT:
       rc = emu68->status;
       break;
 
@@ -474,7 +478,13 @@ int emu68_step(emu68_t * const emu68)
   return rc;
 }
 
-/* Continue after a break. */
+#if 0
+/* Continue after a break.
+ *
+ * @notice the only real difference between enu68_step() and
+ * emu68_continue() is the emu68::framechk clear.
+ *
+ */
 int emu68_continue(emu68_t * const emu68)
 {
   int rc = EMU68_ERR;
@@ -488,7 +498,8 @@ int emu68_continue(emu68_t * const emu68)
     case EMU68_BRK:
       emu68->status = EMU68_NRM;
       controlled_step68(emu68);
-    case EMU68_STP: case EMU68_HLT:
+    case EMU68_stp:
+    case EMU68_HLT:
       rc = emu68->status;
       break;
 
@@ -500,23 +511,28 @@ int emu68_continue(emu68_t * const emu68)
   return rc;
 }
 
+#endif
+
 int emu68_finish(emu68_t * const emu68, uint68_t instructions)
 {
   io68_t *io;
 
-  if (!emu68) {
+  if (!emu68)
     return EMU68_ERR;
+
+  if (instructions == EMU68_CONT) {
+    emu68->status == EMU68_NRM;
+  } else {
+    emu68->finish_sp = REG68.a[7];
+    emu68->framechk  = 0;
+    emu68->instructions = instructions;
   }
-
-  emu68->finish_sp    = REG68.a[7];
-  emu68->framechk     = 0;
-  emu68->instructions = instructions;
-
   for (io=emu68->iohead; io; io=io->next) {
-    io->adjust_cycle(io,emu68->cycle);
+    io->adjust_cycle(io, emu68->cycle);
   }
   emu68->cycle = 0;
 
+  assert ( emu68->status == EMU68_NRM );
   loop68(emu68);
 
   return emu68->status;
@@ -525,12 +541,15 @@ int emu68_finish(emu68_t * const emu68, uint68_t instructions)
 /* Execute interruptions. */
 int emu68_interrupt(emu68_t * const emu68, cycle68_t cycleperpass)
 {
-
-  if (!emu68) {
+  if (!emu68)
     return EMU68_ERR;
-  }
 
-  assert ( emu68->status == EMU68_NRM || emu68->status == EMU68_STP );
+  assert ( emu68->status == EMU68_NRM || emu68->status == EMU68_stp );
+
+  /* Clear STOP mode. If interrupt is running it means execution is
+   * not stopped anymore.
+   */
+  emu68->status = EMU68_NRM;
 
   /* Get interrupt IO (MFP) if any */
   if (emu68->interrupt_io) {
@@ -543,6 +562,8 @@ int emu68_interrupt(emu68_t * const emu68, cycle68_t cycleperpass)
       emu68->cycle = t->cycle;
       if (t->level > ipl) {
         inl_exception68(emu68, t->vector, t->level);
+        if (emu68->status != EMU68_NRM)
+
         /* $$$ ignore break in interrupt atm as we can't resume
          * properly
          */

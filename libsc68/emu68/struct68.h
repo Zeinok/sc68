@@ -5,7 +5,7 @@
  * @date      1999-03-13
  * @brief     Struture definitions header.
  */
-/* Time-stamp: <2013-07-08 06:56:28 ben> */
+/* Time-stamp: <2013-07-13 23:46:23 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -175,7 +175,7 @@ struct emu68_s {
   char name[32];                        /**< Identifier.            */
 
   /* Error. */
-  char err[128][4];                     /**< Error message stack.   */
+  char err[4][128];                     /**< Error message stack.   */
   int  nerr;                            /**< Error counter.         */
 
   reg68_t   reg;                     /**< 68000 internal registers. */

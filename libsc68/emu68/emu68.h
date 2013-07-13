@@ -5,7 +5,7 @@
  * @date      1999/03/13
  * @brief     68K emulator header.
  */
-/* Time-stamp: <2013-07-08 08:47:02 ben> */
+/* Time-stamp: <2013-07-13 18:40:47 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -440,12 +440,12 @@ uint68_t emu68_crc32(emu68_t * const emu68);
  *   The emu68_status_e:: values
  */
 enum emu68_status_e {
-  EMU68_ERR  = -1,          /**< Execution failed.            */
-  EMU68_NRM  =  0,          /**< Execution finished.          */
-  EMU68_STP  =  1,          /**< Execution stopped.           */
-  EMU68_HLT  =  2,          /**< Execution halted.            */
-  EMU68_BRK  =  3,          /**< Execution breaked.           */
-  EMU68_XCT  =  4           /**< Execution in exception.      */
+  EMU68_ERR  = -1,          /**< Execution failed.                          */
+  EMU68_NRM  = 0x00,        /**< Execution running normally.                */
+  EMU68_stp  = 0x01,        /**< Execution stopped by the stop instruction. */
+  EMU68_HLT  = 0x12,        /**< Execution halted (double fault or user.    */
+  EMU68_BRK  = 0x13,        /**< Execution breaked by user.                 */
+  EMU68_XCT  = 0x24         /**< Execution in exception.                    */
 };
 
 EMU68_API
@@ -461,30 +461,31 @@ EMU68_API
 /**
  * Execute one instruction.
  *
- * @param  emu68  emulator instance
+ * @param  emu68     emulator instance
+ * @param  newframe  if true clear emu68::framechk
  * @return @ref emu68_status_e "execution status"
  */
-int emu68_step(emu68_t * const emu68);
+int emu68_step(emu68_t * const emu68, int newframe);
+
+enum {
+  EMU68_CONT = -1 /**< Tells emu68_finish() to continue a breaked run */
+};
 
 EMU68_API
 /**
  * Execute until RTS (Return To Subroutine).
  *
+ *   The execution might be breaked by user or stop instruction or
+ *   some kind of error. It might be continued by using EMU68_CONT as
+ *   instruction counter.
+ *
  * @param  emu68           emulator instance
- * @param  instrunctions   max instruction to execute (0:no limit)
+ * @param  instrunctions   max instruction to execute 0:no limit,
+ *                         EMU68_CONT:continue a breaked run
+
  * @return @ref emu68_status_e "execution status"
  */
 int emu68_finish(emu68_t * const emu68, uint68_t instructions);
-
-EMU68_API
-/**
- * Continue a breaked execution.
- *
- * @param  emu68  emulator instance
- * @return @ref emu68_status_e "execution status"
- */
-int emu68_continue(emu68_t * const emu68);
-
 
 EMU68_API
 /**

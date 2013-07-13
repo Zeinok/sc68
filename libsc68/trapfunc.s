@@ -4,7 +4,9 @@
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
-;;; Time-stamp: <2013-07-12 00:50:35 ben>
+;;; Time-stamp: <2013-07-13 18:43:26 ben>
+
+StackSize = 1024	
 	
 ;;; Install trap vectors
 ;;; 
@@ -27,7 +29,7 @@ install_trap:
 	
 	;; Init dummy malloc system
 	lea	malloc(pc),a0
-	lea	-2048(a7),a1	     ; a7 is at near the end of memory
+	lea	-StackSize(a7),a1 ; a7 is at near the end of memory
 	move.l	a1,-(a0)
 
 	movem.l	(a7)+,d0/a0-a2

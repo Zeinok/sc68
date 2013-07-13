@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-12 22:21:42 ben>
+ * Time-stamp: <2013-07-13 22:35:14 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -821,6 +821,14 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
     } else if (vector == HWSTOP_VECTOR) {
       sprintf (irqname,"stop-#%04x",sr);
       if ((sr & 0x0700) == 0x0700) {
+        if ((sr & 0xFF00) == 0x5700) {
+          const int num = sr & 0xFF;
+          /* Unitialized exception catched !!! */
+          emu68_exception_name(num,irqname);
+          pc = Lpeek(gdb->emu, gdb->emu->reg.a[7]+2);
+          msgnot("non-init exception #%d (%s) from %06x\n",
+                 num, irqname, pc);
+        }
         gdb->sigval = SIGVAL_ABRT;
         STATUS(EXIT, STOP, "stopped");
       } else {
@@ -834,7 +842,13 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
     }
   }
 
-  if (gdb->run != RUN_CONT)
+  if (gdb->run != RUN_CONT) {
+    u8 * memptr = emu68_memptr(gdb->emu,0,0);
+    const addr68_t adr = gdb->emu->reg.a[7] & gdb->emu->memmsk;
+    const addr68_t bot = gdb->emu->memmsk+1-16;
+    char line[16 * 3];
+    int i,j;
+
     msgnot("68k exception in <%s>\n"
            "  vector : %02x (%d)\n"
            "  type   : %s%s\n"
@@ -857,6 +871,29 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
            gdb->emu->reg.a[2], gdb->emu->reg.a[3],
            gdb->emu->reg.a[4], gdb->emu->reg.a[5],
            gdb->emu->reg.a[6], gdb->emu->reg.a[7]);
+
+    /* dump stack */
+    line[0] = 0;
+    for (i = 0, j = 0; adr+i < bot; ++i) {
+      int v = memptr[adr+i];
+
+      line[j+0] = thex[v >> 4];
+      line[j+1] = thex[v & 15];
+      if (j != 3*15) {
+        line[j+2] = '-';
+        j += 3;
+      } else {
+        line[j+2] = 0;
+        msgnot(" %-6x: %s\n", adr + (i & ~15), line);
+        j = 0;
+      }
+    }
+    if (j) {
+      line[j-1] = 0;
+      msgnot(" %-6x: %s\n", adr + (i & ~15), line);
+    }
+  }
+
 
   for (;;) {
     switch (gdb->run) {

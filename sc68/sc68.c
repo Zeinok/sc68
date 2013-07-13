@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-08 07:31:25 ben>
+ * Time-stamp: <2013-07-13 14:57:56 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -297,7 +297,7 @@ static void spool_error_message(sc68_t * sc68)
   if (s = sc68_error_get(sc68), s) {
     msg68_error("%s\n","sc68: stacked error message:");
     do {
-      msg68_error("      - %s\n",s);
+      msg68_error(" * %s\n",s);
     } while (s = sc68_error_get(sc68), s);
   }
 }
@@ -645,7 +645,7 @@ int main(int argc, char *argv[])
   } else if (!strcmp(tracks,"all")) {
     track = -1;
   } else {
-    track = strtol(tracks,0,10);
+    track = strtoul(tracks,0,10);
   }
 
   /* Parse --loop= */
@@ -654,14 +654,14 @@ int main(int argc, char *argv[])
   } else if (!strcmp(loops,"inf")) {
     loop = -1;
   } else {
-    loop = strtol(loops,0,0);
+    loop = strtoul(loops,0,10);
   }
 
   /* Parse --rate= */
   if (!strcmp(rates,"def")) {
     rate = 0;
   } else {
-    rate = strtol(rates,0,0);
+    rate = strtoul(rates,0,10);
   }
 
   /* Create emulator instance */
