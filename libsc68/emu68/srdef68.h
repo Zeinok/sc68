@@ -5,7 +5,7 @@
  * @date      1999/13/03
  * @brief     Status Register (SR) definition header.
  */
-/* Time-stamp: <2013-06-21 02:47:45 ben> */
+/* Time-stamp: <2013-07-14 18:27:22 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -36,25 +36,49 @@
  */
 
 enum {
-  SR_C_BIT = 0    /**< Carry bit number.                    */,
-  SR_V_BIT = 1    /**< Overflow bit number.                 */,
-  SR_Z_BIT = 2    /**< Zero bit number.                     */,
-  SR_N_BIT = 3    /**< Negative bit number.                 */,
-  SR_X_BIT = 4    /**< eXtended carry bit number.           */,
-  SR_I_BIT = 8    /**< Internal Processor Level bit number. */,
-  SR_S_BIT = 13   /**< Superuser bit number.                */,
-  SR_T_BIT = 15   /**< Trace bit number.                    */,
+  SR_C_BIT  = 0   /**< Carry bit number.          */,
+  SR_V_BIT  = 1   /**< Overflow bit number.       */,
+  SR_Z_BIT  = 2   /**< Zero bit number.           */,
+  SR_N_BIT  = 3   /**< Negative bit number.       */,
+  SR_X_BIT  = 4   /**< eXtended carry bit number. */,
+  SR_5_BIT  = 5   /**< Bit#5.                     */,
+  SR_6_BIT  = 6   /**< Bit#6.                     */,
+  SR_7_BIT  = 7   /**< Bit#7.                     */,
+
+  SR_I_BIT  = 8   /**< Internal Processor Level bit number. */,
+  SR_I0_BIT = 8   /**< Internal Processor Level bit#0.      */,
+  SR_I1_BIT = 9   /**< Internal Processor Level bit#1.      */,
+  SR_I2_BIT = 10  /**< Internal Processor Level bit#2.      */,
+
+  SR_B_BIT  = 11  /**< Bit#11.                         */,
+  SR_M_BIT  = 12  /**< Master Interrupt State (68020). */,
+  SR_S_BIT  = 13  /**< Superuser bit number.           */,
+  SR_T0_BIT = 14  /**< Trace enable bit#0 (68020).     */,
+  SR_T1_BIT = 15  /**< Trace enable bit#1 (68020).     */,
+  SR_T_BIT  = 15  /**< Trace bit number.               */,
 };
 
 enum {
-  SR_C = (1<<SR_C_BIT)  /**< Carry value.          */,
-  SR_V = (1<<SR_V_BIT)  /**< Overflow value.       */,
-  SR_Z = (1<<SR_Z_BIT)  /**< Zero value.           */,
-  SR_N = (1<<SR_N_BIT)  /**< Negative value.       */,
-  SR_X = (1<<SR_X_BIT)  /**< eXtended carry value. */,
-  SR_I = (7<<SR_I_BIT)  /**< IPL mask.             */,
-  SR_S = (1<<SR_S_BIT)  /**< Superuser value.      */,
-  SR_T = (1<<SR_T_BIT)  /**< Trace value.          */,
+  SR_C  = (1<<SR_C_BIT)  /**< Carry value.          */,
+  SR_V  = (1<<SR_V_BIT)  /**< Overflow value.       */,
+  SR_Z  = (1<<SR_Z_BIT)  /**< Zero value.           */,
+  SR_N  = (1<<SR_N_BIT)  /**< Negative value.       */,
+  SR_X  = (1<<SR_X_BIT)  /**< eXtended carry value. */,
+  SR_5  = (1<<SR_5_BIT)  /**< bit#5 always 0.       */,
+  SR_6  = (1<<SR_6_BIT)  /**< bit#6 always 0.       */,
+  SR_7  = (1<<SR_7_BIT)  /**< bit#7 always 0.       */,
+
+  SR_I  = (7<<SR_I_BIT)  /**< IPL mask.    */,
+  SR_I0 = (7<<SR_I0_BIT) /**< IPL mask #0. */,
+  SR_I1 = (7<<SR_I1_BIT) /**< IPL mask #1. */,
+  SR_I2 = (7<<SR_I2_BIT) /**< IPL mask #2. */,
+
+  SR_B  = (1<<SR_B_BIT)  /**< bit#11 always 0.                */,
+  SR_M  = (1<<SR_M_BIT)  /**< Master Interrupt State (68020). */,
+  SR_S  = (1<<SR_S_BIT)  /**< Superuser value.                */,
+  SR_T  = (1<<SR_T_BIT)  /**< Trace value.                    */,
+  SR_T0 = (1<<SR_T0_BIT) /**< Trace 0 (68020).                */,
+  SR_T1 = (1<<SR_T1_BIT) /**< Trace 1 (68020).                */,
 };
 
 /**
