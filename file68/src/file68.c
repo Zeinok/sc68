@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-07 19:05:19 ben>
+ * Time-stamp: <2013-07-14 02:22:58 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -1532,6 +1532,9 @@ disk68_t * file68_load(istream68_t * is)
         goto error;
       }
       cursix->first_fr = LPeek(b);
+      /* $$$ Workaround some buggy musics  */
+      if (cursix->first_fr >= 0x1000000u)
+        cursix->first_fr = 0;
     }
     /* Replay frequency */
     else if (ISCHK(chk, CH68_FRQ)) {
