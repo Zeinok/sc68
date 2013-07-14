@@ -5,7 +5,7 @@
  * @date      2009/05/18
  * @brief     68k system control operation inlines.
  */
-/* Time-stamp: <2013-07-14 19:33:58 ben>  */
+/* Time-stamp: <2013-07-14 19:42:13 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -61,10 +61,10 @@ void inl_stop68(emu68_t * const emu68)
 
     /* 68k trace mode release the stop mode. */
     if ((save_sr & (SR_T0|SR_T1)) == SR_T) {
-      emu68->reg.sr = save_sr;
+      emu68->reg.sr |= SR_T;            /* $$$ or save_sr */
       if (emu68->status == EMU68_STP)
         emu68->status = EMU68_NRM;      /* Trace disable stop mode */
-      exception68(emu68, TRACE_VECTOR, GET_IPL(save_sr));
+      /* Trace exception will be handle later out of here. */
     }
   } else {
     /* User mode triggers a privilege violation exception */
