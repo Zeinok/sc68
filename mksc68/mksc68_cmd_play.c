@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-12 22:34:18 ben>
+ * Time-stamp: <2013-07-14 22:23:51 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -116,7 +116,7 @@ static void play_info(playinfo_t * pi)
   }
 }
 
-static int play_hdl(emu68_t* const emu68, int vector, void * cookie)
+static void play_hdl(emu68_t* const emu68, int vector, void * cookie)
 {
   playinfo_t * pi = cookie;
   assert(pi == &playinfo);
@@ -124,25 +124,25 @@ static int play_hdl(emu68_t* const emu68, int vector, void * cookie)
   switch (gdb_event(pi->gdb, vector, emu68)) {
 
   case RUN_EXIT:
-    return 1;
-
-  case RUN_STOP:
-    assert(!"gdb status is stopped but we are not stopped !!!");
+    emu68->status = EMU68_HLT;
+  case RUN_CONT:
+    break;
 
   case RUN_SKIP:
     emu68_set_handler(emu68,0);
     gdb_destroy(pi->gdb);
     pi->gdb = 0;
+    break;
 
-  case RUN_CONT:
-    return 0;
+  case RUN_STOP:
+    assert(!"gdb status is stopped but we are not stopped !!!");
+    emu68->status = EMU68_ERR;
+    break;
 
   default:
     assert(!"unhandled or invalid gdb status");
-    return 0;
+    emu68->status = EMU68_ERR;
   }
-
-  return -1;
 }
 
 static void play_init(playinfo_t * pi)

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-05-24 22:41:07 ben>
+ * Time-stamp: <2013-07-14 13:02:28 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -270,6 +270,7 @@ static int isao_open(istream68_t * istream)
             ;
         if (!info || i<info->option_count) {
           int res = ao_append_option(&is->ao.options, key, val);
+          res = res;
           TRACE68(ao68_cat, "libao68: add options [%s]='%s' -- *%s*\n",
                   key, val, strok68(!res));
         } else

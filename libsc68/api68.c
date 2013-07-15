@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-13 23:43:02 ben>
+ * Time-stamp: <2013-07-15 06:53:42 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -295,65 +295,163 @@ static u32 Lpeek(emu68_t* const emu68, addr68_t  addr)
                  ( (u32) Bpeek(emu68, addr+3)       ) );
 }
 
-
-static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
+/* Exception handler (runs when emu68 runs in debug mode (--sc68-dbg68k=1).
+ *
+ * It's default behaviour is to dump the exception and to break
+ * exection. That will generate an error later in the simulation loop.
+ *
+ * HW-trace and MFP timer interrupts are ignored.
+ *
+ * Know trace vectors (gemdos/xbios/bios) are dumped but not breaked.
+ *
+ */
+static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
 {
   sc68_t* sc68 = cookie;
   char    irqname[32];
+  const char * stname;
+  int     dumpex, savest, subvec, trapfc;
   u32     sr, pc;
+  static const char * traptype[16] =
+    { 0, "gemdos", 0, 0, 0, 0 , 0, 0, 0, 0 , 0, 0, 0, "bios" , "xbios", 0 };
 
-  /* store last interruption */
+  /* Store last interruption */
   sc68->irq.pc     = emu68->reg.pc;
   sc68->irq.vector = vector;
 
-  /* exit this one really fast as it happens every single
-   * instruction. */
-  if ( vector == HWTRACE_VECTOR )
-    return 0;                           /* don't break */
+  /* Exit those really fast as they happen quiet a lot, specially
+   * HWTRACE_VECTOR that happem every single instruction. */
+  if ( vector == HWTRACE_VECTOR ||
+       vector == 0x134/4 /* Timer-A */ ||
+       vector == 0X120/4 /* Timer-B */ ||
+       vector == 0X114/4 /* Timer-C */ ||
+       vector == 0X110/4 /* Timer-D */ )
+    return;
 
+  /* Get fancy names */
   emu68_exception_name(vector,irqname);
+
+  /* Init vars */
+  stname = emu68_status_name(emu68->status);
+  subvec = 0;
+  trapfc = -1;
+  dumpex = 1;
+  savest = emu68->status;
+
+  switch (savest) {
+  case EMU68_NRM:
+    /* Assume break, set back to NRM only hen the exception is known */
+    emu68->status = EMU68_BRK;
+    break;
+
+  case EMU68_STP:
+  case EMU68_BRK:
+  case EMU68_HLT:
+  case EMU68_ERR:
+  case EMU68_XCT:
+  default:
+    break;
+  }
+
+  /***********************************************************************
+   * Retrieve exception source (both pc and sr)
+   */
   if ( vector < 0x100 ) {
     /* normal vectors, get sr and pc from the stack */
     sr = Wpeek(emu68, emu68->reg.a[7]);
     pc = Lpeek(emu68, emu68->reg.a[7]+2);
     sc68->irq.pc = pc;
+
+    if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
+      subvec = vector - TRAP_VECTOR(0);
+      vector = TRAP_VECTOR(0);
+      if (traptype[subvec]) {
+        trapfc = sc68->irq.sysfct = Wpeek(emu68, emu68->reg.a[7]+6);
+        emu68->status = savest;         /* Don't break */
+      }
+    }
   } else {
-    /* special emu68 vectors, just grab cpu's reg as-is */
+    /* Special emu68 vectors, just grab cpu's reg as-is */
     sr = emu68->reg.sr;
     pc = emu68->reg.pc;
-    if ( vector == HWSTOP_VECTOR && (sr & 0xFF00) == 0x7700 ) {
-      const int num = sr & 0xFF;
-      /* Unitialized exception catched !!! */
-      strcpy(irqname,"NC-");
-      emu68_exception_name(num,irqname+3);
-      sr = Wpeek(emu68, emu68->reg.a[7]);
-      pc = Lpeek(emu68, emu68->reg.a[7]+2);
-      sc68_error_add(sc68,
-                     "libsc68: non-init exception #%d (%s) from %06x",
-                     num, irqname, pc);
+
+    if (vector >= HWBREAK_VECTOR && vector < HWTRACE_VECTOR) {
+      subvec = vector - HWBREAK_VECTOR;
+      vector = HWBREAK_VECTOR;
+    }
+
+    switch (vector) {
+
+    case HWSTOP_VECTOR:
+      if ( (sr & 0x3F00) == 0x2F00 ) {
+        /* SR bit#11 (always 0) is used by our special code to catch
+         * Unitialized exception.  The exception vector issued a stop
+         * #$2FNN instruction with NN being the exception vector
+         * number.
+         */
+        const int num = sr & 0xFF;
+        strcpy(irqname,"NC-");
+        emu68_exception_name(num,irqname+3);
+        sr = Wpeek(emu68, emu68->reg.a[7]);
+        pc = Lpeek(emu68, emu68->reg.a[7]+2);
+        sc68_error_add(sc68,
+                       "libsc68: non-init exception #%d (%s) from %06x",
+                       num, irqname, pc);
+        emu68->status = EMU68_HLT;
+      } else {
+        emu68->status = EMU68_STP;
+      }
+
+    case HWBREAK_VECTOR:
+      break;
+
+    case HWHALT_VECTOR:
+    case HWRESET_VECTOR:
+      /* Recieve the reset vector when reset instruction has just been
+       * executed, in our case it happen in the uninitialized
+       * exception catcher code. */
+      emu68->status = EMU68_HLT;
+      break;
+
+    case HWTRACE_VECTOR:
+    default:
+      assert(!"Invalid hardware vector");
+      break;
+
     }
   }
 
-  /* dump classical exceptions */
-  /* if (vector <= TRAP_VECTOR(15) || vector > HWTRACE_VECTOR) */
-  if (vector <= TRAP_VECTOR(15) || vector > 0x100) {
+  /***********************************************************************
+   * Dump exception context
+   */
+  if (dumpex) {
     u8 * memptr = emu68_memptr(sc68->emu68,0,0);
     const addr68_t adr = emu68->reg.a[7] & emu68->memmsk;
     const addr68_t bot = emu68->memmsk+1-16;
     char line[16 * 3];
-    int i,j;
+    int i,j,l = strlen(irqname);
 
+    if (vector == ILLEGAL_VECTOR)
+      sprintf(irqname+l, "#$%02x-%02x",
+              memptr[pc&emu68->memmsk], memptr[(pc+1)&emu68->memmsk]);
+    else if (vector == TRAP_VECTOR(0))
+      sprintf(irqname+l, " %s #%d ($%02x)",
+              traptype[subvec] ? traptype[subvec] : "N/A", trapfc, trapfc&255);
+
+    /* dump cpu status */
     sc68_debug(sc68,
                "libsc68: 68k interruption -- emu68<%s> sc68<%s>\n"
-               "   intr: #%02x %s\n"
+               " status: in:%s out:%s\n"
+               "   intr: #%02x+%02x %s\n"
                "   from: pc:%08x sr:%04x\n"
                "   regs: pc:%08x sr:%04x\n"
                "         d0:%08x d1:%08x d2:%08x d3:%08x\n"
                "         d4:%08x d5:%08x d6:%08x d7:%08x\n"
                "         a0:%08x a1:%08x a2:%08x a3:%08x\n"
                "         a4:%08x a5:%08x a6:%08x a7:%08x\n",
-               /*emu68, */emu68->name, /*sc68, */sc68->name,
-               vector, irqname,
+               emu68->name, sc68->name,
+               stname, emu68_status_name(emu68->status),
+               vector, subvec, irqname,
                pc, sr,
                emu68->reg.pc,   emu68->reg.sr,
                emu68->reg.d[0], emu68->reg.d[1],
@@ -367,7 +465,7 @@ static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
 
     /* dump stack */
     line[0] = 0;
-    for (i = 0, j = 0; adr+i < bot; ++i) {
+    for (i = 0, j = 0; adr+i < bot && i<0x80; ++i) {
       int v = memptr[adr+i];
 
       line[j+0] = thex[v >> 4];
@@ -386,45 +484,6 @@ static int irqhandler(emu68_t* const emu68, int vector, void * cookie)
       sc68_debug(sc68," %-6x: %s\n", adr + (i & ~15), line);
     }
   }
-
-  if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
-    /* It's a trap ! Let's dump GEMDOS/BIOS/XBIOS function number too. */
-    const int num = vector-TRAP_VECTOR_0;
-    static const char * type[16] =
-      { 0, "gemdos", 0, 0, 0, 0 , 0, 0, 0, 0 , 0, 0, 0, "bios" , "xbios", 0 };
-
-    if (type[num]) {
-      sc68->irq.sysfct = Wpeek(emu68, emu68->reg.a[7]+6);
-      sc68_debug(sc68,
-                 "         %s %02d ($%04X)\n",
-                 type[vector-TRAP_VECTOR_0], sc68->irq.sysfct, sc68->irq.sysfct);
-      sc68->irq.sysfct |= (num << 16);
-      return 0;                        /* don't break on know traps */
-    } else {
-      sc68->irq.sysfct = 0;
-    }
-  } else if (vector == ILLEGAL_VECTOR) {
-    const u32 n = (uint32_t)emu68->reg.d[1];
-    if (n >= 0XDEAD0000 && n <= 0XDEAD000F) {
-      const int num = n & 15;
-      /* check if last trap number match this magic illegal value */
-      int fct = num == ((sc68->irq.sysfct >> 16) & 0xffff)
-        ? sc68->irq.sysfct & 0xffff
-        : 0xffff
-        ;
-      sc68_error_add(
-        sc68,
-        "libsc68: trap function not implemented trap-#%d (%d) ($%X)",
-        emu68->reg.d[1] & 15, fct, fct);
-    }
-  } else if (vector == 0x134/4 /* Timer-A */ ||
-             vector == 0X120/4 /* Timer-B */ ||
-             vector == 0X114/4 /* Timer-C */ ||
-             vector == 0X110/4 /* Timer-D */ ) {
-    return 0;                  /* Don't break on timer interruption */
-  }
-
-  return 1; /* Break for everythong else */
 }
 
 static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
@@ -1027,7 +1086,7 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr,uint68_t maxinst)
   emu68_pushl(sc68->emu68, 0);
 
   status = emu68_finish(sc68->emu68, maxinst);
-  while (status == EMU68_stp) {
+  while (status == EMU68_STP) {
     sc68_debug(sc68,
                "libsc68: stop #$%04x ignored @ $%06x\n",
                sc68->emu68->reg.sr, sc68->emu68->reg.pc);
@@ -1036,10 +1095,10 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr,uint68_t maxinst)
 
   if (status != EMU68_NRM) {
     sc68_error_add(sc68,
-                   "libsc68: finish %06x with status %d (%s)"
-                   " pc=%06x sr=%04x"
-                   " irq#%d (%s) %06x",
-                   pc, status, emu68_status_name(status),
+                   "libsc68: pass#%d @%06x %s (%02x)"
+                   " %06x/%04x irq#%d (%s) %06x",
+                   sc68->mix.pass_count, pc,
+                   emu68_status_name(status), status,
                    sc68->emu68->reg.pc, sc68->emu68->reg.sr,
                    sc68->irq.vector, emu68_exception_name(sc68->irq.vector,0),
                    sc68->irq.pc);
@@ -1088,7 +1147,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
   memptr[0]     = 0x4e;
   memptr[1]     = 0x73;
 
-  if (emu68_debugmode(sc68->emu68)) {
+  if (1 || emu68_debugmode(sc68->emu68)) {
     const addr68_t base = INTR_ADDR;
     int i;
 
@@ -1096,7 +1155,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
 
     /* Setup non initialized exception detection. */
     for (i=0; i<256; ++i) {
-      addr68_t vector = base + i*6;
+      addr68_t vector = base + i*8;
 
       /* setup vector */
       memptr[ (i<<2) + 0 ] = vector >> 24;
@@ -1104,13 +1163,15 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
       memptr[ (i<<2) + 2 ] = vector >>  8;
       memptr[ (i<<2) + 3 ] = vector;
 
-      /* install instruction stop #$77NN */
+      /* install instruction stop #$2FNN */
       memptr[ vector + 0 ] = 0x4e;
       memptr[ vector + 1 ] = 0x72;
-      memptr[ vector + 2 ] = 0x77; /* magic SR value (see handler) */
+      memptr[ vector + 2 ] = 0x2F; /* magic SR value (see handler) */
       memptr[ vector + 3 ] = i;    /* vector number                */
-      memptr[ vector + 4 ] = 0x4e; /* RTE                          */
-      memptr[ vector + 5 ] = 0x73;
+      memptr[ vector + 4 ] = 0x4e; /* RESET                        */
+      memptr[ vector + 5 ] = 0x70;
+      memptr[ vector + 6 ] = 0x4e; /* RTE                          */
+      memptr[ vector + 7 ] = 0x73;
     }
   }
 

@@ -5,7 +5,7 @@
  * @date      1999-03-13
  * @brief     Struture definitions header.
  */
-/* Time-stamp: <2013-07-13 23:46:23 ben> */
+/* Time-stamp: <2013-07-14 19:49:35 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -159,9 +159,8 @@ typedef struct
  *  @param  emu68   emulator instance
  *  @param  vector  exception vector number
  *  @param  cookie  user-data pointer
- *  @return Execution break request (return non 0 to ask for a break)
 */
-typedef int (*emu68_handler_t)(emu68_t* const emu68, int vector, void * cookie);
+typedef void (*emu68_handler_t)(emu68_t* const emu68, int vector, void * cookie);
 
 /** Breakpoint definition. */
 typedef struct {
@@ -179,6 +178,8 @@ struct emu68_s {
   int  nerr;                            /**< Error counter.         */
 
   reg68_t   reg;                     /**< 68000 internal registers. */
+  int       save_sr;                 /**< SR before exec            */
+
   cycle68_t cycle;                   /**< Internal cycle counter.   */
   uint68_t  clock;                   /**< Master clock frequency.   */
 

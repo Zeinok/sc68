@@ -5,7 +5,7 @@
  * @date      1999/13/03
  * @brief     68k exception and interruption definition header.
  */
-/* Time-stamp: <2013-07-12 22:50:09 ben> */
+/* Time-stamp: <2013-07-14 12:59:19 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -31,12 +31,14 @@
  * @{
  */
 
-enum {
+enum emu68_vector_e {
   /* Virtual private vectors. */
   HWBREAK_VECTOR  = 0x100, /**< 1st hardware breakpoint, next follow.   */
   HWTRACE_VECTOR  = 0x120, /**< Report hardware trace.                  */
   HWHALT_VECTOR   = 0x121, /**< Report processor halted.                */
   HWSTOP_VECTOR   = 0x122, /**< Report processor suspended (stop).      */
+  HWRESET_VECTOR  = 0x123, /**< Report IO reset (reset).                */
+
   PRIVATE_VECTOR  = 0x200, /**< First private vector for users.         */
   /* Real 68k vectors. */
   RESET_VECTOR    = 0x000, /**< External (hardware) reset.              */
@@ -55,7 +57,6 @@ enum {
   SPURIOUS_VECTOR = 0x018, /**< Spurious interrupt vector address.      */
   TRAP_VECTOR_0   = 0x020, /**< Trap #n vector address.                 */
 };
-
 
 /** Nth TRAP vector address. */
 #define TRAP_VECTOR(N)   ( ( (N) & 15 ) + TRAP_VECTOR_0 )

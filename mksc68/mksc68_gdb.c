@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-13 22:35:14 ben>
+ * Time-stamp: <2013-07-15 04:58:04 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -820,8 +820,9 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
       STATUS(EXIT, HALT, "halted");
     } else if (vector == HWSTOP_VECTOR) {
       sprintf (irqname,"stop-#%04x",sr);
+
       if ((sr & 0x0700) == 0x0700) {
-        if ((sr & 0xFF00) == 0x5700) {
+        if ( (sr & 0x3F00) == 0x2F00 ) {
           const int num = sr & 0xFF;
           /* Unitialized exception catched !!! */
           emu68_exception_name(num,irqname);
@@ -829,8 +830,10 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
           msgnot("non-init exception #%d (%s) from %06x\n",
                  num, irqname, pc);
         }
-        gdb->sigval = SIGVAL_ABRT;
-        STATUS(EXIT, STOP, "stopped");
+        /* $$$ TEMP */
+        /* gdb->sigval = SIGVAL_ABRT; */
+        /* STATUS(EXIT, STOP, "stopped"); */
+        STATUS(CONT, IDLE, "stopped");
       } else {
         gdb->sigval = SIGVAL_STOP;
         SIGNAL(STOP, gdb->sigval, "stopped");

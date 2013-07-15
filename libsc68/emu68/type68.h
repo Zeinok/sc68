@@ -87,6 +87,9 @@ typedef void (*memfunc68_t)(emu68_t * const);
  * @}
  */
 
+#ifdef EMU68_EXPORT
+/* Should be only needed when compiling emu68 */
+
 #define BASE_FIX (sizeof(int68_t)<<3) /* number of bit of int68_t type. */
 #define BYTE_FIX (BASE_FIX-8)  /* shift to normalize byte operands. */
 #define WORD_FIX (BASE_FIX-16) /* shift to normalize word operands. */
@@ -108,5 +111,7 @@ typedef void (*memfunc68_t)(emu68_t * const);
 #define NRM_BYTE_ONE ( (int68_t) ( (int68_t) 0x00000001 << BYTE_FIX ) )
 #define NRM_WORD_ONE ( (int68_t) ( (int68_t) 0x00000001 << WORD_FIX ) )
 #define NRM_LONG_ONE ( (int68_t) ( (int68_t) 0x00000001 << LONG_FIX ) )
+
+#endif
 
 #endif /* #ifndef _EMU68_TYPE68_H_ */

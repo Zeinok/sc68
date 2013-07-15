@@ -5,7 +5,7 @@
  * @date     1998-09-03
  * @brief    Music file header.
  */
-/* Time-stamp: <2013-07-08 07:56:49 ben> */
+/* Time-stamp: <2013-07-14 12:55:18 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -107,16 +107,11 @@ typedef struct {
   unsigned int a0;       /**< A0 Loading address. @see SC68_LOADADDR. */
   unsigned int frq;      /**< Frequency in Hz (default:50).           */
 
-//  unsigned int start_ms; /**< Start time in ms from disk 1st track.   */
-//  unsigned int total_ms; /**< Total time in ms (first+loops).         */
-//  unsigned int total_fr; /**< Total time in frames.                   */
-
   unsigned int first_ms; /**< First loop duration in ms.              */
   unsigned int first_fr; /**< First loop duration in frames.          */
   unsigned int loops_ms; /**< Loop duration in ms (0:no loop).        */
   unsigned int loops_fr; /**< Loop duration in frames (0:no loop).    */
   int          loops;    /**< Default number of loop (-1:infinite).   */
-//  int          track;    /**< Track remapping number (0:default).     */
 
   struct {
     unsigned   sfx  : 1; /**< Track is a sound-fx not a music.        */

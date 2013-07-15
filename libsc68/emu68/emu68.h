@@ -5,7 +5,7 @@
  * @date      1999/03/13
  * @brief     68K emulator header.
  */
-/* Time-stamp: <2013-07-13 18:40:47 ben> */
+/* Time-stamp: <2013-07-14 12:08:02 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -442,7 +442,7 @@ uint68_t emu68_crc32(emu68_t * const emu68);
 enum emu68_status_e {
   EMU68_ERR  = -1,          /**< Execution failed.                          */
   EMU68_NRM  = 0x00,        /**< Execution running normally.                */
-  EMU68_stp  = 0x01,        /**< Execution stopped by the stop instruction. */
+  EMU68_STP  = 0x01,        /**< Execution stopped by the stop instruction. */
   EMU68_HLT  = 0x12,        /**< Execution halted (double fault or user.    */
   EMU68_BRK  = 0x13,        /**< Execution breaked by user.                 */
   EMU68_XCT  = 0x24         /**< Execution in exception.                    */
@@ -459,16 +459,23 @@ const char * emu68_status_name(enum emu68_status_e status);
 
 EMU68_API
 /**
- * Execute one instruction.
+ * Execute one instruction. If the inst parameter is EMU68_STEP
+ * emu68_t::framechk is cleared and emu68_t::status is set to
+ * EMU68_NRM for a clean new run.
  *
  * @param  emu68     emulator instance
- * @param  newframe  if true clear emu68::framechk
+ * @param  inst      EMU68_STEP or EMU68_CONT
  * @return @ref emu68_status_e "execution status"
  */
-int emu68_step(emu68_t * const emu68, int newframe);
+int emu68_step(emu68_t * const emu68, uint68_t inst);
 
-enum {
-  EMU68_CONT = -1 /**< Tells emu68_finish() to continue a breaked run */
+/**
+ * Various constant.
+ */
+enum emu68_const_e {
+  EMU68_STEP = 0, /**< Start a fresh run (emu68_step())               */
+  EMU68_INF  = 0, /**< No instruction limit emu68_finish()            */
+  EMU68_CONT = -1 /**< Continue a run (emu68_step() or emu68_finish() */
 };
 
 EMU68_API

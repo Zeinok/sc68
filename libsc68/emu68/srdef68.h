@@ -5,7 +5,7 @@
  * @date      1999/13/03
  * @brief     Status Register (SR) definition header.
  */
-/* Time-stamp: <2013-07-14 18:27:22 ben> */
+/* Time-stamp: <2013-07-14 19:28:11 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -69,9 +69,9 @@ enum {
   SR_7  = (1<<SR_7_BIT)  /**< bit#7 always 0.       */,
 
   SR_I  = (7<<SR_I_BIT)  /**< IPL mask.    */,
-  SR_I0 = (7<<SR_I0_BIT) /**< IPL mask #0. */,
-  SR_I1 = (7<<SR_I1_BIT) /**< IPL mask #1. */,
-  SR_I2 = (7<<SR_I2_BIT) /**< IPL mask #2. */,
+  SR_I0 = (1<<SR_I0_BIT) /**< IPL mask #0. */,
+  SR_I1 = (1<<SR_I1_BIT) /**< IPL mask #1. */,
+  SR_I2 = (1<<SR_I2_BIT) /**< IPL mask #2. */,
 
   SR_B  = (1<<SR_B_BIT)  /**< bit#11 always 0.                */,
   SR_M  = (1<<SR_M_BIT)  /**< Master Interrupt State (68020). */,

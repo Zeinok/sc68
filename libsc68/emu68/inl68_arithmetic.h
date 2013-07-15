@@ -5,7 +5,7 @@
  * @date      2009/05/18
  * @brief     68k arithmetical instruction inlines.
  */
-/* Time-stamp: <2013-07-07 19:13:15 ben>  */
+/* Time-stamp: <2013-07-15 05:28:38 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 

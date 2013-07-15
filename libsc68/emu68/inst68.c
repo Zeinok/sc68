@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-07 19:53:36 ben>
+ * Time-stamp: <2013-07-14 12:45:41 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -56,10 +56,13 @@ void exception68(emu68_t * const emu68, const int vector, const int level)
     if ( savest == EMU68_XCT &&
          ( vector == BUSERR_VECTOR || vector == ADRERR_VECTOR ) ) {
       /* Double fault ! */
-      emu68->status = EMU68_HLT;        /* Halt processor */
+      emu68->status = EMU68_HLT;       /* Halt processor */
+
       /* Let user know. */
       if (emu68->handler)
         emu68->handler(emu68, HWHALT_VECTOR, emu68->cookie);
+      return;
+
     } else if ( vector == RESET_VECTOR ) {
       REG68.sr  |= SR_I;
       REG68.a[7] = read_L(RESET_SP_VECTOR << 2);
@@ -71,13 +74,17 @@ void exception68(emu68_t * const emu68, const int vector, const int level)
       pushl(REG68.pc);
       pushw(savesr);
       REG68.pc  = read_L(vector << 2);
-      emu68->status = EMU68_NRM;        /* Back to normal mode */
+
+      /* $$$ Which it is ??? */
+      if (0)
+        emu68->status = EMU68_NRM;     /* Back to normal mode */
+      else
+        emu68->status = savest;        /* Back to saved mode */
     }
   }
 
-  if (emu68->handler && emu68->handler(emu68, vector, emu68->cookie) ) {
-    emu68->status = EMU68_BRK;        /* User forced exit */
-  }
+  if (emu68->handler)
+    emu68->handler(emu68, vector, emu68->cookie);
 
 }
 

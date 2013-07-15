@@ -4,28 +4,39 @@
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
-;;; Time-stamp: <2013-07-13 18:43:26 ben>
+;;; Time-stamp: <2013-07-15 04:36:54 ben>
+
+
+;;; Unhandled trap vector and function will execute a stop with a
+;;; special value followed by a reset. The value is used to detect
+;;; this code and to identify which vector was called.
 
 StackSize = 1024	
-	
+STOP_VAL  = $2F20
+
 ;;; Install trap vectors
 ;;; 
 install_trap:
 	movem.l	d0/a0-a2,-(a7)
+
+	;; Install our trap vectors
+	lea	gemdos(pc),a0
+	move.l	a0,$84.w
+	lea	xbios(pc),a0
+	move.l	a0,$B8.w
 	
 	;; Install trap vectors
-	lea	trap_illegal(pc),a0
+	lea	trap_0(pc),a0
 	lea	$80.w,a1
 	moveq	#15,d0
 .copy:
-	move.l	a0,(a1)+
+	tst.l	(a1)
+	bne.s	.skip
+	move.l	a0,(a1)
+.skip:
+	addq	#4,a1
 	addq	#8,a0
 	dbf	d0,.copy
-	lea	gemdos(pc),a0
-	move.l	a0,$84.w
-	
-	;; lea	xbios(pc),a0
-	;; move.l	a0,$B8.w
 	
 	;; Init dummy malloc system
 	lea	malloc(pc),a0
@@ -49,55 +60,49 @@ close:	macro
 	rte
 	}	
 
-return_d0 macro
+return:	macro
 	{
-	move.l	d0,(a7)
+	move.l	\1,(a7)
 	}
-
+	
+ret_d0:	macro
+	{
+	return	d0
+	}
+	
+trap_n:	macro
+	{
+trap_\1:
+	stop	#STOP_VAL+'\1'
+	reset
+	rte
+	}
+	
 ;;; Gemdos functions
 ;;;
 ;;; 0(a7).w -> SR
 ;;; 2(a7).l -> PC
 ;;; 6(a7).w -> Function !!! Cou
 
-	
 trap_close:
 	close
-
-trap_illegal:
-	move.l	#$DEAD0000,d1
-	illegal
-	move.l	#$DEAD0001,d1
-	illegal
-	move.l	#$DEAD0002,d1
-	illegal
-	move.l	#$DEAD0003,d1
-	illegal
-	move.l	#$DEAD0004,d1
-	illegal
-	move.l	#$DEAD0005,d1
-	illegal
-	move.l	#$DEAD0006,d1
-	illegal
-	move.l	#$DEAD0007,d1
-	illegal
-	move.l	#$DEAD0008,d1
-	illegal
-	move.l	#$DEAD0009,d1
-	illegal
-	move.l	#$DEAD000A,d1
-	illegal
-	move.l	#$DEAD000B,d1
-	illegal
-	move.l	#$DEAD000C,d1
-	illegal
-	move.l	#$DEAD000D,d1
-	illegal
-	move.l	#$DEAD000E,d1
-	illegal
-	move.l	#$DEAD000F,d1
-	illegal
-
+	
+	trap_n 0
+	trap_n 1
+	trap_n 2
+	trap_n 3
+	trap_n 4
+	trap_n 5
+	trap_n 6
+	trap_n 7
+	trap_n 8
+	trap_n 9
+	trap_n A
+	trap_n B
+	trap_n C
+	trap_n D
+	trap_n E
+	trap_n F
 	
 ;;; ======================================================================
 ;;; TRAP #1 GEMDOS
@@ -105,7 +110,6 @@ trap_illegal:
 	
 gemdos:
 	open
-	move.l	#$DEAD0D05,d1
 
 	cmp.w	#$09,d0
 	beq.s	cconws
@@ -122,8 +126,10 @@ gemdos:
 	cmp.w	#$49,d0
 	beq.s	mfree
 
-	move.l	#$DEAD0D05,d1
-	illegal
+	stop	#STOP_VAL+$1
+	reset
+	
+	bra	trap_close
 
 ;;; ======================================================================
 ;;; cconws(string.l)
@@ -141,8 +147,8 @@ cconws:
 	tst.b	(a0)+
 	bne.s	.loop
 .done:
-	return_d0
-	close
+	ret_d0
+	bra	trap_close
 	
 	
 ;;; ======================================================================
@@ -182,8 +188,8 @@ super:
 	moveq	#SUP_SUPER,d0
 	
 .done:	
-	return_d0
-	close
+	ret_d0
+	bra	trap_close
 	
 ;;; ======================================================================
 ;;; sversion()
@@ -197,8 +203,8 @@ super:
 ;;	 	MultiTOS 1.00, MultiTOS 1.08
 sversion:
 	move.l	#$1500,d0
-	return_d0
-	close
+	ret_d0
+	bra	trap_close
 
 ;;; ======================================================================
 ;;; malloc(amount.l)
@@ -210,16 +216,16 @@ malloc:
 	sub.l	(a6)+,d0		; alloc amount
 	bclr	#0,d0			; ensure even ptr
 	move.l	d0,(a0)			; save malloc_ptr
-	return_d0
-	close
+	ret_d0
+	bra	trap_close
 
 ;;; ======================================================================
 ;;; mfree(ptr)
 ;;; trap #1 function 73 ($49)
 mfree:
 	moveq	#0,d0
-	return_d0
-	close
+	ret_d0
+	bra	trap_close
 	
 ;;; ======================================================================
 ;;; mxmalloc(amount.l,mode.w)
@@ -232,17 +238,31 @@ mfree:
 
 xbios:
 	open
-	move.l	#$DEAD000E,d1
-	
+
+	cmp.w	#$20,d0
+	beq.s	dosound
+
+	cmp.w	#$26,d0
+	beq.s	superexec
+
 	cmp.w	#$80,d0
 	beq.s	locksnd
 
 	cmp.w	#$81,d0
 	beq.s	unlocksnd
 
-	move.l	#$DEADB105,d1
-	illegal
+	stop	#STOP_VAL+$E
+	reset
+	bra	trap_close
 
+;;; ======================================================================
+;;; Superexec(addr.l)
+;;; trap #14 function 38 ($26)
+superexec:
+	pea	trap_close(pc)
+	move.l	(a6)+,-(a7)
+	rts
+	
 ;;; ======================================================================
 ;;; Locksnd()
 ;;; trap #14 function 128 ($80)
@@ -254,8 +274,8 @@ locksnd:
 	bne.s	.locked
 	moveq	#1,d0
 .locked:
-	return_d0
-	close
+	ret_d0
+	bra	trap_close
 
 ;;; ======================================================================
 ;;; Unlocksnd()
@@ -268,5 +288,63 @@ unlocksnd:
 	clr.b	(a0)
 	moveq	#0,d0
 .notlocked:
-	return_d0
-	close
+	ret_d0
+	bra	trap_close
+	
+;;; ======================================================================
+;;; Dosound(addr.l)
+;;; trap #14 function 32 ($20)
+	dc.w	0		; -6: tmp storage
+	dc.l	0		; -4: ptr storage
+dosound:
+	lea	dosound(pc),a0
+	move.l	(a6)+,a1	; sound commands ptr 
+	cmpa.l	#1,a1
+	bne.s	.no_inquire
+	return	-(a0)
+	bra.s	.bye
+.no_inquire:
+	lea	$ffff8800.w,a2
+	moveq	#0,d0
+	move	-4(a0),d1	; tmp register
+.next:
+	move.b	(a1)+,d0
+	bmi.s	.commands
+	lsl	#8,d0
+	move.b	(a1)+,d0
+	movep	d0,0(a2)
+	bra.s	.next
+.commands:
+	cmp.b	#$80,d0
+	bne.s	.no80
+	move.b	(a1)+,d1
+	bra.s	.next
+.no80:
+	cmp.b	#$81,d0
+	bne.s	.no81
+
+	move.b	(a1)+,d0	; YM register to program
+	move.b	(a1)+,d2	; increments (2nd-complement)
+	move.b	(a1)+,d3	; stop value
+.lp80:
+	move.b	d0,d4
+	lsl	#8,d4
+	move.b	d1,d4
+	movep	d4,0(a2)
+	cmp.b	d1,d3
+	beq.s	.finish
+	sub.b	d2,d1
+	bra.s	.lp80
+.no81:
+	move.b	(a1)+,d0
+	beq.s	.finish
+	;; d0 is a number of frame to wait, we can't do that here
+	stop	#STOP_VAL+$E
+	reset
+	bra.s	.bye
+.finish:
+	move.l	a1,-(a0)	; store ptr
+	move.w	d1,-(a0)	; store tmp
+.bye:	
+	bra	trap_close
+	

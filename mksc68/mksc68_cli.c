@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-12 21:40:00 ben>
+ * Time-stamp: <2013-07-14 22:23:51 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -59,7 +59,7 @@ static char * wo_readline (const char * prompt)
   }
   errno = 0;
   s = fgets(tmp, sizeof(tmp)-1, stdin);
-  
+
   if (s) {
     s[sizeof(tmp)-1] = 0;
     s = strdup(s);

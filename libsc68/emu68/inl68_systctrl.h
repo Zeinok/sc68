@@ -5,7 +5,7 @@
  * @date      2009/05/18
  * @brief     68k system control operation inlines.
  */
-/* Time-stamp: <2013-07-14 19:42:13 ben>  */
+/* Time-stamp: <2013-07-14 20:05:28 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -52,20 +52,16 @@ void inl_stop68(emu68_t * const emu68)
   const u16 stop_sr = (u16) get_nextw();
   if ( emu68->reg.sr & SR_S ) {
     /* Superuser mode */
-    const int save_sr = emu68->reg.sr;
 
     /* set the stop value and trigger status change exception */
     emu68->reg.sr = stop_sr;
     emu68->status = EMU68_STP;
     exception68(emu68, HWSTOP_VECTOR, -1);
 
-    /* 68k trace mode release the stop mode. */
-    if ((save_sr & (SR_T0|SR_T1)) == SR_T) {
-      emu68->reg.sr |= SR_T;            /* $$$ or save_sr */
-      if (emu68->status == EMU68_STP)
-        emu68->status = EMU68_NRM;      /* Trace disable stop mode */
-      /* Trace exception will be handle later out of here. */
-    }
+    /* Entering the instruction in trace mode will disable the stop
+     * status. */
+    if ( (emu68->save_sr & SR_T) && emu68->status == EMU68_STP)
+      emu68->status = EMU68_NRM;
   } else {
     /* User mode triggers a privilege violation exception */
     exception68(emu68, PRIVV_VECTOR, -1);
