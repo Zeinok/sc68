@@ -4,7 +4,7 @@
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
-;;; Time-stamp: <2013-07-15 04:36:54 ben>
+;;; Time-stamp: <2013-07-15 15:59:23 ben>
 
 
 ;;; Unhandled trap vector and function will execute a stop with a
@@ -239,6 +239,9 @@ mfree:
 xbios:
 	open
 
+	cmp.w	#$1f,d0
+	beq	xbtimer
+
 	cmp.w	#$20,d0
 	beq.s	dosound
 
@@ -290,6 +293,7 @@ unlocksnd:
 .notlocked:
 	ret_d0
 	bra	trap_close
+
 	
 ;;; ======================================================================
 ;;; Dosound(addr.l)
@@ -347,4 +351,98 @@ dosound:
 	move.w	d1,-(a0)	; store tmp
 .bye:	
 	bra	trap_close
+
+
+;;; ======================================================================
+;;; Xbtimer(timer.w, ctrl.w, data.w, vector.l)
+;;; trap #14 function 31 ($1f)
+
+	RSRESET
+timer_vector:	rs.w	1
+ti_ctrlreg:	rs.w	1
+ti_datareg:	rs.w	1
+ti_mask:	rs.b	1
+ti_channel:	rs.b	1
+ti_sz:	rs.b	0	
+
+; vector, ctrl-reg, data-reg, msk.b+chan.q+bit.q
+timers:
+tAdef:	dc.w	$134, $fa19, $fa1f, $f005
+tBdef:	dc.w	$120, $fa1b, $fa21, $f000
+tCdef:	dc.w	$114, $fa1d, $fa23, $0f15
+tDdef:	dc.w	$110, $fa1d, $fa25, $f014
+
+xbtimer:
+	lea	timers(pc),a2
+
+	;; get timer
+	moveq	#3,d0
+	and	(a6)+,d0	; timer number (param)
+	lsl	#3,d0		; offset
+	add	d0,a2		; a2: timer definition
+
+	;; stop the timer
+	move.w	ti_ctrlreg(a2),a5	; a5: control reg addr
+	move.b	(a5),d4
+	move.b	ti_mask(a2),d0	; d0: mask
+	and.b	d0,d4
+	move.b	d4,(a5)		; timer stopped
+
+	;; prepare ctrl
+	move	(a6)+,d1	; ctrl (param)
+	not.b	d0
+	smi	d2
+	and	#4,d2		; d2: shift
+	lsl	d2,d1
+	and	d0,d1
+	or	d1,d4		; d4: ctrl register (ready)
+
+	;; ===================================================
+	;; $$$ TEMP, right now only acknowledge stop timer
+	;;
+	tst.b	d1
+	bne.s	.cont
+
+	move.w	ti_datareg(a2),a4
+	move	(a6)+,d0
+	move.b	d0,(a4)
+	move	(a2),a2
+	move.l	(a6)+,(a2)
+	move.b	d4,(a5)
+	bra	trap_close
+	
+.cont:
+	stop	#STOP_VAL+$E
+	reset
+	bra	trap_close
+
+	;; 
+	;; $$$ END-TEMP
+	;; ===================================================
+
+	
+	move.w	ti_datareg(a2),a4 ; a4: data reg addr
+	move	(a6)+,d0
+	move.b	d0,(a4)		; data reg (done)
+
+
+	;; set intena and intmsk
+	moveq	#$7,d0
+	moveq	#0,d1
+	move.b	ti_channel(a2),d1
+	and.b	d1,d0			; d0 = bit number
+	lsr	#3,d1			; d1 is channel [0/2]
+	lea	$fffffa00.w,a1
+	bset	d0,$07(a1,d1)
+	bset	d0,$13(a1,d1)
+	bset	#3,$17(a1)		; set MFP to AEI
+	bset	d6,d7
+
+	;; set vector and start
+	move	(a2),a2		; timer vector
+	move.l	(a6)+,(a2)	; set vector (param)
+	move.b	d4,(a5)		; start the timer
+	
+	bra	trap_close
+	
 	
