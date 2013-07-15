@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-15 06:53:42 ben>
+ * Time-stamp: <2013-07-15 16:47:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -80,6 +80,9 @@ enum {
 static u8 trap_func[] = {
 #include "sc68/trap68.h"
 };
+
+static const char * trap_type[16] =
+{ 0, "gemdos", 0, 0, 0, 0 , 0, 0, 0, 0 , 0, 0, 0, "bios" , "xbios", 0 };
 
 static u8 thex[16] = {
   '0','1','2','3','4','5','6','7',
@@ -310,10 +313,8 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
   sc68_t* sc68 = cookie;
   char    irqname[32];
   const char * stname;
-  int     dumpex, savest, subvec, trapfc;
+  int     dumpex, savest, subvec;
   u32     sr, pc;
-  static const char * traptype[16] =
-    { 0, "gemdos", 0, 0, 0, 0 , 0, 0, 0, 0 , 0, 0, 0, "bios" , "xbios", 0 };
 
   /* Store last interruption */
   sc68->irq.pc     = emu68->reg.pc;
@@ -334,7 +335,6 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
   /* Init vars */
   stname = emu68_status_name(emu68->status);
   subvec = 0;
-  trapfc = -1;
   dumpex = 1;
   savest = emu68->status;
 
@@ -365,9 +365,9 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
     if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
       subvec = vector - TRAP_VECTOR(0);
       vector = TRAP_VECTOR(0);
-      if (traptype[subvec]) {
-        trapfc = sc68->irq.sysfct = Wpeek(emu68, emu68->reg.a[7]+6);
-        emu68->status = savest;         /* Don't break */
+      if (trap_type[subvec]) {
+        sc68->irq.sysfct = Wpeek(emu68, emu68->reg.a[7]+6) & 0xFFFF;
+        emu68->status    = savest;         /* Don't break */
       }
     }
   } else {
@@ -429,14 +429,14 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
     const addr68_t adr = emu68->reg.a[7] & emu68->memmsk;
     const addr68_t bot = emu68->memmsk+1-16;
     char line[16 * 3];
-    int i,j,l = strlen(irqname);
+    int i, j, l = strlen(irqname);
 
     if (vector == ILLEGAL_VECTOR)
       sprintf(irqname+l, "#$%02x-%02x",
               memptr[pc&emu68->memmsk], memptr[(pc+1)&emu68->memmsk]);
-    else if (vector == TRAP_VECTOR(0))
-      sprintf(irqname+l, " %s #%d ($%02x)",
-              traptype[subvec] ? traptype[subvec] : "N/A", trapfc, trapfc&255);
+    else if (vector == TRAP_VECTOR(0) && trap_type[subvec])
+      sprintf(irqname, "%s(%d) ($%02x)",
+              trap_type[subvec], sc68->irq.sysfct, sc68->irq.sysfct);
 
     /* dump cpu status */
     sc68_debug(sc68,
@@ -519,7 +519,8 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
   /* Install cookie and interruption handler (debug mode only). */
   emu68_set_handler(sc68->emu68, (emu68_debug& 1 ) ? irqhandler : 0);
   emu68_set_cookie(sc68->emu68, sc68);
-  sc68->irq.pc = sc68->irq.vector = -1;
+  sc68->irq.pc     = 0xDEAD;
+  sc68->irq.vector = -1;
 
   /* Install gdb-stub */
   if (emu68_debug & 2) {
@@ -1088,20 +1089,34 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr,uint68_t maxinst)
   status = emu68_finish(sc68->emu68, maxinst);
   while (status == EMU68_STP) {
     sc68_debug(sc68,
-               "libsc68: stop #$%04x ignored @ $%06x\n",
+               "libsc68: stop #$%04X ignored @ $%6X\n",
                sc68->emu68->reg.sr, sc68->emu68->reg.pc);
     status = emu68_finish(sc68->emu68, EMU68_CONT);
   }
 
   if (status != EMU68_NRM) {
+    char irqname[32];
+    if (status == EMU68_HLT && (sc68->emu68->reg.sr & 0X3F00) == 0X2F00) {
+      sc68->irq.vector = sc68->emu68->reg.sr & 0xFF;
+      strcpy(irqname,"NC-");
+      emu68_exception_name(sc68->irq.vector,irqname+3);
+      if (sc68->irq.vector >= TRAP_VECTOR(0) &&
+          sc68->irq.vector <= TRAP_VECTOR(15)) {
+        int n = sc68->irq.vector-TRAP_VECTOR(0);
+        if (trap_type[n])
+          sprintf(irqname+3, "%s-$%X", trap_type[n], sc68->irq.sysfct);
+      }
+    } else {
+      emu68_exception_name(sc68->irq.vector,irqname);
+    }
     sc68_error_add(sc68,
-                   "libsc68: pass#%d @%06x %s (%02x)"
-                   " %06x/%04x irq#%d (%s) %06x",
+                   "libsc68: pass#%d @$%X"
+                   " %s (%02X)"
+                   " $%X/$%04X irq#%d (%s) @$%X",
                    sc68->mix.pass_count, pc,
                    emu68_status_name(status), status,
                    sc68->emu68->reg.pc, sc68->emu68->reg.sr,
-                   sc68->irq.vector, emu68_exception_name(sc68->irq.vector,0),
-                   sc68->irq.pc);
+                   sc68->irq.vector, irqname, sc68->irq.pc);
   }
   return status;
 }
@@ -1109,6 +1124,8 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr,uint68_t maxinst)
 static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
 {
   u8 * memptr;
+  const addr68_t base = INTR_ADDR;
+  int i;
 
   assert(sc68);
   assert(sc68->emu68);
@@ -1138,43 +1155,36 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     emu68_ioplug(sc68->emu68, sc68->mwio);
   }
   emu68_reset(sc68->emu68);
-  emu68_memset(sc68->emu68,0,0,0); /* Really ? Quiet an heavy operation */
 
+  /* disable that we should not need it */
+  if (emu68_debugmode(sc68->emu68)) {
+    sc68_debug(sc68," -> Clear 68k memory\n");
+    emu68_memset(sc68->emu68,0,0,0);
+  }
   memptr = emu68_memptr(sc68->emu68,0,0x1000);
 
-  /* Badly iniatialized exception might reach this so let just
-   * RTE */
-  memptr[0]     = 0x4e;
-  memptr[1]     = 0x73;
+  sc68_debug(sc68," -> Exception detection code in $%06x\n", INTR_ADDR);
 
-  if (1 || emu68_debugmode(sc68->emu68)) {
-    const addr68_t base = INTR_ADDR;
-    int i;
+  /* Install non initialized exception detection code. */
+  for (i=0; i<256; ++i) {
+    addr68_t vector = base + i*8;
 
-    sc68_debug(sc68," -> Exception detection code in $%06x\n", INTR_ADDR);
+    /* setup vector */
+    memptr[ (i<<2) + 0 ] = vector >> 24;
+    memptr[ (i<<2) + 1 ] = vector >> 16;
+    memptr[ (i<<2) + 2 ] = vector >>  8;
+    memptr[ (i<<2) + 3 ] = vector;
 
-    /* Setup non initialized exception detection. */
-    for (i=0; i<256; ++i) {
-      addr68_t vector = base + i*8;
-
-      /* setup vector */
-      memptr[ (i<<2) + 0 ] = vector >> 24;
-      memptr[ (i<<2) + 1 ] = vector >> 16;
-      memptr[ (i<<2) + 2 ] = vector >>  8;
-      memptr[ (i<<2) + 3 ] = vector;
-
-      /* install instruction stop #$2FNN */
-      memptr[ vector + 0 ] = 0x4e;
-      memptr[ vector + 1 ] = 0x72;
-      memptr[ vector + 2 ] = 0x2F; /* magic SR value (see handler) */
-      memptr[ vector + 3 ] = i;    /* vector number                */
-      memptr[ vector + 4 ] = 0x4e; /* RESET                        */
-      memptr[ vector + 5 ] = 0x70;
-      memptr[ vector + 6 ] = 0x4e; /* RTE                          */
-      memptr[ vector + 7 ] = 0x73;
-    }
+    /* install instruction stop #$2FNN */
+    memptr[ vector + 0 ] = 0x4e;
+    memptr[ vector + 1 ] = 0x72;
+    memptr[ vector + 2 ] = 0x2F; /* magic SR value (see handler) */
+    memptr[ vector + 3 ] = i;    /* vector number                */
+    memptr[ vector + 4 ] = 0x4e; /* RESET                        */
+    memptr[ vector + 5 ] = 0x70;
+    memptr[ vector + 6 ] = 0x4e; /* RTE                          */
+    memptr[ vector + 7 ] = 0x73;
   }
-
 
   /* $$$ Legacy fix for Zound Dragger. Would be good to get rid of
    * this. */
@@ -1191,8 +1201,8 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     /* Ensure trap emulator do not override exception handler */
     assert(sizeof(trap_func) <= INTR_ADDR-TRAP_ADDR);
 
+    /* Install trap emulator */
     emu68_memput(sc68->emu68, TRAP_ADDR, trap_func, sizeof(trap_func));
-
     sc68->emu68->cycle = 0;
     sc68_debug(sc68," -> Running trap init code -- $%06x ...\n", TRAP_ADDR);
     status = finish(sc68, TRAP_ADDR, 0x2300, INIT_MAX_INST);
@@ -1300,7 +1310,10 @@ static int change_track(sc68_t * sc68, int track, int loop)
 
   /* Copy music data into 68K memory */
   if (emu68_memput(sc68->emu68, a0, (u8 *)m->data, m->datasz)) {
-    sc68_error_add(sc68,"libsc68: %s", emu68_error_get(sc68->emu68));
+    sc68_error_add(sc68,
+                   "libsc68: 68k memory is too short for track #%02d", track);
+    sc68_error_add(sc68,
+                   "libsc68: %s", emu68_error_get(sc68->emu68));
     return SC68_ERROR;
   }
   sc68_debug(sc68," -> music data -- [%06x-%06x]\n", a0, a0+m->datasz-1);
