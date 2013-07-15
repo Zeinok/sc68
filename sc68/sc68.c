@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-13 14:57:56 ben>
+ * Time-stamp: <2013-07-15 16:54:30 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -230,6 +230,7 @@ static int print_usage(void)
       "  -c --stdout         Output raw to stdout (--output=stdout://)\n"
       "  -n --null           No output (--output=null://)\n"
       "  -w --wav            Riff Wav output. Use in combination with -o.\n"
+      "  -m --memory=<val>   68k memory to allocated (2^<val> bytes)\n"
       );
 
   option68_help(stdout,print_option);
@@ -469,8 +470,10 @@ int main(int argc, char *argv[])
   const char * tracks  = "def";
   const char * loops   = "def";
   const char * rates   = "def";
+  const char * memory  = "def";
 
   int i,j;
+  int log2m = 0;
   int track = 0;
   int loop  = 0;
   int rate  = 0;
@@ -495,6 +498,7 @@ int main(int argc, char *argv[])
     {"track",      1, 0, 't'},
     {"loop",       1, 0, 'l'},
     {"rate",       1, 0, 'r'},
+    {"memory",     1, 0, 'm'},
     {0,0,0,0}
   };
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
@@ -553,6 +557,8 @@ int main(int argc, char *argv[])
       break;
     case 't':
       tracks = optarg; break;       /* --track=      */
+    case 'm':
+      memory = optarg; break;       /* --memory=     */
     case 'l':
       loops = optarg; break;        /* --loop=       */
     case 'r':
@@ -664,9 +670,17 @@ int main(int argc, char *argv[])
     rate = strtoul(rates,0,10);
   }
 
+  /* Parse --memory= */
+  if (!strcmp(memory,"def")) {
+    log2m = 0;
+  } else {
+    log2m = strtoul(memory,0,10);
+  }
+
   /* Create emulator instance */
   memset(&create68,0,sizeof(create68));
   create68.sampling_rate = rate;
+  create68.log2mem = log2m;
   sc68 = sc68_create(&create68);
   if (!sc68) {
     goto error;
