@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-15 06:43:01 ben>
+ * Time-stamp: <2013-07-15 16:42:32 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -190,11 +190,10 @@ u8 * emu68_memptr(emu68_t * const emu68, addr68_t dst, uint68_t sz)
   if (emu68) {
     /* const addr68_t top = 0; */
     const addr68_t bot = MEMMSK68+1;
-    addr68_t end = (dst+sz) & MEMMSK68;
-
-    if (end > bot) {
+    const addr68_t end = dst+sz;
+    if (dst >= bot || end > bot || dst > end) {
       emu68_error_add(emu68,
-                      "Invalid memory range [$%06x..$%06x] > $%06x",
+                      "invalid memory range [$%06x..$%06x] > $%06x",
                       dst,end,bot);
     } else {
       ptr = emu68->mem + dst;
@@ -679,7 +678,7 @@ emu68_t * emu68_create(emu68_parms_t * const parms)
   }
   if (p->log2mem < 16 || p->log2mem > 24) {
     emu68_error_add(emu68,
-                    "Invalid requested amount of memory -- 2^%d", p->log2mem);
+                    "invalid requested amount of memory -- 2^%d", p->log2mem);
     goto error;
   }
 
@@ -688,7 +687,7 @@ emu68_t * emu68_create(emu68_parms_t * const parms)
   }
   if (p->clock<500000u || p->clock>60000000u) {
     emu68_error_add(emu68,
-                    "Invalid clock frequency -- %u", p->clock);
+                    "invalid clock frequency -- %u", p->clock);
     goto error;
   }
 
