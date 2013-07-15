@@ -5,7 +5,7 @@
  * @date     2003-08-22
  * @brief    Message header.
  */
-/* Time-stamp: <2013-07-08 07:46:07 ben> */
+/* Time-stamp: <2013-07-15 17:44:36 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -379,7 +379,7 @@ void msg68x_trace(void * cookie, const char * fmt, ...);
 #  if defined(__GNUC__) || defined(CPP_SUPPORTS_VA_MACROS)
 #   define TRACE68(cat,fmt,...)
 #  else
-#   define TRACE68 while (0) msg68_dummy
+#   define TRACE68 if (0);else msg68_dummy
 static void msg68_dummy(int cat, const char * fmt, ...) {}
 #  endif
 #  define VTRACE68(cat,fmt,list)

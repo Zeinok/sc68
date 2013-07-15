@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-17 13:06:40 ben>
+ * Time-stamp: <2013-07-15 17:46:17 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -153,7 +153,7 @@ int timer_get_tdr(const mfp_timer_t * const ptimer, const bogoc68_t bogoc)
 static inline
 void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
 {
-#ifdef DEBUG
+#ifndef NDEBUG
   uint_t          frq = timerfrq(ptimer->tdr_res); /* old frequency       */
 #endif
   const bogoc68_t cti = ptimer->cti - bogoc;       /* cycles to interrupt */
@@ -280,7 +280,7 @@ int68_t mfp_get_tdr(mfp_t * const mfp, const int timer, const bogoc68_t bogoc)
 void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
 {
   mfp_timer_t * const  ptimer = &mfp->timers[timer&3];
-#if defined(DEBUG)
+#ifndef NDEBUG
   const uint_t old_tdr = ptimer->tdr_res;
 #endif
 
@@ -294,7 +294,7 @@ void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
           "mfp: timer-%c -- reload TDR @%u -- %u\n",
           ptimer->def.letter, bogoc, ptimer->tdr_res);
   }
-#if defined(DEBUG)
+#ifndef NDEBUG
   else if (ptimer->tcr && v != old_tdr) {
     uint_t old_frq = timerfrq(old_tdr);
     TRACE68(mfp_cat,
