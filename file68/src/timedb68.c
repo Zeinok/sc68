@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-07 15:07:55 ben>
+ * Time-stamp: <2013-07-15 23:36:53 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -32,7 +32,7 @@
 #include <stdlib.h>
 
 #define HBIT 32                         /* # of bit for hash     */
-#define TBIT 5                          /* # of bit for track    */
+#define TBIT 6                          /* # of bit for track    */
 #define WBIT 5                          /* # of bit for hardware */
 #define FBIT (64-HBIT-TBIT-WBIT)        /* # of bit for frames   */
 
@@ -64,6 +64,7 @@ typedef struct {
 
 static dbentry_t db[] = {
 # include "timedb.inc.h"
+  /* Add a bit of Supplemental empty space */
   E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,
   E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,
   E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,E_EMPTY,
@@ -115,6 +116,9 @@ static dbentry_t * search_for(const dbentry_t * key)
 int timedb68_add(int hash, int track, unsigned int frames, int flags)
 {
   dbentry_t e, *s;
+
+  if ((unsigned)track >= (1u << TBIT) || frames >= (1u << FBIT) )
+    return -1;
 
   e.hash   = hash >> HFIX;
   e.track  = track;

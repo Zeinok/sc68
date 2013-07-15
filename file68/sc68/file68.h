@@ -5,7 +5,7 @@
  * @date     1998-09-03
  * @brief    Music file header.
  */
-/* Time-stamp: <2013-07-14 12:55:18 ben> */
+/* Time-stamp: <2013-07-15 23:26:23 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -50,9 +50,10 @@
 */
 
 #define SC68_NOFILENAME "n/a"   /**< SC68 unknown filename or author.      */
-#define SC68_LOADADDR   0x10000 /**< Default load address in 68K memory.    */
-#define SC68_MAX_TRACK  32      /**< Maximum track per disk (2 digits max). */
-
+enum {
+  SC68_LOADADDR  = 0x10000, /**< Default load address in 68K memory.    */
+  SC68_MAX_TRACK = 63,      /**< Maximum track per disk (2 digits max). */
+};
 
 /**
  * @name  Features flag definitions for music68_t.

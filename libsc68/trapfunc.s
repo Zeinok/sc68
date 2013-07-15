@@ -4,7 +4,7 @@
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
-;;; Time-stamp: <2013-07-15 15:59:23 ben>
+;;; Time-stamp: <2013-07-15 19:54:25 ben>
 
 
 ;;; Unhandled trap vector and function will execute a stop with a
@@ -444,5 +444,4 @@ xbtimer:
 	move.b	d4,(a5)		; start the timer
 	
 	bra	trap_close
-	
 	
