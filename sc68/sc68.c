@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-15 16:54:30 ben>
+ * Time-stamp: <2013-07-15 17:55:17 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -87,7 +87,7 @@ typedef struct my_option_s my_option_t;
 
 static sc68_t * sc68 = 0;
 static const int sc68_cat = msg68_DEBUG;
-static int opt_verb = msg68_WARNING;
+static int opt_verb = msg68_INFO;
 static int opt_vers = 0;
 static int opt_help = 0;
 static int opt_list = 0;

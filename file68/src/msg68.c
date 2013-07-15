@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-05-24 22:05:18 ben>
+ * Time-stamp: <2013-07-15 18:04:55 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -44,10 +44,8 @@ static unsigned int msg68_bitmsk =
   DEBUGMSG_MASK
 #elif defined(DEBUG)
   (1 << msg68_TRACE) - 1
-#elif defined(NDEBUG)
-  (1 << msg68_NOTICE) - 1
 #else
-  (1 << msg68_DEBUG) -1
+  (1 << msg68_NOTICE) - 1
 #endif
   ;
 
