@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-15 04:58:04 ben>
+ * Time-stamp: <2013-07-15 15:23:09 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -132,33 +132,69 @@ static int decode_trap(char * s, int trapnum, emu68_t * emu)
 {
   int fct, valid = 1;
   switch (trapnum) {
+
   case 1:
+    /***********************************************************************
+     * Gemdos (trap #1)
+     */
     fct = Wpeek(emu, emu->reg.a[7]+6);
     s += sprintf(s," gemdos(%02x)", fct);
     switch (fct) {
     case 0x09:
-      s += sprintf(s, " cconws($%x)", Lpeek(emu, emu->reg.a[7]+8));
+      s += sprintf(s, " cconws($%x.l)", Lpeek(emu, emu->reg.a[7]+8));
       break;
     case 0x20:
-      s += sprintf(s, " super($%x)" , Lpeek(emu, emu->reg.a[7]+8));
+      s += sprintf(s, " super($%x.l)" , Lpeek(emu, emu->reg.a[7]+8));
       break;
     case 0x30: s += sprintf(s, " version()");
       break;
-    case 0x48: s += sprintf(s, " malloc(%d)", Lpeek(emu, emu->reg.a[7]+8));
+    case 0x48: s += sprintf(s, " malloc(%d.l)", Lpeek(emu, emu->reg.a[7]+8));
       break;
-    case 0x49: s += sprintf(s, " free($%x)",  Lpeek(emu, emu->reg.a[7]+8));
+    case 0x49: s += sprintf(s, " free($%x.l)",  Lpeek(emu, emu->reg.a[7]+8));
       break;
     default:
       valid = 0;
     }
     break;
+
   case 13:
+    /***********************************************************************
+     * Bios (trap #13)
+     */
     sprintf(s," bios(%02x)", Wpeek(emu, emu->reg.a[7]+6));
     valid = 0;
     break;
+
   case 14:
-    sprintf(s," xbios(%02x)", Wpeek(emu, emu->reg.a[7]+6));
-    valid = 0;
+    /***********************************************************************
+     * Xbios (trap #14)
+     */
+    fct = Wpeek(emu, emu->reg.a[7]+6);
+    s += sprintf(s," xbios(%02x)", fct);
+    switch (fct) {
+    case 0x1f:
+      s += sprintf(s, " xbtimer(%d.w,$%02x.w,$%02x.w,$%x.l)",
+                   Wpeek(emu, emu->reg.a[7]+8),
+                   Wpeek(emu, emu->reg.a[7]+10),
+                   Wpeek(emu, emu->reg.a[7]+12),
+                   Lpeek(emu, emu->reg.a[7]+14));
+      break;
+    case 0x20:
+      s += sprintf(s, " dosound($%x.l)", Lpeek(emu, emu->reg.a[7]+8));
+      break;
+    case 0x26:
+      s += sprintf(s, " superexec($%x.l)", Lpeek(emu, emu->reg.a[7]+8));
+      break;
+    case 0x80:
+        s += sprintf(s, " locksnd()");
+        break;
+    case 0x81:
+      s += sprintf(s, " unlocksnd()");
+      break;
+    default:
+      valid = 0;
+    }
+    break;
   default:
     valid = 0;
     *s = 0;
@@ -733,7 +769,7 @@ fail:
 int gdb_event(gdb_t * gdb, int vector, void * emu)
 {
   int  pc, sr;
-  char irqname[32], fctname[32];
+  char irqname[32], fctname[128];
 
   assert (gdb->run == RUN_CONT);
 
