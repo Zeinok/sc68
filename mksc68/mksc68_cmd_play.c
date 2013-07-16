@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-14 22:23:51 ben>
+ * Time-stamp: <2013-07-16 14:53:31 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -227,7 +227,7 @@ int dsk_stop(void)
 
   if (playinfo.isplaying) {
     if (playinfo.sc68) {
-      msgdbg("stop: sending stop signal to %s\n",sc68_name(playinfo.sc68));
+      msgdbg("stop: signal stop to %s\n", sc68_name(playinfo.sc68));
       sc68_stop(playinfo.sc68);
     } else {
       pthread_cancel(playinfo.thread);

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-15 15:23:09 ben>
+ * Time-stamp: <2013-07-16 14:14:03 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -79,6 +79,13 @@ static uint8_t thex[16] = {
   '0','1','2','3','4','5','6','7',
   '8','9','a','b','c','d','e','f'
 };
+
+static inline int xdigit(const int v) {
+  if (v >= '0' && v <= '9') return v - '0';
+  if (v >= 'a' && v <= 'f') return v - 'a' + 10;
+  if (v >= 'A' && v <= 'F') return v - 'A' + 10;
+  return -1;
+}
 
 typedef struct serverinfo_s serverinfo_t;
 
@@ -363,8 +370,8 @@ static int rsp_event(gdb_t * const gdb)
   ptr = buf;
   switch(*ptr) {
 
-    /* Minimal commands for a stub to implement are 'g' 'G' 'm' 'M'
-     * 'c' 's'
+    /* Minimal commands for a stub to implement are
+     * 'g' 'G' 'm' 'M' 'c' 's'
      */
 
   case '?': {
@@ -462,34 +469,44 @@ static int rsp_event(gdb_t * const gdb)
     *ptr = 0;
   } break;
 
-  case 'm': {
+  case 'm': case 'M': {
     /***********************************************************************
      * m addr,length (read memory)
      */
+    int read = *ptr == 'm';
     int adr, len;
     errno = 0;
     adr = strtoul(++ptr, &ptr, 16);
     if (!errno && *ptr == ',') {
       len = strtoul(++ptr, &ptr, 16);
-      if (!errno && !*ptr) {
+      if (!errno) {
         u8 * mem;
-        int i,n = (max - buf - 4) >> 1;
-        /* msgdbg("COMMAND <memory-read,0x%06x,%d>\n", adr,len); */
-        if (len > n) {
-          len = n;
-        }
+        int i /* ,n = (max - buf - 4) >> 1 */;
+        msgdbg("COMMAND <memory-%cet,0x%06x,%d>\n",read["sg"],adr,len);
+
         mem = emu68_memptr(gdb->emu, adr, len);
         if (!mem) {
           gdb->msg = emu68_error_get(gdb->emu);
           msgnot("gdb tried to access invalid memory [$%x..$%x]\n",
                  adr,adr+len-1);
-        } else {
+        } else if (read && !*ptr) {
           for (i=0, ptr = buf+1; i<len; ++i) {
             *ptr++ = thex[ mem[i] >> 4 ];
             *ptr++ = thex[ mem[i] & 15 ];
           }
+          assert(ptr < max);
           *ptr = 0;
           break;
+        } else if (!read && *ptr == ':') {
+          for (i=0; i<len; ++i) {
+            int a,b;
+            if ( (a = xdigit(*++ptr)) >= 0 && (b = xdigit(*++ptr)) >= 0)
+              mem[i] = (a<<4) + b;
+            else
+              break;
+          }
+          if (i == len)
+            break;
         }
       }
     }
@@ -913,7 +930,7 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
 
     /* dump stack */
     line[0] = 0;
-    for (i = 0, j = 0; adr+i < bot; ++i) {
+    for (i = 0, j = 0; i<256 && adr+i < bot; ++i) {
       int v = memptr[adr+i];
 
       line[j+0] = thex[v >> 4];
