@@ -1,11 +1,11 @@
 /*
- * @file    mksc68_cmd_dbg.c
+ * @file    mksc68_cmd_msg.c
  * @brief   the "debug" command
  * @author  http://sourceforge.net/users/benjihan
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-05 23:42:53 ben>
+ * Time-stamp: <2013-07-16 13:30:39 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -43,11 +43,6 @@
 
 static const opt_t longopts[] = {
   { "help",       0, 0, 'h' },
-  /* {"list",  0, 0, 'l'}, */
-  /* {"lst",   0, 0, 'l'}, */
-  /* {"set",   1, 0, 's'}, */
-  /* {"clr"  , 1, 0, 'c'}, */
-  /* {"clear", 1, 0, 'c'}, */
   {0,0,0,0}
 };
 
@@ -70,7 +65,7 @@ static int print_cats(void)
 }
 
 static
-int run_debug(cmd_t * cmd, int argc, char ** argv)
+int run_msg(cmd_t * cmd, int argc, char ** argv)
 {
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
   int ret = -1, i;
@@ -87,9 +82,6 @@ int run_debug(cmd_t * cmd, int argc, char ** argv)
     case  -1: break;                /* Scan finish */
     case 'h':                       /* --help */
       help(argv[0]); return 0;
-    /* case 'l':                       /\* --lst *\/ */
-    /*   print_cats(); */
-    /*   break; */
     case '?':                       /* Unknown or missing parameter */
       goto error;
     default:
@@ -145,14 +137,14 @@ error:
   return ret;
 }
 
-cmd_t cmd_debug = {
-  /* run */ run_debug,
-  /* com */ "debug",
-  /* alt */ "dbg",
+cmd_t cmd_msg = {
+  /* run */ run_msg,
+  /* com */ "message",
+  /* alt */ "msg",
   /* use */ "[cats ...]",
-  /* des */ "change debug level",
+  /* des */ "change message output level",
   /* hlp */
-  "The `debug' command control debug and message verbosity.\n"
+  "The `message' command control message verbosity.\n"
   "Multiple expressions are evaluated sequencially in given order.\n"
   "If no argument is given the command display the list of existing\n"
   "debug categories and their current status.\n"
