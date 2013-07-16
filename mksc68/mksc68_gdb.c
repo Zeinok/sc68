@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-16 14:14:03 ben>
+ * Time-stamp: <2013-07-16 15:46:22 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -148,16 +148,16 @@ static int decode_trap(char * s, int trapnum, emu68_t * emu)
     s += sprintf(s," gemdos(%02x)", fct);
     switch (fct) {
     case 0x09:
-      s += sprintf(s, " cconws($%x.l)", Lpeek(emu, emu->reg.a[7]+8));
+      s += sprintf(s, " cconws(0x%x.l)", Lpeek(emu, emu->reg.a[7]+8));
       break;
     case 0x20:
-      s += sprintf(s, " super($%x.l)" , Lpeek(emu, emu->reg.a[7]+8));
+      s += sprintf(s, " super(0x%x.l)" , Lpeek(emu, emu->reg.a[7]+8));
       break;
     case 0x30: s += sprintf(s, " version()");
       break;
     case 0x48: s += sprintf(s, " malloc(%d.l)", Lpeek(emu, emu->reg.a[7]+8));
       break;
-    case 0x49: s += sprintf(s, " free($%x.l)",  Lpeek(emu, emu->reg.a[7]+8));
+    case 0x49: s += sprintf(s, " free(0x%x.l)",  Lpeek(emu, emu->reg.a[7]+8));
       break;
     default:
       valid = 0;
@@ -180,21 +180,21 @@ static int decode_trap(char * s, int trapnum, emu68_t * emu)
     s += sprintf(s," xbios(%02x)", fct);
     switch (fct) {
     case 0x1f:
-      s += sprintf(s, " xbtimer(%d.w,$%02x.w,$%02x.w,$%x.l)",
+      s += sprintf(s, " xbtimer(%d.w,0x%02x.w,0x%02x.w,0x%x.l)",
                    Wpeek(emu, emu->reg.a[7]+8),
                    Wpeek(emu, emu->reg.a[7]+10),
                    Wpeek(emu, emu->reg.a[7]+12),
                    Lpeek(emu, emu->reg.a[7]+14));
       break;
     case 0x20:
-      s += sprintf(s, " dosound($%x.l)", Lpeek(emu, emu->reg.a[7]+8));
+      s += sprintf(s, " dosound(0x%x.l)", Lpeek(emu, emu->reg.a[7]+8));
       break;
     case 0x26:
-      s += sprintf(s, " superexec($%x.l)", Lpeek(emu, emu->reg.a[7]+8));
+      s += sprintf(s, " superexec(0x%x.l)", Lpeek(emu, emu->reg.a[7]+8));
       break;
     case 0x80:
-        s += sprintf(s, " locksnd()");
-        break;
+      s += sprintf(s, " locksnd()");
+      break;
     case 0x81:
       s += sprintf(s, " unlocksnd()");
       break;
@@ -487,7 +487,7 @@ static int rsp_event(gdb_t * const gdb)
         mem = emu68_memptr(gdb->emu, adr, len);
         if (!mem) {
           gdb->msg = emu68_error_get(gdb->emu);
-          msgnot("gdb tried to access invalid memory [$%x..$%x]\n",
+          msgnot("gdb tried to access invalid memory [0x%x..0x%x]\n",
                  adr,adr+len-1);
         } else if (read && !*ptr) {
           for (i=0, ptr = buf+1; i<len; ++i) {
@@ -815,13 +815,7 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
     case BUSERR_VECTOR: case ADRERR_VECTOR:
       sigval = SIGVAL_BUS; break;
     case ILLEGAL_VECTOR:
-      /* sc68 trap emulator will set regiter d1 to 0xDEAD000* in case
-       * a trap function is not implemented */
-      sigval = (gdb->emu->reg.d[1] >= 0xDEAD0000 && gdb->emu->reg.d[1] <= 0xDEAD000F)
-        ? SIGVAL_SYS
-        : SIGVAL_ILL
-        ;
-      break;
+      sigval = SIGVAL_ILL; break;
     case DIVIDE_VECTOR: case TRAPV_VECTOR:
       sigval = SIGVAL_FPE; break;
     case LINEA_VECTOR: case LINEF_VECTOR: case CHK_VECTOR:
@@ -872,22 +866,20 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
       gdb->sigval = SIGVAL_ABRT;
       STATUS(EXIT, HALT, "halted");
     } else if (vector == HWSTOP_VECTOR) {
-      sprintf (irqname,"stop-#%04x",sr);
-
-      if ((sr & 0x0700) == 0x0700) {
-        if ( (sr & 0x3F00) == 0x2F00 ) {
-          const int num = sr & 0xFF;
-          /* Unitialized exception catched !!! */
-          emu68_exception_name(num,irqname);
-          pc = Lpeek(gdb->emu, gdb->emu->reg.a[7]+2);
-          msgnot("non-init exception #%d (%s) from %06x\n",
-                 num, irqname, pc);
-        }
-        /* $$$ TEMP */
-        /* gdb->sigval = SIGVAL_ABRT; */
-        /* STATUS(EXIT, STOP, "stopped"); */
-        STATUS(CONT, IDLE, "stopped");
+      if ( (sr & 0x3F00) == 0x2F00 ) {
+        const int num = sr & 0xFF;
+        /* Unitialized exception catched !!! */
+        strcpy(irqname,"NC-");
+        emu68_exception_name(num,irqname+3);
+        pc = Lpeek(gdb->emu, gdb->emu->reg.a[7]+2);
+        msgnot("non-init exception #%d (%s) from 0x%X\n",
+               num, irqname, pc);
       } else {
+        sprintf (irqname,"stop-#%04x",sr);
+        if ((sr & 0x0700) == 0x0700 && !(gdb->emu->save_sr & SR_T)) {
+          /* Stop a IPL 7, trace mode not set. It's a lock */
+          msgnot("stop #0x%04x processor will not quit stop mode !\n", sr);
+        }
         gdb->sigval = SIGVAL_STOP;
         SIGNAL(STOP, gdb->sigval, "stopped");
       }

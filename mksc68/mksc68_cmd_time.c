@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-12 21:59:32 ben>
+ * Time-stamp: <2013-07-16 23:42:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -278,7 +278,7 @@ static const char * vectorname(int vector)
 }
 
 
-static int timemeasure_hdl(emu68_t* const emu68, int vector, void * cookie)
+static void timemeasure_hdl(emu68_t* const emu68, int vector, void * cookie)
 {
   measureinfo_t * mi = cookie;
   assert(mi == &measureinfo);
@@ -287,7 +287,6 @@ static int timemeasure_hdl(emu68_t* const emu68, int vector, void * cookie)
       mi->vector[vector].fst = mi->curfrm;
     mi->vector[vector].lst = mi->curfrm;
   }
-  return 0;                             /* 0:continue in normal mode */
 }
 
 extern void sc68_emulators(sc68_t *, emu68_t **, io68_t ***);
@@ -451,6 +450,7 @@ static void timemeasure_init(measureinfo_t * mi)
 {
   sc68_create_t create68;
   disk68_t * disk;
+  music68_t * mus;
   int sampling;
 
   mi->isplaying = 2;
@@ -470,8 +470,12 @@ static void timemeasure_init(measureinfo_t * mi)
   disk = dsk_get_disk();
   if (sc68_open(mi->sc68, disk) < 0)
     return;
-  mi->replayhz = disk->mus[mi->track-1].frq;
-  mi->location = disk->mus[mi->track-1].a0;
+  mus = &disk->mus[mi->track-1];
+  mi->replayhz = mus->frq;
+  mi->location = mus->a0;
+
+  if ( mus->hwflags.bit.ym )
+    mus->hwflags.bit.ste = 1; /* Force STE on YM (silence detection) */
 
   if (sc68_play(mi->sc68, mi->track, SC68_INF_LOOP) < 0)
     return;
@@ -493,11 +497,11 @@ static void timemeasure_init(measureinfo_t * mi)
 
 static void timemeasure_run(measureinfo_t * mi)
 {
-  char   str[256];
-  int8_t buf[32 << 2];
-  const int slice = sizeof(buf) >> 2;
+  char    str[256];
+  int32_t buf[32];
+  const int slice = sizeof(buf) / sizeof(*buf);
   int code, n;
-  int i,lst=0;
+  int i,lst = 0x1000000;
   unsigned acu;
 
   unsigned frm_cnt;           /* frame counter                      */
@@ -507,10 +511,10 @@ static void timemeasure_run(measureinfo_t * mi)
   unsigned upd_frm;           /* last updated frame                 */
   unsigned cpf;               /* 68k cycle per frame                */
   unsigned sil_val;           /* pcm value                          */
-  unsigned sil_len;
   unsigned sil_frm;           /* first silent frame                 */
   unsigned sil_nop = ~0;      /* special value for no silent        */
   unsigned sil_max;           /* frames to concider real silence    */
+  unsigned sli_cnt;           /* slices counter                     */
   int      updated;           /* has been updated this pass ?       */
 
   mi->isplaying = 1;
@@ -520,22 +524,26 @@ static void timemeasure_run(measureinfo_t * mi)
          mi->track, mi->max_ms, mi->stp_ms, mi->sil_ms,
          mi->sampling, mi->replayhz);
 
+  memset(buf,0,sizeof(buf));
+
   cpf = cycle_per_frame( mi->replayhz, mi->emu68->clock );
 
-  frm_cnt = 0;
+  sli_cnt = frm_cnt = 0;
   if (mi->startfr) {
     mi->startms = fr2ms(mi->startfr, cpf, mi->emu68->clock);
     msgdbg("time-measure: now measuring loop, skipping %u frames (%s)\n",
-           mi->startfr, str_timefmt(str+0x00,0x20, mi->startms));
+           mi->startfr, str_timefmt(str+0x00, 0x20, mi->startms));
     while (n = slice,
            code = sc68_process(mi->sc68,buf,&n),
            code != SC68_ERROR ) {
+      ++sli_cnt;
       if (code & SC68_IDLE)
         continue;
       if (code & (SC68_CHANGE|SC68_END))
         msgwrn("sc68_process() returns an wrong return code (%x) at frame %u (%s)\n",
                code, frm_cnt, str_timefmt(str,32,fr2ms(frm_cnt, cpf, mi->emu68->clock)));
       assert( (code & (SC68_CHANGE|SC68_END)) == 0 );
+      assert( n == slice );
       if (++frm_cnt == mi->startfr)
         break;
     }
@@ -543,8 +551,7 @@ static void timemeasure_run(measureinfo_t * mi)
     msgdbg("time-measure: %u frames skipped\n", frm_cnt);
   }
 
-  sil_len = 0;
-  sil_val = 20 * slice * 2;
+  sil_val = (mi->sil_ms > 0) ? 0x40 * slice * 2 : 0; /* 0 won't trigger silent detection */
   sil_frm = sil_nop;
 
   sil_max = ms2fr(mi->sil_ms, cpf, mi->emu68->clock);
@@ -555,9 +562,9 @@ static void timemeasure_run(measureinfo_t * mi)
   updated = 0;
 
   msgdbg("time search:\n"
-         " max: %u fr, %s\n"
-         " stp: %u fr, %s\n"
-         " sil: %u fr, %s\n",
+         " max: %-6u fr, %s\n"
+         " stp: %-6u fr, %s\n"
+         " sil: %-6u fr, %s\n",
          (unsigned) frm_max, str_timefmt(str+0x00,0x20,mi->max_ms),
          (unsigned) frm_stp, str_timefmt(str+0x20,0x20,mi->stp_ms),
          (unsigned) sil_max, str_timefmt(str+0x40,0x20,mi->sil_ms));
@@ -565,42 +572,66 @@ static void timemeasure_run(measureinfo_t * mi)
   while (n = slice,
          code = sc68_process(mi->sc68,buf,&n),
          code != SC68_ERROR ) {
-
+    ++sli_cnt;
     if (code & (SC68_CHANGE|SC68_END))
       msgwrn("sc68_process() returns an wrong return code (%x) at frame %u (%s)\n",
              code, frm_cnt, str_timefmt(str,32,fr2ms(frm_cnt, cpf, mi->emu68->clock)));
     assert( (code & (SC68_CHANGE|SC68_END)) == 0 );
+    assert( n == slice );
 
     /* Compute the sum of deltas for silence detection */
+    /* msgdbg("slice #%d", sli_cnt); */
+
+    /* Get the very first value */
+    if (lst == 0x1000000)
+      lst = ( (int)(s16)buf[0] ) + ( (int)(s16)(buf[0]>>16) );
+
     for (acu=i=0; i<n; ++i) {
       const int val
         = ( (int)(s16)buf[i] ) + ( (int)(s16)(buf[i]>>16) );
       const int dif = val - lst;
+      /* msgdbg(" %08x(%d,%d)", (uint32_t)buf[i], val, dif); */
       acu += (dif >= 0) ? dif : -dif;
       lst = val;
     }
+    /* msgdbg(" -> "); */
 
-    if ( acu >= sil_val ) {
-      if ( sil_frm != sil_nop ) {
-        unsigned sil_lll = frm_cnt - sil_frm;
-        if (sil_lll > sil_len ) {
-          sil_len = sil_lll;
-          msgdbg("silence length: %u frames (%s) at frame %u (%s)\n",
-                 sil_len, str_timefmt(str+0x00,0x20,fr2ms(sil_len, cpf, mi->emu68->clock)),
-                 sil_frm, str_timefmt(str+0x00,0x20,fr2ms(sil_frm, cpf, mi->emu68->clock)));
-        }
+    /* msgdbg("frame #%u/%u: acu=%d sil_val=%d\n", */
+    /*        frm_cnt, sli_cnt, acu, sil_val); */
+
+    if ( acu < sil_val ) {
+      /* This slice is silent */
+      if ( sil_frm == sil_nop ) {
+        sil_frm = frm_cnt; /* first of a serie, keep the frame number */
+        /* msgdbg("silence start at frame #%u/%u (%s)\n", */
+        /*        sil_frm, sli_cnt, str_timefmt(str+0x00,0x20,fr2ms(sil_frm, cpf, mi->emu68->clock))); */
+      } else {
+        /* msgdbg("silence continue at frame #%u/%u (%s) %u frames (%s) and counting\n", */
+        /*        frm_cnt, sli_cnt, str_timefmt(str+0x00,0x20,fr2ms(frm_cnt, cpf, mi->emu68->clock)), */
+        /*        frm_cnt-sil_frm, str_timefmt(str+0x20,0x20,fr2ms(frm_cnt-sil_frm, cpf, mi->emu68->clock))); */
       }
+    } else {
+      /* This slice is not silent */
+      /* if ( sil_frm != sil_nop ) { */
+      /*   unsigned sil_len = frm_cnt - sil_frm; */
+      /*   msgdbg("silence too short at frame #%u (%s) for %u frames (%s) \n", */
+      /*          sil_frm, str_timefmt(str+0x00,0x20,fr2ms(sil_frm, cpf, mi->emu68->clock)), */
+      /*          sil_len, str_timefmt(str+0x20,0x20,fr2ms(sil_len, cpf, mi->emu68->clock))); */
+      /* } */
       sil_frm = sil_nop;                /* Not silent slice */
-    } else if ( sil_frm == sil_nop )
-      sil_frm = frm_cnt;
+    }
 
-    if ( sil_max > 0 && sil_frm != sil_nop && frm_cnt - sil_frm > sil_max ) {
-      /* silence detected !!! */
-      msgdbg("silence detected at frame %u (%s)\n",
-             (unsigned) sil_frm,
-             str_timefmt(str+0x00,0x20,fr2ms(sil_frm, cpf, mi->emu68->clock)));
+    /* Silence is detected only if it does not start at the beginning
+     * and its length greater than sil_max */
+    if ( sil_frm != sil_nop && sil_frm > 0 && frm_cnt - sil_frm > sil_max ) {
+      unsigned sil_len = frm_cnt - sil_frm;
+      msgdbg("silence detected at frame #%u (%s) for %u frames (%s)\n",
+             sil_frm,
+             str_timefmt(str+0x00,0x20,fr2ms(sil_frm, cpf, mi->emu68->clock)),
+             sil_len,
+             str_timefmt(str+0x20,0x20,fr2ms(sil_len, cpf, mi->emu68->clock)));
       mi->frames = sil_frm;
-      mi->loopfr = ~0;
+      mi->loopfr = sil_nop;
       break;
     }
 
@@ -640,6 +671,12 @@ static void timemeasure_run(measureinfo_t * mi)
         updated = 0;
       }
     }
+  }
+
+
+  /* Got only silent ? */
+  if (sil_frm < 4) {
+    msgwrn("Is this a song of silent ???\n");
   }
 
   /* Don't want to do this while computing loops */
@@ -684,9 +721,9 @@ static void timemeasure_run(measureinfo_t * mi)
       mi->loopfr = frames;
       mi->loopms = timems;
     }
-    msgdbg("set time: %ufr (%s) -- loop: %u fr (%s)\n",
-           mi->frames, str_timefmt(str, 32, mi->timems),
-           mi->loopfr, str_timefmt(str, 32, mi->loopms) );
+    msgdbg("set time: %u fr (%s) -- loop: %u fr (%s)\n",
+           mi->frames, str_timefmt(str+0x00, 32, mi->timems),
+           mi->loopfr, str_timefmt(str+0x20, 32, mi->loopms) );
     mi->code   = 0;
   }
 

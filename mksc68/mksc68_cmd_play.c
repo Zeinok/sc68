@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-16 14:53:31 ben>
+ * Time-stamp: <2013-07-16 15:00:31 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -54,7 +54,7 @@ extern void sc68_emulators(sc68_t *, emu68_t **, io68_t ***);
 
 static const opt_t longopts[] = {
   { "help",     0, 0, 'h' },            /* help             */
-  { "loop",     1, 0, 'l' },            /* loopplay        */
+  { "loop",     1, 0, 'l' },            /* loopplay         */
   { "seek",     1, 0, 's' },            /* seek to position */
   { "to",       1, 0, 't' },            /* stop time        */
   { "fg",       0, 0, 'f' },            /* foreground play  */
