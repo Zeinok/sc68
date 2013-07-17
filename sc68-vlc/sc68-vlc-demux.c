@@ -1,4 +1,4 @@
-/* Time-stamp: <2013-06-17 00:55:12 ben> */
+/* Time-stamp: <2013-07-16 02:06:03 ben> */
 
 /* Minimal version */
 
@@ -520,19 +520,19 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
 
   case DEMUX_GET_TIME: {
     int64_t * pi64 = (int64_t *) va_arg(args, int64_t *);
-    int ms = sc68_seek(p_sys->sc68, -1, 0);
+    int ms = sc68_seek(p_sys->sc68, SC68_SEEK_TRACK, SC68_SEEK_QUERY, 0);
     if (ms == -1) break;
     TrackInfo(p_demux);
-    ms -= p_sys->info.start_ms;
+    /* ms -= p_sys->info.start_ms; */
     *pi64 = (int64_t)ms * 1000;
     return VLC_SUCCESS;
   } break;
 
   case DEMUX_GET_POSITION: {
     double lf, * plf = (double *) va_arg(args, double *);
-    int ms = sc68_seek(p_sys->sc68, -1, 0);
+    int ms = sc68_seek(p_sys->sc68, SC68_SEEK_TRACK, SC68_SEEK_QUERY, 0);
     if (ms == -1 || !p_sys->info.trk.time_ms) break;
-    ms -= p_sys->info.start_ms;
+    /* ms -= p_sys->info.start_ms; */
     *plf = lf = (double)ms / (double)p_sys->info.trk.time_ms;
     return VLC_SUCCESS;
   } break;
