@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-15 16:47:18 ben>
+ * Time-stamp: <2013-07-17 02:39:08 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -298,6 +298,24 @@ static u32 Lpeek(emu68_t* const emu68, addr68_t  addr)
                  ( (u32) Bpeek(emu68, addr+3)       ) );
 }
 
+/* Timer awareness */
+void except_name(const int vector, char * irqname)
+{
+  int c = 0;
+  switch (vector * 4) {
+  case 0x134: c = 'A'; break;
+  case 0X120: c = 'B'; break;
+  case 0X114: c = 'C'; break;
+  case 0X110: c = 'D'; break;
+  default:    c = 0;
+  }
+  if (c)
+    sprintf(irqname,"timer-%c", c);
+  else
+    emu68_exception_name(vector,irqname);
+}
+
+
 /* Exception handler (runs when emu68 runs in debug mode (--sc68-dbg68k=1).
  *
  * It's default behaviour is to dump the exception and to break
@@ -330,7 +348,7 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
     return;
 
   /* Get fancy names */
-  emu68_exception_name(vector,irqname);
+  except_name(vector,irqname);
 
   /* Init vars */
   stname = emu68_status_name(emu68->status);
@@ -390,8 +408,12 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
          * number.
          */
         const int num = sr & 0xFF;
+        addr68_t vaddr;
         strcpy(irqname,"NC-");
-        emu68_exception_name(num,irqname+3);
+        vaddr = Lpeek(sc68->emu68, num * 4);
+        if (vaddr != INTR_ADDR + num * 8)
+          strcpy(irqname,"CH-");
+        except_name(num,irqname+3);
         sr = Wpeek(emu68, emu68->reg.a[7]);
         pc = Lpeek(emu68, emu68->reg.a[7]+2);
         sc68_error_add(sc68,
@@ -1076,7 +1098,6 @@ static void stop_track(sc68_t * sc68, const int real_stop)
   sc68->mix.buflen      = 0;
 }
 
-
 static int finish(sc68_t * sc68, addr68_t pc, int sr,uint68_t maxinst)
 {
   int status;
@@ -1097,17 +1118,23 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr,uint68_t maxinst)
   if (status != EMU68_NRM) {
     char irqname[32];
     if (status == EMU68_HLT && (sc68->emu68->reg.sr & 0X3F00) == 0X2F00) {
+      addr68_t vaddr;
       sc68->irq.vector = sc68->emu68->reg.sr & 0xFF;
       strcpy(irqname,"NC-");
-      emu68_exception_name(sc68->irq.vector,irqname+3);
+      except_name(sc68->irq.vector,irqname+3);
+      vaddr = Lpeek(sc68->emu68, sc68->irq.vector * 4);
+      if (vaddr != INTR_ADDR + sc68->irq.vector * 8)
+        strcpy(irqname,"CH-");
       if (sc68->irq.vector >= TRAP_VECTOR(0) &&
           sc68->irq.vector <= TRAP_VECTOR(15)) {
         int n = sc68->irq.vector-TRAP_VECTOR(0);
         if (trap_type[n])
           sprintf(irqname+3, "%s-$%X", trap_type[n], sc68->irq.sysfct);
       }
+    } else if (status == EMU68_BRK && !sc68->emu68->instructions) {
+      strcpy(irqname,"inst-overflow");
     } else {
-      emu68_exception_name(sc68->irq.vector,irqname);
+      except_name(sc68->irq.vector,irqname);
     }
     sc68_error_add(sc68,
                    "libsc68: pass#%d @$%X"
