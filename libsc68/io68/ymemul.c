@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-11-05 11:39:38 ben>
+ * Time-stamp: <2013-07-16 23:49:45 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -83,8 +83,7 @@ static void access_list_add(ym_t * const ym,
   if (free_access >= ym->waccess+ym->waccess_max) {
     /* No more free entries. */
     /* $$$ TODO: realloc buffer, reloc all lists ... */
-    TRACE68(msg68_CRITICAL,
-            "ym-2149: access list *%s* -- *OVERFLOW*\n", access_list->name);
+    ++ym->overflow;
     return;
   }
   ym->waccess_nxt = free_access+1;
@@ -121,37 +120,31 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 {
   int ret = -1;
 
+  static const struct ym2149_reg_s init_regs = {
+    0xff, 0x0f, 0xff, 0x0f, 0xff, 0x0f, /* tone period A,B,C */
+    0x3f, 077,                          /* noise period & mixer */
+    0x00, 0x00, 0x00,                   /* Volume A,B,C */
+    0xFF, 0xFF,                         /* envelop period */
+    0x0A,                               /* envelop shape */
+    0,0                                 /* oi a,b */
+  };
+
+
   if (ym) {
-    int i;
+    /* reset registers */
+    ym->shadow.name = ym->reg.name = init_regs;
+    ym->ctrl = 0;
 
     /* Run emulator specific reset callback. */
     if (ym->cb_reset) {
       ym->cb_reset(ym,ymcycle);
     }
 
-    /* Clear internal registers. */
-    for (i=0; i<sizeof(ym->reg.index)/sizeof(*ym->reg.index); ++i) {
-      ym->reg.index[i] = 0;
-    }
-
-    /* Reset control register */
-    ym->ctrl               = 0;
-
-    /* Reset mixer: tone & noise off for all channels */
-    ym->reg.name.ctl_mixer = 077;
-
-    /* Reset envelop generator */
-    ym->reg.name.env_shape = 0x0A;
-
     /* Reset access lists */
     access_list_reset(&ym->ton_regs, "Ton", ymcycle);
     access_list_reset(&ym->noi_regs, "Noi", ymcycle);
     access_list_reset(&ym->env_regs, "Env", ymcycle);
-
-    /* Copy registers to shadow */
-    for (i=0; i<sizeof(ym->reg.index)/sizeof(*ym->reg.index); ++i) {
-      ym->shadow.index[i] = ym->reg.index[i];
-    }
+    ym->overflow = 0;
 
     ret = 0;
   }
@@ -615,6 +608,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
           p->engine,p->hz,p->clock,256);
 
   if (ym) {
+    ym->overflow    = 0;
     ym->ymout5      = ymout5;
     ym->waccess_max = sizeof(ym->static_waccess)/sizeof(*ym->static_waccess);
     ym->waccess     = ym->static_waccess;
@@ -669,11 +663,14 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
 void ym_cleanup(ym_t * const ym)
 {
   TRACE68(ym_cat,"%s","ym-2149: cleanup\n");
-  if (ym && ym->cb_cleanup) {
-    ym->cb_cleanup(ym);
+  if (ym) {
+    if (ym->overflow)
+      msg68_critical("ym-2149: write access buffer overflow -- *%u*\n",
+                     ym->overflow);
+    if (ym->cb_cleanup)
+      ym->cb_cleanup(ym);
   }
 }
-
 
 /** Get required output buffer size.
  */

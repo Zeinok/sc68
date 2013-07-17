@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-27 12:01:21 ben>
+ * Time-stamp: <2013-07-16 23:04:20 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -47,8 +47,6 @@ extern int ym_cat;                      /* defined in ymemul.c */
 #ifndef INTMSB
 # define INTMSB (sizeof(int)*8-1)
 #endif
-
-#define YM_PULS_FILTER 1                /* 0:none 1:fast 2:slow */
 
 #define YM_OUT_MSK(C,B,A)                       \
   (((((C)&0x1F)<<10))                           \
@@ -1119,7 +1117,7 @@ static const char prefix[] = "sc68-";
 static const char engcat[] = "ym-puls";
 static option68_t opts[] = {
   { option68_STR, prefix, "ym-filter", engcat,
-    "set ym-2149 filter [none|boxcar|mixed|1-pole|2-pole*]" },
+    "set ym-2149 filter [none|boxcar|mixed|1-pole|2-poles*]" },
 };
 
 int ym_puls_options(int argc, char ** argv)

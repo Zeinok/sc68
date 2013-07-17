@@ -180,6 +180,7 @@ struct ym_s {
   int            waccess_max; /**< Maximum number of entry in waccess.   */
   ym_waccess_t * waccess_nxt; /**< Next available ym_waccess_t.          */
   ym_waccess_t * waccess;     /**< Static register entry list.           */
+  unsigned       overflow;    /**< count overflows                       */
   /** @} */
 
   /* $$$ TEMP: should be allocated... */
