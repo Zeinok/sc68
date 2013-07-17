@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-16 15:46:22 ben>
+ * Time-stamp: <2013-07-17 00:25:50 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -695,7 +695,6 @@ static int rsp_event(gdb_t * const gdb)
     switch (type) {
     case '0':
       /* software breakpoint. using hardware right now */
-
     case '1':
       /* hardware breakpoint. Unsupported by target according to gdb
        * which is really annoying if you ask me. gdb should not
@@ -703,11 +702,18 @@ static int rsp_event(gdb_t * const gdb)
        * target.
        */
       if (remove) {
-        emu68_bp_del(gdb->emu,
-                     emu68_bp_find(gdb->emu,adr));
-      } else if (emu68_bp_set(gdb->emu, -1, adr, 1, 1) < 0) {
-        ptr = stpcpy(buf+1,"E03");
-        break;
+        int id = emu68_bp_find(gdb->emu,adr);
+        if (id < 0) {
+          msgnot("could not find breakpoint to @ 0x%x\n", adr);
+          ptr = stpcpy(buf+1,"E03");
+        } else {
+          emu68_bp_del(gdb->emu, id);
+          msgdbg("delete breakpoint #%02d @ 0x%x\n", id, adr);
+        }
+      } else {
+        int id = emu68_bp_set(gdb->emu, -1, adr, 1, 1);
+        if (id < 0)
+          ptr = stpcpy(buf+1,"E03");
       }
       break;
     default:
