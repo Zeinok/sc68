@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-15 16:42:32 ben>
+ * Time-stamp: <2013-07-17 00:53:16 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -416,9 +416,9 @@ static inline int controlled_step68(emu68_t * const emu68)
          * - run the appropriate exception
          * - reset the breakpoint; delete it if neccessary
          */
-        inl_exception68(emu68, HWBREAK_VECTOR+id, -1);
         if (! (emu68->breakpoints[id].count = emu68->breakpoints[id].reset))
           emu68->chk[addr] &= EMU68_A;
+        inl_exception68(emu68, HWBREAK_VECTOR+id, -1);
         if (emu68->status != EMU68_NRM)
           return emu68->status;
       }
@@ -801,7 +801,7 @@ void emu68_reset(emu68_t * const emu68)
 int emu68_init(int * argc, char ** argv)
 {
   def_parms.name    = 0;
-  def_parms.log2mem = 19;            /* log2mem: 2^19 => 512 kB */
+  def_parms.log2mem = 20;               /* log2mem: 2^20 => 1 mB */
   def_parms.clock   = EMU68_ATARIST_CLOCK;
   def_parms.debug   = 0;
 
