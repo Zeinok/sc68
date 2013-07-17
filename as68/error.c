@@ -1,25 +1,34 @@
 /*
- *                   as68 - 68000 macro assembler
- *                 Copyright (C) 1993 Vincent Penne
- *             Copyright (C) 1999-2009 Benjamin Gerard
+ * @file    error.c
+ * @brief   68000 macro assembler - error messages
+ * @author  http://sourceforge.net/users/benjihan
  *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * Copyright (C) 1993 Vincent Penne
+ * Copyright (C) 1998-2013 Benjamin Gerard
+ *
+ * Time-stamp: <2013-07-16 13:32:04 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the GNU  General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
-/*$Id$*/
+/* generated config include */
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 char *error_list[] = {
   /*00*/ "",
@@ -30,7 +39,7 @@ char *error_list[] = {
   /*05*/ "undefined word",
   /*06*/ "',' expected",
   /*07*/ "unknown mnemonic",
-  /*08*/ "'.S', '.B', '.W'  '.L' expected",
+  /*08*/ "'.S', '.B', '.W' or '.L' expected",
   /*09*/ "invalid value",
   /*10*/ "address register expected",
   /*11*/ "invalid '.B'",
@@ -68,3 +77,6 @@ char *warn_list[] = {
   /*3*/ "position dependant code",
   /*4*/ "ORG may bug -P option ... sorry",
 };
+
+int error_max = sizeof(error_list) / sizeof(error_list[0]);
+int warn_max = sizeof(warn_list) / sizeof(warn_list[0]);

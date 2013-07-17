@@ -1,25 +1,34 @@
 /*
- *                   as68 - 68000 macro assembler
- *                 Copyright (C) 1993 Vincent Penne
- *             Copyright (C) 1999-2009 Benjamin Gerard
+ * @file    as68.c
+ * @brief   68000 macro assembler - main
+ * @author  http://sourceforge.net/users/benjihan
  *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * Copyright (C) 1993 Vincent Penne
+ * Copyright (C) 1998-2013 Benjamin Gerard
+ *
+ * Time-stamp: <2013-07-16 13:32:04 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the GNU  General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
-/*$Id$*/
+/* generated config include */
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #ifdef DEBUG
 # define debug_printf printf
@@ -282,10 +291,10 @@ int main(int argc, char * argv[])
             /* -b */
             int n;
             arg = argv[++i];
-            if (!isdigit(*arg)) {
+            if (!isdigit((int)*arg)) {
               n = DEFAULT_CODE_BUFFER_SIZE;
             } else {
-              for (n=0; isdigit(*arg); arg++)
+              for (n=0; isdigit((int)*arg); arg++)
                 n = n * 10 + *arg - '0';
             }
             buffer_size = n;
@@ -1028,7 +1037,7 @@ void assemble_line()
               for (n = 0; n < MAX_MACRO_ARGS; n++)
                 macro_args[n] = 0;
               plb = s;
-              while (*plb && isspace(*plb))
+              while (*plb && isspace((int)*plb))
                 plb++;
               while (*plb && *plb != ';') {
                 char a[128], *s = a;

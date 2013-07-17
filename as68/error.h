@@ -26,5 +26,8 @@
 
 extern char *error_list[];
 extern char *warn_list[];
+extern int error_max;
+extern int warn_max;
+
 
 #endif

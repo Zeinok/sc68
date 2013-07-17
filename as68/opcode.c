@@ -1,25 +1,34 @@
 /*
- *                   as68 - 68000 macro assembler
- *                 Copyright (C) 1993 Vincent Penne
- *             Copyright (C) 1999-2009 Benjamin Gerard
+ * @file    opcode.c
+ * @brief   68000 macro assembler - opcodes
+ * @author  http://sourceforge.net/users/benjihan
  *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * Copyright (C) 1993 Vincent Penne
+ * Copyright (C) 1998-2013 Benjamin Gerard
+ *
+ * Time-stamp: <2013-07-16 13:32:04 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the GNU  General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
-/*$Id$*/
+/* generated config include */
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,8 +48,8 @@ extern int bss;
 
 static int convchar(char a)
 {
-  a = toupper(a);
-  if(!isgraph(a)) a=0;
+  a = toupper((int)a);
+  if(!isgraph((int)a)) a=0;
   return a & 127;
 }
 
@@ -234,7 +243,12 @@ int tt(int t, int b, int w, int l)
 
 void erreur(int n)
 {
-  error(error_list[n]);
+  char str[32];
+  if (n < 0 || n > error_max) {
+    sprintf(str,"unknowm error #%d (%x)", n, n);
+    error(str);
+  } else
+    error(error_list[n]);
 }
 
 void tstvirg()
@@ -510,7 +524,7 @@ int op(int t, int o)
               opt("zero equal indexation");
             }
           if(cur_pass > 1 && !notdef && b >= 32768)
-            erreur(9);
+            erreur(9); /* $$$ 09 for real */
           if(notdef)
             pc += 2;
           else
@@ -554,7 +568,7 @@ int op(int t, int o)
     {
       get_symbol();
       if(b >= 32768)
-        erreur(9);
+        erreur(9);                     /* $$$ this one */
       tstw(b);
       genW(b);
       return 070 + Control + Data + Memory + Alterable;
@@ -565,7 +579,7 @@ int op(int t, int o)
     {
       get_symbol();
       genL(b);
-      return 071 + Control + Data + Memory + Alterable;;
+      return 071 + Control + Data + Memory + Alterable;
     }
   return 0;
 }
@@ -1000,7 +1014,7 @@ void Cb(int value)
   if(notdef)
     a = 2;
   if(!a && cur_pass >= 2)
-    erreur(9);
+    erreur(9);                         /* $$$ 9 fo real */
   if(opt && optt && (cur_pass >= 2 || !notdef) &&  a >= -128 && a < 128 && t == Word)
     {
       if(cur_pass == 1 || tstopt())
@@ -1017,7 +1031,7 @@ void Cb(int value)
     {
       tstw(a);
       if(a >= 32768)
-        erreur(9);
+        erreur(9);                         /* $$$ 9 fo real */
       genW(0060000 + ((value - 10) << 8));
       genW(a);
     }
@@ -1027,7 +1041,7 @@ void Cb(int value)
       if(a >= 128)
         {
           printf("\n-->%d\n", a);
-          erreur(9);
+          erreur(9);                         /* $$$ 9 fo real */
         }
       genW(0060000 + ((value - 10) << 8) + (a & 0xff));
     }
@@ -1111,14 +1125,14 @@ void Cdb(int value)
   tstvirg();
   a = expression() - (CurPC + org) - 2;
   if(!a && cur_pass >= 2)
-    erreur(9);
+    erreur(9);                         /* $$$ 9 fo real */
   if(a & 1)
     erreur(23);
   if(value == 36)
     value = 38;
   tstw(a);
   if(a >= 32768)
-    erreur(9);
+    erreur(9);                         /* $$$ 9 fo real */
   putW(0050310 + ((value - 37) << 8) + (b & 7), CurPC);
   genW(a);
 }
