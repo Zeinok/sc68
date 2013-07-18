@@ -4,7 +4,7 @@
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
-;;; Time-stamp: <2013-07-15 19:54:25 ben>
+;;; Time-stamp: <2013-07-17 22:51:22 ben>
 
 
 ;;; Unhandled trap vector and function will execute a stop with a
@@ -14,6 +14,10 @@
 StackSize = 1024	
 STOP_VAL  = $2F20
 
+	;; This is the address used by libsc68/api.c but it should be
+	;; PIC anyway
+	org	$500
+	
 ;;; Install trap vectors
 ;;; 
 install_trap:
@@ -24,7 +28,12 @@ install_trap:
 	move.l	a0,$84.w
 	lea	xbios(pc),a0
 	move.l	a0,$B8.w
-	
+	lea	timerc(pc),a0
+	move.l	a0,$114.w
+
+if(0)
+	{
+	toto
 	;; Install trap vectors
 	lea	trap_0(pc),a0
 	lea	$80.w,a1
@@ -37,7 +46,9 @@ install_trap:
 	addq	#4,a1
 	addq	#8,a0
 	dbf	d0,.copy
+	}	
 	
+
 	;; Init dummy malloc system
 	lea	malloc(pc),a0
 	lea	-StackSize(a7),a1 ; a7 is at near the end of memory
@@ -87,22 +98,22 @@ trap_\1:
 trap_close:
 	close
 	
-	trap_n 0
-	trap_n 1
-	trap_n 2
-	trap_n 3
-	trap_n 4
-	trap_n 5
-	trap_n 6
-	trap_n 7
-	trap_n 8
-	trap_n 9
-	trap_n A
-	trap_n B
-	trap_n C
-	trap_n D
-	trap_n E
-	trap_n F
+	;; trap_n 0
+	;; trap_n 1
+	;; trap_n 2
+	;; trap_n 3
+	;; trap_n 4
+	;; trap_n 5
+	;; trap_n 6
+	;; trap_n 7
+	;; trap_n 8
+	;; trap_n 9
+	;; trap_n A
+	;; trap_n B
+	;; trap_n C
+	;; trap_n D
+	;; trap_n E
+	;; trap_n F
 	
 ;;; ======================================================================
 ;;; TRAP #1 GEMDOS
@@ -445,3 +456,9 @@ xbtimer:
 	
 	bra	trap_close
 	
+timerc:
+	btst	#3,$fffffa17.w	; SEI or AEI ?
+	beq.s	.aei
+	move.b	#%11011111,$fffffa11.w	; release
+.aei:	
+	rte
