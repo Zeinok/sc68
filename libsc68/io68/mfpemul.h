@@ -86,7 +86,7 @@
  * - 08 @b ISRB (Interrupt In Service Register B)
  *
  *         In AEI mode the bit is cleared after the MFP has produced
- *         the interruptio n vector and a new event can trigger a new
+ *         the interruption vector and a new event can trigger a new
  *         interruption while another is been proced by the CPU. In
  *         SEI mode the bit is set and the interrupt routine have to
  *         clear it by writing this register (~1<<bit). While ISR bit

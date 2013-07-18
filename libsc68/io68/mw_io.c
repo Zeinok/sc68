@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-06 14:15:44 ben>
+ * Time-stamp: <2013-07-18 03:23:26 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -166,8 +166,8 @@ static void _mw_writeL(mw_io68_t * const mwio, const u8 addr, int68_t v)
 
   } else if ( !(addr & 1) ) {
     /* Any other (even) long access are translate to word access */
-    _mw_writeW(mwio, addr+0, v);
-    _mw_writeW(mwio, addr+2, v >> 16);
+    _mw_writeW(mwio, addr+0, v >> 16);
+    _mw_writeW(mwio, addr+2, v);
   }
 }
 
