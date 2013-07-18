@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-16 23:42:11 ben>
+ * Time-stamp: <2013-07-18 04:12:13 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -117,12 +117,20 @@ static unsigned ms2fr(unsigned ms, unsigned cpf_or_hz, unsigned clk)
   return (unsigned) fr;
 }
 
+typedef struct {
+  int bas;
+  int end;
+  int act;
+  int mod;
+} mw_reg_t;
+
 typedef struct
 {
   io68_t   io;
   unsigned r;
   unsigned w;
   unsigned a;
+  mw_reg_t mw;
   io68_t * pio;
 } time_io_t;
 
@@ -168,6 +176,110 @@ static void time_wl(io68_t * pio) {
   ++ti->a;
   ti->pio->w_long(ti->pio);
 }
+
+
+/* $$$ evil duplicated code from mem68.c */
+static void chkframe(emu68_t * const emu68, addr68_t addr, const int flags)
+{
+  int oldchk;
+
+  addr &= MEMMSK68;
+  oldchk = emu68->chk[addr];
+  if ( ( oldchk & flags ) != flags ) {
+    emu68->framechk |= flags;
+    emu68->chk[addr] = oldchk|flags;
+  }
+}
+
+static void chkframe_range(emu68_t * const emu68,
+                           addr68_t from, addr68_t to, const int flags)
+{
+  while (from < to)
+    chkframe(emu68, from++,flags);
+}
+
+static int mw_get(io68_t * const io, int adr)
+{
+  addr68_t addr = io->emu68->bus_addr;
+  int68_t  data = io->emu68->bus_data;
+  int ret;
+
+  io->emu68->bus_addr = adr;
+  io->r_byte(io);
+  ret = io->emu68->bus_data;
+  io->emu68->bus_addr = addr;
+  io->emu68->bus_data = data;
+  return ret;
+}
+
+static void mw_wreg(time_io_t * const io, int adr, unsigned int val)
+{
+  const int msk = 7<<24;
+
+  switch (adr & 255) {
+  case 0x03: /* MW_BASH */
+    io->mw.bas = (io->mw.bas & 0xFF00FFFF) | (val << 16) | (4<<24); break;
+  case 0x05: /* MW_BASM */
+    io->mw.bas = (io->mw.bas & 0xFFFF00FF) | (val <<  8) | (2<<24); break;
+  case 0x07: /* MW_BASL */
+    io->mw.bas = (io->mw.bas & 0xFFFFFF00) | val         | (1<<24); break;
+
+  case 0x0f: /* MW_ENDH */
+    io->mw.end = (io->mw.end & 0xFF00FFFF) | (val << 16) | (4<<24); break;
+  case 0x11: /* MW_ENDM */
+    io->mw.end = (io->mw.end & 0xFFFF00FF) | (val <<  8) | (2<<24); break;
+  case 0x13: /* MW_ENDL */
+    io->mw.end = (io->mw.end & 0xFFFFFF00) | val         | (1<<24); break;
+
+  case 0x21: /* MW_MODE */
+    io->mw.mod = val; break;
+  }
+
+  if ( (mw_get(io->pio, 0xFF8901) & 1) &&
+       (io->mw.bas & msk) == msk &&
+       (io->mw.end & msk) == msk &&
+       io->mw.bas < io->mw.end) {
+
+    io->mw.bas &= 0xFFFFFF;
+    io->mw.end &= 0xFFFFFF;
+    /* msgdbg("MW-CHK %06x .. %06x\n", io->mw.bas, io->mw.end); */
+    chkframe_range(io->pio->emu68, io->mw.bas, io->mw.end, EMU68_R);
+  }
+
+}
+
+static void mw_wb(io68_t * pio) {
+  time_io_t * ti = (time_io_t *)pio;
+  mw_wreg(ti,pio->emu68->bus_addr, pio->emu68->bus_data & 255);
+  ++ti->w;
+  ++ti->a;
+  ti->pio->w_byte(ti->pio);
+}
+
+static void mw_ww(io68_t * pio) {
+  time_io_t * ti = (time_io_t *)pio;
+
+  if ( !(pio->emu68->bus_addr & 1) ) {
+    mw_wreg(ti,pio->emu68->bus_addr+1, pio->emu68->bus_data & 255);
+  }
+
+  ++ti->w;
+  ++ti->a;
+  ti->pio->w_word(ti->pio);
+}
+
+static void mw_wl(io68_t * pio) {
+  time_io_t * ti = (time_io_t *)pio;
+
+  if ( !(pio->emu68->bus_addr & 1) ) {
+    mw_wreg(ti,pio->emu68->bus_addr+1, (pio->emu68->bus_data>>16) & 255);
+    mw_wreg(ti,pio->emu68->bus_addr+3,  pio->emu68->bus_data      & 255);
+  }
+  ++ti->w;
+  ++ti->a;
+  ti->pio->w_long(ti->pio);
+}
+
 
 typedef struct measureinfo_s measureinfo_t;
 
@@ -236,43 +348,43 @@ enum timer_e {
 static const char * vectorname(int vector)
 {
   static char tmp[64];
+  emu68_exception_name(vector,tmp);
+  /* switch (vector) { */
+  /* case HWBREAK_VECTOR:  return "hardware breakpoint"; */
+  /* case HWTRACE_VECTOR:  return "hardware trace"; */
+  /* case HWHALT_VECTOR:   return "processor halted"; */
 
-  switch (vector) {
-  case HWBREAK_VECTOR:  return "hardware breakpoint";
-  case HWTRACE_VECTOR:  return "hardware trace";
-  case HWHALT_VECTOR:   return "processor halted";
+  /* case RESET_SP_VECTOR: */
+  /* case RESET_PC_VECTOR: return "reset"; */
 
-  case RESET_SP_VECTOR:
-  case RESET_PC_VECTOR: return "reset";
+  /* case BUSERR_VECTOR:   return "bus error"; */
+  /* case ADRERR_VECTOR:   return "address error"; */
+  /* case ILLEGAL_VECTOR:  return "illegal"; */
+  /* case DIVIDE_VECTOR:   return "divide by zero"; */
+  /* case CHK_VECTOR:      return "chk"; */
+  /* case TRAPV_VECTOR:    return "trapv"; */
 
-  case BUSERR_VECTOR:   return "bus error";
-  case ADRERR_VECTOR:   return "address error";
-  case ILLEGAL_VECTOR:  return "illegal";
-  case DIVIDE_VECTOR:   return "divide by zero";
-  case CHK_VECTOR:      return "chk";
-  case TRAPV_VECTOR:    return "trapv";
+  /* case PRIVV_VECTOR:    return "privilege violation"; */
+  /* case TRACE_VECTOR:    return "trace"; */
+  /* case LINEA_VECTOR:    return "line-A"; */
+  /* case LINEF_VECTOR:    return "line-f"; */
+  /* case SPURIOUS_VECTOR: return "spurious interrupt"; */
 
-  case PRIVV_VECTOR:    return "privilege violation";
-  case TRACE_VECTOR:    return "trace";
-  case LINEA_VECTOR:    return "line-A";
-  case LINEF_VECTOR:    return "line-f";
-  case SPURIOUS_VECTOR: return "spurious interrupt";
+  /*   /\* Not always true, depends on MFP VR register bits 4-7 *\/ */
+  /* case TIMER_A:         return "MFP timer-A"; */
+  /* case TIMER_B:         return "MFP timer-B"; */
+  /* case TIMER_C:         return "MFP timer-C"; */
+  /* case TIMER_D:         return "MFP timer-D"; */
 
-    /* Not always true, depends on MFP VR register bits 4-7 */
-  case TIMER_A:         return "MFP timer-A";
-  case TIMER_B:         return "MFP timer-B";
-  case TIMER_C:         return "MFP timer-C";
-  case TIMER_D:         return "MFP timer-D";
-
-  default:
-    if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
-      sprintf(tmp,"trap #%d",vector-TRAP_VECTOR_0);
-    } else if (vector >= AUTO_VECTOR(0) && vector <= AUTO_VECTOR(7)) {
-      sprintf(tmp,"auto vector #%d",vector-AUTO_VECTOR(0));
-    } else {
-      sprintf(tmp,"unknown vector #%d",vector);
-    }
-  }
+  /* default: */
+  /*   if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) { */
+  /*     sprintf(tmp,"trap #%d",vector-TRAP_VECTOR_0); */
+  /*   } else if (vector >= AUTO_VECTOR(0) && vector <= AUTO_VECTOR(7)) { */
+  /*     sprintf(tmp,"auto vector #%d",vector-AUTO_VECTOR(0)); */
+  /*   } else { */
+  /*     sprintf(tmp,"unknown vector #%d",vector); */
+  /*   } */
+  /* } */
 
   return tmp;
 }
@@ -392,9 +504,16 @@ static int hook_ios(measureinfo_t * mi)
     ti->io.r_byte = time_rb;            /* hook memory access handler */
     ti->io.r_word = time_rw;
     ti->io.r_long = time_rl;
-    ti->io.w_byte = time_wb;
-    ti->io.w_word = time_ww;
-    ti->io.w_long = time_wl;
+
+    if ( 0xFF8900 == (0xffffff & pio->addr_lo) )  {
+      ti->io.w_byte = mw_wb;
+      ti->io.w_word = mw_ww;
+      ti->io.w_long = mw_wl;
+    } else {
+      ti->io.w_byte = time_wb;
+      ti->io.w_word = time_ww;
+      ti->io.w_long = time_wl;
+    }
     ti->io.emu68  = mi->emu68;
 
     if ( mi->emu68->mapped_io[line] == pio )
@@ -459,6 +578,8 @@ static void timemeasure_init(measureinfo_t * mi)
   memset(&create68,0,sizeof(create68));
   create68.name        = "mksc68-time";
   create68.emu68_debug = 1;
+  create68.log2mem     = 23;             /* 2Mb */
+
   mi->sc68 = sc68_create(&create68);
   if (!mi->sc68)
     return;

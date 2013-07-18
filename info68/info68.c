@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-06-18 16:27:24 ben>
+ * Time-stamp: <2013-07-18 02:02:19 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -547,8 +547,9 @@ int main(int argc, char ** argv)
             char * key = s+1, * end;
             const char * val;
             if (end = strchr(key,'}'), end) {
+              int trk = isupper((int)*key) ? 0 : curTrack+1;
               *end = 0;
-              val = file68_tag_get(d, isupper((int)*key) ? 0 : curTrack, key);
+              val = file68_tag_get(d, trk, key);
               if (val) PutS(out,val);
               *end = '}';
               s = end;

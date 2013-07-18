@@ -4,8 +4,8 @@
  * @author   Benjamin Gerard
  * @date     2009-01-01
  * @brief    disk function
- *
  */
+/* Time-stamp: <2013-07-17 21:36:37 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 

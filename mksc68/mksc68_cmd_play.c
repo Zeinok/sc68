@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-16 15:00:31 ben>
+ * Time-stamp: <2013-07-17 22:04:51 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -59,12 +59,14 @@ static const opt_t longopts[] = {
   { "to",       1, 0, 't' },            /* stop time        */
   { "fg",       0, 0, 'f' },            /* foreground play  */
   { "debug",    0, 0, 'd' },            /* gdb debug mode   */
+  { "memory",   1, 0, 'm' },            /* 68k memory size  */
   { 0,0,0,0 }
 };
 
 typedef struct {
   volatile int  isplaying;
   volatile int  debug;
+
   sc68_t      * sc68;       /* sc68 instance.    */
   emu68_t     * emu68;      /* emu68 instance.   */
   io68_t     ** ios68;      /* other chip.       */
@@ -74,6 +76,7 @@ typedef struct {
   int           track;
   int           loop;
   int           code;
+  int           log2;
 } playinfo_t;
 
 static playinfo_t playinfo;             /* unique playinfo */
@@ -162,6 +165,7 @@ static void play_init(playinfo_t * pi)
   memset(&create68,0,sizeof(create68));
   create68.name = pi->debug ? "mksc68-debug" : "mksc68-play";
   create68.emu68_debug = !!pi->debug;
+  create68.log2mem = pi->log2;
   if ( !(pi->sc68 = sc68_create(&create68) ) ) return;
   if (pi->debug) {
     sc68_emulators(pi->sc68, &pi->emu68, &pi->ios68);
@@ -246,17 +250,16 @@ int dsk_playing(void)
 }
 
 struct dsk_play_s {
-  int track, loop, start, len, bg, debug;
+  int track, loop, start, len, bg, debug, log2;
 };
 
 
-/* int trk, int loop, int start, int len, int bg, int dbg */
 int dsk_play(dsk_play_t * p)
 {
   int err = -1;
 
-  msgdbg("play [track:%d loop:%d start:%d length:%d bg:%d dbg:%d]\n",
-         p->track, p->loop, p->start, p->len, p->bg, p->debug);
+  msgdbg("play [track:%d loop:%d start:%d length:%d bg:%d dbg:%d mem:%d]\n",
+         p->track, p->loop, p->start, p->len, p->bg, p->debug, p->log2);
 
   if (playinfo.isplaying) {
     dsk_stop();
@@ -266,6 +269,7 @@ int dsk_play(dsk_play_t * p)
   playinfo.track = p->track;
   playinfo.loop  = p->loop;
   playinfo.debug = p->debug;
+  playinfo.log2 = p->log2;
   if ( pthread_create(&playinfo.thread, 0, play_thread, &playinfo) ) {
     msgerr("error creating play thread\n");
     goto error;
@@ -288,12 +292,15 @@ static
 int run_play(cmd_t * cmd, int argc, char ** argv)
 {
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
-  int ret = -1, i, loop = SC68_DEF_LOOP, track, tracks, bg = 1, debug = 0;
+  int ret = -1, i, tracks;
   const char * str;
-  int seek_mode = '?', seek = 0, dur_mode = '?', duration = 0;
+  int seek_mode = '?', dur_mode = '?';
   dsk_play_t params;
 
   opt_create_short(shortopts, longopts);
+  memset(&params,0,sizeof(params));
+  params.bg = 1;
+  params.loop = SC68_DEF_LOOP;
 
   while (1) {
     int longindex;
@@ -309,20 +316,26 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
     case 'l':                           /* --loop      */
       str = optarg;
       if (!strcmp(str,"inf"))
-        loop = SC68_INF_LOOP;
+        params.loop = SC68_INF_LOOP;
       else if (isdigit((int)*str))
-        loop = strtol(str,0,0);
+        params.loop = strtol(str,0,0);
+      break;
+
+    case 'm':                           /* --memory    */
+      str = optarg;
+      if (isdigit((int)*str))
+        params.log2 = strtol(str,0,0);
       break;
 
     case 'f':                           /* --fg        */
-      bg = 0; break;
+      params.bg = 0; break;
 
     case 's':                           /* --seek      */
       str = optarg;
       if (*str == '+' || *str == '-')
         seek_mode = *str++; /* $$$ TODO ? */
       seek_mode = seek_mode;
-      if (str_time_stamp(&str, &seek)) {
+      if (str_time_stamp(&str, &params.start)) {
         msgerr("invalid seek value \"%s\"\n", optarg);
         goto error;
       }
@@ -333,14 +346,14 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
       if (*str == '+' || *str == '-')
         dur_mode = *str++; /* $$$ TODO ? */
       dur_mode = dur_mode;
-      if (str_time_stamp(&str, &duration)) {
+      if (str_time_stamp(&str, &params.len)) {
         msgerr("invalid duration value \"%s\"\n", optarg);
         goto error;
       }
       break;
 
     case 'd':
-      debug = 1; break;
+      params.debug = 1; break;
 
     case '?':                       /* Unknown or missing parameter */
       goto error;
@@ -360,7 +373,7 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
     msgerr("disk has no track\n");
     goto error;
   }
-  track = dsk_trk_get_current();
+  params.track = dsk_trk_get_current();
 
   if (i < argc) {
     int t;
@@ -370,27 +383,19 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
       msgerr("invalid track number \"%s\"\n",argv[--i]);
       goto error;
     }
-    track = t;
+    params.track = t;
   }
 
-  if (!track)
-    track = dsk_trk_get_default();
-  if (track < 0 || track > tracks) {
-    msgerr("track number #%d out of range [1..%d]\n", track, tracks);
+  if (!params.track)
+    params.track = dsk_trk_get_default();
+  if (params.track < 0 || params.track > tracks) {
+    msgerr("track number #%d out of range [1..%d]\n", params.track, tracks);
     goto error;
   }
 
   if (i < argc)
     msgwrn("%d extra parameters ignored\n", argc-i);
 
-
-  memset(&params,0,sizeof(params));
-  params.track = track;
-  params.loop  = loop;
-  params.start = seek;
-  params.len   = duration;
-  params.bg    = bg;
-  params.debug = debug;
   ret =  dsk_play(&params);
 
 error:
@@ -411,6 +416,7 @@ cmd_t cmd_play = {
   "   -s --seek=POS     Seek to this position.\n"
   "   -t --to=POS       End position.\n"
   "   -f --fg           Foreground play.\n"
+  "   -m --m=N          68k memory size of 2^N.\n"
   "   -d --debug        Debug via gdb.\n"
   "\n"
   "POS := [+|-]ms | [+|-]mm:ss[:ms]\n"
