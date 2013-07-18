@@ -108,10 +108,18 @@ AC_TYPE_UINTMAX_T
 AC_TYPE_UNSIGNED_LONG_LONG_INT
 
 # ,----------------------------------------------------------------------.
+# | Standard headers                                                     |
+# `----------------------------------------------------------------------'
+
+AC_CHECK_HEADERS(
+  [stdio.h stdlib.h string.h assert.h libgen.h])
+
+# ,----------------------------------------------------------------------.
 # | Standard functions                                                   |
 # `----------------------------------------------------------------------'
 
-AC_CHECK_FUNCS([malloc free vsprintf vsnprintf getenv strtol stpcpy])
+AC_CHECK_FUNCS(
+  [malloc free vsprintf vsnprintf getenv strtol strtoul stpcpy basename])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |

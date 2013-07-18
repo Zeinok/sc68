@@ -1,4 +1,4 @@
-# Time-stamp: <2013-07-03 05:14:15 ben>
+# Time-stamp: <2013-07-17 16:49:15 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # | libsc68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -59,7 +59,7 @@ $(builddir)/api68.lo: $(srcdir)/sc68/trap68.h
 trap68: $(srcdir)/sc68/trap68.h
 
 $(srcdir)/sc68/trap68.h: $(srcdir)/trapfunc.s
-	e=false; $(as68) -p $< -o trapfunc.bin >/dev/null && \
+	e=false; $(as68) $< -o trapfunc.bin >/dev/null && \
 	$(od) -vtu1 trapfunc.bin | \
 	sed 's/^[0-9]* *//g; s/\([0-9]\)\([[:space:]]\{1,\}\|$$\)/\1,/g' >$@ && \
 	e=true; rm -f trapfunc.bin; $$e

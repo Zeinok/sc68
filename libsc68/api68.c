@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-17 02:39:08 ben>
+ * Time-stamp: <2013-07-17 23:12:39 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -61,6 +61,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
+#endif
+
 
 enum {
   /* Exception handler to catch badly initialize exception */
@@ -217,6 +222,47 @@ static char *stpcpy(char *dst, const char * src) {
   return dst;
 }
 #endif
+
+
+#ifndef HAVE_BASENAME
+
+# if !defined(PRI_PATH_SEP)
+#  define PRI_PATH_SEP '/'
+# endif
+# if !defined(SEC_PATH_SEP)
+#  define SEC_PATH_SEP '\\'
+# endif
+
+static char *basename(char *path)
+{
+  char * s1 = strrchr(path,PRI_PATH_SEP);
+  char * s2 = strrchr(path,SEC_PATH_SEP);
+  if (s2 > s1) s = s2;
+  return s1 ? s1 + 1 : path;
+}
+#endif
+
+#if !defined(EXTENSION_SEP)
+# define EXTENSION_SEP '.'
+#endif
+static void appname_from_path(char *path, char * appname, int max)
+{
+  char * e, *s;
+  int len;
+
+  appname[0] = 0;
+  if (!path || !*path) return;
+  s = basename(path);
+  e = strrchr(s,EXTENSION_SEP);
+  if (!e || e == s)
+    len = strlen(s);
+  else
+    len = e - s;
+  if (len >= max)
+    len = max-1;
+  strncpy(appname, s, len);
+  appname[len] = 0;
+}
 
 static int stream_read_68k(sc68_t * sc68, unsigned int dest,
                            istream68_t * is, unsigned int sz)
@@ -813,37 +859,11 @@ int sc68_init(sc68_init_t * init)
 
   msg68_cat_filter(init->debug_clr_mask,init->debug_set_mask);
 
-  if (init->argc > 0 && init->argv) {
-    /* $$$ Retieving application name from argv[0]. This is still very
-     * system dependant ! Here we assume un*x and Windows path but
-     * that is not good enough. We should encourage application to force
-     * argv[0] to the proper value as we do in sc68.c.
-     */
-
-#if !defined(PRI_PATH_SEP)
-# define PRI_PATH_SEP '/'
-#endif
-#if !defined(SEC_PATH_SEP)
-# define SEC_PATH_SEP '\\'
-#endif
-#if !defined(EXTENSION_SEP)
-# define EXTENSION_SEP '.'
-#endif
-
-    char * e;
-    char * s  = strrchr(init->argv[0],PRI_PATH_SEP);
-    char * s2 = strrchr(init->argv[0],SEC_PATH_SEP);
-    int max = sizeof(appname) - 1;
-    if (s2 > s) s = s2;
-    s = s ? s+1 : init->argv[0];
-    e = strrchr(s,EXTENSION_SEP);
-    if (e && e > s && e-s < max)
-      max = e - s;
-    strncpy(appname,s,max);
-    appname[max] = 0;
-  } else {
+  appname[0] = 0;
+  if (init->argc > 0 && init->argv)
+    appname_from_path(init->argv[0], appname, sizeof(appname));
+  if (!appname[0])
     strcpy(appname,"sc68");
-  }
 
   /* Init config module */
   config68_init();
@@ -871,7 +891,11 @@ int sc68_init(sc68_init_t * init)
   /* $$$: No good */
   opt = option68_get("debug", 1);
   if (opt) {
-    int val = strtoul(opt->val.str,0,0);
+    int val;
+    if (!strcmp(opt->val.str, "yes"))
+      val = 1 << sc68_cat;
+    else
+      val = strtoul(opt->val.str,0,0);
     msg68_cat_filter(~0,val);
   }
 
@@ -1202,9 +1226,15 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     memptr[ (i<<2) + 2 ] = vector >>  8;
     memptr[ (i<<2) + 3 ] = vector;
 
+    /* Timer-C vector (69) might be programmed without setting the
+     * vector. It is legitimate as the ST system uses this timer at
+     * 200hz. We could check this frequence instead of acknowledge
+     * this interruption.
+     */
+
     /* install instruction stop #$2FNN */
     memptr[ vector + 0 ] = 0x4e;
-    memptr[ vector + 1 ] = 0x72;
+    memptr[ vector + 1 ] = 0x72 /* + (i == 69) */;
     memptr[ vector + 2 ] = 0x2F; /* magic SR value (see handler) */
     memptr[ vector + 3 ] = i;    /* vector number                */
     memptr[ vector + 4 ] = 0x4e; /* RESET                        */
