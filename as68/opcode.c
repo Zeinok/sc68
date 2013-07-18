@@ -303,7 +303,7 @@ int get_size(int zp)
  */
 int isreg(char *c)
 {
-  struct fast_table *r;
+  /* struct fast_table *r; */
 
   if(!c[2])
     {
@@ -317,13 +317,15 @@ int isreg(char *c)
           cur_reg = c[1] - '0' + 8;
           return TRUE;
         }
+      if (*c == 's' && c[1] == 'p')
+          cur_reg = 15;
     }
-  r = look_in_fast_table(c, register_table);
-  if(r)
-    {
-      cur_reg = r->value;
-      return TRUE;
-    }
+  /* r = look_in_fast_table(c, register_table); */
+  /* if(r) */
+  /*   { */
+  /*     cur_reg = r->value; */
+  /*     return TRUE; */
+  /*   } */
   return FALSE;
 }
 
@@ -2355,12 +2357,12 @@ opcode_list[] = {
   { "RELOCATION",       Frelocation,    0 },
   { "BSS",              Fbss,           0 },
   { 0, 0, 0 }
-},
-
-register_list[] = {
-  { "sp", 0, 15 },
-  { 0, 0, 0 }
 };
+
+/* register_list[] = { */
+/*   { "sp", 0, 15 }, */
+/*   { 0, 0, 0 } */
+/* }; */
 
 /* Build fast table. */
 void make_fast_table(struct fast_table ** ft, struct slow_table * st)
@@ -2410,9 +2412,9 @@ void init_opcodes()
 {
   memset(opcode_table,0,sizeof(opcode_table));
   make_fast_table(opcode_table, opcode_list);
-  memset(register_table,0,sizeof(register_table));
-  make_fast_table(register_table, register_list);
+  /* memset(register_table,0,sizeof(register_table)); */
+  /* make_fast_table(register_table, register_list); */
 }
 
 fast_table_t * opcode_table[FAST_LETTERS];
-fast_table_t * register_table[FAST_LETTERS];
+/* fast_table_t * register_table[FAST_LETTERS]; */
