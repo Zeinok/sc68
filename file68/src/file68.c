@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-14 02:22:58 ben>
+ * Time-stamp: <2013-07-20 05:17:07 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -44,8 +44,8 @@
 #include "istream68_mem.h"
 #include "istream68_z.h"
 #include "istream68_null.h"
-#include "gzip68.h"
 #include "ice68.h"
+#include "gzip68.h"
 #include "url68.h"
 #include "timedb68.h"
 
@@ -147,6 +147,7 @@ static /* const */ struct strings_table {
   "Atari-ST chiptune",
   -1,
 };
+
 
 /* Does this memory belongs to the disk data ? */
 static inline int is_disk_data(const disk68_t * const mb, const void * const _s)
@@ -292,6 +293,23 @@ static int set_customtag(disk68_t * mb, tagset68_t * tags,
 #define ok_int(V)  strok68(V)
 #define strnull(S) strnevernull68(S)
 
+static int gzip_is_magic(const char * buffer)
+{
+  return 1
+    && buffer[0] == 0x1f
+    && buffer[1] == (char)0x8b
+    && buffer[2] == 8;
+}
+
+static int ice_is_magic(const char * buffer)
+{
+  return 1
+    && buffer[0] == 'I'
+    && (buffer[1]|0x20) == 'c'
+    && (buffer[2]|0x20) == 'e'
+    && buffer[3] == '!';
+}
+
 static int sndh_is_magic(const char *buffer, int max)
 {
   const int start = 6;
@@ -383,10 +401,10 @@ static int read_header(istream68_t * const is, unsigned int * hptr)
     if (have = ensure_header(is, id, have, sndh_req, hptr), !have) {
       return -1;
     }
-    if (gzip68_is_magic(id)) {
+    if (gzip_is_magic(id)) {
       TRACE68(file68_cat,"file68: found %s signature\n","GZIP");
       return -gzip_cc;
-    } else if (ice68_is_magic(id)) {
+    } else if (ice_is_magic(id)) {
       TRACE68(file68_cat,"file68: found %s signature\n","ICE!");
       return -ice_cc;
     } else {
@@ -815,7 +833,7 @@ int file68_verify(istream68_t * is)
       break;
     case -ice_cc:
       if (istream68_seek_to(is,0) == 0) {
-        buffer = ice68_load(is, &len);
+        buffer = file68_ice_load(is, &len);
       }
       break;
     case -sndh_cc:
@@ -985,7 +1003,7 @@ static int sndh_info(disk68_t * mb, int len)
   mb->mus[0].data   = b;
   mb->mus[0].datasz = len;
   mb->nb_mus = -1; /* Make validate failed */
-  mb->mus[0].replay = ice68_version() ? 0 : "sndh_ice";
+  mb->mus[0].replay = 0;
   mb->mus[0].tags.tag.custom[SNDH_RIPP_ID].key = tagstr.ripper;
   mb->mus[0].tags.tag.custom[SNDH_CONV_ID].key = tagstr.converter;
 
@@ -1388,7 +1406,7 @@ disk68_t * file68_load(istream68_t * is)
 
       case -ice_cc:
         if (istream68_seek_to(is,0) == 0) {
-          buffer = ice68_load(is, &l);
+          buffer = file68_ice_load(is, &l);
         }
         break;
 

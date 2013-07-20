@@ -5,7 +5,7 @@
  * @date     2003-09-06
  * @brief    ICE loader header.
  */
-/* Time-stamp: <2013-07-08 07:54:19 ben> */
+/* Time-stamp: <2013-07-20 05:11:51 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -33,7 +33,7 @@ FILE68_EXTERN
  *
  * @see unice68_ice_version()
  */
-int ice68_version(void);
+int file68_ice_version(void);
 
 FILE68_EXTERN
 /**
@@ -44,14 +44,15 @@ FILE68_EXTERN
  * @retval  1  buffer seems to be ice packed..
  * @retval  0  buffer is not ice packed.
  */
-int ice68_is_magic(const void * buffer);
+int file68_ice_is_magic(const void * buffer);
 
 FILE68_EXTERN
 /**
  * Load an iced stream.
  *
- *   The ice68_load() function loads and depack an ice packed file
- *   from a stream and returns a allocate buffer with unpacked data.
+ *   The file68_ice_load() function loads and depack an ice packed
+ *   file from a stream and returns a allocate buffer with unpacked
+ *   data.
  *
  * @param  is     Stream to load (must be opened in read mode).
  * @param  ulen   Pointer to save uncompressed size.
@@ -59,7 +60,7 @@ FILE68_EXTERN
  * @return Pointer to the uncompressed data buffer.
  * @retval 0 Error
  */
-void * ice68_load(istream68_t * is, int * ulen);
+void * file68_ice_load(istream68_t * is, int * ulen);
 
 FILE68_EXTERN
 /**
@@ -71,9 +72,9 @@ FILE68_EXTERN
  * @return Pointer to the uncompressed data buffer.
  * @retval 0 Error
  *
- * @see ice68_load()
+ * @see file68_ice_load()
  */
-void * ice68_load_file(const char * fname, int * ulen);
+void * file68_ice_load_file(const char * fname, int * ulen);
 
 /**
  * @}

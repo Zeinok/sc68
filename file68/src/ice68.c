@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-02 16:04:06 ben>
+ * Time-stamp: <2013-07-20 05:13:30 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -42,17 +42,17 @@
 
 #include <string.h>
 
-int ice68_version(void)
+int file68_ice_version(void)
 {
   return unice68_ice_version();
 }
 
-int ice68_is_magic(const void * buffer)
+int file68_ice_is_magic(const void * buffer)
 {
-  return unice68_get_depacked_size(buffer,0) > 0;
+  return unice68_depacked_size(buffer,0) > 0;
 }
 
-void * ice68_load(istream68_t *is, int *ulen)
+void * file68_ice_load(istream68_t *is, int *ulen)
 {
   char header[12], *inbuf = 0, * outbuf = 0;
   int dsize, csize;
@@ -66,7 +66,7 @@ void * ice68_load(istream68_t *is, int *ulen)
   }
 
   csize = 0;
-  dsize = unice68_get_depacked_size(header, &csize);
+  dsize = unice68_depacked_size(header, &csize);
 
   if (dsize < 0) {
     error68("ice68: load '%s' [not ICE!]", fname);
@@ -110,14 +110,14 @@ success:
   return outbuf;
 }
 
-void * ice68_load_file(const char * fname, int * ulen)
+void * file68_ice_load_file(const char * fname, int * ulen)
 {
   void * ret = 0;
   istream68_t * is;
 
   is = istream68_file_create(fname, 1);
   if (istream68_open(is) != -1) {
-    ret = ice68_load(is, ulen);
+    ret = file68_ice_load(is, ulen);
     istream68_close(is);
   }
   istream68_destroy(is);
@@ -127,12 +127,12 @@ void * ice68_load_file(const char * fname, int * ulen)
 
 #else /* #ifdef USE_UNICE68 */
 
-int ice68_version(void)
+int file68_ice_version(void)
 {
   return 0;
 }
 
-int ice68_is_magic(const void * buffer)
+int file68_ice_is_magic(const void * buffer)
 {
   return buffer
     && 0[(char *)buffer] == 'I'
@@ -141,14 +141,14 @@ int ice68_is_magic(const void * buffer)
     && 3[(char *)buffer] == '!';
 }
 
-void * ice68_load(istream68_t * is, int * ulen)
+void * file68_ice_load(istream68_t * is, int * ulen)
 {
   const char * fname = istream68_filename(is);
   error68("ice68: *NOT SUPPORTED*");
   return 0;
 }
 
-void * ice68_load_file(const char * fname, int * ulen)
+void * file68_ice_load_file(const char * fname, int * ulen)
 {
   error68("ice68: *NOT SUPPORTED*");
   return 0;
