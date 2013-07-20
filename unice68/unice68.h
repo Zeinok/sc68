@@ -4,11 +4,10 @@
  * @author   Benjamin Gerard
  * @date     2003/08/06
  * @brief    ICE! depacker header
- *
  */
+/* Time-stamp: <2013-07-19 04:35:57 ben> */
 
-/* Copyright (C) 1998-2011 Benjamin Gerard
- * <http://sourceforge.net/users/benjihan> */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _UNICE68_H_
 #define _UNICE68_H_
@@ -41,7 +40,8 @@
 # endif
 #endif
 
-/** @defgroup  unice68_lib  unice68 library
+/**
+ *  @defgroup  unice68_lib  unice68 library
  *  @ingroup   api68
  *  @brief     ICE! 2.4 depacker.
  *
@@ -60,7 +60,8 @@
  */
 
 #ifndef UNICE68_API
-/** unice68 symbols specification.
+/**
+ *  unice68 symbols specification.
  *
  *  Define special atributs for importing/exporting unice68 symbols.
  */
@@ -69,28 +70,32 @@
 #endif
 
 UNICE68_API
-/** Get unice68 version.
+/**
+ *  Get unice68 version.
  *
  *  @return version number
  */
 int unice68_version(void);
 
 UNICE68_API
-/** Get unice68 version.
+/**
+ *  Get unice68 version.
  *
  *  @return version string
  */
 const char * unice68_versionstr(void);
 
 UNICE68_API
-/** Get ICE depacker version.
+/**
+ *  Get ICE depacker version.
  *
  *  @return version number (MAJOR*100+MINOR)
  */
 int unice68_ice_version(void);
 
 UNICE68_API
-/** Test ICE and get compressed and uncompresed size.
+/**
+ *  Test ICE and get compressed and uncompresed size.
  *
  *    The unice68_depacked_size() function returns the uncompressed
  *    size of a ICE compressed buffer. If p_size is not 0 it is fill with
@@ -115,13 +120,8 @@ UNICE68_API
 int unice68_depacked_size(const void * buffer, int * p_csize);
 
 UNICE68_API
-/** Test ICE and get compressed and uncompresed size.
- *  @deprecated in favor of unice68_depacked_size()
- */
-int unice68_get_depacked_size(const void * buffer, int * p_csize);
-
-UNICE68_API
-/** Depack an ICE buffer to another.
+/**
+ *  Depack an ICE buffer to another.
  *
  *   The unice68_depacker() function depacks src input ICE compressed
  *   buffer into dst output buffer.  The dst buffer is assumed to be
@@ -141,7 +141,7 @@ UNICE68_API
 int unice68_depacker(void * dst, const void * src);
 
 /**
- *  @}
+ * @}
  */
 
 #endif /* #ifndef _UNICE68_H_ */

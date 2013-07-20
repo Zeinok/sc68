@@ -1,21 +1,24 @@
 /*
- *         unice68 - ice depacker library (native version)
- *             Copyright (C) 1998-2011 Benjamin Gerard
- *             <http://sourceforge.net/users/benjihan>
+ * @file    unice68_native.c
+ * @brief   Ice Depacker 2.40 (native version)
+ * @author  http://sourceforge.net/users/benjihan
  *
- * This program is free software: you can redistribute it and/or
- * modify it under the terms of the GNU General Public License as
- * published by the Free Software Foundation, either version 3 of the
+ * Copyright (C) 1998-2013 Benjamin Gerard
+ *
+ * Time-stamp: <2013-07-19 18:55:46 ben>
+ *
+ * This  program is  free  software: you  can  redistribute it  and/or
+ * modify  it under the  terms of  the GNU  General Public  License as
+ * published by the Free Software  Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
+ * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
  * General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
+ * You should have  received a copy of the  GNU General Public License
  * along with this program.
- *
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
@@ -59,7 +62,7 @@ typedef int dreg_t;
 typedef struct {
   areg_t a0,a1,a2,a3,a4,a5,a6,a7;
   dreg_t d0,d1,d2,d3,d4,d5,d6,d7;
-  areg_t ctop,cbot,dtop,dbot;
+  areg_t srcbuf,srcend,dstbuf,dstend;
   int overflow;
 } all_regs_t;
 
@@ -113,22 +116,19 @@ static void strings(all_regs_t *);
 static void normal_bytes(all_regs_t *);
 static int get_d0_bits(all_regs_t *, int d0);
 
-static inline int check_drange(all_regs_t *R, const areg_t a, const areg_t b)
+static inline int chk_dst_range(all_regs_t *R, const areg_t a, const areg_t b)
 {
-  if (a < R->dtop || b >= R->dbot) {
-    R->overflow |= 1;
-  }
+  R->overflow |= (a <  R->dstbuf) << 0;
+  R->overflow |= (b >= R->dstend) << 1;
   return R->overflow;
 }
 
-static inline int check_crange(all_regs_t *R, const areg_t a, const areg_t b)
+static inline int chk_src_range(all_regs_t *R, const areg_t a, const areg_t b)
 {
-  if (a < R->ctop || b >= R->cbot) {
-    R->overflow |= 2;
-  }
+  R->overflow |= (a <  R->srcbuf) << 2;
+  R->overflow |= (b >= R->srcend) << 3;
   return R->overflow;
 }
-
 
 /* getinfo:     moveq   #3,d1 */
 /* getbytes: lsl.l      #8,d0 */
@@ -158,7 +158,7 @@ static inline int get_1_bit(all_regs_t *R)
   r = (R->d7 & 255) << 1;
   B_CC(r & 255, bitfound);
 
-  check_crange(R,R->a5-1,R->a5-1);
+  chk_src_range(R,R->a5-1,R->a5-1);
 
   r = (r>>8) + (*(--R->a5) << 1);
 bitfound:
@@ -199,19 +199,19 @@ static int ice_decrunch(all_regs_t *R)
 /*      move.b  -(a5),d7 */
 /*      bsr     normal_bytes */
 
-  R->ctop = R->a0;
-  R->dtop = R->a1;
+  R->srcbuf = R->a0;
+  R->dstbuf = R->a1;
 
-  id = getinfo(R);
-  if (id != ICE_MAGIC) {
+  id = getinfo(R);        /* Works with 'Ice!' too */
+  if ( ( id & ~0x202000 ) != ICE_MAGIC) {
     return -1;
   }
   csize = getinfo(R);
-  R->cbot = R->a5 = R->a0 - 8 + csize;
+  R->srcend = R->a5 = R->a0 - 8 + csize;
   R->d0 = dsize = getinfo(R);
   R->a6 = R->a4 = R->a1;
   R->a6 += R->d0;
-  R->dbot = R->a3 = R->a6;
+  R->dstend = R->a3 = R->a6;
 
   R->d7 = *(--R->a5);
   normal_bytes(R);
@@ -274,7 +274,7 @@ ice_02:
   DBF(R->d5,ice_02);
   DBF(R->d6,ice_01);
 
-  if (check_crange(R, R->a3, R->a3+7)) {
+  if (chk_src_range(R, R->a3, R->a3+7)) {
     goto not_packed;
   }
 
@@ -341,8 +341,8 @@ static void normal_bytes(all_regs_t *R)
  copy_direkt:
     {
       const int cnt = DBF_COUNT(R->d1);
-      if (check_drange(R, R->a6-cnt, R->a6-1) |
-          check_crange(R, R->a5-cnt, R->a5-1)) {
+      if (chk_dst_range(R, R->a6-cnt, R->a6-1) |
+          chk_src_range(R, R->a5-cnt, R->a5-1)) {
         break;
       }
     }
@@ -353,7 +353,7 @@ static void normal_bytes(all_regs_t *R)
  test_if_end:
     if (R->a6 <= R->a4) {
       if (R->a6 < R->a4) {
-        check_drange(R, R->a6, R->a6);
+        chk_dst_range(R, R->a6, R->a6);
       }
       break;
     }
@@ -381,7 +381,7 @@ static int get_d0_bits(all_regs_t *R, int r0)
 
   r0 &= 0xFFFF;
   if (r0 > 15) {
-    R->overflow |= 4;
+    R->overflow |= (1 << 4);
     return 0;
   }
 
@@ -389,7 +389,7 @@ hole_bit_loop:
   r7 = (r7 & 255) << 1;
   B_CC(r7 & 255, on_d0);
 
-  check_crange(R,R->a5-1,R->a5-1);
+  chk_src_range(R,R->a5-1,R->a5-1);
 
   r7 = (*(--R->a5) << 1) + (r7>>8);
 on_d0:
@@ -496,16 +496,11 @@ less_40:
 
 depack_bytes:
   R->a1 = R->a6 + 2 + (s16)R->d4 + (s16)R->d1;
-  check_drange(R, R->a6 - DBF_COUNT(R->d4) - 1, R->a6-1);
+  chk_dst_range(R, R->a6 - DBF_COUNT(R->d4) - 1, R->a6-1);
   if (R->a6>R->a4) *(--R->a6) = *(--R->a1);
 dep_b:
   if (R->a6>R->a4) *(--R->a6) = *(--R->a1);
   DBF(R->d4,dep_b);
-}
-
-int unice68_get_depacked_size(const void * buffer, int * p_csize)
-{
-  return unice68_depacked_size(buffer,p_csize);
 }
 
 int unice68_depacked_size(const void * buffer, int * p_csize)
@@ -520,7 +515,7 @@ int unice68_depacked_size(const void * buffer, int * p_csize)
 
   allregs.a0 = (areg_t)buffer;
   id = getinfo(&allregs);
-  if (id != ICE_MAGIC) {
+  if ( ( id & ~0x202000 ) != ICE_MAGIC) {
     return -1;
   }
   csize = getinfo(&allregs);

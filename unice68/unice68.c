@@ -1,11 +1,11 @@
 /*
- * @file    info68.c
+ * @file    unice68.c
  * @brief   program to depack ICE! packed files
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2011-11-07 12:56:02 ben>
+ * Time-stamp: <2013-07-19 04:37:22 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
