@@ -66,7 +66,7 @@ AS_LITERAL_IF([$1],
       _AC_LANG_PREFIX[]FLAGS=$ax_save_FLAGS])],
   [ax_save_FLAGS=$[]_AC_LANG_PREFIX[]FLAGS
    _AC_LANG_PREFIX[]FLAGS="$1"
-   AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
+   AC_COMPILE_IFELSE([AC_LANG_PROGRAM()]	,
      eval AS_TR_SH(ax_cv_[]_AC_LANG_ABBREV[]_flags_$1)=yes,
      eval AS_TR_SH(ax_cv_[]_AC_LANG_ABBREV[]_flags_$1)=no)
    _AC_LANG_PREFIX[]FLAGS=$ax_save_FLAGS])

@@ -1,14 +1,14 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2011-09-08 13:21:42 ben>
+dnl# Time-stamp: <2013-07-22 06:13:29 ben>
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2011 Benjamin Gerard
+dnl# (C) 2009-2013 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20110908 sc68_tools.m4
+# serial 20130822 sc68_tools.m4
 
 # SC68_TOOLS()
 # ------------
