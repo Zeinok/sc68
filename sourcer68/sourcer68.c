@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-11-05 05:10:24 ben>
+ * Time-stamp: <2013-07-22 03:40:25 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -37,13 +37,11 @@
 #include <desa68.h>
 
 #ifdef USE_FILE68
-# include <sc68/file68_api.h>
-# include <sc68/error68.h>
-# include <sc68/alloc68.h>
 # include <sc68/file68.h>
-# include <sc68/url68.h>
-# include <sc68/msg68.h>
-# include <sc68/option68.h>
+# include <sc68/file68_err.h>
+# include <sc68/file68_uri.h>
+# include <sc68/file68_msg.h>
+# include <sc68/file68_opt.h>
 static int sourcer68_cat = -1;
 static int no_sc68 = 0;
 #else
@@ -941,33 +939,33 @@ static char * LoadBinary(char * fname, int * fsize)
 
 #ifdef USE_FILE68
 
-  istream68_t *is = url68_stream_create(fname,1);
+  vfs68_t *is = url68_stream_create(fname,1);
 
-  if (istream68_open(is) == -1) {
+  if (vfs68_open(is) == -1) {
     goto error;
   }
-  size = istream68_length(is);
+  size = vfs68_length(is);
   if (size < 0) {
     goto error;
   }
 
-  b = alloc68(size);
+  b = malloc(size);
   if (!b) {
     goto error;
   }
 
-  if (istream68_read(is, b,size) != size) {
+  if (vfs68_read(is, b,size) != size) {
     goto error;
   }
   if (fsize) {
     *fsize = size;
   }
-  istream68_destroy(is);
+  vfs68_destroy(is);
   return b;
 
   error:
-  istream68_destroy(is);
-  free68(b);
+  vfs68_destroy(is);
+  free(b);
   return 0;
 
 #else
@@ -1300,7 +1298,7 @@ int main(int argc, char **argv)
 
 #ifdef USE_FILE68
   if (d) {
-    free68(d);
+    free(d);
     buf = 0; /* buf was not mallocated. */
   }
 #endif

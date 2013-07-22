@@ -5,18 +5,18 @@
  * @date     1998-09-03
  * @brief    Music file header.
  */
-/* Time-stamp: <2013-07-15 23:26:23 ben> */
+/* Time-stamp: <2013-07-22 00:51:10 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_FILE68_H_
-#define _FILE68_FILE68_H_
+#ifndef _FILE68_H_
+#define _FILE68_H_
 
 #ifndef FILE68_API
 # include "file68_api.h"
 #endif
-#include "istream68.h"
-#include "tag68.h"
+#include "file68_vfs.h"
+#include "file68_tag.h"
 
 /**
  * @defgroup  file68_file  Music file manipulation
@@ -270,7 +270,7 @@ FILE68_API
  * @see file68_save()
  * @see file68_diskname()
  */
-int file68_verify(istream68_t * is);
+int file68_verify(vfs68_t * is);
 
 FILE68_API
 /**
@@ -313,7 +313,7 @@ FILE68_API
  *
  * @deprecated This function needs to be rewritten.
  */
-int file68_diskname(istream68_t * is, char * dest, int max);
+int file68_diskname(vfs68_t * is, char * dest, int max);
 
 
 
@@ -359,7 +359,7 @@ FILE68_API
  * @see file68_verify()
  * @see file68_save()
  */
-disk68_t * file68_load(istream68_t * is);
+disk68_t * file68_load(vfs68_t * is);
 
 FILE68_API
 /**
@@ -411,7 +411,7 @@ FILE68_API
  * @see file68_verify()
  * @see file68_diskname()
  */
-int file68_save(istream68_t * os, const disk68_t * mb,
+int file68_save(vfs68_t * os, const disk68_t * mb,
                 int version, int gzip);
 
 FILE68_API
@@ -544,4 +544,5 @@ void file68_shutdown(void);
  * @}
  */
 
-#endif /* #ifndef _FILE68_FILE68_H_ */
+#endif
+

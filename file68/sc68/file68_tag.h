@@ -1,16 +1,16 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/tag68.h
+ * @file     sc68/file68_tag.h
  * @author   Benjamin Gerard
  * @date     2011-10-03
  * @brief    Metatags definition header file.
  */
-/* Time-stamp: <2013-07-08 07:37:10 ben> */
+/* Time-stamp: <2013-07-22 00:13:14 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_TAG68_H_
-#define _FILE68_TAG68_H_
+#ifndef _FILE68_TAG_H_
+#define _FILE68_TAG_H_
 
 /**
  * @addtogroup   file68_lib
@@ -85,4 +85,4 @@ typedef union {
  * @}
  */
 
-#endif /* #ifndef _FILE68_TAG68_H_ */
+#endif

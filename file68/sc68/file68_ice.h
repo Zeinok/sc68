@@ -1,18 +1,18 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/ice68.h
+ * @file     sc68/file68_ice.h
  * @author   Benjamin Gerard
  * @date     2003-09-06
  * @brief    ICE loader header.
  */
-/* Time-stamp: <2013-07-20 05:11:51 ben> */
+/* Time-stamp: <2013-07-22 01:19:11 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_ICE68_H_
-#define _FILE68_ICE68_H_
+#ifndef _FILE68_ICE_H_
+#define _FILE68_ICE_H_
 
-#include "istream68.h"
+#include "file68_vfs.h"
 
 /**
  * @defgroup  file68_ice  ICE loader support.
@@ -60,7 +60,7 @@ FILE68_EXTERN
  * @return Pointer to the uncompressed data buffer.
  * @retval 0 Error
  */
-void * file68_ice_load(istream68_t * is, int * ulen);
+void * file68_ice_load(vfs68_t * is, int * ulen);
 
 FILE68_EXTERN
 /**
@@ -80,4 +80,5 @@ void * file68_ice_load_file(const char * fname, int * ulen);
  * @}
  */
 
-#endif /* #ifndef _FILE68_ICE68_H_ */
+#endif
+

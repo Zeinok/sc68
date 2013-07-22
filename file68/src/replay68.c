@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-08 21:24:42 ben>
+ * Time-stamp: <2013-07-22 01:42:05 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,7 +28,7 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "string68.h"
+#include "file68_str.h"
 
 #include "replay.inc.h"
 

@@ -1,16 +1,16 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/error68.h
+ * @file     sc68/file68_err.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
  * @brief    Error message header.
  */
-/* Time-stamp: <2013-07-08 08:00:37 ben> */
+/* Time-stamp: <2013-07-22 00:18:21 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_ERROR68_H_
-#define _FILE68_ERROR68_H_
+#ifndef _FILE68_ERR_H_
+#define _FILE68_ERR_H_
 
 #ifndef FILE68_API
 # include "file68_api.h"
@@ -19,7 +19,7 @@
 
 
 /**
- * @defgroup  file68_error  Error message
+ * @defgroup  file68_err  Error message
  * @ingroup   file68_lib
  *
  *   Provides error message facilities.
@@ -85,4 +85,4 @@ int error68x_va(void * cookie, const char * format, va_list list);
  * @}
  */
 
-#endif /* #ifndef _FILE68_ERROR68_H_ */
+#endif

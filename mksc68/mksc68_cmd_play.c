@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-17 22:04:51 ben>
+ * Time-stamp: <2013-07-22 03:13:04 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -37,8 +37,7 @@
 #include "mksc68_gdb.h"
 
 #include <sc68/file68.h>
-#include <sc68/alloc68.h>
-#include <sc68/istream68.h>
+#include <sc68/file68_vfs.h>
 #include <sc68/sc68.h>
 #include <emu68/emu68.h>
 #include <emu68/excep68.h>
@@ -71,7 +70,7 @@ typedef struct {
   emu68_t     * emu68;      /* emu68 instance.   */
   io68_t     ** ios68;      /* other chip.       */
   gdb_t       * gdb;        /* gdb instance      */
-  istream68_t * out;        /* audio out stream  */
+  vfs68_t     * out;        /* audio out stream  */
   pthread_t     thread;     /* play thread       */
   int           track;
   int           loop;
@@ -156,11 +155,11 @@ static void play_init(playinfo_t * pi)
 
   pi->isplaying = 2;
   pi->code      = -1;
-  pi->out       = sc68_stream_create(outname, 2);
+  pi->out       = sc68_vfs(outname, 2);
   pi->gdb       = 0;
 
   if (!pi->out) return;
-  if (istream68_open(pi->out)) return;
+  if (vfs68_open(pi->out)) return;
 
   memset(&create68,0,sizeof(create68));
   create68.name = pi->debug ? "mksc68-debug" : "mksc68-play";
@@ -195,7 +194,7 @@ static void play_run(playinfo_t * pi)
       break;
     if (code & SC68_LOOP)
       ++loop;
-    if (istream68_write(pi->out, buffer, (n << 2)) != (n << 2)) {
+    if (vfs68_write(pi->out, buffer, (n << 2)) != (n << 2)) {
       code = SC68_ERROR;
       break;
     }
@@ -206,7 +205,7 @@ static void play_run(playinfo_t * pi)
 static void play_end(playinfo_t * pi)
 {
   pi->isplaying = 3;
-  istream68_close(pi->out);
+  vfs68_close(pi->out);
   pi->out = 0;
   gdb_destroy(pi->gdb);
   pi->gdb = 0;

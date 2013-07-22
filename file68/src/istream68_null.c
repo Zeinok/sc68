@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-05-24 22:43:37 ben>
+ * Time-stamp: <2013-07-22 01:35:17 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,28 +28,28 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "istream68_null.h"
+#include "file68_vfs_null.h"
 
 /* define this if you don't want NULL support. */
-#ifndef ISTREAM68_NO_NULL
+#ifndef VFS68_NO_NULL
 
-#include "istream68_def.h"
-#include "alloc68.h"
+#include "file68_vfs_def.h"
 
 #include <string.h>
+#include <stdlib.h>
 
-/** istream file structure. */
+/** vfs file structure. */
 typedef struct {
-  istream68_t istream; /**< istream function.           */
+  vfs68_t vfs; /**< vfs function.           */
   int size;            /**< max pos R or W.             */
   int pos;             /**< current position.           */
   int open;            /**< has been opened.            */
   char name[1];        /**< filename (null://filename). */
-} istream68_null_t;
+} vfs68_null_t;
 
-static const char * isn_name(istream68_t * istream)
+static const char * isn_name(vfs68_t * vfs)
 {
-  istream68_null_t * isn = (istream68_null_t *)istream;
+  vfs68_null_t * isn = (vfs68_null_t *)vfs;
 
   return (!isn->name[0])
     ? 0
@@ -57,9 +57,9 @@ static const char * isn_name(istream68_t * istream)
     ;
 }
 
-static int isn_open(istream68_t * istream)
+static int isn_open(vfs68_t * vfs)
 {
-  istream68_null_t * isn = (istream68_null_t *)istream;
+  vfs68_null_t * isn = (vfs68_null_t *)vfs;
 
   if (isn->open) {
     return -1;
@@ -70,9 +70,9 @@ static int isn_open(istream68_t * istream)
   return 0;
 }
 
-static int isn_close(istream68_t * istream)
+static int isn_close(vfs68_t * vfs)
 {
-  istream68_null_t * isn = (istream68_null_t *)istream;
+  vfs68_null_t * isn = (vfs68_null_t *)vfs;
 
   if (!isn->open) {
     return -1;
@@ -81,9 +81,9 @@ static int isn_close(istream68_t * istream)
   return 0;
 }
 
-static int isn_read_or_write(istream68_t * istream, int n)
+static int isn_read_or_write(vfs68_t * vfs, int n)
 {
-  istream68_null_t * isn = (istream68_null_t *)istream;
+  vfs68_null_t * isn = (vfs68_null_t *)vfs;
 
   if (!isn->open || n < 0) {
     return -1;
@@ -98,32 +98,32 @@ static int isn_read_or_write(istream68_t * istream, int n)
   return n;
 }
 
-static int isn_read(istream68_t * istream, void * data, int n)
+static int isn_read(vfs68_t * vfs, void * data, int n)
 {
-  return isn_read_or_write(istream, n);
+  return isn_read_or_write(vfs, n);
 }
 
-static int isn_write(istream68_t * istream, const void * data, int n)
+static int isn_write(vfs68_t * vfs, const void * data, int n)
 {
-  return isn_read_or_write(istream, n);
+  return isn_read_or_write(vfs, n);
 }
 
-static int isn_flush(istream68_t * istream)
+static int isn_flush(vfs68_t * vfs)
 {
-  istream68_null_t * isn = (istream68_null_t *)istream;
+  vfs68_null_t * isn = (vfs68_null_t *)vfs;
   return -!isn->open;
 }
 
-static int isn_length(istream68_t * istream)
+static int isn_length(vfs68_t * vfs)
 {
-  istream68_null_t * isn = (istream68_null_t *)istream;
+  vfs68_null_t * isn = (vfs68_null_t *)vfs;
 
   return isn->size;
 }
 
-static int isn_tell(istream68_t * istream)
+static int isn_tell(vfs68_t * vfs)
 {
-  istream68_null_t * isn = (istream68_null_t *)istream;
+  vfs68_null_t * isn = (vfs68_null_t *)vfs;
 
   return !isn->open
     ? -1
@@ -131,9 +131,9 @@ static int isn_tell(istream68_t * istream)
     ;
 }
 
-static int isn_seek(istream68_t * istream, int offset)
+static int isn_seek(vfs68_t * vfs, int offset)
 {
-  istream68_null_t * isn = (istream68_null_t *)istream;
+  vfs68_null_t * isn = (vfs68_null_t *)vfs;
 
   if (isn) {
     offset += isn->pos;
@@ -145,12 +145,12 @@ static int isn_seek(istream68_t * istream, int offset)
   return -1;
 }
 
-static void isn_destroy(istream68_t * istream)
+static void isn_destroy(vfs68_t * vfs)
 {
-  free68(istream);
+  free(vfs);
 }
 
-static const istream68_t istream68_null = {
+static const vfs68_t vfs68_null = {
   isn_name,
   isn_open, isn_close,
   isn_read, isn_write, isn_flush,
@@ -158,9 +158,9 @@ static const istream68_t istream68_null = {
   isn_destroy
 };
 
-istream68_t * istream68_null_create(const char * name)
+vfs68_t * vfs68_null_create(const char * name)
 {
-  istream68_null_t *isn;
+  vfs68_null_t *isn;
   int size;
   static const char hd[] = "null://";
 
@@ -168,33 +168,33 @@ istream68_t * istream68_null_create(const char * name)
     name = "default";
   }
 
-  size = sizeof(istream68_null_t) + sizeof(hd)-1 + strlen(name);
+  size = sizeof(vfs68_null_t) + sizeof(hd)-1 + strlen(name);
 
-  isn = alloc68(size);
+  isn = malloc(size);
   if (!isn) {
     return 0;
   }
 
-  isn->istream = istream68_null;
+  isn->vfs = vfs68_null;
   isn->size    = 0;
   isn->pos     = 0;
   isn->open    = 0;
   strcpy(isn->name,hd);
   strcat(isn->name,name);
 
-  return &isn->istream;
+  return &isn->vfs;
 }
 
-#else /* #ifndef ISTREAM68_NO_NULL */
+#else /* #ifndef VFS68_NO_NULL */
 
-/* istream mem must not be include in this package. Anyway the creation
+/* vfs mem must not be include in this package. Anyway the creation
  * still exist but it always returns error.
  */
 
-#include "istream68_null.h"
-#include "msg68.h"
+#include "file68_vfs_null.h"
+#include "file68_msg.h"
 
-istream68_t * istream68_null_create(const char * name)
+vfs68_t * vfs68_null_create(const char * name)
 {
   msg68_error("null68: create -- *NOT SUPPORTED*\n");
   return 0;

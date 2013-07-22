@@ -1,21 +1,21 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/url68.h
+ * @file     sc68/file68_uri.h
  * @author   Benjamin Gerard
  * @date     2003-10-28
  * @brief    URL manipulation header.
  */
-/* Time-stamp: <2013-07-08 07:36:29 ben> */
+/* Time-stamp: <2013-07-22 01:19:48 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_URL68_H_
-#define _FILE68_URL68_H_
+#ifndef _FILE68_URI_H_
+#define _FILE68_URI_H_
 
 #ifndef FILE68_API
 # include "file68_api.h"
 #endif
-#include "istream68.h"
+#include "file68_vfs.h"
 
 /**
  * @defgroup  file68_url  URL manipulation
@@ -74,10 +74,10 @@ FILE68_API
  * @return stream
  * @retval 0 error
  */
-istream68_t * url68_stream_create(const char * url, int mode);
+vfs68_t * url68_stream_create(const char * url, int mode);
 
 /**
- *  @}
+ * @}
  */
 
-#endif /* #ifndef _FILE68_URL68_H_ */
+#endif

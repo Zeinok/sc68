@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-16 13:30:39 ben>
+ * Time-stamp: <2013-07-22 03:13:59 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -33,8 +33,8 @@
 #include "mksc68_msg.h"
 #include "mksc68_opt.h"
 
-#include <sc68/msg68.h>
-#include <sc68/string68.h>
+#include <sc68/file68_msg.h>
+#include <sc68/file68_str.h>
 
 #include <stdio.h>
 #include <string.h>

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-11 18:24:13 ben>
+ * Time-stamp: <2013-07-22 03:11:19 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -36,8 +36,7 @@
 #include "mksc68_str.h"
 
 #include <sc68/file68.h>
-#include <sc68/alloc68.h>
-#include <sc68/string68.h>
+#include <sc68/file68_str.h>
 #include <sc68/sc68.h>
 
 #include <assert.h>
@@ -139,7 +138,7 @@ int dsk_load(const char * url, int merge, int force)
   ret = 0;
 error:
   if (ret)
-    free68(newdisk);
+    free(newdisk);
   return ret;
 }
 

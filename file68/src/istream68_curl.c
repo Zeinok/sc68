@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-07 18:13:03 ben>
+ * Time-stamp: <2013-07-22 21:54:08 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,8 +28,8 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "istream68_curl.h"
-#include "msg68.h"
+#include "file68_vfs_curl.h"
+#include "file68_msg.h"
 
 /* Define this if you want CURL support. */
 #ifdef USE_CURL
@@ -39,11 +39,11 @@
 #endif
 static int curl_cat = msg68_DEFAULT;
 
-#include "istream68_def.h"
-#include "alloc68.h"
+#include "file68_vfs_def.h"
 
 #include <curl/curl.h>
 #include <string.h>
+#include <stdlib.h>
 #if defined (HAVE_UNISTD_H) && (defined (HAVE_USLEEP) || defined (HAVE_SLEEP))
 /* $$$ Need this to have usleep prototype. */
 # if defined (HAVE_USLEEP) && !defined(__USE_BSD) && !defined(__USE_XOPEN)
@@ -72,11 +72,11 @@ typedef struct {
   int top;
   int bytes;
   char buffer[IS68_CACHE_SZ];
-} istream68_cache_t;
+} vfs68_cache_t;
 
-/** istream curl structure. */
+/** vfs curl structure. */
 typedef struct {
-  istream68_t istream;       /**< istream function.                 */
+  vfs68_t vfs;       /**< vfs function.                 */
 
   CURLM * curm;              /**< CURL "multi" handle               */
   CURL  * curl;              /**< CURL "easy" handle.               */
@@ -97,7 +97,7 @@ typedef struct {
   int length;                     /**< Known length (-1:unknown).   */
 
   /** Cached data. */
-  istream68_cache_t cache[IS68_CACHE_BLKS];
+  vfs68_cache_t cache[IS68_CACHE_BLKS];
 
   /** Curl error message. */
   char error[CURL_ERROR_SIZE];
@@ -107,7 +107,7 @@ typedef struct {
    */
   char name[1];                   /**< url.                         */
 
-} istream68_curl_t;
+} vfs68_curl_t;
 
 static int init = 0;
 
@@ -131,20 +131,20 @@ static int mysleep(unsigned long ms)
 #endif
 }
 
-static void isf_reset_cache_blocks(istream68_curl_t *isf)
+static void isf_reset_cache_blocks(vfs68_curl_t *isf)
 {
   int i;
 
   for (i=0; i<IS68_CACHE_BLKS; ++i) {
-    istream68_cache_t * c = isf->cache+i;
+    vfs68_cache_t * c = isf->cache+i;
     c->top = -1;
     c->bytes = 0;
   }
 }
 
-static const char * isf_name(istream68_t * istream)
+static const char * isf_name(vfs68_t * vfs)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)istream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)vfs;
 
   return (!isf->name[0])
     ? 0
@@ -155,7 +155,7 @@ static const char * isf_name(istream68_t * istream)
 /* $$$ TODO */
 static size_t isf_read_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)stream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)stream;
   int bytes, org_bytes/* , pos */;
 
   bytes = org_bytes = (int)(size * nmemb);
@@ -171,7 +171,7 @@ static size_t isf_read_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 
 static size_t isf_write_cb(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)stream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)stream;
 
   int bytes, org_bytes, pos;
   int off, top, blk;
@@ -240,7 +240,7 @@ static int isf_debug_cb(CURL *handle, curl_infotype type,
 {
 #if 0
 
-  istream68_curl_t * isf = (istream68_curl_t *)userp;
+  vfs68_curl_t * isf = (vfs68_curl_t *)userp;
   const char * typestr;
 
   switch (type) {
@@ -320,7 +320,7 @@ static int match_header(int *v,
 static size_t isf_header_cb(void  *ptr, size_t  size,
                             size_t  nmemb,  void  *stream)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)stream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)stream;
 
   static const char ftp_size[] = "213";
 /*   static const char ftp_complete[] = "226"; */
@@ -347,7 +347,7 @@ static size_t isf_header_cb(void  *ptr, size_t  size,
   return nmemb;
 }
 
-static int safe_curl_cleanup(istream68_curl_t * isf)
+static int safe_curl_cleanup(vfs68_curl_t * isf)
 {
   int err = 1;
   if (isf) {
@@ -368,9 +368,9 @@ static int safe_curl_cleanup(istream68_curl_t * isf)
   return -err;
 }
 
-static int isf_open(istream68_t * istream)
+static int isf_open(vfs68_t * vfs)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)istream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)vfs;
   const int verbose = ISF_VERBOSE;
   CURLcode code = 0;
   CURLMcode mcode = 0;
@@ -381,8 +381,8 @@ static int isf_open(istream68_t * istream)
   }
 
 /*   SC68os_pdebug("curl68::open(%s,%c%c)\n",isf->name, */
-/*              (isf->mode & ISTREAM68_OPEN_READ)?'R':'r', */
-/*              (isf->mode & ISTREAM68_OPEN_WRITE)?'W':'w'); */
+/*              (isf->mode & VFS68_OPEN_READ)?'R':'r', */
+/*              (isf->mode & VFS68_OPEN_WRITE)?'W':'w'); */
 
   /* Reset info. */
   isf->has_read = isf->has_write = isf->has_hd_read = isf->has_hd_write = 0;
@@ -399,7 +399,7 @@ static int isf_open(istream68_t * istream)
   */
 
   /* Currently accapts only read only open mode. */
-  if (isf->mode != ISTREAM68_OPEN_READ) {
+  if (isf->mode != VFS68_OPEN_READ) {
     strcpy(isf->error, "Invalid open mode");
     return -1;
   }
@@ -475,7 +475,7 @@ static int isf_open(istream68_t * istream)
 /*         TRACE68(curl_cat,"OK, timeleft:%d\n",timeout); */
         timeout -= mysleep(200);
         if (timeout < 0) {
-          TRACE68(curl_cat,"istream_curl: read-header -- *%s*\n","TIME-OUT");
+          TRACE68(curl_cat,"vfs_curl: read-header -- *%s*\n","TIME-OUT");
           break;
         }
       } else if (mcode != CURLM_CALL_MULTI_PERFORM) {
@@ -500,13 +500,13 @@ error:
   return -1;
 }
 
-static int isf_close(istream68_t * istream)
+static int isf_close(vfs68_t * vfs)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)istream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)vfs;
   return safe_curl_cleanup(isf);
 }
 
-static int isf_need_more(istream68_curl_t * isf)
+static int isf_need_more(vfs68_curl_t * isf)
 {
   int n=0, pos;
 
@@ -536,9 +536,9 @@ static int isf_need_more(istream68_curl_t * isf)
 }
 
 
-static int isf_read(istream68_t * istream, void * data, int n)
+static int isf_read(vfs68_t * vfs, void * data, int n)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)istream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)vfs;
   int pos, off, top, blk, bytes;
   const int re_timeout = IS68_TIMEOUT;
   int timeout = re_timeout;
@@ -627,9 +627,9 @@ static int isf_read(istream68_t * istream, void * data, int n)
 }
 
 /* $$$ TODO */
-static int isf_write(istream68_t * istream, const void * data, int n)
+static int isf_write(vfs68_t * vfs, const void * data, int n)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)istream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)vfs;
 
   return (!isf->curl)
     ? -1
@@ -638,9 +638,9 @@ static int isf_write(istream68_t * istream, const void * data, int n)
 }
 
 /* $$$ TODO */
-static int isf_flush(istream68_t * istream)
+static int isf_flush(vfs68_t * vfs)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)istream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)vfs;
   return (!isf->curl)
     ? -1
     : 0
@@ -650,9 +650,9 @@ static int isf_flush(istream68_t * istream)
 /* We could have store the length value at opening, but this way it handles
  * dynamic changes of curl size.
  */
-static int isf_length(istream68_t * istream)
+static int isf_length(vfs68_t * vfs)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)istream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)vfs;
 
   return (!isf->curl)
     ? -1
@@ -660,18 +660,18 @@ static int isf_length(istream68_t * istream)
     ;
 }
 
-static int isf_tell(istream68_t * istream)
+static int isf_tell(vfs68_t * vfs)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)istream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)vfs;
   return (!isf->curl)
     ? -1
     : isf->pos
     ;
 }
 
-static int isf_seek(istream68_t * istream, int offset)
+static int isf_seek(vfs68_t * vfs, int offset)
 {
-  istream68_curl_t * isf = (istream68_curl_t *)istream;
+  vfs68_curl_t * isf = (vfs68_curl_t *)vfs;
   int pos;
 
   if (!isf->curl) {
@@ -686,12 +686,12 @@ static int isf_seek(istream68_t * istream, int offset)
   return 0;
 }
 
-static void isf_destroy(istream68_t * istream)
+static void isf_destroy(vfs68_t * vfs)
 {
-  free68(istream);
+  free(vfs);
 }
 
-static const istream68_t istream68_curl = {
+static const vfs68_t vfs68_curl = {
   isf_name,
   isf_open, isf_close,
   isf_read, isf_write, isf_flush,
@@ -699,7 +699,7 @@ static const istream68_t istream68_curl = {
   isf_destroy
 };
 
-int istream68_curl_init(void)
+int vfs68_curl_init(void)
 {
   if (curl_cat == msg68_DEFAULT) {
     curl_cat = msg68_cat("curl","cURL stream message",DEBUG_CURL_O);
@@ -711,7 +711,7 @@ int istream68_curl_init(void)
   return -(init != 1);
 }
 
-void istream68_curl_shutdown(void)
+void vfs68_curl_shutdown(void)
 {
   if (init == 1) {
     curl_global_cleanup();
@@ -723,13 +723,13 @@ void istream68_curl_shutdown(void)
   }
 }
 
-istream68_t * istream68_curl_create(const char * fname, int mode)
+vfs68_t * vfs68_curl_create(const char * fname, int mode)
 {
 
-  istream68_curl_t *isf;
+  vfs68_curl_t *isf;
   int len;
 
-  if (istream68_curl_init()) {
+  if (vfs68_curl_init()) {
     return 0;
   }
 
@@ -738,45 +738,45 @@ istream68_t * istream68_curl_create(const char * fname, int mode)
   }
 
   /* Don't need +1 because 1 byte already allocated in the
-   * istream68_curl_t::fname.
+   * vfs68_curl_t::fname.
    */
   len = strlen(fname);
-  isf = calloc68(sizeof(istream68_curl_t) + len);
+  isf = calloc(sizeof(vfs68_curl_t) + len, 1);
   if (!isf) {
     return 0;
   }
 
-  /* Copy istream functions. */
-  memcpy(&isf->istream, &istream68_curl, sizeof(istream68_curl));
+  /* Copy vfs functions. */
+  memcpy(&isf->vfs, &vfs68_curl, sizeof(vfs68_curl));
   /* Clean curl handle. */
-  isf->mode = mode & (ISTREAM68_OPEN_READ|ISTREAM68_OPEN_WRITE);
+  isf->mode = mode & (VFS68_OPEN_READ|VFS68_OPEN_WRITE);
 
   strcpy(isf->name, fname);
-  return &isf->istream;
+  return &isf->vfs;
 }
 
 #else /* #ifdef USE_CURL */
 
-/* istream curl must not be include in this package. Anyway the creation
+/* vfs curl must not be include in this package. Anyway the creation
  * still exist but it always returns error.
  */
 
-#include "istream68_curl.h"
-#include "istream68_def.h"
+#include "file68_vfs_curl.h"
+#include "file68_vfs_def.h"
 
-istream68_t * istream68_curl_create(const char * fname, int mode)
+vfs68_t * vfs68_curl_create(const char * fname, int mode)
 {
   msg68_error("curl68: create -- *NOT SUPPORTED*");
   return 0;
 }
 
-int istream68_curl_init(void)
+int vfs68_curl_init(void)
 {
   return 0;
 }
 
-void istream68_curl_shutdown(void)
+void vfs68_curl_shutdown(void)
 {
 }
 
-#endif /* #ifdef USE_CURL */
+#endif

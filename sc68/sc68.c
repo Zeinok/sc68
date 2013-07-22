@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-15 17:55:17 ben>
+ * Time-stamp: <2013-07-22 02:57:23 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -29,15 +29,19 @@
 # include <config.h>
 #endif
 
-/* need this before sc68.h to have all features defined. */
-#include <sc68/istream68.h>
-#include <sc68/msg68.h>
-#include <sc68/option68.h>
-#include <sc68/url68.h>
+/* before sc68.h for vfs */
+#include <sc68/file68_vfs.h>
 
 /* sc68 includes */
 #include <sc68/sc68.h>
-#include <sc68/string68.h>
+
+/* file68 includes */
+#include <sc68/file68_vfs.h>
+#include <sc68/file68_opt.h>
+#include <sc68/file68_uri.h>
+#include <sc68/file68_str.h>
+#include <sc68/file68_msg.h>
+
 
 /* Standard Includes */
 #ifdef HAVE_STDARG_H
@@ -350,7 +354,7 @@ static char * codestr(int code) {
 }
 
 /* track:  0:all -1:default */
-static int PlayLoop(istream68_t * out, int track, int loop)
+static int PlayLoop(vfs68_t * out, int track, int loop)
 {
   static char buffer[512 << 2];
   const int max = sizeof(buffer) >> 2;
@@ -361,7 +365,7 @@ static int PlayLoop(istream68_t * out, int track, int loop)
         " track  : %d\n"
         " loop   : %d\n"
         " output : '%s'\n",
-        track,loop,istream68_filename(out));
+        track,loop,vfs68_filename(out));
 
   if (loop == 0) {
     Debug("PlayLoop: default loop resquested\n");
@@ -421,7 +425,7 @@ static int PlayLoop(istream68_t * out, int track, int loop)
 
     /* if (n > 0) */
     /* Send audio PCM to stdout. */
-    if (istream68_write(out, buffer, n<<2) != (n<<2))
+    if (vfs68_write(out, buffer, n<<2) != (n<<2))
       return -1;
   }
   return -(code == SC68_ERROR);
@@ -480,7 +484,7 @@ int main(int argc, char *argv[])
   int err   = 1;
   sc68_init_t init68;
   sc68_create_t create68;
-  istream68_t * out = 0;
+  vfs68_t * out = 0;
 
   /* Force program name */
   argv[0] = "sc68";
@@ -686,11 +690,11 @@ int main(int argc, char *argv[])
     goto error;
   }
 
-  out = sc68_stream_create(outname, 2);
+  out = sc68_vfs(outname, 2);
   if (!out) {
     goto error;
   }
-  if (istream68_open(out)) {
+  if (vfs68_open(out)) {
     goto error;
   }
 
@@ -719,7 +723,7 @@ error:
     spool_error_message(sc68);
   }
 exit:
-  istream68_destroy(out);
+  vfs68_destroy(out);
   free(namebuf);
   sc68_destroy(sc68);
   sc68_shutdown();

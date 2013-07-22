@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-14 22:23:51 ben>
+ * Time-stamp: <2013-07-22 03:50:07 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -33,7 +33,7 @@
 #include "mksc68_msg.h"
 #include "mksc68_cmd.h"
 
-#include <sc68/string68.h>
+#include <sc68/file68_str.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -46,6 +46,8 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 #endif
+
+extern char * strdup(const char *);
 
 static char * wo_readline (const char * prompt)
 {

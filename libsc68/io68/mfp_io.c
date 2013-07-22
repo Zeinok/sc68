@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-23 16:28:16 ben>
+ * Time-stamp: <2013-07-22 03:08:30 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -32,7 +32,7 @@
 #include "mfpemul.h"
 
 #ifdef DEBUG
-# include <sc68/msg68.h>
+# include <sc68/file68_msg.h>
 
 static const char * const regnames[] = {
   "GPIP", /* 01 - General Purpose I/O Interrupt port     */

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-14 13:02:28 ben>
+ * Time-stamp: <2013-07-22 21:54:13 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,9 +28,9 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "istream68_ao.h"
-#include "audio68.h"
-#include "msg68.h"
+#include "file68_vfs_ao.h"
+#include "file68_aud.h"
+#include "file68_msg.h"
 
 #ifndef DEBUG_AO68_O
 # define DEBUG_AO68_O 0
@@ -40,12 +40,12 @@ int ao68_cat = msg68_DEFAULT;
 /* Define this if you want xiph libao support. */
 #ifdef USE_AO
 
-#include "istream68_def.h"
-#include "alloc68.h"
-#include "string68.h"
+#include "file68_vfs_def.h"
+#include "file68_str.h"
 
 #include <ao/ao.h>
 #include <string.h>
+#include <stdlib.h>
 
 struct ao68_info_s {
   int                default_id;
@@ -58,19 +58,19 @@ struct ao68_info_s {
 
 typedef struct ao68_info_s ao68_info_t;
 
-/** istream ao structure. */
+/** vfs ao structure. */
 typedef struct {
-  istream68_t istream;        /**< istream function.                */
+  vfs68_t vfs;        /**< vfs function.                */
   unsigned int count;         /**< current position.                */
   ao68_info_t ao;             /**< ao specific struct.              */
   int  no_overwrite;          /**< overwriting file output.         */
   char *outname;              /**< part of name[] for file driver.  */
   char defoutname[16];        /**< default outname for file driver. */
   char name[1];               /**< filename.                        */
-} istream68_ao_t;
+} vfs68_ao_t;
 
 static volatile int init;
-static unsigned int istream68_ao_defaut_rate = 44100;
+static unsigned int vfs68_ao_defaut_rate = 44100;
 
 /* $$$ AO is the only audio backend we have. No need for much
    complicated mechanism right now. */
@@ -78,7 +78,7 @@ unsigned int audio68_sampling_rate(const unsigned int rate)
 {
   unsigned int f;
   if (!rate) {
-    f = istream68_ao_defaut_rate;
+    f = vfs68_ao_defaut_rate;
   } else {
     f = rate;
     if (f < 8000u) {
@@ -86,7 +86,7 @@ unsigned int audio68_sampling_rate(const unsigned int rate)
     } else if (f > 96000u) {
       f = 96000u;
     }
-    istream68_ao_defaut_rate = f;
+    vfs68_ao_defaut_rate = f;
     msg68_notice("audio68: sampling rate -- *%uhz*\n", f);
   }
   return f;
@@ -94,7 +94,7 @@ unsigned int audio68_sampling_rate(const unsigned int rate)
 
 /* Init does not actually initialize aolib. That task will be
    performed on the fly only if needed. */
-int istream68_ao_init(void)
+int vfs68_ao_init(void)
 {
   if (ao68_cat == msg68_DEFAULT) {
     ao68_cat =
@@ -129,7 +129,7 @@ static void shutdown_aolib(void)
   }
 }
 
-void istream68_ao_shutdown(void)
+void vfs68_ao_shutdown(void)
 {
   shutdown_aolib();
   if (ao68_cat != msg68_DEFAULT) {
@@ -138,9 +138,9 @@ void istream68_ao_shutdown(void)
   }
 }
 
-static const char * isao_name(istream68_t * istream)
+static const char * isao_name(vfs68_t * vfs)
 {
-  istream68_ao_t * ism = (istream68_ao_t *)istream;
+  vfs68_ao_t * ism = (vfs68_ao_t *)vfs;
 
   return (!ism || !ism->name[0])
     ? 0
@@ -176,14 +176,14 @@ static void dump_ao_info(const int id, const ao_info * info, const int full)
   }
 }
 
-static int isao_open(istream68_t * istream)
+static int isao_open(vfs68_t * vfs)
 {
-  istream68_ao_t * is = (istream68_ao_t *)istream;
+  vfs68_ao_t * is = (vfs68_ao_t *)vfs;
   int err = -1;
   ao_info * info = 0;
   char * url;
 
-  TRACE68(ao68_cat,"libao68: open -- '%s'\n", istream68_filename(istream));
+  TRACE68(ao68_cat,"libao68: open -- '%s'\n", vfs68_filename(vfs));
   if (!is || is->ao.device) {
     goto error;
   }
@@ -368,9 +368,9 @@ error:
   return err;
 }
 
-static int isao_close(istream68_t * istream)
+static int isao_close(vfs68_t * vfs)
 {
-  istream68_ao_t * is = (istream68_ao_t *)istream;
+  vfs68_ao_t * is = (vfs68_ao_t *)vfs;
   int err = -1;
 
   if (is->ao.options) {
@@ -386,14 +386,14 @@ static int isao_close(istream68_t * istream)
   return err;
 }
 
-static int isao_read(istream68_t * istream, void * data, int n)
+static int isao_read(vfs68_t * vfs, void * data, int n)
 {
   return -1;
 }
 
-static int isao_write(istream68_t * istream, const void * data, int n)
+static int isao_write(vfs68_t * vfs, const void * data, int n)
 {
-  istream68_ao_t * isao = (istream68_ao_t *)istream;
+  vfs68_ao_t * isao = (vfs68_ao_t *)vfs;
 
   if (!isao || !isao->ao.device) {
     return -1;
@@ -412,42 +412,42 @@ static int isao_write(istream68_t * istream, const void * data, int n)
   }
 }
 
-static int isao_flush(istream68_t * istream)
+static int isao_flush(vfs68_t * vfs)
 {
-  istream68_ao_t * isao = (istream68_ao_t *)istream;
+  vfs68_ao_t * isao = (vfs68_ao_t *)vfs;
   return !isao->ao.device
     ? -1
     : 0
     ;
 }
 
-static int isao_length(istream68_t * istream)
+static int isao_length(vfs68_t * vfs)
 {
-  istream68_ao_t * isao = (istream68_ao_t *)istream;
+  vfs68_ao_t * isao = (vfs68_ao_t *)vfs;
   return !isao->ao.device
     ? -1
     : isao->count
     ;
 }
 
-static int isao_tell(istream68_t * istream)
+static int isao_tell(vfs68_t * vfs)
 {
-  return isao_length(istream);
+  return isao_length(vfs);
 }
 
-static int isao_seek(istream68_t * istream, int offset)
+static int isao_seek(vfs68_t * vfs, int offset)
 {
   return -1;
 }
 
-static void isao_destroy(istream68_t * istream)
+static void isao_destroy(vfs68_t * vfs)
 {
-  TRACE68(ao68_cat, "libao68: destroy -- '%s'\n", istream68_filename(istream));
-  istream68_ao_shutdown();
-  free68(istream);
+  TRACE68(ao68_cat, "libao68: destroy -- '%s'\n", vfs68_filename(vfs));
+  vfs68_ao_shutdown();
+  free(vfs);
 }
 
-static const istream68_t istream68_ao = {
+static const vfs68_t vfs68_ao = {
   isao_name,
   isao_open, isao_close,
   isao_read, isao_write, isao_flush,
@@ -471,9 +471,9 @@ static const istream68_t istream68_ao = {
  * Other keys will be used as ao driver options.
  *
  */
-istream68_t * istream68_ao_create(const char * fname, int mode)
+vfs68_t * vfs68_ao_create(const char * fname, int mode)
 {
-  istream68_ao_t *isf=0;
+  vfs68_ao_t *isf=0;
   int len;
   ao68_info_t ao;
 
@@ -492,16 +492,16 @@ istream68_t * istream68_ao_create(const char * fname, int mode)
     goto error;
   }
 
-  if (mode != ISTREAM68_OPEN_WRITE) {
+  if (mode != VFS68_OPEN_WRITE) {
     msg68_critical("libao68: create error -- *mode*\n");
     goto error;
   }
 
   /* Don't need 0, because 1 byte already allocated in the
-   * istream68_ao_t::fname.
+   * vfs68_ao_t::fname.
    */
   len = strlen(fname);
-  isf = calloc68(sizeof(istream68_ao_t) + len);
+  isf = calloc(sizeof(vfs68_ao_t) + len, 1);
   if (!isf) {
     goto error;
   }
@@ -514,45 +514,45 @@ istream68_t * istream68_ao_create(const char * fname, int mode)
   /* ao.default_device     = 0; */
   ao.format.bits        = 16;
   ao.format.channels    = 2;
-  ao.format.rate        = istream68_ao_defaut_rate;
+  ao.format.rate        = vfs68_ao_defaut_rate;
   ao.format.byte_format = AO_FMT_NATIVE;
   /* ao.format.matrix      = "L,R"; */
   /* ao.options            = 0; */
 
-  /* Copy istream functions. */
-  memcpy(&isf->istream, &istream68_ao, sizeof(istream68_ao));
-  /*   isf->mode = mode & (ISTREAM68_OPEN_READ|ISTREAM68_OPEN_WRITE); */
+  /* Copy vfs functions. */
+  memcpy(&isf->vfs, &vfs68_ao, sizeof(vfs68_ao));
+  /*   isf->mode = mode & (VFS68_OPEN_READ|VFS68_OPEN_WRITE); */
   isf->ao   = ao;
   strcpy(isf->name, fname);
 
 error:
-  fname = istream68_filename(&isf->istream);
+  fname = vfs68_filename(&isf->vfs);
   TRACE68(ao68_cat,"libao68: create -- *%s* -- '%s'\n",
           strok68(!isf),strnevernull68(fname));
-  return isf ? &isf->istream : 0;
+  return isf ? &isf->vfs : 0;
 }
 
 #else /* #ifdef USE_AO */
 
-/* istream ao must not be include in this package. Anyway the creation
+/* vfs ao must not be include in this package. Anyway the creation
  * still exist but it always returns error.
  */
 
-#include "istream68_ao.h"
-#include "istream68_def.h"
+#include "file68_vfs_ao.h"
+#include "file68_vfs_def.h"
 
-istream68_t * istream68_ao_create(const char * fname, int mode)
+vfs68_t * vfs68_ao_create(const char * fname, int mode)
 {
   msg68_error("libao68: create -- *%s*\n","NOT SUPPORTED");
   return 0;
 }
 
-int istream68_ao_init(void)
+int vfs68_ao_init(void)
 {
   return 0;
 }
 
-void istream68_ao_shutdown(void)
+void vfs68_ao_shutdown(void)
 {
 }
 
@@ -561,4 +561,4 @@ unsigned int audio68_sampling_rate(const unsigned int rate)
   return rate;
 }
 
-#endif /* #ifdef USE_AO */
+#endif

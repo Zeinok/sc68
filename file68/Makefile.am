@@ -1,4 +1,4 @@
-# Time-stamp: <2013-06-08 18:49:14 ben>
+# Time-stamp: <2013-07-22 01:45:20 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  file68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -36,18 +36,19 @@ mysources = $(sdir)/error68.c $(sdir)/file68.c $(sdir)/gzip68.c	\
  $(sdir)/registry68.c $(sdir)/rsc68.c $(sdir)/string68.c	\
  $(sdir)/timedb68.c $(sdir)/url68.c $(replay68_c) $(null)
 
-apiheaders = $(hdir)/alloc68.h $(hdir)/audio68.h $(hdir)/chunk68.h	\
- $(hdir)/endian68.h $(hdir)/error68.h $(hdir)/file68.h			\
- $(hdir)/file68_api.h $(hdir)/file68_features.h $(hdir)/istream68.h	\
- $(hdir)/istream68_def.h $(hdir)/msg68.h $(hdir)/option68.h		\
- $(hdir)/registry68.h $(hdir)/rsc68.h $(hdir)/string68.h		\
- $(hdir)/tag68.h $(hdir)/url68.h $(hdir)/timedb68.h $(null)
+apiheaders = $(hdir)/file68_aud.h $(hdir)/file68_chk.h			\
+ $(hdir)/file68_ord.h $(hdir)/file68_err.h $(hdir)/file68.h		\
+ $(hdir)/file68_api.h $(hdir)/file68_features.h $(hdir)/file68_vfs.h	\
+ $(hdir)/file68_vfs_def.h $(hdir)/file68_msg.h $(hdir)/file68_opt.h	\
+ $(hdir)/file68_reg.h $(hdir)/file68_rsc.h $(hdir)/file68_str.h		\
+ $(hdir)/file68_tag.h $(hdir)/file68_uri.h $(hdir)/file68_tdb.h		\
+ $(null)
 
-otherheaders = $(hdir)/gzip68.h $(hdir)/ice68.h				\
- $(hdir)/istream68_ao.h $(hdir)/istream68_curl.h			\
- $(hdir)/istream68_fd.h $(hdir)/istream68_file.h			\
- $(hdir)/istream68_mem.h $(hdir)/istream68_null.h			\
- $(hdir)/istream68_z.h $(sdir)/timedb.inc.h $(sdir)/replay.inc.h	\
+otherheaders = $(hdir)/file68_zip.h $(hdir)/file68_ice.h		\
+ $(hdir)/file68_vfs_ao.h $(hdir)/file68_vfs_curl.h			\
+ $(hdir)/file68_vfs_fd.h $(hdir)/file68_vfs_file.h			\
+ $(hdir)/file68_vfs_mem.h $(hdir)/file68_vfs_null.h			\
+ $(hdir)/file68_vfs_z.h $(sdir)/timedb.inc.h $(sdir)/replay.inc.h	\
  $(null)
 
 myheaders = $(apiheaders) $(otherheaders)

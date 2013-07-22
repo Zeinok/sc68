@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-16 23:04:20 ben>
+ * Time-stamp: <2013-07-22 02:51:01 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -38,9 +38,9 @@
 #include "ymemul.h"
 #include "emu68/assert68.h"
 
-#include <sc68/msg68.h>
-#include <sc68/string68.h>
-#include <sc68/option68.h>
+#include <sc68/file68_msg.h>
+#include <sc68/file68_str.h>
+#include <sc68/file68_opt.h>
 
 extern int ym_cat;                      /* defined in ymemul.c */
 

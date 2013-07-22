@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-06 09:28:11 ben>
+ * Time-stamp: <2013-07-22 02:50:06 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -36,7 +36,7 @@
 
 #include "io68/paulaemul.h"
 #include "emu68/assert68.h"
-#include <sc68/msg68.h>
+#include <sc68/file68_msg.h>
 
 #ifndef DEBUG_PL_O
 # define DEBUG_PL_O 0

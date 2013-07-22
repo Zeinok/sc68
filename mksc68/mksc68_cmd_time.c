@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-18 04:12:13 ben>
+ * Time-stamp: <2013-07-22 03:13:29 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -36,8 +36,7 @@
 #include "mksc68_str.h"
 
 #include <sc68/file68.h>
-#include <sc68/alloc68.h>
-#include <sc68/istream68.h>
+#include <sc68/file68_vfs.h>
 #include <sc68/sc68.h>
 #include <emu68/emu68.h>
 #include <emu68/excep68.h>

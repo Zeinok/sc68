@@ -1,23 +1,23 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/string68.h
+ * @file     sc68/file68_str.h
  * @author   Benjamin Gerard
  * @date     2003-08-11
  * @brief    String manipulation header.
  */
-/* Time-stamp: <2013-07-08 07:39:34 ben> */
+/* Time-stamp: <2013-07-22 00:22:57 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_STRING68_H_
-#define _FILE68_STRING68_H_
+#ifndef _FILE68_STR_H_
+#define _FILE68_STR_H_
 
 #ifndef FILE68_API
 # include "file68_api.h"
 #endif
 
 /**
- * @defgroup  file68_string  String manipulation
+ * @defgroup  file68_str  String manipulation
  * @ingroup   file68_lib
  *
  *   Provides string manipulation functions.
@@ -210,4 +210,4 @@ const char * strok68(const int v);
  * @}
  */
 
-#endif /* #ifndef _FILE68_STRING68_H_ */
+#endif

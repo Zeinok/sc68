@@ -1,16 +1,16 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/msg68.h
+ * @file     sc68/file68_msg.h
  * @author   Benjamin Gerard
  * @date     2003-08-22
  * @brief    Message header.
  */
-/* Time-stamp: <2013-07-15 17:44:36 ben> */
+/* Time-stamp: <2013-07-22 00:17:05 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_MSG68_H_
-#define _FILE68_MSG68_H_
+#ifndef _FILE68_MSG_H_
+#define _FILE68_MSG_H_
 
 #ifndef FILE68_API
 # include "file68_api.h"
@@ -389,4 +389,4 @@ static void msg68_dummy(int cat, const char * fmt, ...) {}
 # endif
 #endif
 
-#endif /* #ifndef _FILE68_MSG68_H_ */
+#endif

@@ -36,9 +36,9 @@
 #endif
 
 #include "ymemul.h"
-#include <sc68/msg68.h>
-#include <sc68/string68.h>
-#include <sc68/option68.h>
+#include <sc68/file68_msg.h>
+#include <sc68/file68_str.h>
+#include <sc68/file68_opt.h>
 
 static int reset(ym_t * const ym, const cycle68_t ymcycle)
 {

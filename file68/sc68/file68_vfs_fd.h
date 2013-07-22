@@ -1,31 +1,31 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/istream68_fd.h
+ * @file     sc68/file68_vfs_fd.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
  * @brief    File descriptor stream header.
  */
-/* Time-stamp: <2013-07-08 07:49:46 ben> */
+/* Time-stamp: <2013-07-22 01:14:40 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_ISTREAM68_FD_H_
-#define _FILE68_ISTREAM68_FD_H_
+#ifndef _FILE68_VFS_FD_H_
+#define _FILE68_VFS_FD_H_
 
-#include "istream68.h"
+#include "file68_vfs.h"
 
 /**
  * @name     File descriptor stream
- * @ingroup  file68_istream
+ * @ingroup  file68_vfs
  *
- *   Implements istream68_t for "unix like" file descriptor.
+ *   Implements vfs68_t for "unix like" file descriptor.
  *
  * @{
  */
 
 FILE68_EXTERN
 /**
- * Creates a stream for "UNIX" file descriptor.
+ * Creates a stream for "un*x" file descriptor.
  *
  *   If fd parameters is not -1, it is used to as file descriptor for
  *   the stream and fname is used for naming the stream. Else the file
@@ -39,16 +39,16 @@ FILE68_EXTERN
  * @retval 0 on error
  *
  * @note     filename is internally copied.
- * @note     Even if fd is given the istream68_open() must be call.
+ * @note     Even if fd is given the vfs68_open() must be call.
  * @warning  When opening a stream with an already opened descriptor the
  *           mode should match the real open mode but since no tests are
  *           performed before calling r/w access, it should not failed in
  *           case of wrong access on given mode.
  */
-istream68_t * istream68_fd_create(const char * fname, int fd, int mode);
+vfs68_t * vfs68_fd_create(const char * fname, int fd, int mode);
 
 /**
  * @}
  */
 
-#endif /* #define _FILE68_ISTREAM68_FD_H_ */
+#endif

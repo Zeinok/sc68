@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-09 01:18:29 ben>
+ * Time-stamp: <2013-07-22 01:34:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,20 +28,20 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "istream68_mem.h"
+#include "file68_vfs_mem.h"
 
 /* define this if you don't want MEM support. */
 #ifndef ISTREAM68_NO_MEM
 
-#include "istream68_def.h"
-#include "alloc68.h"
+#include "file68_vfs_def.h"
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
-/** istream file structure. */
+/** vfs file structure. */
 typedef struct {
-  istream68_t istream;                  /**< istream function.   */
+  vfs68_t vfs;                  /**< vfs function.   */
   char * buffer;                        /**< memory buffer.      */
   int size;                             /**< memory buffer size. */
   int pos;                              /**< current position.   */
@@ -55,11 +55,11 @@ typedef struct {
    */
   char name[16 + 2 * 2 * sizeof(void*)]; /**< filename (mem://start:end). */
   char internal[4];
-} istream68_mem_t;
+} vfs68_mem_t;
 
-static const char * ism_name(istream68_t * istream)
+static const char * ism_name(vfs68_t * vfs)
 {
-  istream68_mem_t * ism = (istream68_mem_t *)istream;
+  vfs68_mem_t * ism = (vfs68_mem_t *)vfs;
 
   return !ism->name[0]
     ? 0
@@ -67,21 +67,21 @@ static const char * ism_name(istream68_t * istream)
     ;
 }
 
-static int ism_open(istream68_t * istream)
+static int ism_open(vfs68_t * vfs)
 {
-  istream68_mem_t * ism = (istream68_mem_t *)istream;
+  vfs68_mem_t * ism = (vfs68_mem_t *)vfs;
 
-  if (!ISTREAM68_IS_OPEN(ism->mode) || ism->open) {
+  if (!VFS68_IS_OPEN(ism->mode) || ism->open) {
     return -1;
   }
-  ism->open = ism->mode & ISTREAM68_OPEN_MASK;
+  ism->open = ism->mode & VFS68_OPEN_MASK;
   ism->pos = 0;
   return 0;
 }
 
-static int ism_close(istream68_t * istream)
+static int ism_close(vfs68_t * vfs)
 {
-  istream68_mem_t * ism = (istream68_mem_t *)istream;
+  vfs68_mem_t * ism = (vfs68_mem_t *)vfs;
 
   if (!ism->open) {
     return -1;
@@ -90,9 +90,9 @@ static int ism_close(istream68_t * istream)
   return 0;
 }
 
-static int ism_read_or_write(istream68_t * istream, void * data, int n, int mode)
+static int ism_read_or_write(vfs68_t * vfs, void * data, int n, int mode)
 {
-  istream68_mem_t * ism = (istream68_mem_t *)istream;
+  vfs68_mem_t * ism = (vfs68_mem_t *)vfs;
   int pos, endpos;
 
   if (!(ism->open & mode) || n < 0) {
@@ -110,7 +110,7 @@ static int ism_read_or_write(istream68_t * istream, void * data, int n, int mode
   }
   if (n > 0) {
     void *src, *dst;
-    if (mode == ISTREAM68_OPEN_READ) {
+    if (mode == VFS68_OPEN_READ) {
       src = ism->buffer+pos;
       dst = data;
     } else {
@@ -123,26 +123,26 @@ static int ism_read_or_write(istream68_t * istream, void * data, int n, int mode
   return n;
 }
 
-static int ism_read(istream68_t * istream, void * data, int n)
+static int ism_read(vfs68_t * vfs, void * data, int n)
 {
-  return ism_read_or_write(istream, data, n, ISTREAM68_OPEN_READ);
+  return ism_read_or_write(vfs, data, n, VFS68_OPEN_READ);
 }
 
-static int ism_write(istream68_t * istream, const void * data, int n)
+static int ism_write(vfs68_t * vfs, const void * data, int n)
 {
   void * rw = (void *)data;
-  return ism_read_or_write(istream, rw, n, ISTREAM68_OPEN_WRITE);
+  return ism_read_or_write(vfs, rw, n, VFS68_OPEN_WRITE);
 }
 
-static int ism_flush(istream68_t * istream)
+static int ism_flush(vfs68_t * vfs)
 {
-  istream68_mem_t * ism = (istream68_mem_t *)istream;
+  vfs68_mem_t * ism = (vfs68_mem_t *)vfs;
   return -!ism->open;
 }
 
-static int ism_length(istream68_t * istream)
+static int ism_length(vfs68_t * vfs)
 {
-  istream68_mem_t * ism = (istream68_mem_t *)istream;
+  vfs68_mem_t * ism = (vfs68_mem_t *)vfs;
 
   return !ism->open
     ? -1
@@ -150,9 +150,9 @@ static int ism_length(istream68_t * istream)
     ;
 }
 
-static int ism_tell(istream68_t * istream)
+static int ism_tell(vfs68_t * vfs)
 {
-  istream68_mem_t * ism = (istream68_mem_t *)istream;
+  vfs68_mem_t * ism = (vfs68_mem_t *)vfs;
 
   return !ism->open
     ? -1
@@ -160,9 +160,9 @@ static int ism_tell(istream68_t * istream)
     ;
 }
 
-static int ism_seek(istream68_t * istream, int offset)
+static int ism_seek(vfs68_t * vfs, int offset)
 {
-  istream68_mem_t * ism = (istream68_mem_t *)istream;
+  vfs68_mem_t * ism = (vfs68_mem_t *)vfs;
   int pos;
 
   if (!ism->open) {
@@ -176,16 +176,16 @@ static int ism_seek(istream68_t * istream, int offset)
   return 0;
 }
 
-static void ism_destroy(istream68_t * istream)
+static void ism_destroy(vfs68_t * vfs)
 {
-  istream68_mem_t * ism = (istream68_mem_t *)istream;
+  vfs68_mem_t * ism = (vfs68_mem_t *)vfs;
 
-  if (ism && ISTREAM68_IS_SLAVE(ism->mode) && ism->buffer != ism->internal)
-    free68(ism->buffer);
-  free68(ism);
+  if (ism && VFS68_IS_SLAVE(ism->mode) && ism->buffer != ism->internal)
+    free(ism->buffer);
+  free(ism);
 }
 
-static const istream68_t istream68_mem = {
+static const vfs68_t vfs68_mem = {
   ism_name,
   ism_open, ism_close,
   ism_read, ism_write, ism_flush,
@@ -193,9 +193,9 @@ static const istream68_t istream68_mem = {
   ism_destroy
 };
 
-istream68_t * istream68_mem_create(const void * addr, int len, int mode)
+vfs68_t * vfs68_mem_create(const void * addr, int len, int mode)
 {
-  istream68_mem_t *ism;
+  vfs68_mem_t *ism;
   int size;
 
 
@@ -203,15 +203,15 @@ istream68_t * istream68_mem_create(const void * addr, int len, int mode)
     return 0;
   }
 
-  size = sizeof(istream68_mem_t) + (!addr ? len : 0);
-  ism = calloc68(size);
+  size = sizeof(vfs68_mem_t) + (!addr ? len : 0);
+  ism = malloc(size);
   if (!ism) {
     return 0;
   }
   if (!addr) {
     addr = ism->internal;
   }
-  ism->istream = istream68_mem;
+  ism->vfs = vfs68_mem;
   ism->buffer  = (char *)addr;
   ism->size    = len;
   ism->mode    = mode;
@@ -219,19 +219,19 @@ istream68_t * istream68_mem_create(const void * addr, int len, int mode)
   ism->pos     = 0;
   sprintf(ism->name,"mem://%p:%p", addr, (char *)addr+len);
 
-  return &ism->istream;
+  return &ism->vfs;
 }
 
-#else /* #ifndef ISTREAM68_NO_FILE */
+#else /* #ifndef VFS68_NO_FILE */
 
-/* istream mem must not be include in this package. Anyway the creation
+/* vfs mem must not be include in this package. Anyway the creation
  * still exist but it always returns error.
  */
 
-#include "istream68_mem.h"
-#include "msg68.h"
+#include "file68_fvs_mem.h"
+#include "file68_msg.h"
 
-istream68_t * istream68_mem_create(const void * addr, int len, int mode)
+vfs68_t * vfs68_mem_create(const void * addr, int len, int mode)
 {
   msg68_error("mem68: create -- *NOT SUPPORTED*\n");
   return 0;

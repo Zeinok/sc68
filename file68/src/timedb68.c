@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-15 23:36:53 ben>
+ * Time-stamp: <2013-07-22 01:41:02 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -27,7 +27,7 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
-#include "timedb68.h"
+#include "file68_tdb.h"
 
 #include <stdlib.h>
 

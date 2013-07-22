@@ -1,16 +1,17 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/istream68.h
+ * @file     sc68/file68_vfs.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
  * @brief    Stream interface header.
  */
-/* Time-stamp: <2013-07-08 07:53:25 ben> */
+/* Time-stamp: <2013-07-22 02:56:18 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_ISTREAM68_H_
-#define _FILE68_ISTREAM68_H_
+#ifndef _FILE68_VFS_H_
+#define _FILE68_VFS_H_
+
 
 #ifndef FILE68_API
 # include "file68_api.h"
@@ -18,7 +19,7 @@
 
 
 /**
- * @defgroup  file68_istream  I/O streams.
+ * @defgroup  file68_vfs  I/O streams.
  * @ingroup   file68_lib
  *
  *   Provides access functions for generic I/O streams..
@@ -26,8 +27,9 @@
  * @{
  */
 
-/* Stream type. */
-typedef struct _istream68_t istream68_t;
+/** VFS type. */
+typedef struct _vfs68_t vfs68_t;
+#define HAVE_VFS68 1
 
 /**
  * @name Generic access functions.
@@ -38,170 +40,170 @@ FILE68_API
 /**
  * Get stream name.
  *
- * @param  istream  stream
+ * @param  vfs  stream
  *
  * @return stream name
  * @retval 0 Failure.
  */
-const char * istream68_filename(istream68_t *istream);
+const char * vfs68_filename(vfs68_t *vfs);
 
 FILE68_API
 /**
  * Open stream.
  *
- * @param  istream  stream
+ * @param  vfs  stream
  *
  * @return error code
  * @retval 0   Success
  * @retval -1  Failure
  */
-int istream68_open(istream68_t *istream);
+int vfs68_open(vfs68_t *vfs);
 
 FILE68_API
 /**
  * Close stream.
  *
- * @param  istream  stream
+ * @param  vfs  stream
  *
  * @return error code
  * @retval 0   Success
  * @retval -1  Failure
  */
-int istream68_close(istream68_t *istream);
+int vfs68_close(vfs68_t *vfs);
 
 FILE68_API
 /**
  * Read data from stream.
  *
- * @param  istream  stream
- * @param  data     destination buffer
- * @param  len      number of byte to read
+ * @param  vfs   stream
+ * @param  data  destination buffer
+ * @param  len   number of byte to read
  *
  * @return number of byte read
  * @retval -1 Failure.
  */
-int istream68_read(istream68_t *istream, void * data, int len);
+int vfs68_read(vfs68_t *vfs, void * data, int len);
 
 FILE68_API
 /**
  * Write data into stream.
  *
- * @param  istream  stream
- * @param  data     destination buffer
- * @param  len      number of byte to read
+ * @param  vfs   stream
+ * @param  data  destination buffer
+ * @param  len   number of byte to read
  *
  * @return number of byte written
  * @retval -1 Failure.
  */
-int istream68_write(istream68_t *istream, const void * data, int len);
+int vfs68_write(vfs68_t *vfs, const void * data, int len);
 
 FILE68_API
 /**
  * Get stream length.
  *
- * @param  istream  stream
+ * @param  vfs  stream
  *
  * @return number of bytes.
  * @retval -1 Failure.
  */
-int istream68_length(istream68_t *istream);
+int vfs68_length(vfs68_t *vfs);
 
 FILE68_API
 /**
  * Get stream current position.
  *
- * @param  istream  stream
+ * @param  vfs  stream
  *
  * @return stream position
  * @retval -1 Failure.
  */
-int istream68_tell(istream68_t *istream);
+int vfs68_tell(vfs68_t *vfs);
 
 FILE68_API
 /**
  * Set stream relative position.
  *
- * @param  istream  stream
- * @param  offset   displacement from current position
+ * @param  vfs     stream
+ * @param  offset  displacement from current position
  *
  * @return Absolute position after seeking
  * @retval -1 Failure.
  *
- * @see istream68_seek_to()
+ * @see vfs68_seek_to()
  */
-int istream68_seek(istream68_t *istream, int offset);
+int vfs68_seek(vfs68_t *vfs, int offset);
 
 FILE68_API
 /**
  * Set stream absolute position.
  *
- * @param  istream  stream
- * @param  pos      position to reach
+ * @param  vfs  stream
+ * @param  pos  position to reach
  *
  * @return Absolute position after seeking
  * @retval -1 Failure.
  *
- * @see istream68_seek()
+ * @see vfs68_seek()
  */
-int istream68_seek_to(istream68_t *istream, int pos);
+int vfs68_seek_to(vfs68_t *vfs, int pos);
 
 FILE68_API
 /**
  * Close and destroy stream.
  *
- * @param  istream  stream
+ * @param  vfs  stream
  *
  */
-void istream68_destroy(istream68_t *istream);
+void vfs68_destroy(vfs68_t *vfs);
 
 FILE68_API
 /**
  * Read a '\\0' or '\\n' terminated string.
  *
- * @param  istream  stream
- * @param  buffer   destination buffer
- * @param  max      destination buffer size
+ * @param  vfs     stream
+ * @param  buffer  destination buffer
+ * @param  max     destination buffer size
  *
  * @return number of char read
  * @retval -1  Failure.
  */
-int istream68_gets(istream68_t *istream, char * buffer, int max);
+int vfs68_gets(vfs68_t *vfs, char * buffer, int max);
 
 FILE68_API
 /**
  * Read next character.
  *
- * @param  istream  stream
+ * @param  vfs  stream
  *
  * @return char value [0..255]
  * @retval -1  EOF or error.
  */
-int istream68_getc(istream68_t *istream);
+int vfs68_getc(vfs68_t *vfs);
 
 FILE68_API
 /**
  * Write a '\\0' terminated string.
  *
- * @param  istream  stream
- * @param  s        string
+ * @param  vfs  stream
+ * @param  s    string
  *
  * @return number of char written
  * @retval -1  Failure.
  */
-int istream68_puts(istream68_t *istream, const char * s);
+int vfs68_puts(vfs68_t *vfs, const char * s);
 
 FILE68_API
 /**
  * Write a character.
  *
- * @param  istream  stream
- * @param  c        char [0..255]
+ * @param  vfs  stream
+ * @param  c    char [0..255]
  *
  * @return error code
  * @retval  0  Success
  * @retval -1  Failure
  */
-int istream68_putc(istream68_t *istream, const int c);
+int vfs68_putc(vfs68_t *vfs, const int c);
 
 /**
  * @}
@@ -211,4 +213,4 @@ int istream68_putc(istream68_t *istream, const int c);
  * @}
  */
 
-#endif /* #ifndef _FILE68_ISTREAM68_H_ */
+#endif

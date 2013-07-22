@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-17 23:12:39 ben>
+ * Time-stamp: <2013-07-22 17:19:06 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -34,7 +34,7 @@
 # include "io68/default_option68.h"
 #endif
 
-#include <sc68/istream68.h> /* Need istream68.h before sc68.h */
+#include <sc68/file68_vfs.h> /* Need vfs68.h before sc68.h */
 
 #include "sc68.h"
 
@@ -46,15 +46,14 @@
 #include "io68/io68.h"
 
 /* file68 includes */
-#include <sc68/error68.h>
-#include <sc68/string68.h>
-#include <sc68/alloc68.h>
 #include <sc68/file68.h>
-#include <sc68/url68.h>
-#include <sc68/rsc68.h>
-#include <sc68/msg68.h>
-#include <sc68/option68.h>
-#include <sc68/audio68.h>
+#include <sc68/file68_err.h>
+#include <sc68/file68_str.h>
+#include <sc68/file68_uri.h>
+#include <sc68/file68_rsc.h>
+#include <sc68/file68_msg.h>
+#include <sc68/file68_opt.h>
+#include <sc68/file68_aud.h>
 
 /* stardard includes */
 #include <string.h>
@@ -213,6 +212,7 @@ static const char * sc68_name_not_null(sc68_t * sc68)
   return sc68 ? sc68->name : "(nil)";
 }
 
+#if 0
 #ifndef HAVE_STPCPY
 static char *stpcpy(char *dst, const char * src) {
   char c;
@@ -221,8 +221,10 @@ static char *stpcpy(char *dst, const char * src) {
   *dst = 0;
   return dst;
 }
+#else
+extern char *stpcpy(char *dst, const char * src);
 #endif
-
+#endif
 
 #ifndef HAVE_BASENAME
 
@@ -265,7 +267,7 @@ static void appname_from_path(char *path, char * appname, int max)
 }
 
 static int stream_read_68k(sc68_t * sc68, unsigned int dest,
-                           istream68_t * is, unsigned int sz)
+                           vfs68_t * is, unsigned int sz)
 {
   u8 * mem68 = emu68_memptr(sc68->emu68, dest, sz);
 
@@ -273,7 +275,7 @@ static int stream_read_68k(sc68_t * sc68, unsigned int dest,
     return sc68_error_add(sc68, "libsc68: stream error -- %s",
                           emu68_error_get(sc68->emu68));
   }
-  return (istream68_read(is, mem68, sz) == sz) ? 0 : -1;
+  return (vfs68_read(is, mem68, sz) == sz) ? 0 : -1;
 }
 
 static int init_emu68(sc68_t * const sc68, int * argc, char ** argv)
@@ -936,7 +938,7 @@ sc68_t * sc68_create(sc68_create_t * create)
   sc68_debug(0,"libsc68: creating new instance\n");
 
   /* Alloc SC68 struct. */
-  sc68 = calloc68(sizeof(sc68_t));
+  sc68 = calloc(sizeof(sc68_t),1);
   if (!sc68) {
     goto error;
   }
@@ -1012,12 +1014,12 @@ void sc68_destroy(sc68_t * sc68)
 {
   sc68_debug(sc68,"libsc68: destroy sc68<%s>\n", sc68_name_not_null(sc68));
   if (sc68) {
-    sc68_free(sc68->mix.buffer);
+    free(sc68->mix.buffer);
     sc68_close(sc68);
     sc68_config_save(sc68);
     config68_destroy(sc68->config); sc68->config = 0;
     safe_destroy(sc68);
-    sc68_free(sc68);
+    free(sc68);
   }
   sc68_debug(sc68,"libsc68: sc68<> destroyed\n"/*, sc68*/);
 }
@@ -1275,7 +1277,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
 static int load_replay(sc68_t * sc68, const char * replay, int a0)
 {
   int err, size;
-  istream68_t * is;
+  vfs68_t * is;
   char rname[256];
   assert(sc68);
   assert(replay);
@@ -1285,10 +1287,10 @@ static int load_replay(sc68_t * sc68, const char * replay, int a0)
   strcat68(rname, replay, sizeof(rname)-1);
   rname[sizeof(rname)-1] = 0;
   is = url68_stream_create(rname, 1);
-  err = istream68_open(is);
-  err = err || (size = istream68_length(is), size < 0);
+  err = vfs68_open(is);
+  err = err || (size = vfs68_length(is), size < 0);
   err = err || stream_read_68k(sc68, a0, is, size);
-  istream68_destroy(is);
+  vfs68_destroy(is);
   if (err) {
     sc68_error_add(sc68,
                    "libsc68: failed to load external replay -- %s",
@@ -1498,11 +1500,11 @@ static int change_track(sc68_t * sc68, int track, int loop)
                sc68->mix.bufmax);
 
     if (sc68->mix.bufreq > sc68->mix.bufmax) {
-      sc68_free(sc68->mix.buffer);
+      free(sc68->mix.buffer);
       sc68->mix.bufmax = 0;
       sc68_debug(sc68," -> Alloc new PCM buffer -- *%u pcm*\n",
                  sc68->mix.bufreq);
-      sc68->mix.buffer = sc68_alloc(sc68->mix.bufreq << 2);
+      sc68->mix.buffer = malloc(sc68->mix.bufreq << 2);
       if (!sc68->mix.buffer) {
         sc68_error_add(sc68,"libsc68: failed to allocate new sample buffer");
         return SC68_ERROR;
@@ -1696,7 +1698,7 @@ int sc68_process(sc68_t * sc68, void * buf16st, int * _n)
   return ret;
 }
 
-int sc68_verify(istream68_t * is)
+int sc68_verify(vfs68_t * is)
 {
   return file68_verify(is);
 }
@@ -1737,11 +1739,11 @@ static int load_disk(sc68_t * sc68, disk68_t * d, int free_on_close)
   return sc68_play(sc68, SC68_DEF_TRACK, SC68_DEF_LOOP);
 
 error:
-  sc68_free(d);
+  free(d);
   return -1;
 }
 
-int sc68_load(sc68_t * sc68, istream68_t * is)
+int sc68_load(sc68_t * sc68, vfs68_t * is)
 {
   return load_disk(sc68, file68_load(is), 1);
 }
@@ -1757,7 +1759,7 @@ int sc68_load_mem(sc68_t * sc68, const void * buffer, int len)
 }
 
 
-sc68_disk_t sc68_load_disk(istream68_t * is)
+sc68_disk_t sc68_load_disk(vfs68_t * is)
 {
   return (sc68_disk_t) file68_load(is);
 }
@@ -1774,7 +1776,7 @@ sc68_disk_t sc68_disk_load_mem(const void * buffer, int len)
 
 void sc68_disk_free(sc68_disk_t disk)
 {
-  sc68_free(disk);
+  file68_free(disk);                    /* $$$ check this */
 }
 
 int sc68_open(sc68_t * sc68, sc68_disk_t disk)
@@ -1795,7 +1797,7 @@ void sc68_close(sc68_t * sc68)
     sc68->mix.buflen = 0; /* warning removal in stop_track() */
     stop_track(sc68, 1);
     if (sc68->tobe3)
-      sc68_free((void*)sc68->disk);
+      file68_free((disk68_t *)sc68->disk);
     sc68->tobe3     = 0;
     sc68->disk      = 0;
   }
@@ -2216,7 +2218,7 @@ sc68_music_info_t * sc68_music_info(sc68_t * sc68, int track, sc68_disk_t disk)
 }
 #endif
 
-istream68_t * sc68_stream_create(const char * url, int mode)
+vfs68_t * sc68_vfs(const char * url, int mode)
 {
   return url68_stream_create(url,mode);
 }
@@ -2267,27 +2269,6 @@ int sc68_error_add(sc68_t * sc68, const char * fmt, ...)
   estack->cnt++;
 
   return -1;
-}
-
-void * sc68_alloc(unsigned int n)
-{
-  void * const ptr = alloc68(n);
-  if (!ptr)
-    sc68_error_add(0,"libsc68: memory allocation error -- %u bytes", n);
-  return ptr;
-}
-
-void * sc68_calloc(unsigned int n)
-{
-  void * const ptr = calloc68(n);
-  if (!ptr)
-    sc68_error_add(0,"libsc68: memory allocation error -- %u bytes", n);
-  return ptr;
-}
-
-void sc68_free(void * data)
-{
-  free68(data);
 }
 
 void sc68_debug(sc68_t * sc68, const char * fmt, ...)

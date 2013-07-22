@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-06-04 04:51:28 ben>
+ * Time-stamp: <2013-07-22 01:25:09 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -30,14 +30,13 @@
 
 #include "file68_api.h"
 #include "file68.h"
-#include "option68.h"
-#include "msg68.h"
-#include "error68.h"
-#include "alloc68.h"
-#include "registry68.h"
-#include "istream68_curl.h"
-#include "rsc68.h"
-#include "string68.h"
+#include "file68_opt.h"
+#include "file68_msg.h"
+#include "file68_err.h"
+#include "file68_reg.h"
+#include "file68_vfs_curl.h"
+#include "file68_rsc.h"
+#include "file68_str.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -46,14 +45,14 @@ static volatile int init;
 
 extern int aSIDify;                     /* defined in file68.c */
 
-void istream68_ao_shutdown(void);  /* defined in istream68_ao.c */
-int  istream68_z_init(void);       /* defined in istream68_z.c  */
-void istream68_z_shutdown(void);   /* defined in istream68_z.c  */
+void vfs68_ao_shutdown(void);  /* defined in vfs68_ao.c */
+int  vfs68_z_init(void);       /* defined in vfs68_z.c  */
+void vfs68_z_shutdown(void);   /* defined in vfs68_z.c  */
 int  option68_init(void);          /* defined in option68.c     */
 void option68_shutdown(void);      /* defined in option68.c     */
 int  file68_loader_init(void);     /* defined in file68.c       */
 void file68_loader_shutdown(void); /* defined in file68.c       */
-int  istream68_ao_init(void);      /* defined in istream68_ao.c */
+int  vfs68_ao_init(void);      /* defined in vfs68_ao.c */
 
 static char * mygetenv(const char *name)
 {
@@ -139,13 +138,13 @@ int file68_init(int argc, char **argv)
   option68_init();
 
   /* Zlib */
-  istream68_z_init();
+  vfs68_z_init();
 
   /* Curl */
-  istream68_curl_init();
+  vfs68_curl_init();
 
   /* Xiph AO */
-  istream68_ao_init();
+  vfs68_ao_init();
 
   /* Init resource */
   rsc68_init();
@@ -298,13 +297,13 @@ void file68_shutdown(void)
     rsc68_shutdown();
 
     /* Xiph AO */
-    istream68_ao_shutdown();
+    vfs68_ao_shutdown();
 
     /* Curl */
-    istream68_curl_shutdown();
+    vfs68_curl_shutdown();
 
     /* Zlib */
-    istream68_z_shutdown();
+    vfs68_z_shutdown();
 
     init = 0;
   }

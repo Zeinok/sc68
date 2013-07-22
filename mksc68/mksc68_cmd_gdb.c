@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-12 22:34:37 ben>
+ * Time-stamp: <2013-07-22 03:49:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -47,6 +47,8 @@ static const opt_t longopts[] = {
   { "help",     0, 0, 'h' },            /* help             */
   { 0,0,0,0 }
 };
+
+extern int dsk_playing(void);
 
 static
 int run_gdb(cmd_t * cmd, int argc, char ** argv)

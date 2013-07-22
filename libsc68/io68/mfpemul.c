@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-15 17:46:17 ben>
+ * Time-stamp: <2013-07-22 02:49:23 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -30,7 +30,7 @@
 
 #include "mfpemul.h"
 #include "emu68/assert68.h"
-#include <sc68/msg68.h>
+#include <sc68/file68_msg.h>
 
 #define cpp(V)      (V*prediv_width[(int)ptimer->tcr])
 #define timerfrq(V) ((8000000u*192u)/cpp(V))

@@ -1,4 +1,4 @@
-/* Time-stamp: <2013-07-16 02:06:03 ben> */
+/* Time-stamp: <2013-07-22 22:21:47 ben> */
 
 /* Minimal version */
 
@@ -18,15 +18,14 @@
 /* # include <unistd.h> */
 /* #endif */
 
-#include <sc68/msg68.h>
-#include <sc68/istream68.h>
+#include <sc68/file68_vfs_def.h>
+#include <sc68/file68_vfs.h>
 #include <sc68/sc68.h>
-#include <sc68/istream68_def.h>
-#include <sc68/alloc68.h>
-#include <sc68/tag68.h>
 #include <sc68/file68.h>
+#include <sc68/file68_msg.h>
+#include <sc68/file68_tag.h>
 
-istream68_t * istream68_vlc_create(stream_t * vlc);
+vfs68_t * vfs68_vlc_create(stream_t * vlc);
 
 #ifndef _
 # define _(str)  (str)
@@ -288,7 +287,7 @@ static int Open(vlc_object_t * p_this)
   int         i_peek = 0;
   int err = VLC_EGENERIC;
   sc68_create_t  create68;     /* Parameters for creating sc68 instance */
-  istream68_t * stream68 = 0;
+  vfs68_t * stream68 = 0;
   sc68_music_info_t info;
   int i, tracks;
   es_format_t fmt;
@@ -339,7 +338,7 @@ static int Open(vlc_object_t * p_this)
   *(sc68_cookie_ptr(p_demux->p_sys->sc68)) = p_demux;
 
   /* Load and prepare sc68 file */
-  stream68 = istream68_vlc_create(p_demux->s);
+  stream68 = vfs68_vlc_create(p_demux->s);
   if (unlikely(!stream68))
     goto error;
   if (sc68_load(p_demux->p_sys->sc68, stream68))
@@ -407,7 +406,7 @@ static int Open(vlc_object_t * p_this)
   err = VLC_SUCCESS;
 error:
   /* Don't need our stream anymore */
-  istream68_destroy(stream68);
+  vfs68_destroy(stream68);
 
   /* flush sc68 engin error */
   flush_sc68_errors(p_demux);
@@ -590,7 +589,7 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
 
 static void msg(const int bit, void *userdata, const char *fmt, va_list list)
 {
-#if 1
+#if 0
   demux_t * p_demux = (demux_t *) *sc68_cookie_ptr(userdata);
 
   if (p_demux) {

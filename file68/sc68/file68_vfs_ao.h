@@ -1,24 +1,24 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/istream68_ao.h
+ * @file     sc68/file68_vfs_ao.h
  * @author   Benjamin Gerard
  * @date     2007-03-08
  * @brief    AO stream header.
  */
-/* Time-stamp: <2013-07-08 07:52:03 ben> */
+/* Time-stamp: <2013-07-22 01:28:10 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_ISTREAM68_AO_H_
-#define _FILE68_ISTREAM68_AO_H_
+#ifndef _FILE68_VFS_AO_H_
+#define _FILE68_VFS_AO_H_
 
-#include "istream68.h"
+#include "file68_vfs.h"
 
 /**
- * @name     AO stream
- * @ingroup  file68_istream
+ * @name     Audio VFS
+ * @ingroup  file68_vfs
  *
- *   Implements istream68_t for XIPH libao (audio output).
+ *   Implements vfs68_t for XIPH libao (audio output).
  *
  * @{
  */
@@ -36,10 +36,11 @@ FILE68_EXTERN
  * @note    filename is internally copied.
  * @warning write mode only.
  */
-istream68_t * istream68_ao_create(const char * fname, int mode);
+vfs68_t * vfs68_ao_create(const char * fname, int mode);
 
 /**
  * @}
  */
 
-#endif /* #define _FILE68_ISTREAM68_AO_H_ */
+#endif
+

@@ -1,6 +1,6 @@
 /*
  *                       file68 - vlc stream
- *            Copyright (C) 2001-2009 Ben(jamin) Gerard
+ *            Copyright (C) 2001-2013 Ben(jamin) Gerard
  *           <benjihan -4t- users.sourceforge -d0t- net>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
@@ -19,7 +19,7 @@
  *
  */
 
-/* $Id: istream68_file.c 7 2009-01-19 13:49:37Z benjihan $ */
+/* $Id: vfs68_file.c 7 2009-01-19 13:49:37Z benjihan $ */
 
 /* #ifdef HAVE_CONFIG_H */
 /* # include "config.h" */
@@ -35,71 +35,71 @@
 #include <vlc_codec.h>
 #include <vlc_meta.h>
 
-#include <sc68/istream68_def.h>
-#include <sc68/alloc68.h>
+#include <sc68/file68_vfs_def.h>
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
-/** istream vlc structure. */
+/** vfs vlc structure. */
 typedef struct {
-  istream68_t   istream; /**< istream function.   */
+  vfs68_t   vfs; /**< vfs function.   */
   stream_t    * f;       /**< vlc slaved stream.  */
-} istream68_vlc_t;
+} vfs68_vlc_t;
 
-static const char * isf_name(istream68_t * istream)
+static const char * isf_name(vfs68_t * vfs)
 {
-  istream68_vlc_t * isf = (istream68_vlc_t *)istream;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs;
   return "vlc://slave"; /* $$$ probably vlc stream has a name somewhere  */
 }
 
-static int isf_open(istream68_t * istream)
+static int isf_open(vfs68_t * vfs)
 {
-  istream68_vlc_t * isf = (istream68_vlc_t *) istream;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *) vfs;
   return 0;
 }
 
-static int isf_close(istream68_t * istream)
+static int isf_close(vfs68_t * vfs)
 {
-  istream68_vlc_t * isf = (istream68_vlc_t *) istream;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *) vfs;
   return 0;
 }
 
-static int isf_read(istream68_t * istream, void * data, int n)
+static int isf_read(vfs68_t * vfs, void * data, int n)
 {
-  istream68_vlc_t * isf = (istream68_vlc_t *)istream;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs;
   return stream_Read(isf->f, data, n);
 }
 
-static int isf_write(istream68_t * istream, const void * data, int n)
+static int isf_write(vfs68_t * vfs, const void * data, int n)
 {
-  istream68_vlc_t * isf = (istream68_vlc_t *)istream;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs;
   return -1;
 }
 
-static int isf_flush(istream68_t * istream)
+static int isf_flush(vfs68_t * vfs)
 {
-  istream68_vlc_t * isf = (istream68_vlc_t *)istream;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs;
   return -1;
 }
 
-static int isf_length(istream68_t * istream)
+static int isf_length(vfs68_t * vfs)
 {
-  istream68_vlc_t * isf = (istream68_vlc_t *)istream;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs;
   return stream_Size(isf->f);
 }
 
-static int isf_tell(istream68_t * istream)
+static int isf_tell(vfs68_t * vfs)
 {
-  istream68_vlc_t * isf = (istream68_vlc_t *)istream;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs;
 
   return stream_Tell(isf->f);
 }
 
-static int isf_seek(istream68_t * istream, int offset)
+static int isf_seek(vfs68_t * vfs, int offset)
 {
-  istream68_vlc_t * isf = (istream68_vlc_t *)istream;
-  int cur = isf_tell(istream);
+  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs;
+  int cur = isf_tell(vfs);
 
   return (cur == -1)
     ? -1
@@ -107,12 +107,12 @@ static int isf_seek(istream68_t * istream, int offset)
     ;
 }
 
-static void isf_destroy(istream68_t * istream)
+static void isf_destroy(vfs68_t * vfs)
 {
-  free68(istream);
+  free(vfs);
 }
 
-static const istream68_t istream68_vlc = {
+static const vfs68_t vfs68_vlc = {
   isf_name,
   isf_open,
   isf_close,
@@ -126,24 +126,24 @@ static const istream68_t istream68_vlc = {
   isf_destroy
 };
 
-istream68_t * istream68_vlc_create(stream_t * vlc)
+vfs68_t * vfs68_vlc_create(stream_t * vlc)
 {
-  istream68_vlc_t * isf;
+  vfs68_vlc_t * isf;
 
   if (!vlc) {
     return 0;
   }
 
-  isf = alloc68(sizeof(istream68_vlc_t));
+  isf = malloc(sizeof(vfs68_vlc_t));
   if (!isf) {
     return 0;
   }
 
-  /* Copy istream functions. */
-  memcpy(&isf->istream, &istream68_vlc, sizeof(istream68_vlc));
+  /* Copy vfs functions. */
+  memcpy(&isf->vfs, &vfs68_vlc, sizeof(vfs68_vlc));
 
   /* set vlc stream handle. */
   isf->f = vlc;
 
-  return &isf->istream;
+  return &isf->vfs;
 }

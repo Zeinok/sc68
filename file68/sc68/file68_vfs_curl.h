@@ -1,22 +1,22 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/istream68_curl.h
+ * @file     sc68/file68_vfs_curl.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
  * @brief    @ref cURL stream header.
  */
-/* Time-stamp: <2013-07-08 07:51:33 ben> */
+/* Time-stamp: <2013-07-22 01:15:35 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_ISTREAM68_CURL_H_
-#define _FILE68_ISTREAM68_CURL_H_
+#ifndef _FILE68_VFS_CURL_H_
+#define _FILE68_VFS_CURL_H_
 
-#include "istream68.h"
+#include "file68_vfs.h"
 
 /**
  * @name     cURL stream
- * @ingroup  file68_istream
+ * @ingroup  file68_vfs
  *
  * @anchor cURL
  *
@@ -30,24 +30,24 @@ FILE68_EXTERN
 /**
  * Initialize curl engine.
  *
- *   The istream68_curl_init() function initializes curl library.  It
+ *   The vfs68_curl_init() function initializes curl library.  It
  *   is called by the file68_init() function and everytime a new curl
- *   stream is created with the istream68_curl_create() function.
+ *   stream is created with the vfs68_curl_create() function.
  *
  * @return error code
  * @retval  0   success
  * @retval  -1  failure
  */
-int istream68_curl_init(void);
+int vfs68_curl_init(void);
 
 FILE68_EXTERN
 /**
  * Shutdown curl engine.
  *
- *  The istream68_curl_shutdoen() function shutdown curl library. It
+ *  The vfs68_curl_shutdoen() function shutdown curl library. It
  *  is called by the file68_shutdown() function.
  */
-void istream68_curl_shutdown(void);
+void vfs68_curl_shutdown(void);
 
 FILE68_EXTERN
 /**
@@ -62,10 +62,11 @@ FILE68_EXTERN
  * @note     url is internally copied.
  * @todo     Implement write mode.
  */
-istream68_t * istream68_curl_create(const char * url, int mode);
+vfs68_t * vfs68_curl_create(const char * url, int mode);
 
 /**
  * @}
  */
 
-#endif /* #define _FILE68_ISTREAM68_CURL_H_ */
+#endif
+

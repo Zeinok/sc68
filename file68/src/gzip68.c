@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-09 13:39:51 ben>
+ * Time-stamp: <2013-07-22 07:39:25 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,7 +28,7 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "gzip68.h"
+#include "file68_zip.h"
 
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
@@ -68,8 +68,7 @@ int gzip68_is_magic(const void * buffer)
 
 #ifdef USE_Z
 
-#include "error68.h"
-#include "alloc68.h"
+#include "file68_err.h"
 
 #include <errno.h>
 #include <sys/types.h>
@@ -80,7 +79,7 @@ int gzip68_is_magic(const void * buffer)
 # include <stdio.h>
 # include <io.h>
 #else
-# include <unistd.h>
+//# include <unistd.h>
 #endif
 
 
@@ -173,7 +172,7 @@ void *gzip68_load(const char *fname, int *ptr_ulen)
   }
   fd = 0; /* $$$ Closed by gzclose(). Verify fdopen() rules. */
 
-  uncompr = alloc68(ulen);
+  uncompr = malloc(ulen);
   if (!uncompr) {
     error68("gzip68: load '%s' -- alloc error", fname);
     goto error;
@@ -188,7 +187,7 @@ void *gzip68_load(const char *fname, int *ptr_ulen)
 
 error:
   if (uncompr) {
-    free68(uncompr);
+    free(uncompr);
     uncompr = 0;
     ulen = 0;
   }

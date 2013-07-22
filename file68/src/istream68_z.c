@@ -1,11 +1,11 @@
 /*
  * @file    istream68_z.c
- * @brief   implements istream68 VFS for gzip
+ * @brief   implements vfs68 VFS for gzip
  * @author  http://sourceforge.net/users/benjihan
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-09 01:03:07 ben>
+ * Time-stamp: <2013-07-22 01:36:31 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,11 +28,11 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "istream68_z.h"
-#include "msg68.h"
+#include "file68_vfs_z.h"
+#include "file68_msg.h"
 
 /** Default gzip option. */
-const istream68_z_option_t istream68_z_default_option = {
+const vfs68_z_option_t vfs68_z_default_option = {
   1,   /* gzip      */
   3,   /* level     */
   0,   /* strategy  */
@@ -41,12 +41,12 @@ const istream68_z_option_t istream68_z_default_option = {
 
 #ifdef USE_Z
 
-#include "istream68_def.h"
-#include "alloc68.h"
-#include "string68.h"
+#include "file68_vfs_def.h"
+#include "file68_str.h"
 
 #include <zlib.h>
 #include <string.h>
+#include <stdlib.h>
 
 #ifndef DEBUG_ZLIB_O
 # define DEBUG_ZLIB_O 0
@@ -66,10 +66,10 @@ static int zlib_cat = msg68_DEFAULT;
 #define COMMENT      0x10 /* bit 4 set: file comment present       */
 #define RESERVED     0xE0 /* bits 5..7: reserved                   */
 
-/** istream Z structure. */
+/** vfs Z structure. */
 typedef struct {
-  istream68_t istream;     /**< istream function.     */
-  istream68_t * is;        /**< Wrapped stream.       */
+  vfs68_t vfs;     /**< vfs function.     */
+  vfs68_t * is;        /**< Wrapped stream.       */
   unsigned int mode:2;     /**< Available open modes. */
   unsigned int is_slave:1; /**< slave mode.           */
   unsigned int is_err:1;   /**< Last is op failed.    */
@@ -93,39 +93,39 @@ typedef struct {
   Byte * read_out;         /**< Read buffer_out pos.  */
   Byte buffer_in[512];     /**< Input buffer.         */
   Byte buffer_out[512];    /**< Output buffer.        */
-} istream68_z_t;
+} vfs68_z_t;
 
 static voidpf isf_zcalloc(voidpf opaque, unsigned items, unsigned size)
 {
   opaque = opaque;
-  return calloc68(items*size);
+  return calloc(items*size,1);
 }
 
 static void isf_zcfree(voidpf opaque, voidpf ptr)
 {
   opaque = opaque;
-  free68(ptr);
+  free(ptr);
 }
 
-static const char * isf_name(istream68_t * istream)
+static const char * isf_name(vfs68_t * vfs)
 {
-  istream68_z_t * isf = (istream68_z_t *)istream;
+  vfs68_z_t * isf = (vfs68_z_t *)vfs;
 
   return (!isf)
     ? 0
-    : istream68_filename(isf->is);
+    : vfs68_filename(isf->is);
 }
 
 /* Fill input buffer.
  *
  * @return number of bytes read or -1
  */
-static int isf_fill_input_buffer(istream68_z_t * isf, const int max)
+static int isf_fill_input_buffer(vfs68_z_t * isf, const int max)
 {
   int n;
 
   /* Try to fill whole buffer */
-  n = istream68_read(isf->is, isf->buffer_in, max);
+  n = vfs68_read(isf->is, isf->buffer_in, max);
   isf->is_eof = (n != max);
   isf->is_err = (n == -1);
   isf->c_stream.next_in = isf->buffer_in;
@@ -137,14 +137,14 @@ static int isf_fill_input_buffer(istream68_z_t * isf, const int max)
  *
  * @return number of bytes written or -1
  */
-static int isf_flush_output_buffer(istream68_z_t * isf)
+static int isf_flush_output_buffer(vfs68_z_t * isf)
 {
   int n, w;
 
   w = n = isf->c_stream.next_out - isf->buffer_out;
   /*   TRACE68(zlib_cat," FLUSH:%d",n); */
   if (n > 0) {
-    w = istream68_write(isf->is, isf->buffer_out, n);
+    w = vfs68_write(isf->is, isf->buffer_out, n);
     isf->is_eof = (w != n);
     isf->is_err = (w == -1);
     if (isf->is_err) {
@@ -155,7 +155,7 @@ static int isf_flush_output_buffer(istream68_z_t * isf)
       int rem = n - w;
 
       if (rem) {
-        /* Damned! ... Could be an error ... Trust istream & Pray */
+        /* Damned! ... Could be an error ... Trust vfs & Pray */
         int i;
         /*      TRACE68(zlib_cat," FLUSH-MISS:%d", rem); */
         for (i=0; i<rem; ++i) {
@@ -174,7 +174,7 @@ static int isf_flush_output_buffer(istream68_z_t * isf)
 }
 
 /* Read data buffer_in data */
-static int isf_read_buffer(istream68_z_t * isf, void *buffer, int n)
+static int isf_read_buffer(vfs68_z_t * isf, void *buffer, int n)
 {
   int bytes;
 
@@ -208,7 +208,7 @@ static int isf_read_buffer(istream68_z_t * isf, void *buffer, int n)
   return n - bytes;
 }
 
-static int isf_seek_buffer(istream68_z_t * isf, int offset)
+static int isf_seek_buffer(vfs68_z_t * isf, int offset)
 {
   Byte * next_in;
   int avail_in, n;
@@ -233,7 +233,7 @@ static int isf_seek_buffer(istream68_z_t * isf, int offset)
     isf->c_stream.next_in = next_in + n;
     isf->c_stream.avail_in = avail_in - n;
   } else {
-    if (istream68_seek(isf->is, offset) == -1) {
+    if (vfs68_seek(isf->is, offset) == -1) {
       isf->is_err = 1;
       return -1;
     }
@@ -246,7 +246,7 @@ static int isf_seek_buffer(istream68_z_t * isf, int offset)
 
 static const Byte gz_magic[2] = {0x1f, 0x8b};
 
-static int isf_write_gz_header(istream68_z_t * isf)
+static int isf_write_gz_header(vfs68_z_t * isf)
 {
   struct {
     Byte magic[2]; /* gz header                */
@@ -255,7 +255,7 @@ static int isf_write_gz_header(istream68_z_t * isf)
     Byte info[6];  /* time, xflags and OS code */
   } header;
   int i;
-  const char * name = isf->gz_name ? istream68_filename(isf->is) : 0;
+  const char * name = isf->gz_name ? vfs68_filename(isf->is) : 0;
 
   header.magic[0] = gz_magic[0];
   header.magic[1] = gz_magic[1];
@@ -264,7 +264,7 @@ static int isf_write_gz_header(istream68_z_t * isf)
   for (i=0; i<sizeof(header.info); ++i) {
     header.info[i] = 0;
   }
-  if (istream68_write(isf->is, &header, sizeof(header)) != sizeof(header)) {
+  if (vfs68_write(isf->is, &header, sizeof(header)) != sizeof(header)) {
     return -1;
   }
   if (name) {
@@ -275,14 +275,14 @@ static int isf_write_gz_header(istream68_z_t * isf)
     name = (s1 > name) ? s1+1 : name;
     name = (s2 > name) ? s2+1 : name;
     len = strlen(name) + 1;
-    if (istream68_write(isf->is, name, len) != len) {
+    if (vfs68_write(isf->is, name, len) != len) {
       return -1;
     }
   }
   return 0;
 }
 
-static int isf_read_gz_header(istream68_z_t * isf)
+static int isf_read_gz_header(vfs68_z_t * isf)
 {
   int len;
   struct {
@@ -366,7 +366,7 @@ error:
 /* Inflate as much as possible.
  * returns number of byte available in out buffer
  */
-static int isf_inflate_buffer(istream68_z_t * isf)
+static int isf_inflate_buffer(vfs68_z_t * isf)
 {
   int err, n;
   err = 0;
@@ -443,7 +443,7 @@ static int isf_inflate_buffer(istream68_z_t * isf)
 /* Deflate as much as possible.
  * @return  Number of byte
  */
-static int isf_deflate_buffer(istream68_z_t * isf, int finish)
+static int isf_deflate_buffer(vfs68_z_t * isf, int finish)
 {
   int err = 0, mia, zeof;
   const int z_flush_mode = finish ? Z_FINISH : Z_NO_FLUSH;
@@ -526,13 +526,13 @@ static int isf_deflate_buffer(istream68_z_t * isf, int finish)
 }
 
 
-static int isf_close(istream68_t * istream)
+static int isf_close(vfs68_t * vfs)
 {
-  istream68_z_t * isf = (istream68_z_t *)istream;
+  vfs68_z_t * isf = (vfs68_z_t *)vfs;
   int err = -1;
 
-  /* TRACE68(zlib_cat,"istream68_z: close(%s) {\n", */
-  /*         istream68_filename(istream)); */
+  /* TRACE68(zlib_cat,"vfs68_z: close(%s) {\n", */
+  /*         vfs68_filename(vfs)); */
 
   if (isf) {
     err = isf->is_err;
@@ -557,7 +557,7 @@ static int isf_close(istream68_t * istream)
           hd[0+i] = (unsigned char)c;
           hd[4+i] = (unsigned char)t;
         }
-        err = istream68_write(isf->is, hd, 8) != 8;
+        err = vfs68_write(isf->is, hd, 8) != 8;
       }
       deflateEnd(&isf->c_stream);
     }
@@ -573,18 +573,18 @@ static int isf_close(istream68_t * istream)
     }
 
     if (isf->is_slave)
-      err |= istream68_close(isf->is);
+      err |= vfs68_close(isf->is);
   }
 
   /* TRACE68(zlib_cat, " => [%s]\n", strok68(err)); */
-  /* TRACE68(zlib_cat, "istream_z: close '%s' => [%s]\n", */
-  /*         istream68_filename(istream), strok68(err)); */
+  /* TRACE68(zlib_cat, "vfs_z: close '%s' => [%s]\n", */
+  /*         vfs68_filename(vfs), strok68(err)); */
   return err;
 }
 
-static int isf_open(istream68_t * istream)
+static int isf_open(vfs68_t * vfs)
 {
-  istream68_z_t * isf = (istream68_z_t *)istream;
+  vfs68_z_t * isf = (vfs68_z_t *)vfs;
   int err;
 
   if (!isf->is || isf->inflate || isf->deflate) {
@@ -594,7 +594,7 @@ static int isf_open(istream68_t * istream)
   memset(&isf->c_stream, 0 , sizeof(isf->c_stream));
   isf->c_stream.zalloc = isf_zcalloc;
   isf->c_stream.zfree  = isf_zcfree;
-  isf->c_stream.opaque = 0;/* istream->context; */
+  isf->c_stream.opaque = 0;/* vfs->context; */
 
   isf->c_crc32 = crc32(0, 0, 0);
   isf->pos = 0;
@@ -603,14 +603,14 @@ static int isf_open(istream68_t * istream)
   isf->read_out = isf->c_stream.next_out = isf->buffer_out;
 
   err = (isf->is_slave)
-    ? istream68_open(isf->is)
+    ? vfs68_open(isf->is)
     : 0
     ;
 
   if (!err) {
     switch (isf->mode) {
 
-    case ISTREAM68_OPEN_READ:
+    case VFS68_OPEN_READ:
       if (isf->gzip) {
         err = isf_read_gz_header(isf)
           || inflateInit2(&isf->c_stream, -MAX_WBITS) != Z_OK;
@@ -621,7 +621,7 @@ static int isf_open(istream68_t * istream)
 
       break;
 
-    case ISTREAM68_OPEN_WRITE: {
+    case VFS68_OPEN_WRITE: {
       int level = isf->level;
       if (level > Z_BEST_COMPRESSION) {
         level = Z_DEFAULT_COMPRESSION;
@@ -643,19 +643,19 @@ static int isf_open(istream68_t * istream)
   }
 
   if (err) {
-    isf_close(istream);
+    isf_close(vfs);
     err = -1;
   }
 
-  /* msg68_info("istream_z: open(%s) => [%s]\n", */
-  /*            istream68_filename(istream), strok68(err)); */
+  /* msg68_info("vfs_z: open(%s) => [%s]\n", */
+  /*            vfs68_filename(vfs), strok68(err)); */
   return err;
 }
 
 
-static int isf_read(istream68_t * istream, void * data, int n)
+static int isf_read(vfs68_t * vfs, void * data, int n)
 {
-  istream68_z_t * isf = (istream68_z_t *)istream;
+  vfs68_z_t * isf = (vfs68_z_t *)vfs;
   int bytes;
 
   if (!isf->inflate) {
@@ -690,9 +690,9 @@ static int isf_read(istream68_t * istream, void * data, int n)
   return n - bytes;
 }
 
-static int isf_write(istream68_t * istream, const void * data, int n)
+static int isf_write(vfs68_t * vfs, const void * data, int n)
 {
-  istream68_z_t * isf = (istream68_z_t *)istream;
+  vfs68_z_t * isf = (vfs68_z_t *)vfs;
   int bytes;
 
   if (!isf->deflate) {
@@ -729,33 +729,33 @@ static int isf_write(istream68_t * istream, const void * data, int n)
   return n - bytes;
 }
 
-static int isf_flush(istream68_t * istream)
+static int isf_flush(vfs68_t * vfs)
 {
-  /* istream68_z_t * isf = (istream68_z_t *)istream; */
+  /* vfs68_z_t * isf = (vfs68_z_t *)vfs; */
   /* $$$ TODO */
   return 0;
 }
 
-static int isf_length(istream68_t * istream)
+static int isf_length(vfs68_t * vfs)
 {
-  istream68_z_t * isf = (istream68_z_t *)istream;
+  vfs68_z_t * isf = (vfs68_z_t *)vfs;
 
   return (!isf)
     ? -1
     : isf->length;
 }
 
-static int isf_tell(istream68_t * istream)
+static int isf_tell(vfs68_t * vfs)
 {
-  istream68_z_t * isf = (istream68_z_t *)istream;
+  vfs68_z_t * isf = (vfs68_z_t *)vfs;
   return (!isf)
     ? -1
     : isf->pos;
 }
 
-static int isf_seek(istream68_t * istream, int offset)
+static int isf_seek(vfs68_t * vfs, int offset)
 {
-  istream68_z_t * isf = (istream68_z_t *)istream;
+  vfs68_z_t * isf = (vfs68_z_t *)vfs;
   int pos;
 
   if (!isf ) {
@@ -769,18 +769,18 @@ static int isf_seek(istream68_t * istream, int offset)
   return 0;
 }
 
-static void isf_destroy(istream68_t * istream)
+static void isf_destroy(vfs68_t * vfs)
 {
-  istream68_z_t * isf = (istream68_z_t *)istream;
+  vfs68_z_t * isf = (vfs68_z_t *)vfs;
   if (isf->is_slave)
-    istream68_destroy(isf->is);
+    vfs68_destroy(isf->is);
 
   /* call free handler even with NUL pointer since we
      never know what free68() do. */
-  free68(istream);
+  free(vfs);
 }
 
-static const istream68_t istream68_z = {
+static const vfs68_t vfs68_z = {
   isf_name,
   isf_open, isf_close,
   isf_read, isf_write, isf_flush,
@@ -789,36 +789,36 @@ static const istream68_t istream68_z = {
 };
 
 
-istream68_t * istream68_z_create(istream68_t * is, int mode,
-                                 const istream68_z_option_t opt)
+vfs68_t * vfs68_z_create(vfs68_t * is, int mode,
+                                 const vfs68_z_option_t opt)
 {
-  istream68_z_t * isf = 0;
+  vfs68_z_t * isf = 0;
 
   if (!is) {
-    msg68_error("istream68_z: create -- no slave stream\n");
+    msg68_error("vfs68_z: create -- no slave stream\n");
     goto out;
   }
 
   if (!(1&(mode^(mode>>1)))) {
-    msg68_error("istream68_z: create  -- invalid mode (%c%c)\n",
+    msg68_error("vfs68_z: create  -- invalid mode (%c%c)\n",
                 (mode&1)?'R':'.', (mode&2)?'W':'.');
     goto out;
   }
 
-  isf = calloc68(sizeof(istream68_z_t));
+  isf = calloc(sizeof(vfs68_z_t),1);
   if (!isf) {
-    msg68_error("istream68_z: create  -- alloc error\n");
+    msg68_error("vfs68_z: create  -- alloc error\n");
     goto out;
   }
 
-  /* Copy istream functions. */
-  memcpy(&isf->istream, &istream68_z, sizeof(istream68_z));
+  /* Copy vfs functions. */
+  memcpy(&isf->vfs, &vfs68_z, sizeof(vfs68_z));
   /* Setup */
   isf->is       = is;
-  isf->mode     = mode & ISTREAM68_OPEN_MASK;
-  isf->is_slave = mode >> ISTREAM68_SLAVE_BIT;
+  isf->mode     = mode & VFS68_OPEN_MASK;
+  isf->is_slave = mode >> VFS68_SLAVE_BIT;
   isf->length   = -1;
-  isf->org_pos  = istream68_tell(is);
+  isf->org_pos  = vfs68_tell(is);
   /* Setup gzip option. */
   isf->gzip     = opt.gzip;
   isf->level    = opt.level;
@@ -826,24 +826,24 @@ istream68_t * istream68_z_create(istream68_t * is, int mode,
   isf->gz_name  = opt.name;
 
   /* TRACE68(zlib_cat, */
-  /*         "istream68_z: create '%s' mode:%c gz:%c level:%d name:%c\n", */
-  /*         istream68_filename(isf->is), (mode&1)?'R':'W', */
+  /*         "vfs68_z: create '%s' mode:%c gz:%c level:%d name:%c\n", */
+  /*         vfs68_filename(isf->is), (mode&1)?'R':'W', */
   /*         isf->gzip?'Y':'N', isf->level, isf->gz_name?'Y':'N'); */
 
 out:
-  return (istream68_t *) isf;
+  return (vfs68_t *) isf;
 }
 
 #else /* #ifndef USE_Z */
 
-# include "istream68_z.h"
+# include "file68_vfs_z.h"
 
-/* istream Z must not be include in this package. Anyway the creation
+/* vfs Z must not be include in this package. Anyway the creation
  * function still exists but it always returns an error.
  */
 
-istream68_t * istream68_z_create(istream68_t * is, int mode,
-                                 const istream68_z_option_t opt)
+vfs68_t * vfs68_z_create(vfs68_t * is, int mode,
+                                 const vfs68_z_option_t opt)
 {
   msg68_error("zlib68: create -- *NOT SUPPORTED*\n");
   return 0;
@@ -851,7 +851,7 @@ istream68_t * istream68_z_create(istream68_t * is, int mode,
 
 #endif /* #ifndef USE_Z */
 
-int istream68_z_init(void)
+int vfs68_z_init(void)
 {
 #ifdef USE_Z
   zlib_cat = msg68_cat("zlib","Zlib stream message",DEBUG_ZLIB_O);
@@ -859,7 +859,7 @@ int istream68_z_init(void)
   return 0;
 }
 
-void istream68_z_shutdown(void)
+void vfs68_z_shutdown(void)
 {
 #ifdef USE_Z
   if (zlib_cat > 0) {

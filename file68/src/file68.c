@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-20 05:17:07 ben>
+ * Time-stamp: <2013-07-22 01:23:34 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -29,25 +29,24 @@
 #endif
 #include "file68_api.h"
 #include "file68.h"
-#include "chunk68.h"
-#include "error68.h"
-#include "alloc68.h"
-#include "msg68.h"
-#include "string68.h"
-#include "rsc68.h"
-#include "option68.h"
+#include "file68_chk.h"
+#include "file68_err.h"
+#include "file68_msg.h"
+#include "file68_str.h"
+#include "file68_rsc.h"
+#include "file68_opt.h"
 
-#include "istream68_def.h"
-#include "istream68_file.h"
-#include "istream68_fd.h"
-#include "istream68_curl.h"
-#include "istream68_mem.h"
-#include "istream68_z.h"
-#include "istream68_null.h"
-#include "ice68.h"
-#include "gzip68.h"
-#include "url68.h"
-#include "timedb68.h"
+#include "file68_vfs_def.h"
+#include "file68_vfs_file.h"
+#include "file68_vfs_fd.h"
+#include "file68_vfs_curl.h"
+#include "file68_vfs_mem.h"
+#include "file68_vfs_z.h"
+#include "file68_vfs_null.h"
+#include "file68_ice.h"
+#include "file68_zip.h"
+#include "file68_uri.h"
+#include "file68_tdb.h"
 
 #ifndef u64
 # ifdef HAVE_STDINT_H
@@ -65,6 +64,7 @@
 #endif
 
 #include <string.h>
+#include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <assert.h>
@@ -169,7 +169,7 @@ static inline int is_static_str(const char * const s)
 static void free_string(const disk68_t * const mb, void * const s)
 {
   if (s && !is_static_str(s) && !is_disk_data(mb,s))
-    free68(s);
+    free(s);
 }
 
 static inline void safe_free_string(const disk68_t * const mb, void * const _s)
@@ -324,9 +324,9 @@ static int sndh_is_magic(const char *buffer, int max)
 }
 
 static
-int isread(istream68_t * const is, void * data, int len, unsigned int * hptr)
+int isread(vfs68_t * const is, void * data, int len, unsigned int * hptr)
 {
-  int read = istream68_read(is, data, len);
+  int read = vfs68_read(is, data, len);
   if (read > 0 && hptr) {
     unsigned int h = *hptr;
     int n = read;
@@ -347,7 +347,7 @@ int isread(istream68_t * const is, void * data, int len, unsigned int * hptr)
  *  retval  count  on success
  */
 static inline
-int ensure_header(istream68_t * const is, char *id,
+int ensure_header(vfs68_t * const is, char *id,
                   int have, int need, unsigned int * hptr)
 {
   if (have < need) {
@@ -369,7 +369,7 @@ int ensure_header(istream68_t * const is, char *id,
  * or -ice_cc if may be iced
  * or -sndh_cc if may be sndh
  */
-static int read_header(istream68_t * const is, unsigned int * hptr)
+static int read_header(vfs68_t * const is, unsigned int * hptr)
 {
   char id[256];
   const int idv1_req = sizeof(file68_idstr_v1);
@@ -801,10 +801,10 @@ exit:
 /* Check if file is probable SC68 file
  * return 0:SC68-file
  */
-int file68_verify(istream68_t * is)
+int file68_verify(vfs68_t * is)
 {
   int res;
-/*   const char * fname = strnull(istream68_filename(is)); */
+/*   const char * fname = strnull(vfs68_filename(is)); */
 
   if (!is) {
     res = error68("file68_verify(): null pointer");
@@ -820,19 +820,19 @@ int file68_verify(istream68_t * is)
 
     switch (res) {
     case -gzip_cc:
-      if (istream68_seek_to(is,0) == 0) {
-        istream68_t * zis;
-        zis = istream68_z_create(is,ISTREAM68_OPEN_READ,
-                                 istream68_z_default_option);
+      if (vfs68_seek_to(is,0) == 0) {
+        vfs68_t * zis;
+        zis = vfs68_z_create(is,VFS68_OPEN_READ,
+                                 vfs68_z_default_option);
         res = -1;
-        if (!istream68_open(zis)) {
+        if (!vfs68_open(zis)) {
           res = file68_verify(zis);
         }
-        istream68_destroy(zis);
+        vfs68_destroy(zis);
       }
       break;
     case -ice_cc:
-      if (istream68_seek_to(is,0) == 0) {
+      if (vfs68_seek_to(is,0) == 0) {
         buffer = file68_ice_load(is, &len);
       }
       break;
@@ -843,7 +843,7 @@ int file68_verify(istream68_t * is)
     if (buffer) {
       res = -res;
       res = file68_verify_mem(buffer, len);
-      free68(buffer);
+      free(buffer);
     }
   }
 
@@ -851,12 +851,12 @@ error:
   return -(res < 0);
 }
 
-static istream68_t * url_or_file_create(const char * url, int mode,
+static vfs68_t * url_or_file_create(const char * url, int mode,
                                         rsc68_info_t * info)
 {
   char protocol[16], tmp[512];
   const int max = sizeof(tmp)-1;
-  istream68_t *isf = 0;
+  vfs68_t *isf = 0;
   int has_protocol;
   char * newname = 0;
 
@@ -889,28 +889,28 @@ static istream68_t * url_or_file_create(const char * url, int mode,
 
   isf = url68_stream_create(url, mode);
 
-  if (istream68_open(isf)) {
-    istream68_destroy(isf);
+  if (vfs68_open(isf)) {
+    vfs68_destroy(isf);
     isf = 0;
   }
 
-  free68(newname);
+  free(newname);
   TRACE68(file68_cat,"file68: create -- [%s,%s]\n",
           ok_int(!isf),
-          strnull(istream68_filename(isf)));
+          strnull(vfs68_filename(isf)));
   return isf;
 }
 
 int file68_verify_url(const char * url)
 {
   int res;
-  istream68_t * is;
+  vfs68_t * is;
 
 /*   CONTEXT68_CHECK(context); */
 
   is = url_or_file_create(url,1,0);
   res = file68_verify(is);
-  istream68_destroy(is);
+  vfs68_destroy(is);
 
   return -(res < 0);
 }
@@ -918,11 +918,11 @@ int file68_verify_url(const char * url)
 int file68_verify_mem(const void * buffer, int len)
 {
   int res;
-  istream68_t * is;
+  vfs68_t * is;
 
-  is = istream68_mem_create((void *)buffer,len,1);
-  res = istream68_open(is) ? -1 : file68_verify(is);
-  istream68_destroy(is);
+  is = vfs68_mem_create((void *)buffer,len,1);
+  res = vfs68_open(is) ? -1 : file68_verify(is);
+  vfs68_destroy(is);
 
   return res;
 }
@@ -930,7 +930,7 @@ int file68_verify_mem(const void * buffer, int len)
 /* Check if file is probable SC68 file
  * return 0:SC68-file
  */
-int file68_diskname(istream68_t * is, char *dest, int max)
+int file68_diskname(vfs68_t * is, char *dest, int max)
 {
   msg68_error(0,"file68: file68_diskname function is deprecated\n");
   return -1;
@@ -939,14 +939,14 @@ int file68_diskname(istream68_t * is, char *dest, int max)
 disk68_t * file68_load_url(const char * fname)
 {
   disk68_t    * d;
-  istream68_t * is;
+  vfs68_t * is;
   rsc68_info_t  info;
 
   TRACE68(file68_cat,"file68: load -- %s\n", strnull(fname));
 
   is = url_or_file_create(fname, 1, &info);
   d = file68_load(is);
-  istream68_destroy(is);
+  vfs68_destroy(is);
 
   if (d && info.type == rsc68_music) {
     // int i;
@@ -968,11 +968,11 @@ disk68_t * file68_load_url(const char * fname)
 disk68_t * file68_load_mem(const void * buffer, int len)
 {
   disk68_t * d;
-  istream68_t * is;
+  vfs68_t * is;
 
-  is = istream68_mem_create((void *)buffer,len,1);
-  d = istream68_open(is) ? 0 : file68_load(is);
-  istream68_destroy(is);
+  is = vfs68_mem_create((void *)buffer,len,1);
+  d = vfs68_open(is) ? 0 : file68_load(is);
+  vfs68_destroy(is);
 
   return d;
 }
@@ -1319,10 +1319,10 @@ void file68_free(disk68_t * disk)
       }
     }
     if (disk->data != disk->buffer) {
-      free68(disk->data);
+      free(disk->data);
       disk->data = 0;
     }
-    free68(disk);
+    free(disk);
   }
 }
 
@@ -1332,7 +1332,7 @@ static disk68_t * alloc_disk(int datasz)
   disk68_t * mb;
   int        room = datasz + sizeof(disk68_t);
 
-  if (mb = calloc68(room), mb) {
+  if (mb = calloc(room,1), mb) {
     music68_t *cursix;
 
     /* data points into buffer */
@@ -1365,7 +1365,7 @@ disk68_t * file68_new(int extra)
 
 /* Load , allocate memory and valid struct for SC68 music
  */
-disk68_t * file68_load(istream68_t * is)
+disk68_t * file68_load(vfs68_t * is)
 {
   disk68_t *mb = 0;
   int len;
@@ -1375,7 +1375,7 @@ disk68_t * file68_load(istream68_t * is)
   music68_t *cursix;
   tagset68_t * tags;
   char *b;
-  const char *fname = istream68_filename(is);
+  const char *fname = vfs68_filename(is);
   const char *errorstr = 0;
 
   fname = strnevernull68(fname);
@@ -1390,14 +1390,14 @@ disk68_t * file68_load(istream68_t * is)
       switch (len) {
       case -gzip_cc:
         /* gzipped */
-        if (istream68_seek_to(is,0) == 0) {
-          istream68_t * zis;
-          zis=istream68_z_create(is,ISTREAM68_OPEN_READ,
-                                 istream68_z_default_option);
-          if (!istream68_open(zis)) {
+        if (vfs68_seek_to(is,0) == 0) {
+          vfs68_t * zis;
+          zis=vfs68_z_create(is,VFS68_OPEN_READ,
+                                 vfs68_z_default_option);
+          if (!vfs68_open(zis)) {
             mb = file68_load(zis);
           }
-          istream68_destroy(zis);
+          vfs68_destroy(zis);
           if (mb) {
             goto already_valid;
           }
@@ -1405,16 +1405,16 @@ disk68_t * file68_load(istream68_t * is)
         break;
 
       case -ice_cc:
-        if (istream68_seek_to(is,0) == 0) {
+        if (vfs68_seek_to(is,0) == 0) {
           buffer = file68_ice_load(is, &l);
         }
         break;
 
       case -sndh_cc:
-        if (istream68_seek_to(is,0) != 0) {
+        if (vfs68_seek_to(is,0) != 0) {
           break;
         }
-        len = istream68_length(is);
+        len = vfs68_length(is);
         if (len <= 32 || len > 1<<21) {
           break;
         }
@@ -1435,7 +1435,7 @@ disk68_t * file68_load(istream68_t * is)
 
       if (buffer) {
         mb = file68_load_mem(buffer, l);
-        free68(buffer);
+        free(buffer);
         if (mb) {
           return mb;
         }
@@ -1651,16 +1651,16 @@ validate:
 
 already_valid:
   if (opened) {
-    istream68_close(is);
+    vfs68_close(is);
   }
 
   return mb;
 
 error:
   if (opened) {
-    istream68_close(is);
+    vfs68_close(is);
   }
-  free68(mb);
+  free(mb);
   msg68_error("file68: load '%s' failed [%s]\n",
               fname, errorstr ? errorstr : "no reason");
   return 0;
@@ -1691,7 +1691,7 @@ static void get_header(const int version,
 
 /* save CHUNK and data */
 /* $$$ NEW: Add auto 16-bit alignement. */
-static int save_chunk(istream68_t * os,
+static int save_chunk(vfs68_t * os,
                       const char * chunk, const void * data, int size)
 {
   static char zero[4] = {0,0,0,0};
@@ -1702,17 +1702,17 @@ static int save_chunk(istream68_t * os,
   memcpy(chk.id + 2, chunk, 2);
   align = size & 1;
   LPoke(chk.size, size + align);
-  if (istream68_write(os, &chk, (int)sizeof(chunk68_t)) != sizeof(chunk68_t)) {
+  if (vfs68_write(os, &chk, (int)sizeof(chunk68_t)) != sizeof(chunk68_t)) {
     goto error;
   }
   /* Special case data is 0 should happen only for SC68 total size
    * chunk.
    */
   if (size && data) {
-    if (istream68_write(os, data, size) != size) {
+    if (vfs68_write(os, data, size) != size) {
       goto error;
     }
-    if (align && istream68_write(os, zero, align) != align) {
+    if (align && vfs68_write(os, zero, align) != align) {
       goto error;
     }
   }
@@ -1723,7 +1723,7 @@ error:
 }
 
 /* save CHUNK and string (only if non-0 & lenght>0) */
-static int save_string(istream68_t * os,
+static int save_string(vfs68_t * os,
                        const char * chunk, const char * str)
 {
   int len;
@@ -1735,14 +1735,14 @@ static int save_string(istream68_t * os,
 }
 
 /* save CHUNK and string (only if non-0 & lenght>0) */
-static int save_noname(istream68_t * os,
+static int save_noname(vfs68_t * os,
                        const char * chunk, const char * str)
 {
   return save_string(os, chunk, not_noname(str));
 }
 
 /* save CHUNK & string str ( only if oldstr!=str & lenght>0 ) */
-static int save_differstr(istream68_t * os,
+static int save_differstr(vfs68_t * os,
                           const char *chunk, char *str, char *oldstr)
 {
   int len;
@@ -1757,7 +1757,7 @@ static int save_differstr(istream68_t * os,
 }
 
 /* save CHUNK and 4 bytes Big Endian integer */
-static int save_number(istream68_t * os, const char * chunk, int n)
+static int save_number(vfs68_t * os, const char * chunk, int n)
 {
   char number[4];
 
@@ -1766,7 +1766,7 @@ static int save_number(istream68_t * os, const char * chunk, int n)
 }
 
 /* save CHUNK and number (only if n!=0) */
-static int save_nonzero(istream68_t * os, const char * chunk, int n)
+static int save_nonzero(vfs68_t * os, const char * chunk, int n)
 {
   return !n ? 0 : save_number(os, chunk, n);
 }
@@ -1774,17 +1774,17 @@ static int save_nonzero(istream68_t * os, const char * chunk, int n)
 int file68_save_url(const char * fname, const disk68_t * mb,
                     int version, int gzip)
 {
-  istream68_t * os;
+  vfs68_t * os;
   int err;
 
   os = url_or_file_create(fname, 2, 0);
   err = file68_save(os, mb, version, gzip);
-  istream68_destroy(os);
+  vfs68_destroy(os);
 
   return err;
 }
 
-static int save_tags(istream68_t *os, const tagset68_t * tags,
+static int save_tags(vfs68_t *os, const tagset68_t * tags,
                      int start, const char ** skip)
 {
   int i, max = 0, err = 0;
@@ -1825,27 +1825,27 @@ static int save_tags(istream68_t *os, const tagset68_t * tags,
 int file68_save_mem(const char * buffer, int len, const disk68_t * mb,
                     int version, int gzip)
 {
-  istream68_t * os;
+  vfs68_t * os;
   int err;
 
-  os = istream68_mem_create((char *)buffer, len, 2);
+  os = vfs68_mem_create((char *)buffer, len, 2);
   err = file68_save(os, mb, version, gzip);
-  istream68_destroy(os);
+  vfs68_destroy(os);
 
   return err;
 }
 
-static const char * save_sc68(istream68_t * os, const disk68_t * mb,
+static const char * save_sc68(vfs68_t * os, const disk68_t * mb,
                               int len, int version);
 
 /* Save disk into file. */
-int file68_save(istream68_t * os, const disk68_t * mb, int version, int gzip)
+int file68_save(vfs68_t * os, const disk68_t * mb, int version, int gzip)
 {
   int len;
   const char * fname  = 0;
   const char * errstr = 0;
-  istream68_t * null_os = 0;
-  istream68_t * org_os  = 0;
+  vfs68_t * null_os = 0;
+  vfs68_t * org_os  = 0;
 
   const char * header;
   int headsz;
@@ -1857,12 +1857,12 @@ int file68_save(istream68_t * os, const disk68_t * mb, int version, int gzip)
   }
 
   /* Get filename (for error message) */
-  fname = istream68_filename(os);
+  fname = vfs68_filename(os);
 
   /* Create a null stream to calculate total size.
      Needed by gzip stream that can't seek back. */
-  null_os = istream68_null_create(fname);
-  if (istream68_open(null_os)) {
+  null_os = vfs68_null_create(fname);
+  if (vfs68_open(null_os)) {
     errstr = "open";
   } else {
     errstr = save_sc68(null_os, mb, 0, version);
@@ -1870,7 +1870,7 @@ int file68_save(istream68_t * os, const disk68_t * mb, int version, int gzip)
   if (errstr) {
     goto error;
   }
-  len = istream68_length(null_os) - headsz;
+  len = vfs68_length(null_os) - headsz;
   if (len <= 0) {
     errstr = "invalid stream length";
     goto error;
@@ -1878,14 +1878,14 @@ int file68_save(istream68_t * os, const disk68_t * mb, int version, int gzip)
 
   /* Wrap to gzip stream */
   if (gzip) {
-    istream68_z_option_t gzopt;
+    vfs68_z_option_t gzopt;
 
     org_os = os;
-    gzopt = istream68_z_default_option;
+    gzopt = vfs68_z_default_option;
     gzopt.level = gzip;
     gzopt.name  = 0;
-    os = istream68_z_create(org_os, 2, gzopt);
-    if (istream68_open(os)) {
+    os = vfs68_z_create(org_os, 2, gzopt);
+    if (vfs68_open(os)) {
       errstr = "open";
       goto error;
     }
@@ -1896,16 +1896,16 @@ int file68_save(istream68_t * os, const disk68_t * mb, int version, int gzip)
 error:
   if (org_os) {
     /* Was gzipped: clean-up */
-    istream68_destroy(os);
+    vfs68_destroy(os);
   }
-  istream68_destroy(null_os);
+  vfs68_destroy(null_os);
 
   return errstr
     ? error68("file68: %s error -- %s",errstr,fname)
     : 0;
 }
 
-static const char * save_sc68(istream68_t * os, const disk68_t * mb,
+static const char * save_sc68(vfs68_t * os, const disk68_t * mb,
                               int len, int version)
 {
   const char * errstr = 0;
@@ -1932,7 +1932,7 @@ static const char * save_sc68(istream68_t * os, const disk68_t * mb,
   }
 
   /* SC68 file header string */
-  if (istream68_write(os, header, headsz) != headsz) {
+  if (vfs68_write(os, header, headsz) != headsz) {
     errstr = "header write";
     goto error;
   }
@@ -2018,7 +2018,7 @@ static const char * save_sc68(istream68_t * os, const disk68_t * mb,
 
 error:
   if (opened) {
-    istream68_close(os);
+    vfs68_close(os);
   }
   return errstr;
 }

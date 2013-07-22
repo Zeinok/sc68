@@ -1,26 +1,26 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/istream68_z.h
+ * @file     sc68/file68_vfs_z.h
  * @author   Benjamin Gerard
  * @date     2003-10-06
  * @brief    Zlib stream header.
  */
-/* Time-stamp: <2013-07-08 07:46:52 ben> */
+/* Time-stamp: <2013-07-22 01:17:22 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_ISTREAM68_Z_H_
-#define _FILE68_ISTREAM68_Z_H_
+#ifndef _FILE68_VFS_Z_
+#define _FILE68_VFS_Z_
 
-#include "istream68.h"
+#include "file68_vfs.h"
 
 /**
  * @name     Z stream
- * @ingroup  file68_istream
+ * @ingroup  file68_vfs
  *
  * @anchor zlib
  *
- *   Implements istream68_t for Z library.  Z is a famous
+ *   Implements vfs68_t for Z library.  Z is a famous
  *   compression/decompression library. For more informations see
  *   <a href="http://www.gzip.org">gzip website</a>.
  *
@@ -36,13 +36,13 @@ typedef struct {
   unsigned int level:4;    /**< Compression level [0..9] or -1 for default. */
   unsigned int strategy:3; /**< Compression strategy (0 is default).        */
   unsigned int name:1;     /**< Include original name to gzip.              */
-} istream68_z_option_t;
+} vfs68_z_option_t;
 
 /**
  * Default gzip option.
  */
 FILE68_EXTERN
-const istream68_z_option_t istream68_z_default_option;
+const vfs68_z_option_t vfs68_z_default_option;
 
 FILE68_EXTERN
 /**
@@ -55,11 +55,11 @@ FILE68_EXTERN
  * @return stream
  * @retval 0 on error
  */
-istream68_t * istream68_z_create(istream68_t * is, int mode,
-                                 const istream68_z_option_t opt);
+vfs68_t * vfs68_z_create(vfs68_t * is, int mode,
+                                 const vfs68_z_option_t opt);
 
 /**
  * @}
  */
 
-#endif /* #define _FILE68_ISTREAM68_Z_H_ */
+#endif

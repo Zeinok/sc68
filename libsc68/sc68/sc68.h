@@ -619,19 +619,19 @@ SC68_API
  */
 const char * sc68_mimetype(void);
 
-#ifdef _FILE68_ISTREAM68_H_
+#ifndef HAVE_VFS68
+typedef void vfs68_t;
+#endif
+
 SC68_API
 /**
  * Create a stream from url. */
-istream68_t *  sc68_stream_create(const char * url, int mode);
-#endif
+vfs68_t *  sc68_vfs(const char * url, int mode);
 
 /**
  * Verify an sc68 disk. */
-#ifdef _FILE68_ISTREAM68_H_
 SC68_API
-int sc68_verify(istream68_t * is);
-#endif
+int sc68_verify(vfs68_t * is);
 SC68_API
 int sc68_verify_url(const char * url);
 SC68_API
@@ -642,10 +642,8 @@ int sc68_is_our_url(const char * url,
 
 /**
  * Load an sc68 disk for playing. */
-#ifdef _FILE68_ISTREAM68_H_
 SC68_API
-int sc68_load(sc68_t * sc68, istream68_t * is);
-#endif
+int sc68_load(sc68_t * sc68, vfs68_t * is);
 SC68_API
 int sc68_load_url(sc68_t * sc68, const char * url);
 SC68_API
@@ -656,10 +654,8 @@ int sc68_load_mem(sc68_t * sc68, const void * buffer, int len);
  *
  * @notice Free it with sc68_disk_free() function.
  */
-#ifdef _FILE68_ISTREAM68_H_
 SC68_API
-sc68_disk_t sc68_load_disk(istream68_t * is);
-#endif
+sc68_disk_t sc68_load_disk(vfs68_t * is);
 SC68_API
 sc68_disk_t sc68_load_disk_url(const char * url);
 SC68_API
@@ -748,62 +744,8 @@ void sc68_config_apply(sc68_t * sc68);
 
 
 /**
- * @name Dynamic memory access.
- * @{
- */
-
-SC68_API
-/**
- * Allocate dynamic memory.
- *
- *  The sc68_alloc() function calls the alloc68() function.
- *
- * @param  n  Size of buffer to allocate.
- *
- * @return pointer to allocated memory buffer.
- * @retval 0 error
- *
- * @see sc68_calloc()
- * @see sc68_free()
- */
-void * sc68_alloc(unsigned int n);
-
-SC68_API
-/**
- * Allocate zeroed dynamic memory.
- *
- *  The sc68_calloc() function calls the calloc68() function.
- *
- * @param  n  Size of buffer to allocate.
- *
- * @return pointer to allocated memory buffer.
- * @retval 0 error
- *
- * @see sc68_alloc()
- * @see sc68_free()
- */
-void * sc68_calloc(unsigned int n);
-
-
-SC68_API
-/**
- * Free dynamic memory.
- *
- *  The sc68_free() function calls the free68() function.
- *
- * @param  data  Previously allocated memory buffer.
- *
- * @see sc68_alloc()
- * @see sc68_calloc()
- */
-void sc68_free(void * data);
-
-/**
  * @}
  */
 
-/**
- * @}
- */
+#endif
 
-#endif /* #ifndef _SC68_SC68_H_ */

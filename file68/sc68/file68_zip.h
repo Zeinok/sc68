@@ -1,23 +1,23 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/gzip68.h
+ * @file     sc68/file68_zip.h
  * @author   Benjamin Gerard
  * @date     2003-09-03
  * @brief    Gzip loader header.
  */
-/* Time-stamp: <2013-07-08 07:55:02 ben> */
+/* Time-stamp: <2013-07-22 00:22:37 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_GZIP68_H_
-#define _FILE68_GZIP68_H_
+#ifndef _FILE68_ZIP_H_
+#define _FILE68_ZIP_H_
 
 #ifndef FILE68_API
 # include "file68_api.h"
 #endif
 
 /**
- * @defgroup  file68_gzip  gzip file support.
+ * @defgroup  file68_zip  gzip file support.
  * @ingroup   file68_lib
  *
  *   Provides functions for loading and saving gzip file.
@@ -70,4 +70,4 @@ int gzip68_buffer(void * dst, int dsize, const void * src, int csize);
  * @}
  */
 
-#endif /* #ifndef _FILE68_GZIP68_H_ */
+#endif

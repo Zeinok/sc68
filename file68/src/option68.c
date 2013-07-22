@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-05-24 22:16:27 ben>
+ * Time-stamp: <2013-07-22 01:37:31 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -29,10 +29,9 @@
 #endif
 
 #include "file68_api.h"
-#include "msg68.h"
-#include "alloc68.h"
-#include "option68.h"
-#include "string68.h"
+#include "file68_msg.h"
+#include "file68_opt.h"
+#include "file68_str.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -50,7 +49,7 @@ static inline int opt_isset(const option68_t * opt)
 static inline void opt_free_str(option68_t * opt)
 {
   if (opt->has_arg == ~option68_STR) {
-    free68((void *) opt->val.str);
+    free((void *) opt->val.str);
     opt->val.str = 0;
     opt->has_arg = option68_STR;
   }

@@ -3,9 +3,9 @@
  * @brief   program to retrieve information from sc68 files
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-18 02:02:19 ben>
+ * Time-stamp: <2013-07-22 02:48:34 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -29,13 +29,12 @@
 #endif
 
 /* file68 includes */
-#include <sc68/error68.h>
-#include <sc68/alloc68.h>
 #include <sc68/file68.h>
-#include <sc68/string68.h>
-#include <sc68/msg68.h>
-#include <sc68/url68.h>
-#include <sc68/option68.h>
+#include <sc68/file68_err.h>
+#include <sc68/file68_str.h>
+#include <sc68/file68_msg.h>
+#include <sc68/file68_uri.h>
+#include <sc68/file68_opt.h>
 
 /* Standard includes */
 #include <stdio.h>
@@ -226,25 +225,25 @@ static const char * HWflags(const hwflags68_t f)
   return flags;
 }
 
-static void PutC(istream68_t *out, const int c)
+static void PutC(vfs68_t *out, const int c)
 {
-  istream68_putc(out, c);
+  vfs68_putc(out, c);
 }
 
-static void PutS(istream68_t *out, const char *s)
+static void PutS(vfs68_t *out, const char *s)
 {
   if (s)
-    istream68_puts(out, s);
+    vfs68_puts(out, s);
 }
 
-static void PutI(istream68_t *out, int v)
+static void PutI(vfs68_t *out, int v)
 {
   char buffer[64];
   sprintf(buffer,"%d",v);
   PutS(out, buffer);
 }
 
-static void PutX(istream68_t *out, int v)
+static void PutX(vfs68_t *out, int v)
 {
   char buffer[64];
   sprintf(buffer,"%x",v);
@@ -323,7 +322,7 @@ int main(int argc, char ** argv)
   disk68_t *d = 0;
   int curTrack, toTrack;
   char *trackList;
-  istream68_t * out = 0;
+  vfs68_t * out = 0;
   const char * inname  = 0;
   const char * outname = "stdout://";
 
@@ -373,9 +372,9 @@ int main(int argc, char ** argv)
   inname = argv[i];
 
   out = url68_stream_create(outname, 2);
-  if (istream68_open(out)) {
+  if (vfs68_open(out)) {
     error ("info68: error opening output (%s).\n",
-           out ? istream68_filename(out) : outname);
+           out ? vfs68_filename(out) : outname);
     code = 4;
     goto finish;
   }
@@ -578,8 +577,8 @@ int main(int argc, char ** argv)
 
   code = 0;
 finish:
-  istream68_destroy(out);
-  free68(d);
+  vfs68_destroy(out);
+  free(d);
   file68_shutdown();
 
 exit:

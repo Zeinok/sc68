@@ -3,7 +3,7 @@
 # This is a temporary Makefile to build sc68 vlc plugin on win32 platform
 #
 
-ifeq (1,1)
+ifeq ($(M),1)
 TOOLCHAIN := i686-pc-mingw32
 else
 TOOLCHAIN := i686-w64-mingw32

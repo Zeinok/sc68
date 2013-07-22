@@ -1,21 +1,21 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/audio68.h
+ * @file     sc68/file68_aud.h
  * @author   Benjamin Gerard
  * @date     1998-09-03
  * @brief    audio backend header.
  */
-/* Time-stamp: <2013-07-08 08:02:10 ben> */
+/* Time-stamp: <2013-07-22 00:19:54 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_AUDIO68_H_
-#define _FILE68_AUDIO68_H_
+#ifndef _FILE68_AUD_H_
+#define _FILE68_AUD_H_
 
 #include "file68_api.h"
 
 /**
- * @defgroup  file68_audio  Audio output interface.
+ * @defgroup  file68_aud  Audio output interface.
  * @ingroup   file68_lib
  *
  *   Provides function for controling audio output backend.
@@ -42,4 +42,4 @@ unsigned int audio68_sampling_rate(const unsigned int hz);
  * @}
  */
 
-#endif /* #ifndef _FILE68_AUDIO68_H_ */
+#endif

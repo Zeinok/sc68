@@ -1,25 +1,25 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/istream68_mem.h
+ * @file     sc68/file68_vfs_mem.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
  * @brief    Memory stream header.
  */
-/* Time-stamp: <2013-07-08 07:48:31 ben> */
+/* Time-stamp: <2013-07-22 01:16:30 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_ISTREAM68_MEM_H_
-#define _FILE68_ISTREAM68_MEM_H_
+#ifndef _FILE68_VFS_MEM_H_
+#define _FILE68_VFS_MEM_H_
 
-#include "istream68.h"
+#include "file68_vfs.h"
 
 
 /**
  * @name     Memory stream
- * @ingroup  file68_istream
+ * @ingroup  file68_vfs
  *
- *   Implements istream68_t for memory buffer.
+ *   Implements vfs68_t for memory buffer.
  *
  * @{
  */
@@ -40,10 +40,11 @@ FILE68_EXTERN
  *
  * @note   filename is build with memory range.
  */
-istream68_t * istream68_mem_create(const void * addr, int len, int mode);
+vfs68_t * vfs68_mem_create(const void * addr, int len, int mode);
 
 /**
  * @}
  */
 
-#endif /* #define _FILE68_ISTREAM68_MEM_H_ */
+#endif
+

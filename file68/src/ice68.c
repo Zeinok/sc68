@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-20 05:13:30 ben>
+ * Time-stamp: <2013-07-22 01:25:16 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,19 +28,15 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "ice68.h"
-#include "istream68_def.h"
-
-#include "error68.h"
-
+#include "file68_ice.h"
+#include "file68_vfs_def.h"
+#include "file68_err.h"
 #ifdef USE_UNICE68
-
-#include "msg68.h"
-#include "alloc68.h"
-#include "istream68_file.h"
-#include "unice68.h"
-
-#include <string.h>
+# include "file68_msg.h"
+# include "file68_vfs_file.h"
+# include "unice68.h"
+# include <string.h>
+# include <stdlib.h>
 
 int file68_ice_version(void)
 {
@@ -52,15 +48,15 @@ int file68_ice_is_magic(const void * buffer)
   return unice68_depacked_size(buffer,0) > 0;
 }
 
-void * file68_ice_load(istream68_t *is, int *ulen)
+void * file68_ice_load(vfs68_t *is, int *ulen)
 {
   char header[12], *inbuf = 0, * outbuf = 0;
   int dsize, csize;
   const char * fname;
 
-  fname = istream68_filename(is);
+  fname = vfs68_filename(is);
 
-  if (istream68_read(is,header,12) != 12) {
+  if (vfs68_read(is,header,12) != 12) {
     error68("ice68: load '%s' [no header]", fname);
     goto error;
   }
@@ -73,7 +69,7 @@ void * file68_ice_load(istream68_t *is, int *ulen)
     goto error;
   }
 
-  inbuf = alloc68(csize+12);
+  inbuf = malloc(csize+12);
 
   if (!inbuf) {
     error68("ice68: load '%s' [alloc input buffer failed]", fname);
@@ -81,12 +77,12 @@ void * file68_ice_load(istream68_t *is, int *ulen)
   }
 
   memcpy(inbuf,header,12);
-  if (istream68_read(is,inbuf+12,csize) != csize) {
+  if (vfs68_read(is,inbuf+12,csize) != csize) {
     error68("ice68: load '%s' [read failed]", fname);
     goto error;
   }
 
-  outbuf = alloc68(dsize);
+  outbuf = malloc(dsize);
 
   if (!outbuf) {
     error68("ice68: load '%s' [alloc output buffer failed]", fname);
@@ -99,11 +95,11 @@ void * file68_ice_load(istream68_t *is, int *ulen)
 
 error:
 
-  free68(outbuf);
+  free(outbuf);
   outbuf = 0;
   dsize = 0;
 success:
-  free68(inbuf);
+  free(inbuf);
   if (ulen) {
     *ulen = dsize;
   }
@@ -113,14 +109,14 @@ success:
 void * file68_ice_load_file(const char * fname, int * ulen)
 {
   void * ret = 0;
-  istream68_t * is;
+  vfs68_t * is;
 
-  is = istream68_file_create(fname, 1);
-  if (istream68_open(is) != -1) {
+  is = vfs68_file_create(fname, 1);
+  if (vfs68_open(is) != -1) {
     ret = file68_ice_load(is, ulen);
-    istream68_close(is);
+    vfs68_close(is);
   }
-  istream68_destroy(is);
+  vfs68_destroy(is);
 
   return ret;
 }
@@ -141,9 +137,9 @@ int file68_ice_is_magic(const void * buffer)
     && 3[(char *)buffer] == '!';
 }
 
-void * file68_ice_load(istream68_t * is, int * ulen)
+void * file68_ice_load(vfs68_t * is, int * ulen)
 {
-  const char * fname = istream68_filename(is);
+  const char * fname = vfs68_filename(is);
   error68("ice68: *NOT SUPPORTED*");
   return 0;
 }

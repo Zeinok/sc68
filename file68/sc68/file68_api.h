@@ -5,16 +5,16 @@
  * @date     2007-02-25
  * @brief    Symbol exportation header.
  */
-/* Time-stamp: <2013-07-08 07:56:35 ben> */
+/* Time-stamp: <2013-07-22 00:21:52 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_FILE68_API_H_
-#define _FILE68_FILE68_API_H_
+#ifndef _FILE68_API_H_
+#define _FILE68_API_H_
 
 /**
  * @defgroup file68_lib file68 library
- * @ingroup  api68
+ * @ingroup  file68
  *
  *   file68 is a library to manipulate sc68 files and access sc68
  *   resources and much more.
@@ -63,4 +63,4 @@
  * @}
  */
 
-#endif /* ifndef _FILE68_FILE68_API_H_ */
+#endif

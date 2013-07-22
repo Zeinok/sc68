@@ -1,23 +1,23 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/registry68.h
+ * @file     sc68/file68_reg.h
  * @author   Benjamin Gerard
  * @date     2003-08-11
  * @brief    Windows registry header.
  */
-/* Time-stamp: <2013-07-08 07:45:22 ben> */
+/* Time-stamp: <2013-07-22 00:23:07 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_REGISTRY68_H_
-#define _FILE68_REGISTRY68_H_
+#ifndef _FILE68_REG_H_
+#define _FILE68_REG_H_
 
 #ifndef FILE68_API
 # include "file68_api.h"
 #endif
 
 /**
- * @defgroup  file68_registry  Registry access
+ * @defgroup  file68_reg  Registry access
  * @ingroup   file68_lib
  *
  *   Provides Windows registry access functions.
@@ -104,4 +104,4 @@ int registry68_gets(registry68_key_t hkey,
  * @}
  */
 
-#endif /* #ifndef _FILE68_REGISTRY68_H_ */
+#endif

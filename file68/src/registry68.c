@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-06-04 04:35:16 ben>
+ * Time-stamp: <2013-07-22 01:37:28 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,18 +28,19 @@
 # include <config.h>
 #endif
 
-#include "registry68.h"
+#include "file68_reg.h"
 
 #ifdef USE_REGISTRY68
 
 int registry68_support(void) { return 1; }
 
-#include "msg68.h"
-#include "string68.h"
+#include "file68_msg.h"
+#include "file68_str.h"
 #include <windows.h>
 #include <winreg.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #ifndef HKEY_INVALID
 # define HKEY_INVALID ((HKEY)0)

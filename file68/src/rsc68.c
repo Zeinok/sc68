@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-06-18 21:39:05 ben>
+ * Time-stamp: <2013-07-22 01:40:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,20 +28,18 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "rsc68.h"
-
-#include "error68.h"
-#include "url68.h"
-#include "string68.h"
-#include "alloc68.h"
-#include "istream68_def.h"
-#include "istream68_file.h"
-#include "istream68_fd.h"
-#include "istream68_curl.h"
-#include "istream68_mem.h"
-#include "istream68_z.h"
-#include "msg68.h"
-#include "gzip68.h"
+#include "file68_rsc.h"
+#include "file68_err.h"
+#include "file68_uri.h"
+#include "file68_str.h"
+#include "file68_msg.h"
+#include "file68_zip.h"
+#include "file68_vfs_def.h"
+#include "file68_vfs_file.h"
+#include "file68_vfs_fd.h"
+#include "file68_vfs_curl.h"
+#include "file68_vfs_mem.h"
+#include "file68_vfs_z.h"
 
 #include <stdarg.h>
 #include <string.h>
@@ -67,7 +65,7 @@ static const char * user_path   = 0; /* User resource path.   */
 static const char * lmusic_path = 0; /* Local music path.     */
 static const char * rmusic_path = 0; /* Remote music path.    */
 
-static istream68_t * default_open(rsc68_t type, const char *name, int mode,
+static vfs68_t * default_open(rsc68_t type, const char *name, int mode,
                                   rsc68_info_t * info);
 
 static rsc68_handler_t rsc68 = default_open;
@@ -141,7 +139,7 @@ static const char *default_rmusic_path(void)
 
 static const char * rsc_set_any(const char ** any, const char * path)
 {
-  free68((void *)*any);
+  free((void *)*any);
   return *any = strdup68(path) ;
 }
 
@@ -399,10 +397,10 @@ error:
   return 0;
 }
 
-static istream68_t * default_open(rsc68_t type, const char *name,
+static vfs68_t * default_open(rsc68_t type, const char *name,
                                   int mode, rsc68_info_t * info)
 {
-  istream68_t * is = 0;
+  vfs68_t * is = 0;
   int err = -1;
   const char *subdir = 0, *ext = 0;
   char tmp[1024], * apath = 0;
@@ -463,9 +461,9 @@ static istream68_t * default_open(rsc68_t type, const char *name,
 
 #if defined (USE_REPLAY68) && 0
 
-    /* Method using istream to inflate data. Notice that unfortunatly
+    /* Method using vfs to inflate data. Notice that unfortunatly
      * we can't use a proper Z stream because the replay loader needs
-     * to know the length and istream68_z::length() method does not
+     * to know the length and vfs68_z::length() method does not
      * have this information before it has inflated the all data. This
      * is a limitation that could probably be dealt with, at least
      * with gziped stream as the information is available at the end
@@ -475,30 +473,30 @@ static istream68_t * default_open(rsc68_t type, const char *name,
     if (mode == 1) {
       const void * cdata;
       int csize, dsize;
-      istream68_t * is_in;
+      vfs68_t * is_in;
 
       if (!replay68_get(name, &cdata, &csize, &dsize)) {
         TRACE68(rsc68_cat,"rsc68: found built-in replay -- %s %d %d\n",
                 name, csize, dsize);
 
         is_in =
-          istream68_z_create(
-            istream68_mem_create(cdata, csize, mode),
-            mode|ISTREAM68_SLAVE,
-            istream68_z_default_option);
+          vfs68_z_create(
+            vfs68_mem_create(cdata, csize, mode),
+            mode|VFS68_SLAVE,
+            vfs68_z_default_option);
         if (is_in) {
-          is = istream68_mem_create(0, dsize, 3);
-          if (!istream68_open(is_in) && !istream68_open(is)) {
+          is = vfs68_mem_create(0, dsize, 3);
+          if (!vfs68_open(is_in) && !vfs68_open(is)) {
             int n;
-            while (n = istream68_read(is_in, tmpname, sizeof(tmpname)), n > 0)
-              if (istream68_write(is, tmpname, n) != n) {
+            while (n = vfs68_read(is_in, tmpname, sizeof(tmpname)), n > 0)
+              if (vfs68_write(is, tmpname, n) != n) {
                 n = -1;
                 break;
               }
             err = -!!n;
           }
-          istream68_destroy(is_in);
-          istream68_seek_to(is,0);
+          vfs68_destroy(is_in);
+          vfs68_seek_to(is,0);
         }
       }
     }
@@ -508,7 +506,7 @@ static istream68_t * default_open(rsc68_t type, const char *name,
     /* Method using gzip68_buffer() is probably faster (less memory
      * copy) than the previous Z stream one. It still need to allocate
      * a temporary buffer to store deflated data whereas a proper
-     * istream could have deflated on the fly into the 68k memory
+     * vfs could have deflated on the fly into the 68k memory
      * buffer. See previous method comment on that matter.
      */
     if (mode == 1) {
@@ -519,7 +517,7 @@ static istream68_t * default_open(rsc68_t type, const char *name,
       if (!replay68_get(name, &cdata, &csize, &dsize)) {
         TRACE68(rsc68_cat,"rsc68: found built-in replay -- %s %d %d\n",
                 name, csize, dsize);
-        ddata = alloc68(dsize);
+        ddata = malloc(dsize);
         if (ddata) {
           int inflate = gzip68_buffer(ddata, dsize, cdata, csize);
           if (inflate != dsize) {
@@ -527,9 +525,9 @@ static istream68_t * default_open(rsc68_t type, const char *name,
                         " -- %s %d %d\n",name, inflate, dsize);
             err = -1;
           } else {
-            is = istream68_mem_create(ddata, dsize, mode|ISTREAM68_SLAVE);
+            is = vfs68_mem_create(ddata, dsize, mode|VFS68_SLAVE);
             if ( (err = -!is) != 0) {
-              free68(ddata);
+              free(ddata);
             }
           }
         }
@@ -575,8 +573,8 @@ static istream68_t * default_open(rsc68_t type, const char *name,
     } else if (len  <= sizeof(tmp)) {
       path = tmp;
     } else {
-      free68(apath);
-      apath = alloc68(len);
+      free(apath);
+      apath = malloc(len);
       alen = apath ? len : 0;
       path = apath;
     }
@@ -606,30 +604,30 @@ static istream68_t * default_open(rsc68_t type, const char *name,
 
     if (pathes[ipath].curl) {
       TRACE68(rsc68_cat,"rsc68: try open '%s' with curl\n", path);
-      is = istream68_curl_create(path, mode);
+      is = vfs68_curl_create(path, mode);
     } else {
       TRACE68(rsc68_cat,"rsc68: try open '%s' with file\n", path);
-      is = istream68_file_create(path, mode);
+      is = vfs68_file_create(path, mode);
       if (!is) {
         TRACE68(rsc68_cat,"rsc68: try open '%s' with FD\n", path);
-        is = istream68_fd_create(path, -1, mode);
+        is = vfs68_fd_create(path, -1, mode);
       }
     }
-    err = istream68_open(is);
+    err = vfs68_open(is);
     TRACE68(rsc68_cat, "rsc68: try [%s]\n", strok68(err));
     if (!err) {
       break;
     }
 
-    istream68_destroy(is);
+    vfs68_destroy(is);
     is = 0;
   }
 
   if (apath != tmp) {
-    free68(apath);
+    free(apath);
   }
   if (err) {
-    istream68_destroy(is);
+    vfs68_destroy(is);
     is = 0;
   }
 
@@ -638,7 +636,7 @@ static istream68_t * default_open(rsc68_t type, const char *name,
   }
 
   TRACE68(rsc68_cat, "rsc68: open => [%s,%s]\n",
-          strok68(!is), istream68_filename(is));
+          strok68(!is), vfs68_filename(is));
   return is;
 }
 
@@ -654,24 +652,24 @@ rsc68_handler_t rsc68_set_handler(rsc68_handler_t fct)
   return old;
 }
 
-istream68_t * rsc68_create_url(const char *url, int mode, rsc68_info_t * info)
+vfs68_t * rsc68_create_url(const char *url, int mode, rsc68_info_t * info)
 {
-  istream68_t * is;
+  vfs68_t * is;
 
   /* $$$ Ugly haXXX we need to close since created stream are not
      supposed to be open but that's the only function we have
      for now. */
   is = rsc68_open_url(url, mode, info);
-  istream68_close(is);
+  vfs68_close(is);
   return is;
 }
 
 
-istream68_t * rsc68_open_url(const char *url, int mode, rsc68_info_t * info)
+vfs68_t * rsc68_open_url(const char *url, int mode, rsc68_info_t * info)
 {
   int i;
   char protocol[16];
-  istream68_t * is = 0;
+  vfs68_t * is = 0;
 
   TRACE68(rsc68_cat,"rsc68: open url='%s' mode=%c%c%s\n",
           strnevernull68(url),
@@ -729,11 +727,11 @@ istream68_t * rsc68_open_url(const char *url, int mode, rsc68_info_t * info)
 
 error:
   TRACE68(rsc68_cat,"rsc68: open => [%s,'%s']\n",
-          strok68(!is),istream68_filename(is));
+          strok68(!is),vfs68_filename(is));
   return is;
 }
 
-istream68_t * rsc68_open(rsc68_t type, const char *name, int mode,
+vfs68_t * rsc68_open(rsc68_t type, const char *name, int mode,
                          rsc68_info_t * info)
 {
   if (info) {

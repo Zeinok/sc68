@@ -31,7 +31,7 @@
 #endif
 
 #include "ymemul.h"
-#include <sc68/msg68.h>
+#include <sc68/file68_msg.h>
 
 #include <assert.h>
 #include <string.h>

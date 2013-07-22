@@ -1,23 +1,23 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/endian68.h
+ * @file     sc68/file68_ord.h
  * @author   Benjamin Gerard
  * @date     2003-08-12
  * @brief    Byte ordering header.
  */
-/* Time-stamp: <2013-07-08 08:01:32 ben> */
+/* Time-stamp: <2013-07-22 00:15:26 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_ENDIAN68_H_
-#define _FILE68_ENDIAN68_H_
+#ifndef _FILE68_ORD_H_
+#define _FILE68_ORD_H_
 
 #ifndef FILE68_API
 # include "file68_api.h"
 #endif
 
 /**
- * @defgroup  file68_endian  Byte ordering
+ * @defgroup  file68_ord  Byte ordering
  * @ingroup   file68_lib
  *
  *   Provides functions for dealing with host byte order.
@@ -77,4 +77,5 @@ int endian68_is_big(void);
  * @}
  */
 
-#endif /* #ifndef _FILE68_ENDIAN68_H_ */
+#endif
+

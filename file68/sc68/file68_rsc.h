@@ -1,18 +1,18 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/rsc68.h
+ * @file     sc68/file68_rsc.h
  * @author   Benjamin Gerard
  * @date     1998-10-07
  * @brief    Resources access header.
  */
-/* Time-stamp: <2013-07-08 07:44:17 ben> */
+/* Time-stamp: <2013-07-22 01:08:11 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_RSC68_H_
-#define _FILE68_RSC68_H_
+#ifndef _FILE68_RSC_H_
+#define _FILE68_RSC_H_
 
-#include "istream68.h"
+#include "file68_vfs.h"
 
 
 /**
@@ -55,7 +55,7 @@ typedef struct {
 /**
  * Resource handle function type.
  */
-typedef istream68_t * (*rsc68_handler_t)(rsc68_t type,
+typedef vfs68_t * (*rsc68_handler_t)(rsc68_t type,
                                          const char * name,
                                          int mode,
                                          rsc68_info_t * info);
@@ -171,11 +171,11 @@ FILE68_API
  *   function.  Some preliminary tests has already been performed. So
  *   the handler can assume that the name is not a NULL pointer and
  *   the mode is valid (either 1:reading or 2:writing). The resource
- *   handler @b must return an @b already opened istream68_t or 0 in
+ *   handler @b must return an @b already opened vfs68_t or 0 in
  *   error case.
  *
  *   @par Default resource handler
- *   The Default handler use a the istream68_file_create() function.
+ *   The Default handler use a the vfs68_file_create() function.
  *   - If open mode is 2 (write mode) the default handler use the user
  *   resource path.
  *   - If open mode is 1 (read mode) the default handler tries in this
@@ -190,7 +190,7 @@ FILE68_API
 /**
  * Open a resource in given mode.
  *
- *   The function rsc68_open() function opens an istream68_t to
+ *   The function rsc68_open() function opens an vfs68_t to
  *   access a resource.
  *
  * @param  type    Type of resource to open.
@@ -198,12 +198,12 @@ FILE68_API
  * @param  mode    1:read-access, 2:write-access.
  * @param  info    Get additionnal info (depends on type)
  *
- * @return  already opened istream68_t stream.
+ * @return  already opened vfs68_t stream.
  * @retval  0 error.
  *
  * @see rsc68_set_handler() for more info on resource handler.
  */
-istream68_t * rsc68_open(rsc68_t type, const char *name, int mode,
+vfs68_t * rsc68_open(rsc68_t type, const char *name, int mode,
  rsc68_info_t * info);
 
 FILE68_API
@@ -214,12 +214,12 @@ FILE68_API
  * @param  mode    1:read-access, 2:write-access.
  * @param  info    Get additionnal info (depends on type)
  *
- * @return  already opened istream68_t stream.
+ * @return  already opened vfs68_t stream.
  * @retval  0 error.
  *
  * @see rsc68_open()
  */
-istream68_t * rsc68_open_url(const char *url, int mode,
+vfs68_t * rsc68_open_url(const char *url, int mode,
                              rsc68_info_t * info);
 
 FILE68_API
@@ -230,13 +230,12 @@ FILE68_API
  * @param  mode    1:read-access, 2:write-access.
  * @param  info    Get additionnal info (depends on type)
  *
- * @return  istream68_t stream.
+ * @return  vfs68_t stream.
  * @retval  0 error.
  *
  * @see rsc68_open_url()
  */
-istream68_t * rsc68_create_url(const char *url, int mode,
-                               rsc68_info_t * info);
+vfs68_t * rsc68_create_url(const char *url, int mode, rsc68_info_t * info);
 
 
 FILE68_API
@@ -261,4 +260,4 @@ const char * rsc68_get_music_params(rsc68_info_t *info,
  * @}
  */
 
-#endif /* #ifndef _FILE68_RSC68_H_ */
+#endif

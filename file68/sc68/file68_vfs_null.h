@@ -1,31 +1,31 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/istream68_null.h
+ * @file     sc68/file68_vfs_null.h
  * @author   Benjamin Gerard
  * @date     2003-10-10
  * @brief    Null stream header.
  */
-/* Time-stamp: <2013-07-08 07:47:40 ben> */
+/* Time-stamp: <2013-07-22 01:18:35 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_ISTREAM68_NULL_H_
-#define _FILE68_ISTREAM68_NULL_H_
+#ifndef _FILE68_VFS_NULL_H_
+#define _FILE68_VFS_NULL_H_
 
-#include "istream68.h"
+#include "file68_vfs.h"
 
 /**
- * @name     Null stream
- * @ingroup  file68_istream
+ * @name     Null VFS
+ * @ingroup  file68_vfs
  *
- *   Implements a null istream68_t.
+ *   Implements a null vfs68_t.
  *
  *   Null stream does nothing but checking some trivial errors (like
  *   access without opening) and dealing with a virtual stream
  *   position.  The null stream length is the position the highest
  *   byte that has been either read or write. The length is resetted
  *   at open.  It implies that stream length can be retrieved by the
- *   istream68_length() function after istream68_close() call.
+ *   vfs68_length() function after vfs68_close() call.
  *
  * @{
  */
@@ -39,10 +39,11 @@ FILE68_EXTERN
  *
  * @note   filename is prefixed by "null://".
  */
-istream68_t * istream68_null_create(const char * name);
+vfs68_t * vfs68_null_create(const char * name);
 
 /**
  * @}
  */
 
-#endif /* #define _FILE68_ISTREAM68_NULL_H_ */
+#endif
+

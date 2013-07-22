@@ -42,7 +42,7 @@
 #include "mwemul.h"
 
 #include "emu68/assert68.h"
-#include <sc68/msg68.h>
+#include <sc68/file68_msg.h>
 
 #ifndef DEBUG_MW_O
 # define DEBUG_MW_O 0

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-10-15 16:40:36 ben>
+ * Time-stamp: <2013-07-22 01:25:40 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,85 +28,85 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "istream68.h"
-#include "istream68_def.h"
+#include "file68_vfs.h"
+#include "file68_vfs_def.h"
 
-const char * istream68_filename(istream68_t * istream)
+const char * vfs68_filename(vfs68_t * vfs)
 {
   const char * name =
-    (!istream || !istream->name)
+    (!vfs || !vfs->name)
     ? 0
-    : istream->name(istream)
+    : vfs->name(vfs)
     ;
   return name ? name : "<nul>";
 }
 
-int istream68_open(istream68_t *istream)
+int vfs68_open(vfs68_t *vfs)
 {
-  return (!istream || !istream->open)
+  return (!vfs || !vfs->open)
     ? -1
-    : istream->open(istream)
+    : vfs->open(vfs)
     ;
 }
 
-int istream68_close(istream68_t *istream)
+int vfs68_close(vfs68_t *vfs)
 {
   int err = -1;
 
-  if (istream) {
-    if (istream->flush)
-      istream->flush(istream);
-    if (istream->close)
-      err = istream->close(istream);
+  if (vfs) {
+    if (vfs->flush)
+      vfs->flush(vfs);
+    if (vfs->close)
+      err = vfs->close(vfs);
   }
   return err;
 }
 
-int istream68_read(istream68_t *istream, void * data, int len)
+int vfs68_read(vfs68_t *vfs, void * data, int len)
 {
-  return (!istream || !istream->read)
+  return (!vfs || !vfs->read)
     ? -1
-    : istream->read(istream, data, len);
+    : vfs->read(vfs, data, len);
 }
 
-int istream68_write(istream68_t *istream, const void * data, int len)
+int vfs68_write(vfs68_t *vfs, const void * data, int len)
 {
-  return (!istream || !istream->write)
+  return (!vfs || !vfs->write)
     ? -1
-    : istream->write(istream, data, len)
+    : vfs->write(vfs, data, len)
     ;
 }
 
-int istream68_length(istream68_t *istream)
+int vfs68_length(vfs68_t *vfs)
 {
-  return (!istream || !istream->length)
+  return (!vfs || !vfs->length)
     ? -1
-    : istream->length(istream)
+    : vfs->length(vfs)
     ;
 }
 
-int istream68_tell(istream68_t *istream)
+int vfs68_tell(vfs68_t *vfs)
 {
-  return (!istream || !istream->tell)
+  return (!vfs || !vfs->tell)
     ? -1
-    : istream->tell(istream)
+    : vfs->tell(vfs)
     ;
 }
 
-int istream68_flush(istream68_t *istream)
+int vfs68_flush(vfs68_t *vfs)
 {
-  return (!istream || !istream->flush)
+  return (!vfs || !vfs->flush)
     ? -1
-    : istream->flush(istream)
+    : vfs->flush(vfs)
     ;
 }
 
-static int isseek(istream68_t *istream, int pos, int offset)
+static int isseek(vfs68_t *vfs, int pos, int offset)
 {
   if (pos != -1) {
     if (offset) {
-      istream68_seek_t seek = (offset > 0) ? istream->seekf : istream->seekb;
-      if (seek && seek(istream, offset) != -1) {
+      vfs68_seek_t seek = (offset > 0) ? vfs->seekf : vfs->seekb;
+      if (seek && seek(vfs, offset) != -1) {
         pos += offset;
       } else {
         pos = -1;
@@ -116,42 +116,42 @@ static int isseek(istream68_t *istream, int pos, int offset)
   return pos;
 }
 
-int istream68_seek(istream68_t *istream, int offset)
+int vfs68_seek(vfs68_t *vfs, int offset)
 {
-  return isseek(istream, istream68_tell(istream), offset);
+  return isseek(vfs, vfs68_tell(vfs), offset);
 }
 
-int istream68_seek_to(istream68_t *istream, int pos)
+int vfs68_seek_to(vfs68_t *vfs, int pos)
 {
-  int cur = istream68_tell(istream);
+  int cur = vfs68_tell(vfs);
 
-  return isseek(istream, cur, pos-cur);
+  return isseek(vfs, cur, pos-cur);
 }
 
-void istream68_destroy(istream68_t *istream)
+void vfs68_destroy(vfs68_t *vfs)
 {
-  if (istream) {
-    if (istream->close) {
-      istream->close(istream);
+  if (vfs) {
+    if (vfs->close) {
+      vfs->close(vfs);
     }
-    if (istream->destroy) {
-      istream->destroy(istream);
+    if (vfs->destroy) {
+      vfs->destroy(vfs);
     }
   }
 }
 
-int istream68_gets(istream68_t *istream, char * buffer, int max)
+int vfs68_gets(vfs68_t *vfs, char * buffer, int max)
 {
   int i;
 
-  if (!istream || !istream->read || !buffer || max <= 0) {
+  if (!vfs || !vfs->read || !buffer || max <= 0) {
     return -1;
   }
 
   for (i=0, --max; i<max; ) {
     char c;
     int err;
-    err = istream->read(istream, &c, 1);
+    err = vfs->read(vfs, &c, 1);
     if (err == -1) {
       return -1;
     }
@@ -167,29 +167,29 @@ int istream68_gets(istream68_t *istream, char * buffer, int max)
   return i;
 }
 
-int istream68_getc(istream68_t *istream)
+int vfs68_getc(vfs68_t *vfs)
 {
   unsigned char c;
 
-  return istream68_read(istream,&c,1) != 1
+  return vfs68_read(vfs,&c,1) != 1
     ? -1
     : c;
 }
 
-int istream68_puts(istream68_t *istream, const char * s)
+int vfs68_puts(vfs68_t *vfs, const char * s)
 {
   int err = 0;
   if (s) {
     int c;
     while (!err && (c = *s++)) {
-      err = istream68_putc(istream, c);
+      err = vfs68_putc(vfs, c);
     }
   }
   return err;
 }
 
-int istream68_putc(istream68_t *istream, const int c)
+int vfs68_putc(vfs68_t *vfs, const int c)
 {
   unsigned char byte = c;
-  return -(istream68_write(istream,&byte,1) != 1);
+  return -(vfs68_write(vfs,&byte,1) != 1);
 }

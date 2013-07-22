@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-05-24 22:39:13 ben>
+ * Time-stamp: <2013-07-22 01:31:27 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,13 +28,12 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "istream68_fd.h"
+#include "file68_vfs_fd.h"
 
 /* define this if you don't want file descriptor support. */
 #ifndef ISTREAM68_NO_FD
 
-#include "istream68_def.h"
-#include "alloc68.h"
+#include "file68_vfs_def.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -49,10 +48,11 @@
 #endif
 #include <fcntl.h>
 #include <string.h>
+#include <stdlib.h>
 
-/** istream file structure. */
+/** vfs file structure. */
 typedef struct {
-  istream68_t istream;            /**< istream function.            */
+  vfs68_t vfs;            /**< vfs function.            */
   int fd;                         /**< File descriptor (-1:closed). */
   int org_fd;                     /**< Original file descriptor.    */
   int mode;                       /**< Open modes.                  */
@@ -62,21 +62,21 @@ typedef struct {
    */
   char name[1];                   /**< filename.                    */
 
-} istream68_fd_t;
+} vfs68_fd_t;
 
-static const char * ifdname(istream68_t * istream)
+static const char * ifdname(vfs68_t * vfs)
 {
-  istream68_fd_t * isf = (istream68_fd_t *)istream;
+  vfs68_fd_t * isf = (vfs68_fd_t *)vfs;
 
   return (!isf->name[0])
     ? 0
     : isf->name;
 }
 
-static int ifdopen(istream68_t * istream)
+static int ifdopen(vfs68_t * vfs)
 {
   int imode;
-  istream68_fd_t * isf = (istream68_fd_t *)istream;
+  vfs68_fd_t * isf = (vfs68_fd_t *)vfs;
 
   if (!isf->name || isf->fd != -1) {
     return -1;
@@ -88,13 +88,13 @@ static int ifdopen(istream68_t * istream)
   }
 
   switch (isf->mode) {
-  case ISTREAM68_OPEN_READ:
+  case VFS68_OPEN_READ:
     imode = O_RDONLY;
     break;
-  case ISTREAM68_OPEN_WRITE:
+  case VFS68_OPEN_WRITE:
     imode = O_WRONLY | O_CREAT | O_TRUNC;
     break;
-  case ISTREAM68_OPEN_READ|ISTREAM68_OPEN_WRITE:
+  case VFS68_OPEN_READ|VFS68_OPEN_WRITE:
     imode = O_RDWR | O_CREAT;
     break;
   default:
@@ -108,9 +108,9 @@ static int ifdopen(istream68_t * istream)
   return -(isf->fd == -1);
 }
 
-static int ifdclose(istream68_t * istream)
+static int ifdclose(vfs68_t * vfs)
 {
-  istream68_fd_t * isf = (istream68_fd_t *)istream;
+  vfs68_fd_t * isf = (vfs68_fd_t *)vfs;
   int fd;
 
   if (isf->fd == -1) {
@@ -122,17 +122,17 @@ static int ifdclose(istream68_t * istream)
   return close(fd);
 }
 
-static int ifdread(istream68_t * istream, void * data, int n)
+static int ifdread(vfs68_t * vfs, void * data, int n)
 {
-  istream68_fd_t * isf = (istream68_fd_t *)istream;
+  vfs68_fd_t * isf = (vfs68_fd_t *)vfs;
   return  (isf->fd == -1)
     ? -1
     : read(isf->fd, data, n);
 }
 
-static int ifdwrite(istream68_t * istream, const void * data, int n)
+static int ifdwrite(vfs68_t * vfs, const void * data, int n)
 {
-  istream68_fd_t * isf = (istream68_fd_t *)istream;
+  vfs68_fd_t * isf = (vfs68_fd_t *)vfs;
   return isf->fd == -1
     ? -1
     : write(isf->fd, data, n)
@@ -147,9 +147,9 @@ static int ifdwrite(istream68_t * istream, const void * data, int n)
 # define MY_FSYNC(fd) 0
 #endif
 
-static int ifdflush(istream68_t * istream)
+static int ifdflush(vfs68_t * vfs)
 {
-  istream68_fd_t * isf = (istream68_fd_t *)istream;
+  vfs68_fd_t * isf = (vfs68_fd_t *)vfs;
   return isf->fd == -1
     ? -1
     : MY_FSYNC(isf->fd)
@@ -159,9 +159,9 @@ static int ifdflush(istream68_t * istream)
 /* We could have store the length value at opening, but this way it handles
  * dynamic changes of file size.
  */
-static int ifdlength(istream68_t * istream)
+static int ifdlength(vfs68_t * vfs)
 {
-  istream68_fd_t * isf = (istream68_fd_t *)istream;
+  vfs68_fd_t * isf = (vfs68_fd_t *)vfs;
   off_t pos,len = -1;
 
   if (isf->fd == -1) {
@@ -179,9 +179,9 @@ static int ifdlength(istream68_t * istream)
   return len;
 }
 
-static int ifdtell(istream68_t * istream)
+static int ifdtell(vfs68_t * vfs)
 {
-  istream68_fd_t * isf = (istream68_fd_t *)istream;
+  vfs68_fd_t * isf = (vfs68_fd_t *)vfs;
 
   return isf->fd == -1
     ? -1
@@ -189,9 +189,9 @@ static int ifdtell(istream68_t * istream)
     ;
 }
 
-static int ifdseek(istream68_t * istream, int offset)
+static int ifdseek(vfs68_t * vfs, int offset)
 {
-  istream68_fd_t * isf = (istream68_fd_t *)istream;
+  vfs68_fd_t * isf = (vfs68_fd_t *)vfs;
 
   return isf->fd == -1
     ? -1
@@ -199,12 +199,12 @@ static int ifdseek(istream68_t * istream, int offset)
     ;
 }
 
-static void ifddestroy(istream68_t * istream)
+static void ifddestroy(vfs68_t * vfs)
 {
-  free68(istream);
+  free(vfs);
 }
 
-static const istream68_t istream68_fd = {
+static const vfs68_t vfs68_fd = {
   ifdname,
   ifdopen, ifdclose,
   ifdread, ifdwrite, ifdflush,
@@ -213,9 +213,9 @@ static const istream68_t istream68_fd = {
   ifddestroy
 };
 
-istream68_t * istream68_fd_create(const char * fname, int fd, int mode)
+vfs68_t * vfs68_fd_create(const char * fname, int fd, int mode)
 {
-  istream68_fd_t *isf;
+  vfs68_fd_t *isf;
   int len;
 
   if (fd == -1 && (!fname || !fname[0])) {
@@ -227,40 +227,40 @@ istream68_t * istream68_fd_create(const char * fname, int fd, int mode)
   }
 
   /* Don't need 0, because 1 byte already allocated in the
-   * istream68_fd_t::fname.
+   * vfs68_fd_t::fname.
    */
   len = strlen(fname);
-  isf = alloc68(sizeof(istream68_fd_t) + len);
+  isf = malloc(sizeof(vfs68_fd_t) + len);
   if (!isf) {
     return 0;
   }
 
-  /* Copy istream functions. */
-  memcpy(&isf->istream, &istream68_fd, sizeof(istream68_fd));
+  /* Copy vfs functions. */
+  memcpy(&isf->vfs, &vfs68_fd, sizeof(vfs68_fd));
   /* Clean init. */
   isf->fd     = -1;
   isf->org_fd = fd;
-  isf->mode   = mode & (ISTREAM68_OPEN_READ|ISTREAM68_OPEN_WRITE);
+  isf->mode   = mode & (VFS68_OPEN_READ|VFS68_OPEN_WRITE);
 
   /* Copy filename. */
   /* $$$ May be later, we should add a check for relative path and add
    * CWD ... or make it URL compatible */
   strcpy(isf->name, fname);
-  return &isf->istream;
+  return &isf->vfs;
 }
 
-#else /* #ifndef ISTREAM68_NO_FILE */
+#else /* #ifndef VFS68_NO_FILE */
 
-/* istream fd must not be include in this package. Anyway the creation
+/* vfs fd must not be include in this package. Anyway the creation
  * still exist but it always returns error.
  */
 
-#include "msg68.h"
+#include "file68_msg.h"
 
-istream68_t * istream68_fd_create(const char * fname, int fd, int mode)
+vfs68_t * vfs68_fd_create(const char * fname, int fd, int mode)
 {
   msg68_error("fd68: create -- *NOT SUPPORTED*");
   return 0;
 }
 
-#endif /* #ifndef ISTREAM68_NO_FILE */
+#endif

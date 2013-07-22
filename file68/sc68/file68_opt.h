@@ -1,23 +1,23 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/option68.h
+ * @file     sc68/file68_opt.h
  * @author   Benjamin Gerard
  * @date     2009-02-04
  * @brief    Command line option manipulation header.
  */
-/* Time-stamp: <2013-07-08 07:45:55 ben> */
+/* Time-stamp: <2013-07-22 00:15:47 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_OPTION68_H_
-#define _FILE68_OPTION68_H_
+#ifndef _FILE68_OPT_H_
+#define _FILE68_OPT_H_
 
 #ifndef FILE68_API
 # include "file68_api.h"
 #endif
 
 /**
- * @defgroup  file68_option  Options manipulation
+ * @defgroup  file68_opt  Options manipulation
  * @ingroup   file68_lib
  *
  *   Provides command line options manipulation functions.
@@ -178,4 +178,4 @@ const char * option68_getenv(option68_t * opt, int set);
  * @}
  */
 
-#endif /* #ifndef _FILE68_OPTION68_H_ */
+#endif

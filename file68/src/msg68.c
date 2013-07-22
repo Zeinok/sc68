@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-15 18:04:55 ben>
+ * Time-stamp: <2013-07-22 01:36:44 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,8 +28,8 @@
 # include "config.h"
 #endif
 #include "file68_api.h"
-#include "msg68.h"
-#include "string68.h"
+#include "file68_msg.h"
+#include "file68_str.h"
 
 static msg68_t   output = 0;           /* Output function.  */
 static void    * cookie = 0;           /* User data.        */
