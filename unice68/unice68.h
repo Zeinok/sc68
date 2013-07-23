@@ -5,7 +5,7 @@
  * @date     2003/08/06
  * @brief    ICE! depacker header
  */
-/* Time-stamp: <2013-07-19 04:35:57 ben> */
+/* Time-stamp: <2013-07-23 06:05:33 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -91,6 +91,14 @@ UNICE68_API
  *
  *  @return version number (MAJOR*100+MINOR)
  */
+int unice68_unice_version(void);
+
+UNICE68_API
+/**
+ *  Get ICE packer version.
+ *
+ *  @return version number (MAJOR*100+MINOR)
+ */
 int unice68_ice_version(void);
 
 UNICE68_API
@@ -121,7 +129,7 @@ int unice68_depacked_size(const void * buffer, int * p_csize);
 
 UNICE68_API
 /**
- *  Depack an ICE buffer to another.
+ *  Depack an ICE buffer into another.
  *
  *   The unice68_depacker() function depacks src input ICE compressed
  *   buffer into dst output buffer.  The dst buffer is assumed to be
@@ -139,6 +147,23 @@ UNICE68_API
  *          and you are encouraged to add guard bands.
  */
 int unice68_depacker(void * dst, const void * src);
+
+UNICE68_API
+/**
+ *  Pack a buffer with ice packer.
+ *
+ * @param  dst   output (destination) buffer (compressed data).
+ * @param  max   output buffer size.
+ * @param  src   input  (source)      buffer (uncompressed data).
+ * @param  len   input buffer length.
+ *
+ * @return packed size
+ * @retval -1    failure
+ *
+ * @warning  Output buffer overflow is currently not checked and will
+ *           happen if the output buffer is not large enough.
+ */
+int unice68_packer(void * dst, int max, const void * src, int len);
 
 /**
  * @}

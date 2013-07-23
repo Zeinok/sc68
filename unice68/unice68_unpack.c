@@ -1,11 +1,11 @@
 /*
- * @file    unice68_native.c
+ * @file    unice68_unpack.c
  * @brief   Ice Depacker 2.40 (native version)
  * @author  http://sourceforge.net/users/benjihan
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-19 18:55:46 ben>
+ * Time-stamp: <2013-07-23 02:06:57 ben>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -25,15 +25,6 @@
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
-#endif
-#ifndef PACKAGE_NAME
-# define PACKAGE_NAME "unice68"
-#endif
-#ifndef PACKAGE_VERSION
-# define PACKAGE_VERSION __DATE__
-#endif
-#ifndef PACKAGE_VERNUM
-# define PACKAGE_VERNUM 0
 #endif
 
 #include "unice68.h"
@@ -558,19 +549,4 @@ int unice68_depacker(void * dest, const void * src)
   allregs.overflow = 0;
 
   return ice_decrunch(&allregs);
-}
-
-int unice68_ice_version(void)
-{
-  return 240;
-}
-
-const char * unice68_versionstr(void)
-{
-  return PACKAGE_NAME " " PACKAGE_VERSION " ICE! 2.40" ;
-}
-
-int unice68_version(void)
-{
-  return PACKAGE_VERNUM;
 }

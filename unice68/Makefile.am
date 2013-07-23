@@ -1,9 +1,9 @@
-# Time-stamp: <2011-09-10 04:39:54 ben>
+# Time-stamp: <2013-07-23 05:59:45 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  unice68 -- Makefile.am -- Use with automake to produce Makefile.in  | 
 # |                                                                      |
-# |                 (C) 2007-2011 Benjamin Gerard                        |
+# |                 (C) 2007-2013 Benjamin Gerard                        |
 # |                                                                      |
 # |             <http://sourceforge.net/users/benjihan>                  |
 # |                                                                      |
@@ -24,7 +24,7 @@ pkgconfig_DATA = unice68.pc
 # `----------------------------------------------------------------------'
 
 lib_LTLIBRARIES        = libunice68.la
-libunice68_la_SOURCES  = unice68_native.c
+libunice68_la_SOURCES  = unice68_unpack.c unice68_pack.c unice68_version.c
 libunice68_la_CFLAGS   = $(ALL_CFLAGS) $(LIB_CFLAGS)
 libunice68_la_CPPFLAGS = -DUNICE68_EXPORT=1
 libunice68_la_LDFLAGS  = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
