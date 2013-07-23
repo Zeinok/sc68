@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-23 07:19:04 ben>
+ * Time-stamp: <2013-07-23 19:22:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -48,9 +48,10 @@
 #include <libgen.h>
 #endif
 
-static char * prg;
-static int    verbose;
-static FILE * msgout;
+static char     * prg;
+static int        verbose;
+static FILE     * msgout;
+static unsigned   memmax = 1<<24;
 
 #ifndef HAVE_FREOPEN
 static FILE *freopen(const char *path, const char *mode, FILE *stream)
@@ -81,6 +82,7 @@ enum {
   N = 0,                        /* Message level normal  */
   E = -1                        /* Message level error   */
 };
+
 
 static void message_va(const int level, const char *fmt, va_list list)
 {
@@ -128,8 +130,12 @@ static int print_usage(void)
       "       packer %d.%-2d\n"
       "\n"
       " `-' as input/output uses respectively stdin/stdout.\n"
+      " If output is stdout all messages are diverted to stderr.\n"
       "\n"
       "Modes:\n"
+      "\n"
+      "  -h --help      Print this message and exit\n"
+      "  -V --version   Print version and copyright and exit\n"
       /* "  -c --cat       Output input file as is if not ICE! packed\n" */
       "  -t --test      Test if input is an ICE! packed file\n"
       "  -T --deep-test Test if input is a valid ICE! packed file\n"
@@ -142,9 +148,8 @@ static int print_usage(void)
       " and to unpack a packed one.\n"
       "\n"
       "Options:\n"
-      "  -h --help      Print this message and exit\n"
-      "  -V --version   Print version and copyright and exit\n"
       "\n"
+      "  -n --no-limit  Ignore memory sanity check\n"
       "  -v --verbose   Be more verbose (multiple use possible)\n"
       "  -q --quiet     Be less verbose (multiple use possible)\n"
       "\n"
@@ -175,16 +180,59 @@ static int print_version(void)
   return 0;
 }
 
-static unsigned hash_buffer(const char * buf, int len)
+static unsigned hash_buffer(const char * buf, unsigned int len)
 {
   const unsigned char * k = (unsigned char *) buf;
   unsigned int h = 0;
-  while (--len >= 0) {
-    h += *k++;
-    h += h << 10;
-    h ^= h >> 6;
-  }
+  if (len > 0)
+    do {
+      h += *k++;
+      h += h << 10;
+      h ^= h >> 6;
+    } while (--len);
+
   return h;
+}
+
+static void * myalloc(void * buf, int len, char * name)
+{
+  void * newbuf = 0;
+  const unsigned int al = (1<<10) - 1;
+
+  message(D, "Allocating %d bytes for the %s buffer\n", len, name);
+  if (memmax && len >= memmax) {
+    error("cowardly refuse to allocate %u KiB of memory (try `-n')\n",
+          (len+al) >> 10);
+    free(buf);
+  } else {
+    newbuf = realloc(buf,len);
+    if (!newbuf) {
+      syserror(name);
+      free(buf);
+    }
+  }
+  return newbuf;
+}
+
+
+static int myread(void * buf, int len, FILE * inp, const char * name)
+{
+  int n = fread(buf, 1, len, inp);
+  if (n == -1) {
+    syserror(name);
+    return -1;
+  }
+  return n;
+}
+
+static int exactread(void * buf, int len, FILE * inp, const char * name)
+{
+  int n = myread(buf, len, inp, name);
+  if (n != -1 && n != len) {
+    error("%s -- truncated at %d; expected %d\n", n, len);
+    n = -1;
+  }
+  return n;
 }
 
 int main(int argc, char *argv[])
@@ -244,6 +292,8 @@ int main(int argc, char *argv[])
         c = 'P';
       } else if (!strcmp(arg,"stress")) {
         c = 's';
+      } else if (!strcmp(arg,"no-limit")) {
+        c = 'n';
       } else {
         error("invalid option `--%s'.\n", arg);
         return 255;
@@ -258,6 +308,7 @@ int main(int argc, char *argv[])
       case 'V': return print_version();
       case 'v': ++verbose; break;
       case 'q': --verbose; break;
+      case 'n': memmax = 0; break;
       case 'd': case 't': case 'T':
         /* case 'c': */
         sens = 'd';
@@ -326,7 +377,7 @@ int main(int argc, char *argv[])
       }
     }
   }
-  message(V,"input: %s (%d)\n", finp, ilen);
+  message(D,"input: %s (%d)\n", finp, ilen);
   if (!inp) {
     syserror(finp);
     goto error;
@@ -365,18 +416,12 @@ int main(int argc, char *argv[])
     }
 
     if (sens == 'd') {
-      if (ilen != -1 && ilen != csize+sizeof(header)) {
-        error("file size (%d) and packed  size (%d) does not match.\n",
+      if (ilen != -1 && ilen != csize) {
+        error("file size (%d) and packed size (%d) do not match.\n",
               ilen, csize+sizeof(header));
         goto error;
       }
-      /* sanity check */
-      if (csize <= 0 || dsize <= 0 ||
-          csize > 0x1000000 || dsize > 0x1000000) {
-        error("cowardly refuse to unpack this file (%d/%d).\n", csize, dsize);
-        goto error;
-      }
-      ilen = csize+sizeof(header);
+      ilen = csize;
 
       if (mode == 't') {
         err = dsize == -1;
@@ -385,77 +430,58 @@ int main(int argc, char *argv[])
     }
   }
 
-  /* Create and fill input buffer */
   if (ilen != -1) {
-    ibuffer = malloc(ilen);
-    if (ibuffer) {
-      int n;
-      memcpy(ibuffer, header, hread);
-      n = fread(ibuffer+hread, 1, ilen - hread, inp);
-      if (n < 0)
-        ilen = -1;
-      else if (ilen < n+hread) {
-        error("only got %d bytes out of %d expected\n", n, ilen);
-        goto error;
-      }
-    }
+    if (ibuffer = myalloc(0,ilen,"input"), !ibuffer)
+      goto error;
+    memcpy(ibuffer, header, hread);
+    if (-1 == exactread(ibuffer+hread, ilen-hread, inp, finp))
+      goto error;
   } else {
-    /* Don't know about the input size ! now doing an awful
-     * read/realloc thing.
-     */
-    int max = 4096, m, n;
+    int max = 1<<16, m, n;
 
-    ilen = 0;
-    ibuffer = malloc(max);
-    if (ibuffer) {
-      memcpy(ibuffer, header, hread);
-      ilen = hread;
-    }
+    ibuffer = myalloc(0, max, "input");
+    if (!ibuffer)
+      goto error;
+    /* copy pre-read header */
+    memcpy(ibuffer, header, hread);
+    ilen = hread;
     do {
       m = max - ilen;
       if (!m) {
         max <<= 1;
-        ibuffer = realloc(ibuffer, max);
-        if (!ibuffer) break;
+        ibuffer = myalloc(ibuffer, max, "input");
+        if (!ibuffer)
+          goto error;
         m = max - ilen;
       }
-      n = fread(ibuffer+ilen, 1, m, inp);
-      if (n == -1) {
-        ilen = -1;
-        break;
-      }
+      n = myread(ibuffer+ilen, m, inp, finp);
+      if (n == -1)
+        goto error;
       ilen += n;
-    } while (n == m);
-  }
-  if (!ibuffer || ilen == -1) {
-    syserror(finp);
-    goto error;
+    } while (n > 0 && n == m);
   }
   message(D,"Have read all %d input bytes from `%s' ...\n", ilen, finp);
 
   olen = (sens == 'd') ? dsize : (ilen + (ilen>>1) + 1000);
-  message(D, "Allocating %d bytes for the output buffer\n", olen);
-  obuffer = malloc(olen);
-  if (!obuffer) {
-    syserror(fout);
+  if (obuffer = myalloc(0, olen, "output"), !obuffer)
     goto error;
-  }
 
   /***********************************************************************
    * Process
    **********************************************************************/
   switch (sens) {
   case 'p':
-    message(D, "Now packing %d bytes\n", ilen);
+    message(V, "ice packing \"%s\" (%d bytes) ...\n", finp, ilen);
     err = unice68_packer(obuffer, olen, ibuffer, ilen);
+    message(D, "packing returns with %d\n", err);
     if (err == -1)
       break;
     if (err > olen) {
       error("CRITICAL ! ice packer buffer overflow (%d > %d)\n",
             err , olen);
-      return 66;
+      exit(66);
     }
-    csize = err-12;
+    csize = err;
     dsize = unice68_depacked_size(obuffer, &csize);
     if (dsize == -1 || dsize != ilen) {
       if (dsize != -1) dsize = ~dsize;
@@ -478,8 +504,9 @@ int main(int argc, char *argv[])
       obuffer = tbuffer; olen = tlen;
     }
   case 'd':
-    message(D, "Now depacking %d bytes\n", ilen);
+    message(V, "ice depacking \"%s\" (%d bytes) ...\n", finp, ilen);
     err = unice68_depacker(obuffer, ibuffer);
+    message(D, "depacking returns with %d\n", err);
     if (!err && mode =='s') {
       unsigned int hash2 = hash_buffer(obuffer, olen);
       message(D,"depack hash: %x\n", hash2);
@@ -506,7 +533,7 @@ int main(int argc, char *argv[])
     } else {
       out = fopen(fout,"wb");
     }
-    message(V,"output: %s (%d)\n", fout, olen);
+    message(D,"output: %s (%d)\n", fout, olen);
     if (!fout) {
       syserror(fout);
       goto error;

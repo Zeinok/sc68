@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 01:25:16 ben>
+ * Time-stamp: <2013-07-23 20:04:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -48,56 +48,50 @@ int file68_ice_is_magic(const void * buffer)
   return unice68_depacked_size(buffer,0) > 0;
 }
 
+
+#define TERROR(S) do { errstr = S; goto error; } while(0)
+
+
 void * file68_ice_load(vfs68_t *is, int *ulen)
 {
   char header[12], *inbuf = 0, * outbuf = 0;
   int dsize, csize;
   const char * fname;
+  const char * errstr = 0;
 
   fname = vfs68_filename(is);
 
-  if (vfs68_read(is,header,12) != 12) {
-    error68("ice68: load '%s' [no header]", fname);
-    goto error;
-  }
+  if (vfs68_read(is, header, 12) != 12)
+    TERROR("not ICE! (too small)");
 
   csize = 0;
   dsize = unice68_depacked_size(header, &csize);
 
-  if (dsize < 0) {
-    error68("ice68: load '%s' [not ICE!]", fname);
-    goto error;
-  }
+  if (dsize < 0)
+    TERROR("not ICE! (not magic)");
 
-  inbuf = malloc(csize+12);
+  if(inbuf = malloc(csize), !inbuf)
+    TERROR("input alloc failed");
 
-  if (!inbuf) {
-    error68("ice68: load '%s' [alloc input buffer failed]", fname);
-    goto error;
-  }
+  csize -= 12;
+  memcpy(inbuf, header, 12);
+  if (vfs68_read(is, inbuf+12, csize) != csize)
+    TERROR("read error");
 
-  memcpy(inbuf,header,12);
-  if (vfs68_read(is,inbuf+12,csize) != csize) {
-    error68("ice68: load '%s' [read failed]", fname);
-    goto error;
-  }
+  if (outbuf = malloc(dsize), !outbuf)
+    TERROR("output alloc failed");
 
-  outbuf = malloc(dsize);
+  if (unice68_depacker(outbuf, inbuf))
+    TERROR("depack failed");
 
-  if (!outbuf) {
-    error68("ice68: load '%s' [alloc output buffer failed]", fname);
-    goto error;
-  }
-
-  if (!unice68_depacker(outbuf, inbuf)) {
-    goto success;
-  }
+  goto success;
 
 error:
-
+  error68("ice68: load: %s -- %s", errstr, fname);
   free(outbuf);
   outbuf = 0;
   dsize = 0;
+
 success:
   free(inbuf);
   if (ulen) {
@@ -132,8 +126,8 @@ int file68_ice_is_magic(const void * buffer)
 {
   return buffer
     && 0[(char *)buffer] == 'I'
-    && 1[(char *)buffer] == 'C'
-    && 2[(char *)buffer] == 'E'
+    && (1[(char *)buffer] | 0x20) == 'c'
+    && (2[(char *)buffer] | 0x20) == 'e'
     && 3[(char *)buffer] == '!';
 }
 

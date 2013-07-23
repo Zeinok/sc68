@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-23 02:06:57 ben>
+ * Time-stamp: <2013-07-23 18:46:08 ben>
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as
@@ -513,7 +513,7 @@ int unice68_depacked_size(const void * buffer, int * p_csize)
   if (csize < 12) {
     return -2;
   }
-  csize -= 12;
+  /* csize -= 12; */
   dsize = getinfo(&allregs);
   if (p_csize) {
     *p_csize = csize;

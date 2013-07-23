@@ -79,6 +79,9 @@
    */
 #undef LT_OBJDIR
 
+/* Native win32 subsystem */
+#undef NATIVE_WIN32
+
 /* Define to 1 if assertions should be disabled. */
 #undef NDEBUG
 
