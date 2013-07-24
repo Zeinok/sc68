@@ -620,13 +620,14 @@ SC68_API
 const char * sc68_mimetype(void);
 
 #ifndef HAVE_VFS68
-typedef void vfs68_t;
+typedef struct _vfs68_t vfs68_t; /**< normally defined in sc68/file68_vfs.h */
+#define HAVE_VFS68 1
 #endif
 
 SC68_API
 /**
  * Create a stream from url. */
-vfs68_t *  sc68_vfs(const char * url, int mode);
+vfs68_t * sc68_vfs(const char * url, int mode);
 
 /**
  * Verify an sc68 disk. */

@@ -5,7 +5,7 @@
  * @date     2003-08-08
  * @brief    Generic stream definition header.
  */
-/* Time-stamp: <2013-07-22 01:11:35 ben> */
+/* Time-stamp: <2013-07-24 04:20:19 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -19,41 +19,15 @@
  * @ingroup  file68_vfs
  * @{
  */
-
-/**
- * Read open mode bit.
- */
-#define VFS68_OPEN_READ_BIT 0
-
-/**
- * Read open mode value.
- */
-#define VFS68_OPEN_READ  (1<<VFS68_OPEN_READ_BIT)
-
-/**
- * Write open mode bit.
- */
-#define VFS68_OPEN_WRITE_BIT 1
-
-/**
- * Write open mode value.
- */
-#define VFS68_OPEN_WRITE (1<<VFS68_OPEN_WRITE_BIT)
-
-/**
- * Open modes mask.
- */
-#define VFS68_OPEN_MASK (VFS68_OPEN_READ|VFS68_OPEN_WRITE)
-
-/**
- * Slave mode bit.
- */
-#define VFS68_SLAVE_BIT 7
-
-/**
- * Slave mode value.
- */
-#define VFS68_SLAVE (1<<VFS68_SLAVE_BIT)
+enum {
+  VFS68_OPEN_READ_BIT = 0,              /**< Read open mode bit. */
+  VFS68_OPEN_WRITE_BIT = 1,             /**< Write open mode bit. */
+  VFS68_SLAVE_BIT = 7,                  /**< Slave mode bit. */
+  VFS68_OPEN_READ = 1<<VFS68_OPEN_READ_BIT, /**< Read open mode value. */
+  VFS68_OPEN_WRITE = 1<<VFS68_OPEN_WRITE_BIT, /**< Write open mode value. */
+  VFS68_OPEN_MASK= VFS68_OPEN_READ|VFS68_OPEN_WRITE, /**< Open modes mask. */
+  VFS68_SLAVE = 1<<VFS68_SLAVE_BIT,     /**< Slave mode value. */
+};
 
 /**
  * Test SLAVE mode.

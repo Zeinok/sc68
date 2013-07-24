@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 17:19:06 ben>
+ * Time-stamp: <2013-07-24 04:56:22 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -278,24 +278,23 @@ static int stream_read_68k(sc68_t * sc68, unsigned int dest,
   return (vfs68_read(is, mem68, sz) == sz) ? 0 : -1;
 }
 
-static int init_emu68(sc68_t * const sc68, int * argc, char ** argv)
+static int init_emu68(int * argc, char ** argv)
 {
   int err;
 
   /* Initialize emu68 */
-  sc68_debug(sc68,"libsc68: initialise 68k emulator <%s>\n",
-             sc68_name_not_null(sc68));
+  sc68_debug(0,"libsc68: initialise 68k emulator\n");
   err = emu68_init(argc, argv);
   if (err) {
-    sc68_error_add(sc68, "libsc68: failed to initialise 68k emulator");
+    sc68_error_add(0, "libsc68: failed to initialise 68k emulator");
     goto error;
   }
 
   /* Initialize chipset */
-  sc68_debug(sc68,"libsc68: initialise chipsets\n");
+  sc68_debug(0,"libsc68: initialise chipsets\n");
   err = io68_init(argc, argv);
   if (err) {
-    sc68_error_add(sc68, "libsc68: failed to chipsets");
+    sc68_error_add(0, "libsc68: failed to chipsets");
   }
 
 error:
@@ -879,7 +878,7 @@ int sc68_init(sc68_init_t * init)
   init->argc = option68_parse(init->argc, init->argv, 0);
 
   /* Initialize emulators. */
-  err = init_emu68(0, &init->argc, init->argv);
+  err = init_emu68(&init->argc, init->argv);
 
   /* Set default sampling rate. */
   if (!err) {
@@ -2023,17 +2022,17 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
 
   strtime68(info->trk.time, track,(info->trk.time_ms+999u)/1000u);
 
-  info->trk.ym     = m->hwflags.bit.ym;
-  info->trk.ste    = m->hwflags.bit.ste;
-  info->trk.amiga  = m->hwflags.bit.amiga;
-  info->trk.hw     = hwtable[info->trk.ym+(info->trk.ste<<1)+(info->trk.amiga<<2)];
+  info->trk.ym    = m->hwflags.bit.ym;
+  info->trk.ste   = m->hwflags.bit.ste;
+  info->trk.amiga = m->hwflags.bit.amiga;
+  info->trk.hw    = hwtable[info->trk.ym+(info->trk.ste<<1)+(info->trk.amiga<<2)];
 
-  info->trk.tags   = file68_tag_count(d, track);
-  info->trk.tag    = (sc68_tag_t *) m->tags.array;
+  info->trk.tags  = file68_tag_count(d, track);
+  info->trk.tag   = (sc68_tag_t *) m->tags.array;
 
-  info->album      = d->tags.tag.title.val;
-  info->title      = m->tags.tag.title.val;
-  info->artist     = m->tags.tag.artist.val;
+  info->album     = d->tags.tag.title.val;
+  info->title     = m->tags.tag.title.val;
+  info->artist    = m->tags.tag.artist.val;
 
   return 0;
 }

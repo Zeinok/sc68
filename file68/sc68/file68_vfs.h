@@ -5,7 +5,7 @@
  * @date     2003-08-08
  * @brief    Stream interface header.
  */
-/* Time-stamp: <2013-07-22 02:56:18 ben> */
+/* Time-stamp: <2013-07-24 03:59:43 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -27,9 +27,13 @@
  * @{
  */
 
-/** VFS type. */
+/**
+ * VFS type.
+ */
+#ifndef HAVE_VFS68
 typedef struct _vfs68_t vfs68_t;
-#define HAVE_VFS68 1
+#define HAVE_VFS68 1  /**< defined if type vfs68_t is known */
+#endif
 
 /**
  * @name Generic access functions.
