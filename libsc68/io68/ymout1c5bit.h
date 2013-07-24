@@ -1,7 +1,13 @@
-/* YM-2149 D/A output levels
+/**
+ * @file   io68/ymou1c5bit.h
+ * @date   2009-09-14 
+ * @brief  Recorded YM-2149 D/A output levels (not normalized)
+ */
+/* Time-stamp: <2013-07-24 20:26:37 ben> */
+
+/* @ref  YAMAHA COrporation documentation (CATALOG No LSI-2121492)
  *
- * $Id$
- *
+ * 
  */
 
 /* $$$ ben : the function is:
@@ -41,3 +47,4 @@
   /* 1E,00 */ 55141,
   /* 1F,0F */ 65535
 }
+
