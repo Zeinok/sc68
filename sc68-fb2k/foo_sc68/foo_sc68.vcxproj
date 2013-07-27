@@ -107,7 +107,7 @@
     <ClCompile Include="fb2k_sc68.cpp" />
     <ClCompile Include="initquit_sc68.cpp" />
     <ClCompile Include="input_sc68.cpp" />
-    <ClCompile Include="istream_sc68.cpp" />
+    <ClCompile Include="vfs_sc68.cpp" />
     <ClCompile Include="contextmenu_sc68.cpp" />
     <ClCompile Include="mainmenu_sc68.cpp" />
     <ClCompile Include="stdafx.cpp">

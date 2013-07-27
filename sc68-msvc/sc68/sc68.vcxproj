@@ -49,13 +49,15 @@
       <CompileAsManaged>false</CompileAsManaged>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
-      <StringPooling>false</StringPooling>
+      <StringPooling>true</StringPooling>
       <ExceptionHandling>false</ExceptionHandling>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <FloatingPointExceptions>true</FloatingPointExceptions>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -84,6 +86,8 @@
       <OpenMPSupport>false</OpenMPSupport>
       <CompileAs>CompileAsC</CompileAs>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <CompileAsManaged>false</CompileAsManaged>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -119,6 +123,29 @@
     <ClCompile Include="..\..\libsc68\mixer68.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\libsc68\emu68\assert68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\cc68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\emu68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\emu68_api.h" />
+    <ClInclude Include="..\..\libsc68\emu68\error68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\excep68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\inl68_arithmetic.h" />
+    <ClInclude Include="..\..\libsc68\emu68\inl68_bcd.h" />
+    <ClInclude Include="..\..\libsc68\emu68\inl68_bitmanip.h" />
+    <ClInclude Include="..\..\libsc68\emu68\inl68_datamove.h" />
+    <ClInclude Include="..\..\libsc68\emu68\inl68_exception.h" />
+    <ClInclude Include="..\..\libsc68\emu68\inl68_logic.h" />
+    <ClInclude Include="..\..\libsc68\emu68\inl68_progctrl.h" />
+    <ClInclude Include="..\..\libsc68\emu68\inl68_shifting.h" />
+    <ClInclude Include="..\..\libsc68\emu68\inl68_systctrl.h" />
+    <ClInclude Include="..\..\libsc68\emu68\inst68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\ioplug68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\lines68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\macro68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\mem68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\srdef68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\struct68.h" />
+    <ClInclude Include="..\..\libsc68\emu68\type68.h" />
     <ClInclude Include="..\..\libsc68\sc68\conf68.h" />
     <ClInclude Include="..\..\libsc68\sc68\mixer68.h" />
     <ClInclude Include="..\..\libsc68\sc68\sc68.h" />

@@ -1,6 +1,7 @@
 #include "config_msvc.h"
 
 #define EMU68_MONOLITIC 1
+#define EMU68_EXPORT 1
 
 /* Define to 1 if you have the <assert.h> header file. */
 #define HAVE_ASSERT_H 1

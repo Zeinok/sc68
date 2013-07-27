@@ -26,8 +26,8 @@
 
 #include "stdafx.h"
 
-// declare function from istream_sc68.cpp
-istream68_t * istream68_fb2k_create(service_ptr_t<file> p_file, const char * p_path,
+// declare function from vfs_sc68.cpp
+vfs68_t * vfs68_fb2k_create(service_ptr_t<file> p_file, const char * p_path,
 	t_input_open_reason p_reason, abort_callback & p_abort);
 
 // replay config set by menus
@@ -81,11 +81,11 @@ void input_sc68::open(service_ptr_t<file> p_filehint, const char * p_path, t_inp
 	if (p_reason == input_open_info_write)
 		throw exception_io_unsupported_format(); 
 
-	istream68_t  * is = istream68_fb2k_create(/*m_file = */p_filehint, p_path, p_reason, p_abort);
-	istream68_open(is);
+	vfs68_t  * is = vfs68_fb2k_create(/*m_file = */p_filehint, p_path, p_reason, p_abort);
+	vfs68_open(is);
 	int ret = sc68_load(m_sc68, is);
-	istream68_close(is);
-	istream68_destroy(is); is = 0;
+	vfs68_close(is);
+	vfs68_destroy(is); is = 0;
 
 	if (ret)  {
 		sc68_error_flush(m_sc68);

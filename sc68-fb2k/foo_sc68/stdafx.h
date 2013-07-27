@@ -5,10 +5,10 @@
 
 #pragma once
 #include "foobar2000.h"
-#include "sc68/istream68_def.h"
-#include "sc68/istream68.h"
+#include "sc68/file68_vfs_def.h"
+#include "sc68/file68_vfs.h"
 #include "sc68/file68.h"
 #include "sc68/sc68.h"
-#include "sc68/tag68.h"
-#include "sc68/msg68.h"
+#include "sc68/file68_tag.h"
+#include "sc68/file68_msg.h"
 #include "input_sc68.h"

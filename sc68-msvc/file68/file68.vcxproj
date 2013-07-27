@@ -35,36 +35,33 @@
     <ClCompile Include="..\..\file68\src\url68.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\file68\sc68\alloc68.h" />
-    <ClInclude Include="..\..\file68\sc68\audio68.h" />
-    <ClInclude Include="..\..\file68\sc68\chunk68.h" />
-    <ClInclude Include="..\..\file68\sc68\endian68.h" />
-    <ClInclude Include="..\..\file68\sc68\error68.h" />
     <ClInclude Include="..\..\file68\sc68\file68.h" />
     <ClInclude Include="..\..\file68\sc68\file68_api.h" />
-    <ClInclude Include="..\..\file68\sc68\gzip68.h" />
-    <ClInclude Include="..\..\file68\sc68\ice68.h" />
-    <ClInclude Include="..\..\file68\sc68\istream68.h" />
-    <ClInclude Include="..\..\file68\sc68\istream68_ao.h" />
-    <ClInclude Include="..\..\file68\sc68\istream68_curl.h" />
-    <ClInclude Include="..\..\file68\sc68\istream68_def.h" />
-    <ClInclude Include="..\..\file68\sc68\istream68_fd.h" />
-    <ClInclude Include="..\..\file68\sc68\istream68_file.h" />
-    <ClInclude Include="..\..\file68\sc68\istream68_mem.h" />
-    <ClInclude Include="..\..\file68\sc68\istream68_null.h" />
-    <ClInclude Include="..\..\file68\sc68\istream68_z.h" />
-    <ClInclude Include="..\..\file68\sc68\msg68.h" />
-    <ClInclude Include="..\..\file68\sc68\option68.h" />
-    <ClInclude Include="..\..\file68\sc68\registry68.h" />
-    <ClInclude Include="..\..\file68\sc68\rsc68.h" />
-    <ClInclude Include="..\..\file68\sc68\string68.h" />
-    <ClInclude Include="..\..\file68\sc68\tag68.h" />
-    <ClInclude Include="..\..\file68\sc68\url68.h" />
-    <ClInclude Include="..\..\file68\src\replay.inc.h" />
-    <ClInclude Include="..\..\file68\src\timedb.inc.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_aud.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_chk.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_err.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_ice.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_msg.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_opt.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_ord.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_reg.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_rsc.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_str.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_tag.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_tdb.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_uri.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_vfs.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_vfs_ao.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_vfs_curl.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_vfs_def.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_vfs_fd.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_vfs_file.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_vfs_mem.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_vfs_null.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_vfs_z.h" />
+    <ClInclude Include="..\..\file68\sc68\file68_zip.h" />
     <ClInclude Include="..\zlib\zconf.h" />
     <ClInclude Include="..\zlib\zlib.h" />
-    <ClInclude Include="config.h" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="..\zlib\zlib-mt.lib" />
@@ -112,12 +109,14 @@
       <CompileAsManaged>false</CompileAsManaged>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
-      <StringPooling>false</StringPooling>
+      <StringPooling>true</StringPooling>
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <FloatingPointExceptions>true</FloatingPointExceptions>
       <CreateHotpatchableImage>false</CreateHotpatchableImage>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <OpenMPSupport>false</OpenMPSupport>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <CompileAs>CompileAsC</CompileAs>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -146,6 +145,8 @@
       <OpenMPSupport>false</OpenMPSupport>
       <CompileAs>CompileAsC</CompileAs>
       <UseUnicodeForAssemblerListing>false</UseUnicodeForAssemblerListing>
+      <DisableLanguageExtensions>false</DisableLanguageExtensions>
+      <CompileAsManaged>false</CompileAsManaged>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
