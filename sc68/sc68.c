@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 02:57:23 ben>
+ * Time-stamp: <2013-07-29 10:47:21 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -475,6 +475,8 @@ int main(int argc, char *argv[])
   const char * loops   = "def";
   const char * rates   = "def";
   const char * memory  = "def";
+  char sc68_name[] = "sc68"; /* !!! MUST BE in writable memory for
+                                    basename() !!! */
 
   int i,j;
   int log2m = 0;
@@ -487,7 +489,7 @@ int main(int argc, char *argv[])
   vfs68_t * out = 0;
 
   /* Force program name */
-  argv[0] = "sc68";
+  argv[0] = sc68_name;
 
   const my_option_t longopts[] = {
     {"help",       0, 0, 'h'},
