@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 01:25:09 ben>
+ * Time-stamp: <2013-07-29 13:33:29 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -194,12 +194,12 @@ int file68_init(int argc, char **argv)
     /* Get data path from registry */
     if (!option68_isset(opt)) {
       char * e;
-      const char path[] = "Resources";
+      /* const char path[] = "Resources"; */
       e = get_reg_path(registry68_rootkey(REGISTRY68_LMK),
                        "SOFTWARE/sashipa/sc68/Install_Dir",
                        tmp, sizeof(tmp));
-      if (e && (e+sizeof(path) < tmp+sizeof(tmp))) {
-        memcpy(e, path, sizeof(path));
+      if (e /* && (e+sizeof(path) < tmp+sizeof(tmp)) */) {
+        /* memcpy(e, path, sizeof(path)); */
         option68_set(opt,tmp);
       }
     }

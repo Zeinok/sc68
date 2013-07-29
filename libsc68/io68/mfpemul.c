@@ -153,7 +153,7 @@ int timer_get_tdr(const mfp_timer_t * const ptimer, const bogoc68_t bogoc)
 static inline
 void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
 {
-#ifndef NDEBUG
+#if !defined(NDEBUG) || !defined(CPP_SUPPORTS_VA_MACROS)
   uint_t          frq = timerfrq(ptimer->tdr_res); /* old frequency       */
 #endif
   const bogoc68_t cti = ptimer->cti - bogoc;       /* cycles to interrupt */

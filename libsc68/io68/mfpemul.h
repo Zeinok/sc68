@@ -4,10 +4,10 @@
  * @author    Benjamin Gerard
  * @date      1999/03/20
  * @brief     MFP-68901 emulator header.
- *
  */
+/* Time-stamp: <2013-07-26 03:08:28 ben> */
 
-/* Copyright (C) 1998-2011 Benjamin Gerard */
+/* Copyright (C) 1998-2013 Benjamin Gerard */
 
 #ifndef _IO68_MFPEMUL_H_
 #define _IO68_MFPEMUL_H

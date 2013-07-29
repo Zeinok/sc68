@@ -136,9 +136,6 @@ emu68_handler_t emu68_get_handler(emu68_t * const emu68)
 
 const char * emu68_exception_name(unsigned int vector, char * buf)
 {
-  static char tmp[16];
-  if (!buf) buf = tmp;
-
   static const char * xtra_names[] = {
     "hw-trace", "hw-halt", "hw-stop", "hw-reset"
   };
@@ -148,6 +145,9 @@ const char * emu68_exception_name(unsigned int vector, char * buf)
     "illegal", "0-divide", "chk", "trapv", "privv",
     "trace", "linea", "linef"
   };
+
+  static char tmp[16];
+  if (!buf) buf = tmp;
 
   switch ( vector & ~0xCFF ) {
   case 0x000:

@@ -239,7 +239,7 @@ static char *basename(char *path)
 {
   char * s1 = strrchr(path,PRI_PATH_SEP);
   char * s2 = strrchr(path,SEC_PATH_SEP);
-  if (s2 > s1) s = s2;
+  if (s2 > s1) s1 = s2;
   return s1 ? s1 + 1 : path;
 }
 #endif

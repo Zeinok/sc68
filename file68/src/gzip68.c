@@ -33,6 +33,9 @@
 #ifdef HAVE_STDLIB_H
 # include <stdlib.h>
 #endif
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
 
 #ifdef HAVE_STDINT_H
 # include <stdint.h>
@@ -54,10 +57,6 @@ typedef unsigned char byte;
 # define Z_DEFLATED   8 /* From zlib.h */
 #endif
 
-#ifdef HAVE_STRING_H
-# include <string.h>
-#endif
-
 /* gzip magic header */
 static byte gz_magic[] = {0x1f, (char)0x8b, Z_DEFLATED};
 
@@ -74,12 +73,16 @@ int gzip68_is_magic(const void * buffer)
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#ifdef HAVE_STRING_H
+# include <string.h>
+#endif
 
 #ifdef _MSC_VER
 # include <stdio.h>
+# define __STDC__ 0
 # include <io.h>
-#else
-//# include <unistd.h>
+#elif defined(HAVE_UNISTD_H)
+# include <unistd.h>
 #endif
 
 
@@ -123,7 +126,6 @@ error:
   lseek(fd, 0, SEEK_SET);
   return inflate_len;
 }
-
 
 /* Windows opens streams in Text mode by default. */
 #ifndef _O_BINARY
