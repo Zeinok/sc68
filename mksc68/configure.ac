@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [mksc68],
-  [20110827],
+  [20130730],
   [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([mksc68.c])
@@ -45,10 +45,12 @@ AC_SEARCH_LIBS([readline],[readline],
   [AC_CHECK_HEADERS([readline/readline.h readline/history.h])])
 
 # ,----------------------------------------------------------------------.
-# | Standard functions                                                   |
+# | Standard headers and functions                                       |
 # `----------------------------------------------------------------------'
 
-AC_CHECK_FUNCS([malloc free vsprintf vsnprintf strdup strncasecmp])
+AC_CHECK_HEADERS([unistd.h fcntl.h time.h])
+AC_CHECK_HEADERS([sys/socket.h netdb.h winsock.h winsock2.h])
+AC_CHECK_FUNCS([malloc free vsprintf vsnprintf strdup strncasecmp stpcpy])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |

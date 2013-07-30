@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 03:11:12 ben>
+ * Time-stamp: <2013-07-30 14:01:33 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -43,31 +43,41 @@
 #include <emu68/excep68.h>
 #include <io68/io68.h>
 
-
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <time.h>
+#include <stdint.h>
 #include <errno.h>
 #include <unistd.h>
-#include <stdint.h>
-
 #include <fcntl.h>
+#include <time.h>
+
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#include <sys/un.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <errno.h>
+#else
+# ifdef HAVE_WINSOCK2_H
+#  include <winsock2.h>
+# endif
+# ifdef HAVE_WINSOCK_H
+#  include <winsock.h>
+# endif
+#endif
+
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
+
+/* #include <sys/un.h> */
+/* #include <netinet/in.h> */
+/* #include <arpa/inet.h> */
+/* #include <netdb.h> */
 
 
 #define STATUS(S,C,M) \
   if (1) { gdb->run = RUN_##S; gdb->code = CODE_##C; gdb->msg = M; } else
 #define SIGNAL(S,C,M) \
 if (1) { gdb->run = RUN_##S; gdb->code = -C; gdb->msg = M; } else
-
-/* $$$ FIXME */ extern char *stpcpy(char *dest, const char *src);
 
 enum {
   default_port = 6800,
@@ -132,6 +142,27 @@ struct trap_s {
   const char * name;
   const char * parm;
 };
+
+#ifndef HAVE_STPCPY
+static char * stpcpy(char *dst, const char * src)
+{
+  int c;
+  while (c = *src++, c)
+    *dst++ = c;
+  *dst = c;
+  return dst;
+}
+#endif
+
+static const char * sock_error(void)
+{
+#ifdef HAVE_NETDB_H
+  return hstrerror(h_errno);
+#else
+  return "undefined network error";
+#endif
+}
+
 
 
 static int decode_trap(char * s, int trapnum, emu68_t * emu)
@@ -1072,7 +1103,7 @@ int gdb_conf(char * uri)
       if (he) {
         addr = ntohl(((struct in_addr *)he->h_addr)->s_addr);
       } else {
-        msgerr("%s -- '%s'\n", uri, hstrerror(h_errno));
+        msgerr("%s -- '%s'\n", uri, sock_error());
         ret = -1;
       }
     }
