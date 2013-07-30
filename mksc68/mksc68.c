@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-16 13:32:04 ben>
+ * Time-stamp: <2013-07-30 14:04:27 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -852,6 +852,7 @@ int main(int argc, char *argv[])
 {
   int err = -1, i;
   sc68_init_t   init68;
+  char exe_name[] = "mksc68"; /* not read-only or basename() might fault */
 
   static const opt_t longopts[] = {
     {"help",        0, 0, 'h'},
@@ -864,7 +865,7 @@ int main(int argc, char *argv[])
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
   opt_create_short(shortopts,longopts);
 
-  argv[0] = "mksc68";
+  argv[0] = exe_name;
 
   /* Initialize sc68 api. */
   memset(&init68, 0, sizeof(init68));
