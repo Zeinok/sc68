@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [file68],
-  [3.0.0a],
+  [3.0.0b],
   [benjihan -4t- sourceforge],
   [libfile68],
   [http://sc68.atari.org])

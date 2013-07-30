@@ -2,7 +2,7 @@
 # |                                                                      |
 # | sc68-ng -- Makefile.am -- Use with automake to produce configure.in  | 
 # |                                                                      |
-# |	       Copyright (C) 2007-2011 Benjamin Gerard                   |
+# |	       Copyright (C) 2007-2013 Benjamin Gerard                   |
 # |                                                                      |
 # |            <https://sourceforge.net/users/benjihan>                  |
 # |                                                                      |
@@ -12,8 +12,9 @@
 
 ACLOCAL_AMFLAGS = -I m4 --install
 
-ALL_SUBDIRS = as68 desa68 unice68 file68 info68 sourcer68 libsc68	\
-mksc68 cdbg68 sc68
+ALL_SUBDIRS = as68 desa68 file68 info68 libsc68 mksc68 sc68 sourcer68	\
+unice68 sc68-audacious sc68-doc sc68-fb2k sc68-gst sc68-msvc sc68-nsi	\
+sc68-vlc
 
 DIST_SUBDIRS = $(SUBDIRS)
 SUBDIRS      = $(subdirs)

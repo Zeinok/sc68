@@ -57,13 +57,6 @@ AC_ARG_ENABLE(
       [enable all sub-packages @<:@default=no@:>@])],
   [],[enable_sc68_all="check"])
 
-AC_ARG_ENABLE(
-  [sc68-nsi],
-  [AS_HELP_STRING(
-      [--enable-sc68-nsi],
-      [enable win32 nullsoft installer @<:@default=no@:>@])],
-  [],[enable_sc68_nsi="no"])
-
 AS_CASE(["x$enable_sc68_all"],
   [xno|xyes],
   [
@@ -162,10 +155,6 @@ fi
 
 if test Xyes = X"${enable_sc68_doc}"
 then AC_CONFIG_SUBDIRS([sc68-doc])
-fi
-
-if test Xyes = X"${enable_sc68_nsi}"
-then AC_CONFIG_SUBDIRS([sc68-nsi])
 fi
 
 AC_SUBST([subdirs])

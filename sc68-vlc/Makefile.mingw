@@ -17,7 +17,8 @@ RELEASE  := -debug
 RELFLAGS := -UNDEBUG -DDEBUG
 endif
 
-CC=$(TOOLCHAIN)-gcc
+CC	 := $(TOOLCHAIN)-gcc
+STRIP	 := $(TOOLCHAIN)-strip --strip-all
 
 SYSROOT    = /usr/$(TOOLCHAIN)/sys-root
 PREFIX     = /cygdrive/c/Arch/$(TOOLCHAIN)/vlc$(RELEASE)
@@ -86,6 +87,9 @@ libsc68_plugin.dll: $(obj)
 install: $(sos)
 #	test -e "$(VLCPLUGDIR)" || mkdir -pv "$(VLCPLUGDIR)"
 	install $^ "$(VLCPLUGDIR)/"
+
+strip: $(sos)
+	$(STRIP) $<
 
 uninstall:
 	rm -f "$(VLCPLUGDIR)"/libsc68_*

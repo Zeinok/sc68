@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [sc68],
-  [3.0.0],
+  [3.0.0b],
   [benjihan -4t- sourceforge],
   [sc68-cli],
   [http://sc68.atari.org])

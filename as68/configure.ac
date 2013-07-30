@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [as68],
-  [20090117],
+  [20130730],
   [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([as68.c])
