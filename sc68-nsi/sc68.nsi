@@ -1,16 +1,19 @@
-; -*- conf -*-
-;
-; @file   sc68.nsi
-; @author https://sourceforge.net/users/benjihan
-; @brief  Installer for sc68
-;
-; Time-stamp: <2013-07-29 12:03:09 ben>
-; Init-stamp: <2013-07-29 04:43:45 ben>
+# -*- mode: conf; indent-tabs-mode: nil -*-
+#
+# @file   sc68.nsi
+# @author https://sourceforge.net/users/benjihan
+# @brief  Installer for sc68
+#
+# Time-stamp: <2013-07-30 06:33:22 ben>
+# Init-stamp: <2013-07-29 04:43:45 ben>
 
-;--------------------------------
+#--------------------------------
 !include "FileFunc.nsh"
 !insertmacro GetParent
-;--------------------------------
+#--------------------------------
+
+!Define HKLM_SASHIPA "SOFTWARE\sashipa"
+!Define HKLM_SC68    "${HKLM_SASHIPA}\sc68"
 
 Name          "${NAME}"
 Caption       "${CAPTION}"
@@ -18,154 +21,198 @@ Icon          "${SRCDIR}/sc68-icon-32.ico"
 UninstallIcon "${SRCDIR}/sc68-icon-32.ico"
 OutFile       "${OUTFILE}"
 CRCCheck      On
-SetCompress   auto
+SetCompress   force
+SetCompressor /SOLID lzma
+InstProgressFlags smooth colored
 
-Function CleanString
-    ${GetParent} "$0" "$1"
-    strcpy $2 $1 1
-    StrCmp \" $2 noquote
-    StrCpy $1 $1 "" 1
-  noquote:
-    StrCpy $0 $1
+Var /GLOBAL VlcDir              # VLC base install dir
+Var /GLOBAL WmpDir              # Winamp base install dir
+Var /GLOBAL FooDir              # Foobar2000 base install dir
+
+Var /GLOBAL VlcFile             # Installed VLC plugin
+Var /GLOBAL WmpFile             # Installed Winamp plugin
+Var /GLOBAL FooFile             # Installed Foobar2000 plugin
+
+# InstType "Full"
+# InstType "Cli only"
+# InstType "Plugins only"
+
+# ----------------------------------------------------------------------
+#
+# Functions and Macros to locate installation directories
+#
+# ----------------------------------------------------------------------
+
+Function FindPreviousInstall
+    ReadRegStr $0 HKLM ${HKLM_SC68} "Install_Dir"
+    StrCMp "" $0 +2 0
+    StrCpy $INSTDIR $0
 FunctionEnd
 
-Function CheckDisKey
-    pop "$3"
-    pop "$2"
-    pop "$1"
-    StrCpy $0 ""
-    Strcmp $1 "HKCR" 0 no_hkcr
-    ReadRegStr $0 HKCR $2 $3
-    Goto continue
-  no_hkcr:
-    Strcmp $1 "HKLM" 0 no_hklm
-    ReadRegStr $0 HKLM $2 $3
-  no_hklm:
-  
-  continue:
-    StrCmp "" $0 0 found
-    Return
-  found:
-    Call CleanString
-FunctionEnd
+!macro FindWinamp
+    ReadRegStr $WmpDir HKCU "Software\Winamp" ""
+    StrCpy $WmpFile ""
+    IfFileExists "$WmpDir\winamp.exe" 0 +2
+    StrCpy $WmpFile "$WmpDir\Plugins\in_sc68.dll"
+!macroend
 
+!macro FindFoobar
+    ReadRegStr $FooDir HKLM "SOFTWARE\foobar2000" "InstallDir"
+    StrCpy $FooFile ""
+    IfFileExists "$FooDir\foobar2000.exe" 0 +2
+    StrCpy $FooFile "$FooDir\components\foo_sc68.dll"
+!macroend
 
-Function FindWinamp
-;
-FunctionEnd
+!macro FindVlc
+    ReadRegStr $VlcDir HKLM "SOFTWARE\VideoLAN\VLC" "InstallDir"
+    StrCpy $VlcFile ""
+    IfFileExists "$VlcDir\vlc.exe" 0 +2
+    StrCpy $VlcFile "$VlcDir\plugins\demux\libsc68_plugin.dll"
+!macroend
 
-Function FindFoobar
-; HKLM SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\foobar2000
-FunctionEnd
+!macro FindPlugins
+    !insertmacro FindWinamp
+    !insertmacro FindVlc
+    !insertmacro FindFoobar
+!macroend
 
-Function FindVlc
-; HKLM SOFTWARE\VideoLAN\VLC InstallDir
-FunctionEnd
-
-
-; Function FindSteamAccount
-
-;     StrCpy $0 ""
-    
-;     ReadRegStr $0 HKLM \
-;         "SOFTWARE\Team-Aces\aces-css-menu" \
-;         "Install_Dir"
-;     StrCmp "" $0 0 finish
-    
-;     ReadRegStr $0 HKLM \
-;         "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 240" \
-;         "InstallLocation"
-;     StrCmp "" $0 0 finish
-
-;     ReadRegStr $0 HKCU \
-;         "SOFTWARE\Valve\Steam" \
-;         "ModInstallPath"
-;     StrCmp "" $0 notfound 0
-;     ${GetParent} "$0" "$0"
-;     StrCpy $0 "$0\counter-strike source"
-;     goto finish
-
-;   notfound:
-;     push "HKLM"
-;     push "SOFTWARE\Classes\Valve.Source\shell\open\command"
-;     push ""
-;     Call CheckDisKey
-;     StrCmp "" $0 0 finish
-
-;     push "HKLM"
-;     push "SOFTWARE\Classes\Applications\hl2.exe\shell\open\command"
-;     push ""
-;     Call CheckDisKey
-;     StrCmp "" $0 0 finish
-    
-;     push "HKCR"
-;     push "Applications\hl2.exe\shell\open\command"
-;     push ""
-;     Call CheckDisKey
-;     StrCmp "" $0 0 finish
-
-;     push "HKCR"
-;     push "Valve.Source\shell\open\command"
-;     push ""
-;     StrCmp "" $0 0 finish
-
-;     ReadRegStr $0 HKLM "SOFTWARE\Valve\Steam" "InstallPath"
-    
-;   finish:
-;     StrCpy $INSTDIR $0
-; FunctionEnd
-
-;--------------------------------
-
-;;;
-;; Callbacks
-;
+# ----------------------------------------------------------------------
+#
+# Callbacks
+#
+# ----------------------------------------------------------------------
 
 Function .onInit
-;    Call F
+   StrCpy $INSTDIR "$PROGRAMFILES\sc68"
+   Call FindPreviousInstall
+   !insertmacro FindPlugins
 FunctionEnd
 
-;--------------------------------
+Function un.onInit
+   !insertmacro FindPlugins
+FunctionEnd
 
-;;;
-;; Licence
-;
+
+# ----------------------------------------------------------------------
+#
+# Licence
+#
+# ----------------------------------------------------------------------
+
 LicenseBkColor /windows
 LicenseText "license"
 LicenseData ${SRCDIR}\..\COPYING
 LicenseForceSelection checkbox
 
-;--------------------------------
+#--------------------------------
 
-;;;
-;; Pages
-;
-Page license
+# ----------------------------------------------------------------------
+#
+# Pages
+#
+# ----------------------------------------------------------------------
+
+#Page license
+Page components
 Page directory
 Page instfiles
 
-;--------------------------------
+# ----------------------------------------------------------------------
+#
+# Plugins Sections
+#
+# ----------------------------------------------------------------------
 
-;;;
-;; Installation
-;
-Section "Install"
+SectionGroup "!sc68 plugins"
+
+# WINAMP
+Section "sc68 for winamp"
+    SectionIn 1 3
     SetOverwrite on
-    SetOutPath $INSTDIR\Replay
-    File "${DATADIR}\Replay\*.bin"
+    SetOutPath "${WmpDir}\Plugins"
+    File /nonfatal "${WMPFILE}"
+    StrCpy $0 "${WmpDir}\Plugins\${WMPFILE}"
+    IfFileExists $0 0 +2
+    WriteRegStr HKLM ${HKLM_SC68} "winamp_plugin" $0
+SectionEnd
 
+Section "sc68 for vlc"
+    SectionIn 1 3
+    SetOverwrite on
+    SetOutPath $VlcDir
+    SetOutPath "$WmpDir\plugins\demux"
+    File /nonfatal "${VLCFILES}"
+SectionEnd
+
+Section "sc68 for foobar2000"
+    SetOverwrite on
+    SetOutPath $FooDir
+    SetOutPath "$FooDir\components"
+    File /nonfatal "${FOOFILES}"
+SectionEnd
+
+SectionGroupEnd
+
+# ----------------------------------------------------------------------
+#
+# CLI Sections
+#
+# ----------------------------------------------------------------------
+
+SectionGroup "sc68 command line programs"
+
+Section "sc68 command line player"
+    SetOutPath $INSTDIR
+    File "${BINDIR}\sc68.exe"
+    File /nonfatal "${BINDIR}\*68.dll"
+SectionEnd
+
+Section "ICE packer and depacker"
+    SetOutPath $INSTDIR
+    File "${BINDIR}\unice68.exe"
+    File /nonfatal "${BINDIR}\unice68.dll"
+SectionEnd
+
+Section "Make sc68 file"
+    SetOutPath $INSTDIR
+    File /nonfatal "${BINDIR}\mksc68.exe"
+    File /nonfatal "${BINDIR}\*68.dll"
+SectionEnd
+
+SectionGroupEnd
+
+SectionGroup "sc68 config and data"
+
+Section "sc68 music replay"
+    SetOutPath $INSTDIR
+    File /r "${DATADIR}\Replay"
+SectionEnd
+
+Section "sc68 config file"
     SetOutPath $INSTDIR
     File "${DATADIR}\sc68.cfg"
-    File "${BINDIR}\*68.exe"
-    File /nonfatal "${BINDIR}\*68.dll"
-  
-    ;; Write config keys for this programs
-    WriteRegStr HKLM \
-        "SOFTWARE\sashipa\sc68" \
-        "Install_Dir" \
-        "$INSTDIR"
-    
-    ;; Write the uninstall keys for Windows
+SectionEnd
+
+SectionGroupEnd
+
+
+# ----------------------------------------------------------------------
+#
+# Registry Section
+#
+# ----------------------------------------------------------------------
+
+Section "-registry"
+    SectionIn  1 2 3 RO
+
+    DetailPrint "VLC plugin is  '$VlcFile'"
+    DetailPrint "Winamp plugin is '$WmpFile'"
+    DetailPrint "Foobar2000 plugin in '$FooFile'"
+
+    ## Write config keys for this programs
+    WriteRegStr HKLM ${HKLM_SC68} "Install_Dir" "$INSTDIR"
+
+    ## Write the uninstall keys for Windows
     
     WriteRegStr HKLM \
         "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\sc68" \
@@ -194,27 +241,36 @@ Section "Install"
   
 SectionEnd
 
-;--------------------------------
+# ----------------------------------------------------------------------
+#
+# Uninstall Section
+#
+# ----------------------------------------------------------------------
 
-;;;
-;; Uninstall
-;
 Section "Uninstall"
 
-    ;; Remove registry config keys
+    ## Remove registry config keys
 
-    DeleteRegKey HKLM "SOFTWARE\sashipa\sc68"
-    DeleteRegKey /ifempty HKLM "SOFTWARE\sashipa"
+    DeleteRegKey HKLM ${HKLM_SC68}
+    DeleteRegKey /ifempty HKLM ${HKLM_SASHIPA}
 
-    ;; Remove registry uninstaller keys
+    ## Remove registry uninstaller keys
     
     DeleteRegKey HKLM \
         "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\sc68"
 
-    ;; Remove files
-    ;Delete $INSTDIR\cstrike\resource\GameMenu.res
-    ;Delete $INSTDIR\cstrike\resource\gameui_*.txt
-    ;Delete $INSTDIR\cstrike\cfg\aces.cfg
-    ;Delete $INSTDIR\aces-css-menu-uninstall.exe
+    ## Remove files
+
+    StrCmp "" $VlcFile +2 0
+    Delete $VlcFile
+
+    StrCmp "" $WmpFile +2 0
+    Delete $WmpFile
+
+    StrCmp "" $FooFile +2 0
+    Delete $FooFile
+
+    StrCmp "" $INSTDIR +2 0
+    RMDir /r $INSTDIR
 
 SectionEnd
