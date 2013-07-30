@@ -4,12 +4,12 @@
 # @author https://sourceforge.net/users/benjihan
 # @brief  Installer for sc68
 #
-# Time-stamp: <2013-07-30 06:33:22 ben>
+# Time-stamp: <2013-07-30 19:04:33 ben>
 # Init-stamp: <2013-07-29 04:43:45 ben>
 
 #--------------------------------
 !include "FileFunc.nsh"
-!insertmacro GetParent
+!include "x64.nsh"
 #--------------------------------
 
 !Define HKLM_SASHIPA "SOFTWARE\sashipa"
@@ -24,6 +24,7 @@ CRCCheck      On
 SetCompress   force
 SetCompressor /SOLID lzma
 InstProgressFlags smooth colored
+SetOverwrite  On
 
 Var /GLOBAL VlcDir              # VLC base install dir
 Var /GLOBAL WmpDir              # Winamp base install dir
@@ -33,9 +34,7 @@ Var /GLOBAL VlcFile             # Installed VLC plugin
 Var /GLOBAL WmpFile             # Installed Winamp plugin
 Var /GLOBAL FooFile             # Installed Foobar2000 plugin
 
-# InstType "Full"
-# InstType "Cli only"
-# InstType "Plugins only"
+var /GLOBAL Win                 # either "win32" or "win64"
 
 # ----------------------------------------------------------------------
 #
@@ -45,7 +44,7 @@ Var /GLOBAL FooFile             # Installed Foobar2000 plugin
 
 Function FindPreviousInstall
     ReadRegStr $0 HKLM ${HKLM_SC68} "Install_Dir"
-    StrCMp "" $0 +2 0
+    StrCmp "" $0 +2 0
     StrCpy $INSTDIR $0
 FunctionEnd
 
@@ -78,23 +77,6 @@ FunctionEnd
 
 # ----------------------------------------------------------------------
 #
-# Callbacks
-#
-# ----------------------------------------------------------------------
-
-Function .onInit
-   StrCpy $INSTDIR "$PROGRAMFILES\sc68"
-   Call FindPreviousInstall
-   !insertmacro FindPlugins
-FunctionEnd
-
-Function un.onInit
-   !insertmacro FindPlugins
-FunctionEnd
-
-
-# ----------------------------------------------------------------------
-#
 # Licence
 #
 # ----------------------------------------------------------------------
@@ -104,15 +86,13 @@ LicenseText "license"
 LicenseData ${SRCDIR}\..\COPYING
 LicenseForceSelection checkbox
 
-#--------------------------------
-
 # ----------------------------------------------------------------------
 #
 # Pages
 #
 # ----------------------------------------------------------------------
 
-#Page license
+Page license
 Page components
 Page directory
 Page instfiles
@@ -123,35 +103,32 @@ Page instfiles
 #
 # ----------------------------------------------------------------------
 
-SectionGroup "!sc68 plugins"
+SectionGroup /e "!sc68 plugins"
 
 # WINAMP
-Section "sc68 for winamp"
-    SectionIn 1 3
-    SetOverwrite on
-    SetOutPath "${WmpDir}\Plugins"
-    File /nonfatal "${WMPFILE}"
-    StrCpy $0 "${WmpDir}\Plugins\${WMPFILE}"
-    IfFileExists $0 0 +2
-    WriteRegStr HKLM ${HKLM_SC68} "winamp_plugin" $0
+Section "sc68 for winamp" s_wmp
+    file /oname=$WmpFile ${WMPDLL}
 SectionEnd
 
-Section "sc68 for vlc"
-    SectionIn 1 3
-    SetOverwrite on
-    SetOutPath $VlcDir
-    SetOutPath "$WmpDir\plugins\demux"
-    File /nonfatal "${VLCFILES}"
+Section "sc68 for vlc" s_vlc
+    file /oname=$VlcFile ${VLCDLL}
 SectionEnd
 
-Section "sc68 for foobar2000"
-    SetOverwrite on
-    SetOutPath $FooDir
-    SetOutPath "$FooDir\components"
-    File /nonfatal "${FOOFILES}"
+Section "sc68 for foobar2000" s_foo
+    file /oname=$FooFile ${FOODLL}
 SectionEnd
 
 SectionGroupEnd
+
+# ----------------------------------------------------------------------
+#
+# Hidden Section to select outpath
+#
+# ----------------------------------------------------------------------
+
+Section "-outpath"
+    SetOutPath $INSTDIR
+SectionEnd
 
 # ----------------------------------------------------------------------
 #
@@ -159,37 +136,59 @@ SectionGroupEnd
 #
 # ----------------------------------------------------------------------
 
-SectionGroup "sc68 command line programs"
+SectionGroup "sc68 cli programs (win32)" s0_32
 
-Section "sc68 command line player"
-    SetOutPath $INSTDIR
-    File "${BINDIR}\sc68.exe"
-    File /nonfatal "${BINDIR}\*68.dll"
+# ----------------------------------------------------------------------
+
+Section "sc68 cli player" s1_32
+    File "${WIN32DIR}\bin\sc68.exe"
 SectionEnd
 
-Section "ICE packer and depacker"
-    SetOutPath $INSTDIR
-    File "${BINDIR}\unice68.exe"
-    File /nonfatal "${BINDIR}\unice68.dll"
+Section "ICE packer and depacker" s2_32
+    File "${WIN32DIR}\bin\unice68.exe"
 SectionEnd
 
-Section "Make sc68 file"
-    SetOutPath $INSTDIR
-    File /nonfatal "${BINDIR}\mksc68.exe"
-    File /nonfatal "${BINDIR}\*68.dll"
+Section "Info on sc68 files" s3_32
+    File "${WIN32DIR}\bin\info68.exe"
+SectionEnd
+
+Section "Make sc68 file" s4_32
+    File "${WIN32DIR}\bin\mksc68.exe"
 SectionEnd
 
 SectionGroupEnd
 
+# ----------------------------------------------------------------------
+
+SectionGroup "sc68 cli programs (win64)" s0_64
+
+Section "sc68 cli player (w64)"  s1_64
+    File "${WIN64DIR}\bin\sc68.exe"
+SectionEnd
+
+Section "ICE packer and depacker (w64)" s2_64
+    File "${WIN64DIR}\bin\unice68.exe"
+SectionEnd
+
+Section "Info on sc68 files (w64)" s3_64
+    File "${WIN64DIR}\bin\info68.exe"
+SectionEnd
+
+Section "Make sc68 file (w64)" s4_64
+    File "${WIN64DIR}\bin\mksc68.exe"
+SectionEnd
+
+SectionGroupEnd
+
+# ----------------------------------------------------------------------
+
 SectionGroup "sc68 config and data"
 
 Section "sc68 music replay"
-    SetOutPath $INSTDIR
     File /r "${DATADIR}\Replay"
 SectionEnd
 
 Section "sc68 config file"
-    SetOutPath $INSTDIR
     File "${DATADIR}\sc68.cfg"
 SectionEnd
 
@@ -204,10 +203,6 @@ SectionGroupEnd
 
 Section "-registry"
     SectionIn  1 2 3 RO
-
-    DetailPrint "VLC plugin is  '$VlcFile'"
-    DetailPrint "Winamp plugin is '$WmpFile'"
-    DetailPrint "Foobar2000 plugin in '$FooFile'"
 
     ## Write config keys for this programs
     WriteRegStr HKLM ${HKLM_SC68} "Install_Dir" "$INSTDIR"
@@ -274,3 +269,64 @@ Section "Uninstall"
     RMDir /r $INSTDIR
 
 SectionEnd
+
+# ----------------------------------------------------------------------
+#
+# Callbacks
+#
+# ----------------------------------------------------------------------
+
+Function DisableSection
+  push $1
+  push $2
+  IntOp $2 ${SF_SELECTED} ~
+  SectionGetFlags $0 $1
+  IntOp $1 $1 & $2
+  IntOp $1 $1 | ${SF_RO}
+  SectionSetFlags $0 $1
+  pop $1
+FunctionEnd
+
+Function .onInit
+    StrCpy $INSTDIR "$PROGRAMFILES32\sc68"
+    StrCpy $Win "win32"
+    ${If} ${RunningX64}
+        StrCpy $Win "win64"
+        StrCpy $INSTDIR "$PROGRAMFILES64\sc68"
+    ${EndIf}
+    Call FindPreviousInstall
+    !insertmacro FindPlugins
+
+    # Check and disable individual plugin sections
+    StrCpy $0 ${s_wmp}
+    StrCmp "" $WmpFile 0 +2
+    call DisableSection
+
+    StrCpy $0 ${s_vlc}
+    StrCmp "" $VlcFile 0 +2
+    call DisableSection
+
+    StrCpy $0 ${s_foo}
+    StrCmp "" $FooFile 0 +2
+    call DisableSection
+
+    StrCmp $win "win32" +3 0
+    push ${s0_32}
+    goto +2
+    push ${s0_64}
+    pop $0
+    call DisableSection
+    IntOp $0 $0 + 1
+    call DisableSection
+    IntOp $0 $0 + 1
+    call DisableSection
+    IntOp $0 $0 + 1
+    call DisableSection
+    IntOp $0 $0 + 1
+    call DisableSection
+
+FunctionEnd
+
+Function un.onInit
+    !insertmacro FindPlugins
+FunctionEnd
