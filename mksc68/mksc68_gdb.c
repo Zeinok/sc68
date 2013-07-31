@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-30 14:01:33 ben>
+ * Time-stamp: <2013-07-31 12:35:22 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -144,6 +144,10 @@ struct trap_s {
 };
 
 #ifndef HAVE_STPCPY
+/* Sometine we don't have stpcpy. That's weird and it is probably a
+ * configuration problem regarding GLIBC features.
+ * Anyway here is a very simple replacement.
+ */
 static char * stpcpy(char *dst, const char * src)
 {
   int c;
@@ -154,16 +158,17 @@ static char * stpcpy(char *dst, const char * src)
 }
 #endif
 
+/* In case hstrerror() does not exist just return a very generic error
+ * message.
+ */
 static const char * sock_error(void)
 {
-#ifdef HAVE_NETDB_H
+#ifdef HAVE_hstrerror
   return hstrerror(h_errno);
 #else
   return "undefined network error";
 #endif
 }
-
-
 
 static int decode_trap(char * s, int trapnum, emu68_t * emu)
 {

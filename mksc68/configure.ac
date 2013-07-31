@@ -41,6 +41,7 @@ SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
 # ,----------------------------------------------------------------------.
 # | extra libraries                                                      |
 # `----------------------------------------------------------------------'
+# SC68_WITH([readline],[no],[readline],[readline/readline.h],[])
 AC_SEARCH_LIBS([readline],[readline],
   [AC_CHECK_HEADERS([readline/readline.h readline/history.h])])
 
@@ -48,9 +49,16 @@ AC_SEARCH_LIBS([readline],[readline],
 # | Standard headers and functions                                       |
 # `----------------------------------------------------------------------'
 
-AC_CHECK_HEADERS([unistd.h fcntl.h time.h])
-AC_CHECK_HEADERS([sys/socket.h netdb.h winsock.h winsock2.h])
-AC_CHECK_FUNCS([malloc free vsprintf vsnprintf strdup strncasecmp stpcpy])
+AC_CHECK_HEADERS([stdio.h stdlib.h stdarg.h stdint.h string.h])
+AC_CHECK_HEADERS([unistd.h io.h fcntl.h time.h])
+AC_CHECK_HEADERS([sys/socket.h netdb.h])
+if test x"[$]ac_cv_header_sys_socket_h" != x"yes"; then
+  AC_CHECK_HEADERS([winsock.h winsock2.h])
+fi
+AC_CHECK_FUNCS([malloc free])
+AC_CHECK_FUNCS([strdup strncasecmp stpcpy])
+AC_CHECK_FUNCS([vsprintf vsnprintf])
+AC_CHECK_FUNCS([hstrerror])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
