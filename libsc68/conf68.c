@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 02:02:29 ben>
+ * Time-stamp: <2013-08-02 13:47:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -43,6 +43,7 @@
 #include <sc68/file68_str.h>
 #include <sc68/file68_msg.h>
 #include <sc68/file68_opt.h>
+#include <sc68/file68_reg.h>
 
 /* standard headers */
 #include <stdio.h>
@@ -52,11 +53,19 @@
 #ifndef DEBUG_CONFIG68_O
 # define DEBUG_CONFIG68_O 0
 #endif
-static int config68_cat = msg68_DEFAULT;
+
+static int          config68_cat = msg68_DEFAULT;
+static int          config68_use_registry = -1;
+static char       * config68_def_name = "sc68";
+
+/* exported */
+int          config68_opt_count;
+option68_t * config68_options;
+
 
 typedef union {
-  int i;          /**< Used with CONFIG68_INT fields.     */
-  const char * s; /**< Used with CONFIG68_STR fields.  */
+  int i;          /**< Used with CONFIG68_INT fields. */
+  const char * s; /**< Used with CONFIG68_STR fields. */
 } config68_value_t;
 
 typedef struct _config68_field_s config68_field_t;
@@ -74,11 +83,13 @@ typedef struct
 } config68_entry_t;
 
 struct _config68_s {
+  char * name;  /**< Application name.              */
   int saved;    /**< True if config has been saved. */
   int size;     /**< Number of entries allocated.   */
   int n;        /**< Number of entries in used.     */
 
-  /** Config entry table.
+  /**
+   * Config entry table.
    * @warning Must be at the end of the struct.
    */
   config68_entry_t entries[1];
@@ -206,90 +217,17 @@ static int digit(int c, unsigned int base)
   return -1;
 }
 
-#ifdef HAVE_STRTOL
-# define mystrtoul strtol
-#else
-
-/** $$$ Need this function for dcplaya version. */
-static long mystrtoul(const char * s,
-                      char * * end,
-                      unsigned int base)
-{
-  const char * start = s;
-  unsigned long v = 0;
-  int neg = 0, c;
-
-  /* Skip starting spaces. */
-  for (c = *s; (c == ' ' || c == 9 || c == 10 || c == 13); c = *++s)
-    ;
-
-  /* Get optionnal sign. */
-  /* $$$ ben : Does not make sens with unsigned value ! */
-  if (c == '-' || c == '+') {
-    neg = (c == '-');
-    c = *++s;
-  }
-
-  /* Get the base. */
-  if (!base) {
-    /* Assume default base is 10 */
-    base = 10;
-
-    /* Could be either octal(8) or hexidecimal(16) */
-    if (c == '0') {
-      base = 8;
-      c = *++s;
-      if (c == 'x' || c == 'X') {
-        base = 16;
-        c = *++s;
-      }
-    }
-  } else if (base == 16 && c == '0') {
-    /* Hexa mode must skip "0x" sequence */
-    c = *++s;
-    if (c == 'x' || c == 'X') {
-      c = *++s;
-    }
-  }
-
-  c = digit(c,base);
-  if (c < 0) {
-    s = start;
-  } else {
-    do {
-      v = v * base + c;
-      c = digit(*++s,base);
-    } while (c >= 0);
-  }
-
-  if (end) {
-    *end = (char *)s;
-  }
-
-  return neg ? -(signed long)v : v;
-}
-
-#endif
-
 static int config_set_int(config68_t * conf, config68_entry_t *e, int v)
 {
   int m,M;
 
-  if (e->type != CONFIG68_INT) {
-    TRACE68(config68_cat,
-            "conf: set int name='%s' bad type (%d)\n", e->name, e->type);
+  if (e->type != CONFIG68_INT)
     return -1;
-  }
   m = e->min.i;
   M = e->max.i;
-
-  /*   TRACE68(config68_cat, */
-  /*           "conf: set int name='%s' [%d..%d] cur:%d req:%d \n", */
-  /*           e->name, m, M, e->val.i, v); */
-
   if (m != M) {
     if (m==0 && M == 1) {
-      v = !!v;
+      v = !!v;                          /* boolean */
     } else if (v < m) {
       v = m;
     } else if (v > M) {
@@ -300,9 +238,6 @@ static int config_set_int(config68_t * conf, config68_entry_t *e, int v)
   if (v != e->val.i) {
     conf->saved = 0;
     e->val.i = v;
-    TRACE68(config68_cat,
-            "conf: set int name='%s' [%d..%d] new:%d\n",
-            e->name, m, M, e->val.i);
   }
   return 0;
 }
@@ -313,10 +248,8 @@ static int config_set_str(config68_t * conf, config68_entry_t *e,
   int err = 0;
   int m,M;
 
-  if (e->type != CONFIG68_STR) {
+  if (e->type != CONFIG68_STR)
     return -1;
-  }
-
   m = e->min.i;
   M = e->max.i;
   if (m != M) {
@@ -326,7 +259,6 @@ static int config_set_str(config68_t * conf, config68_entry_t *e,
       err = -1;
     }
   }
-
   if (!s) {
     if (e->val.s) {
       free((void*)e->val.s);
@@ -339,23 +271,20 @@ static int config_set_str(config68_t * conf, config68_entry_t *e,
     err = -!e->val.s;
     conf->saved = 0;
   }
-
   return err;
 }
 
 
-/* Check config values and correct invalid ones
- */
+/* Check config values and correct invalid ones */
 int config68_valid(config68_t * conf)
 {
   int err = 0;
   int i;
 
-  if (!conf) {
+  if (!conf)
     return -1;
-  }
 
-  for (i=0; i < conf->n; i++) {
+  for (i=0; i<conf->n; i++) {
     config68_entry_t *e = conf->entries+i;
     switch (e->type) {
     case CONFIG68_INT:
@@ -389,9 +318,8 @@ static int keycmp(const char * k1, const char * k2)
 
 int config68_get_idx(const config68_t * conf, const char * name)
 {
-  if (!conf) {
+  if (!conf)
     return -1;
-  }
   if (name) {
     int i;
     for (i=0; i<conf->n; i++) {
@@ -486,9 +414,9 @@ static int save_config_entry(vfs68_t * os, const config68_entry_t * e)
   int i,err = 0;
   char tmp[64];
 
+  /* Save comment on this entry (description and range) */
   err |= vfs68_puts(os, "\n# ") < 0;
   err |= vfs68_puts(os, e->comment) < 0;
-
   switch (e->type) {
   case CONFIG68_INT:
     sprintf(tmp, "; *int* [%d..%d]", e->min.i, e->max.i);
@@ -516,18 +444,20 @@ static int save_config_entry(vfs68_t * os, const config68_entry_t * e)
   }
   tmp[i] = 0;
 
+
   switch (e->type) {
   case CONFIG68_INT:
     err |= vfs68_puts(os, tmp) < 0;
     err |= vfs68_putc(os, '=') < 0;
     sprintf(tmp, "%d", e->val.i);
     err |= vfs68_puts(os, tmp) < 0;
-    TRACE68(config68_cat,"conf: save name='%s'=%d\n",e->name,e->val.i);
+    TRACE68(config68_cat,"conf68: save name='%s'=%d\n",e->name,e->val.i);
     break;
 
   case CONFIG68_STR: {
     const char * s = e->val.s ? e->val.s : e->def.s;
     if (!s) {
+      s = "";
       err |= vfs68_putc(os, '#') < 0;
     }
     err |= vfs68_puts(os, tmp) < 0;
@@ -535,73 +465,128 @@ static int save_config_entry(vfs68_t * os, const config68_entry_t * e)
     err |= vfs68_putc(os, '"') < 0;
     err |= vfs68_puts(os, s) < 0;
     err |= vfs68_putc(os, '"') < 0;
-    TRACE68(config68_cat,"conf: save name='%s'=\"%s\"\n",e->name,s);
+    TRACE68(config68_cat,"conf68: save name='%s'=\"%s\"\n",e->name,s);
   } break;
 
   default:
     break;
   }
   err |= vfs68_putc(os, '\n') < 0;
+
   return err;
 }
 
 int config68_save(config68_t * conf)
 {
-  int i,err;
-  vfs68_t * os=0;
-  const int sizeof_config_hd = sizeof(config_header)-1; /* Remove '\0' */
+  int i, err = 0;
+  char tmp[128];
 
-  TRACE68(config68_cat,"conf: saving ...\n", conf);
+  if (!conf)
+    return error68(0,"conf68: null pointer");
 
-  if (!conf) {
-    err = error68(0,"conf: null pointer");
-    goto error;
+  if (!config68_use_registry) {
+    /* Save into file */
+    vfs68_t * os=0;
+    const int sizeof_config_hd = sizeof(config_header)-1;
+
+    strncpy(tmp, "sc68://config/", sizeof(tmp));
+    strncat(tmp, conf->name, sizeof(tmp));
+    os = url68_stream_create(tmp, 2);
+    err = vfs68_open(os);
+    if (!err) {
+      TRACE68(config68_cat,"conf68: save into \"%s\"\n",
+              vfs68_filename(os));
+      err =
+        - (vfs68_write(os, config_header, sizeof_config_hd)
+           != sizeof_config_hd);
+    }
+    for (i=0; !err && i < conf->n; ++i) {
+      err = save_config_entry(os, conf->entries+i);
+    }
+    vfs68_close(os);
+    vfs68_destroy(os);
+  } else {
+    /* Save into registry */
+    int l = snprintf(tmp, sizeof(tmp),"CUK:Software/sashipa/%s/", conf->name);
+    char * s = tmp + l;
+    l = sizeof(tmp) - l;
+
+    for (i=0; i<conf->n; ++i) {
+      config68_entry_t * e = conf->entries+i;
+      strncpy(s,e->name,l);
+      switch (e->type) {
+      case CONFIG68_INT:
+        err |= registry68_puti(0, tmp, e->val.i);
+        break;
+      case CONFIG68_STR:
+        if (e->val.s)
+          err |= registry68_puts(0, tmp, e->val.s);
+        break;
+      }
+    }
+
   }
-  os = url68_stream_create("RSC68://config", 2);
-  err = vfs68_open(os);
-  if (!err) {
-    TRACE68(config68_cat,"conf: save into \"%s\"\n",
-            vfs68_filename(os));
-    err =
-      - (vfs68_write(os, config_header, sizeof_config_hd)
-         != sizeof_config_hd);
-  }
-  for (i=0; !err && i < conf->n; ++i) {
-    err = save_config_entry(os, conf->entries+i);
-  }
 
- error:
-  vfs68_close(os);
-  vfs68_destroy(os);
-
-  TRACE68(config68_cat, "config68_save => [%s]\n",strok68(err));
   return err;
 }
 
 
-/* Load config from file
- */
-int config68_load(config68_t * conf)
+/* Load config from registry */
+static int load_from_registry(config68_t * conf)
+{
+  int err = 0, i, j;
+  char paths[2][64];
+
+  j = 0;
+  snprintf(paths[j], sizeof(paths[j]), "CUK:Software/sc68/%s/", conf->name);
+  ++j;
+  strncpy(paths[j], "LMK:Software/sashipa/sc68/config/", sizeof(paths[j]));
+  ++j;
+
+  for (i=0; i<conf->n; ++i) {
+    char path[128], str[512];
+    int  k, val;
+
+    for (k=0; k<j; ++k) {
+      strncpy(path, paths[k], sizeof(path));
+      strncat(path, conf->entries[i].name, sizeof(path));
+
+      TRACE68(config68_cat, "conf68: trying -- '%s'\n", path);
+      if (conf->entries[i].type == CONFIG68_STR)
+        err = registry68_gets(0, path, str, sizeof(str));
+      else
+        err = registry68_geti(0, path, &val);
+
+      if (!err) {
+        if (conf->entries[i].type == CONFIG68_STR)
+          config_set_str(conf, conf->entries+i, str);
+        else
+          config_set_int(conf, conf->entries+i, val);
+        break;
+      }
+    }
+  }
+
+  return 0;
+}
+
+/* Load config from file */
+static int load_from_file(config68_t * conf)
 {
   vfs68_t * is = 0;
   char s[1024], * word;
   int err;
   config68_type_t type;
 
-  TRACE68(config68_cat, "conf: loading ...\n",conf);
-
-  err = config68_default(conf);
-  if (err) {
+  if (err = config68_default(conf), err)
     goto error;
-  }
 
-  is = url68_stream_create("RSC68://config", 1);
+  strcpy(s, "sc68://config/");
+  strcat(s, conf->name);
+  is = url68_stream_create(s, 1);
   err = vfs68_open(is);
-  if (err) {
+  if (err)
     goto error;
-  }
-  TRACE68(config68_cat, "conf: filename='%s'\n",
-          vfs68_filename(is));
 
   for(;;) {
     char * name;
@@ -632,7 +617,7 @@ int config68_load(config68_t * conf)
       if (c == '_') s[i-1] = c = '-';
     s[i-1] = 0;
 
-    /* TRACE68(config68_cat,"conf: load get key name='%s\n", name); */
+    /* TRACE68(config68_cat,"conf68: load get key name='%s\n", name); */
 
     /* Skip space */
     while (i < len && (c == ' ' || c == 9)) {
@@ -653,36 +638,36 @@ int config68_load(config68_t * conf)
       type = CONFIG68_STR;
       word = s + i;
       /*       TRACE68(config68_cat, */
-      /*               "conf: load name='%s' looks like a string(%d)\n", */
+      /*               "conf68: load name='%s' looks like a string(%d)\n", */
       /*               name, type); */
     } else if (c == '-' || digit(c, 10) != -1) {
       type = CONFIG68_INT;
       word = s + i - 1;
       /*       TRACE68(config68_cat, */
-      /*               "conf: load name='%s' looks like an int(%d)\n", name, type); */
+      /*               "conf68: load name='%s' looks like an int(%d)\n", name, type); */
     } else {
       TRACE68(config68_cat,
-              "conf: load name='%s' looks like nothing valid\n", name);
+              "conf68: load name='%s' looks like nothing valid\n", name);
       continue;
     }
     /*     TRACE68(config68_cat, */
-    /*             "conf: load name='%s' not parsed value='%s'\n", name, word); */
+    /*             "conf68: load name='%s' not parsed value='%s'\n", name, word); */
 
     idx = config68_get_idx(conf, name);
     if (idx < 0) {
       /* Create this config entry */
-      TRACE68(config68_cat, "conf: load name='%s' unknown\n", name);
+      TRACE68(config68_cat, "conf68: load name='%s' unknown\n", name);
       continue;
     }
     if (conf->entries[idx].type != type) {
-      TRACE68(config68_cat, "conf: load name='%s' types differ\n", name);
+      TRACE68(config68_cat, "conf68: load name='%s' types differ\n", name);
       continue;
     }
 
     switch (type) {
     case CONFIG68_INT:
-      config_set_int(conf, conf->entries+idx, mystrtoul(word, 0, 0));
-      TRACE68(config68_cat, "conf: load name='%s'=%d\n",
+      config_set_int(conf, conf->entries+idx, strtoul(word, 0, 0));
+      TRACE68(config68_cat, "conf68: load name='%s'=%d\n",
               conf->entries[idx].name, conf->entries[idx].val.i);
       break;
     case CONFIG68_STR:
@@ -690,19 +675,33 @@ int config68_load(config68_t * conf)
         ;
       s[i-1] = 0;
       config_set_str(conf, conf->entries+idx, word);
-      TRACE68(config68_cat, "conf: load name='%s'=\"%s\"\n",
+      TRACE68(config68_cat, "conf68: load name='%s'=\"%s\"\n",
               conf->entries[idx].name, conf->entries[idx].val.s);
     default:
       break;
     }
   }
-  if (!err) {
-    err = config68_valid(conf);
-  }
 
  error:
   vfs68_destroy(is);
-  TRACE68(config68_cat, "conf: loaded => [%s]\n",strok68(err));
+  TRACE68(config68_cat, "conf68: loaded => [%s]\n",strok68(err));
+  return err;
+
+}
+
+
+/* Load config */
+int config68_load(config68_t * conf)
+{
+  int err = -1;
+  if (conf) {
+    err = config68_use_registry
+      ? load_from_registry(conf)
+      : load_from_file(conf)
+      ;
+    if (!err)
+      err = config68_valid(conf);
+  }
   return err;
 }
 
@@ -712,11 +711,12 @@ int config68_default(config68_t * conf)
 {
   int i;
 
-  if(!conf) {
+  if(!conf)
     return -1;
-  }
+
   for (i=0; i < conf->n; i++) {
     config68_entry_t * e = conf->entries+i;
+
     switch (e->type) {
     case CONFIG68_INT:
       e->val.i = e->def.i;
@@ -729,6 +729,7 @@ int config68_default(config68_t * conf)
     }
   }
   conf->saved = 0;
+
   return config68_valid(conf);
 }
 
@@ -737,14 +738,16 @@ config68_t * config68_create(const char * appname, int size)
   config68_t * c;
   int i,j;
 
-  TRACE68(config68_cat, "config68: create '%s' size=%d\n", appname, size);
-
-  if (size < nconfig) {
+  if (size < nconfig)
     size = nconfig;
-  }
+
   c = malloc(sizeof(*c)-sizeof(c->entries)+sizeof(*c->entries)*size);
   if (c) {
-    c->size = size;
+    if (appname)
+      c->name = strdup68(appname);
+    if (!c->name)
+      c->name = config68_def_name;
+    c->size  = size;
     c->saved = 0;
     for (j=i=0; i<nconfig; ++i) {
       c->entries[j] = conftab[i];
@@ -767,16 +770,17 @@ config68_t * config68_create(const char * appname, int size)
     }
     c->n = j;
   }
-  TRACE68(config68_cat, "config68: create => [%s]\n",strok68(!c));
 
   return c;
 }
 
 void config68_destroy(config68_t * c)
 {
-  TRACE68(config68_cat, "config68: destroy [%p]\n",c);
   if (c) {
     int i;
+
+    if (c->name != config68_def_name)
+      free(c->name);
 
     for (i=0; i<c->n; ++i) {
       if (c->entries[i].type == CONFIG68_STR) {
@@ -787,15 +791,15 @@ void config68_destroy(config68_t * c)
   }
 }
 
-option68_t * config68_options;
-int config68_option_count;
-
-int config68_init(void)
+int config68_init(int force_file)
 {
   if (config68_cat == msg68_DEFAULT) {
     int f = msg68_cat("conf","config file", DEBUG_CONFIG68_O);
     if (f > 0) config68_cat = f;
   }
+
+  if (config68_use_registry < 0)
+    config68_use_registry = !force_file && registry68_support();
 
   if (!config68_options) {
     int i,n;
@@ -806,12 +810,10 @@ int config68_init(void)
       n += !!conftab[i].exported;
     }
 
-    TRACE68(config68_cat,"config68: got %d exportable keys\n",n);
-
     if (n > 0) {
       options = malloc(n*sizeof(*options));
       if (!options) {
-        msg68_error("conf: alloc error\n");
+        msg68_error("conf68: alloc error\n");
       } else {
         int j;
         for (i=j=0; i<nconfig; ++i) {
@@ -834,27 +836,27 @@ int config68_init(void)
       }
     }
     config68_options      = options;
-    config68_option_count = n;
+    config68_opt_count = n;
   }
   return 0;
 }
 
-void config68_shutdown()
+void config68_shutdown(void)
 {
   /* release options */
   if (config68_options) {
     int i;
-    for (i=0; i<config68_option_count; ++i) {
+    for (i=0; i<config68_opt_count; ++i) {
       if (config68_options[i].next) {
         msg68_critical("config68: option #%d '%s' still attached\n",
                        i, config68_options[i].name);
         break;
       }
     }
-    if (i == config68_option_count)
+    if (i == config68_opt_count)
       free(config68_options);
     config68_options = 0;
-    config68_option_count = 0;
+    config68_opt_count = 0;
   }
 
   /* release debug feature. */

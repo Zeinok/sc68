@@ -4,13 +4,13 @@
  * @author    Benjamin Gerard
  * @date      1999/07/27
  * @brief     configuration file.
- *
  */
+/* Time-stamp: <2013-08-02 09:12:21 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _API68_CONF68_H_
-#define _API68_CONF68_H_
+#ifndef SC68_CONF68_H
+#define SC68_CONF68_H
 
 #ifndef SC68_EXTERN
 # ifdef __cplusplus
@@ -180,11 +180,13 @@ SC68_EXTERN
 /**
  *  Library one time init.
  *
+ *  @param  force_file  Set to force the use of config file over registry.
+ *
  *  @return error code
  *  @retval 0 on success
  *  @retval 0 on error
  */
-int config68_init(void);
+int config68_init(int force_file);
 
 SC68_EXTERN
 /**
@@ -193,7 +195,7 @@ SC68_EXTERN
 void config68_shutdown(void);
 
 /**
- *  @}
+ * @}
  */
 
-#endif /* #ifndef _API68_CONF68_H_ */
+#endif

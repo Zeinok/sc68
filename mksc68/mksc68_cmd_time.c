@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 03:13:29 ben>
+ * Time-stamp: <2013-08-01 20:51:26 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -583,7 +583,10 @@ static void timemeasure_init(measureinfo_t * mi)
   if (!mi->sc68)
     return;
 
-  sc68_emulators(mi->sc68, &mi->emu68, &mi->ios68);
+  sc68_cntl(mi->sc68, SC68_EMULATORS, &mi->ios68);
+  mi->emu68 = (emu68_t *)*mi->ios68++;
+  /* sc68_emulators(mi->sc68, &mi->emu68, &mi->ios68); */
+
   emu68_set_handler(mi->emu68, timemeasure_hdl);
   emu68_set_cookie(mi->emu68, mi);
 
@@ -606,7 +609,7 @@ static void timemeasure_init(measureinfo_t * mi)
   if (hook_ios(mi))
     return;
 
-  sampling = sc68_sampling_rate(mi->sc68, SC68_SPR_QUERY);
+  sampling = sc68_cntl(mi->sc68, SC68_GET_SPR);
   if (sampling <= 0)
     return;
   mi->sampling = sampling;

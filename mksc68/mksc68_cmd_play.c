@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 03:13:04 ben>
+ * Time-stamp: <2013-08-01 20:50:40 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -167,7 +167,9 @@ static void play_init(playinfo_t * pi)
   create68.log2mem = pi->log2;
   if ( !(pi->sc68 = sc68_create(&create68) ) ) return;
   if (pi->debug) {
-    sc68_emulators(pi->sc68, &pi->emu68, &pi->ios68);
+    sc68_cntl(pi->sc68, SC68_EMULATORS, &pi->ios68);
+    pi->emu68 = (emu68_t *)*pi->ios68++;
+    /* sc68_emulators(pi->sc68, &pi->emu68, &pi->ios68); */
     emu68_set_handler(pi->emu68, play_hdl);
     emu68_set_cookie(pi->emu68, pi);
     pi->gdb = gdb_create();
@@ -230,7 +232,7 @@ int dsk_stop(void)
 
   if (playinfo.isplaying) {
     if (playinfo.sc68) {
-      msgdbg("stop: signal stop to %s\n", sc68_name(playinfo.sc68));
+      msgdbg("stop: signal stop to %s\n", sc68_cntl(playinfo.sc68, SC68_NAME));
       sc68_stop(playinfo.sc68);
     } else {
       pthread_cancel(playinfo.thread);

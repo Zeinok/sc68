@@ -55,7 +55,7 @@ static gboolean is_init = FALSE;
 
 void gst_sc68_flush_error(Gstsc68 * filter)
 {
-  sc68_error_flush(filter ? filter->sc68 : 0);
+  /* sc68_error_flush(filter ? filter->sc68 : 0); */
 }
 
 void gst_sc68_report_error(Gstsc68 * filter)
@@ -123,7 +123,7 @@ void gst_sc68_shutdown_engine(Gstsc68 * filter)
 {
   sc68_t * sc68 = filter->sc68;
 
-  GST_DEBUG("ENTER(%p) {",sc68);
+  GST_DEBUG("ENTER(%p) {", (void*)sc68);
   if (sc68) {
     gst_sc68_report_error(filter);      /* flush sc68 instance errors */
     filter->sc68 = NULL;
@@ -205,11 +205,11 @@ gboolean gst_sc68_caps(Gstsc68 * filter)
   }
 
   if (filter->sc68)
-    sampling = sc68_sampling_rate(filter->sc68, SC68_SPR_QUERY);
+    sampling = sc68_cntl(filter->sc68, SC68_GET_SPR);
   else
     sampling = filter->prop.rate;
   if (sampling <= 0)
-    sampling = sc68_sampling_rate(0, SC68_SPR_QUERY);
+    sampling = sc68_cntl(0, SC68_GET_SPR);
   filter->prop.rate = sampling;
   filter->bufcaps =
     gst_caps_new_simple("audio/x-raw-int",

@@ -59,7 +59,7 @@
  *
  * @code
  * #include <sc68/sc68.h>
- * #include <FILE.h>
+ * #include <stdio.h>
  *
  * sc68_t * sc68 = 0;
  * char buffer[512*4];
@@ -271,6 +271,29 @@ enum sc68_play_e {
   SC68_GET_LOOP   = -1   /**< loop value for query loop instead of track. */
 };
 
+/**
+ * PCM formats.
+ */
+enum sc68_pcm_e {
+  SC68_PCM_S16 = 1,               /**< Native 16bit signed.  */
+  SC68_PCM_F32 = 2                /**< native 32bit float.   */
+};
+
+/**
+ * sc68_cntl() fct parameter.
+ */
+enum sc68_cntl_e {
+  SC68_NOP = 0,
+  SC68_NAME,                         /**< Get sc68 instance name.   */
+  SC68_GET_SPR,                      /**< Get sampling rate.        */
+  sc68_SET_SPR,                      /**< Set sampling rate.        */
+  SC68_GET_POS,                      /**< Get postion (ms).         */
+  SC68_SET_POS,                      /**< Set postion.              */
+  SC68_GET_PCM,                      /**< Get PCM format            */
+  SC68_SET_PCM,                      /**< Set PCM format            */
+  SC68_TRACKS,                       /**< Get number of tracks.     */
+  SC68_EMULATORS,                    /**< Get emulators array.      */
+};
 
 /**
  * @name API control functions.
@@ -337,12 +360,15 @@ void sc68_destroy(sc68_t * sc68);
 
 SC68_API
 /**
- * Get instance name.
+ * Generic control function.
  *
- * @param   sc68  sc68 instance to destroy.
- * @return  sc68 instance name.
+ * @param  sc68  sc68 instance or 0 for general control.
+ * @param  fct   what to control (@ref sc68_cntl_fct).
+ *
+ * @retval  0  success
+ * @retval -1  failure
  */
-const char * sc68_name(sc68_t * sc68);
+int sc68_cntl(sc68_t * sc68, int fct, ...);
 
 SC68_API
 /**
@@ -358,6 +384,7 @@ SC68_API
  */
 void ** sc68_cookie_ptr(sc68_t * sc68);
 
+#if 0
 SC68_API
 /**
  * Set/Get sampling rate.
@@ -389,15 +416,7 @@ SC68_API
  */
 void sc68_set_user(sc68_t * sc68, const char * path);
 
-
-SC68_API
-/**
- * Empty error message stack.
- *
- * @param   sc68   sc68 instance or 0 for library messages.
- */
-void sc68_error_flush(sc68_t * sc68);
-
+#endif
 
 SC68_API
 /**
@@ -408,30 +427,6 @@ SC68_API
  * @retval  0      No stacked error message.
  */
 const char * sc68_error_get(sc68_t * sc68);
-
-
-SC68_API
-/**
- * Stack an error Add Pop and return last stacked error message.
- *
- * @param   sc68   sc68 instance or 0 for library messages.
- * @return  Error string.
- * @retval  0      No stacked error message.
- */
-int sc68_error_add(sc68_t * sc68, const char * fmt, ...);
-
-
-SC68_API
-/**
- * Display debug message.
- *
- * @param  sc68  sc68 instance.
- * @param  fmt   printf() like format string.
- *
- * @see debugmsg68()
- * @see sc68_t::debug_bit
- */
-void sc68_debug(sc68_t * sc68, const char * fmt, ...);
 
 /**
  * @}
@@ -626,11 +621,13 @@ typedef struct _vfs68_t vfs68_t; /**< normally defined in sc68/file68_vfs.h */
 
 SC68_API
 /**
- * Create a stream from url. */
+ * Create a stream from url.
+ */
 vfs68_t * sc68_vfs(const char * url, int mode);
 
 /**
- * Verify an sc68 disk. */
+ * Verify an sc68 disk.
+ */
 SC68_API
 int sc68_verify(vfs68_t * is);
 SC68_API
@@ -642,7 +639,8 @@ int sc68_is_our_url(const char * url,
                     const char *exts, int * is_remote);
 
 /**
- * Load an sc68 disk for playing. */
+ * Load an sc68 disk for playing.
+ */
 SC68_API
 int sc68_load(sc68_t * sc68, vfs68_t * is);
 SC68_API
@@ -719,25 +717,19 @@ SC68_API
 /**
  * Load config.
  *
- * @param  sc68  sc68 instance
+ * @retval  0  success
+ * @retval -1  failure
  */
-int sc68_config_load(sc68_t * sc68);
+int sc68_config_load(void);
 
 SC68_API
 /**
  * Save config.
  *
- * @param  sc68  sc68 instance
+ * @retval  0  success
+ * @retval -1  failure
  */
-int sc68_config_save(sc68_t * sc68);
-
-SC68_API
-/**
- * Apply current configuration to sc68.
- *
- * @param  sc68  sc68 instance
- */
-void sc68_config_apply(sc68_t * sc68);
+int sc68_config_save(void);
 
 /**
  * @}
