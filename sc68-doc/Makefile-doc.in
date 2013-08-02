@@ -1,11 +1,22 @@
-# -*- makefile -*-
-#
-# $Id$
-#
-doxygen                  = @doxygen@
+# ,----------------------------------------------------------------------.
+# |                                                                      |
+# | 		  sc68-doc -- doxygen specific rules                     |
+# |                                                                      |
+# |                 (C) 2007-2013 Benjamin Gerard                        |
+# |          <benjihan -4t- users.sourceforge -d0t- net>                 |
+# |                                                                      |
+# `----------------------------------------------------------------------'
+# @configure_input@
+
+cfgname = @doxfile@
+doxygen = @doxygen@
+srcdir  = @srcdir@
 
 dox-clean-local:
-	-rm -rf -- doc-@PACKAGE_VERSION@/
+	rm -rf -- doc-*/ html/ latex/
 
-dox-all: doxygen.cfg
-	-srcdir="$(srcdir)" $(doxygen) doxygen.cfg
+dox-all: $(cfgname)
+	$(doxygen) "$<"
+
+$(cfgname): gen-doxcfg.sh
+	${SHELL} "$<" "$@"

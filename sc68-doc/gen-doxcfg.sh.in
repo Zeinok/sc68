@@ -1,0 +1,30 @@
+# -*- sh -*-
+#
+# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
+#
+
+doxygen=@doxygen@
+srcdir="@srcdir@"
+spc='[[:space:]]*'
+
+if test -z "$1"; then
+    echo "missing argument" 1>&2
+    exit 2
+fi
+
+"$doxygen" -s -g "$1.tmp" >/dev/null &&
+sed -f - $1.tmp >$1  <<EOF
+s|\(^PROJECT_NAME${spc}=\)${spc}.*$|\1 "sc68"|
+s|\(^PROJECT_NUMBER${spc}=\)${spc}.*$|\1 "@PACKAGE_VERSION@"|
+s|\(^PROJECT_BRIEF${spc}=\)${spc}.*$|\1 "An Atari-ST and Amiga music player"|
+s|\(^INPUT${spc}=\)${spc}.*$|\1 @INPUTS@|
+s|\(^OUTPUT_DIRECTORY${spc}=\)${spc}.*$|\1 doc-@PACKAGE_VERSION@|
+s|\(^OPTIMIZE_OUTPUT_FOR_C${spc}=\)${spc}.*$|\1 YES|
+s|\(^QUIET${spc}=\)${spc}.*$|\1 NO|
+s|\(^FILE_PATTERNS${spc}=\)${spc}.*$|\1 *68.h|
+s|\(^RECURSIVE${spc}=\)${spc}.*$|\1 NO|
+s|\(^GENERATE_LATEX${spc}=\)${spc}.*$|\1 NO|
+EOF
+r=$?
+rm -- "$1.tmp"
+exit $r

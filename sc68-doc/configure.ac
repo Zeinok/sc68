@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [sc68-doc],
-  [2011112],
+  [20130801],
   [benjihan -4t- sourceforge],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68_doc.h])
@@ -46,20 +46,28 @@ AS_IF([test "x[$]doxygen" = xfalse],
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
-INPUTS='$(srcdir)'
-m4_foreach_w([dir],[
-    sc68-doc/sc68_doc.h as68/as68_doc.h info68/info68_doc.h
-    sourcer68/sourcer68_doc.h mksc68/mksc68_doc.h sc68/sc68_doc.h 
-    desa68 unice68 file68 libsc68],[
-    AC_MSG_CHECKING([whether dir exists])
-    AS_IF([test -e "${srcdir}/../dir"],
-      [INPUTS="$INPUTS"' $(srcdir)/../dir'
-        AC_MSG_RESULT([yes])],
-      [AC_MSG_RESULT([no])])])
+doxfile='sc68-doc.dox'
+AC_SUBST([doxfile])
+
+mydocdir=`cd "${srcdir}/.." && pwd`
+
+for dir in sc68-doc sc68-doc/sc68_doc.h as68/as68_doc.h \
+  info68/info68_doc.h sourcer68/sourcer68_doc.h mksc68/mksc68_doc.h \
+  sc68/sc68_doc.h desa68 unice68 file68/sc68 \
+  libsc68/sc68 libsc68/io68 libsc68/emu68 
+do
+  AC_MSG_CHECKING([whether [$]dir exists])
+  if test -e "[$]{mydocdir}/[$]{dir}"; then
+    INPUTS="[$]{INPUTS} [$]{mydocdir}/[$]{dir}"
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+  fi
+done
 
 AC_SUBST([INPUTS])
 AC_CONFIG_FILES([
-    doxygen.cfg
+    gen-doxcfg.sh
     sc68-doc.spec
     sc68-doc-${VERSION}.ebuild:sc68-doc.ebuild.in
     Makefile])
