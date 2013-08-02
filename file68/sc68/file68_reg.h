@@ -5,12 +5,12 @@
  * @date     2003-08-11
  * @brief    Windows registry header.
  */
-/* Time-stamp: <2013-07-22 00:23:07 ben> */
+/* Time-stamp: <2013-08-02 12:39:28 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_REG_H_
-#define _FILE68_REG_H_
+#ifndef FILE68_REG_H
+#define FILE68_REG_H
 
 #ifndef FILE68_API
 # include "file68_api.h"
@@ -25,8 +25,11 @@
  * @{
  */
 
-/** Enumerate registry key type. */
-/*  *** DO NOT CHANGE ORDER ***  */
+/**
+ * Enumerate registry key type.
+ *
+ *  @warning Do not change order
+ */
 enum registry68_key_e {
   REGISTRY68_INK = -1,                  /**< INvalid Key.          */
   REGISTRY68_CRK = 0,                   /**< Classes Root Key.     */
@@ -44,9 +47,6 @@ enum registry68_key_e {
  * Registry key type (override Microsoft HKEY type)
  */
 typedef void * registry68_key_t;
-
-/* Last error message. */
-/* extern char registry68_errorstr[]; */
 
 FILE68_API
 /**
@@ -75,15 +75,17 @@ FILE68_API
  * @param hkey     Opened key handle or one of reserved registry key handles.
  * @param kname    Hierarchic key name. Slash '/' caractere is interpreted
  *                 as sub-key separator.
+ * @param mode     bit#0:read bit#1:write
  *
- * @return Registry key handle
- * @retval registry68InvalidKey Error
+ * @return registry key handle
+ * @retval registry68_key_e::REGISTRY68_INK on error
  */
-registry68_key_t registry68_open(registry68_key_t hkey, const char *kname);
+registry68_key_t registry68_open(registry68_key_t hkey,
+                                 const char *kname, int mode);
 
 FILE68_API
 /**
- * Get value of a named hierarchic string key.
+ * Get a string value of a named hierarchic string key.
  *
  * @param hkey     Opened key handle or one of reserved registry key handles.
  * @param kname    Hierarchic key name. Slash '/' caractere is interpreted
@@ -91,14 +93,61 @@ FILE68_API
  * @param kdata    Returned string storage location
  * @param kdatasz  Maximum size of kdata buffer.
  *
- * @return ErrorNo
+ * @return error status
  * @retval 0  Success
- * @retval <0 Error
+ * @retval -1 Error
  */
-int registry68_gets(registry68_key_t hkey,
-                    const char *kname,
-                    char *kdata,
-                    int kdatasz);
+int registry68_gets(registry68_key_t hkey, const char *kname,
+                    char *kdata, int kdatasz);
+
+FILE68_API
+/**
+ * Get integer value of a named hierarchic string key.
+ *
+ * @param hkey    Opened key handle or one of reserved registry key handles.
+ * @param kname   Hierarchic key name. Slash '/' caractere is interpreted
+ *                as sub-key separator.
+ * @param kdata   Pointer to returned int.
+ *
+ * @return error status
+ * @retval 0  Success
+ * @retval -1 Error
+ */
+int registry68_geti(registry68_key_t hkey, const char *kname, int * kdata);
+
+
+FILE68_API
+/**
+ * Put a string value of a named hierarchic string key.
+ *
+ * @param hkey     Opened key handle or one of reserved registry key handles.
+ * @param kname    Hierarchic key name. Slash '/' caractere is interpreted
+ *                 as sub-key separator.
+ * @param kdata    Nul-terminated string.
+ *
+ * @return error status
+ * @retval 0  Success
+ * @retval -1 Error
+ */
+int registry68_puts(registry68_key_t rootkey, const char * kname_cst,
+                    const char * kdata);
+
+FILE68_API
+/**
+ * Put integer value of a named hierarchic string key.
+ *
+ * @param hkey    Opened key handle or one of reserved registry key handles.
+ * @param kname   Hierarchic key name. Slash '/' caractere is interpreted
+ *                as sub-key separator.
+ * @param kdata   Integer value.
+ *
+ * @return error status
+ * @retval 0  Success
+ * @retval -1 Error
+ */
+int registry68_puti(registry68_key_t rootkey, const char * kname_cst,
+                    int kdata);
+
 
 /**
  * @}
