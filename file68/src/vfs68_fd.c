@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 01:31:27 ben>
+ * Time-stamp: <2013-08-02 22:34:15 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -34,21 +34,22 @@
 #ifndef ISTREAM68_NO_FD
 
 #include "file68_vfs_def.h"
+#include "file68_uri.h"
+#include "file68_str.h"
 
+#include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #if defined(_MSC_VER)
 # include <stdio.h>
 # include <io.h>
 #else
-# ifdef __MINGW32__ /* mingw defines SEEK_CUR and pals in stdio.h */
-#  include <stdio.h>
-# endif
 # include <unistd.h>
 #endif
 #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 /** vfs file structure. */
 typedef struct {
@@ -63,6 +64,29 @@ typedef struct {
   char name[1];                   /**< filename.                    */
 
 } vfs68_fd_t;
+
+static int fd_ismine(const char *);
+static vfs68_t * fd_create(const char *, int, int, va_list);
+static scheme68_t fd_scheme = {
+  0, "vfs-fd", fd_ismine, fd_create
+};
+
+static int fd_ismine(const char * uri)
+{
+  const int ok = SCHEME68_ISMINE | SCHEME68_READ | SCHEME68_WRITE;
+
+  if (!strncmp68(uri,"file://",7) || !strncmp68(uri,"local://",8))
+    return ok;
+  if (!strncmp68(uri,"fd:",3) && isdigit((int)uri[3]))
+    return ok;
+#ifdef NATIVE_WIN32
+  if (isalpha((int)uri[0]) && uri[1] == ':')
+    return ok;
+#endif
+  if (uri68_get_scheme(0, 0, uri) == 0)
+    return ok;
+  return 0;
+}
 
 static const char * ifdname(vfs68_t * vfs)
 {
@@ -218,22 +242,25 @@ vfs68_t * vfs68_fd_create(const char * fname, int fd, int mode)
   vfs68_fd_t *isf;
   int len;
 
-  if (fd == -1 && (!fname || !fname[0])) {
-    fname = ":fd:";
+  if (fname && !strncmp68(fname,"fd:",3) && isdigit((int)fname[3])) {
+    fd = strtoul(fname+3, 0, 10);
+    fname = 0;
   }
 
-  if (!fname || !fname[0]) {
+  if (fname)
+    len = strlen(fname);
+  else if (fd >= 0)
+    len = 40;
+  else
     return 0;
-  }
 
   /* Don't need 0, because 1 byte already allocated in the
    * vfs68_fd_t::fname.
    */
-  len = strlen(fname);
+
   isf = malloc(sizeof(vfs68_fd_t) + len);
-  if (!isf) {
+  if (!isf)
     return 0;
-  }
 
   /* Copy vfs functions. */
   memcpy(&isf->vfs, &vfs68_fd, sizeof(vfs68_fd));
@@ -242,11 +269,32 @@ vfs68_t * vfs68_fd_create(const char * fname, int fd, int mode)
   isf->org_fd = fd;
   isf->mode   = mode & (VFS68_OPEN_READ|VFS68_OPEN_WRITE);
 
-  /* Copy filename. */
-  /* $$$ May be later, we should add a check for relative path and add
-   * CWD ... or make it URL compatible */
-  strcpy(isf->name, fname);
+  if (!fname)
+    sprintf(isf->name, "fd:%u", fd);
+  else
+    /* Copy filename. */
+    /* $$$ May be later, we should add a check for relative path and add
+     * CWD ... or make it URL compatible */
+    strcpy(isf->name, fname);
+
   return &isf->vfs;
+}
+
+static vfs68_t * fd_create(const char * uri, int mode,
+                           int argc , va_list list)
+{
+  if (!strncmp68(uri,"file://", 7))
+    uri += 7;
+  else if (!strncmp68(uri,"local://", 8))
+    uri += 8;
+  if (argc == 1)
+    return vfs68_fd_create(0, va_arg(list,int), mode);
+  return vfs68_fd_create(uri, -1, mode);
+}
+
+int vfs68_fd_init(void)
+{
+  return uri68_register(&fd_scheme);
 }
 
 #else /* #ifndef VFS68_NO_FILE */
@@ -260,6 +308,11 @@ vfs68_t * vfs68_fd_create(const char * fname, int fd, int mode)
 vfs68_t * vfs68_fd_create(const char * fname, int fd, int mode)
 {
   msg68_error("fd68: create -- *NOT SUPPORTED*");
+  return 0;
+}
+
+int vfs68_fd_init(void)
+{
   return 0;
 }
 

@@ -5,7 +5,7 @@
  * @date     2007-03-08
  * @brief    AO stream header.
  */
-/* Time-stamp: <2013-07-22 01:28:10 ben> */
+/* Time-stamp: <2013-08-02 16:38:23 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -25,22 +25,18 @@
 
 FILE68_EXTERN
 /**
- * Creates a stream for libao.
- *
- * @param  fname    path of file.
- * @param  mode     bit#0 : read access, bit#1 : write access.
- *
- * @return stream
- * @retval 0 on error
- *
- * @note    filename is internally copied.
- * @warning write mode only.
+ * Initialize ao virtual file system.
  */
-vfs68_t * vfs68_ao_create(const char * fname, int mode);
+int vfs68_ao_init(void);
+
+FILE68_EXTERN
+/**
+ * Shutdown ao virtual file system.
+ */
+void vfs68_ao_shutdown(void);
 
 /**
  * @}
  */
 
 #endif
-

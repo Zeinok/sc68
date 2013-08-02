@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 01:40:37 ben>
+ * Time-stamp: <2013-08-02 23:42:08 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -41,6 +41,7 @@
 #include "file68_vfs_mem.h"
 #include "file68_vfs_z.h"
 
+#include <assert.h>
 #include <stdarg.h>
 #include <string.h>
 #include <stdlib.h>
@@ -69,6 +70,11 @@ static vfs68_t * default_open(rsc68_t type, const char *name, int mode,
                                   rsc68_info_t * info);
 
 static rsc68_handler_t rsc68 = default_open;
+static int rsc68_ismine(const char *);
+static vfs68_t * rsc68_create(const char *, int, int, va_list);
+static scheme68_t rsc68_scheme = {
+  0, "vfs-sc68", rsc68_ismine, rsc68_create
+};
 
 #ifndef FILE68_SHARED_PATH
 # define FILE68_SHARED_PATH 0
@@ -91,6 +97,13 @@ static struct {
   const char * path;
   const char * ext;
 } rsc68_table[rsc68_last];
+
+static int rsc68_ismine(const char * uri)
+{
+  if (!strncmp68(uri, "sc68://", 7))
+    return SCHEME68_ISMINE | SCHEME68_READ | SCHEME68_WRITE;
+  return 0;
+}
 
 static void rsc68_init_table(void)
 {
@@ -452,7 +465,7 @@ static vfs68_t * default_open(rsc68_t type, const char *name,
     name = "sc68";
   }
 
-  TRACE68(rsc68_cat,"rsc68: open %c 'rsc68://%s/%s%s'\n",
+  TRACE68(rsc68_cat,"rsc68: open %c 'sc68://%s/%s%s'\n",
           (mode==1)?'R':'W',rsc68_table[type].name, name, ext?ext:"");
 
   /* Any specific stuff. */
@@ -652,27 +665,32 @@ rsc68_handler_t rsc68_set_handler(rsc68_handler_t fct)
   return old;
 }
 
-vfs68_t * rsc68_create_url(const char *url, int mode, rsc68_info_t * info)
+static vfs68_t * rsc68_create(const char *uri, int mode, int argc, va_list list)
 {
-  vfs68_t * is;
+  rsc68_info_t * info = argc > 0 ? va_arg(list, rsc68_info_t *) : 0;
+  return rsc68_create_uri(uri, mode, info);
+}
 
+vfs68_t * rsc68_create_uri(const char *uri, int mode, rsc68_info_t * info)
+{
+  vfs68_t * vfs;
   /* $$$ Ugly haXXX we need to close since created stream are not
      supposed to be open but that's the only function we have
      for now. */
-  is = rsc68_open_url(url, mode, info);
-  vfs68_close(is);
-  return is;
+  vfs = rsc68_open_uri(uri, mode, info);
+  vfs68_close(vfs);
+  return vfs;
+
 }
 
-
-vfs68_t * rsc68_open_url(const char *url, int mode, rsc68_info_t * info)
+vfs68_t * rsc68_open_uri(const char *uri, int mode, rsc68_info_t * info)
 {
   int i;
-  char protocol[16];
   vfs68_t * is = 0;
+  char scheme[32];
 
-  TRACE68(rsc68_cat,"rsc68: open url='%s' mode=%c%c%s\n",
-          strnevernull68(url),
+  TRACE68(rsc68_cat,"rsc68: open uri='%s' mode=%c%c%s\n",
+          strnevernull68(uri),
           (mode&1) ? 'R' : '.',
           (mode&2) ? 'W' : '.',
           info ? " with info" : "");
@@ -680,34 +698,32 @@ vfs68_t * rsc68_open_url(const char *url, int mode, rsc68_info_t * info)
   if (info) {
     info->type = rsc68_last;
   }
+
+  assert(rsc68);
   if (!rsc68) {
     msg68_critical("rsc68: no handler defined\n");
     goto error;
   }
-  if (mode < 1 || mode > 2) {
-    msg68_critical("rsc68: invalid open mode %d\n",mode);
-    goto error;
-  }
 
-  if (url68_get_protocol(protocol, sizeof(protocol), url) ||
-      strcmp68(protocol,"RSC68")) {
-    msg68_error("rsc68: missing or invalid protocol");
+  mode &= 3;
+
+  if (strncmp68(uri, "sc68://", 7)) {
+    msg68_error("rsc68: invalid scheme -- %s\n", uri);
     goto error;
   }
-  url += 5+3; /* Skip "RSC68://" */
+  uri += 7;                             /* skip sc68:// */
 
   /* Get resource type. */
   for (i=0; 1; ++i) {
-    int c = url[i] & 255;
+    int c = uri[i] & 255;
     if (!c || c == '/') {
-      protocol[i]=0;
-      url += i + (c=='/');
+      scheme[i]=0;
+      uri += i + (c=='/');
       break;
     }
-    protocol[i] = c;
-    if (i >= sizeof(protocol)-1) {
-      msg68_critical("rsc68: invalid RSC68 url; resource type too long '%s'",
-                     url);
+    scheme[i] = c;
+    if (i >= sizeof(scheme)-1) {
+      msg68_error("rsc68: invalid sc68 uri -- %s\n", uri);
       goto error;
     }
   }
@@ -715,15 +731,14 @@ vfs68_t * rsc68_open_url(const char *url, int mode, rsc68_info_t * info)
   /* Table should be initialized by proper library initialization. */
   /* rsc68_init_table(); */
 
-  for (i=0; i<rsc68_last && strcmp68(rsc68_table[i].name, protocol); ++i)
+  for (i=0; i<rsc68_last && strcmp68(rsc68_table[i].name, scheme); ++i)
     ;
   if (i >= rsc68_last) {
-    msg68_critical("rsc68: invalid RSC68 url; invalid resource type '%s'",
-                   protocol);
+    msg68_error("rsc68: invalid sc68 uri -- %s\n", uri);
     goto error;
   }
-  TRACE68(rsc68_cat,"rsc68: resource type #%d '%s'\n", i, protocol);
-  is =  rsc68(i, url, mode, info);
+  TRACE68(rsc68_cat,"rsc68: resource type #%d '%s'\n", i, scheme);
+  is = rsc68(i, uri, mode, info);
 
 error:
   TRACE68(rsc68_cat,"rsc68: open => [%s,'%s']\n",
@@ -759,6 +774,8 @@ int rsc68_init(void)
     rsc68_set_user(FILE68_USER_PATH);
     rsc68_set_music(FILE68_MUSIC_PATH);
     rsc68_set_remote_music(FILE68_RMUSIC_PATH);
+
+    uri68_register(&rsc68_scheme);
 
     TRACE68(rsc68_cat,"rsc68: shared-data = '%s'\n",strnevernull68(share_path));
     TRACE68(rsc68_cat,"rsc68: user_path   = '%s'\n",strnevernull68(user_path));

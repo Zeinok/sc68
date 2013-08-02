@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 03:11:19 ben>
+ * Time-stamp: <2013-08-02 19:48:41 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -103,7 +103,7 @@ static int is_valid_track(int trk)
   return 1;
 }
 
-int dsk_load(const char * url, int merge, int force)
+int dsk_load(const char * uri, int merge, int force)
 {
   int ret = -1;
   disk68_t * newdisk = 0;
@@ -113,9 +113,9 @@ int dsk_load(const char * url, int merge, int force)
     goto error;
   }
 
-  newdisk = file68_load_url(url);
+  newdisk = file68_load_uri(uri);
   if (!newdisk) {
-    msgerr("failed to load \"%s\"\n",url);
+    msgerr("failed to load \"%s\"\n",uri);
     goto error;
   }
 
@@ -125,7 +125,7 @@ int dsk_load(const char * url, int merge, int force)
 
   if (!merge) {
     dsk_kill();
-    dsk.filename = strdup68(url);
+    dsk.filename = strdup68(uri);
     dsk.disk = newdisk;
     newdisk  = 0;
     dsk.cur_trk = dsk.disk->def_mus;
@@ -142,23 +142,23 @@ error:
   return ret;
 }
 
-int dsk_merge(const char * url)
+int dsk_merge(const char * uri)
 {
   msgerr("not implemented\n");
   return -1;
 }
 
-int dsk_save(const char * url, int version, int gzip)
+int dsk_save(const char * uri, int version, int gzip)
 {
   int err;
 
-  if (!url)
-    url = dsk.filename;
-  if (!url || !*url) {
+  if (!uri)
+    uri = dsk.filename;
+  if (!uri || !*uri) {
     msgerr("missing filename\n");
     return -1;
   }
-  msgdbg("saving disk as '%s' gzip:%d version:%d\n", url, gzip, version);
+  msgdbg("saving disk as '%s' gzip:%d version:%d\n", uri, gzip, version);
 
   if (!is_valid_disk())
     return -1;
@@ -166,12 +166,12 @@ int dsk_save(const char * url, int version, int gzip)
   if (dsk_validate())
     return -1;
 
-  err = file68_save_url(url, dsk_get_disk(), version, gzip);
+  err = file68_save_uri(uri, dsk_get_disk(), version, gzip);
   if (!err) {
     dsk.modified = 0;
     msginf("disk saved\n");
   } else
-    msgerr("failed to save \"%s\"\n",url);
+    msgerr("failed to save \"%s\"\n",uri);
 
   return err;
 }

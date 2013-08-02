@@ -1,4 +1,4 @@
-# Time-stamp: <2013-07-22 01:45:20 ben>
+# Time-stamp: <2013-08-02 17:30:08 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  file68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -27,14 +27,13 @@ else
 replay68_c=
 endif
 
-mysources = $(sdir)/error68.c $(sdir)/file68.c $(sdir)/gzip68.c	\
- $(sdir)/ice68.c $(sdir)/init68.c $(sdir)/istream68.c		\
- $(sdir)/istream68_ao.c $(sdir)/istream68_curl.c		\
- $(sdir)/istream68_fd.c $(sdir)/istream68_file.c		\
- $(sdir)/istream68_mem.c $(sdir)/istream68_null.c		\
- $(sdir)/istream68_z.c $(sdir)/msg68.c $(sdir)/option68.c	\
- $(sdir)/registry68.c $(sdir)/rsc68.c $(sdir)/string68.c	\
- $(sdir)/timedb68.c $(sdir)/url68.c $(replay68_c) $(null)
+mysources = $(sdir)/error68.c $(sdir)/file68.c $(sdir)/gzip68.c		\
+ $(sdir)/ice68.c $(sdir)/init68.c $(sdir)/vfs68.c $(sdir)/vfs68_ao.c	\
+ $(sdir)/vfs68_curl.c $(sdir)/vfs68_fd.c $(sdir)/vfs68_file.c		\
+ $(sdir)/vfs68_mem.c $(sdir)/vfs68_null.c $(sdir)/vfs68_z.c		\
+ $(sdir)/msg68.c $(sdir)/option68.c $(sdir)/registry68.c		\
+ $(sdir)/rsc68.c $(sdir)/string68.c $(sdir)/timedb68.c			\
+ $(sdir)/uri68.c $(replay68_c) $(null)
 
 apiheaders = $(hdir)/file68_aud.h $(hdir)/file68_chk.h			\
  $(hdir)/file68_ord.h $(hdir)/file68_err.h $(hdir)/file68.h		\

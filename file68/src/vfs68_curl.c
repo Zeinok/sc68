@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 21:54:08 ben>
+ * Time-stamp: <2013-08-02 23:35:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -40,6 +40,8 @@
 static int curl_cat = msg68_DEFAULT;
 
 #include "file68_vfs_def.h"
+#include "file68_uri.h"
+#include "file68_str.h"
 
 #include <curl/curl.h>
 #include <string.h>
@@ -110,6 +112,26 @@ typedef struct {
 } vfs68_curl_t;
 
 static int init = 0;
+
+static int curl_ismine(const char *);
+static vfs68_t * curl_create(const char *, int, int, va_list);
+static scheme68_t curl_scheme = {
+  0, "vfs-curl", curl_ismine, curl_create
+};
+
+static int curl_ismine(const char * uri)
+{
+  const int ok = SCHEME68_ISMINE | SCHEME68_READ;
+
+  if (0
+      || !strncmp68(uri,"ftp://",6)
+      || !strncmp68(uri,"http://",7)
+      || !strncmp68(uri,"sftp://",7)
+      || !strncmp68(uri,"https://",8))
+    return ok;
+  return 0;
+}
+
 
 static int mysleep(unsigned long ms)
 {
@@ -707,6 +729,8 @@ int vfs68_curl_init(void)
   }
   if (!init) {
     init = ( curl_global_init(CURL_GLOBAL_ALL) == CURLE_OK ) ? 1 : -1;
+    if (init == 1)
+      uri68_register(&curl_scheme);
   }
   return -(init != 1);
 }
@@ -723,7 +747,7 @@ void vfs68_curl_shutdown(void)
   }
 }
 
-vfs68_t * vfs68_curl_create(const char * fname, int mode)
+vfs68_t * vfs68_curl_create(const char * uri, int mode)
 {
 
   vfs68_curl_t *isf;
@@ -733,14 +757,14 @@ vfs68_t * vfs68_curl_create(const char * fname, int mode)
     return 0;
   }
 
-  if (!fname || !fname[0]) {
+  if (!uri || !uri[0]) {
     return 0;
   }
 
   /* Don't need +1 because 1 byte already allocated in the
-   * vfs68_curl_t::fname.
+   * vfs68_curl_t::uri.
    */
-  len = strlen(fname);
+  len = strlen(uri);
   isf = calloc(sizeof(vfs68_curl_t) + len, 1);
   if (!isf) {
     return 0;
@@ -751,9 +775,16 @@ vfs68_t * vfs68_curl_create(const char * fname, int mode)
   /* Clean curl handle. */
   isf->mode = mode & (VFS68_OPEN_READ|VFS68_OPEN_WRITE);
 
-  strcpy(isf->name, fname);
+  strcpy(isf->name, uri);
   return &isf->vfs;
 }
+
+static vfs68_t * curl_create(const char *uri, int mode,
+                             int argc, va_list list)
+{
+  return vfs68_curl_create(uri, mode);
+}
+
 
 #else /* #ifdef USE_CURL */
 

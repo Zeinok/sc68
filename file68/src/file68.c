@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 01:23:34 ben>
+ * Time-stamp: <2013-08-02 20:23:24 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -37,12 +37,13 @@
 #include "file68_opt.h"
 
 #include "file68_vfs_def.h"
-#include "file68_vfs_file.h"
-#include "file68_vfs_fd.h"
-#include "file68_vfs_curl.h"
-#include "file68_vfs_mem.h"
+#include "file68_vfs.h"
+/* #include "file68_vfs_file.h" */
+/* #include "file68_vfs_fd.h" */
+/* #include "file68_vfs_curl.h" */
+/* #include "file68_vfs_mem.h" */
 #include "file68_vfs_z.h"
-#include "file68_vfs_null.h"
+/* #include "file68_vfs_null.h" */
 #include "file68_ice.h"
 #include "file68_zip.h"
 #include "file68_uri.h"
@@ -727,16 +728,19 @@ static int valid(disk68_t * mb)
   return 0;
 }
 
-int file68_is_our_url(const char * url, const char * exts, int * is_remote)
+int file68_is_our(const char * uri, const char * exts, int * is_remote)
 {
-  const char * url_end, *u;
+  assert(!"do not use, needs a refresh");
+  return 0;
+
+#if 0
+  const char * uri_end, *u;
   char protocol[16], *p;
   int has_protocol, remote, is_our;
 
-  TRACE68(file68_cat,"file68: check url --\n",url);
-
+  TRACE68(file68_cat,"file68: check uri --\n",uri);
   is_our = remote = 0;
-  if (!url || !*url) {
+  if (!uri || !*uri) {
     goto exit;
   }
 
@@ -745,13 +749,13 @@ int file68_is_our_url(const char * url, const char * exts, int * is_remote)
     exts = ".sc68\0.sndh\0.snd\0";
   }
 
-  url_end = url + strlen(url);
-  has_protocol = !url68_get_protocol(protocol, sizeof(protocol), url);
+  uri_end = uri + strlen(uri);
+  has_protocol = !uri68_get_protocol(protocol, sizeof(protocol), uri);
 
   if (has_protocol) {
     is_our = !strcmp68(protocol,"SC68");
-    if (!is_our && !strcmp68(protocol,"RSC68") && url+14<url_end) {
-      is_our = strncmp(url+8, "music/", 6);
+    if (!is_our && !strcmp68(protocol,"RSC68") && uri+14<uri_end) {
+      is_our = strncmp(uri+8, "music/", 6);
     }
 
     if (is_our)  {
@@ -764,12 +768,12 @@ int file68_is_our_url(const char * url, const char * exts, int * is_remote)
   }
 
   /* Check remote for other protocol */
-  remote = !url68_local_protocol(protocol);
+  remote = !uri68_local_protocol(protocol);
 
   /* Check extension ... */
   p = protocol+sizeof(protocol);
   *--p = 0;
-  for (u=url_end; u > url && p > protocol; ) {
+  for (u=uri_end; u > uri && p > protocol; ) {
     int c = *--u & 255;
     if (c == '/') {
       break;
@@ -794,149 +798,38 @@ int file68_is_our_url(const char * url, const char * exts, int * is_remote)
 
 exit:
   if (is_remote) *is_remote = remote;
-  TRACE68(file68_cat, "file68: check url -- [%s]\n", ok_int(!is_our));
+  TRACE68(file68_cat, "file68: check uri -- [%s]\n", ok_int(!is_our));
   return is_our;
+#endif
 }
 
-/* Check if file is probable SC68 file
- * return 0:SC68-file
- */
-int file68_verify(vfs68_t * is)
+static vfs68_t * uri_or_file_create(const char * uri, int mode,
+                                    rsc68_info_t * info)
 {
-  int res;
-/*   const char * fname = strnull(vfs68_filename(is)); */
-
-  if (!is) {
-    res = error68("file68_verify(): null pointer");
-    goto error;
-  }
-
-  res = read_header(is, 0);
-
-  /* Verify tells it is a gzip file, so we may give it a try. */
-  if (res < 0) {
-    void * buffer = 0;
-    int len;
-
-    switch (res) {
-    case -gzip_cc:
-      if (vfs68_seek_to(is,0) == 0) {
-        vfs68_t * zis;
-        zis = vfs68_z_create(is,VFS68_OPEN_READ,
-                                 vfs68_z_default_option);
-        res = -1;
-        if (!vfs68_open(zis)) {
-          res = file68_verify(zis);
-        }
-        vfs68_destroy(zis);
-      }
-      break;
-    case -ice_cc:
-      if (vfs68_seek_to(is,0) == 0) {
-        buffer = file68_ice_load(is, &len);
-      }
-      break;
-    case -sndh_cc:
-      res = 0;
-      break;
-    }
-    if (buffer) {
-      res = -res;
-      res = file68_verify_mem(buffer, len);
-      free(buffer);
-    }
-  }
-
-error:
-  return -(res < 0);
-}
-
-static vfs68_t * url_or_file_create(const char * url, int mode,
-                                        rsc68_info_t * info)
-{
-  char protocol[16], tmp[512];
-  const int max = sizeof(tmp)-1;
-  vfs68_t *isf = 0;
-  int has_protocol;
-  char * newname = 0;
+  vfs68_t *vfs = 0;
+  void * param = 0;
 
   TRACE68(file68_cat,"file68: create -- %s -- mode:%d -- with%s info\n",
-          strnull(url),mode,info?"":"out");
+          strnull(uri),mode,info?"":"out");
 
-  if (info) {
+  if (info && !strncmp68(uri,"sc68://music/", 13)) {
+    param = info;
     info->type = rsc68_last;
   }
 
-  has_protocol = !url68_get_protocol(protocol, sizeof(protocol), url);
-
-  if (has_protocol) {
-
-    /* convert sc68:// -> rsc68:// */
-    if (!strcmp68(protocol, "SC68")) {
-      url += 4+3;
-      strcpy(tmp, "rsc68://music/");
-      strncpy(tmp+14, url, max-14);
-      tmp[max] = 0;
-      url = tmp;
-      strcpy(protocol,"rsc68");
-      TRACE68(file68_cat,"file68: transform url into -- %s\n",url);
-    }
-
-    if (!strcmp68(protocol, "RSC68")) {
-      return rsc68_open_url(url, mode, info);
-    }
+  vfs = uri68_create_vfs(uri, mode, 1, param);
+  if (vfs68_open(vfs) < 0) {
+    vfs68_destroy(vfs);
+    vfs = 0;
   }
 
-  isf = url68_stream_create(url, mode);
-
-  if (vfs68_open(isf)) {
-    vfs68_destroy(isf);
-    isf = 0;
-  }
-
-  free(newname);
   TRACE68(file68_cat,"file68: create -- [%s,%s]\n",
-          ok_int(!isf),
-          strnull(vfs68_filename(isf)));
-  return isf;
+          ok_int(!vfs),
+          strnull(vfs68_filename(vfs)));
+  return vfs;
 }
 
-int file68_verify_url(const char * url)
-{
-  int res;
-  vfs68_t * is;
-
-/*   CONTEXT68_CHECK(context); */
-
-  is = url_or_file_create(url,1,0);
-  res = file68_verify(is);
-  vfs68_destroy(is);
-
-  return -(res < 0);
-}
-
-int file68_verify_mem(const void * buffer, int len)
-{
-  int res;
-  vfs68_t * is;
-
-  is = vfs68_mem_create((void *)buffer,len,1);
-  res = vfs68_open(is) ? -1 : file68_verify(is);
-  vfs68_destroy(is);
-
-  return res;
-}
-
-/* Check if file is probable SC68 file
- * return 0:SC68-file
- */
-int file68_diskname(vfs68_t * is, char *dest, int max)
-{
-  msg68_error(0,"file68: file68_diskname function is deprecated\n");
-  return -1;
-}
-
-disk68_t * file68_load_url(const char * fname)
+disk68_t * file68_load_uri(const char * fname)
 {
   disk68_t    * d;
   vfs68_t * is;
@@ -944,7 +837,7 @@ disk68_t * file68_load_url(const char * fname)
 
   TRACE68(file68_cat,"file68: load -- %s\n", strnull(fname));
 
-  is = url_or_file_create(fname, 1, &info);
+  is = uri_or_file_create(fname, 1, &info);
   d = file68_load(is);
   vfs68_destroy(is);
 
@@ -970,7 +863,8 @@ disk68_t * file68_load_mem(const void * buffer, int len)
   disk68_t * d;
   vfs68_t * is;
 
-  is = vfs68_mem_create((void *)buffer,len,1);
+  is = uri68_create_vfs("mem:", 1, 2, buffer, len);
+  /* is = vfs68_mem_create((void *)buffer,len,1); */
   d = vfs68_open(is) ? 0 : file68_load(is);
   vfs68_destroy(is);
 
@@ -1771,13 +1665,13 @@ static int save_nonzero(vfs68_t * os, const char * chunk, int n)
   return !n ? 0 : save_number(os, chunk, n);
 }
 
-int file68_save_url(const char * fname, const disk68_t * mb,
+int file68_save_uri(const char * fname, const disk68_t * mb,
                     int version, int gzip)
 {
   vfs68_t * os;
   int err;
 
-  os = url_or_file_create(fname, 2, 0);
+  os = uri_or_file_create(fname, 2, 0);
   err = file68_save(os, mb, version, gzip);
   vfs68_destroy(os);
 
@@ -1825,12 +1719,13 @@ static int save_tags(vfs68_t *os, const tagset68_t * tags,
 int file68_save_mem(const char * buffer, int len, const disk68_t * mb,
                     int version, int gzip)
 {
-  vfs68_t * os;
+  vfs68_t * vfs;
   int err;
 
-  os = vfs68_mem_create((char *)buffer, len, 2);
-  err = file68_save(os, mb, version, gzip);
-  vfs68_destroy(os);
+  vfs = uri68_create_vfs("mem:", 2, 2, buffer, len);
+  /* vfs = vfs68_mem_create((char *)buffer, len, 2); */
+  err = file68_save(vfs, mb, version, gzip);
+  vfs68_destroy(vfs);
 
   return err;
 }
@@ -1861,7 +1756,8 @@ int file68_save(vfs68_t * os, const disk68_t * mb, int version, int gzip)
 
   /* Create a null stream to calculate total size.
      Needed by gzip stream that can't seek back. */
-  null_os = vfs68_null_create(fname);
+  null_os = uri68_create_vfs("null:", 3, 0);
+  /* null_os = vfs68_null_create(fname); */
   if (vfs68_open(null_os)) {
     errstr = "open";
   } else {

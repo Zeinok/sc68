@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 01:34:18 ben>
+ * Time-stamp: <2013-08-02 21:46:54 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -34,6 +34,8 @@
 #ifndef ISTREAM68_NO_MEM
 
 #include "file68_vfs_def.h"
+#include "file68_uri.h"
+#include "file68_str.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -56,6 +58,19 @@ typedef struct {
   char name[16 + 2 * 2 * sizeof(void*)]; /**< filename (mem://start:end). */
   char internal[4];
 } vfs68_mem_t;
+
+static int mem_ismine(const char *);
+static vfs68_t * mem_create(const char *, int, int, va_list);
+static scheme68_t mem_scheme = {
+  0, "vfs-mem", mem_ismine, mem_create
+};
+
+static int mem_ismine(const char * uri)
+{
+  if (!strncmp68(uri,"mem:", 4))
+    return SCHEME68_ISMINE | SCHEME68_READ | SCHEME68_WRITE;
+  return 0;
+}
 
 static const char * ism_name(vfs68_t * vfs)
 {
@@ -222,6 +237,22 @@ vfs68_t * vfs68_mem_create(const void * addr, int len, int mode)
   return &ism->vfs;
 }
 
+static vfs68_t * mem_create(const char * uri, int mode,
+                            int argc, va_list list)
+{
+  if (argc == 2) {
+    void * addr = va_arg(list, void *);
+    int len     = va_arg(list, int);
+    return vfs68_mem_create(addr, len, mode);
+  }
+  return 0;
+}
+
+int vfs68_mem_init(void)
+{
+  return uri68_register(&mem_scheme);
+}
+
 #else /* #ifndef VFS68_NO_FILE */
 
 /* vfs mem must not be include in this package. Anyway the creation
@@ -230,6 +261,11 @@ vfs68_t * vfs68_mem_create(const void * addr, int len, int mode)
 
 #include "file68_fvs_mem.h"
 #include "file68_msg.h"
+
+int vfs68_mem_init(void)
+{
+  return 0;
+}
 
 vfs68_t * vfs68_mem_create(const void * addr, int len, int mode)
 {

@@ -5,7 +5,7 @@
  * @date     2003-08-08
  * @brief    Memory stream header.
  */
-/* Time-stamp: <2013-07-22 01:16:30 ben> */
+/* Time-stamp: <2013-08-02 21:32:29 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -13,7 +13,6 @@
 #define _FILE68_VFS_MEM_H_
 
 #include "file68_vfs.h"
-
 
 /**
  * @name     Memory stream
@@ -23,6 +22,14 @@
  *
  * @{
  */
+
+FILE68_EXTERN
+/**
+ * Init memory VFS (register mem: scheme).
+ *
+ * @retval  0  always success
+ */
+int vfs68_mem_init(void);
 
 FILE68_EXTERN
 /**

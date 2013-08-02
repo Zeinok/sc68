@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 01:41:02 ben>
+ * Time-stamp: <2013-08-02 23:17:43 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -89,7 +89,7 @@ static int dbmax    = DB_MAX;        /* max entry                   */
 static int dbsort   = DB_SORT;       /* set if db is sorted         */
 static int dbchange = 0;             /* set if db has been modified */
 
-/* static const char * db_uri="rsc68://timedb"; */
+/* static const char * db_uri="sc68://timedb"; */
 
 static int cmp(const void * ea, const void *eb)
 {

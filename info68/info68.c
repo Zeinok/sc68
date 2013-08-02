@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 02:48:34 ben>
+ * Time-stamp: <2013-08-02 23:47:30 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -179,7 +179,7 @@ static int display_help(void)
   puts
     ("Examples:\n"
      "\n"
-     "  info68 'sc68://Jochen Hippel (Mad Max)/0/Wings Of Death/' '-1,5,4-6' '> %&/%# %N - %a - %n%L'\n"
+     "  info68 'sc68://music/Jochen Hippel (Mad Max)/0/Wings Of Death/' '-1,5,4-6' '> %&/%# %N - %a - %n%L'\n"
      "\n"
      "  > 1/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #1\n"
      "  > 5/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #5\n"
@@ -371,7 +371,7 @@ int main(int argc, char ** argv)
   }
   inname = argv[i];
 
-  out = url68_stream_create(outname, 2);
+  out = uri68_create_vfs(outname, 2, 0);
   if (vfs68_open(out)) {
     error ("info68: error opening output (%s).\n",
            out ? vfs68_filename(out) : outname);
@@ -380,7 +380,7 @@ int main(int argc, char ** argv)
   }
 
   /* Load input file */
-  d = file68_load_url(inname);
+  d = file68_load_uri(inname);
   if (!d) {
     code = 5;
     file_error(inname);

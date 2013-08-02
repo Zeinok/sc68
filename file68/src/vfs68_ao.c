@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 21:54:13 ben>
+ * Time-stamp: <2013-08-02 21:45:07 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -42,6 +42,7 @@ int ao68_cat = msg68_DEFAULT;
 
 #include "file68_vfs_def.h"
 #include "file68_str.h"
+#include "file68_uri.h"
 
 #include <ao/ao.h>
 #include <string.h>
@@ -71,6 +72,12 @@ typedef struct {
 
 static volatile int init;
 static unsigned int vfs68_ao_defaut_rate = 44100;
+static int ao_ismine(const char *);
+static vfs68_t * ao_create(const char *, int, int, va_list);
+static scheme68_t ao_scheme = {
+  0, "vfs-ao", ao_ismine, ao_create
+};
+
 
 /* $$$ AO is the only audio backend we have. No need for much
    complicated mechanism right now. */
@@ -102,8 +109,10 @@ int vfs68_ao_init(void)
     if (ao68_cat == -1)
       ao68_cat = msg68_DEFAULT;
   }
-  return - ( ao68_cat == msg68_DEFAULT );
+  uri68_register(&ao_scheme);
+  return 0;
 }
+
 
 static int init_aolib(void)
 {
@@ -136,6 +145,13 @@ void vfs68_ao_shutdown(void)
     msg68_cat_free(ao68_cat);
     ao68_cat = msg68_DEFAULT;
   }
+}
+
+static int ao_ismine(const char * uri)
+{
+  if (!strncmp68(uri, "audio:", 6))
+    return SCHEME68_ISMINE | SCHEME68_WRITE;
+  return 0;
 }
 
 static const char * isao_name(vfs68_t * vfs)
@@ -532,6 +548,11 @@ error:
   return isf ? &isf->vfs : 0;
 }
 
+static vfs68_t * ao_create(const char * uri, int mode, int argc, va_list list)
+{
+  return vfs68_ao_create(uri, mode);
+}
+
 #else /* #ifdef USE_AO */
 
 /* vfs ao must not be include in this package. Anyway the creation
@@ -540,12 +561,6 @@ error:
 
 #include "file68_vfs_ao.h"
 #include "file68_vfs_def.h"
-
-vfs68_t * vfs68_ao_create(const char * fname, int mode)
-{
-  msg68_error("libao68: create -- *%s*\n","NOT SUPPORTED");
-  return 0;
-}
 
 int vfs68_ao_init(void)
 {

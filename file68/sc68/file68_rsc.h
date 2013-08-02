@@ -5,7 +5,7 @@
  * @date     1998-10-07
  * @brief    Resources access header.
  */
-/* Time-stamp: <2013-07-22 01:08:11 ben> */
+/* Time-stamp: <2013-08-02 23:18:38 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -208,9 +208,9 @@ vfs68_t * rsc68_open(rsc68_t type, const char *name, int mode,
 
 FILE68_API
 /**
- * Open a resource URL in given mode.
+ * Open a resource URI in given mode.
  *
- * @param  url     Any valid rsc68://type/ URL
+ * @param  uri     Any valid sc68://type/ URI
  * @param  mode    1:read-access, 2:write-access.
  * @param  info    Get additionnal info (depends on type)
  *
@@ -219,23 +219,23 @@ FILE68_API
  *
  * @see rsc68_open()
  */
-vfs68_t * rsc68_open_url(const char *url, int mode,
+vfs68_t * rsc68_open_uri(const char *uri, int mode,
                              rsc68_info_t * info);
 
 FILE68_API
 /**
- * Create a resource from URL in given mode.
+ * Create a resource from URI in given mode.
  *
- * @param  url     Any valid rsc68://type/ URL
+ * @param  uri     Any valid sc68://type/ URI
  * @param  mode    1:read-access, 2:write-access.
  * @param  info    Get additionnal info (depends on type)
  *
  * @return  vfs68_t stream.
  * @retval  0 error.
  *
- * @see rsc68_open_url()
+ * @see rsc68_open_uri()
  */
-vfs68_t * rsc68_create_url(const char *url, int mode, rsc68_info_t * info);
+vfs68_t * rsc68_create_uri(const char *uri, int mode, rsc68_info_t * info);
 
 
 FILE68_API
@@ -247,7 +247,7 @@ FILE68_API
  *  info::type is set to rsc68_music else it is set rsc68_last.
  *
  * @param  info  info to fill (0:parse only)
- * @param  str   URL part containing music parameter ":track:loop:time"
+ * @param  str   URI part containing music parameter ":track:loop:time"
  *
  * @return  Parsing stop position
  * @retval  str   on invalid string

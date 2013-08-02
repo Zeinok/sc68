@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-29 10:47:21 ben>
+ * Time-stamp: <2013-08-02 18:55:42 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -250,7 +250,7 @@ static int print_usage(void)
       "  <path> or file://path\n"
       "   or local://path    Local file\n"
       "  http://path or ftp://path\n"
-      "   or others          Remote protocol (see curl)\n"
+      "   or others          Remote scheme (see curl)\n"
       "  sc68://author/hw/title[/:track[:loop:[time]]]\n"
       "                      Access sc68 music database. The music file is\n"
       "                      searched in `sc68-music' music path, then in\n"
@@ -435,18 +435,18 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
 static char * build_output_uri(char * inname, char * outname)
 {
   static char prefix[] = "audio://ao/driver=wav/output=";
-  char protocol[32];
+  char scheme[32];
   char * namebuf = 0, * ext = 0;
   int len;
 
   Debug("sc68: create output URI in:'%s' out:'%s'\n",inname,outname);
 
   if (outname) {
-    if (!url68_get_protocol(protocol, 32, outname)) {
-      fprintf(stderr,"sc68: can't create wav here '%s://'\n", protocol);
+    if (!uri68_get_scheme(scheme, 32, outname)) {
+      fprintf(stderr,"sc68: can't create wav here '%s://'\n", scheme);
       return 0;
     }
-    Debug("sc68: don't have a protocol\n");
+    Debug("sc68: don't have a scheme\n");
   } else {
     /* no output given, make it from inname */
     outname = mybasename(inname);
@@ -700,14 +700,7 @@ int main(int argc, char *argv[])
     goto error;
   }
 
-  /* Verify sc68 file. */
-#if 0  /* Mess with stdin  */
-  if (sc68_verify_file(inname) < 0) {
-    goto error;
-  }
-#endif
-
-  if (sc68_load_url(sc68, inname)) {
+  if (sc68_load_uri(sc68, inname)) {
     goto error;
   }
 

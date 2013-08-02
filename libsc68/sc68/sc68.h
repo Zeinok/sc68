@@ -4,8 +4,8 @@
  * @author    Benjamin Gerard
  * @date      2003/08/07
  * @brief     sc68 API header.
- *
  */
+/* Time-stamp: <2013-08-02 19:45:38 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -74,7 +74,7 @@
  * if (sc68 = sc68_create(0), !sc68) goto error;
  *
  * // Load an sc68 file.
- * if (sc68_load_url(sc68, fname))
+ * if (sc68_load_uri(sc68, fname))
  *   goto error;
  *
  * // Set track and loop (optionnal).
@@ -621,21 +621,15 @@ typedef struct _vfs68_t vfs68_t; /**< normally defined in sc68/file68_vfs.h */
 
 SC68_API
 /**
- * Create a stream from url.
+ * Create a stream from uri.
  */
-vfs68_t * sc68_vfs(const char * url, int mode);
+vfs68_t * sc68_vfs(const char * uri, int mode);
 
+SC68_API
 /**
- * Verify an sc68 disk.
+ * Checks if this uri is an sc68 file.
  */
-SC68_API
-int sc68_verify(vfs68_t * is);
-SC68_API
-int sc68_verify_url(const char * url);
-SC68_API
-int sc68_verify_mem(const void * buffer, int len);
-SC68_API
-int sc68_is_our_url(const char * url,
+int sc68_is_our_uri(const char * uri,
                     const char *exts, int * is_remote);
 
 /**
@@ -644,7 +638,7 @@ int sc68_is_our_url(const char * url,
 SC68_API
 int sc68_load(sc68_t * sc68, vfs68_t * is);
 SC68_API
-int sc68_load_url(sc68_t * sc68, const char * url);
+int sc68_load_uri(sc68_t * sc68, const char * uri);
 SC68_API
 int sc68_load_mem(sc68_t * sc68, const void * buffer, int len);
 
@@ -656,7 +650,7 @@ int sc68_load_mem(sc68_t * sc68, const void * buffer, int len);
 SC68_API
 sc68_disk_t sc68_load_disk(vfs68_t * is);
 SC68_API
-sc68_disk_t sc68_load_disk_url(const char * url);
+sc68_disk_t sc68_load_disk_uri(const char * uri);
 SC68_API
 sc68_disk_t sc68_disk_load_mem(const void * buffer, int len);
 SC68_API

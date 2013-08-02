@@ -5,7 +5,7 @@
  * @date     2003-08-22
  * @brief    Message header.
  */
-/* Time-stamp: <2013-07-22 00:17:05 ben> */
+/* Time-stamp: <2013-08-02 18:48:16 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -378,6 +378,9 @@ void msg68x_trace(void * cookie, const char * fmt, ...);
 # ifdef NDEBUG
 #  if defined(__GNUC__) || defined(CPP_SUPPORTS_VA_MACROS)
 #   define TRACE68(cat,fmt,...)
+#   ifndef CPP_SUPPORTS_VA_MACROS
+#    define CPP_SUPPORTS_VA_MACROS 1
+#   endif
 #  else
 #   define TRACE68 if (0);else msg68_dummy
 static void msg68_dummy(int cat, const char * fmt, ...) {}

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 21:53:19 ben>
+ * Time-stamp: <2013-08-02 21:45:30 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -34,10 +34,38 @@
 #ifndef ISTREAM68_NO_FILE
 
 #include "file68_vfs_def.h"
+#include "file68_uri.h"
+#include "file68_str.h"
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
+
+static int file_ismine(const char *);
+static vfs68_t * file_create(const char *, int, int, va_list);
+static scheme68_t file_scheme = {
+  0, "vfs-file", file_ismine, file_create
+};
+
+static int file_ismine(const char * uri)
+{
+  const int ok = SCHEME68_ISMINE | SCHEME68_READ | SCHEME68_WRITE;
+
+  if (!strncmp68(uri,"file://",7) || !strncmp68(uri,"local://",8))
+    return ok;
+
+#ifdef NATIVE_WIN32
+  if (isalpha((int)uri[0]) && uri[1] == ':')
+    return ok;
+#endif
+
+  if (uri68_get_scheme(0, 0, uri) == 0)
+    return ok;
+
+  return 0;
+}
+
 
 /** vfs file structure. */
 typedef struct {
@@ -231,6 +259,22 @@ vfs68_t * vfs68_file_create(const char * fname, int mode)
   return &isf->vfs;
 }
 
+static vfs68_t * file_create(const char * uri, int mode,
+                             int argc , va_list list)
+{
+  if (!strncmp68(uri,"file://",7))
+    uri += 7;
+  else if (!strncmp68(uri,"local://",8))
+    uri += 8;
+  return vfs68_file_create(uri, mode);
+}
+
+
+int vfs68_file_init(void)
+{
+  return uri68_register(&file_scheme);
+}
+
 #else /* #ifndef VFS68_NO_FILE */
 
 /* vfs file must not be include in this package. Anyway the creation
@@ -242,6 +286,11 @@ vfs68_t * vfs68_file_create(const char * fname, int mode)
 vfs68_t * vfs68_file_create(const char * fname, int mode)
 {
   msg68_error("file68: create -- *NOT SUPPORTED*");
+  return 0;
+}
+
+int vfs68_file_init(void)
+{
   return 0;
 }
 

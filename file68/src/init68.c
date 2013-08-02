@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-29 13:33:29 ben>
+ * Time-stamp: <2013-08-02 21:53:50 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -45,14 +45,17 @@ static volatile int init;
 
 extern int aSIDify;                     /* defined in file68.c */
 
-void vfs68_ao_shutdown(void);  /* defined in vfs68_ao.c */
-int  vfs68_z_init(void);       /* defined in vfs68_z.c  */
-void vfs68_z_shutdown(void);   /* defined in vfs68_z.c  */
-int  option68_init(void);          /* defined in option68.c     */
-void option68_shutdown(void);      /* defined in option68.c     */
-int  file68_loader_init(void);     /* defined in file68.c       */
-void file68_loader_shutdown(void); /* defined in file68.c       */
-int  vfs68_ao_init(void);      /* defined in vfs68_ao.c */
+void vfs68_ao_shutdown(void);          /* defined in vfs68_ao.c   */
+int  vfs68_z_init(void);               /* defined in vfs68_z.c    */
+void vfs68_z_shutdown(void);           /* defined in vfs68_z.c    */
+int  option68_init(void);              /* defined in option68.c   */
+void option68_shutdown(void);          /* defined in option68.c   */
+int  file68_loader_init(void);         /* defined in file68.c     */
+void file68_loader_shutdown(void);     /* defined in file68.c     */
+int  vfs68_ao_init(void);              /* defined in vfs68_ao.c   */
+int  vfs68_mem_init(void);             /* defined in vfs68_mem.c  */
+int  vfs68_fd_init();                  /* defined in vfs68_fd.c   */
+int  vfs68_file_init();                /* defined in vfs68_file.c */
 
 static char * mygetenv(const char *name)
 {
@@ -146,7 +149,16 @@ int file68_init(int argc, char **argv)
   /* Xiph AO */
   vfs68_ao_init();
 
-  /* Init resource */
+  /* Memory */
+  vfs68_mem_init();
+
+  /* File descriptor */
+  vfs68_fd_init();
+
+  /* File */
+  vfs68_file_init();
+
+  /* Resource locator */
   rsc68_init();
 
   /* Loader */
@@ -171,7 +183,8 @@ int file68_init(int argc, char **argv)
     else if (!strcmp68(opt->val.str,"force"))
       aSIDify = 2;
     else
-      msg68_notice("file68: ignore invalid mode for --sc68-asid -- *%s*\n", opt->val.str);
+      msg68_notice("file68: ignore invalid mode for --sc68-asid -- *%s*\n",
+                   opt->val.str);
   }
 
   /* Check for --sc68-debug= */

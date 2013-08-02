@@ -5,7 +5,7 @@
  * @date     2003-08-08
  * @brief    File descriptor stream header.
  */
-/* Time-stamp: <2013-07-22 01:14:40 ben> */
+/* Time-stamp: <2013-08-02 21:53:22 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -18,10 +18,26 @@
  * @name     File descriptor stream
  * @ingroup  file68_vfs
  *
- *   Implements vfs68_t for "unix like" file descriptor.
+ *   Implements vfs68_t for "un*x like" file descriptor.
  *
  * @{
  */
+
+FILE68_EXTERN
+/**
+ * Init file descriptor VFS.
+ *
+ * @retval  0  always success
+ */
+int vfs68_fd_init(void);
+
+FILE68_EXTERN
+/**
+ * Init file descriptor VFS.
+ *
+ * @retval  0  always success
+ */
+int vfs68_fd_init(void);
 
 FILE68_EXTERN
 /**

@@ -5,7 +5,7 @@
  * @date     2007/08/08
  * @brief    FILE stream header.
  */
-/* Time-stamp: <2013-07-22 01:13:04 ben> */
+/* Time-stamp: <2013-08-02 21:25:12 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -22,6 +22,14 @@
  *
  * @{
  */
+
+FILE68_EXTERN
+/**
+ * Init file VFS.
+ *
+ * @retval  0  always success
+ */
+int vfs68_file_init(void);
 
 FILE68_EXTERN
 /**

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 09:47:22 ben>
+ * Time-stamp: <2013-08-02 23:17:29 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -848,7 +848,6 @@ int sc68_init(sc68_init_t * init)
 
   /* Init config module */
   config68_init(0);
-  sc68_config_load();
 
   /* Intialize file68. */
   init->argc = file68_init(init->argc, init->argv);
@@ -857,6 +856,9 @@ int sc68_init(sc68_init_t * init)
   /* option68_append(&emuopt,1); */
   option68_append(config68_options, config68_opt_count);
   init->argc = option68_parse(init->argc, init->argv, 0);
+
+  /* Load config */
+  sc68_config_load();
 
   /* Initialize emulators. */
   err = init_emu68(&init->argc, init->argv);
@@ -1264,10 +1266,10 @@ static int load_replay(sc68_t * sc68, const char * replay, int a0)
   assert(replay);
 
   sc68_debug(sc68, " -> external replay -- %s\n", replay);
-  strcpy(rname,"RSC68://replay/");    /* $$$ to be change a sc68://replay/... */
+  strcpy(rname,"sc68://replay/");    /* $$$ to be change a sc68://replay/... */
   strcat68(rname, replay, sizeof(rname)-1);
   rname[sizeof(rname)-1] = 0;
-  is = url68_stream_create(rname, 1);
+  is = uri68_create_vfs(rname, 1, 0);
   err = vfs68_open(is);
   err = err || (size = vfs68_length(is), size < 0);
   err = err || stream_read_68k(sc68, a0, is, size);
@@ -1679,24 +1681,11 @@ int sc68_process(sc68_t * sc68, void * buf16st, int * _n)
   return ret;
 }
 
-int sc68_verify(vfs68_t * is)
+int sc68_is_our_uri(const char * uri, const char *exts, int * is_remote)
 {
-  return file68_verify(is);
-}
-
-int sc68_verify_url(const char * url)
-{
-  return file68_verify_url(url);
-}
-
-int sc68_verify_mem(const void * buffer, int len)
-{
-  return file68_verify_mem(buffer,len);
-}
-
-int sc68_is_our_url(const char * url, const char *exts, int * is_remote)
-{
-  return file68_is_our_url(url,exts,is_remote);
+  assert(!"TO DO");
+  return 0;
+  /* return file68_is_our_uri(uri,exts,is_remote); */
 }
 
 static int load_disk(sc68_t * sc68, disk68_t * d, int free_on_close)
@@ -1729,9 +1718,9 @@ int sc68_load(sc68_t * sc68, vfs68_t * is)
   return load_disk(sc68, file68_load(is), 1);
 }
 
-int sc68_load_url(sc68_t * sc68, const char * url)
+int sc68_load_uri(sc68_t * sc68, const char * uri)
 {
-  return load_disk(sc68, file68_load_url(url), 1);
+  return load_disk(sc68, file68_load_uri(uri), 1);
 }
 
 int sc68_load_mem(sc68_t * sc68, const void * buffer, int len)
@@ -1745,9 +1734,9 @@ sc68_disk_t sc68_load_disk(vfs68_t * is)
   return (sc68_disk_t) file68_load(is);
 }
 
-sc68_disk_t sc68_load_disk_url(const char * url)
+sc68_disk_t sc68_load_disk_uri(const char * uri)
 {
-  return (sc68_disk_t) file68_load_url(url);
+  return (sc68_disk_t) file68_load_uri(uri);
 }
 
 sc68_disk_t sc68_disk_load_mem(const void * buffer, int len)
@@ -2199,9 +2188,9 @@ sc68_music_info_t * sc68_music_info(sc68_t * sc68, int track, sc68_disk_t disk)
 }
 #endif
 
-vfs68_t * sc68_vfs(const char * url, int mode)
+vfs68_t * sc68_vfs(const char * uri, int mode)
 {
-  return url68_stream_create(url,mode);
+  return uri68_create_vfs(uri, mode, 0);
 }
 
 const char * sc68_error_get(sc68_t * sc68)

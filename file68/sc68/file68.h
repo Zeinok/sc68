@@ -5,7 +5,7 @@
  * @date     1998-09-03
  * @brief    Music file header.
  */
-/* Time-stamp: <2013-07-22 00:51:10 ben> */
+/* Time-stamp: <2013-08-02 18:40:48 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -246,90 +246,22 @@ FILE68_API
 const char * file68_tag_set(disk68_t * mb, int track,
                             const char * key, const char * val);
 
-/**
- * @name  File verify functions.
- * @{
- */
-
 FILE68_API
 /**
- * Verify SC68 file from stream.
+ * Check if an URI is a standard sc68 one.
  *
- *  The file68_verify() function opens, reads and closes given file to
- *  determine if it is a valid SC68 file. This function only checks
- *  for a valid file header, and does not perform any consistent error
- *  checking.
- *
- * @param  is       input stream to verify
- *
- * @return error-code
- * @retval  0  success, seems to be a valid SC68 file
- * @retval <0  failure, file error or invalid SC68 file
- *
- * @see file68_load()
- * @see file68_save()
- * @see file68_diskname()
- */
-int file68_verify(vfs68_t * is);
-
-FILE68_API
-/**
- * Verify SC68 file.
- *
- * @param  url      URL to verify.
- */
-int file68_verify_url(const char * url);
-
-FILE68_API
-/**
- * Verify SC68 file mapped into memory buffer.
- *
- * @param  buffer   buffer address
- * @param  len      buffer length
- */
-int file68_verify_mem(const void * buffer, int len);
-
-FILE68_API
-/**
- * Get SC68 disk name.
- *
- *  The file68_diskname() function opens, reads and closes given file
- *  to determine if it is a valid SC68 file. In the same time it tries
- *  to retrieve the stored disk name into the dest buffer with a
- *  maximum length of max bytes.  If the name overflows, the last byte
- *  of the dest buffer will be non zero.
- *
- * @param  is       input stream
- * @param  dest     disk name destination buffer
- * @param  max      number of bytes of dest buffer
- *
- * @return error-code
- * @retval  0  success, found a disk-name
- * @retval <0  failure, file error, invalid SC68 file or disk-name not found
- *
- * @see file68_load()
- * @see file68_save()
- * @see file68_diskname()
- *
- * @deprecated This function needs to be rewritten.
- */
-int file68_diskname(vfs68_t * is, char * dest, int max);
-
-
-
-FILE68_API
-/**
- * Check if an URL is a standard sc68 one.
- *
- * @param  url        URL to check.
+ * @param  uri        URI to check.
  * @param  exts       extension list. (0 is default: ".sc68\0.sndh\0.snd\0").
- * @param  is_remote  fill with 0/1 if respectevely URL is a local/remote
- *                     file. May be 0.
+ * @param  is_remote  fill with 0/1 if respectevely URI is a local/remote
+ *                    file. May be 0.
  * @return  bool
  * @retval  0  not compatible sc68 file
  * @retval  1  sc68 compatible file
+ *
+ * @todo    Implements file68_is_our()
+ * @warning Not implemented.
  */
-int file68_is_our_url(const char * url, const char * exts, int * is_remote);
+int file68_is_our(const char * uri, const char * exts, int * is_remote);
 
 /**
  * @}
@@ -356,7 +288,6 @@ FILE68_API
  * @return  pointer to allocated disk68_t disk structure
  * @retval  0  failure
  *
- * @see file68_verify()
  * @see file68_save()
  */
 disk68_t * file68_load(vfs68_t * is);
@@ -365,12 +296,12 @@ FILE68_API
 /**
  * Load SC68 file.
  *
- * @param  url      URL to load.
+ * @param  uri      URI to load.
  *
  * @return  pointer to allocated disk68_t disk structure
  * @retval  0  failure
  */
-disk68_t * file68_load_url(const char * url);
+disk68_t * file68_load_uri(const char * uri);
 
 FILE68_API
 /**
@@ -418,12 +349,12 @@ FILE68_API
 /**
  * Save SC68 disk into file.
  *
- * @param  url      URL to save.
+ * @param  uri      URI to save.
  * @param  mb       pointer to SC68 disk to save
  * @param  version  file version [0:default]
  * @param  gzip     gzip compression level [0:no-gzip, 1..9 or -1]
  */
-int file68_save_url(const char * url, const disk68_t * mb,
+int file68_save_uri(const char * uri, const disk68_t * mb,
                     int version, int gzip);
 
 FILE68_API

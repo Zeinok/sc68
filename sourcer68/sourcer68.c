@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 03:40:25 ben>
+ * Time-stamp: <2013-08-02 20:20:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -939,7 +939,7 @@ static char * LoadBinary(char * fname, int * fsize)
 
 #ifdef USE_FILE68
 
-  vfs68_t *is = url68_stream_create(fname,1);
+  vfs68_t *is = uri68_create_vfs(fname, 1, 0);
 
   if (vfs68_open(is) == -1) {
     goto error;
@@ -1188,12 +1188,12 @@ int main(int argc, char **argv)
 
   /* Verify if input is an sc68 file */
 #ifdef USE_FILE68
-  if (!no_sc68 && !file68_verify_url(fname)) {
+  if (!no_sc68 /* && !file68_verify_uri(fname) */) {
     music68_t * m;
     debugmsg("sourcer68: sc68 file detected\n");
     tosreloc = TOS_RELOC_NEVER;
 
-    d = file68_load_url(fname);
+    d = file68_load_uri(fname);
     if (!d) {
       return SpoolError(4);
     }
