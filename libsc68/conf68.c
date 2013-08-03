@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 20:16:50 ben>
+ * Time-stamp: <2013-08-03 14:42:24 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -147,16 +147,16 @@ static const config68_entry_t conftab[] = {
   /*   "seek speed factor {0:OFF 256:1 512:2 ...}", */
   /*   {0}, {MAX_SEEKSPD}, {DEFAULT_SEEKSPD} */
   /* }, */
-  { 0,
-    "total-time", CONFIG68_INT,
-    "total playing time since first launch",
-    {0}, {0}, {0}
-  },
-  { 0,
-    "total-ms", CONFIG68_INT,
-    "total-time adjustment",
-    {0}, {999}, {0}
-  },
+  /* { 0, */
+  /*   "total-time", CONFIG68_INT, */
+  /*   "total playing time since first launch", */
+  /*   {0}, {0}, {0} */
+  /* }, */
+  /* { 0, */
+  /*   "total-ms", CONFIG68_INT, */
+  /*   "total-time adjustment", */
+  /*   {0}, {999}, {0} */
+  /* }, */
   { 0,                          /* already exported by file68 */
     "music-path", CONFIG68_STR,
     "local sc68 music path",

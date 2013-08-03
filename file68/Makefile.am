@@ -1,4 +1,4 @@
-# Time-stamp: <2013-08-02 17:30:08 ben>
+# Time-stamp: <2013-08-03 14:33:10 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  file68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -35,9 +35,9 @@ mysources = $(sdir)/error68.c $(sdir)/file68.c $(sdir)/gzip68.c		\
  $(sdir)/rsc68.c $(sdir)/string68.c $(sdir)/timedb68.c			\
  $(sdir)/uri68.c $(replay68_c) $(null)
 
-apiheaders = $(hdir)/file68_aud.h $(hdir)/file68_chk.h			\
- $(hdir)/file68_ord.h $(hdir)/file68_err.h $(hdir)/file68.h		\
- $(hdir)/file68_api.h $(hdir)/file68_features.h $(hdir)/file68_vfs.h	\
+apiheaders = $(hdir)/file68_chk.h $(hdir)/file68_ord.h			\
+ $(hdir)/file68_err.h $(hdir)/file68.h $(hdir)/file68_api.h		\
+ $(hdir)/file68_features.h $(hdir)/file68_vfs.h				\
  $(hdir)/file68_vfs_def.h $(hdir)/file68_msg.h $(hdir)/file68_opt.h	\
  $(hdir)/file68_reg.h $(hdir)/file68_rsc.h $(hdir)/file68_str.h		\
  $(hdir)/file68_tag.h $(hdir)/file68_uri.h $(hdir)/file68_tdb.h		\

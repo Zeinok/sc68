@@ -1,11 +1,11 @@
 /*
- * @file    ym_atarist_oldtable.c
+ * @file    ym_emul.c
  * @brief   YM-2149 emulator
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 02:51:23 ben>
+ * Time-stamp: <2013-08-03 15:26:23 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -539,8 +539,8 @@ int ym_sampling_rate(ym_t * const ym, const int chz)
     } else {
       default_parms.hz = hz;
     }
-    msg68_notice("ym-2149: %ssampling rate -- *%dhz*\n",
-               ym ? "" : "default ", hz);
+    msg68_notice("ym-2149: %s sampling rate -- *%dhz*\n",
+               ym ? "select" : "default", hz);
   }
   return hz;
 }

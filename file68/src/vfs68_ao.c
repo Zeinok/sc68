@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 13:50:49 ben>
+ * Time-stamp: <2013-08-03 14:34:24 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -29,7 +29,6 @@
 #endif
 #include "file68_api.h"
 #include "file68_vfs_ao.h"
-#include "file68_aud.h"
 #include "file68_msg.h"
 
 #ifndef DEBUG_AO68_O
@@ -103,28 +102,9 @@ int vfs68_ao_sampling(vfs68_t * vfs)
   return is->ao.format.rate;
 }
 
-/* $$$ AO is the only audio backend we have. No need for much
-   complicated mechanism right now. */
-unsigned int audio68_sampling_rate(const unsigned int rate)
-{
-  if (!rate) {
-    return vfs68_ao_sampling(&ao_unic_vfs->vfs);
-  }
-  vfs68_ao_defaut_rate = spr_in_range(rate);
-  TRACE68(ao68_cat,
-          "audio68: default sampling rate -- *%uhz*\n",
-          vfs68_ao_defaut_rate);
-  if (ao_unic_vfs) {
-    TRACE68(ao68_cat,
-            "audio68: VFS sampling rate -- *%uhz*\n",
-            vfs68_ao_defaut_rate);
-    ao_unic_vfs->ao.format.rate = vfs68_ao_defaut_rate;
-  }
-  return vfs68_ao_defaut_rate;
-}
-
 /* Init does not actually initialize aolib. That task will be
-   performed on the fly only if needed. */
+ * performed on the fly only if needed.
+ */
 int vfs68_ao_init(void)
 {
   if (ao68_cat == msg68_DEFAULT) {

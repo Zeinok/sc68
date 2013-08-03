@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-18 03:23:26 ben>
+ * Time-stamp: <2013-08-03 15:12:38 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -76,7 +76,7 @@ static void mwio_readB(io68_t * const io)
 {
   io->emu68->bus_data =
     _mw_readB((mw_io68_t *)io, io->emu68->bus_addr);
-/*   msg68_debug("microwire: read BYTE [%06x] => %02x\n", */
+/*   msg68_debug("ste-mw : read BYTE [%06x] => %02x\n", */
 /*               io->emu68->bus_addr & 0xFFFFFF, */
 /*               io->emu68->bus_data & 0xFFFFFFFF); */
 }
@@ -85,7 +85,7 @@ static void mwio_readW(io68_t * const io)
 {
   io->emu68->bus_data =
     _mw_readW((mw_io68_t *)io, io->emu68->bus_addr);
-/*   msg68_debug("microwire: read WORD [%06x] => %04x\n", */
+/*   msg68_debug("ste-mw : read WORD [%06x] => %04x\n", */
 /*               io->emu68->bus_addr & 0xFFFFFF, */
 /*               io->emu68->bus_data & 0xFFFF); */
 }
@@ -97,7 +97,7 @@ static void mwio_readL(io68_t * const io)
     |
     ( _mw_readW((mw_io68_t *)io, io->emu68->bus_addr+2)       )
     ;
-/*   msg68_debug("microwire: read LONG [%06x] => %08x\n", */
+/*   msg68_debug("ste-mw : read LONG [%06x] => %08x\n", */
 /*               io->emu68->bus_addr & 0xFFFFFF, */
 /*               io->emu68->bus_data & 0xFFFFFFFF); */
 }
@@ -173,7 +173,7 @@ static void _mw_writeL(mw_io68_t * const mwio, const u8 addr, int68_t v)
 
 static void mwio_writeB(io68_t * const io)
 {
-/*   msg68_debug("microwire: write BYTE [%06x] <= %02x\n", */
+/*   msg68_debug("ste-mw : write BYTE [%06x] <= %02x\n", */
 /*               io->emu68->bus_addr & 0xFFFFFF, */
 /*               io->emu68->bus_data & 0xFF); */
   _mw_writeB((mw_io68_t *)io,
@@ -182,7 +182,7 @@ static void mwio_writeB(io68_t * const io)
 
 static void mwio_writeW(io68_t * const io)
 {
-/*   msg68_debug("microwire: write WORD [%06x] <= %04x\n", */
+/*   msg68_debug("ste-mw : write WORD [%06x] <= %04x\n", */
 /*               io->emu68->bus_addr & 0xFFFFFF, */
 /*               io->emu68->bus_data & 0xFFFF); */
   _mw_writeW((mw_io68_t *)io,
@@ -191,7 +191,7 @@ static void mwio_writeW(io68_t * const io)
 
 static void mwio_writeL(io68_t * const io)
 {
-/*   msg68_debug("microwire: write LONG [%06x] <= %08x\n", */
+/*   msg68_debug("ste-mw : write LONG [%06x] <= %08x\n", */
 /*               io->emu68->bus_addr & 0xFFFFFF, */
 /*               io->emu68->bus_data & 0xFFFFFFFF); */
   _mw_writeL((mw_io68_t *)io,

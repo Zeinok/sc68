@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 23:17:29 ben>
+ * Time-stamp: <2013-08-03 15:25:15 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -66,7 +66,6 @@
 #ifdef HAVE_LIBGEN_H
 #include <libgen.h>
 #endif
-
 
 enum {
   /* Exception handler to catch badly initialize exception */
@@ -132,8 +131,6 @@ struct _sc68_s {
     unsigned int length_ms;   /**< current track length in ms.           */
     unsigned int origin_ms;   /**< elapsed ms at track origin.           */
     unsigned int elapsed_ms;  /**< elapsed ms since track start.         */
-    unsigned int total;       /**< total sec played so far.              */
-    unsigned int total_ms;    /**< total ms correction.                  */
   } time;
 
 /** IRQ handler. */
@@ -191,7 +188,7 @@ static config68_t  * config;
 static void sc68_debug(sc68_t * sc68, const char * fmt, ...);
 static int error_add(sc68_t * sc68, const char * fmt, ...);
 static int get_spr(const sc68_t * sc68);
-static int set_spr(const sc68_t * sc68, int hz);
+static int set_spr(sc68_t * sc68, int hz);
 static int get_pcm_fmt(sc68_t * sc68);
 static int set_pcm_fmt(sc68_t * sc68, int pcmfmt);
 static int get_pos(sc68_t * sc68, int origin);
@@ -712,8 +709,6 @@ static void set_config(sc68_t * sc68)
   sc68->cfg_loop      = myconfig_get_int(c, "force-loop",    0);
   sc68->time.def_ms   = myconfig_get_int(c, "default-time",  TIME_DEF) * 1000;
   sc68->mix.rate      = myconfig_get_int(c, "sampling-rate", SAMPLING_RATE_DEF);
-  sc68->time.total    = myconfig_get_int(c, "total-time",    0);
-  sc68->time.total_ms = myconfig_get_int(c, "total-ms",      0);
 
   rsc68_get_path(0,0,&lmusic, &rmusic);
   if (!lmusic) {
@@ -736,23 +731,6 @@ static void myconfig_set_int(config68_t * c,
   }
 }
 
-static void get_config(sc68_t * sc68)
-{
-  config68_t * const c = config;
-
-  myconfig_set_int(c, "version",       PACKAGE_VERNUM);
-  /* Do not change user config ! */
-  /*   myconfig_set_int(c, "aga_blend",   sc68->mix.aga_blend); */
-  /*   myconfig_set_int(c, "force_track",   sc68->track_here); */
-  /*   myconfig_set_int(c, "default_time",  (sc68->time.def_ms+999)/1000u); */
-  /*   myconfig_set_int(c, "sampling_rate", sc68->mix.rate); */
-  /*   myconfig_set_int(c, "force_loop",    sc68->force_loop); */
-  /*   myconfig_set_int(c, "seek_speed",    sc68->mix.max_stp); */
-  /*   myconfig_set_int(c, "allow_remote",  sc68->remote); */
-  myconfig_set_int(c, "total_time",    sc68->time.total);
-  myconfig_set_int(c, "total_ms",      sc68->time.total_ms);
-}
-
 int sc68_config_load(void)
 {
   int err;
@@ -760,6 +738,8 @@ int sc68_config_load(void)
   if (!config)
     config = config68_create(appname, 0);
   err = config68_load(config);
+  myconfig_set_int(config, "version", PACKAGE_VERNUM);
+
   sc68_debug(0,"libsc68: load config -- %s\n",strok68(err));
   return err;
 }
@@ -960,7 +940,6 @@ sc68_t * sc68_create(sc68_create_t * create)
     goto error;
   }
 
-
   /* Set IO chipsets sampling rates */
   sc68->mix.rate = set_spr(sc68, sc68->mix.rate);
   if (sc68->mix.rate <= 0) {
@@ -1008,13 +987,10 @@ void sc68_destroy(sc68_t * sc68)
 
 static int get_spr(const sc68_t * sc68)
 {
-  int hz = sc68 ? sc68->mix.rate : 0;
-  if (hz <= 0)
-    hz = audio68_sampling_rate(0);
-  return hz;
+  return sc68 ? sc68->mix.rate : sc68_spr_def;
 }
 
-static int set_spr(const sc68_t * sc68, int hz)
+static int set_spr(sc68_t * sc68, int hz)
 {
   if (hz == SC68_SPR_QUERY)
     hz = get_spr(sc68);
@@ -1026,11 +1002,13 @@ static int set_spr(const sc68_t * sc68, int hz)
       hz = def;
     if (hz <  min) hz = min;
     if (hz >  max) hz = max;
-    hz = audio68_sampling_rate(hz);
-    if (hz != -1 && sc68) {
-      ymio_sampling_rate(sc68->ymio, hz);
-      mwio_sampling_rate(sc68->mwio, hz);
-      paulaio_sampling_rate(sc68->paulaio, hz);
+    if (sc68) {
+      hz = ymio_sampling_rate(sc68->ymio, hz);
+      hz = mwio_sampling_rate(sc68->mwio, hz);
+      hz = paulaio_sampling_rate(sc68->paulaio, hz);
+      sc68->mix.rate = hz;
+    } else {
+      sc68_spr_def = hz;
     }
   }
   return hz;
@@ -1085,11 +1063,6 @@ static void stop_track(sc68_t * sc68, const int real_stop)
   sc68->seek_to         = -1;
   sc68->track_to        = 0;
   sc68->loop_to         = 0;
-
-  sc68->time.total     += sc68->time.elapsed_ms / 1000u;
-  sc68->time.total_ms  += sc68->time.elapsed_ms % 1000u;
-  sc68->time.total     += sc68->time.total_ms / 1000u;
-  sc68->time.total_ms  %= 1000u;
 
   if (real_stop)
     sc68->time.origin_ms  = 0;
