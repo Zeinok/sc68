@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 15:41:56 ben>
+ * Time-stamp: <2013-08-03 17:14:14 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -1241,7 +1241,7 @@ static int load_replay(sc68_t * sc68, const char * replay, int a0)
   strcpy(rname,"sc68://replay/");    /* $$$ to be change a sc68://replay/... */
   strcat68(rname, replay, sizeof(rname)-1);
   rname[sizeof(rname)-1] = 0;
-  is = uri68_create_vfs(rname, 1, 0);
+  is = uri68_vfs(rname, 1, 0);
   err = vfs68_open(is);
   err = err || (size = vfs68_length(is), size < 0);
   err = err || stream_read_68k(sc68, a0, is, size);
@@ -2160,9 +2160,16 @@ sc68_music_info_t * sc68_music_info(sc68_t * sc68, int track, sc68_disk_t disk)
 }
 #endif
 
-vfs68_t * sc68_vfs(const char * uri, int mode)
+vfs68_t * sc68_vfs(const char * uri, int mode, int argc, ...)
 {
-  return uri68_create_vfs(uri, mode, 0);
+  vfs68_t * vfs;
+  va_list list;
+
+  va_start(list, argc);
+  vfs = uri68_vfs_va(uri, mode, argc, list);
+  va_end(list);
+
+  return vfs;
 }
 
 const char * sc68_error_get(sc68_t * sc68)

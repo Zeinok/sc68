@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 23:47:30 ben>
+ * Time-stamp: <2013-08-03 17:05:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -371,7 +371,7 @@ int main(int argc, char ** argv)
   }
   inname = argv[i];
 
-  out = uri68_create_vfs(outname, 2, 0);
+  out = uri68_vfs(outname, 2, 0);
   if (vfs68_open(out)) {
     error ("info68: error opening output (%s).\n",
            out ? vfs68_filename(out) : outname);

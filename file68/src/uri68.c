@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 23:10:16 ben>
+ * Time-stamp: <2013-08-03 16:59:21 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -98,25 +98,7 @@ int uri68_register(scheme68_t * scheme)
   return 0;
 }
 
-/* int url68_local_protocol(const char * protocol) */
-/* { */
-/*   int i; */
-
-/*   static const char * local_proto[] = { */
-/*     "", "FILE","LOCAL","NULL" */
-/*     /\* , "STDIN", "STDOUT" remove this (not seekable) *\/ */
-/*   }; */
-/*   const int n_proto = sizeof(local_proto)/sizeof(*local_proto); */
-
-/*   i = 0; */
-/*   if (protocol) { */
-/*     for (; i<n_proto && strcmp68(protocol, local_proto[i]); ++i) */
-/*       ; */
-/*   } */
-/*   return i < n_proto; */
-/* } */
-
-vfs68_t * uri68_create_vfs(const char * uri, int mode, int argc, ...)
+vfs68_t * uri68_vfs_va(const char * uri, int mode, int argc, va_list list)
 {
   vfs68_t * vfs = 0;
   scheme68_t * scheme;
@@ -129,12 +111,8 @@ vfs68_t * uri68_create_vfs(const char * uri, int mode, int argc, ...)
       break;
   }
 
-  if (scheme) {
-    va_list list;
-    va_start(list,argc);
+  if (scheme)
     vfs = scheme->create(uri, mode, argc, list);
-    va_end(list);
-  }
 
   msg68_debug("url68: create url='%s' %c%c => [%s,'%s']\n",
               strnevernull68(uri),
@@ -142,6 +120,18 @@ vfs68_t * uri68_create_vfs(const char * uri, int mode, int argc, ...)
               (mode&2) ? 'W' : '.',
               strok68(!vfs),
               vfs68_filename(vfs));
+
+  return vfs;
+}
+
+vfs68_t * uri68_vfs(const char * uri, int mode, int argc, ...)
+{
+  vfs68_t * vfs;
+  va_list list;
+
+  va_start(list, argc);
+  vfs = uri68_vfs_va(uri, mode, argc, list);
+  va_end(list);
 
   return vfs;
 }

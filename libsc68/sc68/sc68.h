@@ -5,7 +5,7 @@
  * @date      2003/08/07
  * @brief     sc68 API header.
  */
-/* Time-stamp: <2013-08-02 19:45:38 ben> */
+/* Time-stamp: <2013-08-03 17:13:21 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -621,9 +621,16 @@ typedef struct _vfs68_t vfs68_t; /**< normally defined in sc68/file68_vfs.h */
 
 SC68_API
 /**
- * Create a stream from uri.
+ * Create a VFS from uri.
+ *
+ * @name  uri     URI or path
+ * @name  mode    open mode
+ * @argc  number  of supplemental arguments
+ *
+ * @return VFS
+ * @retval 0 on error
  */
-vfs68_t * sc68_vfs(const char * uri, int mode);
+vfs68_t * sc68_vfs(const char * uri, int mode, int argc, ...);
 
 SC68_API
 /**

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 20:20:11 ben>
+ * Time-stamp: <2013-08-03 17:06:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -939,7 +939,7 @@ static char * LoadBinary(char * fname, int * fsize)
 
 #ifdef USE_FILE68
 
-  vfs68_t *is = uri68_create_vfs(fname, 1, 0);
+  vfs68_t *is = uri68_vfs(fname, 1, 0);
 
   if (vfs68_open(is) == -1) {
     goto error;

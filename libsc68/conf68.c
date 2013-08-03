@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 14:42:24 ben>
+ * Time-stamp: <2013-08-03 17:14:46 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -491,7 +491,7 @@ int config68_save(config68_t * conf)
 
     strncpy(tmp, "sc68://config/", sizeof(tmp));
     strncat(tmp, conf->name, sizeof(tmp));
-    os = uri68_create_vfs(tmp, 2, 0);
+    os = uri68_vfs(tmp, 2, 0);
     err = vfs68_open(os);
     if (!err) {
       TRACE68(config68_cat,"conf68: save into \"%s\"\n",
@@ -584,7 +584,7 @@ static int load_from_file(config68_t * conf)
 
   strcpy(s, "sc68://config/");
   strcat(s, conf->name);
-  is = uri68_create_vfs(s, 1, 0);
+  is = uri68_vfs(s, 1, 0);
   err = vfs68_open(is);
   if (err)
     goto error;

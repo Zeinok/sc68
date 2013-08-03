@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 14:34:24 ben>
+ * Time-stamp: <2013-08-03 17:04:16 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -378,7 +378,7 @@ static int isao_open(vfs68_t * vfs)
 
   if (!is->ao.format.rate) {
     is->ao.format.rate = vfs68_ao_defaut_rate;
-    TRACE68(ao68_cat,"libao68: using default sampling rate\n");
+    TRACE68(ao68_cat,"libao68: %s\n", "using default sampling rate");
   }
   dump_ao_format(&is->ao.format);
   is->ao.device =

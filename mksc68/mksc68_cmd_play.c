@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-01 20:50:40 ben>
+ * Time-stamp: <2013-08-03 17:16:34 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -155,7 +155,7 @@ static void play_init(playinfo_t * pi)
 
   pi->isplaying = 2;
   pi->code      = -1;
-  pi->out       = sc68_vfs(outname, 2);
+  pi->out       = sc68_vfs(outname, 2, 0);
   pi->gdb       = 0;
 
   if (!pi->out) return;

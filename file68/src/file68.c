@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 20:23:24 ben>
+ * Time-stamp: <2013-08-03 17:03:29 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -817,7 +817,7 @@ static vfs68_t * uri_or_file_create(const char * uri, int mode,
     info->type = rsc68_last;
   }
 
-  vfs = uri68_create_vfs(uri, mode, 1, param);
+  vfs = uri68_vfs(uri, mode, 1, param);
   if (vfs68_open(vfs) < 0) {
     vfs68_destroy(vfs);
     vfs = 0;
@@ -863,7 +863,7 @@ disk68_t * file68_load_mem(const void * buffer, int len)
   disk68_t * d;
   vfs68_t * is;
 
-  is = uri68_create_vfs("mem:", 1, 2, buffer, len);
+  is = uri68_vfs("mem:", 1, 2, buffer, len);
   /* is = vfs68_mem_create((void *)buffer,len,1); */
   d = vfs68_open(is) ? 0 : file68_load(is);
   vfs68_destroy(is);
@@ -1722,7 +1722,7 @@ int file68_save_mem(const char * buffer, int len, const disk68_t * mb,
   vfs68_t * vfs;
   int err;
 
-  vfs = uri68_create_vfs("mem:", 2, 2, buffer, len);
+  vfs = uri68_vfs("mem:", 2, 2, buffer, len);
   /* vfs = vfs68_mem_create((char *)buffer, len, 2); */
   err = file68_save(vfs, mb, version, gzip);
   vfs68_destroy(vfs);
@@ -1756,7 +1756,7 @@ int file68_save(vfs68_t * os, const disk68_t * mb, int version, int gzip)
 
   /* Create a null stream to calculate total size.
      Needed by gzip stream that can't seek back. */
-  null_os = uri68_create_vfs("null:", 3, 0);
+  null_os = uri68_vfs("null:", 3, 0);
   /* null_os = vfs68_null_create(fname); */
   if (vfs68_open(null_os)) {
     errstr = "open";

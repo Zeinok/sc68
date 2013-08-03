@@ -5,12 +5,12 @@
  * @date     2003-10-28
  * @brief    URI manipulation header.
  */
-/* Time-stamp: <2013-08-02 23:04:12 ben> */
+/* Time-stamp: <2013-08-03 17:02:18 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_URI_H_
-#define _FILE68_URI_H_
+#ifndef FILE68_URI_H
+#define FILE68_URI_H
 
 #ifndef FILE68_API
 # include "file68_api.h"
@@ -86,7 +86,15 @@ FILE68_API
  * @return stream
  * @retval 0 error
  */
-vfs68_t * uri68_create_vfs(const char * uri, int mode, int argc, ...);
+vfs68_t * uri68_vfs(const char * uri, int mode, int argc, ...);
+
+FILE68_API
+/**
+ * Create a stream for an URI (va version).
+ *
+ * @see uri68_vfs()
+ */
+vfs68_t * uri68_vfs_va(const char * uri, int mode, int argc, va_list list);
 
 FILE68_API
 /**
