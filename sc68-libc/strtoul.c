@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 09:19:28 ben>
+ * Time-stamp: <2013-08-03 08:59:06 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,9 +28,13 @@
 # include <config.h>
 #endif
 
+#ifdef HAVE_STRTOUL
+# error "compiling strtoul.c but already have a strtoul() function"
+#endif
+
 #include "libc68.h"
 
-static int digit(int c, unsigned int base)
+static int digit(const int c, const unsigned int base)
 {
   int n = -1;
   if (c <= '9') {
@@ -46,6 +50,10 @@ static int digit(int c, unsigned int base)
   return -1;
 }
 
+/**
+ * @todo  Check how we should handle prefix sign.
+ * @todo  Handle errno properly
+ */
 unsigned long int strtoul(const char *s, char **end, int base);
 {
   const char * start = s;

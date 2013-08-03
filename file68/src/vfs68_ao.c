@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 21:45:07 ben>
+ * Time-stamp: <2013-08-03 13:50:49 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -70,33 +70,57 @@ typedef struct {
   char name[1];               /**< filename.                        */
 } vfs68_ao_t;
 
+enum {
+  AO_SPR_MIN = 8000,
+  AO_SPR_MAX = 96000,
+  AO_SPR_DEF = 44100
+};
+
 static volatile int init;
-static unsigned int vfs68_ao_defaut_rate = 44100;
+static unsigned int vfs68_ao_defaut_rate = AO_SPR_DEF;
+static vfs68_ao_t * ao_unic_vfs;
 static int ao_ismine(const char *);
 static vfs68_t * ao_create(const char *, int, int, va_list);
 static scheme68_t ao_scheme = {
   0, "vfs-ao", ao_ismine, ao_create
 };
 
+static unsigned int spr_in_range(unsigned int rate)
+{
+  if (rate > (unsigned)AO_SPR_MAX) {
+    rate = AO_SPR_MAX;
+  } else if (rate < (unsigned)AO_SPR_MIN) {
+    rate = AO_SPR_MIN;
+  }
+  return rate;
+}
+
+int vfs68_ao_sampling(vfs68_t * vfs)
+{
+  vfs68_ao_t * is = (vfs68_ao_t *)vfs;
+  if (!is || !is->ao.format.rate)
+    return vfs68_ao_defaut_rate;
+  return is->ao.format.rate;
+}
 
 /* $$$ AO is the only audio backend we have. No need for much
    complicated mechanism right now. */
 unsigned int audio68_sampling_rate(const unsigned int rate)
 {
-  unsigned int f;
   if (!rate) {
-    f = vfs68_ao_defaut_rate;
-  } else {
-    f = rate;
-    if (f < 8000u) {
-      f = 8000u;
-    } else if (f > 96000u) {
-      f = 96000u;
-    }
-    vfs68_ao_defaut_rate = f;
-    msg68_notice("audio68: sampling rate -- *%uhz*\n", f);
+    return vfs68_ao_sampling(&ao_unic_vfs->vfs);
   }
-  return f;
+  vfs68_ao_defaut_rate = spr_in_range(rate);
+  TRACE68(ao68_cat,
+          "audio68: default sampling rate -- *%uhz*\n",
+          vfs68_ao_defaut_rate);
+  if (ao_unic_vfs) {
+    TRACE68(ao68_cat,
+            "audio68: VFS sampling rate -- *%uhz*\n",
+            vfs68_ao_defaut_rate);
+    ao_unic_vfs->ao.format.rate = vfs68_ao_defaut_rate;
+  }
+  return vfs68_ao_defaut_rate;
 }
 
 /* Init does not actually initialize aolib. That task will be
@@ -192,6 +216,16 @@ static void dump_ao_info(const int id, const ao_info * info, const int full)
   }
 }
 
+static void dump_ao_format(const ao_sample_format * fmt)
+{
+  TRACE68(ao68_cat,
+          "libao68: sample format -- %d-bits %d-hz %d-chan %c-endian %s\n",
+          fmt->bits, fmt->rate, fmt->channels,
+          fmt->byte_format == AO_FMT_LITTLE ? 'L' :
+          (fmt->byte_format == AO_FMT_BIG ? 'B' : 'N'),
+          fmt->matrix?fmt->matrix:"no-matrix");
+}
+
 static int isao_open(vfs68_t * vfs)
 {
   vfs68_ao_t * is = (vfs68_ao_t *)vfs;
@@ -232,7 +266,8 @@ static int isao_open(vfs68_t * vfs)
       } else if (!strcmp68(key,"rate")) {
         int frq = 0;
         while (*val>='0' && *val<='9') frq = frq*10 + *val++ - '0';
-        if (frq > 0) {
+        if (frq) {
+          frq = spr_in_range(frq);
           TRACE68(ao68_cat,"libao68: open -- *SAMPLING-RATE* %d\n",frq);
           is->ao.format.rate = frq;
         }
@@ -280,7 +315,8 @@ static int isao_open(vfs68_t * vfs)
       } else {
         int i = 0;
         if (!info)
-          msg68_warning("libao68: consider setting driver before options -- [%s]='%s'\n", key, val);
+          msg68_warning("libao68: choose driver before options -- [%s]='%s'\n",
+                        key, val);
         else
           for (; i<info->option_count && strcmp68(info->options[i],key); ++i)
             ;
@@ -290,7 +326,7 @@ static int isao_open(vfs68_t * vfs)
           TRACE68(ao68_cat, "libao68: add options [%s]='%s' -- *%s*\n",
                   key, val, strok68(!res));
         } else
-          msg68_warning("libao68: ignore invalid option for driver '%s' -- [%s]='%s'\n",
+          msg68_warning("libao68: ignore option for driver '%s' -- [%s]='%s'\n",
                         info->short_name, key, val);
       }
       *s2 = '=';
@@ -360,12 +396,16 @@ static int isao_open(vfs68_t * vfs)
     }
   }
 
+  if (!is->ao.format.rate) {
+    is->ao.format.rate = vfs68_ao_defaut_rate;
+    TRACE68(ao68_cat,"libao68: using default sampling rate\n");
+  }
+  dump_ao_format(&is->ao.format);
   is->ao.device =
     (info->type==AO_TYPE_LIVE)
     ? ao_open_live(is->ao.driver_id, &is->ao.format, is->ao.options)
     : ao_open_file(is->ao.driver_id, is->outname, !is->no_overwrite,
                    &is->ao.format, is->ao.options);
-
   if (!is->ao.device) {
     goto error;
   }
@@ -376,6 +416,7 @@ static int isao_open(vfs68_t * vfs)
     msg68_notice("libao68: file driver -- *%s* -- '%s''\n",
                  info->short_name, is->outname);
   }
+  dump_ao_format(&is->ao.format);
 
   is->count = 0;
   err = 0;
@@ -459,6 +500,8 @@ static int isao_seek(vfs68_t * vfs, int offset)
 static void isao_destroy(vfs68_t * vfs)
 {
   TRACE68(ao68_cat, "libao68: destroy -- '%s'\n", vfs68_filename(vfs));
+  if (&ao_unic_vfs->vfs == vfs)
+    ao_unic_vfs = 0;
   vfs68_ao_shutdown();
   free(vfs);
 }
@@ -487,14 +530,14 @@ static const vfs68_t vfs68_ao = {
  * Other keys will be used as ao driver options.
  *
  */
-vfs68_t * vfs68_ao_create(const char * fname, int mode)
+vfs68_t * vfs68_ao_create(const char * uri, int mode, int spr)
 {
   vfs68_ao_t *isf=0;
   int len;
   ao68_info_t ao;
 
-  TRACE68(ao68_cat,"libao68: create -- '%s' (%d)\n",
-          strnevernull68(fname), mode);
+  TRACE68(ao68_cat,"libao68: create -- '%s' (%d) %dhz\n",
+          strnevernull68(uri), mode, spr);
 
   if (!init) {
     if (init_aolib() || !init) {
@@ -503,54 +546,53 @@ vfs68_t * vfs68_ao_create(const char * fname, int mode)
     }
   }
 
-  if (!fname || !fname[0]) {
-    msg68_critical("libao68: create error -- *parameter*\n");
+  if (!uri || !ao_ismine(uri)) {
+    msg68_error("libao68: create error -- *parameter*\n");
     goto error;
   }
 
   if (mode != VFS68_OPEN_WRITE) {
-    msg68_critical("libao68: create error -- *mode*\n");
+    msg68_error("libao68: create error -- *mode*\n");
     goto error;
   }
 
-  /* Don't need 0, because 1 byte already allocated in the
-   * vfs68_ao_t::fname.
-   */
-  len = strlen(fname);
+  len = strlen(uri);
   isf = calloc(sizeof(vfs68_ao_t) + len, 1);
   if (!isf) {
     goto error;
   }
 
+
   /* -- Setup for default driver -- */
   memset(&ao,0,sizeof(ao));
   ao.default_id         = ao_default_driver_id();
   ao.driver_id          = ao.default_id;
-  /* ao.device             = 0; */
-  /* ao.default_device     = 0; */
   ao.format.bits        = 16;
   ao.format.channels    = 2;
-  ao.format.rate        = vfs68_ao_defaut_rate;
+  ao.format.rate        = spr ? spr_in_range(spr) : 0;
   ao.format.byte_format = AO_FMT_NATIVE;
-  /* ao.format.matrix      = "L,R"; */
-  /* ao.options            = 0; */
 
   /* Copy vfs functions. */
   memcpy(&isf->vfs, &vfs68_ao, sizeof(vfs68_ao));
   /*   isf->mode = mode & (VFS68_OPEN_READ|VFS68_OPEN_WRITE); */
   isf->ao   = ao;
-  strcpy(isf->name, fname);
+  strcpy(isf->name, uri);
 
 error:
-  fname = vfs68_filename(&isf->vfs);
+  if (!ao_unic_vfs)
+    ao_unic_vfs = isf;
+  uri = vfs68_filename(&isf->vfs);
   TRACE68(ao68_cat,"libao68: create -- *%s* -- '%s'\n",
-          strok68(!isf),strnevernull68(fname));
+          strok68(!isf),strnevernull68(uri));
   return isf ? &isf->vfs : 0;
 }
 
 static vfs68_t * ao_create(const char * uri, int mode, int argc, va_list list)
 {
-  return vfs68_ao_create(uri, mode);
+  unsigned int rate = 0;
+  if (argc == 1)
+    rate = va_arg(list,unsigned int);
+  return vfs68_ao_create(uri, mode, rate);
 }
 
 #else /* #ifdef USE_AO */

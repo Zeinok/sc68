@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 18:55:42 ben>
+ * Time-stamp: <2013-08-03 13:59:35 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -692,7 +692,7 @@ int main(int argc, char *argv[])
     goto error;
   }
 
-  out = sc68_vfs(outname, 2);
+  out = uri68_create_vfs(outname, 2, 1, create68.sampling_rate);
   if (!out) {
     goto error;
   }

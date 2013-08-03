@@ -5,7 +5,7 @@
  * @date     2007-03-08
  * @brief    AO stream header.
  */
-/* Time-stamp: <2013-08-02 16:38:23 ben> */
+/* Time-stamp: <2013-08-03 13:52:51 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -34,6 +34,18 @@ FILE68_EXTERN
  * Shutdown ao virtual file system.
  */
 void vfs68_ao_shutdown(void);
+
+FILE68_EXTERN
+/**
+ * Get sampling rate.
+ */
+int vfs68_ao_sampling(vfs68_t * vfs);
+
+FILE68_EXTERN
+/**
+ * Create audio VFS.
+ */
+vfs68_t * vfs68_ao_create(const char * uri, int mode, int spr);
 
 /**
  * @}
