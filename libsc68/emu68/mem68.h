@@ -1,16 +1,16 @@
 /**
  * @ingroup   emu68_lib
  * @file      emu68/mem68.h
+ * @brief     68k memory and IO manager header.
  * @author    Benjamin Gerard
  * @date      1999/03/13
- * @brief     68k memory and IO manager header.
  */
-/* Time-stamp: <2013-07-08 00:22:23 ben> */
+/* Time-stamp: <2013-08-04 23:14:22 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _EMU68_MEM68_H_
-#define _EMU68_MEM68_H_
+#ifndef EMU68_MEM68_H
+#define EMU68_MEM68_H
 
 #include "emu68_api.h"
 #include "struct68.h"
@@ -374,4 +374,4 @@ void emu68_mem_reset_area(emu68_t * const emu68, u8 area);
  * @}
  */
 
-#endif /* #ifndef _EMU68_MEM68_H_ */
+#endif

@@ -1,16 +1,16 @@
 /**
  * @ingroup   emu68_lib
  * @file      emu68/inst68.h
+ * @brief     68k instructions header.
  * @author    Benjamin Gerard
  * @date      1999/03/13
- * @brief     68k instructions header.
  */
-/* Time-stamp: <2013-07-07 19:43:44 ben>  */
+/* Time-stamp: <2013-08-04 23:10:03 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _EMU68_INST68_H_
-#define _EMU68_INST68_H_
+#ifndef EMU68_INST68_H
+#define EMU68_INST68_H
 
 #include "emu68_api.h"
 #include "type68.h"
@@ -760,7 +760,7 @@ void stop68(emu68_t * const emu68);
 
 
 /**
- *  @}
+ * @}
  */
 
-#endif /* #ifndef _EMU68_INST68_H_ */
+#endif

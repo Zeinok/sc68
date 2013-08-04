@@ -1,16 +1,16 @@
 /**
  * @ingroup   emu68_lib_inline
  * @file      emu68/inl68_bcd.h
+ * @brief     68k binary coded decimal arithmetic inlines.
  * @author    Benjamin Gerard
  * @date      2009/05/18
- * @brief     68k binary coded decimal arithmetic inlines.
  */
-/* Time-stamp: <2013-07-07 19:13:49 ben>  */
+/* Time-stamp: <2013-08-04 23:11:44 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _INL68_BCD_H_
-#define _INL68_BCD_H_
+#ifndef INL68_BCD_H
+#define INL68_BCD_H
 
 static inline
 int inl_abcd68(emu68_t * const emu68, int a, int b)
@@ -66,4 +66,4 @@ int inl_nbcd68(emu68_t * const emu68, int a)
   return inl_sbcd68(emu68,0,a);
 }
 
-#endif /* #ifndef _INL68_BCD_H_ */
+#endif

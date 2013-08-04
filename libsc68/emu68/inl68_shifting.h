@@ -1,16 +1,16 @@
 /**
  * @ingroup   emu68_lib_inline
  * @file      emu68/inl68_shifting.h
+ * @brief     68k bit shifting inlines.
  * @author    Benjamin Gerard
  * @date      2009/05/18
- * @brief     68k bit shifting inlines.
  */
-/* Time-stamp: <2013-07-07 19:31:39 ben>  */
+/* Time-stamp: <2013-08-04 23:10:29 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _INL68_SHIFTING_H_
-#define _INL68_SHIFTING_H_
+#ifndef INL68_SHIFTING_H
+#define INL68_SHIFTING_H
 
 static inline
 void inl_swap68(emu68_t * const emu68, int dn)
@@ -218,4 +218,4 @@ int68_t inl_roxr68(emu68_t * const emu68, uint68_t d, int s, const int l)
   return d;
 }
 
-#endif /* #ifndef _INL68_SHIFTING_H_ */
+#endif

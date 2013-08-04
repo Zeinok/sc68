@@ -1,16 +1,16 @@
 /**
  * @ingroup   emu68_lib_inline
  * @file      emu68/inl68_systctrl.h
+ * @brief     68k system control operation inlines.
  * @author    Benjamin Gerard
  * @date      2009/05/18
- * @brief     68k system control operation inlines.
  */
-/* Time-stamp: <2013-07-14 20:05:28 ben>  */
+/* Time-stamp: <2013-08-04 23:10:15 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _INL68_SYSTCTRL_H_
-#define _INL68_SYSTCTRL_H_
+#ifndef INL68_SYSTCTRL_H
+#define INL68_SYSTCTRL_H
 
 static inline
 void inl_andtosr68(emu68_t * const emu68, int68_t v)
@@ -103,4 +103,4 @@ void inl_illegal68(emu68_t * const emu68)
   inl_exception68(emu68, ILLEGAL_VECTOR, -1);
 }
 
-#endif /* #ifndef _INL68_SYSTCTRL_H_ */
+#endif

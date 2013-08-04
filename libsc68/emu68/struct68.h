@@ -1,16 +1,16 @@
 /**
  * @ingroup   emu68_lib
  * @file      emu68/struct68.h
+ * @brief     Struture definitions header.
  * @author    Benjamin Gerard
  * @date      1999-03-13
- * @brief     Struture definitions header.
  */
-/* Time-stamp: <2013-07-14 19:49:35 ben> */
+/* Time-stamp: <2013-08-04 23:14:11 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _EMU68_STRUCT68_H_
-#define _EMU68_STRUCT68_H_
+#ifndef EMU68_STRUCT68_H
+#define EMU68_STRUCT68_H
 
 #include "type68.h"
 
@@ -238,4 +238,4 @@ void inl_addcycle68(emu68_t * const emu68, const cycle68_t n)
  * @}
  */
 
-#endif /* #ifndef _EMU68_STRUCT68_H_ */
+#endif

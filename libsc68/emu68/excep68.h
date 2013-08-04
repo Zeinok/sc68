@@ -1,16 +1,16 @@
 /**
  * @ingroup   emu68_lib
  * @file      emu68/excep68.h
+ * @brief     68k exception and interruption definition header.
  * @author    Benjamin Gerard
  * @date      1999/13/03
- * @brief     68k exception and interruption definition header.
  */
-/* Time-stamp: <2013-07-14 12:59:19 ben> */
+/* Time-stamp: <2013-08-04 23:12:04 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _EMU68_EXCEP68_H_
-#define _EMU68_EXCEP68_H_
+#ifndef EMU68_EXCEP68_H
+#define EMU68_EXCEP68_H
 
 /**
  * @addtogroup  emu68_lib
@@ -72,4 +72,4 @@ enum emu68_vector_e {
  * @}
  */
 
-#endif /* #ifndef _EMU68_EXCEP68_H_ */
+#endif

@@ -1,16 +1,16 @@
 /**
  * @ingroup   emu68_lib_inline
  * @file      emu68/inl68_bitmanip.h
+ * @brief     68k bit manipalution instruction inlines.
  * @author    Benjamin Gerard
  * @date      2009/05/18
- * @brief     68k bit manipalution instruction inlines.
  */
-/* Time-stamp: <2013-07-07 19:14:13 ben>  */
+/* Time-stamp: <2013-08-04 23:11:36 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _INL68_BITMANIP_H_
-#define _INL68_BITMANIP_H_
+#ifndef INL68_BITMANIP_H
+#define INL68_BITMANIP_H
 
 static inline
 void inl_btst68(emu68_t * const emu68, const int68_t v, const int bit)
@@ -40,4 +40,4 @@ int68_t inl_bchg68(emu68_t * const emu68, const int68_t v, const int bit)
   return v ^ ( 1 << bit );
 }
 
-#endif /* #ifndef _INL68_BITMANIP_H_ */
+#endif

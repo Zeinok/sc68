@@ -1,16 +1,16 @@
 /**
  * @ingroup   emu68_lib_inline
  * @file      emu68/inl68_datamove.h
+ * @brief     68k program control inlines.
  * @author    Benjamin Gerard
  * @date      2009/05/18
- * @brief     68k program control inlines.
  */
-/* Time-stamp: <2013-07-07 19:14:34 ben>  */
+/* Time-stamp: <2013-08-04 23:11:28 ben>  */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _INL68_DATAMOVE_H_
-#define _INL68_DATAMOVE_H_
+#ifndef INL68_DATAMOVE_H
+#define INL68_DATAMOVE_H
 
 static inline
 void inl_link68(emu68_t * const emu68, const int reg)
@@ -49,4 +49,4 @@ addr68_t inl_pea68(emu68_t * const emu68, const  int mode, const int reg)
   return ea;
 }
 
-#endif /* #ifndef _INL68_DATAMOVE_H_ */
+#endif

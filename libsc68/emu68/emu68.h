@@ -1,19 +1,18 @@
 /**
  * @ingroup   emu68_lib
  * @file      emu68/emu68.h
+ * @brief     68K emulator header.
  * @author    Benjamin Gerard
  * @date      1999/03/13
- * @brief     68K emulator header.
  */
-/* Time-stamp: <2013-07-14 12:08:02 ben> */
+/* Time-stamp: <2013-08-04 23:12:39 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _EMU68_EMU68_H_
-#define _EMU68_EMU68_H_
+#ifndef EMU68_EMU68_H
+#define EMU68_EMU68_H
 
 #include "emu68_api.h"
-
 #include "struct68.h"
 #include "error68.h"
 #include "cc68.h"
@@ -580,4 +579,4 @@ int emu68_debugmode(emu68_t * const emu68);
  * @}
  */
 
-#endif /* #ifndef _EMU68_EMU68_H_ */
+#endif

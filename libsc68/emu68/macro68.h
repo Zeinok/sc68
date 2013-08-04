@@ -1,15 +1,16 @@
 /**
  * @ingroup   emu68_lib
  * @file      emu68/macro68.h
+ * @brief     68K instruction emulation macro definitions.
  * @author    Benjamin Gerard
  * @date      1999/13/03
- * @brief     68K instruction emulation macro definitions.
  */
-/* Time-stamp: <2013-07-15 06:47:10 ben> */
+/* Time-stamp: <2013-08-04 23:07:54 ben> */
+
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _EMU68_MACRO68_H_
-#define _EMU68_MACRO68_H_
+#ifndef EMU68_MACRO68_H
+#define EMU68_MACRO68_H
 
 /* Determine what instruction to inline.
  *
@@ -355,4 +356,4 @@
 #define BCC(PC,CC)   bcc68[CC](emu68,PC)
 #define DBCC(DN,CC)  dbcc68[CC](emu68,DN)
 
-#endif /* #ifdefndef _EMU68_MACRO68_H_ */
+#endif

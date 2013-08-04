@@ -1,16 +1,16 @@
 /**
  * @ingroup   emu68_lib
  * @file      emu68/srdef68.h
- * @author    Benjamin Gerard
- * @date      1999/13/03
  * @brief     Status Register (SR) definition header.
+ * @date      1999/13/03
+ * @author    Benjamin Gerard
  */
-/* Time-stamp: <2013-07-14 19:28:11 ben> */
+/* Time-stamp: <2013-08-05 00:45:58 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _EMU68_SRDEF68_H_
-#define _EMU68_SRDEF68_H_
+#ifndef EMU68_SRDEF68_H
+#define EMU68_SRDEF68_H
 
 /**
  * @defgroup  emu68_lib_srdef  Status Register (SR) definitions
@@ -104,7 +104,7 @@ enum {
  * @param  SR  current SR value
  * @param  CCR ccr value [0..255]
  * @return new SR value
- * @retval (SR&~255)|CCR
+ * @retval ( SR & ~255 ) | CCR
  */
 #define SET_CCR(SR,CCR) (SR) = ( ( (SR) & ~255 ) | (CCR) )
 
@@ -112,7 +112,7 @@ enum {
  * Get IPL in SR value.
  * @param  SR  current SR value
  * @return IPL value
- * @retval (SR>>SR_I_BIT)&7
+ * @retval ( SR >> SR_I_BIT ) & 7
  */
 #define GET_IPL(SR) ( ( (SR) >> SR_I_BIT ) & 7 )
 
@@ -121,7 +121,7 @@ enum {
  * @param  SR   current SR value
  * @param  IPL  new IPL value [0..7]
  * @return new SR value
- * @retval ((SR)&~SR_I)|((IPL)<<SR_IPL_BIT)
+ * @retval ( SR & ~SR_I ) | ( IPL << SR_IPL_BIT )
  */
 #define SET_IPL(SR,IPL) (SR) = ( ( (SR) & ~SR_I ) | ( (IPL) << SR_I_BIT ) )
 
@@ -133,4 +133,4 @@ enum {
  * @}
  */
 
-#endif /* #ifndef _EMU68_SRDEF68_H_ */
+#endif

@@ -1,16 +1,16 @@
 /**
  * @ingroup   emu68_lib
  * @file      emu68/emu68_api.h
+ * @brief     emu68 library export header.
  * @author    Benjamin Gerard
  * @date      2009/02/10
- * @brief     emu68 library export header.
  */
-/* Time-stamp: <2013-05-13 02:11:34 ben> */
+/* Time-stamp: <2013-08-04 23:12:28 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _EMU68_EMU68_API_H_
-#define _EMU68_EMU68_API_H_
+#ifndef EMU68_EMU68_API_H
+#define EMU68_EMU68_API_H
 
 #ifndef EMU68_API
 # ifdef EMU68_EXPORT
