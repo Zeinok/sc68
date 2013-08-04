@@ -60,11 +60,10 @@ void gst_sc68_flush_error(Gstsc68 * filter)
 
 void gst_sc68_report_error(Gstsc68 * filter)
 {
-  const char * err;
-  sc68_t * sc68 = filter ? filter->sc68 : 0;
-
-  while ( err = sc68_error_get(sc68), err ) {
-    GST_ERROR_OBJECT(filter,"%s",err);
+  if (filter) {
+    const char * err = sc68_error(filter->sc68);
+    if (err)
+      GST_ERROR_OBJECT(filter,"%s",err);
   }
 }
 
@@ -263,7 +262,8 @@ gboolean gst_sc68_onchangetrack(Gstsc68 * filter)
       gst_sc68_report_error(filter);
       return FALSE;
     }
-    pos_ms = sc68_seek(filter->sc68, SC68_SEEK_PLAY, SC68_SEEK_QUERY, 0);
+    /* $$$ orgin ? */
+    pos_ms = sc68_cntl(filter->sc68, SC68_GET_POS);
     if (pos_ms == -1) {
       GST_ERROR_OBJECT(filter, "failed to retrieve position");
       gst_sc68_report_error(filter);

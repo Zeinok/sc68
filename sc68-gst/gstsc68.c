@@ -430,7 +430,7 @@ static gboolean gst_sc68_task_play(Gstsc68 * filter)
       int is_seeking, ms;
       filter->samples += n;
       /* $$$ Check dis SC68_SEEK_DISK ? SC68_SEEK_TRAKC */
-      ms = sc68_seek(filter->sc68, SC68_SEEK_PLAY ,SC68_SEEK_QUERY, &is_seeking);
+      ms = sc68_cntl(filter->sc68, SC68_GET_POS);
       filter->position_ns = gst_sc68_mstons(ms);
       flow = gst_pad_push(filter->srcpad, buf);
       if (flow != GST_FLOW_OK) {

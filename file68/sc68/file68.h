@@ -5,7 +5,7 @@
  * @date     1998-09-03
  * @brief    Music file header.
  */
-/* Time-stamp: <2013-08-02 18:40:48 ben> */
+/* Time-stamp: <2013-08-04 10:12:38 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -49,8 +49,10 @@
 #define SC68_IDSTR_V2 "SC68\0\002\377\251\337\353\321"
 */
 
-#define SC68_NOFILENAME "n/a"   /**< SC68 unknown filename or author.      */
+#define SC68_NOFILENAME "n/a" /**< SC68 unknown filename or author. */
+
 enum {
+  SC68_DISK_ID   = (('d' << 24) | ('i' << 16) | ('s' << 8) | 'k'),
   SC68_LOADADDR  = 0x10000, /**< Default load address in 68K memory.    */
   SC68_MAX_TRACK = 63,      /**< Maximum track per disk (2 digits max). */
 };
@@ -148,6 +150,7 @@ typedef struct {
  *
  */
 typedef struct {
+  int          magic;       /**< Magic identifier is FILE68_MAGIC.       */
   int          def_mus;     /**< Preferred default music (default is 0). */
   int          nb_mus;      /**< Number of music track in file.          */
   int          nb_asid;     /**< Number of supplemental aSID tracks.     */
@@ -476,4 +479,3 @@ void file68_shutdown(void);
  */
 
 #endif
-

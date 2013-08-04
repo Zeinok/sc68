@@ -5,7 +5,7 @@
  * @date     2003-10-10
  * @brief    Null stream header.
  */
-/* Time-stamp: <2013-07-22 01:18:35 ben> */
+/* Time-stamp: <2013-08-04 21:30:00 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -32,14 +32,14 @@
 
 FILE68_EXTERN
 /**
- * Creates a null stream.
+ * Init null vfs.
  *
- * @param  name     Optionnal name *  @return stream
- * @retval 0 on error
+ * @retval  0 on success
+ * @retval -1 on error
  *
- * @note   filename is prefixed by "null://".
+ * @note   null scheme is "null:".
  */
-vfs68_t * vfs68_null_create(const char * name);
+int vfs68_null_init(void);
 
 /**
  * @}

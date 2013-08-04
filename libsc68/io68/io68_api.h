@@ -5,12 +5,12 @@
  * @date      2009/02/10
  * @brief     io68 export header.
  */
-/* Time-stamp: <2013-05-13 02:11:40 ben> */
+/* Time-stamp: <2013-08-04 19:14:37 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _IO68_IO68_API_H_
-#define _IO68_IO68_API_H_
+#ifndef IO68_IO68_API_H
+#define IO68_IO68_API_H
 
 #ifndef IO68_API
 # ifdef IO68_EXPORT
@@ -29,4 +29,4 @@
 # endif
 #endif
 
-#endif /* #ifndef _IO68_IO68_API_H_ */
+#endif

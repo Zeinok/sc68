@@ -1,11 +1,11 @@
 /**
  * @ingroup   sc68_lib
  * @file      sc68/sc68.h
+ * @brief     sc68 API header.
  * @author    Benjamin Gerard
  * @date      2003/08/07
- * @brief     sc68 API header.
  */
-/* Time-stamp: <2013-08-03 17:13:21 ben> */
+/* Time-stamp: <2013-08-04 23:13:24 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -252,23 +252,16 @@ enum sc68_spr_e {
 };
 
 /**
- * sc68_seek() parameters.
- */
-enum sc68_seek_e {
-  SC68_SEEK_QUERY  = -1, /**< Query position instead of seeking.     */
-  SC68_SEEK_TRACK  = 0,  /**< Seek time value are relative to track. */
-  SC68_SEEK_PLAY   = 1   /**< Seek time value are relative to play.  */
-};
-
-/**
  * sc68_play() parameters.
  */
 enum sc68_play_e {
   SC68_DEF_TRACK  =  0,  /**< track value for the default track.  */
   SC68_DEF_LOOP   =  0,  /**< loop value for the default loop.    */
   SC68_INF_LOOP   = -1,  /**< loop value for infinite loop.       */
+#if 0
   SC68_GET_TRACK  = -1,  /**< track value for query track or loop. */
   SC68_GET_LOOP   = -1   /**< loop value for query loop instead of track. */
+#endif
 };
 
 /**
@@ -284,14 +277,22 @@ enum sc68_pcm_e {
  */
 enum sc68_cntl_e {
   SC68_NOP = 0,
-  SC68_NAME,                         /**< Get sc68 instance name.   */
+  SC68_GET_NAME,                     /**< Get sc68 instance name.   */
+  SC68_GET_TRACKS,                   /**< Get number of tracks.     */
+  SC68_GET_TRACK,                    /**< Get current track.        */
+  SC68_GET_DEFTRACK,                 /**< Get disk default track.   */
+  SC68_GET_LOOPS,                    /**< Number of loops to play.  */
+  SC68_GET_LOOP,                     /**< Get current loop.         */
+  SC68_GET_DISK,                     /**< Get a pointer to disk.    */
   SC68_GET_SPR,                      /**< Get sampling rate.        */
   sc68_SET_SPR,                      /**< Set sampling rate.        */
-  SC68_GET_POS,                      /**< Get postion (ms).         */
-  SC68_SET_POS,                      /**< Set postion.              */
+  SC68_GET_POS,                      /**< Get track position (ms).  */
+  SC68_GET_PLAYPOS,                  /**< Get play position (ms).   */
+  SC68_SET_POS,                      /**< Set position.             */
   SC68_GET_PCM,                      /**< Get PCM format            */
   SC68_SET_PCM,                      /**< Set PCM format            */
-  SC68_TRACKS,                       /**< Get number of tracks.     */
+  SC68_GET_COOKIE,                   /**< Get cookie (user data).   */
+  SC68_SET_COOKIE,                   /**< Set cookie (user data).   */
   SC68_EMULATORS,                    /**< Get emulators array.      */
 };
 
@@ -370,6 +371,8 @@ SC68_API
  */
 int sc68_cntl(sc68_t * sc68, int fct, ...);
 
+#if 0
+
 SC68_API
 /**
  * Get user private data pointer.
@@ -384,7 +387,6 @@ SC68_API
  */
 void ** sc68_cookie_ptr(sc68_t * sc68);
 
-#if 0
 SC68_API
 /**
  * Set/Get sampling rate.
@@ -420,13 +422,13 @@ void sc68_set_user(sc68_t * sc68, const char * path);
 
 SC68_API
 /**
- * Pop and return last stacked error message.
+ * Return last error message.
  *
  * @param   sc68   sc68 instance or 0 for library messages.
  * @return  Error string.
  * @retval  0      No stacked error message.
  */
-const char * sc68_error_get(sc68_t * sc68);
+const char * sc68_error(sc68_t * sc68);
 
 /**
  * @}
@@ -742,4 +744,3 @@ int sc68_config_save(void);
  */
 
 #endif
-

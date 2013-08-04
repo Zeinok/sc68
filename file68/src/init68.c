@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 21:53:50 ben>
+ * Time-stamp: <2013-08-04 21:30:54 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -56,7 +56,7 @@ int  vfs68_ao_init(void);              /* defined in vfs68_ao.c   */
 int  vfs68_mem_init(void);             /* defined in vfs68_mem.c  */
 int  vfs68_fd_init();                  /* defined in vfs68_fd.c   */
 int  vfs68_file_init();                /* defined in vfs68_file.c */
-
+int  vfs68_null_init();                /* defined in vfs68_null.c */
 static char * mygetenv(const char *name)
 {
 #ifndef HAVE_GETENV
@@ -151,6 +151,9 @@ int file68_init(int argc, char **argv)
 
   /* Memory */
   vfs68_mem_init();
+
+  /* NUll */
+  vfs68_null_init();
 
   /* File descriptor */
   vfs68_fd_init();

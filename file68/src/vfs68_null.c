@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 01:35:17 ben>
+ * Time-stamp: <2013-08-04 21:47:14 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -34,6 +34,8 @@
 #ifndef VFS68_NO_NULL
 
 #include "file68_vfs_def.h"
+#include "file68_uri.h"
+#include "file68_str.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -46,6 +48,19 @@ typedef struct {
   int open;            /**< has been opened.            */
   char name[1];        /**< filename (null://filename). */
 } vfs68_null_t;
+
+static int null_ismine(const char *);
+static vfs68_t * null_create(const char *, int, int, va_list);
+static scheme68_t null_scheme = {
+  0, "vfs-null", null_ismine, null_create
+};
+
+static int null_ismine(const char * uri)
+{
+  if (!strncmp68(uri, "null:", 5))
+    return SCHEME68_ISMINE | SCHEME68_READ | SCHEME68_WRITE;
+  return 0;
+}
 
 static const char * isn_name(vfs68_t * vfs)
 {
@@ -158,31 +173,38 @@ static const vfs68_t vfs68_null = {
   isn_destroy
 };
 
-vfs68_t * vfs68_null_create(const char * name)
+int vfs68_null_init(void)
 {
-  vfs68_null_t *isn;
+  return uri68_register(&null_scheme);
+}
+
+vfs68_t * vfs68_null_create(const char * uri)
+{
+  vfs68_null_t * isn;
   int size;
-  static const char hd[] = "null://";
 
-  if (!name) {
-    name = "default";
-  }
+  if (!null_ismine(uri))
+    return 0;
 
-  size = sizeof(vfs68_null_t) + sizeof(hd)-1 + strlen(name);
+  size = sizeof(vfs68_null_t) + strlen(uri);
 
   isn = malloc(size);
   if (!isn) {
     return 0;
   }
 
-  isn->vfs = vfs68_null;
+  isn->vfs     = vfs68_null;
   isn->size    = 0;
   isn->pos     = 0;
   isn->open    = 0;
-  strcpy(isn->name,hd);
-  strcat(isn->name,name);
+  strcpy(isn->name,uri);
 
   return &isn->vfs;
+}
+
+static vfs68_t * null_create(const char * uri, int mode, int argc, va_list list)
+{
+  return vfs68_null_create(uri);
 }
 
 #else /* #ifndef VFS68_NO_NULL */
@@ -194,10 +216,6 @@ vfs68_t * vfs68_null_create(const char * name)
 #include "file68_vfs_null.h"
 #include "file68_msg.h"
 
-vfs68_t * vfs68_null_create(const char * name)
-{
-  msg68_error("null68: create -- *NOT SUPPORTED*\n");
-  return 0;
-}
+int vfs68_null_register(void) { return -1; }
 
 #endif

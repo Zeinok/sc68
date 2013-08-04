@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 17:21:24 ben>
+ * Time-stamp: <2013-08-04 21:14:42 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -143,6 +143,7 @@ void Print(const char * fmt, ...)
     va_list list;
     va_start(list, fmt);
     vfprintf(sc68_debug_data.out,fmt,list);
+    fflush(sc68_debug_data.out);
     va_end(list);
   }
 }
@@ -293,20 +294,6 @@ static char * mybasename(char * fname)
   return fname;
 }
 
-/** Display to output debug statcked error messages.
- */
-static void spool_error_message(sc68_t * sc68)
-{
-  const char * s;
-
-  if (s = sc68_error_get(sc68), s) {
-    msg68_error("%s\n","sc68: stacked error message:");
-    do {
-      msg68_error(" * %s\n",s);
-    } while (s = sc68_error_get(sc68), s);
-  }
-}
-
 static void DisplayInfo(int track)
 {
   sc68_music_info_t Info, * info = &Info;
@@ -399,24 +386,30 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
   }
 
   while ( ! (code & SC68_END) ) {
+    char tmp1[32],tmp2[32];
     int n = max;
+    int play_ms, track_ms,track,tracks;
+
+    track    = sc68_cntl(sc68,SC68_GET_TRACK);
+    tracks   = sc68_cntl(sc68,SC68_GET_TRACKS);
+    play_ms  = sc68_cntl(sc68,SC68_GET_PLAYPOS);
+    track_ms = sc68_cntl(sc68,SC68_GET_POS);
 
     code = sc68_process(sc68, buffer, &n);
 
-    if (0) {
-      static int pass;
-      if (++pass < 10 || n != max || (code & ~SC68_IDLE) )
-        Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n",
-              pass, n, max, codestr(code), code);
-    }
+    Print("\r%s,%03u %s,%03u",
+          strtime68(tmp2,track,track_ms/1000u),track_ms%1000u,
+          strtime68(tmp1,tracks,play_ms/1000u),play_ms%1000u);
 
     if (code == SC68_ERROR)
       break;
 
     if (code & SC68_LOOP)
-      Debug("Loop: #%d\n", sc68_play(sc68, SC68_GET_TRACK, SC68_GET_LOOP));
+      Debug("\nLoop: #%d/%d\n",
+            sc68_cntl(sc68, SC68_GET_LOOP),sc68_cntl(sc68, SC68_GET_LOOPS));
 
     if (code & SC68_CHANGE) {
+      Print("\n");
       if (!all)
         break;
       else
@@ -714,9 +707,8 @@ int main(int argc, char *argv[])
   err = 0;
 
 error:
-  if (err) {
-    spool_error_message(sc68);
-  }
+  if (err)
+    ;
 exit:
   vfs68_destroy(out);
   free(namebuf);

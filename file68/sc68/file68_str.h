@@ -1,11 +1,11 @@
 /**
  * @ingroup  file68_lib
  * @file     sc68/file68_str.h
+ * @brief    String manipulation header.
  * @author   Benjamin Gerard
  * @date     2003-08-11
- * @brief    String manipulation header.
  */
-/* Time-stamp: <2013-07-22 00:22:57 ben> */
+/* Time-stamp: <2013-08-04 23:13:05 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -124,7 +124,7 @@ FILE68_API
 /**
  * Make a track and time information string.
  *
- *   The SC68time_str() function formats a string with track time info.
+ *   The strtime68() function formats a string with track time info.
  *   The general format is "TK MN:SS" where:
  *    - TK is track_num or "--" if track_num < 0 or track_num > 99
  *    - MN:SS is time minutes and seconds or "--:--" if seconds < 0
@@ -138,8 +138,6 @@ FILE68_API
  *
  * @warning  The function returns a static buffer. Do try to modify it.
  * @warning  Not thread safe.
- *
- * @see SC68utils_make_big_playing_time()
  */
 char * strtime68(char * buffer, int track_num, int seconds);
 
@@ -159,7 +157,6 @@ FILE68_API
  *
  * @warning  Not thread safe when using static buffer.
  *
- * @see SC68utils_make_track_time_info()
  */
 char * strlongtime68(char * buffer, int time);
 
@@ -184,12 +181,12 @@ FILE68_API
 const char * strnevernull68(const char *s);
 #endif
 
-#define strok68 strok68
+#define strok68(V) strok68(V)
 #ifdef strok68
 static inline
 const char * strok68(const int v)
 {
-  static const char * const r[2] = { "failure", "success" };
+  static const char const r[2][8] = { "failure","success" };
   return r[!v];
 }
 #else

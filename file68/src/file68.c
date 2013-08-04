@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 17:03:29 ben>
+ * Time-stamp: <2013-08-04 10:19:49 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -149,12 +149,16 @@ static /* const */ struct strings_table {
   -1,
 };
 
+/* Is disk ? */
+static inline int is_disk(const disk68_t * const mb) {
+  return mb && mb->magic == SC68_DISK_ID;
+}
 
 /* Does this memory belongs to the disk data ? */
 static inline int is_disk_data(const disk68_t * const mb, const void * const _s)
 {
   const char * const s = (const char *) _s;
-  return (mb && s >= mb->data && s < mb->data+mb->datasz);
+  return is_disk(mb) && s >= mb->data && s < mb->data+mb->datasz;
 }
 
 /* Does this memory belongs to the static string array ? */
@@ -1229,6 +1233,9 @@ static disk68_t * alloc_disk(int datasz)
   if (mb = calloc(room,1), mb) {
     music68_t *cursix;
 
+    /* Set a little bit of magic */
+    mb->magic = SC68_DISK_ID;
+
     /* data points into buffer */
     mb->data = mb->buffer;
     mb->datasz = datasz;
@@ -1747,10 +1754,6 @@ int file68_save(vfs68_t * os, const disk68_t * mb, int version, int gzip)
 
   get_header(version, &header, &headsz);
 
-  if (!os) {
-    /* mia ??? */
-  }
-
   /* Get filename (for error message) */
   fname = vfs68_filename(os);
 
@@ -1816,8 +1819,15 @@ static const char * save_sc68(vfs68_t * os, const disk68_t * mb,
 
   get_header(version, &header, &headsz);
 
+  /* Check vfs */
   if (!os) {
     errstr = "null stream";
+    goto error;
+  }
+
+  /* Check disk */
+  if (!is_disk(mb)) {
+    errstr = "not a sc68 disk";
     goto error;
   }
 

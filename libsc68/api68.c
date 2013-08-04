@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 17:14:14 ben>
+ * Time-stamp: <2013-08-04 22:33:51 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -61,6 +61,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 
 #ifdef HAVE_LIBGEN_H
 #include <libgen.h>
@@ -79,6 +80,12 @@ enum {
   TIME_DEF = 3 * 60,
   /* default music time in millisec */
   TIMEMS_DEF = (TIME_DEF * 1000),
+  /* sc68_t magic identifier value. */
+  SC68_MAGIC = (('s' << 24) | ('c' << 16) | ('6' << 8) | '8'),
+  /* disk68_t magic identifier value. */
+  DISK_MAGIC = SC68_DISK_ID,
+  /* Error message maximum length */
+  ERRMAX = 96,
 };
 
 static u8 trap_func[] = {
@@ -94,6 +101,7 @@ static u8 thex[16] = {
 
 /** sc68 instance. */
 struct _sc68_s {
+  int            magic;       /**< magic identifier.                     */
   char           name[16];    /**< short name.                           */
   int            version;     /**< sc68 version.                         */
   void         * cookie;      /**< User private data.                    */
@@ -162,6 +170,10 @@ struct _sc68_s {
   } mix;
 
   sc68_minfo_t     info;         /**< Disk and track info struct.        */
+
+/* Error message */
+  const char   * errstr;         /**< Last error message.                */
+  char           errbuf[ERRMAX]; /**< For non-static error message.      */
 };
 
 #ifndef DEBUG_SC68_O
@@ -182,58 +194,55 @@ static int           dbg68k;
 static const char    not_available[] = SC68_NOFILENAME;
 static char          appname[16];
 static config68_t  * config;
-
+static char          sc68_errstr[ERRMAX];
 
 static void sc68_debug(sc68_t * sc68, const char * fmt, ...);
-static int error_add(sc68_t * sc68, const char * fmt, ...);
+static int error_addx(sc68_t * sc68, const char * fmt, ...);
+static int error_add(sc68_t * sc68, const char * fmt, const char *);
 static int get_spr(const sc68_t * sc68);
 static int set_spr(sc68_t * sc68, int hz);
 static int get_pcm_fmt(sc68_t * sc68);
 static int set_pcm_fmt(sc68_t * sc68, int pcmfmt);
 static int get_pos(sc68_t * sc68, int origin);
 
+
+/***********************************************************************
+ * Check functions
+ **********************************************************************/
+
 static inline const char * ok_int(const int err) {
   return !err ? "success" : "failure";
 }
 
-static inline const char * sc68_name_not_null(sc68_t * sc68)
-{
-  return sc68 ? sc68->name : "(nil)";
+static inline const char * never_null(const char * ptr) {
+  return ptr ? ptr : "(nil)";
 }
 
-#if 0
-#ifndef HAVE_STPCPY
-static char *stpcpy(char *dst, const char * src) {
-  char c;
-  while (c = *src++, c)
-    *dst++ = c;
-  *dst = 0;
-  return dst;
+static inline int is_magic(const sc68_t * sc68) {
+  return sc68->magic == SC68_MAGIC;
 }
-#else
-extern char *stpcpy(char *dst, const char * src);
-#endif
-#endif
 
-#ifndef HAVE_BASENAME
-
-# if !defined(PRI_PATH_SEP)
-#  define PRI_PATH_SEP '/'
-# endif
-# if !defined(SEC_PATH_SEP)
-#  define SEC_PATH_SEP '\\'
-# endif
-
-static char *basename(char *path)
-{
-  char * s1 = strrchr(path,PRI_PATH_SEP);
-  char * s2 = strrchr(path,SEC_PATH_SEP);
-  if (s2 > s1) s1 = s2;
-  return s1 ? s1 + 1 : path;
+static inline int is_sc68(const sc68_t * sc68) {
+  return sc68 && is_magic(sc68);
 }
-#endif
 
-#if !defined(EXTENSION_SEP)
+static inline int null_or_sc68(const sc68_t * sc68) {
+  return !sc68 || is_magic(sc68);
+}
+
+static inline int is_disk(const disk68_t * disk) {
+  return disk && disk->magic == DISK_MAGIC;
+}
+
+static inline int has_disk(const sc68_t * sc68) {
+  return is_sc68(sc68) && is_disk(sc68->disk);
+}
+
+/***********************************************************************
+ * Convenience functions
+ **********************************************************************/
+
+#ifndef EXTENSION_SEP
 # define EXTENSION_SEP '.'
 #endif
 static void appname_from_path(char *path, char * appname, int max)
@@ -255,15 +264,20 @@ static void appname_from_path(char *path, char * appname, int max)
   appname[len] = 0;
 }
 
+
+/***********************************************************************
+ * Emulators functions
+ **********************************************************************/
+
 static int stream_read_68k(sc68_t * sc68, unsigned int dest,
                            vfs68_t * is, unsigned int sz)
 {
   u8 * mem68 = emu68_memptr(sc68->emu68, dest, sz);
 
-  if (!mem68) {
-    return error_add(sc68, "libsc68: stream error -- %s",
-                     emu68_error_get(sc68->emu68));
-  }
+  if (!mem68)
+    return error_addx(sc68,
+                      "libsc68: %s -- %s\n",
+                      "vfs error", emu68_error_get(sc68->emu68));
   return (vfs68_read(is, mem68, sz) == sz) ? 0 : -1;
 }
 
@@ -272,19 +286,22 @@ static int init_emu68(int * argc, char ** argv)
   int err;
 
   /* Initialize emu68 */
-  sc68_debug(0,"libsc68: initialise 68k emulator\n");
   err = emu68_init(argc, argv);
   if (err) {
-    error_add(0, "libsc68: failed to initialise 68k emulator");
+    error_add(0, "libsc68: %s\n","emu68 library *FAILED*");
     goto error;
   }
 
   /* Initialize chipset */
-  sc68_debug(0,"libsc68: initialise chipsets\n");
   err = io68_init(argc, argv);
   if (err) {
-    error_add(0, "libsc68: failed to chipsets");
+    error_add(0, "libsc68: %s\n","chipset library *FAILED*");
+    goto error;
   }
+
+  TRACE68(sc68_cat,
+          "libsc68: %s\n",
+          "68k and chipset emulator initialized");
 
 error:
   return err;
@@ -304,18 +321,17 @@ static void safe_emu68_destroy(emu68_t **pemu)
 
 static void safe_destroy(sc68_t * sc68)
 {
-  sc68_debug(sc68,"libsc68: safe destroy <%s>\n",
-             sc68_name_not_null(sc68));
-  sc68_debug(sc68,"libsc68: - unplug all\n");
+  assert(sc68);
   emu68_ioplug_unplug_all(sc68->emu68);
-  sc68_debug(sc68,"libsc68: - destroy io\n");
   safe_io68_destroy(&sc68->ymio);
   safe_io68_destroy(&sc68->mwio);
   safe_io68_destroy(&sc68->shifterio);
   safe_io68_destroy(&sc68->paulaio);
   safe_io68_destroy(&sc68->mfpio);
-  sc68_debug(sc68,"libsc68: - destroy 68k\n");
   safe_emu68_destroy(&sc68->emu68);
+  TRACE68(sc68_cat,
+          "libsc68: %s\n",
+          "68k and chipset emulators destroyed");
 }
 
 #define Bpeek(EMU68,ADDR) emu68_peek((EMU68), (ADDR))
@@ -452,9 +468,9 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
         except_name(num,irqname+3);
         sr = Wpeek(emu68, emu68->reg.a[7]);
         pc = Lpeek(emu68, emu68->reg.a[7]+2);
-        error_add(sc68,
-                  "libsc68: non-init exception #%d (%s) from %06x",
-                  num, irqname, pc);
+        error_addx(sc68,
+                   "libsc68: non-init exception #%d (%s) from %06x",
+                   num, irqname, pc);
         emu68->status = EMU68_HLT;
       } else {
         emu68->status = EMU68_STP;
@@ -497,29 +513,29 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
               trap_type[subvec], sc68->irq.sysfct, sc68->irq.sysfct);
 
     /* dump cpu status */
-    sc68_debug(sc68,
-               "libsc68: 68k interruption -- emu68<%s> sc68<%s>\n"
-               " status: in:%s out:%s\n"
-               "   intr: #%02x+%02x %s\n"
-               "   from: pc:%08x sr:%04x\n"
-               "   regs: pc:%08x sr:%04x\n"
-               "         d0:%08x d1:%08x d2:%08x d3:%08x\n"
-               "         d4:%08x d5:%08x d6:%08x d7:%08x\n"
-               "         a0:%08x a1:%08x a2:%08x a3:%08x\n"
-               "         a4:%08x a5:%08x a6:%08x a7:%08x\n",
-               emu68->name, sc68->name,
-               stname, emu68_status_name(emu68->status),
-               vector, subvec, irqname,
-               pc, sr,
-               emu68->reg.pc,   emu68->reg.sr,
-               emu68->reg.d[0], emu68->reg.d[1],
-               emu68->reg.d[2], emu68->reg.d[3],
-               emu68->reg.d[4], emu68->reg.d[5],
-               emu68->reg.d[6], emu68->reg.d[7],
-               emu68->reg.a[0], emu68->reg.a[1],
-               emu68->reg.a[2], emu68->reg.a[3],
-               emu68->reg.a[4], emu68->reg.a[5],
-               emu68->reg.a[6], emu68->reg.a[7]);
+    TRACE68(sc68_cat,
+            "libsc68: 68k interruption -- emu68<%s> sc68<%s>\n"
+            " status: in:%s out:%s\n"
+            "   intr: #%02x+%02x %s\n"
+            "   from: pc:%08x sr:%04x\n"
+            "   regs: pc:%08x sr:%04x\n"
+            "         d0:%08x d1:%08x d2:%08x d3:%08x\n"
+            "         d4:%08x d5:%08x d6:%08x d7:%08x\n"
+            "         a0:%08x a1:%08x a2:%08x a3:%08x\n"
+            "         a4:%08x a5:%08x a6:%08x a7:%08x\n",
+            emu68->name, sc68->name,
+            stname, emu68_status_name(emu68->status),
+            vector, subvec, irqname,
+            pc, sr,
+            emu68->reg.pc,   emu68->reg.sr,
+            emu68->reg.d[0], emu68->reg.d[1],
+            emu68->reg.d[2], emu68->reg.d[3],
+            emu68->reg.d[4], emu68->reg.d[5],
+            emu68->reg.d[6], emu68->reg.d[7],
+            emu68->reg.a[0], emu68->reg.a[1],
+            emu68->reg.a[2], emu68->reg.a[3],
+            emu68->reg.a[4], emu68->reg.a[5],
+            emu68->reg.a[6], emu68->reg.a[7]);
 
     /* dump stack */
     line[0] = 0;
@@ -533,13 +549,13 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
         j += 3;
       } else {
         line[j+2] = 0;
-        sc68_debug(sc68," %-6x: %s\n", adr + (i & ~15), line);
+        TRACE68(sc68_cat," %-6x: %s\n", adr + (i & ~15), line);
         j = 0;
       }
     }
     if (j) {
       line[j-1] = 0;
-      sc68_debug(sc68," %-6x: %s\n", adr + (i & ~15), line);
+      TRACE68(sc68_cat," %-6x: %s\n", adr + (i & ~15), line);
     }
   }
 }
@@ -549,10 +565,8 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
   int err = -1;
   emu68_parms_t * const parms = &sc68->emu68_parms;
 
-  if (sc68->emu68) {
-    sc68_debug(sc68,"libsc68: init 68k -- found previous emu68\n");
+  if (sc68->emu68)
     safe_destroy(sc68);
-  }
 
   /* setup parameters. */
   parms->name    = "sc68/emu68";
@@ -560,19 +574,22 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
   parms->clock   = EMU68_ATARIST_CLOCK;
   parms->debug   = emu68_debug & 1;
 
-  sc68_debug(sc68,
-             "libsc68: init 68k -- '%s' mem:%d-bit(%dkB) clock:%uhz debug:%s\n",
-             parms->name,
-             parms->log2mem,parms->log2mem>10?1<<(parms->log2mem-10):0,
-             parms->clock,parms->debug?"On":"Off");
+  TRACE68(sc68_cat,
+          "libsc68: init 68k -- '%s' mem:%d-bit(%dkB) clock:%uhz debug:%s\n",
+          parms->name,
+          parms->log2mem,parms->log2mem>10?1<<(parms->log2mem-10):0,
+          parms->clock,parms->debug?"On":"Off");
 
   /* Do initialization. */
   sc68->emu68 = emu68_create(parms);
   if (!sc68->emu68) {
-    error_add(sc68,"libsc68: create 68k emulator failed");
+    error_add(sc68, "libsc68: %s\n", "68k emulator creation failed");
     goto error;
   }
-  sc68_debug(sc68,"libsc68: init 68k -- CPU emulator created\n");
+
+  TRACE68(sc68_cat,
+          "libsc68: init 68k -- %s\n",
+          "CPU emulator created");
 
   /* Install cookie and interruption handler (debug mode only). */
   emu68_set_handler(sc68->emu68, (emu68_debug& 1 ) ? irqhandler : 0);
@@ -580,71 +597,79 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
   sc68->irq.pc     = 0xDEAD;
   sc68->irq.vector = -1;
 
-  /* Install gdb-stub */
-  if (emu68_debug & 2) {
-#ifdef USE_GDBSTUB68
-    sc68_debug(sc68,"libsc68: init 68k -- install gdb-stub\n");
-    if (emu68_gdbstub_create(sc68->emu68, gdb_access)) {
-      error_add(sc68,"libsc68: install install gdb-stub failed");
-      goto error;
-    }
-#endif
-  }
-
   /* Setup critical 68K registers (SR and SP) */
   sc68->emu68->reg.sr   = 0x2000;
   sc68->emu68->reg.a[7] = sc68->emu68->memmsk+1-4;
 
   /* Initialize chipset */
-
   sc68->ymio = ymio_create(sc68->emu68,0);
   sc68->ym   = ymio_emulator(sc68->ymio);
   if (!sc68->ymio) {
-    error_add(sc68,"libsc68: create YM emulator failed");
+    error_add(sc68,"libsc68: %s","YM-2149 creation failed");
     goto error;
   }
-  sc68_debug(sc68,"libsc68: init 68k -- chipset -- YM-2149\n");
+  TRACE68(sc68_cat,
+          "libsc68: %s\n",
+          "init 68k -- chipset -- YM-2149");
 
   sc68->mwio = mwio_create(sc68->emu68,0);
   sc68->mw   = mwio_emulator(sc68->mwio);
   if (!sc68->mwio) {
-    error_add(sc68,"libsc68: create MW emulator failed");
+    error_add(sc68,"libsc68: %s\n", "STE-MW creation failed");
     goto error;
   }
-  sc68_debug(sc68,"libsc68: init 68k -- chipset -- MicroWire\n");
+
+  TRACE68(sc68_cat,
+          "libsc68: %s\n",
+          "init 68k -- chipset -- STE-MW");
 
   sc68->shifterio = shifterio_create(sc68->emu68,0);
   if (!sc68->shifterio) {
-    error_add(sc68,"libsc68: create Shifter emulator failed");
+    error_add(sc68,"libsc68: %s\n","Atari Shifter creation failed");
     goto error;
   }
-  sc68_debug(sc68,"libsc68: init 68k -- chipset -- ST shifter\n");
+
+  TRACE68(sc68_cat,
+          "libsc68: %s\n",
+          "init 68k -- chipset -- ST shifter");
 
   sc68->paulaio = paulaio_create(sc68->emu68,0);
   sc68->paula   = paulaio_emulator(sc68->paulaio);
   if (!sc68->paulaio) {
-    error_add(sc68,"libsc68: create Paula emulator failed");
+    error_add(sc68,"libsc68: %s\n","create Paula emulator failed");
     goto error;
   }
-  sc68_debug(sc68,"libsc68: init 68k -- chipset -- Amiga Paula\n");
+
+  TRACE68(sc68_cat,
+          "libsc68: %s\n",
+          "init 68k -- chipset -- Amiga Paula");
 
   sc68->mfpio = mfpio_create(sc68->emu68);
   if (!sc68->mfpio) {
-    error_add(sc68,"libsc68: create MFP emulator failed");
+    error_add(sc68,"libsc68: %s\n","MK-68901 creation failed");
     goto error;
   }
-  sc68_debug(sc68,"libsc68: init 68k -- chipset -- MFP\n");
+
+  TRACE68(sc68_cat,
+          "libsc68: %s\n",
+          "init 68k -- chipset -- MFP");
 
   err = 0;
 error:
-  if (err) {
+  if (err)
     safe_destroy(sc68);
-  }
 
-  sc68_debug(sc68,"libsc68: init 68k -- %s\n", strok68(err));
+  TRACE68(sc68_cat,
+          "libsc68: init 68k -- %s\n",
+          strok68(err));
 
   return err;
 }
+
+/***********************************************************************
+ * Config functions
+ **********************************************************************/
+
 
 /* Get integer config vaue.
  * - just command line if available
@@ -661,11 +686,13 @@ static int myconfig_get_int(config68_t * c,
   switch (option68_type(opt = option68_get(name, 1))) {
   case option68_BOL: case option68_INT:
     v = opt->val.num;
-    sc68_debug(0,"libsc68: get config from cli -- name='%s' val=%d\n", name, v);
+    TRACE68(sc68_cat,
+            "libsc68: get config from cli -- name='%s' val=%d\n", name, v);
   default:
     if ( config68_get(c, &idx, &name) == CONFIG68_INT ) {
       v = idx;
-      sc68_debug(0,"libsc68: get config from cfg -- name='%s' val=%d\n", name, v);
+      TRACE68(sc68_cat,
+              "libsc68: get config from cfg -- name='%s' val=%d\n", name, v);
     }
   }
   return v;
@@ -685,16 +712,17 @@ static const char * myconfig_get_str(config68_t * c,
   switch (option68_type(opt = option68_get(name, 1))) {
   case option68_STR:
     v = opt->val.str;
-    sc68_debug(0,"libsc68: get config from cli -- name='%s' val='%s'\n", name, v);
+    TRACE68(sc68_cat,
+            "libsc68: get config from cli -- name='%s' val='%s'\n", name, v);
   default:
     if ( config68_get(c, &idx, &key) == CONFIG68_STR ) {
       v = key;
-      sc68_debug(0,"libsc68: get config from cfg -- name='%s' val=%d\n", name, v);
+      TRACE68(sc68_cat,
+              "libsc68: get config from cfg -- name='%s' val=%d\n", name, v);
     }
   }
   return v;
 }
-
 
 static void set_config(sc68_t * sc68)
 {
@@ -739,7 +767,7 @@ int sc68_config_load(void)
   err = config68_load(config);
   myconfig_set_int(config, "version", PACKAGE_VERNUM);
 
-  sc68_debug(0,"libsc68: load config -- %s\n",strok68(err));
+  sc68_debug(0,"libsc68: load config -- %s\n", strok68(err));
   return err;
 }
 
@@ -748,7 +776,7 @@ int sc68_config_save(void)
   int err = -1;
   if (config)
     err = config68_save(config);
-  sc68_debug(0,"libsc68: save config -- %s\n",strok68(err));
+  sc68_debug(0,"libsc68: save config -- %s\n", strok68(err));
   return err;
 }
 
@@ -788,6 +816,10 @@ config68_type_t sc68_config_set(int idx,
 }
 
 
+/***********************************************************************
+ * API functions
+ **********************************************************************/
+
 int sc68_init(sc68_init_t * init)
 {
   int err = -1;
@@ -802,12 +834,13 @@ int sc68_init(sc68_init_t * init)
   };
 
   if (sc68_init_flag) {
-    err = error_add(0, "libsc68: already initialized");
+    err = error_add(0, "libsc68: %s\n","already initialized");
     goto error_no_shutdown;
   }
+  sc68_errstr[0] = 0;
 
   if (!init) {
-    memset(&dummy_init,0,sizeof(dummy_init));
+    memset(&dummy_init, 0, sizeof(dummy_init));
     init = &dummy_init;
   }
 
@@ -871,14 +904,11 @@ error_no_shutdown:
 
 void sc68_shutdown(void)
 {
-  sc68_debug(0,"libsc68: shutdowning\n");
-
   if (config) {
     sc68_config_save();
     config68_destroy(config);
     config = 0;
   }
-
 
   if (sc68_init_flag) {
     sc68_init_flag = 0;
@@ -890,21 +920,21 @@ void sc68_shutdown(void)
 
 sc68_t * sc68_create(sc68_create_t * create)
 {
-  /*const int log2mem = 0;*/
-  sc68_t *sc68 = 0;
+  sc68_t      * sc68 = 0;
   sc68_create_t dummy_create;
 
   if (!create) {
-    memset(&dummy_create,0,sizeof(dummy_create));
+    memset(&dummy_create, 0, sizeof(dummy_create));
     create = &dummy_create;
   }
-  sc68_debug(0,"libsc68: creating new instance\n");
 
   /* Alloc SC68 struct. */
   sc68 = calloc(sizeof(sc68_t),1);
-  if (!sc68) {
+  if (!sc68)
     goto error;
-  }
+
+  /* Set magic */
+  sc68->magic = SC68_MAGIC;
 
   /* User private data. */
   sc68->cookie = create->cookie;
@@ -931,9 +961,6 @@ sc68_t * sc68_create(sc68_create_t * create)
     sc68->time.def_ms = TIMEMS_DEF;
   }
 
-  /* Create RSP server if needed */
-  sc68_debug(sc68, "libsc68: debug mode -- %d\n", create->emu68_debug | dbg68k);
-
   /* Create 68k emulator and pals. */
   if (init68k(sc68, create->log2mem, create->emu68_debug | dbg68k)) {
     goto error;
@@ -942,12 +969,11 @@ sc68_t * sc68_create(sc68_create_t * create)
   /* Set IO chipsets sampling rates */
   sc68->mix.rate = set_spr(sc68, sc68->mix.rate);
   if (sc68->mix.rate <= 0) {
-    error_add(sc68,"invalid sampling rate -- *%dhz*", sc68->mix.rate);
+    error_addx(sc68, "libsc68: %s\n", "invalid sampling rate");
     goto error;
   }
-
   create->sampling_rate = sc68->mix.rate;
-  sc68_debug(sc68,"sampling rate -- *%dhz*\n", create->sampling_rate);
+  sc68_debug(sc68,"libsc68: sampling rate -- *%dhz*\n", create->sampling_rate);
 
   /* Finally gets all pathes. */
   /*   rsc68_get_path(&init->shared_path, */
@@ -962,7 +988,7 @@ sc68_t * sc68_create(sc68_create_t * create)
 
   /*   sc68_unic = sc68; */
 
-  sc68_debug(0,"create *%s* -- %s\n", sc68->name, ok_int(0));
+  sc68_debug(0,"libsc68: sc68<%s> create -- %s\n", sc68->name, ok_int(0));
   return sc68;
 
 error:
@@ -974,14 +1000,15 @@ error:
 
 void sc68_destroy(sc68_t * sc68)
 {
-  sc68_debug(sc68,"libsc68: destroy sc68<%s>\n", sc68_name_not_null(sc68));
-  if (sc68) {
+  if (is_sc68(sc68)) {
     free(sc68->mix.buffer);
     sc68_close(sc68);
     safe_destroy(sc68);
+    sc68_debug(sc68,"libsc68: sc68<%s> destroyed\n", sc68->name);
     free(sc68);
+  } else {
+    assert(!sc68);                      /* catch bad magic */
   }
-  sc68_debug(sc68,"libsc68: sc68<> destroyed\n"/*, sc68*/);
 }
 
 static int get_spr(const sc68_t * sc68)
@@ -1023,15 +1050,15 @@ static int set_pcm_fmt(sc68_t * sc68, int pcmfmt)
   return -(pcmfmt != SC68_PCM_S16);
 }
 
-void sc68_set_share(sc68_t * sc68, const char * path)
-{
-  rsc68_set_share(path);
-}
+/* void sc68_set_share(sc68_t * sc68, const char * path) */
+/* { */
+/*   rsc68_set_share(path); */
+/* } */
 
-void sc68_set_user(sc68_t * sc68, const char * path)
-{
-  rsc68_set_user(path);
-}
+/* void sc68_set_user(sc68_t * sc68, const char * path) */
+/* { */
+/*   rsc68_set_user(path); */
+/* } */
 
 /* static unsigned int calc_disk_time(sc68_t * sc68, const disk68_t * d) */
 /* { */
@@ -1067,8 +1094,9 @@ static void stop_track(sc68_t * sc68, const int real_stop)
     sc68->time.origin_ms  = 0;
   else
     sc68->time.origin_ms += sc68->time.elapsed_ms;
-  sc68_debug(sc68, "libsc68: new track origin is -- *%d ms*\n",
-             sc68->time.origin_ms);
+  TRACE68(sc68_cat,
+          "libsc68: %s -- *%d ms*\n",
+          "new track origin is", sc68->time.origin_ms);
 
   sc68->time.elapsed_ms = 0;
   sc68->time.length_ms  = 0;
@@ -1117,14 +1145,14 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr,uint68_t maxinst)
     } else {
       except_name(sc68->irq.vector,irqname);
     }
-    error_add(sc68,
-              "libsc68: pass#%d @$%X"
-              " %s (%02X)"
-              " $%X/$%04X irq#%d (%s) @$%X",
-              sc68->mix.pass_count, pc,
-              emu68_status_name(status), status,
-              sc68->emu68->reg.pc, sc68->emu68->reg.sr,
-              sc68->irq.vector, irqname, sc68->irq.pc);
+    error_addx(sc68,
+               "libsc68: pass#%d @$%X"
+               " %s (%02X)"
+               " $%X/$%04X irq#%d (%s) @$%X\n",
+               sc68->mix.pass_count, pc,
+               emu68_status_name(status), status,
+               sc68->emu68->reg.pc, sc68->emu68->reg.sr,
+               sc68->irq.vector, irqname, sc68->irq.pc);
   }
   return status;
 }
@@ -1143,35 +1171,35 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
   emu68_mem_reset(sc68->emu68);
 
   if (hw->bit.amiga) {
-    sc68_debug(sc68," -> Add Paula hardware\n");
+    TRACE68(sc68_cat," -> Add Paula hardware\n");
     emu68_ioplug(sc68->emu68, sc68->paulaio);
-    sc68_debug(sc68," -> Set PAULA as interruptible\n");
+    TRACE68(sc68_cat," -> Set PAULA as interruptible\n");
     emu68_set_interrupt_io(sc68->emu68, sc68->paulaio);
   }
   if (hw->bit.ym) {
-    sc68_debug(sc68," -> Add SHIFTER hardware\n");
+    TRACE68(sc68_cat," -> Add SHIFTER hardware\n");
     emu68_ioplug(sc68->emu68, sc68->shifterio);
-    sc68_debug(sc68," -> Add YM hardware\n");
+    TRACE68(sc68_cat," -> Add YM hardware\n");
     emu68_ioplug(sc68->emu68, sc68->ymio);
-    sc68_debug(sc68," -> Add MFP hardware\n");
+    TRACE68(sc68_cat," -> Add MFP hardware\n");
     emu68_ioplug(sc68->emu68, sc68->mfpio);
-    sc68_debug(sc68," -> Set MFP as interruption\n");
+    TRACE68(sc68_cat," -> Set MFP as interruption\n");
     emu68_set_interrupt_io(sc68->emu68, sc68->mfpio);
   }
   if (hw->bit.ste) {
-    sc68_debug(sc68," -> Add MW (STE) hardware\n");
+    TRACE68(sc68_cat," -> Add MW (STE) hardware\n");
     emu68_ioplug(sc68->emu68, sc68->mwio);
   }
   emu68_reset(sc68->emu68);
 
   /* disable that we should not need it */
   if (emu68_debugmode(sc68->emu68)) {
-    sc68_debug(sc68," -> Clear 68k memory\n");
+    TRACE68(sc68_cat," -> Clear 68k memory\n");
     emu68_memset(sc68->emu68,0,0,0);
   }
   memptr = emu68_memptr(sc68->emu68,0,0x1000);
 
-  sc68_debug(sc68," -> Exception detection code in $%06x\n", INTR_ADDR);
+  TRACE68(sc68_cat," -> Exception detection code in $%06x\n", INTR_ADDR);
 
   /* Install non initialized exception detection code. */
   for (i=0; i<256; ++i) {
@@ -1209,8 +1237,8 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
   if (!hw->bit.amiga) {
     int status;
 
-    sc68_debug(sc68," -> Load TOS trap emulator @$%06x-$%06x\n",
-               TRAP_ADDR,TRAP_ADDR+sizeof(trap_func)-1);
+    TRACE68(sc68_cat," -> Load TOS trap emulator @$%06x-$%06x\n",
+            TRAP_ADDR,TRAP_ADDR+sizeof(trap_func)-1);
 
     /* Ensure trap emulator do not override exception handler */
     assert(sizeof(trap_func) <= INTR_ADDR-TRAP_ADDR);
@@ -1218,11 +1246,12 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     /* Install trap emulator */
     emu68_memput(sc68->emu68, TRAP_ADDR, trap_func, sizeof(trap_func));
     sc68->emu68->cycle = 0;
-    sc68_debug(sc68," -> Running trap init code -- $%06x ...\n", TRAP_ADDR);
+    TRACE68(sc68_cat," -> Running trap init code -- $%06x ...\n", TRAP_ADDR);
     status = finish(sc68, TRAP_ADDR, 0x2300, INIT_MAX_INST);
     if ( status != EMU68_NRM ) {
-      error_add(sc68, "libsc68: abnormal 68K status %d (%s) in trap code",
-                status, emu68_status_name(status));
+      error_addx(sc68,
+                 "libsc68: abnormal 68K status %d (%s) in trap code\n",
+                 status, emu68_status_name(status));
       return SC68_ERROR;
     }
   }
@@ -1237,7 +1266,7 @@ static int load_replay(sc68_t * sc68, const char * replay, int a0)
   assert(sc68);
   assert(replay);
 
-  sc68_debug(sc68, " -> external replay -- %s\n", replay);
+  TRACE68(sc68_cat, " -> external replay -- %s\n", replay);
   strcpy(rname,"sc68://replay/");    /* $$$ to be change a sc68://replay/... */
   strcat68(rname, replay, sizeof(rname)-1);
   rname[sizeof(rname)-1] = 0;
@@ -1252,7 +1281,7 @@ static int load_replay(sc68_t * sc68, const char * replay, int a0)
               rname);
     return SC68_ERROR;
   }
-  sc68_debug(sc68," -> external replay -- [%06x-%06x]\n", a0, a0+size-1);
+  TRACE68(sc68_cat," -> external replay -- [%06x-%06x]\n", a0, a0+size-1);
   return a0 + ((size + 1) & ~1);
 }
 
@@ -1278,11 +1307,11 @@ static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
 
   /* Run music init code. */
   sc68->emu68->cycle = 0;
-  sc68_debug(sc68," -> Running music init code ...\n");
+  TRACE68(sc68_cat," -> Running music init code ...\n");
   status = finish(sc68, sc68->playaddr, 0x2300, INIT_MAX_INST);
   if ( status != EMU68_NRM ) {
-    error_add(sc68, "libsc68: abnormal 68K status %d (%s) in init code",
-              status, emu68_status_name(status));
+    error_addx(sc68, "libsc68: abnormal 68K status %d (%s) in init code",
+               status, emu68_status_name(status));
     return SC68_ERROR;
   }
   return SC68_OK;
@@ -1310,7 +1339,7 @@ static int change_track(sc68_t * sc68, int track, int loop)
 
   /* Set music replay address in 68K memory. */
   sc68->playaddr = a0 = m->a0;
-  sc68_debug(sc68," -> play address -- $%06x\n", sc68->playaddr);
+  TRACE68(sc68_cat," -> play address -- $%06x\n", sc68->playaddr);
 
   if (m->has.asid_trk) {
     if (a0 = load_replay(sc68, "asidifier", a0), a0 == SC68_ERROR)
@@ -1324,13 +1353,10 @@ static int change_track(sc68_t * sc68, int track, int loop)
 
   /* Copy music data into 68K memory */
   if (emu68_memput(sc68->emu68, a0, (u8 *)m->data, m->datasz)) {
-    error_add(sc68,
-              "libsc68: 68k memory is too short for track #%02d", track);
-    error_add(sc68,
-              "libsc68: %s", emu68_error_get(sc68->emu68));
+    error_add(sc68,"libsc68: %s\n", emu68_error_get(sc68->emu68));
     return SC68_ERROR;
   }
-  sc68_debug(sc68," -> music data -- [%06x-%06x]\n", a0, a0+m->datasz-1);
+  TRACE68(sc68_cat," -> music data -- [%06x-%06x]\n", a0, a0+m->datasz-1);
 
   /* Run music init code */
   if ( run_music_init(sc68, m, a0, a6) == SC68_ERROR )
@@ -1341,8 +1367,10 @@ static int change_track(sc68_t * sc68, int track, int loop)
     sc68->mix.rate = sc68_spr_def;
   if (sc68->mix.rate < SAMPLING_RATE_MIN ||
       sc68->mix.rate > SAMPLING_RATE_MAX) {
-    error_add(sc68,"libsc68: invalid sampling rate -- %dhz",
-              sc68->mix.rate);
+    error_addx(sc68,
+               "libsc68: %s -- %dhz\n",
+               "invalid sampling rate",
+               sc68->mix.rate);
     return SC68_ERROR;
   }
 
@@ -1360,7 +1388,7 @@ static int change_track(sc68_t * sc68, int track, int loop)
 
 
   if (force_ms > 0) {
-    sc68_debug(sc68,"libsc68: disk force length -- *%d ms*\n", force_ms);
+    TRACE68(sc68_cat,"libsc68: disk force length -- *%d ms*\n", force_ms);
     sc68->time.length_ms = force_ms;
     sc68->mix.pass_2loop = ms_to_fr(sc68->time.length_ms, m->frq);
     sc68->mix.pass_3loop = sc68->mix.pass_2loop;
@@ -1375,29 +1403,29 @@ static int change_track(sc68_t * sc68, int track, int loop)
     sc68->time.length_ms = fr_to_ms(sc68->mix.pass_total, m->frq);
   }
 
-  sc68_debug(sc68," -> loops           : %u\n", sc68->mix.loop_total);
-  sc68_debug(sc68," -> first pass ms   : %u\n",
-             fr_to_ms(sc68->mix.pass_2loop, m->frq));
-  sc68_debug(sc68," -> loops pass ms   : %u\n",
-             fr_to_ms(sc68->mix.pass_3loop, m->frq));
-  sc68_debug(sc68," -> total ms        : %u\n", sc68->time.length_ms);
+  TRACE68(sc68_cat," -> loops           : %u\n", sc68->mix.loop_total);
+  TRACE68(sc68_cat," -> first pass ms   : %u\n",
+          fr_to_ms(sc68->mix.pass_2loop, m->frq));
+  TRACE68(sc68_cat," -> loops pass ms   : %u\n",
+          fr_to_ms(sc68->mix.pass_3loop, m->frq));
+  TRACE68(sc68_cat," -> total ms        : %u\n", sc68->time.length_ms);
 
   /* $$$$ fix start time on the fly because it is broken ! */
   // m->start_ms = sc68->time.save_ms;
-  // sc68_debug(sc68," -> start ms        : %u\n", m->start_ms);
+  // TRACE68(sc68_cat," -> start ms        : %u\n", m->start_ms);
 
-  sc68_debug(sc68," -> first frames    : %u\n", sc68->mix.pass_2loop);
-  sc68_debug(sc68," -> loops frames    : %u\n", sc68->mix.pass_3loop);
-  sc68_debug(sc68," -> total frames    : %u\n", sc68->mix.pass_total);
+  TRACE68(sc68_cat," -> first frames    : %u\n", sc68->mix.pass_2loop);
+  TRACE68(sc68_cat," -> loops frames    : %u\n", sc68->mix.pass_3loop);
+  TRACE68(sc68_cat," -> total frames    : %u\n", sc68->mix.pass_total);
 
 
-  sc68_debug(sc68," -> replay rate     : %u\n", m->frq);
+  TRACE68(sc68_cat," -> replay rate     : %u\n", m->frq);
   sc68->mix.cycleperpass =
     ( m->frq % 50u == 0 && sc68->emu68->clock == EMU68_ATARIST_CLOCK)
     ? 160256u * 50u / m->frq    /* exact value for genuine Atari ST */
     : (sc68->emu68->clock / m->frq)
     ;
-  sc68_debug(sc68," -> cycle (exact)   : %u\n", sc68->mix.cycleperpass);
+  TRACE68(sc68_cat," -> cycle (exact)   : %u\n", sc68->mix.cycleperpass);
 
   if (m->hwflags.bit.ym) {
     cycle68_t cycles;
@@ -1416,14 +1444,14 @@ static int change_track(sc68_t * sc68, int track, int loop)
 
     /* verify */
     cycles = ymio_cycle_cpu2ym(sc68->ymio,sc68->mix.cycleperpass);
-    sc68_debug(sc68," -> ym cycles       : %u [%s]\n",
-               cycles, strok68(cycles&31));
+    TRACE68(sc68_cat," -> ym cycles       : %u [%s]\n",
+            cycles, strok68(cycles&31));
   }
   sc68->mix.cycleperpass = (sc68->mix.cycleperpass+31) & ~31;
-  sc68_debug(sc68," -> cycle (round)   : %u\n", sc68->mix.cycleperpass);
+  TRACE68(sc68_cat," -> cycle (round)   : %u\n", sc68->mix.cycleperpass);
 
   if (m->frq == 60 && sc68->shifterio) {
-    sc68_debug(sc68," -> Force shifter to 60Hz\n");
+    TRACE68(sc68_cat," -> Force shifter to 60Hz\n");
     shifterio_reset(sc68->shifterio,60);
   }
 
@@ -1434,7 +1462,7 @@ static int change_track(sc68_t * sc68, int track, int loop)
     len *= sc68->mix.cycleperpass;
     len /= sc68->emu68->clock;
     sc68->mix.stdlen = (int) len;
-    sc68_debug(sc68," -> std buffer len  : %u\n", sc68->mix.stdlen);
+    TRACE68(sc68_cat," -> std buffer len  : %u\n", sc68->mix.stdlen);
   }
 
   /* Compute *REAL* required size (in PCM) for buffer and realloc */
@@ -1443,31 +1471,31 @@ static int change_track(sc68_t * sc68, int track, int loop)
       ? ymio_buffersize(sc68->ymio, sc68->mix.cycleperpass)
       : sc68->mix.stdlen
       ;
-    sc68_debug(sc68," -> mix buffer len  : %u\n", sc68->mix.bufreq);
+    TRACE68(sc68_cat," -> mix buffer len  : %u\n", sc68->mix.bufreq);
 
     /* Should not happen. Anyway it does not hurt. */
     if (m->hwflags.bit.amiga && sc68->mix.stdlen > sc68->mix.bufreq)
       sc68->mix.bufreq = sc68->mix.stdlen;
 
-    sc68_debug(sc68," -> required PCM buffer size -- *%u pcm*\n",
-               sc68->mix.bufreq);
-    sc68_debug(sc68," ->  current PCM buffer size -- *%u pcm*\n",
-               sc68->mix.bufmax);
+    TRACE68(sc68_cat," -> required PCM buffer size -- *%u pcm*\n",
+            sc68->mix.bufreq);
+    TRACE68(sc68_cat," ->  current PCM buffer size -- *%u pcm*\n",
+            sc68->mix.bufmax);
 
     if (sc68->mix.bufreq > sc68->mix.bufmax) {
       free(sc68->mix.buffer);
       sc68->mix.bufmax = 0;
-      sc68_debug(sc68," -> Alloc new PCM buffer -- *%u pcm*\n",
-                 sc68->mix.bufreq);
+      TRACE68(sc68_cat," -> Alloc new PCM buffer -- *%u pcm*\n",
+              sc68->mix.bufreq);
       sc68->mix.buffer = malloc(sc68->mix.bufreq << 2);
       if (!sc68->mix.buffer) {
-        error_add(sc68,"libsc68: failed to allocate new sample buffer");
+        error_add(sc68,"libsc68: %s\n", strerror(errno));
         return SC68_ERROR;
       }
       sc68->mix.bufmax = sc68->mix.bufreq;
     }
   }
-  sc68_debug(sc68," -> buffer length -- %u pcm\n", sc68->mix.bufreq);
+  TRACE68(sc68_cat," -> buffer length -- %u pcm\n", sc68->mix.bufreq);
 
   /* Setup internal info struct */
   if (sc68_music_info(sc68, &sc68->info, track, 0))
@@ -1475,11 +1503,11 @@ static int change_track(sc68_t * sc68, int track, int loop)
   sc68->mus           = m;
   sc68->track         = track;
 
-  sc68_debug(sc68, "libsc68: track ready -- %s %s - %s - %s\n",
-             sc68->info.trk.time,
-             sc68->info.artist,
-             sc68->info.album,
-             sc68->info.title);
+  TRACE68(sc68_cat, "libsc68: track ready -- %s %s - %s - %s\n",
+          sc68->info.trk.time,
+          sc68->info.artist,
+          sc68->info.album,
+          sc68->info.title);
 
   return SC68_OK;
 }
@@ -1489,8 +1517,7 @@ static int check_track_range(sc68_t * const sc68,
                              const int track)
 {
   if (track < 1 || track > disk->nb_mus) {
-    error_add(sc68, "libsc68: track out of range -- *%02d* (>%02d)",
-              track, disk->nb_mus);
+    error_addx(sc68, "libsc68: %s\n","track out of range");
     return -1;
   }
   return 0;
@@ -1502,8 +1529,7 @@ static int apply_change_track(sc68_t * const sc68)
 {
   int track, loop;
 
-  assert(sc68);
-  assert(sc68->disk);
+  assert(has_disk(sc68));
 
   if (track = sc68->track_to, !track)
     return SC68_OK;
@@ -1512,14 +1538,15 @@ static int apply_change_track(sc68_t * const sc68)
 
   /* -1 : stop */
   if (track == -1) {
-    sc68_debug(sc68,"libsc68: stop requested\n");
+    TRACE68(sc68_cat,"libsc68: %s\n","stop requested");
     sc68->mix.buflen = 0; /* warning removal in stop_track() */
     stop_track(sc68, 1);
     sc68->time.origin_ms = 0;
     return SC68_END;
   }
-
-  sc68_debug(sc68,"libsc68: change track requested -- *%02d*\n", track);
+  TRACE68(sc68_cat,
+          "libsc68: %s -- *%02d*\n",
+          "change track requested", track);
 
   if (check_track_range(sc68, sc68->disk, track))
     return SC68_ERROR;
@@ -1536,6 +1563,9 @@ static unsigned int calc_current_ms(sc68_t * const sc68)
   ms  = sc68->mix.pass_count;
   ms *= sc68->mix.cycleperpass * 1000u;
   ms /= sc68->emu68->clock;
+
+  assert(ms == (u64)(unsigned int)ms);  /* check overflow */
+
   return sc68->time.elapsed_ms = (unsigned int) ms;
 }
 
@@ -1543,7 +1573,7 @@ int sc68_process(sc68_t * sc68, void * buf16st, int * _n)
 {
   int ret;
 
-  if (!sc68) {
+  if (!is_sc68(sc68)) {
     ret = SC68_ERROR;
   } else if (!_n) {
     /* Flush internal PCM buffer and apply change track request. */
@@ -1590,10 +1620,10 @@ int sc68_process(sc68_t * sc68, void * buf16st, int * _n)
         if (status == EMU68_NRM)
           status = emu68_interrupt(sc68->emu68, sc68->mix.cycleperpass);
         if (status != EMU68_NRM) {
-          error_add(sc68,
-                    "libsc68: abnormal 68K status %d (%s) in play pass %u",
-                    status, emu68_status_name(status),
-                    sc68->mix.pass_count);
+          error_addx(sc68,
+                     "libsc68: abnormal 68K status %d (%s) in play pass %u\n",
+                     status, emu68_status_name(status),
+                     sc68->mix.pass_count);
           ret = SC68_ERROR;
           break;
         }
@@ -1769,25 +1799,25 @@ int sc68_play(sc68_t * sc68, int track, int loop)
     /* Mean track has been forced while the disk was loaded (via
      * URI) */
     track = d->force_track;
-    sc68_debug(sc68,"libsc68: disk has a forced track -- *%02d*\n",track);
+    TRACE68(sc68_cat,"libsc68: disk has a forced track -- *%02d*\n",track);
   } else if (track == SC68_DEF_TRACK) {
     track = d->def_mus + 1;
     if (sc68->cfg_track > 0 && sc68->cfg_track <= d->nb_mus) {
       /* track forced in config only applied if default track was
        * asked and it is not out of range. */
       track = sc68->cfg_track;
-      sc68_debug(sc68,"libsc68: config has a forced track -- *%02d*\n", track);
+      TRACE68(sc68_cat,"libsc68: config has a forced track -- *%02d*\n", track);
     }
   }
 
   /* Unless disk has an overide. */
   if (d->force_loops) {
     loop = d->force_loops;
-    sc68_debug(sc68,"libsc68: disk has a forced loop -- %02d\n",loop);
+    TRACE68(sc68_cat,"libsc68: disk has a forced loop -- %02d\n",loop);
   }
   else if (loop == SC68_DEF_LOOP && sc68->cfg_loop != SC68_DEF_LOOP) {
     loop = sc68->cfg_loop;
-    sc68_debug(sc68,"libsc68: config has a forced loop -- %02d\n", loop);
+    TRACE68(sc68_cat,"libsc68: config has a forced loop -- %02d\n", loop);
   }
 
   /* Check track range. */
@@ -1814,82 +1844,24 @@ int sc68_stop(sc68_t * sc68)
   return 0;
 }
 
+enum {
+  SC68_POS_PLAY,
+  SC68_POS_TRACK
+};
+
 static int get_pos(sc68_t * sc68, int origin)
 {
-  return sc68_seek(sc68, origin, SC68_SEEK_QUERY, 0);
-}
-
-/** $$$ loop stuff is broken if loop differs some tracks */
-int sc68_seek(sc68_t * sc68, int origin, int time_ms, int * is_seeking)
-{
-  const disk68_t * d;
-
-  if (!sc68 || (d=sc68->disk, !d)) {
-    return -1;
+  int pos = -1;
+  if (sc68->track > 0) {
+    pos = 0;
+    switch (origin) {
+    case SC68_POS_PLAY:
+      pos += sc68->time.origin_ms;
+    case SC68_POS_TRACK:
+      pos += sc68->time.elapsed_ms;
+    }
   }
-
-  if (time_ms == SC68_SEEK_QUERY) {
-    /* Query current position and seek status */
-    if (is_seeking) {
-      *is_seeking = sc68->seek_to != -1;
-    }
-    if (!sc68->mus) {
-      return -1;
-    }
-    return sc68->time.elapsed_ms +
-
-      (origin == SC68_SEEK_TRACK)
-      ? 0
-      : /* $$$ TODO: sc68->time.track_start_ms */ 0
-      ;
-  } else {
-    /* $$$ seeking disabled */
-    return -1;
-#if 0
-    int i,n;
-    unsigned int start_ms;
-    unsigned int end_ms = 0;
-
-    for (i=0, n=d->nb_mus ; i<n; ++i) {
-      unsigned int ms = (unsigned int) time_ms;
-      int loop =
-        loop_total(sc68->loop_to, d->mus[i].loops);
-
-      start_ms = end_ms;
-      end_ms   = start_ms
-        + ((d->mus+i == sc68->mus)
-           ? sc68->time.length_ms :
-           d->mus[i].time_ms) * loop;
-
-      if (ms >= start_ms && ms < end_ms) {
-        unsigned int cur_ms  = start_ms;
-        sc68_debug(sc68,"Find track #%d [%u - %u]\n", i+1, start_ms, end_ms);
-        if (i+1 == sc68->track) {
-          /* Same track : return current time */
-          cur_ms += sc68->time.elapsed_ms;
-        } else {
-          /* Change track : current time is start of new track */
-          sc68->track_to = i+1;
-        }
-
-        if (ms > cur_ms) {
-          /* real seek forward */
-          if (is_seeking) *is_seeking = 1;
-          sc68->seek_to = ms - start_ms;
-          sc68_debug(sc68,"SEEK-TO %d, cur:%d\n", sc68->seek_to, cur_ms);
-        } else {
-          if (is_seeking) *is_seeking = 0;
-          sc68->seek_to = -1;
-          sc68_debug(sc68,"NO-SEEK-TO cur:%d\n", cur_ms);
-        }
-        return (int) cur_ms;
-      }
-    }
-    sc68_debug(sc68,"-> Not in disk range !!! [%d>%d]\n",time_ms, d->time_ms);
-    return -1;
-#endif
-
-  }
+  return pos;
 }
 
 int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
@@ -2172,49 +2144,87 @@ vfs68_t * sc68_vfs(const char * uri, int mode, int argc, ...)
   return vfs;
 }
 
-const char * sc68_error_get(sc68_t * sc68)
+const char * sc68_error(sc68_t * sc68)
 {
-  // $$$ TODO
-  return 0;
+  return is_sc68(sc68)
+    ? sc68->errstr
+    : sc68_errstr
+    ;
 }
 
-static int error_add(sc68_t * sc68, const char * fmt, ...)
+static int error_addx(sc68_t * sc68, const char * fmt, ...)
 {
   va_list list;
+  char * errstr;
+  int n;
+
+  n = strncmp(fmt,"libsc68: ",9) ? 0 : 9; /* skip "libsc68: " */
+  errstr = is_sc68(sc68) ? sc68->errbuf : sc68_errstr;
   va_start(list, fmt);
+  n = vsnprintf(errstr, ERRMAX, fmt+n, list);
+  va_end(list);
+  if (n > 0 && errstr[n-1] == '\n')
+    errstr[n-1] = 0;
+  if (sc68)
+    sc68->errstr = sc68->errbuf;
+  va_start(list,  fmt);
   error68_va(fmt,list);
   va_end(list);
+  return -1;
+}
 
-  /* va_start(list, fmt); */
-  /* vsnprintf(tmp,sizeof(tmp),fmt,list); */
-  /* tmp[sizeof(tmp)-1] = 0; */
-  /* va_end(list); */
-
+static int error_add(sc68_t * sc68, const char * fmt, const char * errstr)
+{
+  if (is_sc68(sc68)) {
+    sc68->errstr = errstr;
+    error68x(sc68,fmt,errstr);
+  } else
+    error68(fmt,errstr);
   return -1;
 }
 
 static void sc68_debug(sc68_t * sc68, const char * fmt, ...)
 {
   va_list list;
+
+  assert(null_or_sc68(sc68));
   va_start(list,fmt);
-  msg68x_va(sc68_cat,sc68,fmt,list);
+  if (!sc68)
+    msg68_va(sc68_cat, fmt, list);
+  else if (is_magic(sc68))
+    msg68x_va(sc68_cat, sc68, fmt, list);
   va_end(list);
 }
 
 int sc68_cntl(sc68_t * sc68, int fct, ...)
 {
-  int res = 0;
+  int res;
   va_list list;
+
+  assert(null_or_sc68(sc68));
+
+  /* Default to error if no sc68 instance is given. Function that
+   * don't need a valid sc68 object have to clear the error flag
+   */
+  if (!sc68)
+    res = -1;
+  else if (is_magic(sc68))
+    res = 0;
+  else
+    return -1;
+
   va_start(list, fct);
 
   switch (fct) {
+    /* Functions accepting null */
+
   case SC68_NOP:
     break;
 
-  case SC68_NAME: {
-    char ** pname =  va_arg(list, char **);
-    *pname = sc68 ? sc68->name : appname;
-  } break;
+  case SC68_GET_NAME:
+    *va_arg(list, char **) = sc68 ? sc68->name : appname;
+    res = 0;
+    break;
 
   case SC68_GET_PCM:
     res = get_pcm_fmt(sc68);
@@ -2232,38 +2242,74 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
     res = set_spr(sc68, va_arg(list, int));
     break;
 
-  case SC68_GET_POS:
-    res = get_pos(sc68, va_arg(list, int));
-    break;
-
-  case SC68_TRACKS:
-    res = (sc68 && sc68->disk) ? sc68->disk->nb_mus : -1;
-    break;
-
-  case SC68_EMULATORS:
-    if (!sc68)
-      res = -1;
-    else {
-      void ** ptr = va_arg(list, void **);
-      *ptr = &sc68->emu68;
-    }
-    break;
-
-  case SC68_SET_POS:
   default:
-    res = error_add(sc68, "sc68_cntl() -- invalid function -- *%d*", fct);
+    if (!sc68)
+      break;
+
+    switch (fct) {
+      /* Functions not accepting null */
+
+    case SC68_GET_DISK:
+      *va_arg(list, const disk68_t **)
+        = is_disk(sc68->disk) ? sc68->disk : 0;
+      break;
+
+    case SC68_GET_TRACKS:
+      res = is_disk(sc68->disk) ? sc68->disk->nb_mus : -1;
+      break;
+
+    case SC68_GET_TRACK:
+      res = sc68->track;
+      break;
+
+    case SC68_DEF_TRACK:
+      if (is_disk(sc68->disk))
+        res = sc68->disk->def_mus+1;
+      break;
+
+    case SC68_GET_LOOPS:
+      if (sc68->track > 0)
+        res = sc68->mix.loop_total;
+      break;
+
+    case SC68_GET_LOOP:
+      if (sc68->track > 0)
+        res = sc68->mix.loop_count;
+      break;
+
+    case SC68_GET_POS:
+      res = get_pos(sc68, SC68_POS_TRACK);
+      break;
+
+    case SC68_GET_PLAYPOS:
+      res = get_pos(sc68, SC68_POS_PLAY);
+      break;
+
+    case SC68_GET_COOKIE:
+      *va_arg(list, void **) = sc68->cookie;
+      break;
+
+    case SC68_SET_COOKIE:
+      sc68->cookie = va_arg(list, void *);
+      break;
+
+    case SC68_EMULATORS:
+      *va_arg(list, void **) = &sc68->emu68;
+      break;
+
+    case SC68_SET_POS:
+    default:
+      res = error_addx(sc68,
+                       "libsc68: %s (%d)\n",
+                       "invalid control function", fct);
+      break;
+    }
   }
+  va_end(list);
   return res;
 }
 
-void ** sc68_cookie_ptr(sc68_t * sc68)
+const char * sc68_mimetype(void)
 {
-  return sc68
-    ? &sc68->cookie
-    : 0
-    ;
-}
-
-const char * sc68_mimetype(void) {
   return SC68_MIMETYPE;
 }
