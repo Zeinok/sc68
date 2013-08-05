@@ -5,12 +5,12 @@
  * @author    Benjamin Gerard
  * @date      2003/08/07
  */
-/* Time-stamp: <2013-08-04 23:13:24 ben> */
+/* Time-stamp: <2013-08-05 21:50:21 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _SC68_SC68_H_
-#define _SC68_SC68_H_
+#ifndef SC68_SC68_H
+#define SC68_SC68_H
 
 #ifndef SC68_EXTERN
 # ifdef __cplusplus
@@ -144,10 +144,10 @@ typedef struct {
   /** message handler. */
   sc68_msg_t msg_handler;
 
-  /** debug mask (set bit to clear in debugmsg68). */
+  /** debug mask (set bit to clear in msg68). */
   int debug_clr_mask;
 
-  /** debug mask (set bit to set in debugmsg68). */
+  /** debug mask (set bit to set in msg68). */
   int debug_set_mask;
 
   /** number of arguments in command line (modified) */
@@ -213,21 +213,18 @@ typedef struct {
  */
 typedef struct {
   int tracks;            /**< number of tracks [1..99].          */
-  unsigned start_ms;     /**< Absolute start time in disk in ms. */
-  unsigned loop_ms;      /**< Length of track loop in ms.        */
 
-  unsigned int addr;     /**< Laod address.                      */
+  unsigned int addr;     /**< Load address.                      */
   unsigned int rate;     /**< Replay rate.                       */
   char * replay;         /**< replay name.                       */
 
   sc68_cinfo_t dsk;      /**< disk info.                         */
-  sc68_cinfo_t trk;      /**< track info (MUST BE just after dsk.*/
+  sc68_cinfo_t trk;      /**< track info (MUST BE behind dsk).   */
 
   char * album;          /**< Points to album's title tag.       */
   char * title;          /**< Points to track's title tag.       */
   char * artist;         /**< Points to track's artist tag.      */
 } sc68_music_info_t, sc68_minfo_t;
-
 
 /**
  * Return code (as returned by sc68_process() function)
@@ -255,13 +252,11 @@ enum sc68_spr_e {
  * sc68_play() parameters.
  */
 enum sc68_play_e {
-  SC68_DEF_TRACK  =  0,  /**< track value for the default track.  */
-  SC68_DEF_LOOP   =  0,  /**< loop value for the default loop.    */
-  SC68_INF_LOOP   = -1,  /**< loop value for infinite loop.       */
-#if 0
-  SC68_GET_TRACK  = -1,  /**< track value for query track or loop. */
-  SC68_GET_LOOP   = -1   /**< loop value for query loop instead of track. */
-#endif
+  SC68_DEF_TRACK  =  0,  /**< track value for the default track. */
+  SC68_DEF_LOOP   =  0,  /**< loop value for the default loop.   */
+  SC68_INF_LOOP   = -1,  /**< loop value for infinite loop.      */
+  SC68_CUR_TRACK  = -1,  /**< track value for the current track. */
+  SC68_CUR_LOOP   = -1,  /**< track value for the current track. */
 };
 
 /**
@@ -285,7 +280,10 @@ enum sc68_cntl_e {
   SC68_GET_LOOP,                     /**< Get current loop.         */
   SC68_GET_DISK,                     /**< Get a pointer to disk.    */
   SC68_GET_SPR,                      /**< Get sampling rate.        */
-  sc68_SET_SPR,                      /**< Set sampling rate.        */
+  SC68_SET_SPR,                      /**< Set sampling rate.        */
+  SC68_GET_LEN,                      /**< Get current track length. */
+  SC68_GET_TRKLEN,                   /**< Get some track length.    */
+  SC68_GET_DSKLEN,                   /**< Get disk length.          */
   SC68_GET_POS,                      /**< Get track position (ms).  */
   SC68_GET_PLAYPOS,                  /**< Get play position (ms).   */
   SC68_SET_POS,                      /**< Set position.             */
@@ -464,10 +462,10 @@ SC68_API
  *
  *  The sc68_play() function get or set current track.
  *
- *  If track == SC68_GET_TRACK (-1) and loop != SC68_GET_LOOP the
+ *  If track == SC68_CUR_TRACK (-1) and loop != SC68_CUR_LOOP the
  *  function returns the current track or 0 if none.
  *
- *  If track == SC68_GET_TRACK (-1) and loop == SC68_GET_LOOP the
+ *  If track == SC68_CUR_TRACK (-1) and loop == SC68_CUR_LOOP the
  *  returns the current loop counter.
  *
  *  Forced track and loop values while disk loading (see sc68_uri)
@@ -553,7 +551,7 @@ SC68_API
  *
  * @param  info  pointer to a sc68_music_info_t struct to be fill.
  * @param  sc68  sc68 instance
- * @param  track track number (-1 or 0:current/default).
+ * @param  track track number
  * @param  disk  disk to get information from (0 for current disk).
  *
  * @return error code

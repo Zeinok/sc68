@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-04 21:04:01 ben>
+ * Time-stamp: <2013-08-05 19:09:36 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -90,8 +90,8 @@ static void play_info(playinfo_t * pi)
     msginf("%-*s : %s\n",     len, "Title",   info.title);
     msginf("%-*s : %s\n",     len, "Artist",  info.artist);
     msginf("%-*s : %s\n",     len, "Hardware",info.trk.hw);
-    msginf("%-*s : %u:%02u\n",len, "Start time",
-          info.start_ms/60000u, (info.start_ms/1000u)%60u);
+    /* msginf("%-*s : %u:%02u\n",len, "Start time", */
+    /*       info.start_ms/60000u, (info.start_ms/1000u)%60u); */
     msginf("%-*s : %s\n",len, "Duration", info.trk.time);
 
     if (info.dsk.tags) {

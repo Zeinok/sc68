@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 19:48:41 ben>
+ * Time-stamp: <2013-08-05 15:57:38 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -251,7 +251,7 @@ static unsigned int fr_to_ms(unsigned int fr, unsigned int hz)
 
 int dsk_validate(void)
 {
-  int t;
+  int t, has_infinite;
 
   if (!is_valid_disk())
     return -1;
@@ -259,17 +259,19 @@ int dsk_validate(void)
   /* Validate time and loop */
   dsk.disk->time_ms = 0;
   dsk.disk->hwflags.all = 0;
-  for (t = 0; t < dsk.disk->nb_mus; ++t) {
+  for (t = has_infinite = 0; t < dsk.disk->nb_mus; ++t) {
     music68_t * m = dsk.disk->mus + t;
     m->loops    = ( m->loops > 0 ) ? m->loops : 1;
     m->first_ms = fr_to_ms(m->first_fr, m->frq);
     m->loops_ms = fr_to_ms(m->loops_fr, m->frq);
-    // m->total_fr = m->first_fr + (m->loops-1) * m->loops_fr;
-    // m->total_ms = fr_to_ms(m->total_fr, m->frq);
-    // m->start_ms = dsk.disk->time_ms;
-    dsk.disk->time_ms += m->first_ms;
+    if (m->loops > 0)
+      dsk.disk->time_ms += fr_to_ms(m->first_fr+m->loops_fr*(m->loops-1), m->frq);
+    else
+      has_infinite = 1;
     dsk.disk->hwflags.all |= m->hwflags.all;
   }
+  if (has_infinite)
+    dsk.disk->time_ms = 0;
 
   return 0;
 }
@@ -307,7 +309,7 @@ const char * dsk_tag_get(int trk, const char * var)
     else if ( ! strcmp (var, TAG68_LENGTH)) {
       unsigned int ms = !trk
         ? dsk.disk->time_ms
-        : m->first_ms
+        : m->loops > 0 ? fr_to_ms(m->first_fr+m->loops_fr*(m->loops-1),m->frq) : 0;
         ;
       /* unsigned int h, m , s; */
       /* h = ms / 3600000u; */

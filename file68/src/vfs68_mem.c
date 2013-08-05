@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 21:46:54 ben>
+ * Time-stamp: <2013-08-06 00:44:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -213,19 +213,15 @@ vfs68_t * vfs68_mem_create(const void * addr, int len, int mode)
   vfs68_mem_t *ism;
   int size;
 
-
-  if (len < 0 /* || (!addr && len) */) {
+  if (len < 0)
     return 0;
-  }
 
   size = sizeof(vfs68_mem_t) + (!addr ? len : 0);
   ism = malloc(size);
-  if (!ism) {
+  if (!ism)
     return 0;
-  }
-  if (!addr) {
+  if (!addr)
     addr = ism->internal;
-  }
   ism->vfs = vfs68_mem;
   ism->buffer  = (char *)addr;
   ism->size    = len;
@@ -240,7 +236,7 @@ vfs68_t * vfs68_mem_create(const void * addr, int len, int mode)
 static vfs68_t * mem_create(const char * uri, int mode,
                             int argc, va_list list)
 {
-  if (argc == 2) {
+  if (mem_ismine(uri) && argc == 2) {
     void * addr = va_arg(list, void *);
     int len     = va_arg(list, int);
     return vfs68_mem_create(addr, len, mode);

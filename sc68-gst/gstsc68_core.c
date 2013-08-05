@@ -243,7 +243,7 @@ static int tag_get(sc68_cinfo_t * cinfo, const char * key, GValue * val)
 gboolean gst_sc68_onchangetrack(Gstsc68 * filter)
 {
   GstTagList * tags = NULL;
-  int track, pos_ms;
+  int track, pos_ms, len_ms;
   GValue val;
 
   memset(&val,0,sizeof(val));
@@ -264,13 +264,14 @@ gboolean gst_sc68_onchangetrack(Gstsc68 * filter)
     }
     /* $$$ orgin ? */
     pos_ms = sc68_cntl(filter->sc68, SC68_GET_POS);
-    if (pos_ms == -1) {
+    len_ms = sc68_cntl(filter->sc68, SC68_GET_LEN);
+    if (pos_ms == -1 || len_ms == -1) {
       GST_ERROR_OBJECT(filter, "failed to retrieve position");
       gst_sc68_report_error(filter);
       return FALSE;
     }
-    filter->position_ns = gst_sc68_mstons(pos_ms - filter->info.start_ms);
-    filter->duration_ns = gst_sc68_mstons(filter->info.trk.time_ms);
+    filter->position_ns = gst_sc68_mstons(pos_ms);
+    filter->duration_ns = gst_sc68_mstons(len_ms);
 
     filter->buffer_frames =
       (filter->prop.rate + filter->info.rate - 1) / filter->info.rate;

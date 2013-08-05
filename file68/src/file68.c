@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-04 10:19:49 ben>
+ * Time-stamp: <2013-08-06 01:29:16 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -502,7 +502,7 @@ static int guess_artist_alias(disk68_t * mb, tagset68_t * tags)
 static int valid(disk68_t * mb)
 {
   music68_t *m;
-  int i, pdatasz = 0;
+  int i, pdatasz = 0, has_infinite = 0;
   void * pdata   = 0;
   char * title, * artist, * aalias;
   int is_sndh = mb->tags.tag.genre.val == tagstr.sndh;
@@ -623,8 +623,11 @@ static int valid(disk68_t * mb)
     m->start_ms = mb->time_ms;
 
     /* Advance disk total time. */
-    mb->time_ms += m->total_ms;
 #endif
+    if (m->loops > 0)
+      mb->time_ms += fr_to_ms(m->first_fr+m->loops_fr*(m->loops-1), m->frq);
+    else
+      has_infinite = 1;
 
     /* default mode is YM2149 (Atari ST) */
     if (!m->hwflags.all) {
@@ -715,9 +718,10 @@ static int valid(disk68_t * mb)
         m->has.asid_tC = 'D'-'A';
         m->has.asid_tX = 'B'-'A';
         if (m != s) {
-//          m->start_ms = mb->time_ms;
-          mb->time_ms += m->first_ms;
-//          mb->time_ms += m->total_ms;
+          if (m->loops > 0)
+            mb->time_ms += fr_to_ms(m->first_fr+m->loops_fr*(m->loops-1), m->frq);
+          else
+            has_infinite = 1;
         }
         mb->nb_asid++;
 
@@ -728,6 +732,8 @@ static int valid(disk68_t * mb)
     mb->nb_mus += j;
     TRACE68(file68_cat,"file68: aSID tracks -- %d/%d\n", mb->nb_asid,mb->nb_mus );
   }
+  if (has_infinite)
+    mb->time_ms = 0;
 
   return 0;
 }
@@ -811,7 +817,6 @@ static vfs68_t * uri_or_file_create(const char * uri, int mode,
                                     rsc68_info_t * info)
 {
   vfs68_t *vfs = 0;
-  void * param = 0;
 
   TRACE68(file68_cat,"file68: create -- %s -- mode:%d -- with%s info\n",
           strnull(uri),mode,info?"":"out");
@@ -819,9 +824,11 @@ static vfs68_t * uri_or_file_create(const char * uri, int mode,
   if (info && !strncmp68(uri,"sc68://music/", 13)) {
     param = info;
     info->type = rsc68_last;
+    vfs = uri68_vfs(uri, mode, 1, &info);
+  } else {
+    vfs = uri68_vfs(uri, mode, 0);
   }
 
-  vfs = uri68_vfs(uri, mode, 1, param);
   if (vfs68_open(vfs) < 0) {
     vfs68_destroy(vfs);
     vfs = 0;
@@ -868,7 +875,6 @@ disk68_t * file68_load_mem(const void * buffer, int len)
   vfs68_t * is;
 
   is = uri68_vfs("mem:", 1, 2, buffer, len);
-  /* is = vfs68_mem_create((void *)buffer,len,1); */
   d = vfs68_open(is) ? 0 : file68_load(is);
   vfs68_destroy(is);
 
@@ -969,14 +975,14 @@ static int sndh_info(disk68_t * mb, int len)
       /* p = ... */
     } else if (!memcmp(b+i,"MuMo",4)) {
       /* MusicMon ???  */
-      msg68_warning("file68: sndh -- what to do with 'MuMo' tag ?\n");
+      msg68_warning("file68: sndh -- %s\n","what to do with 'MuMo' tag ?");
       /* musicmon = 1; */
       i += 4;
     } else if (!memcmp(b+i,"TIME",4)) {
       int j, tracks;
       /* Time in second */
       if (! (tracks = mb->nb_mus) ) {
-        msg68_warning("file68: sndh -- got 'TIME' before track count\n");
+        msg68_warning("file68: sndh -- %s\n","got 'TIME' before track count");
         tracks = 1;
       }
       t = i; i += 4;
@@ -985,7 +991,7 @@ static int sndh_info(disk68_t * mb, int len)
           mb->mus[j].first_ms = 1000u *
             ( ( ( (unsigned char) b[i]) << 8 ) | (unsigned char) b[i+1] );
         TRACE68(file68_cat,
-                "file68: sndh -- TIME #%02 -- 0x%02X%02X (%c%c) -- %u ms\n",
+                "file68: sndh -- TIME #%02d -- 0x%02X%02X (%c%c) -- %u ms\n",
                 j+1, (unsigned char)b[i], (unsigned char)b[i+1],
                 isgraph((int)(unsigned char)b[i])?b[i]:'.',
                 isgraph((int)(unsigned char)b[i+1])?b[i+1]:'.',
@@ -1730,7 +1736,6 @@ int file68_save_mem(const char * buffer, int len, const disk68_t * mb,
   int err;
 
   vfs = uri68_vfs("mem:", 2, 2, buffer, len);
-  /* vfs = vfs68_mem_create((char *)buffer, len, 2); */
   err = file68_save(vfs, mb, version, gzip);
   vfs68_destroy(vfs);
 
@@ -1760,7 +1765,6 @@ int file68_save(vfs68_t * os, const disk68_t * mb, int version, int gzip)
   /* Create a null stream to calculate total size.
      Needed by gzip stream that can't seek back. */
   null_os = uri68_vfs("null:", 3, 0);
-  /* null_os = vfs68_null_create(fname); */
   if (vfs68_open(null_os)) {
     errstr = "open";
   } else {

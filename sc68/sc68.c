@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-04 21:14:42 ben>
+ * Time-stamp: <2013-08-05 20:55:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -304,10 +304,10 @@ static void DisplayInfo(int track)
     Print("%-*s : %s %s\n", len, "Disk"   , info->dsk.time, info->album);
     Print("%-*s : %s %s\n", len, "Track"  , info->trk.time, info->title);
     Print("%-*s : %s\n",    len, "Artist" , info->artist);
-    Print("%-*s : %02u:%02u,%02u\n", len, "Loop-Len",
-          info->loop_ms / 60000u,
-          info->loop_ms / 1000u % 60u,
-          info->loop_ms % 1000u / 100);
+    /* Print("%-*s : %02u:%02u,%02u\n", len, "Loop-Len", */
+    /*       info->loop_ms / 60000u, */
+    /*       info->loop_ms / 1000u % 60u, */
+    /*       info->loop_ms % 1000u / 100); */
 
     Print("Disk tags:\n");
     for (j=0; j<info->dsk.tags; ++j)
@@ -343,7 +343,7 @@ static char * codestr(int code) {
 /* track:  0:all -1:default */
 static int PlayLoop(vfs68_t * out, int track, int loop)
 {
-  static char buffer[512 << 2];
+  static char buffer[256 << 2];
   const int max = sizeof(buffer) >> 2;
   int all = 0;
   int code;
@@ -374,6 +374,8 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
   }
   Debug(" all    : %s\n",all?"yes":"no");
 
+
+
   /* Set track. */
   code = sc68_play(sc68, track, loop);
   if (code != SC68_ERROR) {
@@ -385,21 +387,46 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
       DisplayInfo(-1);
   }
 
-  while ( ! (code & SC68_END) ) {
-    char tmp1[32],tmp2[32];
-    int n = max;
-    int play_ms, track_ms,track,tracks;
+  /* $$$ TEMP */
+  if (0) {
+    int i;
+    int tracks, total;
+    char tmp[256];
 
-    track    = sc68_cntl(sc68,SC68_GET_TRACK);
-    tracks   = sc68_cntl(sc68,SC68_GET_TRACKS);
-    play_ms  = sc68_cntl(sc68,SC68_GET_PLAYPOS);
-    track_ms = sc68_cntl(sc68,SC68_GET_POS);
+    tracks = sc68_cntl(sc68, SC68_GET_TRACKS);
+    total  = sc68_cntl(sc68, SC68_GET_DSKLEN);
+
+    Print("%s,%u\n"
+          "------------------\n",
+          strtime68(tmp,tracks,total/1000u),total%1000u);
+    for (i=1; i<= tracks; ++i) {
+      int ms = sc68_cntl(sc68, SC68_GET_TRKLEN, i);
+      Print("%s,%u\n",
+            strtime68(tmp,i,ms/1000u),ms%1000u);
+    }
+  }
+
+  while ( ! (code & SC68_END) ) {
+    char tmp1[32],tmp2[32],tmp3[32],tmp4[32];
+    int n = max;
+    int play_len,  play_pos;
+    int track_len, track_pos;
+    int track, tracks;
+
+    track     = sc68_cntl(sc68,SC68_GET_TRACK);
+    tracks    = sc68_cntl(sc68,SC68_GET_TRACKS);
+    play_pos  = sc68_cntl(sc68,SC68_GET_PLAYPOS);
+    play_len  = sc68_cntl(sc68,SC68_GET_DSKLEN);
+    track_pos = sc68_cntl(sc68,SC68_GET_POS);
+    track_len = sc68_cntl(sc68,SC68_GET_LEN);
 
     code = sc68_process(sc68, buffer, &n);
 
-    Print("\r%s,%03u %s,%03u",
-          strtime68(tmp2,track,track_ms/1000u),track_ms%1000u,
-          strtime68(tmp1,tracks,play_ms/1000u),play_ms%1000u);
+    Print("\r%s,%03u ~ %s,%03u ** %s,%03u ~ %s,%03u",
+          strtime68(tmp1, track , track_pos/1000u),track_pos%1000u,
+          strtime68(tmp2, track , track_len/1000u),track_len%1000u,
+          strtime68(tmp3, tracks, play_pos/1000u), play_pos%1000u,
+          strtime68(tmp4, tracks, play_len/1000u), play_len%1000u);
 
     if (code == SC68_ERROR)
       break;

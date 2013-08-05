@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 17:14:46 ben>
+ * Time-stamp: <2013-08-05 23:39:57 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -118,6 +118,11 @@ static const config68_entry_t conftab[] = {
     {SAMPLING_RATE_MIN},{SAMPLING_RATE_MAX},{SAMPLING_RATE_DEF}
   },
   { 1,
+    "asid", CONFIG68_INT,
+    "aSIDfier settings {0:off 1:safe 2:force}",
+    {0},{2},{0}
+  },
+  { 1,
     "amiga-blend", CONFIG68_INT,
     "Amiga left/right voices blending factor {32768:center}",
     {0},{65535},{AMIGA_BLEND}
@@ -142,21 +147,6 @@ static const config68_entry_t conftab[] = {
     "default track time (in second)",
     {0}, {MAX_TIME}, {DEFAULT_TIME}
   },
-  /* { 0,                          /\* could be export but is it useful *\/ */
-  /*   "seek-speed", CONFIG68_INT, */
-  /*   "seek speed factor {0:OFF 256:1 512:2 ...}", */
-  /*   {0}, {MAX_SEEKSPD}, {DEFAULT_SEEKSPD} */
-  /* }, */
-  /* { 0, */
-  /*   "total-time", CONFIG68_INT, */
-  /*   "total playing time since first launch", */
-  /*   {0}, {0}, {0} */
-  /* }, */
-  /* { 0, */
-  /*   "total-ms", CONFIG68_INT, */
-  /*   "total-time adjustment", */
-  /*   {0}, {999}, {0} */
-  /* }, */
   { 0,                          /* already exported by file68 */
     "music-path", CONFIG68_STR,
     "local sc68 music path",
@@ -575,7 +565,7 @@ static int load_from_registry(config68_t * conf)
 static int load_from_file(config68_t * conf)
 {
   vfs68_t * is = 0;
-  char s[1024], * word;
+  char s[256], * word;
   int err;
   config68_type_t type;
 

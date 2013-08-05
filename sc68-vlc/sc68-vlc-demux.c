@@ -1,4 +1,4 @@
-/* Time-stamp: <2013-07-22 22:21:47 ben> */
+/* Time-stamp: <2013-08-05 22:20:47 ben> */
 
 /* Minimal version */
 
@@ -47,12 +47,18 @@ static void meta_lut_sort(void);
 static int  Open  ( vlc_object_t * );
 static void Close ( vlc_object_t * );
 
+static void sc68_debug(sc68_t * sc68, const char * fmt, ...) { };
+
 /* Init sc68 library (call once on load) */
 static int vlc_init_sc68(void)
 {
   sc68_init_t init68;
+  char appname[] = "vlc";
+  char * argv[] = { appname };
   meta_lut_sort();
   memset(&init68,0,sizeof(init68));
+  init68.argc = sizeof(argv)/sizeof(*argv);
+  init68.argv = argv;
 #ifdef DEBUG
   init68.debug_set_mask = -1;
   init68.debug_clr_mask =  0;
@@ -109,9 +115,9 @@ struct demux_sys_t {
 
 static void flush_sc68_errors(demux_t * const p_demux)
 {
-  sc68_error_flush(0);
-  if (p_demux && p_demux->p_sys && p_demux->p_sys->sc68)
-    sc68_error_flush(p_demux->p_sys->sc68);
+  /* sc68_error_flush(0); */
+  /* if (p_demux && p_demux->p_sys && p_demux->p_sys->sc68) */
+  /*   sc68_error_flush(p_demux->p_sys->sc68); */
 }
 
 /* Shutdown sc68 demux module private */
@@ -335,7 +341,8 @@ static int Open(vlc_object_t * p_this)
     goto error;
 
   /* Set sc68 cookie */
-  *(sc68_cookie_ptr(p_demux->p_sys->sc68)) = p_demux;
+  sc68_cntl(p_demux->p_sys->sc68, SC68_SET_COOKIE, p_demux);
+  /* *(sc68_cookie_ptr(p_demux->p_sys->sc68)) = p_demux; */
 
   /* Load and prepare sc68 file */
   stream68 = vfs68_vlc_create(p_demux->s);
@@ -349,7 +356,7 @@ static int Open(vlc_object_t * p_this)
     goto error;
   if (sc68_process(p_demux->p_sys->sc68, 0, 0) == SC68_ERROR)
     goto error;
-  p_demux->p_sys->sample_rate = sc68_sampling_rate(p_demux->p_sys->sc68,0);
+  p_demux->p_sys->sample_rate = sc68_cntl(p_demux->p_sys->sc68, SC68_GET_SPR);
 
   /* Set track info */
   if (!sc68_music_info(p_demux->p_sys->sc68, &info, 1, 0)) {
@@ -508,28 +515,26 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
   } break;
 
   case DEMUX_GET_LENGTH: {
+    int ms = sc68_cntl(p_sys->sc68, p_sys->allin1
+                       ? SC68_GET_DSKLEN : SC68_GET_LEN);
+
     int64_t * pi64 = (int64_t *) va_arg(args, int64_t *);
-    TrackInfo(p_demux);
-    *pi64 =  (int64_t) (p_sys->allin1
-                        ? p_sys->info.dsk.time_ms
-                        : p_sys->info.trk.time_ms) * 1000;
-    /* *pi64 =  (int64_t) p_sys->info.dsk.time_ms * 1000; */
+    
+    *pi64 = (int64_t) ms * 1000;
     return VLC_SUCCESS;
   } break;
 
   case DEMUX_GET_TIME: {
     int64_t * pi64 = (int64_t *) va_arg(args, int64_t *);
-    int ms = sc68_seek(p_sys->sc68, SC68_SEEK_TRACK, SC68_SEEK_QUERY, 0);
+    int ms = sc68_cntl(p_sys->sc68, p_sys->allin1 ? SC68_GET_PLAYPOS : SC68_GET_POS);
     if (ms == -1) break;
-    TrackInfo(p_demux);
-    /* ms -= p_sys->info.start_ms; */
     *pi64 = (int64_t)ms * 1000;
     return VLC_SUCCESS;
   } break;
 
   case DEMUX_GET_POSITION: {
     double lf, * plf = (double *) va_arg(args, double *);
-    int ms = sc68_seek(p_sys->sc68, SC68_SEEK_TRACK, SC68_SEEK_QUERY, 0);
+    int ms = sc68_cntl(p_sys->sc68, p_sys->allin1 ? SC68_GET_PLAYPOS : SC68_GET_POS);
     if (ms == -1 || !p_sys->info.trk.time_ms) break;
     /* ms -= p_sys->info.start_ms; */
     *plf = lf = (double)ms / (double)p_sys->info.trk.time_ms;
@@ -607,11 +612,9 @@ static void msg(const int bit, void *userdata, const char *fmt, va_list list)
     }
     vlc_vaLog(vlc_object, level, MODULE_STRING, fmt , list);
   }
-#else
-  int len = strlen(fmt);
-  vfprintf(stderr, fmt, list);
-  if (len > 0 && fmt[len-1] != '\n')
-    fputc('\n',stderr);
-  fflush(stderr);
+#elif defined (WIN32)
+  char tmp[512];
+  vsnprintf(tmp,512,fmt,list);
+  OutputDebugString(tmp);
 #endif
 }

@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      1999/03/13
  */
-/* Time-stamp: <2013-08-04 23:12:39 ben> */
+/* Time-stamp: <2013-08-05 01:22:32 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -62,7 +62,7 @@ EMU68_API
 /**
  * Shutdown 68K emulator.
  *
- *   The emu68_shutdown() function shutdown the EM68 library. It must
+ *   The emu68_shutdown() function shutdown the EMU68 library. It must
  *   be call at the end and further more calls are forbidden except
  *   for emu68_init(). All emulator instances created should have been
  *   killed before.
