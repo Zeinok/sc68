@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-06 01:29:16 ben>
+ * Time-stamp: <2013-08-06 10:12:23 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -822,7 +822,6 @@ static vfs68_t * uri_or_file_create(const char * uri, int mode,
           strnull(uri),mode,info?"":"out");
 
   if (info && !strncmp68(uri,"sc68://music/", 13)) {
-    param = info;
     info->type = rsc68_last;
     vfs = uri68_vfs(uri, mode, 1, &info);
   } else {
