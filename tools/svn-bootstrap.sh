@@ -195,4 +195,5 @@ if test ${err} -ne 0; then
 fi
 
 # No error runs autoreconf to create missing files.
+msg "Running autoreconf ${vifs}"
 autoreconf ${vifs}
