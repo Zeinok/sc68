@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-05 21:28:40 ben>
+ * Time-stamp: <2013-08-06 23:35:04 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -262,6 +262,10 @@ static inline int has_disk(const sc68_t * sc68) {
 
 static inline int has_track(const sc68_t * sc68, const int track) {
   return has_disk(sc68) && track > 0 && track <= sc68->disk->nb_mus;
+}
+
+static inline int in_disk(const disk68_t * disk, const int track) {
+  return is_disk(disk) && track > 0 && track <= disk->nb_mus;
 }
 
 /***********************************************************************
@@ -1992,12 +1996,10 @@ static int get_len(sc68_t * sc68, int track)
   return len;
 }
 
-int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
-                    sc68_disk_t disk)
+
+static void music_info(sc68_music_info_t * f, const disk68_t * d,
+                       int track, int loops)
 {
-  const disk68_t  * d;
-  const music68_t * m;
-  int loops;
   static const char * hwtable[8] = {
     "none",
     "Yamaha-2149",
@@ -2008,7 +2010,48 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
     "MicroWire (STE) & Amiga/Paula",
     "Yamaha-2149 & MicroWire (STE) & Amiga/Paula",
   };
+  const music68_t * m;
 
+  assert(f);
+  assert(in_disk(d, track));
+  m = d->mus + track - 1;
+  f->tracks      = d->nb_mus;
+  f->addr        = m->a0;
+  f->rate        = m->frq;
+  f->replay      = m->replay ? m->replay : "built-in";
+  f->dsk.track   = d->def_mus+1;
+  f->dsk.time_ms = get_disk_len(d, loops);
+  strtime68(f->dsk.time, f->tracks, (f->dsk.time_ms+999u)/1000u);
+  f->dsk.ym      = d->hwflags.bit.ym;
+  f->dsk.ste     = d->hwflags.bit.ste;
+  f->dsk.amiga   = d->hwflags.bit.amiga;
+  f->dsk.hw      = hwtable[f->dsk.ym+(f->dsk.ste<<1)+(f->dsk.amiga<<2)];
+  f->dsk.tags    = file68_tag_count(d, 0);
+  f->dsk.tag     = (sc68_tag_t *) d->tags.array;
+
+  f->trk.track   = track;
+  f->trk.time_ms = calc_len(d, track, loops);
+  strtime68(f->trk.time, track,(f->trk.time_ms+999u)/1000u);
+
+  f->trk.ym    = m->hwflags.bit.ym;
+  f->trk.ste   = m->hwflags.bit.ste;
+  f->trk.amiga = m->hwflags.bit.amiga;
+  f->trk.hw    = hwtable[f->trk.ym+(f->trk.ste<<1)+(f->trk.amiga<<2)];
+
+  f->trk.tags  = file68_tag_count(d, track);
+  f->trk.tag   = (sc68_tag_t *) m->tags.array;
+
+  f->album     = d->tags.tag.title.val;
+  f->title     = m->tags.tag.title.val;
+  f->artist    = m->tags.tag.artist.val;
+}
+
+
+int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
+                    sc68_disk_t disk)
+{
+  const disk68_t  * d;
+  int loaded;
 
   assert(null_or_sc68(sc68));
   assert(info);
@@ -2029,52 +2072,19 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
       return error_add(sc68, "libsc68: %s\n","music info -- no current track");
   } else if (track == SC68_DEF_TRACK)
     track = d->def_mus+1;
+
   if (check_track_range(sc68, d, track))
     return -1;
 
   /* Asking for the track being played by sc68, simply copy internal
    * info struct, unless off course it is the one being filled.
    */
-  if (d == sc68->disk && track == sc68->track && info != &sc68->info) {
+  loaded = sc68 && d == sc68->disk;
+  if (loaded && track == sc68->track && info != &sc68->info) {
     *info = sc68->info;
-    return 0;
+  } else {
+    music_info(info, d, track, loaded ? sc68->loop_to : SC68_DEF_LOOP);
   }
-
-  m = d->mus + track - 1;
-
-  loops = (d == sc68->disk) ? sc68->loop_to : SC68_DEF_LOOP;
-
-  info->tracks      = d->nb_mus;
-  // info->loop_ms     = m->loops_ms; /* fr_to_ms(m->loops_fr,m->frq); */
-  info->addr        = m->a0;
-  info->rate        = m->frq;
-  info->replay      = m->replay ? m->replay : "built-in";
-
-  info->dsk.track   = d->def_mus+1;
-  info->dsk.time_ms = get_disk_len(d, loops);
-  strtime68(info->dsk.time, info->tracks, (info->dsk.time_ms+999u)/1000u);
-  info->dsk.ym      = d->hwflags.bit.ym;
-  info->dsk.ste     = d->hwflags.bit.ste;
-  info->dsk.amiga   = d->hwflags.bit.amiga;
-  info->dsk.hw      = hwtable[info->dsk.ym+(info->dsk.ste<<1)+(info->dsk.amiga<<2)];
-  info->dsk.tags    = file68_tag_count(d, 0);
-  info->dsk.tag     = (sc68_tag_t *) d->tags.array;
-
-  info->trk.track   = track;
-  info->trk.time_ms = calc_len(d, track, loops);
-  strtime68(info->trk.time, track,(info->trk.time_ms+999u)/1000u);
-
-  info->trk.ym    = m->hwflags.bit.ym;
-  info->trk.ste   = m->hwflags.bit.ste;
-  info->trk.amiga = m->hwflags.bit.amiga;
-  info->trk.hw    = hwtable[info->trk.ym+(info->trk.ste<<1)+(info->trk.amiga<<2)];
-
-  info->trk.tags  = file68_tag_count(d, track);
-  info->trk.tag   = (sc68_tag_t *) m->tags.array;
-
-  info->album     = d->tags.tag.title.val;
-  info->title     = m->tags.tag.title.val;
-  info->artist    = m->tags.tag.artist.val;
 
   return 0;
 }
@@ -2116,148 +2126,6 @@ int sc68_tag_enum(sc68_t * sc68, sc68_tag_t * tag, int track, int idx,
                          (const char **)&tag->key,
                          (const char **)&tag->val);
 }
-
-
-#if 0
-sc68_music_info_t * sc68_music_info(sc68_t * sc68, int track, sc68_disk_t disk)
-{
-  sc68_music_info_t * info = 0;
-  int infosz;
-
-  disk68_t * d;
-  music68_t * m = 0;
-  int hw;
-  hwflags68_t hwf;
-  int loop, force_loop, loop_to;
-
-  char * tagdata;
-  const char * key, * val;
-  int tag_cnt, tag_len;
-
-  static const char * hwtable[8] = {
-    "none",
-    "Yamaha-2149",
-    "MicroWire (STE)",
-    "Yamaha-2149 & MicroWire (STE)",
-    "Amiga/Paula",
-    "Yamaha-2149 & Amiga/Paula",
-    "MicroWire (STE) & Amiga/Paula",
-    "Yamaha-2149 & MicroWire (STE) & Amiga/Paula",
-  };
-
-  if (!sc68 && !disk)
-    return 0;
-
-  d = disk ? disk : sc68->disk;
-  if (!d)
-    return 0;
-
-  /* -1 : use current track or default track (depending if disk was given) */
-  if (track == -1)
-    track = disk ? d->def_mus+1 : sc68->track;
-
-  if (track <= 0 || track > d->nb_mus)
-    return 0;
-
-  /* count and measure tags */
-  tag_cnt = tag_len = 0;
-  for (tag_cnt = 0;
-       !file68_tag_enum(d, track, tag_cnt, &key, &val);
-       ++tag_cnt) {
-    tag_len += strlen(key) + strlen(val) + 2;
-  }
-
-  /* alloc the info struct */
-  infosz
-    = sizeof(*info)
-    - sizeof(info->tag)
-    + sizeof(*info->tag) * tag_cnt
-    + tag_len
-    ;
-  if (info = sc68_calloc(infosz), !info) {
-    return 0;
-  }
-  info->tags = tag_cnt;
-
-  /* copy tag data */
-  tagdata = (char *)(info->tag+tag_cnt);
-  for (tag_cnt = 0;
-       !file68_tag_enum(d, track, tag_cnt, &key, &val);
-       ++tag_cnt) {
-    info->tag[tag_cnt].key = tagdata;
-    tagdata = stpcpy(tagdata, key) + 1;
-    info->tag[tag_cnt].val = tagdata;
-    tagdata = stpcpy(tagdata, val) + 1;
-  }
-
-  info->title = (tag_cnt > TAG68_ID_TITLE)
-    ? info->tag[TAG68_ID_TITLE].val
-    : not_available
-    ;
-
-  info->author = (tag_cnt > TAG68_ID_ARTIST)
-    ? info->tag[TAG68_ID_ARTIST].val
-    : not_available
-    ;
-
-  m = d->mus + ((!track) ? d->def_mus : (track - 1));
-  info->track  = track;
-  info->tracks = d->nb_mus;
-
-  force_loop   = sc68 ? sc68->force_loop : -1;
-  loop_to      = sc68 ? sc68->loop_to    : -1;
-  loop         = calc_loop_total(force_loop, loop_to, m->loop);
-
-  if (!track) {
-    /* disk info */
-    info->replay   = 0;
-    info->time_ms  = calc_disk_time(sc68,d);
-    info->start_ms = 0;
-    hwf.all        = d->hwflags.all;
-    track          = info->tracks;
-  } else {
-    /* track info */
-    info->replay   = m->replay ? m->replay : "built-in";
-    info->time_ms  = (sc68 && m == sc68->mus)
-      ? sc68->time.length_ms : (m->time_ms ? m->time_ms : TIMEMS_DEF);
-    info->start_ms = m->start_ms;
-    hwf.all        = m->hwflags.all;
-  }
-
-  loop = calc_loop_total(force_loop,
-                         (sc68 && m==sc68->mus) ? loop_to : 1,
-                         m->loop);
-  info->time_ms  *= loop;
-  info->start_ms *= loop;
-
-  /* If there is a track remapping always use it. */
-  if (m->track) {
-    track = info->track = m->track;
-  }
-
-  /* info->author    = m->tags.tag.artist.val ? m->tags.tag.artist.val  : "n/a"; */
-  /* info->composer  = /\* m->composer  ? m->composer  : *\/ "n/a"; */
-  /* info->ripper    = /\* m->ripper    ? m->ripper    : *\/ "n/a"; */
-  /* info->converter = /\* m->converter ? m->converter : *\/ "n/a"; */
-
-  hw = 7 &
-    (  (hwf.bit.ym      ? SC68_YM    : 0)
-       | (hwf.bit.ste   ? SC68_STE   : 0)
-       | (hwf.bit.amiga ? SC68_AMIGA : 0)
-      )
-    ;
-
-  info->hw.ym    = hwf.bit.ym;
-  info->hw.ste   = hwf.bit.ste;
-  info->hw.amiga = hwf.bit.amiga;
-  info->rate     = m->frq;
-  info->addr     = m->a0;
-  info->hwname   = hwtable[hw];
-  strtime68(info->time, track, (info->time_ms+999u)/1000u);
-
-  return info;
-}
-#endif
 
 vfs68_t * sc68_vfs(const char * uri, int mode, int argc, ...)
 {
