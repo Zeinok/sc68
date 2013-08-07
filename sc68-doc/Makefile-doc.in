@@ -15,8 +15,13 @@ srcdir  = @srcdir@
 dox-clean-local:
 	rm -rf -- doc-*/ html/ latex/
 
-dox-all: $(cfgname)
+dox-all: $(cfgname) doc-filter.sh
 	$(doxygen) "$<"
 
 $(cfgname): gen-doxcfg.sh
 	${SHELL} "$<" "$@"
+
+# ----------------------------------------------------------------------
+# Local Variables:
+# mode: makefile
+# End:

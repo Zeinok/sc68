@@ -1,32 +1,82 @@
-/* FOR DOCUMENTATION PURPOSE ONLY. */
+#error "FOR DOCUMENTATION PURPOSE ONLY"
+
+/*
+
+GROUPS HIERARCHY
+
+sc68_doc
+  sc68_usr
+    sc68_cfg
+    sc68_prg
+      sc68_prg_dev
+      sc68_prg_usr
+  sc68_dev
+    sc68_dev_lib
+*/
 
 /**
-   @defgroup  cli_tools68  sc68 command line tools
+ @mainpage sc68 documentation
 
-   Documents all sc68 related command line tools.
+ @section Copyleft
+
+   Copyright (C) 1993-2013 Benjamin Gerard
+
+   Permission is granted to copy, distribute and/or modify this
+   document under the terms of the GNU Free Documentation License,
+   Version 1.3 or any later version published by the Free Software
+   Foundation; with no Invariant Sections, no Front-Cover Texts, and
+   no Back-Cover Texts.  A copy of the license is included in the
+   section entitled "GNU Free Documentation License".
+
+   The full license is at http://www.gnu.org/licenses/fdl-1.3.en.html
+
+ @section Content
+
+   The @ref sc68_usr "sc68 user documentation" contains documentation for
+   - @ref sc68_cli "Using programs and utilities"
+   - @ref sc68_cfg "Configuration"
+
+   The sc68 developer documentation contains documentation for
+   - Building sc68
+   - Using sc68 library
 
 */
 
 /**
-   @defgroup  devtools68  sc68 developer tools
-   @ingroup   cli_tools68
-
-   Documents all sc68 related command line tools useful for
-   developers.
-
+ @defgroup  sc68_doc  All sc68 documentations.
 */
 
 /**
-   @defgroup  usertools68  sc68 user tools
-   @ingroup   cli_tools68
-
-   Documents all sc68 related command line tools useful for
-   users.
-
+ @defgroup  sc68_usr  End user's documentation
+ @ingroup   sc68_doc
+ @brief     Configure and use sc68 programs.
 */
 
 /**
-   @defgroup  api68 sc68 libraries
+ @defgroup  sc68_dev  Developer's documentation
+ @ingroup   sc68_doc
+ @brief     How to use sc68 libraries in your programs.
+*/
+
+
+/**
+ @defgroup  sc68_prg  sc68 programs
+ @ingroup   sc68_usr
+*/
+
+/**
+ @defgroup  sc68_prg_dev  sc68 programs for developers
+ @ingroup   sc68_prg
+*/
+
+/**
+ @defgroup  sc68_prg_usr  sc68 programs for end users
+ @ingroup   sc68_prg
+*/
+
+/**
+ @defgroup  sc68_dev_lib sc68  libraries
+ @ingroup   sc68_dev
 
    Documents sc68 and buddies libraries.
 
@@ -41,15 +91,5 @@
    @ref sourcer68_prg or @ref debug68_prg for disassemble M68000
    machine code.
 
-
 */
 
-
-/**
-   @mainpage sc68 documentation
-
-   This is sc68 documentation.
-
-   Something has to be written here ...
-
-*/

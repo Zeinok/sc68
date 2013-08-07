@@ -1,7 +1,10 @@
 # -*- sh -*-
 #
-# by Benjamin Gerard <benjihan -4t- users.sourceforge -d0t- net>
-#
+# @file    gen-doxcfg.sh
+# @author  Benjamin Gerard
+# @brief   Generate sc68 doxygen configuration file.
+# 
+# Time-stamp: <2013-08-07 15:13:51 ben>
 
 doxygen=@doxygen@
 srcdir="@srcdir@"
@@ -20,10 +23,13 @@ s|\(^PROJECT_BRIEF${spc}=\)${spc}.*$|\1 "An Atari-ST and Amiga music player"|
 s|\(^INPUT${spc}=\)${spc}.*$|\1 @INPUTS@|
 s|\(^OUTPUT_DIRECTORY${spc}=\)${spc}.*$|\1 doc-@PACKAGE_VERSION@|
 s|\(^OPTIMIZE_OUTPUT_FOR_C${spc}=\)${spc}.*$|\1 YES|
-s|\(^QUIET${spc}=\)${spc}.*$|\1 NO|
+s|\(^QUIET${spc}=\)${spc}.*$|\1 YES|
 s|\(^FILE_PATTERNS${spc}=\)${spc}.*$|\1 *68.h|
 s|\(^RECURSIVE${spc}=\)${spc}.*$|\1 NO|
 s|\(^GENERATE_LATEX${spc}=\)${spc}.*$|\1 NO|
+s|\(^FILE_PATTERNS${spc}=\)${spc}.*$|\1 \*.h|
+s|\(^JAVADOC_AUTOBRIEF${spc}=\)${spc}.*$|\1 YES|
+s|\(^INPUT_FILTER${spc}=\)${spc}.*$|\1 "${SHELL} ./doc-filter.sh"|
 EOF
 r=$?
 rm -- "$1.tmp"

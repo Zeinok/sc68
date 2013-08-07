@@ -68,6 +68,7 @@ done
 AC_SUBST([INPUTS])
 AC_CONFIG_FILES([
     gen-doxcfg.sh
+    doc-filter.sh
     sc68-doc.spec
     sc68-doc-${VERSION}.ebuild:sc68-doc.ebuild.in
     Makefile])
