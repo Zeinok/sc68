@@ -17,17 +17,17 @@ RELEASE  := -debug
 RELFLAGS := -UNDEBUG -DDEBUG
 endif
 
+ARCHBASE := $(shell realpath "$$HOME/_Arch")
+DEVEL    := $(shell realpath "$$HOME/_Code")
 CC	 := $(TOOLCHAIN)-gcc
 STRIP	 := $(TOOLCHAIN)-strip --strip-all
+SYSROOT  := /usr/$(TOOLCHAIN)/sys-root
+PREFIX   := $(ARCHBASE)/$(TOOLCHAIN)/vlc$(RELEASE)
 
-SYSROOT    = /usr/$(TOOLCHAIN)/sys-root
-PREFIX     = /cygdrive/c/Arch/$(TOOLCHAIN)/vlc$(RELEASE)
-
-
-VLCDIR     = /cygdrive/c/Program Files (x86)/VideoLAN/VLC
-VLCSDK     = ./sdk
-VLCPLUGDIR = $(VLCDIR)/plugins/demux
-VLCFIXSDK  = | sed "s|/home/jb/vlc_2.0/win32/_win32|'$(VLCSDK)'|g"
+VLCSDK     := $(shell realpath ./sdk)
+VLCDIR     := $(shell realpath "$(VLCSDK)/..")
+VLCPLUGDIR := $(VLCDIR)/plugins/demux
+VLCFIXSDK  := | sed "s|/home/jb/vlc_2.0/win32/_win32|'$(VLCSDK)'|g"
 
 PKGCONFIG  = PKG_CONFIG_LIBDIR='$(SYSROOT)/mingw/lib/pkgconfig'
 PKGCONFIG += PKG_CONFIG_PATH='$(PREFIX)/lib/pkgconfig:$(VLCSDK)/lib/pkgconfig'
@@ -86,7 +86,7 @@ libsc68_plugin.dll: $(obj)
 
 install: $(sos)
 #	test -e "$(VLCPLUGDIR)" || mkdir -pv "$(VLCPLUGDIR)"
-	install $^ "$(VLCPLUGDIR)/"
+	install $^ "$(VLCPLUGDIR)"/
 
 strip: $(sos)
 	$(STRIP) $<
@@ -108,6 +108,7 @@ info:
 	@$(PKGCONFIG) --cflags sc68 vlc-plugin $(VLCFIXSDK)
 	@$(PKGCONFIG) --modversion sc68 vlc-plugin
 	@echo
+	@echo "VLC_DIR=[$(VLCDIR)]"
 	@echo "VLC_CFLAGS=[$(VLC_CFLAGS)]"
 	@echo "VLC_LIBS=[$(VLC_LIBS)]"
 	@echo "VLC_VER=]$(VLC_VER)]"

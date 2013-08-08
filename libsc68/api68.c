@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-08 03:10:40 ben>
+ * Time-stamp: <2013-08-08 17:09:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -150,7 +150,7 @@ struct _sc68_s {
   int            track_to;    /**< Track to set (0:n/a, -1:end req).     */
   int            loop_to;     /**< Loop to set (0:default -1:infinite).  */
   int            asid;        /**< aSIDifier flags.                      */
-
+  int            asid_timers; /**< timer assignment 4cc (0:not asid).    */
   int            cfg_track;   /**< from config "force-track".            */
   int            cfg_loop;    /**< from config "force-loop".             */
   int            cfg_asid;    /**< from config "asid".                   */
@@ -1396,7 +1396,7 @@ static int load_replay(sc68_t * sc68, const char * replay, int a0)
 
 static int aSIDifier(sc68_t * sc68, const music68_t * m)
 {
-  int res = -1;
+  int res = 0;
   assert(is_sc68(sc68));
 
   if ( ! m->hwflags.bit.ym )
@@ -1444,7 +1444,7 @@ static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
   sc68->emu68->reg.d[2] = m->datasz;
   sc68->emu68->reg.a[0] = a0;
   sc68->emu68->reg.a[6] = a6;           /* original replay address  */
-  /* d7 (asid timers) was set in change_track() */
+  sc68->emu68->reg.d[7] = sc68->asid_timers;
 
   /* Run music init code. */
   sc68->emu68->cycle = 0;
@@ -1482,13 +1482,13 @@ static int change_track(sc68_t * sc68, int track/* , int loop */)
   sc68->playaddr = a0 = m->a0;
   TRACE68(sc68_cat," -> play address -- $%06x\n", sc68->playaddr);
 
-  sc68->emu68->reg.d[7] = aSIDifier(sc68, m);
-  if (sc68->emu68->reg.d[7] != -1) {
+  sc68->asid_timers = aSIDifier(sc68, m);
+  if (sc68->asid_timers) {
     TRACE68(sc68_cat," -> aSID timers -- %c%c%c%c\n",
-            (int)(u8)(sc68->emu68->reg.d[7] >> 24),
-            (int)(u8)(sc68->emu68->reg.d[7] >> 16),
-            (int)(u8)(sc68->emu68->reg.d[7] >>  8),
-            (int)(u8)(sc68->emu68->reg.d[7] >>  0));
+            (int)(u8)(sc68->asid_timers >> 24),
+            (int)(u8)(sc68->asid_timers >> 16),
+            (int)(u8)(sc68->asid_timers >>  8),
+            (int)(u8)(sc68->asid_timers >>  0));
     if (a0 = load_replay(sc68, "asidifier", a0), a0 == SC68_ERROR)
       return SC68_ERROR;
   }
@@ -1927,7 +1927,8 @@ sc68_disk_t sc68_disk_load_mem(const void * buffer, int len)
 
 void sc68_disk_free(sc68_disk_t disk)
 {
-  file68_free(disk);                    /* $$$ check this */
+  if (is_disk(disk))
+    file68_free(disk);                    /* $$$ check this */
 }
 
 int sc68_open(sc68_t * sc68, sc68_disk_t disk)

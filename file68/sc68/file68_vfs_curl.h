@@ -5,7 +5,7 @@
  * @date     2003-08-08
  * @brief    @ref cURL stream header.
  */
-/* Time-stamp: <2013-07-22 01:15:35 ben> */
+/* Time-stamp: <2013-08-08 17:21:46 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -48,21 +48,6 @@ FILE68_EXTERN
  *  is called by the file68_shutdown() function.
  */
 void vfs68_curl_shutdown(void);
-
-FILE68_EXTERN
-/**
- * Creates an URL based stream using @ref cURL.
- *
- * @param  url     URL
- * @param  mode    bit#0: read access, bit#1: write access.
- *
- * @return stream
- * @retval 0 on error
- *
- * @note     url is internally copied.
- * @todo     Implement write mode.
- */
-vfs68_t * vfs68_curl_create(const char * url, int mode);
 
 /**
  * @}

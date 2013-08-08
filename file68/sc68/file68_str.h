@@ -5,7 +5,7 @@
  * @author   Benjamin Gerard
  * @date     2003-08-11
  */
-/* Time-stamp: <2013-08-04 23:13:05 ben> */
+/* Time-stamp: <2013-08-08 17:37:26 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -186,7 +186,7 @@ const char * strnevernull68(const char *s);
 static inline
 const char * strok68(const int v)
 {
-  static const char const r[2][8] = { "failure","success" };
+  static const char r[2][8] = { "failure","success" };
   return r[!v];
 }
 #else

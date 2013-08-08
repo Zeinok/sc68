@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-08 02:57:08 ben>
+ * Time-stamp: <2013-08-08 17:56:11 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -513,7 +513,7 @@ int config68_save(config68_t * conf)
         err |= registry68_puti(0, tmp, e->val.i);
         break;
       case CONFIG68_STR:
-        if (!e->val.s) {
+        if (e->val.s) {
           TRACE68(config68_cat,
                   "conf68: save '%s' <- '%s'\n", tmp, e->val.s);
           err |= registry68_puts(0, tmp, e->val.s);
