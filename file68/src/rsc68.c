@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 23:42:08 ben>
+ * Time-stamp: <2013-08-07 22:01:17 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -419,9 +419,7 @@ static vfs68_t * default_open(rsc68_t type, const char *name,
   char tmp[1024], * apath = 0;
   char tmpname[512];
   int alen = 0;
-
   char_cv_t cv_path=0, cv_extra=0;
-
   struct {
     const char * path, * sdir, * ext;
     int curl;
@@ -451,6 +449,14 @@ static vfs68_t * default_open(rsc68_t type, const char *name,
   /* Build default pathes list */
   if (user_path) {
     pathes[npath++].path = user_path;
+  }
+
+  switch (mode &= 3) {
+    case 1: case 2:
+      break;
+  default:
+    assert(!"invalid mode");
+    return 0;
   }
 
   if (mode == 1 && share_path) {
@@ -488,10 +494,10 @@ static vfs68_t * default_open(rsc68_t type, const char *name,
       int csize, dsize;
       vfs68_t * is_in;
 
+      TRACE68(rsc68_cat,"rsc68: trying built-in replay -- %s\n", name);
       if (!replay68_get(name, &cdata, &csize, &dsize)) {
         TRACE68(rsc68_cat,"rsc68: found built-in replay -- %s %d %d\n",
                 name, csize, dsize);
-
         is_in =
           vfs68_z_create(
             vfs68_mem_create(cdata, csize, mode),
@@ -527,6 +533,7 @@ static vfs68_t * default_open(rsc68_t type, const char *name,
       void * ddata;
       int csize, dsize;
 
+      TRACE68(rsc68_cat,"rsc68: trying built-in replay -- %s\n", name);
       if (!replay68_get(name, &cdata, &csize, &dsize)) {
         TRACE68(rsc68_cat,"rsc68: found built-in replay -- %s %d %d\n",
                 name, csize, dsize);
@@ -648,8 +655,9 @@ static vfs68_t * default_open(rsc68_t type, const char *name,
     info->type = type;
   }
 
-  TRACE68(rsc68_cat, "rsc68: open => [%s,%s]\n",
-          strok68(!is), vfs68_filename(is));
+  TRACE68(rsc68_cat, "rsc68: open '%s' -- *%s*\n",
+          vfs68_filename(is),
+          strok68(!is));
   return is;
 }
 
@@ -799,5 +807,5 @@ void rsc68_shutdown(void)
     rsc68 = default_open;
     init  = 0;
   }
-  TRACE68(rsc68_cat,"rsc68: *%s*\n","SHUTDOWN");
+  TRACE68(rsc68_cat,"rsc68: *%s*\n","shutdown");
 }

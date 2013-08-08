@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-05 23:39:57 ben>
+ * Time-stamp: <2013-08-08 02:57:08 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -54,9 +54,11 @@
 # define DEBUG_CONFIG68_O 0
 #endif
 
-static int          config68_cat = msg68_DEFAULT;
-static int          config68_use_registry = -1;
-static char       * config68_def_name = "sc68";
+static int        config68_cat = msg68_DEFAULT;
+static int        config68_use_registry = -1;
+static char     * config68_def_name = "sc68";
+static const char cuk_fmt[] = "CUK:Software/sashipa/sc68-%s/";
+static const char lmk_str[] = "LMK:Software/sashipa/sc68/config/";
 
 /* exported */
 int          config68_opt_count;
@@ -112,7 +114,7 @@ static const config68_entry_t conftab[] = {
     "major*100+minor",
     {0}, {10000}, {PACKAGE_VERNUM}
   },
-  { 0,                          /* controled by application */
+  { 1,                          /* controled by application */
     "sampling-rate", CONFIG68_INT,
     "sampling rate in Hz",
     {SAMPLING_RATE_MIN},{SAMPLING_RATE_MAX},{SAMPLING_RATE_DEF}
@@ -497,7 +499,7 @@ int config68_save(config68_t * conf)
     vfs68_destroy(os);
   } else {
     /* Save into registry */
-    int l = snprintf(tmp, sizeof(tmp),"CUK:Software/sashipa/%s/", conf->name);
+    int l = snprintf(tmp, sizeof(tmp), cuk_fmt, conf->name);
     char * s = tmp + l;
     l = sizeof(tmp) - l;
 
@@ -506,11 +508,16 @@ int config68_save(config68_t * conf)
       strncpy(s,e->name,l);
       switch (e->type) {
       case CONFIG68_INT:
+        TRACE68(config68_cat,
+                "conf68: save '%s' <- %d\n", tmp, e->val.i);
         err |= registry68_puti(0, tmp, e->val.i);
         break;
       case CONFIG68_STR:
-        if (e->val.s)
+        if (!e->val.s) {
+          TRACE68(config68_cat,
+                  "conf68: save '%s' <- '%s'\n", tmp, e->val.s);
           err |= registry68_puts(0, tmp, e->val.s);
+        }
       default:
         break;
       }
@@ -521,7 +528,6 @@ int config68_save(config68_t * conf)
   return err;
 }
 
-
 /* Load config from registry */
 static int load_from_registry(config68_t * conf)
 {
@@ -529,30 +535,36 @@ static int load_from_registry(config68_t * conf)
   char paths[2][64];
 
   j = 0;
-  snprintf(paths[j], sizeof(paths[j]), "CUK:Software/sc68/%s/", conf->name);
+  snprintf(paths[j], sizeof(paths[j]), cuk_fmt, conf->name);
   ++j;
-  strncpy(paths[j], "LMK:Software/sashipa/sc68/config/", sizeof(paths[j]));
+  strncpy(paths[j], lmk_str, sizeof(paths[j]));
   ++j;
 
   for (i=0; i<conf->n; ++i) {
+    config68_entry_t * e = conf->entries+i;
     char path[128], str[512];
     int  k, val;
 
     for (k=0; k<j; ++k) {
       strncpy(path, paths[k], sizeof(path));
-      strncat(path, conf->entries[i].name, sizeof(path));
+      strncat(path, e->name, sizeof(path));
 
       TRACE68(config68_cat, "conf68: trying -- '%s'\n", path);
-      if (conf->entries[i].type == CONFIG68_STR)
+      if (e->type == CONFIG68_STR)
         err = registry68_gets(0, path, str, sizeof(str));
       else
         err = registry68_geti(0, path, &val);
 
       if (!err) {
-        if (conf->entries[i].type == CONFIG68_STR)
+        if (e->type == CONFIG68_STR) {
           config_set_str(conf, conf->entries+i, str);
-        else
+          TRACE68(config68_cat,
+                  "conf68: load '%s' <- '%s'\n", path, e->val.s);
+        } else {
           config_set_int(conf, conf->entries+i, val);
+          TRACE68(config68_cat,
+                  "conf68: load '%s' <- %d\n", path, e->val.i);
+        }
         break;
       }
     }
@@ -789,8 +801,12 @@ int config68_init(int force_file)
     if (f > 0) config68_cat = f;
   }
 
-  if (config68_use_registry < 0)
+  if (config68_use_registry < 0) {
     config68_use_registry = !force_file && registry68_support();
+    TRACE68(config68_cat,
+            "conf68: will use %s\n",
+            config68_use_registry?"registry":"config file");
+  }
 
   if (!config68_options) {
     int i,n;

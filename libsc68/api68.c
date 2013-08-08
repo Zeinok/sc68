@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-06 23:35:04 ben>
+ * Time-stamp: <2013-08-08 03:10:40 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -67,7 +67,13 @@
 #include <libgen.h>
 #endif
 
+#define MK4CC(A,B,C,D) (((int)(A)<<24)|((int)(B)<<16)|((int)(C)<<8)|((int)(D)))
+
+/* Bunch of constant use by sc68
+ */
 enum {
+  /* Internal use for get_pos() and set_pos() */
+  SC68_POS_PLAY, SC68_POS_TRACK,
   /* Exception handler to catch badly initialize exception */
   INTR_ADDR = 0x800,
   /* TOS emulator */
@@ -81,23 +87,29 @@ enum {
   /* default music time in millisec */
   TIMEMS_DEF = (TIME_DEF * 1000),
   /* sc68_t magic identifier value. */
-  SC68_MAGIC = (('s' << 24) | ('c' << 16) | ('6' << 8) | '8'),
+  SC68_MAGIC = MK4CC('s','c','6','8'),
   /* disk68_t magic identifier value. */
   DISK_MAGIC = SC68_DISK_ID,
   /* Error message maximum length */
   ERRMAX = 96,
+  /* Default sampling rate */
+  SPR_DEF = SAMPLING_RATE_DEF,
+  /* Minimal sampling rate */
+  SPR_MIN = SAMPLING_RATE_MIN,
+  /* Maxinal sampling rate */
+  SPR_MAX = SAMPLING_RATE_MAX,
 };
 
+/* Atari-ST trap emulator (see trap.s)
+ */
 static u8 trap_func[] = {
 #include "sc68/trap68.h"
 };
 
+/* Atari-ST trap categories
+ */
 static const char * trap_type[16] =
 { 0, "gemdos", 0, 0, 0, 0 , 0, 0, 0, 0 , 0, 0, 0, "bios" , "xbios", 0 };
-
-static u8 thex[16] = {
-  '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'
-};
 
 /** sc68 config */
 static struct {
@@ -137,9 +149,11 @@ struct _sc68_s {
   int            track;       /**< Current playing track.                */
   int            track_to;    /**< Track to set (0:n/a, -1:end req).     */
   int            loop_to;     /**< Loop to set (0:default -1:infinite).  */
+  int            asid;        /**< aSIDifier flags.                      */
 
   int            cfg_track;   /**< from config "force-track".            */
   int            cfg_loop;    /**< from config "force-loop".             */
+  int            cfg_asid;    /**< from config "asid".                   */
 
   unsigned int   playaddr;    /**< Current play address in 68 memory.    */
   int            seek_to;     /**< Seek to this time (-1:n/a)            */
@@ -206,7 +220,7 @@ struct _sc68_s {
 static int           sc68_cat = msg68_NEVER;
 static int           sc68_id;        /* counter for auto generated name */
 static volatile int  sc68_init_flag; /* Library init flag     */
-static int           sc68_spr_def = SAMPLING_RATE_DEF;
+static int           sc68_spr_def = SPR_DEF;
 extern option68_t  * config68_options;   /* conf68.c */
 extern int           config68_opt_count; /* conf68.c */
 static int           dbg68k;
@@ -219,6 +233,8 @@ static int error_addx(sc68_t * sc68, const char * fmt, ...);
 static int error_add(sc68_t * sc68, const char * fmt, const char *);
 static int get_spr(const sc68_t * sc68);
 static int set_spr(sc68_t * sc68, int hz);
+static int get_asid(const sc68_t * sc68);
+static int set_asid(sc68_t * sc68, int asid);
 static int get_pcm_fmt(sc68_t * sc68);
 static int set_pcm_fmt(sc68_t * sc68, int pcmfmt);
 static int get_pos(sc68_t * sc68, int origin);
@@ -410,6 +426,10 @@ void except_name(const int vector, char * irqname)
  */
 static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
 {
+  static u8 thex[16] = {
+    '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f'
+  };
+
   sc68_t* sc68 = cookie;
   char    irqname[32];
   const char * stname;
@@ -706,7 +726,7 @@ error:
  * - else get the value from the config file
  * - fallback to default otherwise.
  */
-static int myconfig_get_int(config68_t * c,
+static int optcfg_get_int(config68_t * c,
                             const char * name,
                             int def)
 {
@@ -718,6 +738,7 @@ static int myconfig_get_int(config68_t * c,
     v = opt->val.num;
     TRACE68(sc68_cat,
             "libsc68: get config from cli -- name='%s' val=%d\n", name, v);
+    break;
   default:
     if ( config68_get(c, &idx, &name) == CONFIG68_INT ) {
       v = idx;
@@ -729,9 +750,9 @@ static int myconfig_get_int(config68_t * c,
 }
 
 /* Get string config value
- * @myconfig_get_int for details,
+ * @optcfg_get_int for details,
  */
-static const char * myconfig_get_str(config68_t * c,
+static const char * optcfg_get_str(config68_t * c,
                                      const char * name,
                                      const char * def)
 {
@@ -744,6 +765,7 @@ static const char * myconfig_get_str(config68_t * c,
     v = opt->val.str;
     TRACE68(sc68_cat,
             "libsc68: get config from cli -- name='%s' val='%s'\n", name, v);
+    break;
   default:
     if ( config68_get(c, &idx, &key) == CONFIG68_STR ) {
       v = key;
@@ -754,22 +776,7 @@ static const char * myconfig_get_str(config68_t * c,
   return v;
 }
 
-static void set_config(sc68_t * sc68)
-{
-  assert(is_sc68(sc68));
-  assert(config.cfg);
-
-  sc68->version       = config.version;
-  sc68->remote        = config.allow_remote;
-  sc68->mix.aga_blend = config.aga_blend;
-  sc68->cfg_track     = config.force_track;
-  sc68->cfg_loop      = config.force_loop;
-  /* $$$ TODO config.asid; */
-  sc68->time.def_ms   = config.def_time_ms;
-  sc68->mix.spr       = config.spr;
-}
-
-static void myconfig_set_int(config68_t * c,
+static void optcfg_set_int(config68_t * c,
                              const char * name,
                              int v)
 {
@@ -778,7 +785,7 @@ static void myconfig_set_int(config68_t * c,
   }
 }
 
-int sc68_config_load(void)
+static int config_load(void)
 {
   int err;
   config68_t * c;
@@ -788,29 +795,29 @@ int sc68_config_load(void)
   err = config68_load(config.cfg);
 
   /* Set version number will force a save in case of upgrading */
-  myconfig_set_int(config.cfg, "version", PACKAGE_VERNUM);
+  optcfg_set_int(config.cfg, "version", PACKAGE_VERNUM);
 
   if (c = config.cfg, c) {
     const char * lmusic = 0, * rmusic = 0;
 
     /* copy config values for faster access */
-    config.version       = myconfig_get_int(c, "version",       PACKAGE_VERNUM);
-    config.allow_remote  = myconfig_get_int(c, "allow-remote",  1);
-    config.aga_blend     = myconfig_get_int(c, "amiga-blend",   0x4000);
-    config.force_track   = myconfig_get_int(c, "force-track",   0);
-    config.force_loop    = myconfig_get_int(c, "force-loop",    0);
-    config.asid          = myconfig_get_int(c, "asid",          0);
-    config.def_time_ms   = myconfig_get_int(c, "default-time",  TIME_DEF) * 1000;
-    config.spr           = myconfig_get_int(c, "sampling-rate", SAMPLING_RATE_DEF);
+    config.version      = optcfg_get_int(c, "version",       PACKAGE_VERNUM);
+    config.allow_remote = optcfg_get_int(c, "allow-remote",  1);
+    config.aga_blend    = optcfg_get_int(c, "amiga-blend",   0x4000);
+    config.force_track  = optcfg_get_int(c, "force-track",   0);
+    config.force_loop   = optcfg_get_int(c, "force-loop",    0);
+    config.asid         = optcfg_get_int(c, "asid",          0);
+    config.def_time_ms  = optcfg_get_int(c, "default-time",  TIME_DEF) * 1000;
+    config.spr          = optcfg_get_int(c, "sampling-rate", SPR_DEF);
 
     /* set resource path */
     rsc68_get_path(0,0,&lmusic, &rmusic);
     if (!lmusic) {
-      lmusic = myconfig_get_str(c, "music_path", 0);
+      lmusic = optcfg_get_str(c, "music_path", 0);
       rsc68_set_music(lmusic);
     }
     if (!rmusic) {
-      rmusic = myconfig_get_str(c, "remote_music_path", 0);
+      rmusic = optcfg_get_str(c, "remote_music_path", 0);
       rsc68_set_remote_music(rmusic);
     }
   }
@@ -819,7 +826,7 @@ int sc68_config_load(void)
   return err;
 }
 
-int sc68_config_save(void)
+static int config_save(void)
 {
   int err = -1;
   if (config.cfg)
@@ -828,12 +835,23 @@ int sc68_config_save(void)
   return err;
 }
 
-void sc68_config_apply(sc68_t * sc68)
+static void config_apply(sc68_t * sc68)
 {
   if (!config.cfg)
-    sc68_config_load();
-  if (is_sc68(sc68))
-    set_config(sc68);
+    config_load();
+  if (config.cfg && is_sc68(sc68)) {
+    sc68->version       = config.version;
+    sc68->remote        = config.allow_remote;
+    sc68->mix.aga_blend = config.aga_blend;
+    sc68->cfg_track     = config.force_track;
+    sc68->cfg_loop      = config.force_loop;
+    sc68->cfg_asid      = config.asid;
+    sc68->time.def_ms   = config.def_time_ms;
+    sc68->mix.spr       = config.spr;
+    TRACE68(sc68_cat,
+            "libsc68: sc68<%s> %s\n",
+            sc68->name, "config applied");
+  }
 }
 
 #if 0
@@ -875,9 +893,23 @@ int sc68_init(sc68_init_t * init)
   static option68_t debug_options[] = {
     {
       option68_BOL, "sc68-","dbg68k","debug",
-      "run 68K in debug mode"
+      "run m68K in debug mode"
     }
   };
+
+  /* Just a stupid test to check if this host arythmetic unit use 2's
+   * complement as signed representation of negative numbers.
+   *
+   * It should always be the case but we never know. So many things in
+   * sc68 rely on that specially in the 68k emulators there is not a
+   * chance it works properly otherwise.
+   */
+  assert( -1 == ~0 );
+  if ( -1 != ~0 ) {
+    err = error_add(0, "libsc68: %s\n",
+                    "internal error (negative are not 2's complement)");
+    goto error_no_shutdown;
+  }
 
   if (sc68_init_flag) {
     err = error_add(0, "libsc68: %s\n","already initialized");
@@ -911,12 +943,11 @@ int sc68_init(sc68_init_t * init)
   init->argc = file68_init(init->argc, init->argv);
 
   option68_append(debug_options,sizeof(debug_options)/sizeof(*debug_options));
-  /* option68_append(&emuopt,1); */
   option68_append(config68_options, config68_opt_count);
   init->argc = option68_parse(init->argc, init->argv, 0);
 
   /* Load config */
-  sc68_config_load();
+  config_load();
 
   /* Initialize emulators. */
   err = init_emu68(&init->argc, init->argv);
@@ -951,7 +982,7 @@ error_no_shutdown:
 void sc68_shutdown(void)
 {
   if (config.cfg) {
-    sc68_config_save();
+    config_save();
     config68_destroy(config.cfg);
     config.cfg = 0;
   }
@@ -994,7 +1025,7 @@ sc68_t * sc68_create(sc68_create_t * create)
   sc68->name[sizeof(sc68->name)-1] = 0;
 
   /* Apply config */
-  sc68_config_apply(sc68);
+  config_apply(sc68);
 
   /* Override config. */
   if (create->sampling_rate) {
@@ -1006,6 +1037,19 @@ sc68_t * sc68_create(sc68_create_t * create)
   if (!sc68->time.def_ms) {
     sc68->time.def_ms = TIMEMS_DEF;
   }
+
+  /* aSIDifier. */
+  switch (sc68->cfg_asid) {
+  case SC68_ASID_ON:
+    sc68->asid = SC68_ASID_ON; break;
+  case SC68_ASID_FORCE:
+    sc68->asid = SC68_ASID_ON | SC68_ASID_FORCE; break;
+  case SC68_ASID_OFF:
+  default:
+    sc68->asid = SC68_ASID_OFF; break;
+  }
+  TRACE68(sc68_cat,"libsc68: config-asid=%d asid-flags=%d\n",
+          sc68->cfg_asid,sc68->asid);
 
   /* Create 68k emulator and pals. */
   if (init68k(sc68, create->log2mem, create->emu68_debug | dbg68k)) {
@@ -1067,9 +1111,9 @@ static int set_spr(sc68_t * sc68, int hz)
   if (hz == SC68_SPR_QUERY)
     hz = get_spr(sc68);
   else {
-    const int min = SAMPLING_RATE_MIN;
-    const int max = SAMPLING_RATE_MAX;
-    const int def = SAMPLING_RATE_DEF;
+    const int min = SPR_MIN;
+    const int max = SPR_MAX;
+    const int def = SPR_DEF;
     if (hz == SC68_SPR_DEFAULT)
       hz = def;
     if (hz <  min) hz = min;
@@ -1094,6 +1138,23 @@ static int get_pcm_fmt(sc68_t * sc68)
 static int set_pcm_fmt(sc68_t * sc68, int pcmfmt)
 {
   return -(pcmfmt != SC68_PCM_S16);
+}
+
+static int get_asid(const sc68_t * sc68)
+{
+  return sc68 ? sc68->asid : config.asid;
+}
+
+static int set_asid(sc68_t * sc68, int asid)
+{
+  if (sc68)
+    sc68->asid = asid &= 0x7fff;
+  else if (asid >= 0 && asid <= 2)
+    config.asid = asid;
+  else
+    asid = -1;
+
+  return asid;
 }
 
 /* void sc68_set_share(sc68_t * sc68, const char * path) */
@@ -1230,7 +1291,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     emu68_ioplug(sc68->emu68, sc68->ymio);
     TRACE68(sc68_cat," -> %s\n","add MFP hardware");
     emu68_ioplug(sc68->emu68, sc68->mfpio);
-    TRACE68(sc68_cat," -> %s\n","set MFP as interruption\n");
+    TRACE68(sc68_cat," -> %s\n","set MFP as interruption");
     emu68_set_interrupt_io(sc68->emu68, sc68->mfpio);
   }
   if (hw->bit.ste) {
@@ -1246,7 +1307,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
   }
   memptr = emu68_memptr(sc68->emu68,0,0x1000);
 
-  TRACE68(sc68_cat," -> %s\n","exception detection code in $%06x", INTR_ADDR);
+  TRACE68(sc68_cat," -> exception detection code in $%06x\n", INTR_ADDR);
 
   /* Install non initialized exception detection code. */
   for (i=0; i<256; ++i) {
@@ -1314,7 +1375,7 @@ static int load_replay(sc68_t * sc68, const char * replay, int a0)
   assert(replay);
 
   TRACE68(sc68_cat, " -> external replay -- %s\n", replay);
-  strcpy(rname,"sc68://replay/");    /* $$$ to be change a sc68://replay/... */
+  strcpy(rname,"sc68://replay/");
   strcat68(rname, replay, sizeof(rname)-1);
   rname[sizeof(rname)-1] = 0;
   is = uri68_vfs(rname, 1, 0);
@@ -1332,6 +1393,44 @@ static int load_replay(sc68_t * sc68, const char * replay, int a0)
   return a0 + ((size + 1) & ~1);
 }
 
+
+static int aSIDifier(sc68_t * sc68, const music68_t * m)
+{
+  int res = -1;
+  assert(is_sc68(sc68));
+
+  if ( ! m->hwflags.bit.ym )
+    goto done;                          /* No YM, no aSID */
+  if ( ! ( sc68->asid & SC68_ASID_ON ) )
+    goto done;                          /* Not on */
+
+  if ( ! ( sc68->asid & SC68_ASID_FORCE ) && /* Not forced */
+       ( !m->hwflags.bit.timers   /* Don't know about timers: not safe */
+         || m->hwflags.bit.timera /* One or more timers in used: not safe */
+         || m->hwflags.bit.timerb
+         || m->hwflags.bit.timerc
+         || m->hwflags.bit.timerd ) )
+    goto done;
+
+  /* Default timers assignment */
+  res = MK4CC('A','C','D','B');
+
+  /* In case of forced aSID try to assign free timer first. But
+   * usually it won't help much.
+   */
+  if (m->hwflags.bit.timers) {
+    if (m->hwflags.bit.timera)
+      res = MK4CC('B','C','D','A');
+    if (m->hwflags.bit.timerc)
+      res = MK4CC('A','B','D','C');
+    if (m->hwflags.bit.timerd)
+      res = MK4CC('A','C','B','D');
+  }
+
+done:
+  return res;
+}
+
 static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
 {
   int status;
@@ -1345,12 +1444,7 @@ static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
   sc68->emu68->reg.d[2] = m->datasz;
   sc68->emu68->reg.a[0] = a0;
   sc68->emu68->reg.a[6] = a6;           /* original replay address  */
-  if (m->has.asid_trk)
-    sc68->emu68->reg.d[7] = 0
-      | ( ('A'+m->has.asid_tA) << 24 )
-      | ( ('A'+m->has.asid_tB) << 16 )
-      | ( ('A'+m->has.asid_tC) <<  8 )
-      | ( ('A'+m->has.asid_tX) <<  0 );
+  /* d7 (asid timers) was set in change_track() */
 
   /* Run music init code. */
   sc68->emu68->cycle = 0;
@@ -1388,7 +1482,13 @@ static int change_track(sc68_t * sc68, int track/* , int loop */)
   sc68->playaddr = a0 = m->a0;
   TRACE68(sc68_cat," -> play address -- $%06x\n", sc68->playaddr);
 
-  if (m->has.asid_trk) {
+  sc68->emu68->reg.d[7] = aSIDifier(sc68, m);
+  if (sc68->emu68->reg.d[7] != -1) {
+    TRACE68(sc68_cat," -> aSID timers -- %c%c%c%c\n",
+            (int)(u8)(sc68->emu68->reg.d[7] >> 24),
+            (int)(u8)(sc68->emu68->reg.d[7] >> 16),
+            (int)(u8)(sc68->emu68->reg.d[7] >>  8),
+            (int)(u8)(sc68->emu68->reg.d[7] >>  0));
     if (a0 = load_replay(sc68, "asidifier", a0), a0 == SC68_ERROR)
       return SC68_ERROR;
   }
@@ -1412,8 +1512,8 @@ static int change_track(sc68_t * sc68, int track/* , int loop */)
   /* Ensure sampling rate */
   if (sc68->mix.spr <= 0)
     sc68->mix.spr = sc68_spr_def;
-  if (sc68->mix.spr < SAMPLING_RATE_MIN ||
-      sc68->mix.spr > SAMPLING_RATE_MAX) {
+  if (sc68->mix.spr < SPR_MIN ||
+      sc68->mix.spr > SPR_MAX) {
     error_addx(sc68,
                "libsc68: %s -- %dhz\n",
                "invalid sampling rate",
@@ -1924,11 +2024,6 @@ int sc68_stop(sc68_t * sc68)
   return 0;
 }
 
-enum {
-  SC68_POS_PLAY,
-  SC68_POS_TRACK
-};
-
 static int get_pos(sc68_t * sc68, int origin)
 {
   int pos = -1;
@@ -2236,6 +2331,14 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
 
   case SC68_SET_SPR:
     res = set_spr(sc68, va_arg(list, int));
+    break;
+
+  case SC68_GET_ASID:
+    res = get_asid(sc68);
+    break;
+
+  case SC68_SET_ASID:
+    res = set_asid(sc68, va_arg(list, int));
     break;
 
   default:

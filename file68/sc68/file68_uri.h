@@ -5,7 +5,7 @@
  * @date     2003-10-28
  * @brief    URI manipulation header.
  */
-/* Time-stamp: <2013-08-03 17:02:18 ben> */
+/* Time-stamp: <2013-08-07 13:47:37 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -32,7 +32,7 @@
 /**
  * Enum for the scheme68_t::ismine() return value.
  */
-enum {
+enum scheme68_e {
   SCHEME68_READ   = VFS68_OPEN_READ,   /**< can be open for read.   */
   SCHEME68_WRITE  = VFS68_OPEN_WRITE,  /**< can be open for write.  */
   SCHEME68_ISMINE = SCHEME68_WRITE<<1, /**< URI might be mime.      */
@@ -41,11 +41,17 @@ enum {
 
 typedef struct scheme68_s scheme68_t;
 
+/**
+ * Declare and register an URI scheme handler.
+ */
 struct scheme68_s {
   scheme68_t * next;                 /**< next scheme in the list.  */
   char       * name;                 /**< register name (curl ...). */
 
-  /** is mine callback. */
+  /** is mine callback.
+   *  @return  @ref scheme68_e "capabilities flags"
+   *  @retval  0  not mine
+   */
   int       (*ismine)(const char *);
 
   /** VFS stream create callback. */

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-05 20:55:18 ben>
+ * Time-stamp: <2013-08-08 01:48:03 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -172,7 +172,7 @@ static int print_version(void)
   puts
     (PACKAGE_STRING "\n"
      "\n"
-     "Copyright (C) 2001-2009 Benjamin Gerard.\n"
+     "Copyright (C) 1998-2013 Benjamin Gerard.\n"
      "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
      "This is free software: you are free to change and redistribute it.\n"
      "There is NO WARRANTY, to the extent permitted by law.\n"

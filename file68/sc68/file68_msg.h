@@ -1,11 +1,11 @@
 /**
  * @ingroup  file68_lib
  * @file     sc68/file68_msg.h
+ * @brief    Message header.
  * @author   Benjamin Gerard
  * @date     2003-08-22
- * @brief    Message header.
  */
-/* Time-stamp: <2013-08-02 18:48:16 ben> */
+/* Time-stamp: <2013-08-08 02:06:53 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 

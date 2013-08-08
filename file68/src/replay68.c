@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 01:42:05 ben>
+ * Time-stamp: <2013-08-07 23:00:38 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -29,26 +29,52 @@
 #endif
 #include "file68_api.h"
 #include "file68_str.h"
+#include "file68_msg.h"
+FILE68_API
+int replay68_get(const char * name, const void ** data,
+                 int * csize, int * dsize);
 
 #include "replay.inc.h"
 
-# include <stdlib.h>
+#include <assert.h>
+#include <stdlib.h>
+#include <string.h>
 
 static int cmp(const void * pa, const void * pb)
 {
-  const struct replay
-    * a = (const struct replay *) pa,
-    * b = (const struct replay *) pb;
-  return strcmp68(a->name, b->name);
+  const char
+    * a = ( (const struct replay *) pa ) -> name,
+    * b = ( (const struct replay *) pb ) -> name;
+  return strcmp68(a, b);
 }
 
-FILE68_API
-int replay68_get(const char * name, const void ** data, int * csize, int * dsize)
+int replay68_get(const char * name, const void ** data,
+                 int * csize, int * dsize)
 {
+  const int max = sizeof(replays)/sizeof(*replays);
   struct replay s, *r;
   s.name = name;
-  r = bsearch(&s, replays, sizeof(replays)/sizeof(*replays),
-              sizeof(*replays), cmp);
+
+  r = bsearch(&s, replays, max, sizeof(*replays), cmp);
+  if (!r) {
+    int i;
+    /* This should not happen unless the replay-rom is not sorted
+     * properly. Anyway it does not cost too much work.
+     */
+#ifdef DEBUG
+    const char * prev = "";
+    for (i=0; i<max; ++i) {
+      assert ( strcmp68(prev, replays[i].name) < 0);
+      prev = replays[i].name;
+    }
+#endif
+    for (i=0; i<max; ++i)
+      if (!strcmp68(name, replays[i].name)) {
+        r = replays+i;
+        break;
+      }
+  }
+
   if (r) {
     if (data)
       *data = r->data;
@@ -56,6 +82,8 @@ int replay68_get(const char * name, const void ** data, int * csize, int * dsize
       *csize = r->csize;
     if (dsize)
       *dsize = r->dsize;
-  }
+  } else
+    msg68_warning("rsc68: can't find built-in replay -- *%s*\n",
+                  name);
   return -!r;
 }

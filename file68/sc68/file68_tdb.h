@@ -1,11 +1,11 @@
 /**
  * @ingroup  file68_lib
- * @file     sc68/file68_.h
+ * @file     sc68/file68_tdb.h
  * @author   Benjamin Gerard
  * @date     2013-05-30
  * @brief    music duration database header.
  */
-/* Time-stamp: <2013-07-22 00:22:48 ben> */
+/* Time-stamp: <2013-08-07 13:43:11 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 

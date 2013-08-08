@@ -5,7 +5,7 @@
  * @date     1998-09-03
  * @brief    Music file header.
  */
-/* Time-stamp: <2013-08-05 15:44:11 ben> */
+/* Time-stamp: <2013-08-07 18:36:27 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -122,11 +122,13 @@ typedef struct {
     unsigned   time : 1; /**< Track has time info.                    */
     unsigned   loop : 1; /**< Track has loop info.                    */
 
+#if 0
     unsigned asid_trk : 6; /**< 0:not asid, >0: original track.       */
     unsigned asid_tA  : 2; /**< timer used for YM channel-A.          */
     unsigned asid_tB  : 2; /**< timer used for YM channel-B.          */
     unsigned asid_tC  : 2; /**< timer used for YM channel-C.          */
     unsigned asid_tX  : 2; /**< timer not used by aSID.               */
+#endif
 
   } has;                 /**< Track flags.                            */
 
@@ -153,7 +155,9 @@ typedef struct {
   int          magic;       /**< Magic identifier is FILE68_MAGIC.       */
   int          def_mus;     /**< Preferred default music (default is 0). */
   int          nb_mus;      /**< Number of music track in file.          */
+#if 0
   int          nb_asid;     /**< Number of supplemental aSID tracks.     */
+#endif
   unsigned int time_ms;     /**< Total time for all tracks in ms.        */
   hwflags68_t  hwflags;     /**< All tracks flags ORed.                  */
   int          hash;        /**< Caclulated hash (for sndh timedb).      */

@@ -1,13 +1,15 @@
 /**
- * @file   io68/ymou1c5bit.h
- * @date   2009-09-14 
- * @brief  Recorded YM-2149 D/A output levels (not normalized)
+ * @ingroup  sc68_dev_lib_io68
+ * @file     io68/ymout1c5bit.h
+ * @brief    Recorded YM-2149 D/A output levels (not normalized)
+ * @author   Benjamin Gerard
+ * @date     2009-09-14
  */
-/* Time-stamp: <2013-07-24 20:26:37 ben> */
+/* Time-stamp: <2013-08-07 13:49:19 ben> */
 
-/* @ref  YAMAHA COrporation documentation (CATALOG No LSI-2121492)
+/* @ref  YAMAHA Corporation documentation (CATALOG No LSI-2121492)
  *
- * 
+ *
  */
 
 /* $$$ ben : the function is:
@@ -47,4 +49,3 @@
   /* 1E,00 */ 55141,
   /* 1F,0F */ 65535
 }
-

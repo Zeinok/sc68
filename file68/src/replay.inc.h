@@ -8476,10 +8476,10 @@ static const struct replay {
   int   csize;
   int   dsize;
 } replays[55] = {
-  {     "asidifier",     dat_asidifier,     sizeof(dat_asidifier),  15270 },
   {   "aenigmatica",   dat_aenigmatica,   sizeof(dat_aenigmatica),   3742 },
   {  "alteredbeast",  dat_alteredbeast,  sizeof(dat_alteredbeast),   9130 },
   {      "armalyte",      dat_armalyte,      sizeof(dat_armalyte),   2934 },
+  {     "asidifier",     dat_asidifier,     sizeof(dat_asidifier),  15270 },
   {      "blipblop",      dat_blipblop,      sizeof(dat_blipblop),   4002 },
   {      "blipp079",      dat_blipp079,      sizeof(dat_blipp079),   2192 },
   {      "chipmon2",      dat_chipmon2,      sizeof(dat_chipmon2),  12109 },

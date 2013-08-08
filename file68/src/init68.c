@@ -3,9 +3,9 @@
  * @brief   library initialization
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2001-2011 Benjamin Gerard
+ * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-05 21:20:27 ben>
+ * Time-stamp: <2013-08-08 02:04:20 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -42,8 +42,6 @@
 #include <string.h>
 
 static volatile int init;
-
-extern int aSIDify;                     /* defined in file68.c */
 
 void vfs68_ao_shutdown(void);          /* defined in vfs68_ao.c   */
 int  vfs68_z_init(void);               /* defined in vfs68_z.c    */
@@ -105,8 +103,7 @@ static option68_t opts[] = {
   { option68_STR,prefix,"data"    ,rsccat,"shared (system) resource path" },
   { option68_STR,prefix,"home"    ,rsccat,"private (user) resource path"  },
   { option68_STR,prefix,"music"   ,rsccat,"music database path"           },
-  { option68_STR,prefix,"rmusic"  ,rsccat,"online music base URI"         },
-  { option68_STR,prefix,"asid"    ,rsccat,"create aSID tracks [no*|safe|force]" }
+  { option68_STR,prefix,"rmusic"  ,rsccat,"online music base URI"         }
 };
 
 static char * convert_backslash(char * s) {
@@ -173,19 +170,6 @@ int file68_init(int argc, char **argv)
     msg68_set_handler(0);
   }
 
-  /* Check for --sc68-asid=off|safe|force */
-  if (opt = option68_get("asid",1), opt) {
-    if (!strcmp68(opt->val.str,"no"))
-      aSIDify = 0;
-    else if (!strcmp68(opt->val.str,"safe"))
-      aSIDify = 1;
-    else if (!strcmp68(opt->val.str,"force"))
-      aSIDify = 2;
-    else
-      msg68_notice("file68: ignore invalid mode for --sc68-asid -- *%s*\n",
-                   opt->val.str);
-  }
-
   /* Check for --sc68-debug= */
 
   /* postpone: at this point most debug features have not been created
@@ -207,8 +191,7 @@ int file68_init(int argc, char **argv)
     if (!option68_isset(opt)) {
       char * e;
       /* const char path[] = "Resources"; */
-      e = get_reg_path(registry68_rootkey(REGISTRY68_LMK),
-                       "SOFTWARE/sashipa/sc68/Install_Dir",
+      e = get_reg_path(0, "LMK:SOFTWARE/sashipa/sc68/Install_Dir",
                        tmp, sizeof(tmp));
       if (e /* && (e+sizeof(path) < tmp+sizeof(tmp)) */) {
         /* memcpy(e, path, sizeof(path)); */
@@ -247,8 +230,7 @@ int file68_init(int argc, char **argv)
       const char path[] = "/sc68";
       char * env;
 
-      env = get_reg_path(registry68_rootkey(REGISTRY68_CUK),
-                         "Volatile Environment/APPDATA",
+      env = get_reg_path(0, "CUK:Volatile Environment/APPDATA",
                          tmp, sizeof(tmp));
 
       if(env && strlen(env)+sizeof(path) < sizeof(tmp)) {

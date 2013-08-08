@@ -1,11 +1,11 @@
 /**
  * @ingroup   sc68_lib
  * @file      conf68.h
+ * @brief     configuration file.
  * @author    Benjamin Gerard
  * @date      1999/07/27
- * @brief     configuration file.
  */
-/* Time-stamp: <2013-08-02 09:12:21 ben> */
+/* Time-stamp: <2013-08-07 19:59:02 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 

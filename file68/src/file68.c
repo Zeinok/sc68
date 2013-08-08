@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-06 10:12:23 ben>
+ * Time-stamp: <2013-08-07 18:35:48 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -70,7 +70,9 @@
 #include <stdio.h>
 #include <assert.h>
 
+#if 0
 int aSIDify = 0;                        /* 0:off, 1:safe, 2:force */
+#endif
 
 #define FOURCC(A,B,C,D) ((int)( ((A)<<24) | ((B)<<16) | ((C)<<8) | (D) ))
 #define gzip_cc FOURCC('g','z','i','p')
@@ -679,6 +681,7 @@ static int valid(disk68_t * mb)
                     mb->mus[mb->def_mus].tags.array[i].val);
   }
 
+#if 0
   /* aSIDidy */
   if (aSIDify) {
     int j;
@@ -732,6 +735,8 @@ static int valid(disk68_t * mb)
     mb->nb_mus += j;
     TRACE68(file68_cat,"file68: aSID tracks -- %d/%d\n", mb->nb_asid,mb->nb_mus );
   }
+#endif
+
   if (has_infinite)
     mb->time_ms = 0;
 

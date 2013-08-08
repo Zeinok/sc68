@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      2003/08/07
  */
-/* Time-stamp: <2013-08-05 21:50:21 ben> */
+/* Time-stamp: <2013-08-07 19:32:46 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -42,7 +42,7 @@
 
 /**
  * @defgroup  sc68_lib  sc68 library
- * @ingroup   api68
+ * @ingroup   sc68_dev_lib
  *
  * This API provides functions to use sc68 libraries efficiently.
  *
@@ -227,7 +227,7 @@ typedef struct {
 } sc68_music_info_t, sc68_minfo_t;
 
 /**
- * Return code (as returned by sc68_process() function)
+ * Flags returned eturn codeby the sc68_process() functions.
  */
 enum sc68_code_e {
   SC68_IDLE   = (1<<0),   /**< Set if no emulation has been runned. */
@@ -236,8 +236,8 @@ enum sc68_code_e {
   SC68_END    = (1<<3),   /**< Set if track(s) has ended.           */
   SC68_SEEK   = (1<<4),   /**< Set if currently seeking.            */
   /* */
-  SC68_OK     =  0,                     /**< Success return code.  */
-  SC68_ERROR  = ~0                      /**< Failure return code.  */
+  SC68_OK     =  0,       /**< Success return code.                 */
+  SC68_ERROR  = ~0        /**< Failure return code (all bits set).  */
 };
 
 /**
@@ -249,7 +249,7 @@ enum sc68_spr_e {
 };
 
 /**
- * sc68_play() parameters.
+ * sc68_play() function parameters.
  */
 enum sc68_play_e {
   SC68_DEF_TRACK  =  0,  /**< track value for the default track. */
@@ -265,6 +265,18 @@ enum sc68_play_e {
 enum sc68_pcm_e {
   SC68_PCM_S16 = 1,               /**< Native 16bit signed.  */
   SC68_PCM_F32 = 2                /**< native 32bit float.   */
+};
+
+/**
+ * aSIDifier flags.
+ */
+enum sc68_asid_e {
+  SC68_ASID_OFF   = 0,
+  SC68_ASID_ON    = 1,        /**< aSIDifier enable/disable.        */
+  SC68_ASID_FORCE = 2,        /**< Force aSIDify unsafe track.      */
+  SC68_ASID_NO_A  = 4,        /**< Disable ASIDifier for channel A. */
+  SC68_ASID_NO_B  = 8,        /**< Disable ASIDifier for channel B. */
+  SC68_ASID_NO_C  = 16,       /**< Disable ASIDifier for channel C. */
 };
 
 /**
@@ -289,9 +301,13 @@ enum sc68_cntl_e {
   SC68_SET_POS,                      /**< Set position.             */
   SC68_GET_PCM,                      /**< Get PCM format            */
   SC68_SET_PCM,                      /**< Set PCM format            */
+  SC68_GET_ASID,                     /**< Get aSID mode             */
+  SC68_SET_ASID,                     /**< Set aSID mode             */
   SC68_GET_COOKIE,                   /**< Get cookie (user data).   */
   SC68_SET_COOKIE,                   /**< Set cookie (user data).   */
   SC68_EMULATORS,                    /**< Get emulators array.      */
+  SC68_CONFIG_LOAD,                  /**< Load and apply config.    */
+  SC68_CONFIG_SAVE,                  /**< Save config               */
 };
 
 /**
@@ -707,35 +723,6 @@ int sc68_tracks(sc68_t * sc68);
 /**
  * @}
  */
-
-
-/**
- * @name Configuration functions
- * @{
- */
-
-SC68_API
-/**
- * Load config.
- *
- * @retval  0  success
- * @retval -1  failure
- */
-int sc68_config_load(void);
-
-SC68_API
-/**
- * Save config.
- *
- * @retval  0  success
- * @retval -1  failure
- */
-int sc68_config_save(void);
-
-/**
- * @}
- */
-
 
 /**
  * @}

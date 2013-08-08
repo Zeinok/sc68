@@ -1,11 +1,11 @@
 /**
  * @ingroup   desa68_lib
  * @file      desa68.h
+ * @brief     Motorola 68K disassembler header.
  * @author    Benjamin Gerard
  * @date      1999-03-17
- * @brief     Motorola 68K disassembler header.
  */
-/* Time-stamp: <2013-07-03 02:10:25 ben> */
+/* Time-stamp: <2013-08-07 16:14:53 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -42,7 +42,7 @@
 
 /**
  * @defgroup desa68_lib desa68 library
- * @ingroup  api68
+ * @ingroup  sc68_dev_lib
  *
  * desa68 is a standalone library to disassemble 68000 machine code.
  *
@@ -65,12 +65,6 @@
  */
 
 #ifndef DESA68_API
-/**
- * desa68 symbols specification.
- *
- * Define special atributs for importing/exporting desa68 symbols.
- */
-# define DESA68_API DESA68_EXTERN
 # error "DESA68_API should be defined"
 #endif
 
