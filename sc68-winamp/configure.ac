@@ -67,7 +67,7 @@ if test s[$]{wa_dir+et} != set; then
     if test x"[$]reg" != x; then
       windir=`"[$]reg" QUERY 'HKEY_CURRENT_USER\Software\Winamp' | sed -n 's|^.* \+REG_SZ \+\(.*\)[$]|\1|p'`
       if test x"[$]windir" != x; then
-        if cygpath=`which cygpath 2>1`; then
+        if which cygpath >/dev/null 2>/dev/null; then
           wa_dir=`cygpath "$windir"`
         else
           wa_dir="[$]windir"
