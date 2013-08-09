@@ -27,9 +27,9 @@ AC_ARG_WITH(
   [winamp-sdk],
   [AS_HELP_STRING([--with-winamp-sdk],[locate winamp SDK])])
 
-AC_ARG_WITH(
-  [windows-sdk],
-  [AS_HELP_STRING([--with-windows-sdk],[locate windows platform SDK])])
+# AC_ARG_WITH(
+#   [windows-sdk],
+#   [AS_HELP_STRING([--with-windows-sdk],[locate windows platform SDK])])
 
 AC_ARG_WITH(
   [winamp-dir],
@@ -55,26 +55,47 @@ AC_CHECK_HEADERS([winamp/in2.h],,AC_MSG_ERROR([See above]))
 CPPFLAGS="[$]save_CPPFLAGS"
 
 # ,----------------------------------------------------------------------.
-# | Windows Platform SDK                                                 |
+# | Winamp Install Dir                                                   |
 # `----------------------------------------------------------------------'
+if test s[$]{wa_dir+et} != set; then
+  if test s[$]{with_winamp_dir+et} = set; then
+    wa_dir="[$]{with_winamp_dir}"
+  elif test -d ./winamp-dir/; then
+    wa_dir=./winamp-dir
+  else
+    reg="`which reg 2>/dev/null`"
+    if test x"[$]reg" != x; then
+      windir=`"[$]reg" QUERY 'HKEY_CURRENT_USER\Software\Winamp' | sed -n 's|^.* \+REG_SZ \+\(.*\)[$]|\1|p'`
+      if test x"[$]windir" != x; then
+        if cygpath=`which cygpath 2>1`; then
+          wa_dir=`cygpath "$windir"`
+        else
+          wa_dir="[$]windir"
+        fi
+      fi
 
-if test s[$]{wp_sdk+et} != set; then
-  if test s[$]{with_windows_sdk+et} = set; then
-    wp_sdk="[$]{with_windows_sdk}"
-  elif test -d ./windows-sdk/; then
-      wp_sdk=./windows-sdk
+    fi
   fi
 fi
 
-save_CPPFLAGS="[$]CPPFLAGS"
-if test s[$]{wp_sdk+et} = set; then
-  CPPFLAGS="[$]CPPFLAGS -I[$]{wp_sdk}"
-fi
-AC_CHECK_HEADERS([windows.h],,AC_MSG_ERROR([See above]))
-CPPFLAGS="[$]save_CPPFLAGS"
+# ,----------------------------------------------------------------------.
+# | Windows Platform SDK                                                 |
+# `----------------------------------------------------------------------'
 
+# if test s[$]{wp_sdk+et} != set; then
+#   if test s[$]{with_windows_sdk+et} = set; then
+#     wp_sdk="[$]{with_windows_sdk}"
+#   elif test -d ./windows-sdk/; then
+#       wp_sdk=./windows-sdk
+#   fi
+# fi
 
-
+# save_CPPFLAGS="[$]CPPFLAGS"
+# if test s[$]{wp_sdk+et} = set; then
+#   CPPFLAGS="[$]CPPFLAGS -I[$]{wp_sdk}"
+# fi
+# AC_CHECK_HEADERS([windows.h],,AC_MSG_ERROR([See above]))
+# CPPFLAGS="[$]save_CPPFLAGS"
 
  
 export [PKG_CONFIG_PATH]="[$]prefix/lib/pkgconfig"
@@ -89,21 +110,17 @@ CPPFLAGS="[$]sc68_CFLAGS [$]CPPFLAGS"
 AC_CHECK_HEADERS([sc68/sc68.h],,AC_MSG_ERROR([See above]))
 CPPFLAGS="[$]save_CPPFLAGS"
 
-
 save_LIBS="[$]LIBS"
 LIBS="[$]sc68_LIBS [$]LIBS"
 AC_CHECK_FUNCS([sc68_version],,AC_MSG_ERROR([See above]))
 LIBS="[$]save_LIBS"
-
-
-
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
 AC_SUBST([wa_sdk])
-AC_SUBST([wp_sdk])
+# AC_SUBST([wp_sdk])
 AC_SUBST([wa_dir])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
