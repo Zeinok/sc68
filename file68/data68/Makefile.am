@@ -20,15 +20,12 @@ if FILE68_DATA
 
 data68dir=$(sc68datadir)
 replaydir=$(data68dir)/Replay
-sampledir=$(data68dir)/Sample
 dist_data68_DATA = $(config_files)
-dist_sample_DATA = $(sample_files)
 dist_replay_DATA = $(replay_files)
 
 endif 
 
 config_files = sc68.cfg
-sample_files = Sample/About-Intro.sc68
 
 replay_files = Replay/asidifier.bin \
  Replay/dmu.bin Replay/dwaga.bin Replay/jamcrackerpro.bin		\
