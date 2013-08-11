@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-08 01:48:03 ben>
+ * Time-stamp: <2013-08-11 02:34:47 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -347,6 +347,7 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
   const int max = sizeof(buffer) >> 2;
   int all = 0;
   int code;
+  int last_playpos = -1000;
 
   Debug("PlayLoop:\n"
         " track  : %d\n"
@@ -373,8 +374,6 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
     Debug("PlayLoop: track #%d resquested\n",track);
   }
   Debug(" all    : %s\n",all?"yes":"no");
-
-
 
   /* Set track. */
   code = sc68_play(sc68, track, loop);
@@ -422,20 +421,25 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
 
     code = sc68_process(sc68, buffer, &n);
 
-    Print("\r%s,%03u ~ %s,%03u ** %s,%03u ~ %s,%03u",
-          strtime68(tmp1, track , track_pos/1000u),track_pos%1000u,
-          strtime68(tmp2, track , track_len/1000u),track_len%1000u,
-          strtime68(tmp3, tracks, play_pos/1000u), play_pos%1000u,
-          strtime68(tmp4, tracks, play_len/1000u), play_len%1000u);
-
+    if (play_pos - last_playpos >= 1000) {
+      last_playpos = play_pos;
+      Print("\r%s ~ %s ** %s ~ %s",
+            strtime68(tmp1, track , track_pos/1000u),
+            strtime68(tmp2, track , track_len/1000u),
+            strtime68(tmp3, tracks, play_pos/1000u),
+            strtime68(tmp4, tracks, play_len/1000u));
+    }
     if (code == SC68_ERROR)
       break;
 
-    if (code & SC68_LOOP)
+    if (code & SC68_LOOP) {
+      last_playpos = play_pos - 1000;
       Debug("\nLoop: #%d/%d\n",
             sc68_cntl(sc68, SC68_GET_LOOP),sc68_cntl(sc68, SC68_GET_LOOPS));
+    }
 
     if (code & SC68_CHANGE) {
+      last_playpos = play_pos - 1000;
       Print("\n");
       if (!all)
         break;
