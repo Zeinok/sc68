@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 17:05:18 ben>
+ * Time-stamp: <2013-08-10 01:34:57 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -202,7 +202,7 @@ static int display_version(void)
   puts
     (PACKAGE_STRING "\n"
      "\n"
-     "Copyright (C) 1998-2011 Benjamin Gerard.\n"
+     "Copyright (C) 1998-2013 Benjamin Gerard.\n"
      "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
      "This is free software: you are free to change and redistribute it.\n"
      "There is NO WARRANTY, to the extent permitted by law.\n"
@@ -315,16 +315,21 @@ static int ReadTrackList(char **trackList, int max, int *from, int *to)
   return 1;
 }
 
+static char * get_tag(const disk68_t * dsk, int trk, const char * key)
+{
+  return file68_tag(dsk, trk, key);
+}
+
 int main(int argc, char ** argv)
 {
   int  i, opt_all = 0, code = 127;
   /*   hwflags68_t diskHW; */
-  disk68_t *d = 0;
+  const disk68_t *d = 0;
   int curTrack, toTrack;
   char *trackList;
   vfs68_t * out = 0;
   const char * inname  = 0;
-  const char * outname = "stdout://";
+  const char * outname = "stdout:info68";
 
   argv[0] = "info68";
   argc = file68_init(argc, argv);
@@ -401,7 +406,7 @@ int main(int argc, char ** argv)
     }
 
     for (i=1; i<=d->nb_mus; ++i) {
-      music68_t *m = d->mus+(i-1);
+      const music68_t *m = d->mus+(i-1);
       PutS(out,"track: ");    PutI(out,i);           PutC(out,'\n');
       // PutS(out,"remap: ");    PutI(out,m->track);    PutC(out,'\n');
       PutS(out,"loops: ");    PutI(out,m->loops);    PutC(out,'\n');
@@ -445,7 +450,7 @@ int main(int argc, char ** argv)
     while (curTrack <= toTrack) {
       int esc = 0, c;
       char * s;
-      music68_t *m = d->mus + curTrack;
+      const music68_t *m = d->mus + curTrack;
 
       /* Parse format string for this track */
       for (s=argv[i], esc=0; (c = *s, c); ++s) {
@@ -543,13 +548,13 @@ int main(int argc, char ** argv)
             PutX(out,m->a0);
             break;
           case '{': {
-            char * key = s+1, * end;
-            const char * val;
+            char * key = s+1, * end, * val;
             if (end = strchr(key,'}'), end) {
               int trk = isupper((int)*key) ? 0 : curTrack+1;
               *end = 0;
-              val = file68_tag_get(d, trk, key);
+              val = get_tag(d, trk, key);
               if (val) PutS(out,val);
+              free(val);
               *end = '}';
               s = end;
               break;
@@ -578,7 +583,7 @@ int main(int argc, char ** argv)
   code = 0;
 finish:
   vfs68_destroy(out);
-  free(d);
+  file68_free(d);
   file68_shutdown();
 
 exit:
