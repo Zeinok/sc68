@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      2003/08/07
  */
-/* Time-stamp: <2013-08-07 19:32:46 ben> */
+/* Time-stamp: <2013-08-09 18:27:04 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -221,9 +221,11 @@ typedef struct {
   sc68_cinfo_t dsk;      /**< disk info.                         */
   sc68_cinfo_t trk;      /**< track info (MUST BE behind dsk).   */
 
-  char * album;          /**< Points to album's title tag.       */
+  char * album;          /**< Points to disk's title tag.        */
   char * title;          /**< Points to track's title tag.       */
   char * artist;         /**< Points to track's artist tag.      */
+  char * format;         /**< Points to disk's format tag.       */
+  char * genre;          /**< Point to track's genre  tag.       */
 } sc68_music_info_t, sc68_minfo_t;
 
 /**
@@ -252,11 +254,12 @@ enum sc68_spr_e {
  * sc68_play() function parameters.
  */
 enum sc68_play_e {
-  SC68_DEF_TRACK  =  0,  /**< track value for the default track. */
+  SC68_DSK_TRACK  =  0,  /**< special value for addressing disk. */
   SC68_DEF_LOOP   =  0,  /**< loop value for the default loop.   */
   SC68_INF_LOOP   = -1,  /**< loop value for infinite loop.      */
-  SC68_CUR_TRACK  = -1,  /**< track value for the current track. */
-  SC68_CUR_LOOP   = -1,  /**< track value for the current track. */
+  SC68_DEF_TRACK  = -1,  /**< track value for the default track. */
+  SC68_CUR_TRACK  = -2,  /**< track value for the current track. */
+  SC68_CUR_LOOP   = -2,  /**< track value for the current track. */
 };
 
 /**
@@ -287,7 +290,7 @@ enum sc68_cntl_e {
   SC68_GET_NAME,                     /**< Get sc68 instance name.   */
   SC68_GET_TRACKS,                   /**< Get number of tracks.     */
   SC68_GET_TRACK,                    /**< Get current track.        */
-  SC68_GET_DEFTRACK,                 /**< Get disk default track.   */
+  SC68_GET_DEFTRK,                   /**< Get disk default track.   */
   SC68_GET_LOOPS,                    /**< Number of loops to play.  */
   SC68_GET_LOOP,                     /**< Get current loop.         */
   SC68_GET_DISK,                     /**< Get a pointer to disk.    */
@@ -591,9 +594,28 @@ SC68_API
  * @retval  0  Success.
  * @retval -1  Failure.
  *
+ *
+ * @see file68_tag_get()
  */
 int sc68_tag_get(sc68_t * sc68, sc68_tag_t * tag,
                  int track, sc68_disk_t disk);
+
+
+SC68_API
+/**
+ * Get a copy of disk/track meta tag.
+ *
+ * @param  sc68  sc68 instance
+ * @param  tag   tag to look for (tag68_t::key must be set).
+ * @param  track track number (0:disk tags, -1:current/default).
+ * @param  disk  disk to get information from (0 for current disk).
+ *
+ * @return dynamic copy of a metatag
+ * @retval  0  Failure.
+ *
+ * @see file68_tag() for more infornmation.
+ */
+char * sc68_tag(sc68_t * sc68, const char * key, int track, sc68_disk_t disk);
 
 SC68_API
 /**
