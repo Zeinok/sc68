@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-23 20:04:37 ben>
+ * Time-stamp: <2013-08-09 21:08:36 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -33,7 +33,7 @@
 #include "file68_err.h"
 #ifdef USE_UNICE68
 # include "file68_msg.h"
-# include "file68_vfs_file.h"
+# include "file68_uri.h"
 # include "unice68.h"
 # include <string.h>
 # include <stdlib.h>
@@ -105,7 +105,7 @@ void * file68_ice_load_file(const char * fname, int * ulen)
   void * ret = 0;
   vfs68_t * is;
 
-  is = vfs68_file_create(fname, 1);
+  is = uri68_vfs(fname, 1, 0);
   if (vfs68_open(is) != -1) {
     ret = file68_ice_load(is, ulen);
     vfs68_close(is);

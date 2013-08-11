@@ -5,7 +5,7 @@
  * @date     1998-10-07
  * @brief    Resources access header.
  */
-/* Time-stamp: <2013-08-02 23:18:38 ben> */
+/* Time-stamp: <2013-08-09 21:42:03 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -31,8 +31,6 @@ typedef enum
 {
   rsc68_replay,       /**< 68000 external replay.           */
   rsc68_config,       /**< Config file.                     */
-  rsc68_sample,       /**< sc68 sample files.               */
-  rsc68_dll,          /**< sc68 dynamic library.            */
   rsc68_music,        /**< sc68 music files.                */
 
   rsc68_last          /**< last valid type.                 */

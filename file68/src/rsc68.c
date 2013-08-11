@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-07 22:01:17 ben>
+ * Time-stamp: <2013-08-09 21:46:08 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -119,16 +119,15 @@ static void rsc68_init_table(void)
   rsc68_table[rsc68_config].path = "/";
   rsc68_table[rsc68_config].ext  = ".cfg";
 
-  rsc68_table[rsc68_sample].type = rsc68_sample;
-  rsc68_table[rsc68_sample].name = "sample";
-  rsc68_table[rsc68_sample].path = "/Sample/";
-  rsc68_table[rsc68_sample].ext  = ".sc68";
+  /* rsc68_table[rsc68_sample].type = rsc68_sample; */
+  /* rsc68_table[rsc68_sample].name = "sample"; */
+  /* rsc68_table[rsc68_sample].path = "/Sample/"; */
+  /* rsc68_table[rsc68_sample].ext  = ".sc68"; */
 
-
-  rsc68_table[rsc68_dll].type = rsc68_dll;
-  rsc68_table[rsc68_dll].name = "dll";
-  rsc68_table[rsc68_dll].path = "/Dll/";
-  rsc68_table[rsc68_dll].ext  = 0;
+  /* rsc68_table[rsc68_dll].type = rsc68_dll; */
+  /* rsc68_table[rsc68_dll].name = "dll"; */
+  /* rsc68_table[rsc68_dll].path = "/Dll/"; */
+  /* rsc68_table[rsc68_dll].ext  = 0; */
 
   rsc68_table[rsc68_music].type = rsc68_music;
   rsc68_table[rsc68_music].name = "music";
@@ -622,38 +621,25 @@ static vfs68_t * default_open(rsc68_t type, const char *name,
       p += l;
     }
 
-    if (pathes[ipath].curl) {
-      TRACE68(rsc68_cat,"rsc68: try open '%s' with curl\n", path);
-      is = vfs68_curl_create(path, mode);
-    } else {
-      TRACE68(rsc68_cat,"rsc68: try open '%s' with file\n", path);
-      is = vfs68_file_create(path, mode);
-      if (!is) {
-        TRACE68(rsc68_cat,"rsc68: try open '%s' with FD\n", path);
-        is = vfs68_fd_create(path, -1, mode);
-      }
-    }
+    is = uri68_vfs(path, mode, 0);
     err = vfs68_open(is);
     TRACE68(rsc68_cat, "rsc68: try [%s]\n", strok68(err));
-    if (!err) {
+    if (!err)
       break;
-    }
 
     vfs68_destroy(is);
     is = 0;
   }
 
-  if (apath != tmp) {
+  if (apath != tmp)
     free(apath);
-  }
   if (err) {
     vfs68_destroy(is);
     is = 0;
   }
 
-  if (is && info) {
+  if (is && info)
     info->type = type;
-  }
 
   TRACE68(rsc68_cat, "rsc68: open '%s' -- *%s*\n",
           vfs68_filename(is),

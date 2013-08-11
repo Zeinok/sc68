@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 23:35:11 ben>
+ * Time-stamp: <2013-08-10 01:14:23 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -47,7 +47,7 @@ static int curl_cat = msg68_DEFAULT;
 #include <string.h>
 #include <stdlib.h>
 #if defined (HAVE_UNISTD_H) && (defined (HAVE_USLEEP) || defined (HAVE_SLEEP))
-/* $$$ Need this to have usleep prototype. */
+/* Need this to have usleep prototype. */
 # if defined (HAVE_USLEEP) && !defined(__USE_BSD) && !defined(__USE_XOPEN)
 #  define __USE_BSD
 # endif
@@ -738,6 +738,7 @@ int vfs68_curl_init(void)
 void vfs68_curl_shutdown(void)
 {
   if (init == 1) {
+    uri68_unregister(&curl_scheme);
     curl_global_cleanup();
     init = 0;
   }
@@ -747,9 +748,9 @@ void vfs68_curl_shutdown(void)
   }
 }
 
-vfs68_t * vfs68_curl_create(const char * uri, int mode)
+static vfs68_t * curl_create(const char *uri, int mode,
+                             int argc, va_list list)
 {
-
   vfs68_curl_t *isf;
   int len;
 
@@ -772,17 +773,12 @@ vfs68_t * vfs68_curl_create(const char * uri, int mode)
 
   /* Copy vfs functions. */
   memcpy(&isf->vfs, &vfs68_curl, sizeof(vfs68_curl));
+
   /* Clean curl handle. */
   isf->mode = mode & (VFS68_OPEN_READ|VFS68_OPEN_WRITE);
 
   strcpy(isf->name, uri);
   return &isf->vfs;
-}
-
-static vfs68_t * curl_create(const char *uri, int mode,
-                             int argc, va_list list)
-{
-  return vfs68_curl_create(uri, mode);
 }
 
 
@@ -795,19 +791,7 @@ static vfs68_t * curl_create(const char *uri, int mode,
 #include "file68_vfs_curl.h"
 #include "file68_vfs_def.h"
 
-vfs68_t * vfs68_curl_create(const char * fname, int mode)
-{
-  msg68_error("curl68: create -- *NOT SUPPORTED*");
-  return 0;
-}
-
-int vfs68_curl_init(void)
-{
-  return 0;
-}
-
-void vfs68_curl_shutdown(void)
-{
-}
+int vfs68_curl_init(void) { return 0; }
+void vfs68_curl_shutdown(void) {}
 
 #endif

@@ -5,7 +5,7 @@
  * @date     2003-10-28
  * @brief    URI manipulation header.
  */
-/* Time-stamp: <2013-08-07 13:47:37 ben> */
+/* Time-stamp: <2013-08-09 19:25:57 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -69,6 +69,15 @@ FILE68_API
  * @retval -1    failure
  */
 int uri68_register(scheme68_t * scheme);
+
+FILE68_API
+/**
+ * Unregister a scheme handler.
+ *
+ * @param  scheme  scheme info,
+ * @TODO   implements uri68_unregister() for real !
+ */
+void uri68_unregister(scheme68_t * scheme);
 
 FILE68_API
 /**

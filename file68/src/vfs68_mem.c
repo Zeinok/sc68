@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-06 00:44:11 ben>
+ * Time-stamp: <2013-08-10 01:17:20 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -249,6 +249,11 @@ int vfs68_mem_init(void)
   return uri68_register(&mem_scheme);
 }
 
+void vfs68_mem_shutdown(void)
+{
+  uri68_unregister(&mem_scheme);
+}
+
 #else /* #ifndef VFS68_NO_FILE */
 
 /* vfs mem must not be include in this package. Anyway the creation
@@ -258,15 +263,7 @@ int vfs68_mem_init(void)
 #include "file68_fvs_mem.h"
 #include "file68_msg.h"
 
-int vfs68_mem_init(void)
-{
-  return 0;
-}
-
-vfs68_t * vfs68_mem_create(const void * addr, int len, int mode)
-{
-  msg68_error("mem68: create -- *NOT SUPPORTED*\n");
-  return 0;
-}
+int vfs68_mem_init(void) { return 0; }
+void vfs68_mem_shutdown(void) { }
 
 #endif

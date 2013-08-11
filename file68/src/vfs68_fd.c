@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 22:34:15 ben>
+ * Time-stamp: <2013-08-10 01:33:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -71,20 +71,32 @@ static scheme68_t fd_scheme = {
   0, "vfs-fd", fd_ismine, fd_create
 };
 
+static struct {
+  const char * name;  int len;  int mode;
+} myshemes[] =
+{
+  { "fd:",      3, SCHEME68_ISMINE|SCHEME68_READ|SCHEME68_WRITE },
+  { "file://",  7, SCHEME68_ISMINE|SCHEME68_READ|SCHEME68_WRITE },
+  { "local://", 8, SCHEME68_ISMINE|SCHEME68_READ|SCHEME68_WRITE },
+  { "stdout:",  7, SCHEME68_ISMINE|              SCHEME68_WRITE },
+  { "stderr:",  7, SCHEME68_ISMINE|              SCHEME68_WRITE },
+  { "stdin:",   7, SCHEME68_ISMINE|SCHEME68_READ                },
+};
+
 static int fd_ismine(const char * uri)
 {
-  const int ok = SCHEME68_ISMINE | SCHEME68_READ | SCHEME68_WRITE;
-
-  if (!strncmp68(uri,"file://",7) || !strncmp68(uri,"local://",8))
-    return ok;
-  if (!strncmp68(uri,"fd:",3) && isdigit((int)uri[3]))
-    return ok;
+  int i = uri68_get_scheme(0, 0, uri);
+  if (!i)
+    return SCHEME68_ISMINE|SCHEME68_READ|SCHEME68_WRITE;
+  else if (i > 0) {
 #ifdef NATIVE_WIN32
-  if (isalpha((int)uri[0]) && uri[1] == ':')
-    return ok;
+    if (i == 2 && isalpha((int)uri[0]))
+      return SCHEME68_ISMINE|SCHEME68_READ|SCHEME68_WRITE;
 #endif
-  if (uri68_get_scheme(0, 0, uri) == 0)
-    return ok;
+    for (i = 0; i < sizeof(myshemes)/sizeof(*myshemes); ++i)
+      if (!strncmp68(uri, myshemes[i].name, myshemes[i].len))
+        return myshemes[i].mode;
+  }
   return 0;
 }
 
@@ -237,7 +249,7 @@ static const vfs68_t vfs68_fd = {
   ifddestroy
 };
 
-vfs68_t * vfs68_fd_create(const char * fname, int fd, int mode)
+static vfs68_t * create(const char * fname, int fd, int mode)
 {
   vfs68_fd_t *isf;
   int len;
@@ -283,18 +295,46 @@ vfs68_t * vfs68_fd_create(const char * fname, int fd, int mode)
 static vfs68_t * fd_create(const char * uri, int mode,
                            int argc , va_list list)
 {
-  if (!strncmp68(uri,"file://", 7))
+  int fd = -1;
+
+  if (!strncmp68(uri,"fd:", 3))
+    fd = strtoul(uri+3, 0, 10);
+  else if (!strncmp68(uri,"file://", 7))
     uri += 7;
   else if (!strncmp68(uri,"local://", 8))
     uri += 8;
-  if (argc == 1)
-    return vfs68_fd_create(0, va_arg(list,int), mode);
-  return vfs68_fd_create(uri, -1, mode);
+  else if (!strncmp68(uri,"stdin:", 6))
+    return (mode & 3) == 1
+      ? create(0, 0, mode)
+      : 0
+      ;
+  else if (!strncmp68(uri,"stdout:", 7))
+    return (mode & 3) == 2
+      ? create(0, 1, mode)
+      : 0
+      ;
+  else if (!strncmp68(uri,"stderr:", 7))
+    return (mode & 3) == 2
+      ? create(0, 2, mode)
+      : 0
+      ;
+
+  if (fd == -1 && argc == 1) {
+    fd = va_arg(list,int);
+    uri = 0;
+  }
+
+  return create(uri, fd, mode);
 }
 
 int vfs68_fd_init(void)
 {
   return uri68_register(&fd_scheme);
+}
+
+void vfs68_fd_shutdown(void)
+{
+  uri68_unregister(&fd_scheme);
 }
 
 #else /* #ifndef VFS68_NO_FILE */
@@ -305,15 +345,8 @@ int vfs68_fd_init(void)
 
 #include "file68_msg.h"
 
-vfs68_t * vfs68_fd_create(const char * fname, int fd, int mode)
-{
-  msg68_error("fd68: create -- *NOT SUPPORTED*");
-  return 0;
-}
-
-int vfs68_fd_init(void)
-{
-  return 0;
-}
+int vfs68_fd_init(void) { return 0; }
+void vfs68_fd_shutdown(void) { }
 
 #endif
+

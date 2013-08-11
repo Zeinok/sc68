@@ -5,7 +5,7 @@
  * @date     2003-10-06
  * @brief    Zlib stream header.
  */
-/* Time-stamp: <2013-07-22 01:17:22 ben> */
+/* Time-stamp: <2013-08-09 21:45:29 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -57,6 +57,18 @@ FILE68_EXTERN
  */
 vfs68_t * vfs68_z_create(vfs68_t * is, int mode,
                                  const vfs68_z_option_t opt);
+
+FILE68_EXTERN
+/**
+ * Init gzip vfs.
+ */
+int vfs68_z_init(void);
+
+FILE68_EXTERN
+/**
+ * Shutdown gzip vfs.
+ */
+void vfs68_z_shutdown(void);
 
 /**
  * @}

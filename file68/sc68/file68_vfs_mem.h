@@ -5,7 +5,7 @@
  * @date     2003-08-08
  * @brief    Memory stream header.
  */
-/* Time-stamp: <2013-08-02 21:32:29 ben> */
+/* Time-stamp: <2013-08-09 19:39:44 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -20,6 +20,8 @@
  *
  *   Implements vfs68_t for memory buffer.
  *
+ * @note   mem vfs scheme is "mem:".
+ *
  * @{
  */
 
@@ -30,6 +32,12 @@ FILE68_EXTERN
  * @retval  0  always success
  */
 int vfs68_mem_init(void);
+
+FILE68_EXTERN
+/**
+ * shutdown memory VFS (unregister mem: scheme).
+ */
+void vfs68_mem_shutdown(void);
 
 FILE68_EXTERN
 /**

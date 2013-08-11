@@ -5,7 +5,7 @@
  * @date     1998-09-03
  * @brief    Music file header.
  */
-/* Time-stamp: <2013-08-07 18:36:27 ben> */
+/* Time-stamp: <2013-08-09 16:12:04 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -229,6 +229,37 @@ FILE68_API
 const char * file68_tag_get(const disk68_t * mb, int track,
                             const char * key);
 
+FILE68_API
+/**
+ * Get a copy of a metatag from disk or track.
+ *
+ *  The file68_tag() function gets a copy of the value of a metatag.
+ *
+ *  Contrary to the file68_tag_get() function the file68_tag()
+ *  function returns a wider range of tag. It can handle disk and
+ *  track information that are avaiable in the disk68_t or music68_t
+ *  structures.
+ *
+ *  List of sipplemental metatags:
+ *
+ * - "track" returns track number (01) or default track for disk
+ *     query.
+ * - "tracks" returns the number of tracks (01).
+ *
+ * @param  mb     pointer to SC68 disk
+ * @param  track  track number (0:disk)
+ * @param  key    tag name
+ *
+ * @return allocated copy of tag value
+ * @retval  0  tag is not set or copy failed.
+ *
+ * @note  The caller have to free the returned string by itself.
+ * @todo Implements the dynamic part and use it in mksc68 and info68.
+ *
+ * @see file68_tag_get()
+ */
+char * file68_tag(const disk68_t * mb, int track, const char * key);
+
 /**
  * @}
  */
@@ -412,7 +443,7 @@ FILE68_API
  * @see file68_new()
  * @see file68_load()
  */
-void file68_free(disk68_t * disk);
+void file68_free(const disk68_t * disk);
 
 /**
  * @}

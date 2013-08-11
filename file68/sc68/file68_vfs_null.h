@@ -5,7 +5,7 @@
  * @date     2003-10-10
  * @brief    Null stream header.
  */
-/* Time-stamp: <2013-08-04 21:30:00 ben> */
+/* Time-stamp: <2013-08-09 19:39:53 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -27,19 +27,25 @@
  *   at open.  It implies that stream length can be retrieved by the
  *   vfs68_length() function after vfs68_close() call.
  *
+ * @note   null vfs scheme is "null:".
+ *
  * @{
  */
 
 FILE68_EXTERN
 /**
- * Init null vfs.
+ * Init null vfs (register null: scheme).
  *
  * @retval  0 on success
  * @retval -1 on error
- *
- * @note   null scheme is "null:".
  */
 int vfs68_null_init(void);
+
+FILE68_EXTERN
+/**
+ * Shutdown null vfs (unregister null: scheme).
+ */
+void vfs68_null_shutdown(void);
 
 /**
  * @}

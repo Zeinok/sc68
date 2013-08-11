@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-08-04 21:47:14 ben>
+ * Time-stamp: <2013-08-10 01:18:19 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -178,7 +178,12 @@ int vfs68_null_init(void)
   return uri68_register(&null_scheme);
 }
 
-vfs68_t * vfs68_null_create(const char * uri)
+void vfs68_null_shutdown(void)
+{
+  uri68_unregister(&null_scheme);
+}
+
+static vfs68_t * null_create(const char * uri, int mode, int argc, va_list list)
 {
   vfs68_null_t * isn;
   int size;
@@ -202,11 +207,6 @@ vfs68_t * vfs68_null_create(const char * uri)
   return &isn->vfs;
 }
 
-static vfs68_t * null_create(const char * uri, int mode, int argc, va_list list)
-{
-  return vfs68_null_create(uri);
-}
-
 #else /* #ifndef VFS68_NO_NULL */
 
 /* vfs mem must not be include in this package. Anyway the creation
@@ -216,6 +216,7 @@ static vfs68_t * null_create(const char * uri, int mode, int argc, va_list list)
 #include "file68_vfs_null.h"
 #include "file68_msg.h"
 
-int vfs68_null_register(void) { return -1; }
+int vfs68_null_init(void) { return 0; }
+void vfs68_null_shutdown(void) { }
 
 #endif

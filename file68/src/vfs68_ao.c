@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 17:04:16 ben>
+ * Time-stamp: <2013-08-10 01:18:43 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -584,18 +584,7 @@ static vfs68_t * ao_create(const char * uri, int mode, int argc, va_list list)
 #include "file68_vfs_ao.h"
 #include "file68_vfs_def.h"
 
-int vfs68_ao_init(void)
-{
-  return 0;
-}
-
-void vfs68_ao_shutdown(void)
-{
-}
-
-unsigned int audio68_sampling_rate(const unsigned int rate)
-{
-  return rate;
-}
+int vfs68_ao_init(void) { return 0; }
+void vfs68_ao_shutdown(void) { }
 
 #endif

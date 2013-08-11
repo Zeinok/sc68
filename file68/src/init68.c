@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-08 02:04:20 ben>
+ * Time-stamp: <2013-08-09 21:27:58 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -34,7 +34,13 @@
 #include "file68_msg.h"
 #include "file68_err.h"
 #include "file68_reg.h"
+#include "file68_vfs_ao.h"
 #include "file68_vfs_curl.h"
+#include "file68_vfs_fd.h"
+#include "file68_vfs_file.h"
+#include "file68_vfs_mem.h"
+#include "file68_vfs_null.h"
+#include "file68_vfs_z.h"
 #include "file68_rsc.h"
 #include "file68_str.h"
 
@@ -43,18 +49,10 @@
 
 static volatile int init;
 
-void vfs68_ao_shutdown(void);          /* defined in vfs68_ao.c   */
-int  vfs68_z_init(void);               /* defined in vfs68_z.c    */
-void vfs68_z_shutdown(void);           /* defined in vfs68_z.c    */
 int  option68_init(void);              /* defined in option68.c   */
 void option68_shutdown(void);          /* defined in option68.c   */
 int  file68_loader_init(void);         /* defined in file68.c     */
 void file68_loader_shutdown(void);     /* defined in file68.c     */
-int  vfs68_ao_init(void);              /* defined in vfs68_ao.c   */
-int  vfs68_mem_init(void);             /* defined in vfs68_mem.c  */
-int  vfs68_fd_init();                  /* defined in vfs68_fd.c   */
-int  vfs68_file_init();                /* defined in vfs68_file.c */
-int  vfs68_null_init();                /* defined in vfs68_null.c */
 static char * mygetenv(const char *name)
 {
 #ifndef HAVE_GETENV
@@ -291,14 +289,26 @@ void file68_shutdown(void)
     /* Shutdown resource */
     rsc68_shutdown();
 
-    /* Xiph AO */
-    vfs68_ao_shutdown();
+    /* Zlib */
+    vfs68_z_shutdown();
 
     /* Curl */
     vfs68_curl_shutdown();
 
-    /* Zlib */
-    vfs68_z_shutdown();
+    /* Xiph AO */
+    vfs68_ao_shutdown();
+
+    /* Memory */
+    vfs68_mem_shutdown();
+
+    /* NUll */
+    vfs68_null_shutdown();
+
+    /* File descriptor */
+    vfs68_fd_shutdown();
+
+    /* File */
+    vfs68_file_shutdown();
 
     init = 0;
   }

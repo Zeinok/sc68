@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-07 18:35:48 ben>
+ * Time-stamp: <2013-08-11 01:57:52 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -89,11 +89,6 @@ const char file68_mimestr[]  = SC68_MIMETYPE;
 /* below this value, force a few loops */
 #define MIN_TRACK_MS (45*1000u)
 
-/* time we use as default if track contains no such info */
-/* $$$ Finally it is better without. Just don't have time and let the
- * application decide. */
-/* #define DEF_TRACK_MS (90*1000u) */
-
 #ifndef DEBUG_FILE68_O
 # define DEBUG_FILE68_O 0
 #endif
@@ -151,9 +146,29 @@ static /* const */ struct strings_table {
   -1,
 };
 
-/* Is disk ? */
+
+/***********************************************************************
+ * Check functions
+ **********************************************************************/
+
+/* valid disk ? */
 static inline int is_disk(const disk68_t * const mb) {
   return mb && mb->magic == SC68_DISK_ID;
+}
+
+/* null or valid disk ? */
+static inline int null_or_disk(const disk68_t * const mb) {
+  return !mb || mb->magic == SC68_DISK_ID;
+}
+
+/* Track value in range ? */
+static inline int in_range(const disk68_t * mb, const int track) {
+  return (unsigned int)track <= (unsigned int)mb->nb_mus;
+}
+
+/* Track in disk ? */
+static inline int in_disk(const disk68_t * mb, const int track) {
+  return is_disk(mb) && track > 0 && track <= mb->nb_mus;
 }
 
 /* Does this memory belongs to the disk data ? */
@@ -192,6 +207,7 @@ static char *strdup_not_static(const disk68_t * const mb, const char * s)
                     : s );
 }
 
+
 /* Peek Little Endian Unaligned 32 bit value */
 static inline int LPeek(const void * const a)
 {
@@ -201,6 +217,16 @@ static inline int LPeek(const void * const a)
   return r;
 }
 
+/* Peek big Endian Unaligned 16 bit value */
+static inline int WPeekBE(const void * const a)
+{
+  int r;
+  const unsigned char * const c = (const unsigned char *) a;
+  r = c[1] + ((int)(signed char)c[0] << 8);
+  return r;
+}
+
+/* Peek Big Endian Unaligned 32 bit value */
 static inline int LPeekBE(const void * const a)
 {
   int r;
@@ -895,9 +921,19 @@ static int st_isdigit( int c )
   return c >= '0' && c <= '9';
 }
 
-#define SNDH_RIPP_ID 0
-#define SNDH_CONV_ID 1
+/* sndh extra disk tag */
+enum {
+  SNDH_YEAR_ID,
+};
 
+/* sndh extra track tag */
+enum {
+  SNDH_RIPP_ID,
+  SNDH_CONV_ID,
+};
+
+/* @see http://sndh.atari.org/fileformat.php
+ */
 static int sndh_info(disk68_t * mb, int len)
 {
   const int unknowns_max = 8;
@@ -912,6 +948,7 @@ static int sndh_info(disk68_t * mb, int len)
   mb->mus[0].datasz = len;
   mb->nb_mus = -1; /* Make validate failed */
   mb->mus[0].replay = 0;
+  mb->tags.tag.custom[SNDH_YEAR_ID].key    = tagstr.year;
   mb->mus[0].tags.tag.custom[SNDH_RIPP_ID].key = tagstr.ripper;
   mb->mus[0].tags.tag.custom[SNDH_CONV_ID].key = tagstr.converter;
 
@@ -976,12 +1013,12 @@ static int sndh_info(disk68_t * mb, int len)
     } else if (!memcmp(b+i, "YEAR", 4)) {
       /* year */
       t = i; s = i += 4;
-      /* p = ... */
+      p = &mb->tags.tag.custom[SNDH_YEAR_ID].val;
     } else if (!memcmp(b+i,"MuMo",4)) {
       /* MusicMon ???  */
       msg68_warning("file68: sndh -- %s\n","what to do with 'MuMo' tag ?");
       /* musicmon = 1; */
-      i += 4;
+      t = i; i += 4;
     } else if (!memcmp(b+i,"TIME",4)) {
       int j, tracks;
       /* Time in second */
@@ -1005,6 +1042,32 @@ static int sndh_info(disk68_t * mb, int len)
 
     } else if ( !memcmp(b+i,"##",2) && ( (ctypes & 0xC00) == 0xC00 ) ) {
       mb->nb_mus = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' );
+      /* assert(0); */
+      t = i; i += 4;
+    } else if (!memcmp(b+i,"!#SN",4)) {
+      /* track names */
+      int j, tracks, max = 0;
+      t = i;
+      /* assert(0); */
+      if (! (tracks = mb->nb_mus) ) {
+        msg68_warning("file68: sndh -- %s\n","got '!#SN' before track count");
+        tracks = 1;
+      }
+      for (j = 0; j < tracks; ++ j) {
+        int off = WPeekBE(b + i + 4 + j*2);
+        if (off > max) max = off;
+        mb->mus[j].tags.tag.title.val = b + i + off;
+        TRACE68(file68_cat,
+                "file68: sndh -- !#SN #%02d pos:%d -- '%s'\n",
+                j+1, i+off, mb->mus[j].tags.tag.title.val);
+      }
+      /* Position on the last sub name and skip it. */
+      for (i += max; i < len && b[i] ; i++ )
+        ;
+      for (; i < len && !b[i] ; i++ )
+        ;
+    } else if ( !memcmp(b+i,"!#",2) && ( (ctypes & 0xC00) == 0xC00 ) ) {
+      mb->def_mus = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' ) - 1;
       t = i; i += 4;
     } else if ( !memcmp(b+i,"!V",2) && ( (ctypes & 0xC00) == 0xC00 ) ) {
       vbl = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' );
@@ -1150,22 +1213,48 @@ int file68_tag_enum(const disk68_t * mb, int track, int idx,
   return -!(k && v);
 }
 
-const char * file68_tag_get(const disk68_t * mb, int track, const char * key)
+static const char * get_tag(const disk68_t * mb, int track, const char * key)
 {
   const char * val = 0;
-  if (mb) {
-    const tagset68_t * tags = 0;
-    if (!track)
-      tags = &mb->tags;
-    else if (track <= mb->nb_mus)
-      tags = &mb->mus[track-1].tags;
-    if (tags) {
-      int i = get_customtag(tags, key);
-      if (i >= 0)
-        val = tags->array[i].val;
-    }
+  const tagset68_t * tags;
+
+  assert(is_disk(mb));
+  assert(!track || in_range(mb,track));
+  assert(key);
+
+  if (!track)
+    tags = &mb->tags;
+  else if (track <= mb->nb_mus)
+    tags = &mb->mus[track-1].tags;
+  if (tags) {
+    int i = get_customtag(tags, key);
+    if (i >= 0)
+      val = tags->array[i].val;
   }
   return val;
+}
+
+
+const char * file68_tag_get(const disk68_t * mb, int track, const char * key)
+{
+  return (key && is_disk(mb) && (!track || in_range(mb,track)))
+    ? get_tag(mb, track, key)
+    : 0
+    ;
+}
+
+char * file68_tag(const disk68_t * mb, int track, const char * key)
+{
+  const char * val = 0;
+
+  if (key && is_disk(mb) && (!track || in_range(mb,track))) {
+    val = get_tag(mb, track, key);
+    if (!val) {
+      /* $$$ TODO */
+    }
+  }
+
+  return strdup68(val);
 }
 
 const char * file68_tag_set(disk68_t * mb, int track,
@@ -1201,9 +1290,11 @@ static void free_tags(disk68_t * mb, tagset68_t *tags)
   }
 }
 
-void file68_free(disk68_t * disk)
+void file68_free(const disk68_t * const_disk)
 {
-  if (disk) {
+  disk68_t * disk = (disk68_t *)const_disk;
+
+  if (is_disk(disk)) {
     const int max = disk->nb_mus;
     int i;
 

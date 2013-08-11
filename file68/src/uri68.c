@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 16:59:21 ben>
+ * Time-stamp: <2013-08-10 01:11:12 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -88,8 +88,29 @@ int uri68_get_scheme(char * scheme, int max, const char *uri)
   return len;
 }
 
+void uri68_unregister(scheme68_t * scheme)
+{
+  if (scheme) {
+    msg68_debug("uri68: unregister scheme -- %s\n", scheme->name);
+    if (scheme == schemes)
+      schemes = scheme->next;
+    else if (schemes) {
+      scheme68_t * sch;
+      for (sch = schemes; sch->next; sch = sch->next)
+        if (sch->next == scheme) {
+          sch->next = scheme->next;
+          break;
+        }
+    }
+    scheme->next = 0;
+  }
+}
+
 int uri68_register(scheme68_t * scheme)
 {
+  if (!scheme)
+    return -1;
+
   assert(!scheme->next);
   scheme->next = schemes;
   schemes = scheme;
