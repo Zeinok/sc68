@@ -1,11 +1,11 @@
 /*
  * @file    in_sc68.c
- * @brief   sc68-ng plugin for winamp 5.5.
+ * @brief   sc68-ng plugin for winamp 5.5
  * @author  http://sourceforge.net/users/benjihan
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-10 23:14:02 ben>
+ * Time-stamp: <2013-08-12 00:12:52 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -428,12 +428,12 @@ static void clean_close(wasc68_t * wasc68)
   if (wasc68->sc68) {
     sc68_destroy(wasc68->sc68);
     wasc68->sc68 = 0;
-    dbg("wasc68::clean - %s\n","sc68 cleaned");
+    /* dbg("wasc68::clean - %s\n","sc68 cleaned"); */
   }
   if (wasc68->uri) {
     free(wasc68->uri);
     wasc68->uri = 0;
-    dbg("wasc68::clean - %s\n","uri cleaned");
+    /* dbg("wasc68::clean - %s\n","uri cleaned"); */
   }
   if ( 1 /* wasc68->mod */) {
     /* Close output system. */
@@ -556,14 +556,10 @@ int play(const char *fn)
                  &wasc68->tid                      /* Thread Id       */
       );
 
-  dbg("wasc68::play - thread %p\n", wasc68->thdl);
-
   err = !wasc68->thdl;
-
 exit:
-  if (err) {
+  if (err)
     clean_close(wasc68);
-  }
 
 inused:
   unlock(wasc68);
@@ -599,8 +595,6 @@ void dump_music_info(const sc68_music_info_t * const mi, const char * uri)
   dbg("%-*s : %s %s\n", len, "Disk"   , mi->dsk.time, mi->album);
   dbg("%-*s : %s %s\n", len, "Track"  , mi->trk.time, mi->title);
   dbg("%-*s : %s\n",    len, "Artist" , mi->artist);
-  /* dbg("%-*s : %02u:%02u,%02u\n", len, "Loop-Len", */
-  /*         mi->loop_ms / 60000u, mi->loop_ms / 1000u % 60u, mi->loop_ms % 1000u / 100); */
   dbg("%s\n", "------------------------");
   dbg("Disk tags:\n");
   for (j=0; j<mi->dsk.tags; ++j)
@@ -621,6 +615,31 @@ void dump_music_info(const sc68_music_info_t * const mi, const char * uri)
   dbg("%s\n", "========================");
 }
 
+static void xfinfo(char *title, int *msptr, sc68_t *sc68, sc68_disk_t disk)
+{
+  const int max = GETFILEINFO_TITLE_LENGTH;
+  sc68_music_info_t tmpmi, * const mi = &tmpmi;
+
+  if (sc68_music_info(sc68, mi,
+                      sc68 ? SC68_CUR_TRACK :SC68_DEF_TRACK, disk))
+    return;
+
+  if (title) {
+    const char * artist = get_tag(&mi->dsk, "aka");
+    if (!artist)
+      artist = mi->artist;
+
+    if (mi->tracks == 1 /* || !strcmp68(mi->title, mi->album) */)
+      snprintf(title, max, "%s - %s",artist, mi->album);
+    else
+      snprintf(title, max, "%s - %s [%d tracks]",
+               artist, mi->album, mi->tracks);
+  }
+  if (msptr)
+    *msptr = mi->dsk.time_ms;
+}
+
+
 static
 /*******************************************************************************
  * GET FILE INFO
@@ -630,86 +649,35 @@ static
  * of a track.  If filename is either NULL or of length 0, it means
  * you should return the info of lastfn. Otherwise, return the
  * information for the file in filename.  if title is NULL, no title
- * is copied into it.  if length_in_ms is NULL, no length is copied
+ * is copied into it.  if msptr is NULL, no length is copied
  * into it.
  ******************************************************************************/
-void getfileinfo(const in_char * uri, in_char * title, int * length_in_ms)
+void getfileinfo(const in_char * uri, in_char * title, int * msptr)
 {
   const int max = GETFILEINFO_TITLE_LENGTH;
 
+  if (title)
+    *title = 0;
+  if (msptr)
+    *msptr = 0;
+
   if (!uri || !*uri) {
-    wasc68_t * wasc68;
-    return;
-
+    /* current disk */
+    wasc68_t * wasc68 = 0;
     if (wasc68 = lock(), wasc68) {
-      sc68_music_info_t tmp, * const mi = &tmp;
-
-      sc68_music_info(wasc68->sc68, mi, SC68_CUR_TRACK, 0);
-
-      dbg("wasc68::getfileinfo current title:%c length:%c\n",
-          title ? 'Y' : 'N', length_in_ms ? 'Y' : 'N');
-
-      if (title) {
-        /* int i = 0; */
-        /* const char * const artist   = mi->artist; */
-        /* const char * const    aka   = get_tag(&mi->trk, "aka"); */
-        /* const char * const composer = get_tag(&mi->trk, "composer"); */
-        /* const char * const original = composer */
-        /*   ? composer : get_tag(&mi->trk, "original"); */
-
-        /* i += snprintf(title+i, max-i, "%s - %02d", mi->album, mi->trk.track); */
-        /* if (i < max && strcmp(mi->album,mi->title)) */
-        /*   i += snprintf(title+i, max-i, " - %s", mi->title); */
-        /* if (i < max) */
-        /*   i += snprintf(title+i, max-i, " - By %s", aka ? aka : artist); */
-        /* if (i < max && (aka && strcmp(aka,original)) && strcmp(artist,original) ) */
-        /*   i += snprintf(title+i, max-i, " - Original by %s", original); */
-        /* if (i < max) */
-        /*   i += snprintf(title+i, max-i, " - Hardware %s", mi->trk.hw); */
-        /* title[max-1] = 0; */
-
-        snprintf(title, max, "%s - %s", mi->artist, mi->album);
-        dbg("wasc68::getfileinfo current -- title '%s\n", title);
-      }
-
-      if (length_in_ms) {
-        *length_in_ms = mi->dsk.time_ms;
-        dbg("wasc68::getfileinfo current -- length %d ms\n", *length_in_ms);
-      }
+      if (wasc68->sc68)
+        xfinfo(title, msptr, wasc68->sc68, 0);
       unlock(wasc68);
-    } else
-      dbg("wasc68::getfileinfo -- %s\n", "lock failed");
-
+    }
   } else {
+    /* some other disk */
     sc68_disk_t disk;
-    sc68_music_info_t mi;
-
     if (disk = wasc68_get_disk(uri), disk) {
-      if (!sc68_music_info(0, &mi, SC68_DEF_TRACK, disk)) {
-        dump_music_info(&mi, uri);
-        if (title) {
-          const char * const    aka = get_tag(&mi.dsk, "aka");
-          const char * const artist = aka ? aka : mi.artist;
-          if (mi.tracks == 1) {
-            if (strcmp(mi.album,mi.title))
-              snprintf(title, max, "%s - %s - %s", artist, mi.album, mi.title);
-            else
-              snprintf(title, max, "%s - %s", artist, mi.album);
-          } else {
-            snprintf(title, max, "%s - %s [%d tracks]", artist, mi.album, mi.tracks);
-          }
-          title[max-1] = 0;
-          dbg("wasc68::getfileinfo - '%s' -- title '%s'\n", uri, title);
-        }
-        if (length_in_ms) {
-          *length_in_ms = mi.dsk.time_ms;
-          dbg("wasc68::getfileinfo - '%s' -- length %d ms\n", uri, *length_in_ms);
-        }
-      }
+      xfinfo(title, msptr, 0, disk);
       wasc68_rel_disk(disk, 0);
-      }
     }
   }
+}
 
 static
 /*******************************************************************************
@@ -720,8 +688,6 @@ DWORD WINAPI playloop(LPVOID _wasc68)
   wasc68_t * wasc68 = (wasc68_t *)_wasc68;
   const int get_pos =
     wasc68->allin1 ? SC68_GET_PLAYPOS :SC68_GET_POS;
-
-  dbg("wasc68::playloop(%p) {\n",_wasc68);
 
   while (!wasc68->stop_req) {
     int seeking = 0, l;
@@ -1096,29 +1062,33 @@ static int xinfo(const char *data, char *dest, size_t destlen,
   sc68_music_info_t tmpmi, * const mi = &tmpmi;
   const char * value = 0;
 
-  if (!strcasecmp(data, "type"))
+  if (!strcasecmp(data, "type")) {
     /* "TYPE" is an important value as it tells Winamp if this is an
      * audio or video format */
     value = "0";
-  else if (!strcasecmp(data,"family"))
+  }
+  else if (!strcasecmp(data,"family")) {
     value = "sc68 audio files";
   /* Get the info for the default track only. */
+  }
   else if (sc68_music_info(sc68, mi,
-                           sc68 ? SC68_CUR_TRACK : SC68_DEF_TRACK, disk))
-    ;
-  else if (!strcasecmp(data,"album"))   /* Album name */
+                           sc68 ? SC68_CUR_TRACK : SC68_DEF_TRACK, disk)) {
+  }
+  else if (!strcasecmp(data,"album")) { /* Album name */
     value = mi->album;
-  else if (!strcasecmp(data,"title"))   /* Song title */
+  }
+  else if (!strcasecmp(data,"title")) { /* Song title */
     value = mi->title;
-  else if (!strcasecmp(data,"artist") ) /* Song artist */
-  {
+  }
+  else if (!strcasecmp(data,"artist")) { /* Song artist */
     value = get_tag(&mi->trk,"aka");
     if (!value)
       value = mi->artist;
   }
-  /* } else if (!strcasecmp(data,"track")) { */
-  /*   snprintf(dest, destlen, "%02d", track); */
-  /* } */
+  else if (!strcasecmp(data,"track")) {
+    value = "01";
+    /* snprintf(dest, destlen, "%02d", track); */
+  }
   else if (!strcasecmp(data,"albumartist")) {
     value = get_tag(&mi->dsk,"aka");
     if (!value) value = get_tag(&mi->dsk,"artist");
@@ -1130,37 +1100,47 @@ static int xinfo(const char *data, char *dest, size_t destlen,
     if (!value) value = get_tag(&mi->dsk,"original");
     if (!value) value = get_tag(&mi->dsk,"composer");
   }
-  /* else if (!strcasecmp(data,"track")) */
+  else if (!strcasecmp(data,"track")) {
   /*   snprintf(dest, destlen, "%02d", ti->track); */
-  else if (!strcasecmp(data,"genre"))
+  } else if (!strcasecmp(data,"genre")) {
     value = mi->genre;
+  }
   else if (!strcasecmp(data,"length")) {
     /* length in ms */
     /* $$$ Right now disk length but that might change in the future */
     snprintf(dest, destlen, "%u", mi->dsk.time_ms);
     value = dest;
-  } else if (!strcasecmp(data,"year")) {
+  }
+  else if (!strcasecmp(data,"year")) {
     value = get_tag(&mi->dsk,"year");
     if (!value)
       value = get_tag(&mi->trk,"year");
-  } else if (!strcasecmp(data,"publisher")) {
+  }
+  else if (!strcasecmp(data,"publisher")) {
     value = get_tag(&mi->trk,"converter");
     if (!value) value = get_tag(&mi->dsk,"converter");
     value = get_tag(&mi->trk,"converter");
   }
-  /* Other interresting tag we might handle someday: */
-  /* "rating" "albumartist" "year" "publisher" "comment" "lossless"
-   * "bpm" */
-
-  if (!value) {
-    dbg("wasc68::%s unhandled TAG '%s'\n", __FUNCTION__, data);
-    return 0;
+  else if (!strcasecmp(data,"streamtype")) {
   }
+  else if (!strcasecmp(data, "lossless")) {
+    value = "1";
+  }
+  else if (!strcasecmp(data,"")) {
+    /* Other interresting tag we might handle someday: */
+    /* "rating" "albumartist" "year" "publisher" "comment" "lossless"
+     * "bpm" */
+    dbg("wasc68::%s unhandled TAG '%s'\n", __FUNCTION__, data);
+  }
+
+  if (!value)
+    return 0;
+
   if (value != dest)
     strncpy(dest, value, destlen);
   dest[destlen-1] = 0;
-  dbg("wasc68::%s TAG '%s' -> '%s'\n", __FUNCTION__, data, dest);
-  return ;
+  /* dbg("wasc68::%s TAG '%s' -> '%s'\n", __FUNCTION__, data, dest); */
+  return 1;
 }
 
 /**
