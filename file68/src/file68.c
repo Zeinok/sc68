@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-11 01:57:52 ben>
+ * Time-stamp: <2013-08-11 17:38:16 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -69,10 +69,6 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <assert.h>
-
-#if 0
-int aSIDify = 0;                        /* 0:off, 1:safe, 2:force */
-#endif
 
 #define FOURCC(A,B,C,D) ((int)( ((A)<<24) | ((B)<<16) | ((C)<<8) | (D) ))
 #define gzip_cc FOURCC('g','z','i','p')
@@ -150,6 +146,15 @@ static /* const */ struct strings_table {
 /***********************************************************************
  * Check functions
  **********************************************************************/
+
+/* valid year ? */
+static int is_year(const char * const s) {
+  int year = 0;
+  if ( ( (*s=='1' && s[1]=='9') || (*s=='2' && s[1] =='0') ) &&
+       isdigit((int)s[2]) && isdigit((int)s[3]) )
+    year = (*s-'0')*1000 + (s[1]-'0')*100 + (s[2]-'0')*10 + (s[3]-'0');
+  return year;
+}
 
 /* valid disk ? */
 static inline int is_disk(const disk68_t * const mb) {
@@ -497,30 +502,73 @@ static unsigned int ms_to_fr(unsigned int ms, unsigned int hz)
   return (unsigned int) fr;
 }
 
-/* Extract AKA from legacy sc68 artist nomenclature `ARTIST (AKA)'
- * excepted for unknown (replay) ones.
- */
-static int guess_artist_alias(disk68_t * mb, tagset68_t * tags)
+/* match ".+ ([^)]+)$" */
+static int has_parenthesis(char * name, char ** sptr, char ** eptr)
 {
-  int id;
-  char * artist = tags->array[TAG68_ID_ARTIST].val;
-  if ((id = get_customtag(tags, tagstr.aka))<0 && artist) {
-    /* Don't have aka tag, trying to guess it from artist */
-    char * e = strrchr(artist,')');
-    if (e && !e[1]) {
-      char * s;
-      for (s = e-1; s > artist && *s != '('; --s)
-        ;
-      if (s > artist && s[-1] == ' ' && strncmp68(artist,"unknown",7)) {
-        s[-1] = 0;
-        *e = 0;
-        id = set_customtag(mb, tags, tagstr.aka, s+1);
-        TRACE68(file68_cat,"file68 guessed AKA '%s' from '%s' tag-id:%d\n",
-                s+1, artist, id);
-      }
+  int i, l = strlen(name);
+
+  if (l < 5 || name[l-1] != ')')
+    return 0;
+  for (i = l-2; i > 1 && name[i] != '('; --i)
+    if (name[i] == ')') return 0;
+  if (i <= 1 || i == l-2 || name[i-1] != ' ')
+    return 0;
+  *sptr = name+i;
+  *eptr = name+l-1;
+
+  return 1;
+}
+
+/* A bit of cooking here
+ *
+ * For sc68 file: extract AKA from legacy sc68 artist nomenclature
+ *                `ARTIST (AKA)' excepted for unknown (replay) ones.
+ *
+ * For sndh file: extract YEAR from title or artist.
+ *
+ * always returns AKA tag id or -1
+ */
+static int decode_artist(disk68_t * mb, tagset68_t * tags)
+{
+  char *s, *e;
+  const int is_sc68 = mb->tags.tag.genre.val == tagstr.sc68;
+  int id_aka
+    = get_customtag(tags, tagstr.aka);
+
+  if (is_sc68) {
+    /* sc68 file format */
+    if (id_aka >= 0)
+      return id_aka;
+    if ( !tags->tag.artist.val ||
+         !has_parenthesis(tags->tag.artist.val, &s, &e) ||
+         !strncmp68(tags->tag.artist.val,"unknown",7) )
+      return id_aka;
+    s[-1] = e[0] = 0;                   /* remove `(' and `)' */
+    id_aka = set_customtag(mb, tags, tagstr.aka, s+1);
+    TRACE68(file68_cat, "file68 guessed %s='%s'\n", tagstr.aka, s+1);
+  } else {
+    /* not sc68 file format */
+    if (get_customtag(&mb->tags, tagstr.year) < 0 &&
+         (
+           (
+             ( tags->tag.title.val &&
+               has_parenthesis(tags->tag.title.val, &s, &e) &&
+               is_year(s+1) >= 1990 )
+             ||
+             ( tags->tag.artist.val &&
+               has_parenthesis(tags->tag.artist.val, &s, &e) &&
+               is_year(s+1) >= 1990 )
+             )
+           )
+      ) {
+      s[-1] = e[0] = 0;                   /* remove `(' and `)' */
+      set_customtag(mb, &mb->tags, tagstr.year, s+1);
+      TRACE68(file68_cat, "file68 guessed %s='%s'\n",
+              tagstr.year, s+1);
+
     }
   }
-  return id;
+  return id_aka;
 }
 
 /* This function inits all pointers for this music files. It setup non
@@ -551,7 +599,7 @@ static int valid(disk68_t * mb)
   /* default artist is album artist or 'n/a' */
   artist = mb->tags.tag.artist.val ? mb->tags.tag.artist.val : tagstr.n_a;
   /* default alias */
-  aalias = (i = guess_artist_alias(mb, &mb->tags), i<0)
+  aalias = (i = decode_artist(mb, &mb->tags), i<0)
     ? 0 : mb->tags.array[i].val;
 
   /* Disk total time : 00:00 */
@@ -643,15 +691,6 @@ static int valid(disk68_t * mb)
         m->loops = MAX_TRACK_LP;
     }
 
-#if 0
-    m->total_fr = m->first_fr + (m->loops - 1) * m->loops_fr;
-    m->total_ms = fr_to_ms(m->total_fr, m->frq);
-
-    /* set start time in the disk. */
-    m->start_ms = mb->time_ms;
-
-    /* Advance disk total time. */
-#endif
     if (m->loops > 0)
       mb->time_ms += fr_to_ms(m->first_fr+m->loops_fr*(m->loops-1), m->frq);
     else
@@ -684,7 +723,7 @@ static int valid(disk68_t * mb)
     } else {
       int id;
       artist = m->tags.tag.artist.val;  /* new inherited artist */
-      aalias = (id = guess_artist_alias(mb, &m->tags), id < 0)
+      aalias = (id = decode_artist(mb, &m->tags), id < 0)
         ? 0 : m->tags.array[id].val;
     }
 
@@ -706,62 +745,6 @@ static int valid(disk68_t * mb)
       set_customtag(mb, &mb->tags, tagstr.aka,
                     mb->mus[mb->def_mus].tags.array[i].val);
   }
-
-#if 0
-  /* aSIDidy */
-  if (aSIDify) {
-    int j;
-
-    /* Init all music in this file */
-    for (i=j=0; i<mb->nb_mus && mb->nb_mus+j<SC68_MAX_TRACK ; i++) {
-      music68_t * s = mb->mus+i;
-
-      if (!s->hwflags.bit.ym)
-        continue;                  /* not a YM track, can't aSIDify */
-
-      switch (aSIDify) {
-
-      case 1:
-        /* "safe" mode */
-        if (!s->hwflags.bit.timers   /* Don't know about timers: not safe */
-            || s->hwflags.bit.timera /* One or more timers in used: not safe */
-            || s->hwflags.bit.timerb
-            || s->hwflags.bit.timerc
-            || s->hwflags.bit.timerd)
-          break;
-
-      case 2:
-        /* "force" mode */
-
-        if (1)
-          m = s;
-        else {
-          m  = mb->mus + mb->nb_mus + j++;
-          *m = *s;
-          /* $$$ WE SHOULD CHECK FOR MALLOCATED DATA IN THE TAG SET */
-        }
-
-        m->has.asid_trk = i+1;
-        m->has.asid_tA = 'A'-'A';
-        m->has.asid_tB = 'C'-'A';
-        m->has.asid_tC = 'D'-'A';
-        m->has.asid_tX = 'B'-'A';
-        if (m != s) {
-          if (m->loops > 0)
-            mb->time_ms += fr_to_ms(m->first_fr+m->loops_fr*(m->loops-1), m->frq);
-          else
-            has_infinite = 1;
-        }
-        mb->nb_asid++;
-
-      default:
-        break;
-      }
-    }
-    mb->nb_mus += j;
-    TRACE68(file68_cat,"file68: aSID tracks -- %d/%d\n", mb->nb_asid,mb->nb_mus );
-  }
-#endif
 
   if (has_infinite)
     mb->time_ms = 0;
@@ -948,9 +931,6 @@ static int sndh_info(disk68_t * mb, int len)
   mb->mus[0].datasz = len;
   mb->nb_mus = -1; /* Make validate failed */
   mb->mus[0].replay = 0;
-  mb->tags.tag.custom[SNDH_YEAR_ID].key    = tagstr.year;
-  mb->mus[0].tags.tag.custom[SNDH_RIPP_ID].key = tagstr.ripper;
-  mb->mus[0].tags.tag.custom[SNDH_CONV_ID].key = tagstr.converter;
 
   i = sndh_is_magic(b, len);
   if (!i) {
@@ -1005,14 +985,17 @@ static int sndh_info(disk68_t * mb, int len)
     } else if (!memcmp(b+i,"RIPP",4)) {
       /* Ripper */
       t = i; s = i += 4;
+      mb->mus[0].tags.tag.custom[SNDH_RIPP_ID].key = tagstr.ripper;
       p = &mb->mus[0].tags.tag.custom[SNDH_RIPP_ID].val;
     } else if (!memcmp(b+i,"CONV",4)) {
       /* Converter */
       t = i; s = i += 4;
+      mb->mus[0].tags.tag.custom[SNDH_CONV_ID].key = tagstr.converter;
       p = &mb->mus[0].tags.tag.custom[SNDH_CONV_ID].val;
     } else if (!memcmp(b+i, "YEAR", 4)) {
       /* year */
       t = i; s = i += 4;
+      mb->tags.tag.custom[SNDH_YEAR_ID].key = tagstr.year;
       p = &mb->tags.tag.custom[SNDH_YEAR_ID].val;
     } else if (!memcmp(b+i,"MuMo",4)) {
       /* MusicMon ???  */
@@ -1224,8 +1207,11 @@ static const char * get_tag(const disk68_t * mb, int track, const char * key)
 
   if (!track)
     tags = &mb->tags;
-  else if (track <= mb->nb_mus)
+  else if (in_range(mb, track))
     tags = &mb->mus[track-1].tags;
+  else
+    tags = 0;
+
   if (tags) {
     int i = get_customtag(tags, key);
     if (i >= 0)
