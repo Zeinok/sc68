@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-08 17:09:11 ben>
+ * Time-stamp: <2013-08-09 18:33:21 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -228,6 +228,10 @@ static const char    not_available[] = SC68_NOFILENAME;
 static char          appname[16];
 static char          sc68_errstr[ERRMAX];
 
+/***********************************************************************
+ * Forward declarations
+ **********************************************************************/
+
 static void sc68_debug(sc68_t * sc68, const char * fmt, ...);
 static int error_addx(sc68_t * sc68, const char * fmt, ...);
 static int error_add(sc68_t * sc68, const char * fmt, const char *);
@@ -238,6 +242,7 @@ static int set_asid(sc68_t * sc68, int asid);
 static int get_pcm_fmt(sc68_t * sc68);
 static int set_pcm_fmt(sc68_t * sc68, int pcmfmt);
 static int get_pos(sc68_t * sc68, int origin);
+static sc68_disk_t get_dt(sc68_t * sc68, int * ptr_track, sc68_disk_t disk);
 
 
 /***********************************************************************
@@ -252,36 +257,40 @@ static inline const char * never_null(const char * ptr) {
   return ptr ? ptr : "(nil)";
 }
 
-static inline int is_magic(const sc68_t * sc68) {
+static inline int is_magic(const sc68_t * const sc68) {
   return sc68->magic == SC68_MAGIC;
 }
 
-static inline int is_sc68(const sc68_t * sc68) {
+static inline int is_sc68(const sc68_t * const sc68) {
   return sc68 && is_magic(sc68);
 }
 
-static inline int null_or_sc68(const sc68_t * sc68) {
+static inline int null_or_sc68(const sc68_t * const sc68) {
   return !sc68 || is_magic(sc68);
 }
 
-static inline int is_disk(const disk68_t * disk) {
+static inline int is_disk(const disk68_t * const disk) {
   return disk && disk->magic == DISK_MAGIC;
 }
 
-static inline int null_or_disk(const disk68_t * disk) {
+static inline int null_or_disk(const disk68_t * const disk) {
   return !disk || disk->magic == DISK_MAGIC;
 }
 
-static inline int has_disk(const sc68_t * sc68) {
+static inline int has_disk(const sc68_t * const sc68) {
   return is_sc68(sc68) && is_disk(sc68->disk);
 }
 
-static inline int has_track(const sc68_t * sc68, const int track) {
-  return has_disk(sc68) && track > 0 && track <= sc68->disk->nb_mus;
+static inline int in_range(const disk68_t * disk, const int track) {
+  return (unsigned int)track <= (unsigned int)disk->nb_mus;
+}
+
+static inline int has_track(const sc68_t * const sc68, const int track) {
+  return has_disk(sc68) && in_range(sc68->disk, track);
 }
 
 static inline int in_disk(const disk68_t * disk, const int track) {
-  return is_disk(disk) && track > 0 && track <= disk->nb_mus;
+  return is_disk(disk) && in_range(disk, track);
 }
 
 /***********************************************************************
@@ -843,8 +852,14 @@ static void config_apply(sc68_t * sc68)
     sc68->version       = config.version;
     sc68->remote        = config.allow_remote;
     sc68->mix.aga_blend = config.aga_blend;
-    sc68->cfg_track     = config.force_track;
-    sc68->cfg_loop      = config.force_loop;
+    sc68->cfg_track     = SC68_DEF_TRACK;
+    if (config.force_track > 0)
+      sc68->cfg_track = config.force_track;
+    sc68->cfg_loop      = SC68_DEF_LOOP;
+    if (config.force_loop == -1)
+      sc68->cfg_loop      = SC68_INF_LOOP;
+    if (config.force_loop > 0)
+      sc68->cfg_loop      = config.force_loop;
     sc68->cfg_asid      = config.asid;
     sc68->time.def_ms   = config.def_time_ms;
     sc68->mix.spr       = config.spr;
@@ -1458,7 +1473,7 @@ static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
   return SC68_OK;
 }
 
-static int change_track(sc68_t * sc68, int track/* , int loop */)
+static int change_track(sc68_t * sc68, int track)
 {
   const disk68_t  * d;
   const music68_t * m;
@@ -1526,13 +1541,14 @@ static int change_track(sc68_t * sc68, int track/* , int loop */)
   if (!force_ms && !m->first_fr)
     force_ms = sc68->time.def_ms;
 
-  assert(m->loops >= -1 && m->loops != 0);
+  assert(m->loops == SC68_DEF_LOOP ||
+         m->loops == SC68_INF_LOOP ||
+         m->loops >  0);
   if (loop == SC68_DEF_LOOP)
     loop = m->loops;
   sc68->mix.loop_count = 0;
   sc68->mix.loop_total = (loop == SC68_INF_LOOP) ? 0 : loop;
   sc68->mix.pass_count = 0;
-
 
   if (force_ms > 0) {
     TRACE68(sc68_cat,"libsc68: disk force length -- *%d ms*\n", force_ms);
@@ -1959,20 +1975,18 @@ int sc68_play(sc68_t * sc68, int track, int loop)
 {
   const disk68_t * d;
 
-  if (!sc68) {
+  if (!has_disk(sc68))
     return -1;
-  }
   d = sc68->disk;
-  if (!d) {
-    return -1;
-  }
 
-
-  /* track == -1 : read current track or current loop. */
+  /* Legacy, better sc68_cntl()  */
   if (track == SC68_CUR_TRACK) {
+    msg68x_warning(sc68, "libsc68: %s\n",
+                   "deprecated use sc68_play() to get track and loops");
     return loop == SC68_CUR_LOOP
       ? sc68->mix.loop_count
-      : sc68->track;
+      : sc68->track
+      ;
   }
 
   /* Choose track */
@@ -1980,14 +1994,14 @@ int sc68_play(sc68_t * sc68, int track, int loop)
     /* Mean track has been forced while the disk was loaded (via
      * URI) */
     track = d->force_track;
-    TRACE68(sc68_cat,"libsc68: disk has a forced track -- *%02d*\n",track);
+    TRACE68(sc68_cat,"libsc68: disk's forced track -- *%02d*\n",track);
   } else if (track == SC68_DEF_TRACK) {
     track = d->def_mus + 1;
-    if (sc68->cfg_track > 0 && sc68->cfg_track <= d->nb_mus) {
+    if (in_range(d, sc68->cfg_track)) {
       /* track forced in config only applied if default track was
        * asked and it is not out of range. */
       track = sc68->cfg_track;
-      TRACE68(sc68_cat,"libsc68: config has a forced track -- *%02d*\n", track);
+      TRACE68(sc68_cat,"libsc68: config's forced track -- *%02d*\n", track);
     }
   }
 
@@ -2049,9 +2063,9 @@ static unsigned int calc_len(const disk68_t * d, int track, int loop)
   const music68_t * m;
   unsigned force_ms;
 
-  assert(is_disk(d) && track > 0 && track <= d->nb_mus);
+  assert(in_disk(d,track));
+
   m = d->mus + track - 1;
-  assert(m->loops >= -1 && m->loops != 0);
 
   if (loop == SC68_DEF_LOOP)
     loop = m->loops;
@@ -2140,6 +2154,8 @@ static void music_info(sc68_music_info_t * f, const disk68_t * d,
   f->album     = d->tags.tag.title.val;
   f->title     = m->tags.tag.title.val;
   f->artist    = m->tags.tag.artist.val;
+  f->format    = d->tags.tag.genre.val;
+  f->genre     = m->tags.tag.genre.val;
 }
 
 
@@ -2149,28 +2165,9 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
   const disk68_t  * d;
   int loaded;
 
-  assert(null_or_sc68(sc68));
-  assert(info);
-  assert(null_or_disk(disk));
-
-  /* Check storage */
-  if (!info)
-    return error_add(sc68, "libsc68: %s\n", "music info -- null pointer");
-
-  /* If disk is given use it, else use sc68 disk. */
-  d = is_disk(disk) ? disk : (has_disk(sc68) ? sc68->disk : 0);
-  if (!d)
-    return error_add(sc68, "libsc68: %s\n", "music info -- no disk");
-
-  /* Asking for current or default track */
-  if (track == SC68_CUR_TRACK) {
-    if (d != sc68->disk || !(track = sc68->track))
-      return error_add(sc68, "libsc68: %s\n","music info -- no current track");
-  } else if (track == SC68_DEF_TRACK)
-    track = d->def_mus+1;
-
-  if (check_track_range(sc68, d, track))
-    return -1;
+  d = get_dt(sc68, &track, disk);
+  if (!d || !info)
+    return error_add(sc68, "libsc68: %s\n", "invalid parameter");
 
   /* Asking for the track being played by sc68, simply copy internal
    * info struct, unless off course it is the one being filled.
@@ -2185,21 +2182,52 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
   return 0;
 }
 
+/* resolve disk and track number */
+
+static sc68_disk_t get_dt(sc68_t * sc68, int * ptr_track, sc68_disk_t disk)
+{
+  disk68_t * d;
+  int track;
+
+  if (disk)
+    d = disk;
+  else if (is_sc68(sc68) && sc68->disk)
+    d = (sc68_disk_t)sc68->disk;
+  else
+    d = 0;
+  if (!is_disk(d))
+    return 0;
+
+  switch (track = *ptr_track) {
+  case SC68_DEF_TRACK:
+    track = d->def_mus + 1;
+    break;
+  case SC68_CUR_TRACK:
+    track = (sc68 && d == sc68->disk) ? sc68->track : -1;
+  case SC68_DSK_TRACK:
+    break;
+  }
+  if (track != SC68_DSK_TRACK && !in_range(d,track))
+    d = 0;
+  else
+    *ptr_track = track;
+  return d;
+}
+
+char * sc68_tag(sc68_t * sc68, const char * key, int track, sc68_disk_t disk)
+{
+  disk68_t * d;
+  if (!key || !(d = get_dt(sc68, &track, disk)))
+    return 0;
+  return file68_tag(d, track, key);
+}
 
 int sc68_tag_get(sc68_t * sc68, sc68_tag_t * tag, int track,
                  sc68_disk_t disk)
 {
-  const disk68_t  * d;
-
-  /* If disk is given use it, else use sc68 disk. */
-  d = disk ? disk : (sc68 ? sc68->disk : 0);
-  if (!d || !tag)
+  disk68_t * d;
+  if (!tag || !(d = get_dt(sc68, &track, disk)))
     return -1;
-
-  /* Asking for current or default track */
-  if (track == -1)
-    track = (disk || !sc68->track) ? d->def_mus+1 : sc68->track;
-
   tag->val = (char *) file68_tag_get(d, track, tag->key);
   return -!tag->val;
 }
@@ -2207,17 +2235,9 @@ int sc68_tag_get(sc68_t * sc68, sc68_tag_t * tag, int track,
 int sc68_tag_enum(sc68_t * sc68, sc68_tag_t * tag, int track, int idx,
                   sc68_disk_t disk)
 {
-  const disk68_t  * d;
-
-  /* If disk is given use it, else use sc68 disk. */
-  d = disk ? disk : (sc68 ? sc68->disk : 0);
-  if (!d || !tag)
+  disk68_t  * d;
+  if (!tag || !(d = get_dt(sc68, &track, disk)))
     return -1;
-
-  /* Asking for current or default track */
-  if (track == -1)
-    track = (disk || !sc68->track) ? d->def_mus+1 : sc68->track;
-
   return file68_tag_enum(d, track, idx,
                          (const char **)&tag->key,
                          (const char **)&tag->val);
@@ -2363,7 +2383,7 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
       res = sc68->track;
       break;
 
-    case SC68_DEF_TRACK:
+    case SC68_GET_DEFTRK:
       if (is_disk(sc68->disk))
         res = sc68->disk->def_mus+1;
       break;

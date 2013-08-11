@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-08 17:56:11 ben>
+ * Time-stamp: <2013-08-09 18:17:43 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -129,12 +129,12 @@ static const config68_entry_t conftab[] = {
     "Amiga left/right voices blending factor {32768:center}",
     {0},{65535},{AMIGA_BLEND}
   },
-  { 0,                          /* could be export but is it useful */
+  { 1,
     "force-track", CONFIG68_INT,
     "override default track {0:off}",
     {0}, {SC68_MAX_TRACK}, {FORCE_TRACK}
   },
-  { 0,                          /* could be export but is it useful */
+  { 1,
     "force-loop", CONFIG68_INT,
     "override default loop {0:off -1:inf}",
     {-1}, {100}, {FORCE_LOOP}
