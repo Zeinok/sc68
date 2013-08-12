@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-31 12:35:22 ben>
+ * Time-stamp: <2013-08-12 19:30:54 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -312,7 +312,8 @@ error:
  */
 static int send_packet(gdb_t * gdb)
 {
-  int c, i, j, sum = 0;
+  int  i, j, sum = 0;
+  char c;
   char * const buf = gdb->buf;
 
   buf[0] = '$';
