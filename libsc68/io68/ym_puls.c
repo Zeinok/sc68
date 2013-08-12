@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 02:51:01 ben>
+ * Time-stamp: <2013-08-12 19:18:46 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -505,8 +505,8 @@ static void do_envelop(ym_t * const ym, cycle68_t ymcycle)
 
     if (access->ymcycle > ymcycle) {
       TRACE68(ym_cat,"%s access reg %X out of frame!! (%u>%u %u)\n",
-              regs->name, access->reg, access->ymcycle, ymcycle,
-              access->ymcycle/ymcycle);
+              regs->name, (unsigned) access->reg, (unsigned) access->ymcycle,
+              (unsigned) ymcycle, (unsigned) (access->ymcycle/ymcycle) );
       break;
     }
 
@@ -652,8 +652,8 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
 
     if (access->ymcycle > ymcycle) {
       TRACE68(ym_cat,"%s access reg %X out of frame!! (%u>%u %u)\n",
-              regs->name, access->reg, access->ymcycle, ymcycle,
-              access->ymcycle/ymcycle);
+              regs->name, (unsigned) access->reg, (unsigned) access->ymcycle,
+              (unsigned) ymcycle, (unsigned) (access->ymcycle/ymcycle));
       break;
     }
 

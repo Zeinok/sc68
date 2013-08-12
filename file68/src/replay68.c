@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-07 23:00:38 ben>
+ * Time-stamp: <2013-08-12 19:40:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -52,7 +52,8 @@ int replay68_get(const char * name, const void ** data,
                  int * csize, int * dsize)
 {
   const int max = sizeof(replays)/sizeof(*replays);
-  struct replay s, *r;
+  struct replay s;
+  const struct replay *r;
   s.name = name;
 
   r = bsearch(&s, replays, max, sizeof(*replays), cmp);

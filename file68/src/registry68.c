@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-02 13:41:49 ben>
+ * Time-stamp: <2013-08-12 19:33:58 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -70,6 +70,7 @@ static const char * keyhdlname(const registry68_key_t key)
   return keys[i].name;
 }
 
+#if 0
 static const char * keyname(const enum registry68_key_e key)
 {
   return keys
@@ -78,6 +79,7 @@ static const char * keyname(const enum registry68_key_e key)
      : key
       ] . name;
 }
+#endif
 
 static HKEY keyhandle(const enum registry68_key_e key)
 {
@@ -273,7 +275,7 @@ static int put_data(registry68_key_t rootkey,
   HKEY hkey = HKEY_INVALID;
   int len;
   LONG hres;
-  char * name, kname[1024], error[256];
+  char * name, kname[1024]/* , error[256] */;
   const char * kname_save = kname_cst;
 
   if (!kname_cst|| !kdata || kdatasz <= 0) {
@@ -314,7 +316,7 @@ static int put_data(registry68_key_t rootkey,
                     name,
                     0,
                     type,
-                    kdata,
+                    (const BYTE *)kdata,
                     kdatasz);
 
     if (hres != ERROR_SUCCESS) {
@@ -341,7 +343,7 @@ static int get_data(registry68_key_t rootkey,
   HKEY hkey = HKEY_INVALID;
   int len;
   LONG hres;
-  char * name, kname[1024], error[256];
+  char * name, kname[1024]/* , error[256] */;
   const char * kname_save = kname_cst;
 
   if (!kname_cst|| !kdata || kdatasz <= 0) {

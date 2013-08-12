@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 15:26:23 ben>
+ * Time-stamp: <2013-08-12 19:18:42 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -444,14 +444,14 @@ int ym_clock(ym_t * const ym, int clock)
 
   default:
     if (clock != YM_CLOCK_ATARIST) {
-      msg68_warning("ym-2149: unsupported clock -- %u\n",
-                    (unsigned int)clock);
+      msg68_warning("ym-2149: unsupported clock -- *%u*\n",
+                    (unsigned int) clock);
     }
     clock = YM_CLOCK_ATARIST;
     if (!ym) {
       default_parms.clock = clock;
-      msg68_notice("ym-2149: default clock -- *ATARI-ST*\n",
-                 (unsigned int)clock);
+      msg68_notice("ym-2149: default clock -- *%u*\n",
+                   (unsigned int) clock);
     } else {
       clock = ym->clock;
     }

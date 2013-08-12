@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-09 18:33:21 ben>
+ * Time-stamp: <2013-08-12 19:25:36 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -232,8 +232,8 @@ static char          sc68_errstr[ERRMAX];
  * Forward declarations
  **********************************************************************/
 
-static void sc68_debug(sc68_t * sc68, const char * fmt, ...);
-static int error_addx(sc68_t * sc68, const char * fmt, ...);
+static void sc68_debug(sc68_t * sc68, const char * fmt, ...) FMT23;
+static int error_addx(sc68_t * sc68, const char * fmt, ...) FMT23;
 static int error_add(sc68_t * sc68, const char * fmt, const char *);
 static int get_spr(const sc68_t * sc68);
 static int set_spr(sc68_t * sc68, int hz);
@@ -608,13 +608,13 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
         j += 3;
       } else {
         line[j+2] = 0;
-        TRACE68(sc68_cat," %-6x: %s\n", adr + (i & ~15), line);
+        TRACE68(sc68_cat," %-6x: %s\n", (unsigned) adr + (i & ~15), line);
         j = 0;
       }
     }
     if (j) {
       line[j-1] = 0;
-      TRACE68(sc68_cat," %-6x: %s\n", adr + (i & ~15), line);
+      TRACE68(sc68_cat," %-6x: %s\n", (unsigned) adr + (i & ~15), line);
     }
   }
 }
@@ -779,7 +779,7 @@ static const char * optcfg_get_str(config68_t * c,
     if ( config68_get(c, &idx, &key) == CONFIG68_STR ) {
       v = key;
       TRACE68(sc68_cat,
-              "libsc68: get config from cfg -- name='%s' val=%d\n", name, v);
+              "libsc68: get config from cfg -- name='%s' val='%s'\n", name, v);
     }
   }
   return v;
@@ -1272,10 +1272,10 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr,uint68_t maxinst)
                "libsc68: pass#%d @$%X"
                " %s (%02X)"
                " $%X/$%04X irq#%d (%s) @$%X\n",
-               sc68->mix.pass_count, pc,
+               sc68->mix.pass_count, (unsigned) pc,
                emu68_status_name(status), status,
-               sc68->emu68->reg.pc, sc68->emu68->reg.sr,
-               sc68->irq.vector, irqname, sc68->irq.pc);
+               (unsigned) sc68->emu68->reg.pc, (unsigned) sc68->emu68->reg.sr,
+               sc68->irq.vector, irqname, (unsigned) sc68->irq.pc);
   }
   return status;
 }
@@ -1361,7 +1361,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     int status;
 
     TRACE68(sc68_cat," -> Load TOS trap emulator @$%06x-$%06x\n",
-            TRAP_ADDR,TRAP_ADDR+sizeof(trap_func)-1);
+            (unsigned) TRAP_ADDR, (unsigned) (TRAP_ADDR+sizeof(trap_func)-1));
 
     /* Ensure trap emulator do not override exception handler */
     assert(sizeof(trap_func) <= INTR_ADDR-TRAP_ADDR);
@@ -1369,7 +1369,8 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     /* Install trap emulator */
     emu68_memput(sc68->emu68, TRAP_ADDR, trap_func, sizeof(trap_func));
     sc68->emu68->cycle = 0;
-    TRACE68(sc68_cat," -> Running trap init code -- $%06x ...\n", TRAP_ADDR);
+    TRACE68(sc68_cat," -> Running trap init code -- $%06x ...\n",
+            (unsigned) TRAP_ADDR);
     status = finish(sc68, TRAP_ADDR, 0x2300, INIT_MAX_INST);
     if ( status != EMU68_NRM ) {
       error_addx(sc68,
@@ -1608,7 +1609,7 @@ static int change_track(sc68_t * sc68, int track)
     /* verify */
     cycles = ymio_cycle_cpu2ym(sc68->ymio,sc68->mix.cycleperpass);
     TRACE68(sc68_cat," -> ym cycles       : %u [%s]\n",
-            cycles, strok68(cycles&31));
+            (unsigned) cycles, strok68(cycles&31));
   }
   sc68->mix.cycleperpass = (sc68->mix.cycleperpass+31) & ~31;
   TRACE68(sc68_cat," -> cycle (round)   : %u\n", sc68->mix.cycleperpass);

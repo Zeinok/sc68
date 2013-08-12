@@ -331,7 +331,8 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
   for (access = ym->waccess; access != ym->waccess_nxt; access ++) {
     if (access->ymcycle > ymcycles) {
       TRACE68(ym_cat, "access reg %X out of frame: (%u > %u)\n",
-              access->reg, access->ymcycle, ymcycles);
+              (unsigned) access->reg, (unsigned) access->ymcycle,
+              (unsigned) ymcycles);
     }
 
     /* mix up to this cycle, update state */

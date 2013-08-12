@@ -5,18 +5,27 @@
  * @author   Benjamin Gerard
  * @date     2003-08-22
  */
-/* Time-stamp: <2013-08-08 02:06:53 ben> */
+/* Time-stamp: <2013-08-12 19:12:36 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_MSG_H_
-#define _FILE68_MSG_H_
+#ifndef FILE68_MSG_H
+#define FILE68_MSG_H
 
 #ifndef FILE68_API
 # include "file68_api.h"
 #endif
 #include <stdarg.h>
 
+#ifdef __GNUC__
+# define FMT12 __attribute__ ((format (printf, 1, 2)))
+# define FMT23 __attribute__ ((format (printf, 2, 3)))
+# define FMT34 __attribute__ ((format (printf, 3, 4)))
+#else
+# define FMT12
+# define FMT23
+# define FMT34
+#endif
 
 /**
  * @defgroup  file68_msg  Output messages
@@ -116,14 +125,6 @@ FILE68_API
  */
 int msg68_cat(const char * name, const char * desc, int filter);
 
-#if 0
-FILE68_API
-/**
- * Get/Set current category.
- */
-int msg68_cat_current(int cat);
-#endif
-
 FILE68_API
 /**
  * Free/Destroy a category.
@@ -202,7 +203,7 @@ FILE68_API
  */
 void msg68_va(int cat, const char * fmt, va_list list);
 
-FILE68_API
+FILE68_API FMT23
 /**
  * Print generic message.
  *
@@ -211,7 +212,7 @@ FILE68_API
  */
 void msg68(int cat, const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT12
 /**
  * Print critical message.
  *
@@ -219,7 +220,7 @@ FILE68_API
  */
 void msg68_critical(const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT12
 /**
  * Print error message.
  *
@@ -227,7 +228,7 @@ FILE68_API
  */
 void msg68_error(const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT12
 /**
  * Print warning message.
  *
@@ -235,7 +236,7 @@ FILE68_API
  */
 void msg68_warning(const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT12
 /**
  * Print notice message.
  *
@@ -243,7 +244,7 @@ FILE68_API
  */
 void msg68_notice(const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT12
 /**
  * Print info message.
  *
@@ -251,7 +252,7 @@ FILE68_API
  */
 void msg68_info(const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT12
 /**
  * Print debug message.
  *
@@ -259,7 +260,7 @@ FILE68_API
  */
 void msg68_debug(const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT12
 /**
  * Print trace message.
  *
@@ -271,7 +272,6 @@ void msg68_trace(const char * fmt, ...);
  * @}
  */
 
-
 /**
  * @name  Extended message functions
  * @{
@@ -282,7 +282,7 @@ void msg68_trace(const char * fmt, ...);
  *   msg68_set_cookie() function.
  */
 
-FILE68_API
+FILE68_API FMT34
 /**
  * Print message (eXtended version).
  *
@@ -303,7 +303,7 @@ FILE68_API
  */
 void msg68x_va(int cat, void * cookie, const char * fmt, va_list list);
 
-FILE68_API
+FILE68_API FMT23
 /**
  * Print critical message (eXtended version).
  *
@@ -312,7 +312,7 @@ FILE68_API
  */
 void msg68x_critical(void * cookie, const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT23
 /**
  * Print error message (eXtended version).
  *
@@ -321,7 +321,7 @@ FILE68_API
  */
 void msg68x_error(void * cookie, const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT23
 /**
  * Print warning message (eXtended version).
  *
@@ -330,7 +330,7 @@ FILE68_API
  */
 void msg68x_warning(void * cookie, const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT23
 /**
  * Print notice message (eXtended version).
  *
@@ -339,7 +339,7 @@ FILE68_API
  */
 void msg68x_notice(void * cookie, const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT23
 /**
  * Print info message (eXtended version).
  *
@@ -348,7 +348,7 @@ FILE68_API
  */
 void msg68x_info(void * cookie, const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT23
 /**
  * Print debug message (eXtended version).
  *
@@ -357,7 +357,7 @@ FILE68_API
  */
 void msg68x_debug(void * cookie, const char * fmt, ...);
 
-FILE68_API
+FILE68_API FMT23
 /**
  * Print trace message (eXtended version).
  *
@@ -388,7 +388,7 @@ static void msg68_dummy(int cat, const char * fmt, ...) {}
 #  define VTRACE68(cat,fmt,list)
 # else
 #  define  TRACE68 msg68
-#  define VTRACE68 vmsg68
+#  define VTRACE68 msg68_va
 # endif
 #endif
 

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 02:49:23 ben>
+ * Time-stamp: <2013-08-12 19:10:04 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -170,7 +170,7 @@ void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
   if (bogoc > ptimer->cti) {
     TRACE68(mfp_cat,
           "mfp: timer-%c -- reconf out of range -- @%u > cti:%u\n",
-          ptimer->def.letter, bogoc, ptimer->cti);
+          ptimer->def.letter, (unsigned) bogoc, (unsigned) ptimer->cti);
     ptimer->cti = bogoc + psw * ptimer->tdr_res;
   } else {
     ptimer->cti = bogoc + psr + (tdr-1) * new_psw;
@@ -180,10 +180,10 @@ void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
   ptimer->tcr = tcr;
 
   TRACE68(mfp_cat,
-        "mfp: timer-%c -- reconf @%u cti:%u cpp:%u -- %d:%dhz\n",
-        ptimer->def.letter, bogoc,
-        ptimer->cti, cpp(ptimer->tdr_res),
-        frq,timerfrq(ptimer->tdr_res));
+          "mfp: timer-%c -- reconf @%u cti:%u cpp:%u -- %u:%uhz\n",
+          ptimer->def.letter, (unsigned) bogoc,
+          (unsigned) ptimer->cti, (unsigned) cpp(ptimer->tdr_res),
+          (unsigned) frq, (unsigned) timerfrq(ptimer->tdr_res));
 }
 
 /* Stop a running timer: tcr !0->0
@@ -224,13 +224,13 @@ void resume_timer(mfp_timer_t * const ptimer, int tcr, bogoc68_t bogoc)
   ptimer->cti = bogoc + ptimer->tdr_cur * prediv_width[tcr] - ptimer->psc;
 
   TRACE68(mfp_cat,
-        "mfp: timer-%c  -- resume @%u cti:%u cpp:%u "
-        "tdr:%u/%u psw:%u(%u) -- %dhz\n",
-        ptimer->def.letter, bogoc, ptimer->cti,
-        cpp(ptimer->tdr_res),
-        (int)ptimer->tdr_cur,(int)ptimer->tdr_res,
-        prediv_width[ptimer->tcr],ptimer->tcr,
-        timerfrq(ptimer->tdr_res));
+          "mfp: timer-%c  -- resume @%u cti:%u cpp:%u "
+          "tdr:%u/%u psw:%u(%u) -- %uhz\n",
+          ptimer->def.letter, (unsigned) bogoc, (unsigned) ptimer->cti,
+          (unsigned) cpp(ptimer->tdr_res),
+          (unsigned) ptimer->tdr_cur, (unsigned) ptimer->tdr_res,
+          (unsigned) prediv_width[ptimer->tcr], (unsigned) ptimer->tcr,
+          (unsigned) timerfrq(ptimer->tdr_res));
 }
 
 /* Read timer data register:
@@ -292,7 +292,7 @@ void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
     ptimer->tdr_cur = v;
     TRACE68(mfp_cat,
           "mfp: timer-%c -- reload TDR @%u -- %u\n",
-          ptimer->def.letter, bogoc, ptimer->tdr_res);
+            ptimer->def.letter, (unsigned) bogoc, (unsigned) ptimer->tdr_res);
   }
 #ifndef NDEBUG
   else if (ptimer->tcr && v != old_tdr) {
@@ -300,11 +300,11 @@ void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
     TRACE68(mfp_cat,
             "mfp: timer-%c -- change @%u cti:%u psw:%u(%u) cpp:%u"
             " -- %u(%u) -> %u(%u)hz\n",
-            ptimer->def.letter, bogoc, ptimer->cti,
-            prediv_width[ptimer->tcr], ptimer->tcr,
-            cpp(ptimer->tdr_res),
-            old_frq,old_tdr,
-            timerfrq(ptimer->tdr_res), ptimer->tdr_res);
+            ptimer->def.letter, (unsigned) bogoc, (unsigned) ptimer->cti,
+            (unsigned) prediv_width[ptimer->tcr], (unsigned) ptimer->tcr,
+            (unsigned) cpp(ptimer->tdr_res),
+            (unsigned) old_frq, (unsigned) old_tdr,
+            (unsigned) timerfrq(ptimer->tdr_res), (unsigned) ptimer->tdr_res);
   }
 #endif
 }
@@ -447,7 +447,7 @@ void mfp_adjust_bogoc(mfp_t * const mfp, const bogoc68_t bogoc)
       if (ptimer->cti < bogoc) {
         TRACE68(mfp_cat,
               "mfp: timer-%c -- adjust -- cti:%u cycle:%u\n",
-              ptimer->def.letter,ptimer->cti, bogoc);
+              ptimer->def.letter, (unsigned) ptimer->cti, (unsigned) bogoc);
       }
       assert(ptimer->cti >= bogoc);
       while (ptimer->cti < bogoc) {
