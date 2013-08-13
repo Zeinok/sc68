@@ -3,9 +3,9 @@
 ; 
 ; Add SID synthesis to classic music.
 ;
-; (C) Benjamin Gerard <ben@sashipa.com>
+; by Benjamin Gerard <https://sourceforge.net/users/benjihan>
 ;
-; $Id$
+; Time-stamp: <2013-08-13 21:04:57 ben>
 ;
 ; TODO:
 ;	- TONE_MODE as an option instead of conditionnal assembly
@@ -14,52 +14,53 @@
 ; Set this to 1 to get some new sound FX !
 TONE_MODE = 0
 	
-;------------------------------------------------------------
-;------------------------------------------------------------
-; 
-; Header:
-;
-;  Classic sc68/sndh (...) music driver header.
-; 
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;; 
+;;; Header:
+;;;
+;;;  Classic sc68/sndh (...) music driver header.
+;;; 
 	bra	init
 	bra	exit
 	bra	play
-	bra	active
 	
-;------------------------------------------------------------
-;------------------------------------------------------------
-
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;; DO NOT CHANGE PLACE AND ORDER
+	
 music_ptr:
 	dc.l	0		; Pointer to current music replay
-aSid_activ:	
-	dc.w	0		; $0000:off, $FF00:on
+aSid_activ:
+	print	aSid_activ
+	dc.w	0      ; $0000:off $FFFF:on $00FF:enable $FF00:disable
 
-;------------------------------------------------------------
-;------------------------------------------------------------
-; 
-; Init code:
-; 
-; - init aSIDfier
-; - save MFP
-; - run music replay init code.
-; 
-; IN:
-; 
-;  specific to aSIDifier:
-;	a6: original music replay [+0 init, +4 stop, +8 play]
-;	d7: timer selection. Use token like 'abcx' where a,b,c,x is
-;	    one of 'A','B','C' or 'D' the timer to use for respectively
-;           canal a,b,c. 'x' is the unused timer and *MUST* be set too.
-;	    Default is 'ACDB'.
-;
-;  specific to sc68:
-;	a0: music data (for external replay)
-;	d0: sub-song number
-;	d1: ste-selection (0:stf, 1:ste)
-;	d2: music data size (size of buffer pointed by a0)
-; 
-; OUT:
-; 	none, all registers restored 
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;; 
+;;; Init code:
+;;; 
+;;; - init aSIDfier
+;;; - save MFP
+;;; - run music replay init code.
+;;; 
+;;; IN:
+;;; 
+;;;  specific to aSIDifier:
+;;;	a6: original music replay [+0 init, +4 stop, +8 play]
+;;;	d7: timer selection. Use token like 'abcx' where a,b,c,x is
+;;;	    one of 'A','B','C' or 'D' the timer to use for respectively
+;;;           canal a,b,c. 'x' is the unused timer and *MUST* be set too.
+;;;	    Default is 'ACDB'.
+;;;
+;;;  specific to sc68:
+;;;	a0: music data (for external replay)
+;;;	d0: sub-song number
+;;;	d1: ste-selection (0:stf, 1:ste)
+;;;	d2: music data size (size of buffer pointed by a0)
+;;; 
+;;; OUT:
+;;; 	none, all registers restored 
 	
 init:
 	movem.l	d0-a6,-(a7)
@@ -96,20 +97,15 @@ init:
 	move.l	a6,(a5)
 	jsr	(a6)
 
-	;; Test if music init code has modified some timers
-  	;; bsr	test_mfp_change
-  	;; lea	aSid_activ(pc),a0
-  	;; seq	(a0)
-
+	;; set active to enable
   	lea	aSid_activ(pc),a0
-  	st	(a0)
+	move.w	#$00ff,(a0)
 	
 	;;  reset ym status buffer
 	bsr	get_ym_status
 
-	;; Setup voice info structs
+	;; setup voice info structs
 	lea	ym_status(pc),a0
-
 	move.w	d7,ym_m7(a0)
 	movem.w	d0-d1,ym_A+ym_per(a0)
 	movem.w	d2-d3,ym_B+ym_per(a0)
@@ -130,36 +126,36 @@ init:
 	movem.l	(a7)+,d0-a6
 	rts
 
-;------------------------------------------------------------
-;------------------------------------------------------------
-; 
-; Exit code:
-; 
-; - Run music stop code
-; - Stop aSIDifier
-; - restore MFP
-; - cut YM
-;
-; IN:	none
-; OUT:	none
-; 
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;; 
+;;; Exit code:
+;;; 
+;;; - Run music stop code
+;;; - Stop aSIDifier
+;;; - restore MFP
+;;; - cut YM
+;;;
+;;; IN:	none
+;;; OUT:	none
+;;; 
 exit:
 	movem.l	d0-a6, -(a7)
 	
 	lea	music_ptr(pc),a6
 	move.l	(a6),d0
 	beq.s	.exit
-	clr.l	(a6)
 
+	;; clear music pointer and aSid status
+	clr.l	(a6)+
+	clr.w	(a6)+
+	
 	;; call music stop
 	move.l	d0,a6
 	jsr	4(a6)
 
 	;; restore mfp
-	move	sr,-(a7)
-	move.w	#$2700,sr
 	bsr	restore_mfp
-	move	(a7)+,sr
 	
 	;; cut YM
 	lea	$ffff8800.w,a0
@@ -170,121 +166,135 @@ exit:
 .exit:
 	movem.l	(a7)+,d0-a6
 	rts
-
-;------------------------------------------------------------
-;------------------------------------------------------------
-; 
-; Active code:
-; 
-; - Set aSid On/Off on the fly
-; 
-; IN:	d0:0(off), 1(on)
-; 
-active:
-	movem.l	d1-d2/d7/a0-a1/a6,-(a7)
 	
-	lea	aSid_activ(pc),a0
-	lea	$ffff8800.w,a1
-	lea	ym_status(pc),a6
-	
-	tst.b	d0
-	sne	d0
-	cmp.b	(a0),d0
-	beq.s	.same
-	bmi.s	.enable
-.disable:
-	;; save active
-	move.b	d0,(a0)
-	
-	;; restore mixer mode
-	moveq	#%11000000,d1
-	move	sr,-(a7)
-	move	#$2700,sr
-	move.b	#7,(a1)
-	and.b	(a1),d1
-	or.w	ym_m7(a6),d1
-	move.b	d1,2(a1)
-	move	(a7)+,sr
-
-	;; clear intena and intmsk for each voice timer
-	moveq	#3-1,d7
-	lea	ym_A(a6),a6
-	lea	$fffffa00.w,a1
-.lp_voice:
-	move.l	ym_tim(a6),a0
-	moveq	#$7,d2
-	moveq	#0,d1
-	move.b	timer_channel(a0),d1
-	and.b	d1,d2			; d0 = bit number
-	lsr	#3,d1			; d1 is channel [0/2]
-	bclr	d2,$07(a1,d1)
-	bclr	d2,$13(a1,d1)
-	lea	ym_vsz(a6),a6
-	dbf	d7,.lp_voice
-	bra.s	.same
-.enable:
-	;; save active
-	move.b	d0,(a0)
-
-	;; save mixer mode
-	move	sr,-(a7)
-	move	#$2700,sr
-	moveq	#%00111111,d1
-	move.b	#7,(a1)
-	and.b	(a1),d1
-	move.b	d1,ym_m7+1(a6)
-	move	(a7)+,sr
-.same:
-	movem.l	(a7)+,d1-d2/d7/a0-a1/a6
-	rts
-	
-;------------------------------------------------------------
-;------------------------------------------------------------
-
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;;  
+;;; Play code:
+;;;
 play:
+	;; check music ptr
 	move.l	music_ptr(pc),d0
-	beq.s	.exit
-
-	lea	aSid_activ(pc),a0
-	tst.b	(a0)
-	beq.s	.music_only
-	
-	;; restore YM registers
-	lea	$ffff8800.w,a0
-
-	;; Restore mixer stat, keep port-A and B values
-	moveq	#%11000000,d7
-	move	sr,-(a7)
-	move	#$2700,sr
-	move.b	#7,(a0)
-	and.b	(a0),d7
-	or.w	ym_status+ym_m7(pc),d7
-	move.b	d7,2(a0)
-	move	(a7)+,sr
-	
-	move.w	ym_status+ym_A+ym_vol(pc),d7
-  	movep.w	d7,0(a0)
-	
-	move.w	ym_status+ym_B+ym_vol(pc),d7
-  	movep.w	d7,0(a0)
-	
-	move.w	ym_status+ym_C+ym_vol(pc),d7
-  	movep.w	d7,0(a0)
-
-	move.l	d0,a0
-	jsr	8(a0)
-	
- 	;; bsr	test_mfp_change
-	;; lea	aSid_activ(pc),a0
-	;; seq	(a0)
-	
-	bsr	aSidifier
-.exit:
+	bne.s	.running
 	rts
 
-.music_only:	
+.running:
+	;; What to do depends on aSid_activ value.
+	lea	aSid_activ(pc),a1
+	move.w	(a1),d7
+	bne.s	.not_off
+
+	;; aSid_activ=$0000 -> aSid OFF
+.asid_off:	
 	move.l	d0,a0
 	jmp	8(a0)
+	
+.not_off:
+	cmp.w	#-1,d7
+	bne.s	.changed
+	
+	;; aSid_activ=$FFFF -> aSid ON
+.asid_on:
+	bsr.s	ym_restore
+.no_restore:
+	move.l	d0,a0
+	jsr	8(a0)
+	move	sr,-(a7)
+	move	#$2700,sr
+	bsr	aSidifier
+	move	(a7)+,sr
+	rts
+	
+.changed:
+	tst.b	d7
+	beq.s	.disable
+	
+	;; aSid_activ=$00FF -> enable aSid
+.enable:
+	move	#$FFFF,(a1)
+	bra.s	.no_restore
+
+	;; aSid_activ=$FF00 -> disable aSid
+.disable:
+	clr.w	(a1)
+	bsr.s	disable_timers
+	bsr.s	ym_restore
+	bra.s	.asid_off
+
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;;
+;;; Disable timers:
+;;;
+;;;   Disable timer interruptions on aSidfied voices
+	
+disable_timers:
+	movem.l	d0-d2/a0-a2,-(a7)
+	move	sr,-(a7)
+	move	#$2700,sr
+	
+	;; clear intena and intmsk for each voice timer
+	moveq	#3-1,d2
+	lea	ym_status+ym_A(pc),a2
+	lea	$fffffa00.w,a1
+.lp_voice:
+	move.l	ym_tim(a2),a0
+	moveq	#$7,d1
+	moveq	#0,d0
+	move.b	timer_channel(a0),d0
+	and.b	d0,d1			; d0 = bit number
+	lsr	#3,d0			; d0 is channel [0/2]
+	bclr	d1,$07(a1,d0)
+	bclr	d1,$13(a1,d0)
+	lea	ym_vsz(a2),a2
+	dbf	d2,.lp_voice
+
+	move	(a7)+,sr
+	movem.l	(a7)+,d0-d2/a0-a2
+	rts
+
+
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;;
+;;; YM restore:
+;;;
+;;;   Restore YM registers modified by aSid (7,8,9,A).
+	
+ym_restore:
+	move.l	a1,-(a7)
+	move	d7,-(a7)
+	move	sr,-(a7)
+	
+	;; Restore mixer register but port-A and port-B
+	move	#$2700,sr
+	move	#%11000000,d7
+	lea	$ffff8800.w,a1
+	move.b	#7,(a1)
+	and.b	(a1),d7
+	or.w	ym_status+ym_m7(pc),d7
+	move.b	d7,2(a1)
+	move.w	ym_status+ym_A+ym_vol(pc),d7
+  	movep.w	d7,0(a1)
+	move.w	ym_status+ym_B+ym_vol(pc),d7
+  	movep.w	d7,0(a1)
+	move.w	ym_status+ym_C+ym_vol(pc),d7
+  	movep.w	d7,0(a1)
+	
+	move.w	(a7)+,sr
+	move	(a7)+,d7
+	move.l	(a7)+,a1
+	rts
+
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;;
+;;; Init timer:
+;;;
+;;;    - Init timers table
+;;;    - Assign timers to voices
+;;; 
+;;; In:  d7: timer assignment ('ACDB')
 	
 init_timers:
 	movem.l	d0-a6,-(a7)
@@ -347,8 +357,8 @@ clear:
 	dbf	d0,.clr
 	rts
 	
-;------------------------------------------------------------
-;------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
 
 	RSRESET
 timersv_vector:	rs.w	1
@@ -464,63 +474,11 @@ restore_mfp:
 
 	rts
 
-
-	if (0)
-	{
-	
-; Test if interrupt has been modified
-test_mfp_change:
-	moveq	#0,d0
-	
-	lea	mfp_buffer(pc),a0
-	lea	$fffffa00.w,a1
-	lea	timer_table(pc),a2
-
-	moveq	#0,d0		; results
-	moveq	#0,d1		; timer num
-.loop:
-	move.w	(a2),a3		; vector address
-	move.l	(a3),d2		; current timer interruption routine
-	movem.l	(a7)+,a3-a4	; get timer HI/LO
-	cmp.l	(a0)+,d2	; Compare with saved vector
-	beq.s	.cont
-	cmp.l	a3,d2
-	beq.s	.cont
-	cmp.l	a4,d2
-	beq.s	.cont
-	
-	bset	d1,d0
-	
-.cont:
-	addq	#8,a2		;  next timer def
-	addq	#1,d1		;  next timer num
-	cmp.b	#3,d1
-	bne.s	.loop
-
-	;; timer B is not used by aSID anyway we have to test it.
-	move.l	$120.w,d2
-	cmp.l	(a0)+,d2
-	beq.s	.ok
-	bset	d1,d0
-.ok:
-	tst.b	d0
-	beq.s	.exit
-
-	;; We are in jeopardy, some timers have been modified !
-	clr.b	$fffffa19.w
-	clr.b	$fffffa1f.w
-	
-.exit:
-	tst.b	d0
-	rts
-
-	}
-
-;------------------------------------------------------------
-;------------------------------------------------------------
-; 
-;------------------------------------------------------------
-;------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;; Asidifier private data
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
 
 	RSRESET
 	
@@ -547,18 +505,15 @@ ym_status:
 	ds.b	ym_sz
 
 
-; Get YM stat
-; 
-; output:
-;
-; d0,d1: voice-A per,vol
-; d2,d3: voice-B per,vol
-; d4,d5: voice-C per,vol
-; d7:    mixer
+;;; Get YM stat
+;;; 
+;;; output:
+;;;
+;;; d0,d1: voice-A per,vol
+;;; d2,d3: voice-B per,vol
+;;; d4,d5: voice-C per,vol
+;;; d7:    mixer
 get_ym_status:
-	move	sr,-(a7)
-	move	#$2700,sr
-	
 	lea	$ffff8800.w,a0
 
 	;; Get voice A
@@ -604,57 +559,33 @@ get_ym_status:
 	move.w	#$073f,d7
 	move.b	#$7,(a0)
 	and.b	(a0),d7
-
-	move	(a7)+,sr
 		
 	rts
 
-;------------------------------------------------------------
-;------------------------------------------------------------
-; aSIDifier (o_O)
-; 
-
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;; aSIDifier (o_O)
+;;; 
   		
 aSidifier:
-	move.b	aSid_activ(pc),d0
-    	bne.s	.activ
-   	rts
-.activ:
-	bsr	get_ym_status
-	
-	lea	ym_status(pc),a6
 
-	;; TONE MODE, dephasing timer
-	if (TONE_MODE)
-	{
-; 	swap	d7
-; 	move	#9,d7
-; 	move	d0,d6
-; 	lsr	d7,d6
-; 	sub	d6,d0
-; 	move	d2,d6
-; 	lsr	d7,d6
-; 	sub	d6,d2
-; 	move	d4,d6
-; 	lsr	d7,d6
-; 	sub	d6,d4
-; 	swap	d7
-	}
-	
+	;; Read and store current ym status
+	bsr	get_ym_status
+	lea	ym_status(pc),a6
 	movem.w	d0-d1,ym_A+ym_per(a6)
 	movem.w	d2-d3,ym_B+ym_per(a6)
 	movem.w	d4-d5,ym_C+ym_per(a6)
 	move.w	d7,ym_m7(a6)
 
-; mixer rules:
-; -----------
-; noise | tone | aSIDdifier
-; 0       0      0
-; 0       1      0
-; 1       0      1
-; 1       1      0
-;
-; aSIDifier = (noise^tone)&noise
+;;; mixer rules:
+;;; -----------
+;;; noise | tone | aSIDdifier
+;;; 0       0      0
+;;; 0       1      0
+;;; 1       0      1
+;;; 1       1      0
+;;;
+;;; aSIDifier = (noise^tone)&noise
 
 NOISE_LATCH   = 6
 NOSOUND_LATCH = 3
@@ -833,17 +764,17 @@ RND_1	=	RND_1+RND_2
 	}
 		
 
-; aSIDify one voice.
-; 
-; IN:
-; 
-;	d6: num voice
-;	a6: voice struct
-;	d7: current SIDfied flags
-; 
-; OUT:
-;	d7: new SIDfied flags
-; 
+;;; aSIDify one voice.
+;;; 
+;;; IN:
+;;; 
+;;;	d6: num voice
+;;;	a6: voice struct
+;;;	d7: current SIDfied flags
+;;; 
+;;; OUT:
+;;;	d7: new SIDfied flags
+;;; 
 aSIDvoicify:
 	
 	;; Get timer table
@@ -1037,16 +968,16 @@ timerB:	ds.b	timer_sz
 timerC:	ds.b	timer_sz
 timerD:	ds.b	timer_sz
 	
-;------------------------------------------------------------
-; Timer interruption routines
-; - name (A/B/C) referes to the sound channel not the timer
-;------------------------------------------------------------
-;
+;;; ------------------------------------------------------------
+;;; Timer interruption routines
+;;; - name (A/B/C) referes to the sound channel not the timer
+;;; ------------------------------------------------------------
+
 
 	
-; \1:	'A','B','C','D'
-; \2:	timer vector
-; \3:	timer data reg
+;;; \1:	'A','B','C','D'
+;;; \2:	timer vector
+;;; \3:	timer data reg
 timerN:	MACRO
 	{
 timer\1_irq:
@@ -1072,31 +1003,31 @@ timer_irq_base:
 	timerN	C,$114.w,$fffffa23.w
 	timerN	D,$110.w,$fffffa25.w
 	
-;------------------------------------------------------------
-;------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
 
 ;;; per = 125000/frq
 ;;; frq = 125000/per
 ;;; frq = 2457600/(       unsigned int frq = 8000000*192 / t->cpp; */
 
 
-; timer_fmin = 2457600/(200*256)	; 48 Hz
-; timer_fmax = 2457600/(4*1)		; 614400 Hz
+;;; timer_fmin = 2457600/(200*256)	; 48 Hz
+;;; timer_fmax = 2457600/(4*1)		; 614400 Hz
 
-; frq = 125000/per
-; frq = 2457600/width
-; 125000 / p = 2457600 / w
-; w * 125000 / p = 2457600
-; w = 2457600 * p / 125000
-; w = 12288 * p / 625	
-; w = d * r
-; d * r = 12288 * p / 625
-; d = 12288 * p / (625*r)
+;;; frq = 125000/per
+;;; frq = 2457600/width
+;;; 125000 / p = 2457600 / w
+;;; w * 125000 / p = 2457600
+;;; w = 2457600 * p / 125000
+;;; w = 12288 * p / 625	
+;;; w = d * r
+;;; d * r = 12288 * p / 625
+;;; d = 12288 * p / (625*r)
 
 Tper2MFP:
 	ds.w	$1000
 	
-; Timer prediviser table
+;;; Timer prediviser table
 timer_prediv:
 	dc.w	0*625, 4/2*625, 10/2*625, 16/2*625
 	dc.w	50/2*625, 64/2*625, 100/2*625, 200/2*625
@@ -1143,10 +1074,10 @@ compute_timer_table:
 	movem.l	(a7)+,d0-d3/a0-a1
 	rts
 
-; IN:
-;	d0 = chords.q octave.q
-; OUT:
-;	d1 = YM period
+;;; IN:
+;;;	d0 = chords.q octave.q
+;;; OUT:
+;;;	d1 = YM period
 get_chord_period:
 	moveq	#15,d1
 	and	d0,d1
@@ -1157,8 +1088,8 @@ get_chord_period:
 	rol	#4,d0
 	rts
 
-; Chords table:
-; - One octave at lowest frequency available for the YM tone generator
+;;; Chords table:
+;;; - One octave at lowest frequency available for the YM tone generator
 chords:	
 	dc.w	$EEE,$E17,$D4D,$C8E,$BD9,$B2F,$A8E,$9F7,$967,$8E0,$861,$7E8
 	dc.w	$EEE/2	
@@ -1303,9 +1234,9 @@ sinus:
 	
 	}
 
-; Compute per2chd table.
-; see per2chd for more info.
-; 
+;;; Compute per2chd table.
+;;; see per2chd for more info.
+;;; 
 compute_per2chd_table:
 	movem.l	d0-a1,-(a7)
 
@@ -1347,14 +1278,13 @@ compute_per2chd_table:
 	movem.l	(a7)+,d0-a1
 	rts
 
-; Table to convert YM periods to the nearest chord.
-; Each value is $XY
-; where:
-; - X is octave in the range [$0..$9].
-; - Y is chord in the range [$0..$b]
-;
-; note:
-; 	YM periods = chords[Y]>>X
+;;; Table to convert YM periods to the nearest chord.
+;;; Each value is $XY
+;;; where:
+;;; - X is octave in the range [$0..$9].
+;;; - Y is chord in the range [$0..$b]
+;;;
+;;; note:
+;;; 	YM periods = chords[Y]>>X
 per2chd:
 	ds.b	$1000
-	
