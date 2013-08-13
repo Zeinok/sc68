@@ -1,6 +1,6 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2013-06-12 11:42:14 ben>
+dnl# Time-stamp: <2013-08-14 00:25:09 ben>
 dnl#
 dnl# autoconf macros
 dnl#
@@ -38,7 +38,7 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
     # Check some more (mostly GCC) switch
     # -----------------------------------
     AC_FOREACH([FLAG],
-      [-std=${CSTD-c99} -pedantic -Wall],
+      [-std=${CSTD-gnu99} -pedantic -Wall],
       [AX_CHECK_COMPILER_FLAGS(FLAG,SC68_ADD_FLAG(ALL_CFLAGS,FLAG))])
 
     # --enable-debug

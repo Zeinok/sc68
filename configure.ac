@@ -163,7 +163,7 @@ AC_SUBST([subdirs])
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
-AC_CONFIG_FILES([Makefile sc68-nsi/Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
 # ,----------------------------------------------------------------------.
