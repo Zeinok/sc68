@@ -5,12 +5,12 @@
  * @date     2011-10-03
  * @brief    Metatags definition header file.
  */
-/* Time-stamp: <2013-07-22 00:13:14 ben> */
+/* Time-stamp: <2013-08-12 22:02:18 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_TAG_H_
-#define _FILE68_TAG_H_
+#ifndef FILE68_TAG_H
+#define FILE68_TAG_H
 
 /**
  * @addtogroup   file68_lib
@@ -36,7 +36,9 @@ enum {
   TAG68_ID_MAX    = 12                  /**< Maximum number of tag.    */
 };
 
-/** tag set type. */
+/**
+ * tag set type.
+ */
 typedef union {
   tag68_t array[TAG68_ID_MAX];    /**< Tags indexed by TAG68_ID enum. */
   struct {

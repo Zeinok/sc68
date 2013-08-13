@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      2003/08/07
  */
-/* Time-stamp: <2013-08-09 18:27:04 ben> */
+/* Time-stamp: <2013-08-13 01:45:48 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -299,7 +299,10 @@ enum sc68_cntl_e {
   SC68_GET_LEN,                      /**< Get current track length. */
   SC68_GET_TRKLEN,                   /**< Get some track length.    */
   SC68_GET_DSKLEN,                   /**< Get disk length.          */
+  SC68_GET_ORG,                      /**< Get current track origin. */
+  SC68_GET_TRKORG,                   /**< Get some track origin.    */
   SC68_GET_POS,                      /**< Get track position (ms).  */
+  SC68_GET_DSKPOS,                   /**< Get disk position (ms).   */
   SC68_GET_PLAYPOS,                  /**< Get play position (ms).   */
   SC68_SET_POS,                      /**< Set position.             */
   SC68_GET_PCM,                      /**< Get PCM format            */

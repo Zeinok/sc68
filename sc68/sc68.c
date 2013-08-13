@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-11 02:34:47 ben>
+ * Time-stamp: <2013-08-13 01:55:42 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -347,7 +347,7 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
   const int max = sizeof(buffer) >> 2;
   int all = 0;
   int code;
-  int last_playpos = -1000;
+  int last_dskpos = -1000;
 
   Debug("PlayLoop:\n"
         " track  : %d\n"
@@ -408,38 +408,38 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
   while ( ! (code & SC68_END) ) {
     char tmp1[32],tmp2[32],tmp3[32],tmp4[32];
     int n = max;
-    int play_len,  play_pos;
-    int track_len, track_pos;
+    int dsk_len,  dsk_pos;
+    int trk_len, trk_pos;
     int track, tracks;
 
     track     = sc68_cntl(sc68,SC68_GET_TRACK);
     tracks    = sc68_cntl(sc68,SC68_GET_TRACKS);
-    play_pos  = sc68_cntl(sc68,SC68_GET_PLAYPOS);
-    play_len  = sc68_cntl(sc68,SC68_GET_DSKLEN);
-    track_pos = sc68_cntl(sc68,SC68_GET_POS);
-    track_len = sc68_cntl(sc68,SC68_GET_LEN);
+    dsk_pos  = sc68_cntl(sc68,SC68_GET_DSKPOS);
+    dsk_len  = sc68_cntl(sc68,SC68_GET_DSKLEN);
+    trk_pos = sc68_cntl(sc68,SC68_GET_POS);
+    trk_len = sc68_cntl(sc68,SC68_GET_LEN);
 
     code = sc68_process(sc68, buffer, &n);
 
-    if (play_pos - last_playpos >= 1000) {
-      last_playpos = play_pos;
+    if (dsk_pos - last_dskpos >= 1000) {
+      last_dskpos = dsk_pos;
       Print("\r%s ~ %s ** %s ~ %s",
-            strtime68(tmp1, track , track_pos/1000u),
-            strtime68(tmp2, track , track_len/1000u),
-            strtime68(tmp3, tracks, play_pos/1000u),
-            strtime68(tmp4, tracks, play_len/1000u));
+            strtime68(tmp1, track , trk_pos/1000u),
+            strtime68(tmp2, track , trk_len/1000u),
+            strtime68(tmp3, tracks, dsk_pos/1000u),
+            strtime68(tmp4, tracks, dsk_len/1000u));
     }
     if (code == SC68_ERROR)
       break;
 
     if (code & SC68_LOOP) {
-      last_playpos = play_pos - 1000;
+      last_dskpos = dsk_pos - 1000;
       Debug("\nLoop: #%d/%d\n",
             sc68_cntl(sc68, SC68_GET_LOOP),sc68_cntl(sc68, SC68_GET_LOOPS));
     }
 
     if (code & SC68_CHANGE) {
-      last_playpos = play_pos - 1000;
+      last_dskpos = dsk_pos - 1000;
       Print("\n");
       if (!all)
         break;

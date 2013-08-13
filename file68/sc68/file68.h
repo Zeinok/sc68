@@ -5,12 +5,12 @@
  * @date     1998-09-03
  * @brief    Music file header.
  */
-/* Time-stamp: <2013-08-09 16:12:04 ben> */
+/* Time-stamp: <2013-08-12 22:02:31 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_H_
-#define _FILE68_H_
+#ifndef FILE68_H
+#define FILE68_H
 
 #ifndef FILE68_API
 # include "file68_api.h"
@@ -121,15 +121,6 @@ typedef struct {
     unsigned   pic  : 1; /**< Track is position independant code.     */
     unsigned   time : 1; /**< Track has time info.                    */
     unsigned   loop : 1; /**< Track has loop info.                    */
-
-#if 0
-    unsigned asid_trk : 6; /**< 0:not asid, >0: original track.       */
-    unsigned asid_tA  : 2; /**< timer used for YM channel-A.          */
-    unsigned asid_tB  : 2; /**< timer used for YM channel-B.          */
-    unsigned asid_tC  : 2; /**< timer used for YM channel-C.          */
-    unsigned asid_tX  : 2; /**< timer not used by aSID.               */
-#endif
-
   } has;                 /**< Track flags.                            */
 
   char        *replay;   /**< External replay name.                   */
@@ -155,9 +146,6 @@ typedef struct {
   int          magic;       /**< Magic identifier is FILE68_MAGIC.       */
   int          def_mus;     /**< Preferred default music (default is 0). */
   int          nb_mus;      /**< Number of music track in file.          */
-#if 0
-  int          nb_asid;     /**< Number of supplemental aSID tracks.     */
-#endif
   unsigned int time_ms;     /**< Total time for all tracks in ms.        */
   hwflags68_t  hwflags;     /**< All tracks flags ORed.                  */
   int          hash;        /**< Caclulated hash (for sndh timedb).      */

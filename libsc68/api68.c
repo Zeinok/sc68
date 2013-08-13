@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-12 19:25:36 ben>
+ * Time-stamp: <2013-08-13 01:46:30 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -73,7 +73,7 @@
  */
 enum {
   /* Internal use for get_pos() and set_pos() */
-  SC68_POS_PLAY, SC68_POS_TRACK,
+  SC68_POS_PLAY, SC68_POS_TRACK,  SC68_POS_DISK,
   /* Exception handler to catch badly initialize exception */
   INTR_ADDR = 0x800,
   /* TOS emulator */
@@ -159,16 +159,16 @@ struct _sc68_s {
   int            seek_to;     /**< Seek to this time (-1:n/a)            */
   int            remote;      /**< Allow remote access.                  */
 
-/** More track info. */
-  /* struct xtra_tinfo_s { */
-  /*   int start_ms; */
-  /*   int time_ms; */
-  /* } tinfo[SC68_MAX_TRACK+1]; */
+  struct {
+    int org_ms;
+    int len_ms;
+  } tinfo[SC68_MAX_TRACK+1];
 
 /** Playing time info. */
   struct {
     unsigned int def_ms;      /**< default time in ms.                   */
-    unsigned int length_ms;   /**< current track length in ms.           */
+//    unsigned int disk_ms;     /**< current disk length in ms.            */
+//    unsigned int track_ms;    /**< current track length in ms.           */
     unsigned int origin_ms;   /**< elapsed ms at track origin.           */
     unsigned int elapsed_ms;  /**< elapsed ms since track start.         */
   } time;
@@ -243,7 +243,9 @@ static int get_pcm_fmt(sc68_t * sc68);
 static int set_pcm_fmt(sc68_t * sc68, int pcmfmt);
 static int get_pos(sc68_t * sc68, int origin);
 static sc68_disk_t get_dt(sc68_t * sc68, int * ptr_track, sc68_disk_t disk);
-
+static int calc_disk_len(const disk68_t * disk, const int loop);
+static unsigned int calc_track_len(const disk68_t * d, int track, int loop);
+static unsigned int calc_pos(sc68_t * const sc68);
 
 /***********************************************************************
  * Check functions
@@ -282,7 +284,7 @@ static inline int has_disk(const sc68_t * const sc68) {
 }
 
 static inline int in_range(const disk68_t * disk, const int track) {
-  return (unsigned int)track <= (unsigned int)disk->nb_mus;
+  return track > 0 && track <= disk->nb_mus;
 }
 
 static inline int has_track(const sc68_t * const sc68, const int track) {
@@ -1182,13 +1184,6 @@ static int set_asid(sc68_t * sc68, int asid)
 /*   rsc68_set_user(path); */
 /* } */
 
-/* static unsigned int calc_disk_time(sc68_t * sc68, const disk68_t * d) */
-/* { */
-/*   return (sc68 && sc68->disk == d && d->nb_mus == 1 && d->mus == sc68->mus) */
-/*     ? sc68->time.length_ms */
-/*     : d->time_ms; */
-/* } */
-
 static inline unsigned int fr_to_ms(unsigned int frames, unsigned int hz) {
   return (unsigned int) ( (u64)frames * 1000u / hz );
 }
@@ -1222,8 +1217,8 @@ static void stop_track(sc68_t * sc68, const int real_stop)
   }
 
   sc68->time.elapsed_ms = 0;
-  sc68->time.length_ms  = 0;
-
+  /* sc68->time.disk_ms    = 0; */
+  /* sc68->time.track_ms   = 0; */
   sc68->mix.pass_count  = 0;
   sc68->mix.loop_count  = 0;
   sc68->mix.bufpos      = 0;
@@ -1542,29 +1537,30 @@ static int change_track(sc68_t * sc68, int track)
   if (!force_ms && !m->first_fr)
     force_ms = sc68->time.def_ms;
 
-  assert(m->loops == SC68_DEF_LOOP ||
-         m->loops == SC68_INF_LOOP ||
-         m->loops >  0);
+  assert(m->loops >= 0);
   if (loop == SC68_DEF_LOOP)
-    loop = m->loops;
+    loop = m->loops > 0 ? m->loops : SC68_INF_LOOP;
+
   sc68->mix.loop_count = 0;
   sc68->mix.loop_total = (loop == SC68_INF_LOOP) ? 0 : loop;
   sc68->mix.pass_count = 0;
 
   if (force_ms > 0) {
     TRACE68(sc68_cat,"libsc68: disk force length -- *%d ms*\n", force_ms);
-    sc68->time.length_ms = force_ms;
-    sc68->mix.pass_2loop = ms_to_fr(sc68->time.length_ms, m->frq);
+    //sc68->time.track_ms  = force_ms * sc68->mix.loop_total;
+    //sc68->time.disk_ms   = sc68->time.track_ms * d->nb_mus;
+    sc68->mix.pass_2loop = ms_to_fr(force_ms, m->frq);
     sc68->mix.pass_3loop = sc68->mix.pass_2loop;
     sc68->mix.pass_total = sc68->mix.loop_total * sc68->mix.pass_2loop;
   } else {
     sc68->mix.pass_2loop = m->first_fr;
     sc68->mix.pass_3loop = m->loops_fr;
-    sc68->mix.pass_total = (sc68->mix.loop_total > 0)
+    sc68->mix.pass_total = sc68->mix.loop_total > 0
       ? sc68->mix.pass_2loop + (sc68->mix.loop_total-1) * sc68->mix.pass_3loop
       : 0
       ;
-    sc68->time.length_ms = fr_to_ms(sc68->mix.pass_total, m->frq);
+    //sc68->time.track_ms = fr_to_ms(sc68->mix.pass_total, m->frq);
+    //sc68->time.disk_ms  = calc_disk_len(d, sc68->loop_to);
   }
 
   TRACE68(sc68_cat," -> loops           : %u\n", sc68->mix.loop_total);
@@ -1572,7 +1568,9 @@ static int change_track(sc68_t * sc68, int track)
           fr_to_ms(sc68->mix.pass_2loop, m->frq));
   TRACE68(sc68_cat," -> loops pass ms   : %u\n",
           fr_to_ms(sc68->mix.pass_3loop, m->frq));
-  TRACE68(sc68_cat," -> total ms        : %u\n", sc68->time.length_ms);
+  TRACE68(sc68_cat," -> origin ms       : %u\n", sc68->tinfo[track].len_ms);
+  TRACE68(sc68_cat," -> track ms        : %u\n", sc68->tinfo[track].len_ms);
+  TRACE68(sc68_cat," -> disk ms         : %u\n", sc68->tinfo[0].len_ms);
 
   /* $$$$ fix start time on the fly because it is broken ! */
   // m->start_ms = sc68->time.save_ms;
@@ -1723,50 +1721,6 @@ static int apply_change_track(sc68_t * const sc68)
   return SC68_CHANGE;
 }
 
-
-/* static unsigned int calc_len(const sc68_t * sc68, int track) */
-/* { */
-/*   const disk68_t  * d; */
-/*   const music68_t * m; */
-/*   unsigned force_ms; */
-/*   int      loop; */
-
-/*   assert(has_track(sc68,track)); */
-
-/*   d = sc68->disk; */
-/*   m = d->mus + track - 1; */
-
-/*   assert(sc68->time.def_ms > 0); */
-/*   assert(m->loops >= -1 && m->loops != 0); */
-/*   loop = sc68->loop_to; */
-
-/*   if (loop == SC68_DEF_LOOP) */
-/*     loop = m->loops; */
-/*   if (loop <= 0) */
-/*     return 0;                          /\* return 0 on infinite loop *\/ */
-
-/*   /\* force length if asked or if we don't have a length *\/ */
-/*   force_ms = d->force_ms; */
-/*   if (!force_ms && !m->first_fr) */
-/*     force_ms = sc68->time.def_ms; */
-/*   if (force_ms) */
-/*     return loop * force_ms; */
-
-/*   return fr_to_ms(m->first_fr + (loop-1) * m->loops_fr, m->frq); */
-/* } */
-
-static unsigned int calc_pos(sc68_t * const sc68)
-{
-  u64 ms;
-  ms  = sc68->mix.pass_count;
-  ms *= sc68->mix.cycleperpass * 1000u;
-  ms /= sc68->emu68->clock;
-
-  assert(ms == (u64)(unsigned int)ms);  /* check overflow */
-
-  return sc68->time.elapsed_ms = (unsigned int) ms;
-}
-
 int sc68_process(sc68_t * sc68, void * buf16st, int * _n)
 {
   int ret;
@@ -1888,11 +1842,8 @@ int sc68_is_our_uri(const char * uri, const char *exts, int * is_remote)
 
 static int load_disk(sc68_t * sc68, disk68_t * d, int free_on_close)
 {
-  // int track, loop;
-
-  if (!sc68 || !d) {
+  if (!is_sc68(sc68) || !is_disk(d))
     goto error;
-  }
 
   if (sc68->disk) {
     error_add(sc68,"libsc68: %s","disk already loaded");
@@ -2019,6 +1970,16 @@ int sc68_play(sc68_t * sc68, int track, int loop)
   /* Check track range. */
   if (check_track_range(sc68, sc68->disk, track)) {
     return -1;
+  } else {
+    int i;
+
+    sc68->tinfo[0].org_ms = 0;
+    sc68->tinfo[0].len_ms = 0;
+    for (i=1; i <= d->nb_mus; ++i) {
+      sc68->tinfo[i].org_ms = sc68->tinfo[0].len_ms;
+      sc68->tinfo[i].len_ms = calc_track_len(d,i,loop);
+      sc68->tinfo[0].len_ms += sc68->tinfo[i].len_ms;
+    }
   }
 
   /* Set change track. Real track loading occurs during process thread to
@@ -2040,26 +2001,45 @@ int sc68_stop(sc68_t * sc68)
   return 0;
 }
 
+static unsigned int calc_pos(sc68_t * const sc68)
+{
+  u64 ms;
+  ms  = sc68->mix.pass_count;
+  ms *= sc68->mix.cycleperpass * 1000u;
+  ms /= sc68->emu68->clock;
+
+  assert(ms == (u64)(unsigned int)ms);  /* check overflow */
+
+  return sc68->time.elapsed_ms = (unsigned int) ms;
+}
+
 static int get_pos(sc68_t * sc68, int origin)
 {
-  int pos = -1;
-  if (sc68->track > 0) {
-    pos = 0;
+  int pos = -1, track;
+  if ( (track = sc68->track) > 0 ) {
     switch (origin) {
-    case SC68_POS_PLAY:
-      /* Add number of ms already played before this track */
-      pos += sc68->time.origin_ms;
-    case SC68_POS_TRACK:
-      /* Add time-stamp for the current buffer. */
-      pos += sc68->time.elapsed_ms;
-      /* Add correction for PCMs already sent in the current buffer */
-      pos += (sc68->mix.bufpos * 1000U) / sc68->mix.spr;
+
+    case SC68_POS_PLAY:                 /* Position since sc68_play() */
+      pos = sc68->time.elapsed_ms;
+      break;
+
+    case SC68_POS_DISK:                 /* Position in the entire disk */
+      pos = sc68->tinfo[track].org_ms;
+      break;
+
+    default:
+      assert(!"invalid origin");
+    case SC68_POS_TRACK:                /* Position in current track */
+      pos = 0;
     }
+    pos += sc68->time.elapsed_ms;
+    /* Add correction for PCMs already sent in the current buffer */
+    pos += (sc68->mix.bufpos * 1000u) / sc68->mix.spr;
   }
   return pos;
 }
 
-static unsigned int calc_len(const disk68_t * d, int track, int loop)
+static unsigned int calc_track_len(const disk68_t * d, int track, int loop)
 {
   const music68_t * m;
   unsigned force_ms;
@@ -2083,32 +2063,41 @@ static unsigned int calc_len(const disk68_t * d, int track, int loop)
   return fr_to_ms(m->first_fr + (loop-1) * m->loops_fr, m->frq);
 }
 
-static int get_disk_len(const disk68_t * disk, const int loop)
+static int calc_disk_len(const disk68_t * disk, const int loop)
 {
   int i, len = 0;
+
+  assert(is_disk(disk));
   for (i = 1; i <= disk->nb_mus; ++i)
-    len += calc_len(disk,i,loop);
+    len += calc_track_len(disk,i,loop);
+  /* sc68_debug(0, "libsc68: %s(%s,%d) -> %d\n", __FUNCTION__, */
+  /*            disk->tags.tag.title.val, loop, len); */
   return len;
 }
 
 static int get_len(sc68_t * sc68, int track)
 {
-  int len = -1;
+  /* int len = -1; */
 
-  assert(has_disk(sc68));
+  assert(track == SC68_DSK_TRACK || has_track(sc68,track));
+  assert(SC68_DSK_TRACK == 0);
+  return (unsigned) track <= sc68->disk->nb_mus
+    ? sc68->tinfo[track].len_ms
+    : -1;
 
-  if (!track) {
-    len = get_disk_len(sc68->disk, sc68->loop_to);
-  } else if (track == sc68->track) {
-    len = sc68->time.length_ms;
-  } else if (track <= sc68->disk->nb_mus) {
-    len = calc_len(sc68->disk,track,sc68->loop_to);
-  }
-  return len;
+  /* if (track == SC68_DSK_TRACK) { */
+  /*   len = sc68->time.disk_ms; */
+  /* } else if (track == sc68->track) { */
+  /*   len = sc68->time.track_ms; */
+  /* } else if (track <= sc68->disk->nb_mus) { */
+  /*   len = calc_track_len(sc68->disk, track, sc68->loop_to); */
+  /* } */
+  /* sc68_debug(sc68,"libsc68: %s(%d) -> %d\n", __FUNCTION__, track, len); */
+  /* return len; */
 }
 
 
-static void music_info(sc68_music_info_t * f, const disk68_t * d,
+static void music_info(sc68_t * sc68, sc68_music_info_t * f, const disk68_t * d,
                        int track, int loops)
 {
   static const char * hwtable[8] = {
@@ -2131,7 +2120,8 @@ static void music_info(sc68_music_info_t * f, const disk68_t * d,
   f->rate        = m->frq;
   f->replay      = m->replay ? m->replay : "built-in";
   f->dsk.track   = d->def_mus+1;
-  f->dsk.time_ms = get_disk_len(d, loops);
+  f->dsk.time_ms = sc68
+    ? sc68->tinfo[0].len_ms : calc_disk_len(d, loops);
   strtime68(f->dsk.time, f->tracks, (f->dsk.time_ms+999u)/1000u);
   f->dsk.ym      = d->hwflags.bit.ym;
   f->dsk.ste     = d->hwflags.bit.ste;
@@ -2141,7 +2131,8 @@ static void music_info(sc68_music_info_t * f, const disk68_t * d,
   f->dsk.tag     = (sc68_tag_t *) d->tags.array;
 
   f->trk.track   = track;
-  f->trk.time_ms = calc_len(d, track, loops);
+  f->trk.time_ms = sc68
+    ? sc68->tinfo[track].len_ms : calc_track_len(d, track, loops);
   strtime68(f->trk.time, track,(f->trk.time_ms+999u)/1000u);
 
   f->trk.ym    = m->hwflags.bit.ym;
@@ -2177,7 +2168,7 @@ int sc68_music_info(sc68_t * sc68, sc68_music_info_t * info, int track,
   if (loaded && track == sc68->track && info != &sc68->info) {
     *info = sc68->info;
   } else {
-    music_info(info, d, track, loaded ? sc68->loop_to : SC68_DEF_LOOP);
+    music_info(0, info, d, track, loaded ? sc68->loop_to : SC68_DEF_LOOP);
   }
 
   return 0;
@@ -2411,11 +2402,27 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
 
     case SC68_GET_DSKLEN:
       if (is_disk(sc68->disk))
-        res = get_len(sc68, 0);
+        res = get_len(sc68, SC68_DSK_TRACK);
       break;
 
     case SC68_GET_POS:
       res = get_pos(sc68, SC68_POS_TRACK);
+      break;
+
+    case SC68_GET_ORG:
+      if (sc68->track > 0)
+        res = sc68->tinfo[sc68->track].org_ms;
+      break;
+
+    case SC68_GET_TRKORG:
+      if (is_disk(sc68->disk)) {
+        int track = va_arg(list,int);
+        if (in_range(sc68->disk,track))
+          res = sc68->tinfo[track].org_ms;
+      } break;
+
+    case SC68_GET_DSKPOS:
+      res = get_pos(sc68, SC68_POS_DISK);
       break;
 
     case SC68_GET_PLAYPOS:

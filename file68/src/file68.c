@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-11 17:38:16 ben>
+ * Time-stamp: <2013-08-13 00:19:22 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -168,12 +168,12 @@ static inline int null_or_disk(const disk68_t * const mb) {
 
 /* Track value in range ? */
 static inline int in_range(const disk68_t * mb, const int track) {
-  return (unsigned int)track <= (unsigned int)mb->nb_mus;
+  return track > 0 && track <= mb->nb_mus;
 }
 
 /* Track in disk ? */
 static inline int in_disk(const disk68_t * mb, const int track) {
-  return is_disk(mb) && track > 0 && track <= mb->nb_mus;
+  return is_disk(mb) && in_range(mb, track);
 }
 
 /* Does this memory belongs to the disk data ? */
@@ -684,6 +684,10 @@ static int valid(disk68_t * mb)
       /* Track does not loop, force number of loops to 1. */
       m->loops = 1;
     } else if (!m->loops) {
+      /* Number of loop unspeficied: calcultate it so that the total
+       * time never be less than MIN_TRACK_MS, unless it requires more
+       * loop than MAX_TRACK_LP.
+       */
       m->loops = 1;
       if ( m->first_ms < MIN_TRACK_MS)
         m->loops += (MIN_TRACK_MS - m->first_ms + (m->loops_ms>>1)) / m->loops_ms;
@@ -693,8 +697,10 @@ static int valid(disk68_t * mb)
 
     if (m->loops > 0)
       mb->time_ms += fr_to_ms(m->first_fr+m->loops_fr*(m->loops-1), m->frq);
-    else
+    else {
+      m->loops = 0;
       has_infinite = 1;
+    }
 
     /* default mode is YM2149 (Atari ST) */
     if (!m->hwflags.all) {
