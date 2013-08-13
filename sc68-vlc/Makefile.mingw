@@ -70,7 +70,7 @@ LDFLAGS   = $(VLC_LIBS) -static $(SC68_LIBS) $(XLIB) -shared
 
 
 # ----------------------------------------------------------------------
-src     := sc68-vlc-demux.c sc68-vlc-stream.c
+src     := sc68-vlc-demux.c sc68-vlc-vfs.c
 obj     := $(src:%.c=%.o)
 sos     := libsc68_plugin.dll
 # ----------------------------------------------------------------------
