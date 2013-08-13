@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      2003/08/07
  */
-/* Time-stamp: <2013-08-13 01:45:48 ben> */
+/* Time-stamp: <2013-08-13 09:52:12 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -391,55 +391,6 @@ SC68_API
  */
 int sc68_cntl(sc68_t * sc68, int fct, ...);
 
-#if 0
-
-SC68_API
-/**
- * Get user private data pointer.
- *
- *  The sc68_cookie_ptr() function get a pointer to the user private
- *  data. This pointer can be use to get a modify this sc68 instance
- *  private data.
- *
- * @param   sc68  sc68 instance.
- * @return        a pointer to the user data inside this sc68 instance.
- * @retval  0     on error
- */
-void ** sc68_cookie_ptr(sc68_t * sc68);
-
-SC68_API
-/**
- * Set/Get sampling rate.
- *
- * @param   sc68  sc68 api or 0 for library default.
- * @param   hz    @ref sc68_spr_e "sampling rate" (in hz).
- *
- * @return  Actual @ref sc68_spr_e "sampling rate"
- * @retval  -1  on error
- * @retval  >0  on success
- */
-int sc68_sampling_rate(sc68_t * sc68, int hz);
-
-SC68_API
-/**
- * Set share data path.
- *
- * @param   sc68  sc68 instance.
- * @param   path  New shared data path.
- */
-void sc68_set_share(sc68_t * sc68, const char * path);
-
-SC68_API
-/**
- * Set user data path.
- *
- * @param   sc68  sc68 instance.
- * @param   path  New user data path.
- */
-void sc68_set_user(sc68_t * sc68, const char * path);
-
-#endif
-
 SC68_API
 /**
  * Return last error message.
@@ -533,39 +484,6 @@ SC68_API
  * @retval -1 Failure
  */
 int sc68_stop(sc68_t * sc68);
-
-SC68_API
-/**
- * Set/Get current play position.
- *
- *   The sc68_seek() functions get or set the current play position.
- *
- *   If time_ms == SC68_SEEK_QUERY the function returns the current
- *   play position or -1 if not currently playing.
- *
- *   If time_ms >= 0 the function tries to seek to the given position.
- *   If time_ms is out of range the function returns -1.
- *   If time_ms is inside the current playing track the function does not
- *   seek backward.
- *   Else the function changes to the track which time_ms belong to and
- *   returns the time position at the beginning of this track.
- *
- *   The returned time is always the current position in millisecond
- *   (not the goal position).
- *
- * @param  sc68        sc68 instance.
- * @param  orgin       Origin of time (SC68_SEEK_TRACK or SC68_SEEK_DISK)
- * @param  time_ms     new time position in ms or SC68_SEEK_QUERY to query.
- * @param  is_seeking  Fill with current seek status (0:not seeking 1:seeking)
- *
- * @return  Current play position (in ms)
- * @retval  >0  Success
- * @retval  -1  Failure
- *
- * @bug  Seeking is currently disabled. Query still work.
- *
- */
-int sc68_seek(sc68_t * sc68, int origin, int time_ms, int * is_seeking);
 
 SC68_API
 /**
@@ -731,19 +649,6 @@ SC68_API
  * @note   Can be safely call with null sc68 or if no disk has been loaded.
  */
 void sc68_close(sc68_t * sc68);
-
-SC68_API
-/**
- * Get number of tracks.
- *
- * @param  sc68  sc68 instance
- *
- * @return Number of track
- * @retval -1 error
- *
- * @note Could be use to check if a disk is loaded.
- */
-int sc68_tracks(sc68_t * sc68);
 
 /**
  * @}

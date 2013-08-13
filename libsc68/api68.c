@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-13 01:46:30 ben>
+ * Time-stamp: <2013-08-13 10:58:33 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -1225,7 +1225,7 @@ static void stop_track(sc68_t * sc68, const int real_stop)
   sc68->mix.buflen      = 0;
 }
 
-static int finish(sc68_t * sc68, addr68_t pc, int sr,uint68_t maxinst)
+static int finish(sc68_t * sc68, addr68_t pc, int sr, uint68_t maxinst)
 {
   int status;
 
@@ -1412,8 +1412,12 @@ static int aSIDifier(sc68_t * sc68, const music68_t * m)
 
   if ( ! m->hwflags.bit.ym )
     goto done;                          /* No YM, no aSID */
+
+  /* We can activate on the fly */
+#if 0
   if ( ! ( sc68->asid & SC68_ASID_ON ) )
     goto done;                          /* Not on */
+#endif
 
   if ( ! ( sc68->asid & SC68_ASID_FORCE ) && /* Not forced */
        ( !m->hwflags.bit.timers   /* Don't know about timers: not safe */
@@ -1442,11 +1446,34 @@ done:
   return res;
 }
 
+static int run_asid_setup(sc68_t * sc68)
+{
+  int status;
+
+  assert(is_sc68(sc68));
+  assert(sc68->asid_timers);
+
+  /* Set 68K registers. */
+  sc68->emu68->reg.d[0] = sc68->asid & SC68_ASID_ON;
+
+  /* Run music asid setup code. */
+  /* sc68->emu68->cycle = 0; */
+  /* TRACE68(sc68_cat," -> running asid %s code\n", */
+  /*         (sc68->asid & SC68_ASID_ON) ? "enable" : "disable"); */
+  status = finish(sc68, sc68->playaddr+12, 0x2300, INIT_MAX_INST);
+  if ( status != EMU68_NRM ) {
+    error_addx(sc68, "libsc68: abnormal 68K status %d (%s) in asid setup code",
+               status, emu68_status_name(status));
+    return SC68_ERROR;
+  }
+  return SC68_OK;
+}
+
 static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
 {
   int status;
 
-  assert(sc68);
+  assert(is_sc68(sc68));
   assert(m);
 
   /* Set 68K registers. */
@@ -1519,6 +1546,11 @@ static int change_track(sc68_t * sc68, int track)
   /* Run music init code */
   if ( run_music_init(sc68, m, a0, a6) == SC68_ERROR )
     return SC68_ERROR;
+
+  /* Disable aSid if loaded but OFF */
+  /* if (sc68->asid_timers) */
+  /*   if (run_asid_setup(sc68)) */
+  /*     return SC68_ERROR; */
 
   /* Ensure sampling rate */
   if (sc68->mix.spr <= 0)
@@ -1766,6 +1798,12 @@ int sc68_process(sc68_t * sc68, void * buf16st, int * _n)
         if (ret & (SC68_END|SC68_CHANGE)) /* exit on error|end|change */
           break;
         ret &= ~SC68_IDLE;              /* No more idle */
+
+        /* setup aSID */
+        if (sc68->asid_timers && run_asid_setup(sc68) == SC68_ERROR) {
+          ret = SC68_ERROR;
+          break;
+        }
 
         /* Run 68K emulator */
         status = finish(sc68, sc68->playaddr+8, 0x2300, PLAY_MAX_INST);
@@ -2328,6 +2366,18 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
   case SC68_GET_NAME:
     *va_arg(list, char **) = sc68 ? sc68->name : appname;
     res = 0;
+    break;
+
+  case SC68_CONFIG_LOAD:
+    if (!config_load()) {
+      res = 0;
+      config_apply(sc68);
+    }
+    break;
+
+  case SC68_CONFIG_SAVE:
+    if (!config_save())
+      res = 0;
     break;
 
   case SC68_GET_PCM:

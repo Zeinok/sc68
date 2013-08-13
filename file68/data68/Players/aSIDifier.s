@@ -24,7 +24,8 @@ TONE_MODE = 0
 	bra	init
 	bra	exit
 	bra	play
-
+	bra	active
+	
 ;------------------------------------------------------------
 ;------------------------------------------------------------
 
@@ -96,10 +97,13 @@ init:
 	jsr	(a6)
 
 	;; Test if music init code has modified some timers
-  	bsr	test_mfp_change
-  	lea	aSid_activ(pc),a0
-  	seq	(a0)
+  	;; bsr	test_mfp_change
+  	;; lea	aSid_activ(pc),a0
+  	;; seq	(a0)
 
+  	lea	aSid_activ(pc),a0
+  	st	(a0)
+	
 	;;  reset ym status buffer
 	bsr	get_ym_status
 
@@ -166,6 +170,74 @@ exit:
 .exit:
 	movem.l	(a7)+,d0-a6
 	rts
+
+;------------------------------------------------------------
+;------------------------------------------------------------
+; 
+; Active code:
+; 
+; - Set aSid On/Off on the fly
+; 
+; IN:	d0:0(off), 1(on)
+; 
+active:
+	movem.l	d1-d2/d7/a0-a1/a6,-(a7)
+	
+	lea	aSid_activ(pc),a0
+	lea	$ffff8800.w,a1
+	lea	ym_status(pc),a6
+	
+	tst.b	d0
+	sne	d0
+	cmp.b	(a0),d0
+	beq.s	.same
+	bmi.s	.enable
+.disable:
+	;; save active
+	move.b	d0,(a0)
+	
+	;; restore mixer mode
+	moveq	#%11000000,d1
+	move	sr,-(a7)
+	move	#$2700,sr
+	move.b	#7,(a1)
+	and.b	(a1),d1
+	or.w	ym_m7(a6),d1
+	move.b	d1,2(a1)
+	move	(a7)+,sr
+
+	;; clear intena and intmsk for each voice timer
+	moveq	#3-1,d7
+	lea	ym_A(a6),a6
+	lea	$fffffa00.w,a1
+.lp_voice:
+	move.l	ym_tim(a6),a0
+	moveq	#$7,d2
+	moveq	#0,d1
+	move.b	timer_channel(a0),d1
+	and.b	d1,d2			; d0 = bit number
+	lsr	#3,d1			; d1 is channel [0/2]
+	bclr	d2,$07(a1,d1)
+	bclr	d2,$13(a1,d1)
+	lea	ym_vsz(a6),a6
+	dbf	d7,.lp_voice
+	bra.s	.same
+.enable:
+	;; save active
+	move.b	d0,(a0)
+
+	;; save mixer mode
+	move	sr,-(a7)
+	move	#$2700,sr
+	moveq	#%00111111,d1
+	move.b	#7,(a1)
+	and.b	(a1),d1
+	move.b	d1,ym_m7+1(a6)
+	move	(a7)+,sr
+.same:
+	movem.l	(a7)+,d1-d2/d7/a0-a1/a6
+	rts
+	
 ;------------------------------------------------------------
 ;------------------------------------------------------------
 
@@ -202,9 +274,10 @@ play:
 	move.l	d0,a0
 	jsr	8(a0)
 	
- 	bsr	test_mfp_change
-	lea	aSid_activ(pc),a0
-	seq	(a0)
+ 	;; bsr	test_mfp_change
+	;; lea	aSid_activ(pc),a0
+	;; seq	(a0)
+	
 	bsr	aSidifier
 .exit:
 	rts
@@ -392,12 +465,13 @@ restore_mfp:
 	rts
 
 
+	if (0)
+	{
+	
 ; Test if interrupt has been modified
 test_mfp_change:
 	moveq	#0,d0
 	
-	if (0)
-	{
 	lea	mfp_buffer(pc),a0
 	lea	$fffffa00.w,a1
 	lea	timer_table(pc),a2
@@ -435,12 +509,13 @@ test_mfp_change:
 	;; We are in jeopardy, some timers have been modified !
 	clr.b	$fffffa19.w
 	clr.b	$fffffa1f.w
-	}
 	
 .exit:
 	tst.b	d0
 	rts
-	
+
+	}
+
 ;------------------------------------------------------------
 ;------------------------------------------------------------
 ; 
