@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 08:54:25 ben>
+ * Time-stamp: <2013-08-14 03:46:22 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -25,7 +25,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+# include "config.h"
 #endif
 
 #ifdef HAVE_BASENAME
@@ -35,14 +35,12 @@
 #include "libc68.h"
 
 #ifndef PATH_SEP
-#  ifdef NATIVE_WIN32
-#   define PATH_SEP { '/' , '\\' }
-#  else
-#   define PATH_SEP { '/' }
-#  endif
+# ifdef NATIVE_WIN32
+#  define PATH_SEP { '/' , '\\' }
+# else
+#  define PATH_SEP { '/' }
 # endif
 #endif
-
 
 /**
  * @warning  Sloppy replacement. In many cases this function won't
@@ -50,8 +48,14 @@
  */
 char *basename(char *path)
 {
-  static const char sep[] = PATHSEP;
+  static const char sep[] = PATH_SEP;
   int i,c,j,k;
+
+#ifdef NATIVE_WIN32
+  c = path[0] | 0x20;
+  if (c >= 'a' && c <= 'z' && path[1] == ':')
+    path += 2;                          /* skip drive letter */
+#endif
   for (i=j=0; c = path[i], c; ++i)
     for (k=0; k < sizeof(sep); ++k)
       if (c == sep[k]) {
