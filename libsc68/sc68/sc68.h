@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      2003/08/07
  */
-/* Time-stamp: <2013-08-13 09:52:12 ben> */
+/* Time-stamp: <2013-08-14 04:07:26 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -203,6 +203,7 @@ typedef struct {
   unsigned ym:1;        /**< Music uses YM-2149 (ST).           */
   unsigned ste:1;       /**< Music uses STE specific hardware.  */
   unsigned amiga:1;     /**< Music uses Paula Amiga hardware.   */
+  unsigned asid:1;      /**< aSid caps.                         */
   const char * hw;      /**< Hardware name.                     */
   int          tags;    /**< Number of tags.                    */
   sc68_tag_t * tag;
@@ -307,6 +308,7 @@ enum sc68_cntl_e {
   SC68_SET_POS,                      /**< Set position.             */
   SC68_GET_PCM,                      /**< Get PCM format            */
   SC68_SET_PCM,                      /**< Set PCM format            */
+  SC68_CAN_ASID,                     /**< Get aSID caps             */
   SC68_GET_ASID,                     /**< Get aSID mode             */
   SC68_SET_ASID,                     /**< Set aSID mode             */
   SC68_GET_COOKIE,                   /**< Get cookie (user data).   */

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-13 20:00:40 ben>
+ * Time-stamp: <2013-08-14 05:22:24 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -40,6 +40,10 @@
 #include "sc68.h"
 #include "mixer68.h"
 #include "conf68.h"
+
+#ifndef HAVE_BASENAME
+#include "libc68.h"
+#endif
 
 /* libsc68 emulators includes */
 #include "emu68/emu68.h"
@@ -239,6 +243,7 @@ static int get_spr(const sc68_t * sc68);
 static int set_spr(sc68_t * sc68, int hz);
 static int get_asid(const sc68_t * sc68);
 static int set_asid(sc68_t * sc68, int asid);
+static int can_asid(const sc68_t * sc68, int track);
 static int get_pcm_fmt(sc68_t * sc68);
 static int set_pcm_fmt(sc68_t * sc68, int pcmfmt);
 static int get_pos(sc68_t * sc68, int origin);
@@ -246,6 +251,8 @@ static sc68_disk_t get_dt(sc68_t * sc68, int * ptr_track, sc68_disk_t disk);
 static int calc_disk_len(const disk68_t * disk, const int loop);
 static unsigned int calc_track_len(const disk68_t * d, int track, int loop);
 static unsigned int calc_pos(sc68_t * const sc68);
+static void music_info(sc68_t * sc68, sc68_music_info_t * f,
+                       const disk68_t * d, int track, int loops);
 
 /***********************************************************************
  * Check functions
@@ -293,6 +300,17 @@ static inline int has_track(const sc68_t * const sc68, const int track) {
 
 static inline int in_disk(const disk68_t * disk, const int track) {
   return is_disk(disk) && in_range(disk, track);
+}
+
+static inline int trk_can_asid(const music68_t * const m)
+{
+  return 1
+    &&  m->hwflags.bit.ym
+    &&  m->hwflags.bit.timers
+    && !m->hwflags.bit.timera
+    && !m->hwflags.bit.timerb
+    && !m->hwflags.bit.timerc
+    && !m->hwflags.bit.timerd;
 }
 
 /***********************************************************************
@@ -738,8 +756,8 @@ error:
  * - fallback to default otherwise.
  */
 static int optcfg_get_int(config68_t * c,
-                            const char * name,
-                            int def)
+                          const char * name,
+                          int def)
 {
   option68_t    * opt;
   int             v = def, idx = -1;
@@ -764,8 +782,8 @@ static int optcfg_get_int(config68_t * c,
  * @optcfg_get_int for details,
  */
 static const char * optcfg_get_str(config68_t * c,
-                                     const char * name,
-                                     const char * def)
+                                   const char * name,
+                                   const char * def)
 {
   option68_t    * opt;
   const char    * v = def, *key = name;
@@ -788,8 +806,8 @@ static const char * optcfg_get_str(config68_t * c,
 }
 
 static void optcfg_set_int(config68_t * c,
-                             const char * name,
-                             int v)
+                           const char * name,
+                           int v)
 {
   if (c) {
     config68_set(c, -1, name, v, 0);
@@ -1162,6 +1180,29 @@ static int get_asid(const sc68_t * sc68)
   return sc68 ? sc68->asid : config.asid;
 }
 
+static int dsk_can_asid(const disk68_t * const d)
+{
+  int i, k;
+  for (k=i=0; i<d->nb_mus; ++i)
+    k += trk_can_asid(d->mus + i);
+  return k;
+}
+
+static int can_asid(const sc68_t * sc68, int track)
+{
+  assert(is_sc68(sc68));
+
+  if (!is_disk(sc68->disk))
+    return -1;
+  if (track == SC68_DSK_TRACK)
+    return dsk_can_asid(sc68->disk);
+  if (track == SC68_CUR_TRACK)
+    track = sc68->track;
+  if (in_range(sc68->disk,track))
+    return trk_can_asid(sc68->disk->mus + track - 1);
+  return -1;
+}
+
 static int set_asid(sc68_t * sc68, int asid)
 {
   if (sc68)
@@ -1410,21 +1451,13 @@ static int aSIDifier(sc68_t * sc68, const music68_t * m)
   int res = 0;
   assert(is_sc68(sc68));
 
+  /* No YM no aSID even if forced !*/
   if ( ! m->hwflags.bit.ym )
-    goto done;                          /* No YM, no aSID */
+    goto done;
 
-  /* We can activate on the fly */
-#if 0
-  if ( ! ( sc68->asid & SC68_ASID_ON ) )
-    goto done;                          /* Not on */
-#endif
-
-  if ( ! ( sc68->asid & SC68_ASID_FORCE ) && /* Not forced */
-       ( !m->hwflags.bit.timers   /* Don't know about timers: not safe */
-         || m->hwflags.bit.timera /* One or more timers in used: not safe */
-         || m->hwflags.bit.timerb
-         || m->hwflags.bit.timerc
-         || m->hwflags.bit.timerd ) )
+  /* Not forced and can't safely aSid */
+  if ( ! ( sc68->asid & SC68_ASID_FORCE ) &&
+       ! trk_can_asid(m) )
     goto done;
 
   /* Default timers assignment */
@@ -1863,7 +1896,12 @@ static int load_disk(sc68_t * sc68, disk68_t * d, int free_on_close)
   sc68->track = 0;
   sc68->mus   = 0;
 
-  return sc68_play(sc68, SC68_DEF_TRACK, SC68_DEF_LOOP);
+  if (sc68_play(sc68, SC68_DEF_TRACK, SC68_DEF_LOOP) < 0)
+    goto error;
+
+  music_info(sc68, &sc68->info, d, sc68->track_to, sc68->loop_to);
+
+  return 0;
 
 error:
   free(d);
@@ -2089,7 +2127,7 @@ static int get_len(sc68_t * sc68, int track)
 
   assert(track == SC68_DSK_TRACK || has_track(sc68,track));
   assert(SC68_DSK_TRACK == 0);
-  return (unsigned) track <= sc68->disk->nb_mus
+  return (unsigned) track <= (unsigned) sc68->disk->nb_mus
     ? sc68->tinfo[track].len_ms
     : -1;
 
@@ -2134,6 +2172,7 @@ static void music_info(sc68_t * sc68, sc68_music_info_t * f, const disk68_t * d,
   f->dsk.ym      = d->hwflags.bit.ym;
   f->dsk.ste     = d->hwflags.bit.ste;
   f->dsk.amiga   = d->hwflags.bit.amiga;
+  f->dsk.asid    = dsk_can_asid(d) > 0;
   f->dsk.hw      = hwtable[f->dsk.ym+(f->dsk.ste<<1)+(f->dsk.amiga<<2)];
   f->dsk.tags    = file68_tag_count(d, 0);
   f->dsk.tag     = (sc68_tag_t *) d->tags.array;
@@ -2146,8 +2185,8 @@ static void music_info(sc68_t * sc68, sc68_music_info_t * f, const disk68_t * d,
   f->trk.ym    = m->hwflags.bit.ym;
   f->trk.ste   = m->hwflags.bit.ste;
   f->trk.amiga = m->hwflags.bit.amiga;
+  f->trk.asid  = trk_can_asid(m);
   f->trk.hw    = hwtable[f->trk.ym+(f->trk.ste<<1)+(f->trk.amiga<<2)];
-
   f->trk.tags  = file68_tag_count(d, track);
   f->trk.tag   = (sc68_tag_t *) m->tags.array;
 
@@ -2380,6 +2419,10 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
 
     switch (fct) {
       /* Functions not accepting null */
+
+    case SC68_CAN_ASID:
+      res = can_asid(sc68,va_arg(list,int));
+      break;
 
     case SC68_GET_DISK:
       *va_arg(list, const disk68_t **)
