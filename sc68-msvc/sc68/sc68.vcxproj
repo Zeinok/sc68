@@ -44,7 +44,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)/..;$(ProjectDir)/../../file68;$(ProjectDir)/../../libsc68;$(ProjectDir)/../../libsc68/sc68</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)/..;$(ProjectDir)/../../file68;$(ProjectDir)/../../libsc68;$(ProjectDir)/../../libsc68/sc68;$(ProjectDir)/../../sc68-libc</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <CompileAsManaged>false</CompileAsManaged>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
@@ -72,7 +72,7 @@
       <FunctionLevelLinking>false</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>HAVE_CONFIG_H;WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)/..;$(ProjectDir)/../../file68;$(ProjectDir)/../../libsc68;$(ProjectDir)/../../libsc68/sc68</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)/..;$(ProjectDir)/../../file68;$(ProjectDir)/../../libsc68;$(ProjectDir)/../../libsc68/sc68;$(ProjectDir)/../../sc68-libc</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -121,6 +121,7 @@
     <ClCompile Include="..\..\libsc68\io68\ym_puls.c" />
     <ClCompile Include="..\..\libsc68\libsc68.c" />
     <ClCompile Include="..\..\libsc68\mixer68.c" />
+    <ClCompile Include="..\..\sc68-libc\basename.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\libsc68\emu68\assert68.h" />
@@ -146,10 +147,30 @@
     <ClInclude Include="..\..\libsc68\emu68\srdef68.h" />
     <ClInclude Include="..\..\libsc68\emu68\struct68.h" />
     <ClInclude Include="..\..\libsc68\emu68\type68.h" />
+    <ClInclude Include="..\..\libsc68\io68\default_option68.h" />
+    <ClInclude Include="..\..\libsc68\io68\io68.h" />
+    <ClInclude Include="..\..\libsc68\io68\io68_api.h" />
+    <ClInclude Include="..\..\libsc68\io68\mfpemul.h" />
+    <ClInclude Include="..\..\libsc68\io68\mfp_io.h" />
+    <ClInclude Include="..\..\libsc68\io68\mwemul.h" />
+    <ClInclude Include="..\..\libsc68\io68\mw_io.h" />
+    <ClInclude Include="..\..\libsc68\io68\paulaemul.h" />
+    <ClInclude Include="..\..\libsc68\io68\paula_io.h" />
+    <ClInclude Include="..\..\libsc68\io68\shifter_io.h" />
+    <ClInclude Include="..\..\libsc68\io68\ymemul.h" />
+    <ClInclude Include="..\..\libsc68\io68\ymout1c5bit.h" />
+    <ClInclude Include="..\..\libsc68\io68\ymout2k9.h" />
+    <ClInclude Include="..\..\libsc68\io68\ymoutorg.h" />
+    <ClInclude Include="..\..\libsc68\io68\ym_blep.h" />
+    <ClInclude Include="..\..\libsc68\io68\ym_dump.h" />
+    <ClInclude Include="..\..\libsc68\io68\ym_fixed_vol.h" />
+    <ClInclude Include="..\..\libsc68\io68\ym_io.h" />
+    <ClInclude Include="..\..\libsc68\io68\ym_puls.h" />
     <ClInclude Include="..\..\libsc68\sc68\conf68.h" />
     <ClInclude Include="..\..\libsc68\sc68\mixer68.h" />
     <ClInclude Include="..\..\libsc68\sc68\sc68.h" />
     <ClInclude Include="..\..\libsc68\sc68\trap68.h" />
+    <ClInclude Include="..\..\sc68-libc\libc68.h" />
     <ClInclude Include="config.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

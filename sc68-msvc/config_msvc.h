@@ -32,6 +32,8 @@
 #define HAVE_MALLOC 1
 #undef HAVE_BASENAME
 
+/* Other stuff */
+#define NATIVE_WIN32 1
 //#define _POSIX_ 0
 
 //#define memcmp(a,b,c) _memcmp(a,b,c)

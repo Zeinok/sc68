@@ -11,33 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\file68\src\endian68.c" />
-    <ClCompile Include="..\..\file68\src\error68.c" />
-    <ClCompile Include="..\..\file68\src\file68.c" />
-    <ClCompile Include="..\..\file68\src\gzip68.c" />
-    <ClCompile Include="..\..\file68\src\ice68.c" />
-    <ClCompile Include="..\..\file68\src\init68.c" />
-    <ClCompile Include="..\..\file68\src\istream68.c" />
-    <ClCompile Include="..\..\file68\src\istream68_ao.c" />
-    <ClCompile Include="..\..\file68\src\istream68_curl.c" />
-    <ClCompile Include="..\..\file68\src\istream68_fd.c" />
-    <ClCompile Include="..\..\file68\src\istream68_file.c" />
-    <ClCompile Include="..\..\file68\src\istream68_mem.c" />
-    <ClCompile Include="..\..\file68\src\istream68_null.c" />
-    <ClCompile Include="..\..\file68\src\istream68_z.c" />
-    <ClCompile Include="..\..\file68\src\msg68.c" />
-    <ClCompile Include="..\..\file68\src\option68.c" />
-    <ClCompile Include="..\..\file68\src\registry68.c" />
-    <ClCompile Include="..\..\file68\src\replay68.c" />
-    <ClCompile Include="..\..\file68\src\rsc68.c" />
-    <ClCompile Include="..\..\file68\src\string68.c" />
-    <ClCompile Include="..\..\file68\src\timedb68.c" />
-    <ClCompile Include="..\..\file68\src\url68.c" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\file68\sc68\file68.h" />
     <ClInclude Include="..\..\file68\sc68\file68_api.h" />
-    <ClInclude Include="..\..\file68\sc68\file68_aud.h" />
     <ClInclude Include="..\..\file68\sc68\file68_chk.h" />
     <ClInclude Include="..\..\file68\sc68\file68_err.h" />
     <ClInclude Include="..\..\file68\sc68\file68_ice.h" />
@@ -60,6 +35,8 @@
     <ClInclude Include="..\..\file68\sc68\file68_vfs_null.h" />
     <ClInclude Include="..\..\file68\sc68\file68_vfs_z.h" />
     <ClInclude Include="..\..\file68\sc68\file68_zip.h" />
+    <ClInclude Include="..\..\file68\src\replay.inc.h" />
+    <ClInclude Include="..\..\file68\src\timedb.inc.h" />
     <ClInclude Include="..\zlib\zconf.h" />
     <ClInclude Include="..\zlib\zlib.h" />
   </ItemGroup>
@@ -68,6 +45,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\zlib\README.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\file68\src\endian68.c" />
+    <ClCompile Include="..\..\file68\src\error68.c" />
+    <ClCompile Include="..\..\file68\src\file68.c" />
+    <ClCompile Include="..\..\file68\src\gzip68.c" />
+    <ClCompile Include="..\..\file68\src\ice68.c" />
+    <ClCompile Include="..\..\file68\src\init68.c" />
+    <ClCompile Include="..\..\file68\src\msg68.c" />
+    <ClCompile Include="..\..\file68\src\option68.c" />
+    <ClCompile Include="..\..\file68\src\registry68.c" />
+    <ClCompile Include="..\..\file68\src\replay68.c" />
+    <ClCompile Include="..\..\file68\src\rsc68.c" />
+    <ClCompile Include="..\..\file68\src\string68.c" />
+    <ClCompile Include="..\..\file68\src\timedb68.c" />
+    <ClCompile Include="..\..\file68\src\uri68.c" />
+    <ClCompile Include="..\..\file68\src\vfs68.c" />
+    <ClCompile Include="..\..\file68\src\vfs68_ao.c" />
+    <ClCompile Include="..\..\file68\src\vfs68_curl.c" />
+    <ClCompile Include="..\..\file68\src\vfs68_fd.c" />
+    <ClCompile Include="..\..\file68\src\vfs68_file.c" />
+    <ClCompile Include="..\..\file68\src\vfs68_mem.c" />
+    <ClCompile Include="..\..\file68\src\vfs68_null.c" />
+    <ClCompile Include="..\..\file68\src\vfs68_z.c" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{65AF7FE8-8C9E-43D7-9C84-43140F89F0D5}</ProjectGuid>
