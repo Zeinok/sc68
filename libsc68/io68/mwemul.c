@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 15:24:14 ben>
+ * Time-stamp: <2013-08-15 07:16:30 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -560,8 +560,9 @@ out:
   mw->end = end;
 }
 
+/* $$$ TODO: STe volume balance correction. */
 #define _VOL(LR) \
-  (mw->db_conv[mw->lmc.master+mw->lmc.LR] * 0xC0 >> 8)
+  (mw->db_conv[mw->lmc.master+mw->lmc.LR] >> 1)
 
 static void mix_ste(mw_t * const mw, s32 *b, int n)
 {
