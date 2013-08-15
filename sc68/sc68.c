@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-13 11:03:48 ben>
+ * Time-stamp: <2013-08-15 06:39:46 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -257,7 +257,7 @@ static int print_usage(void)
       "                      searched in `sc68-music' music path, then in\n"
       "                      `sc68-rmusic' music path.\n"
       "\n"
-      "Copyright (C) 1998-2009 Benjamin Gerard\n"
+      "Copyright (C) 1998-2013 Benjamin Gerard\n"
       "Visit <" PACKAGE_URL ">\n"
       "Report bugs to <" PACKAGE_BUGREPORT ">"
       );

@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      2003/08/07
  */
-/* Time-stamp: <2013-08-14 04:07:26 ben> */
+/* Time-stamp: <2013-08-14 05:51:59 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -206,7 +206,7 @@ typedef struct {
   unsigned asid:1;      /**< aSid caps.                         */
   const char * hw;      /**< Hardware name.                     */
   int          tags;    /**< Number of tags.                    */
-  sc68_tag_t * tag;
+  sc68_tag_t * tag;     /**< Tags array                         */
 } sc68_cinfo_t;
 
 /**
