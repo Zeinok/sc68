@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-16 05:35:13 ben>
+ * Time-stamp: <2013-08-16 20:04:17 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -102,6 +102,8 @@ enum {
   SPR_MIN = SAMPLING_RATE_MIN,
   /* Maxinal sampling rate */
   SPR_MAX = SAMPLING_RATE_MAX,
+  /* Default amiga blend */
+  AGA_BLEND = 0x5000,
 };
 
 /* Atari-ST trap emulator (see trap.s)
@@ -809,10 +811,18 @@ static void optcfg_set_int(config68_t * c,
                            const char * name,
                            int v)
 {
-  if (c) {
+  if (c)
     config68_set(c, -1, name, v, 0);
-  }
 }
+
+static void optcfg_set_str(config68_t * c,
+                           const char * name,
+                           const char * v)
+{
+  if (c)
+    config68_set(c, -1, name, 0, v);
+}
+
 
 static int config_load(void)
 {
@@ -864,14 +874,62 @@ static int config_save(void)
   return err;
 }
 
+/* update config values with current sc68 ones. */
+static void config_update(const sc68_t * sc68)
+{
+  const char * share, * user, * lmusic, * rmusic;
+
+  config68_t * const c = config.cfg;
+  if (!c)
+    return;
+  if (is_sc68(sc68)) {
+    config.version = sc68->version;
+    config.allow_remote = sc68->remote;
+    config.aga_blend = sc68->mix.aga_blend;
+    config.force_track = sc68->cfg_track;
+    if (sc68->cfg_loop == SC68_INF_LOOP)
+      config.force_loop = -1;
+    else if (sc68->cfg_loop == SC68_DEF_LOOP)
+      config.force_loop = 0;
+    else if (sc68->cfg_loop > 0)
+      config.force_loop = sc68->cfg_loop;
+    config.asid = sc68->cfg_asid & (SC68_ASID_ON|SC68_ASID_FORCE);
+    if (config.asid == (SC68_ASID_ON|SC68_ASID_FORCE))
+      config.asid = SC68_ASID_FORCE;
+    config.def_time_ms = sc68->time.def_ms;
+    config.spr = sc68->mix.spr;
+  }
+
+  optcfg_set_int(c, "version",       PACKAGE_VERNUM);
+  optcfg_set_int(c, "allow-remote",  !!config.allow_remote);
+  optcfg_set_int(c, "amiga-blend",   config.aga_blend);
+  optcfg_set_int(c, "force-track",   config.force_track);
+  optcfg_set_int(c, "force-loop",    config.force_loop);
+  optcfg_set_int(c, "asid",          config.asid);
+  optcfg_set_int(c, "default-time",  (config.def_time_ms+999)/1000);
+  optcfg_set_int(c, "sampling-rate", config.spr);
+
+  /* set resource path */
+  rsc68_get_path(&share, &user, &lmusic, &rmusic);
+  optcfg_set_str(c, "music_path", lmusic);
+  optcfg_get_str(c, "remote_music_path", rmusic);
+
+  TRACE68(sc68_cat, "libsc68: %s\n", "config update");
+}
+
+/* Apply config to sc68 instance */
 static void config_apply(sc68_t * sc68)
 {
   if (!config.cfg)
     config_load();
   if (config.cfg && is_sc68(sc68)) {
-    sc68->version       = config.version;
+    sc68->version       = PACKAGE_VERNUM/* config.version */;
     sc68->remote        = config.allow_remote;
+
+    /* $$$ HAXX: reloading because it might have changed. */
+    config.aga_blend    = optcfg_get_int(config.cfg, "amiga-blend", AGA_BLEND);
     sc68->mix.aga_blend = config.aga_blend;
+
     sc68->cfg_track     = SC68_DEF_TRACK;
     if (config.force_track > 0)
       sc68->cfg_track = config.force_track;
@@ -889,32 +947,6 @@ static void config_apply(sc68_t * sc68)
   }
 }
 
-#if 0
-int sc68_config_idx(const char * name)
-{
-  return config68_get_idx(config.cfg, name);
-}
-
-config68_type_t sc68_config_range(int idx,
-                                  int * min, int * max, int * def)
-{
-  return config68_range(config.cfg, idx, min, max, def);
-}
-
-config68_type_t sc68_config_get(int * idx, const char ** name)
-{
-  return config68_get(config.cfg, idx, name);
-}
-
-config68_type_t sc68_config_set(int idx,
-                                const char * name,
-                                int v,
-                                const char * s)
-{
-  return config68_set(config.cfg,idx,name,v,s);
-}
-
-#endif
 /***********************************************************************
  * API functions
  **********************************************************************/
@@ -1206,13 +1238,19 @@ static int can_asid(const sc68_t * sc68, int track)
 
 static int set_asid(sc68_t * sc68, int asid)
 {
-  if (sc68)
-    sc68->asid = asid &= 0x7fff;
-  else if (asid >= 0 && asid <= 2)
+  if (sc68) {
+    if (asid & SC68_ASID_FORCE)
+      asid |= SC68_ASID_ON;
+    sc68->asid = asid &= ~ (1 << (sizeof(int)*8-1));
+  } else {
+    if (asid & SC68_ASID_FORCE)
+      asid = SC68_ASID_FORCE;
+    else if (asid & SC68_ASID_ON)
+      asid = SC68_ASID_ON;
+    else
+      asid = SC68_ASID_OFF;
     config.asid = asid;
-  else
-    asid = -1;
-
+  }
   return asid;
 }
 
@@ -2386,6 +2424,7 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
     break;
 
   case SC68_CONFIG_SAVE:
+    config_update(sc68);
     if (!config_save())
       res = 0;
     break;

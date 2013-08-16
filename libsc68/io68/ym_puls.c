@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-08-16 07:33:13 ben>
+ * Time-stamp: <2013-08-16 19:48:26 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -1116,7 +1116,7 @@ static int onchange_filter(const option68_t * opt, value68_t * val)
 {
   int i;
 
-  TRACE68(ym_cat,"ym-2149: change YM engine model to -- *%s*\n", val->str);
+  TRACE68(ym_cat,"ym-2149: change YM filter model to -- *%s*\n", val->str);
 
   for (i=0; i<n_filters; ++i) {
     if (!strcmp68(val->str, filters[i].name)) {

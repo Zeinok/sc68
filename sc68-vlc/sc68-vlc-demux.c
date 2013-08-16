@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-16 08:53:09 ben>
+ * Time-stamp: <2013-08-16 19:43:12 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -98,6 +98,14 @@ static void _dbg(demux_t * demux, const char * fmt, ...)
 
 #define CFG_PREFIX "sc68-"
 
+static const int asidmodes[] = {
+  SC68_ASID_ON, SC68_ASID_OFF, SC68_ASID_FORCE
+};
+
+static const char *const asidmodes_text[] = {
+  N_("On"), N_("Off"), N_("Force"),
+};
+
 static const char *const ppsz_ymengine[] = {
   "blep", "pulse"
 };
@@ -164,7 +172,7 @@ vlc_module_begin()
   set_subcategory( SUBCAT_INPUT_DEMUX );
   set_capability( "demux", 100);
   set_callbacks( Open, Close );
-  /* add_shortcut( "sc68" ); */ 
+  /* add_shortcut( "sc68" ); */
 
   set_section( "General", N_("sc68 general options") );
 
@@ -175,13 +183,6 @@ vlc_module_begin()
     N_("Have sub-songs displayed as chapters instead of titles."),
     true);
 
-  add_bool(
-    CFG_PREFIX "asid",
-    false,
-    N_( "Favour aSid tracks" ),
-    N_( "Play aSidified tracks over normal Atari tracks." ),
-    true);
-
   add_integer_with_range(
     CFG_PREFIX "samplerate",
     44100, 8000, 96000,
@@ -189,6 +190,25 @@ vlc_module_begin()
     N_( "Sampling rate in hertz"),
     true);
   change_integer_list(sprs,sprs_text);
+
+  /* ---------------------------------------------------------------------- */
+
+  set_section( "aSID", N_("Automatic SID voices") );
+
+  add_integer_with_range(
+    CFG_PREFIX "asid-mode",
+    SC68_ASID_ON, SC68_ASID_OFF, SC68_ASID_FORCE,
+    N_("aSIDify songs"),
+    N_( "Force might break the music"),
+    true);
+  change_integer_list(asidmodes,asidmodes_text);
+
+  add_bool(
+    CFG_PREFIX "asid-fav",
+    false,
+    N_( "Favour aSID tracks" ),
+    N_( "Default to play aSIDdified tracks over normal Atari tracks." ),
+    true);
 
   /* ---------------------------------------------------------------------- */
 
@@ -261,7 +281,8 @@ struct demux_sys_t {
   int               pcm_per_loop; /* PCM per sound rendering loop            */
   int               sample_rate;  /* Sample rate in hz                       */
   int               allin1;       /* 0:track by track                        */
-  int               asid;         /* 0:off 1:on                              */
+  int               asid;         /* aSID status 0:off 1:on                  */
+  int               asidify;      /* Add asid songs (0:no)                   */
   int               asid_count;   /* Number of tracks that can asid          */
   int               track;        /* current track (1 based)                 */
   int               tracks;       /* number of tracks                        */
@@ -283,7 +304,7 @@ static int vlc_init_sc68(void)
   init68.argc = sizeof(argv)/sizeof(*argv);
   init68.argv = argv;
 #ifdef DEBUG
-  init68.debug_set_mask = msg68_DEBUG;
+  init68.debug_set_mask = (1<<msg68_DEBUG)|(1<<msg68_TRACE);
   init68.debug_clr_mask = -1;
   init68.msg_handler    = msg;
 #endif
@@ -316,8 +337,8 @@ static void sys_shutdown(demux_t * p_demux)
     if (p_sys->meta)
       vlc_meta_Delete(p_sys->meta);
 
+    sc68_cntl(p_sys->sc68,SC68_CONFIG_SAVE);
     sc68_destroy(p_sys->sc68);
-    sc68_cntl(0,SC68_CONFIG_SAVE);
     free(p_sys);
   }
 }
@@ -438,16 +459,15 @@ static char * mk_title(demux_sys_t * const p_sys, int i, const char * extra)
 static int Open(vlc_object_t * p_this)
 {
   static int id;
-
   demux_t     * p_demux = (demux_t*)p_this;
-
   const uint8_t *p_peek;
 
-  int         i_peek = 0;
   int err = VLC_EGENERIC;
   sc68_create_t  create68;     /* Parameters for creating sc68 instance */
   vfs68_t * stream68 = 0;
   int i, tracks, track;
+  char * s;
+
   es_format_t fmt;
 
   dbg(p_demux,"Open() {");
@@ -479,6 +499,53 @@ static int Open(vlc_object_t * p_this)
   if (unlikely(!p_demux->p_sys))
     goto error;
 
+
+  /***********************************************************************
+  * Apply VLC config
+  */
+
+  if (s = var_InheritString( p_demux, CFG_PREFIX "ym-engine"), s) {
+    dbg(p_demux, "vlc-config -- ym-engine -- *%s*\n", s);
+    sc68_cntl(0,SC68_SET_OPT,"ym-engine",s);
+  }
+
+  if (s = var_InheritString( p_demux, CFG_PREFIX "ym-filter"), s) {
+    dbg(p_demux, "vlc-config -- ym-filter -- *%s*\n", s);
+    sc68_cntl(0,SC68_SET_OPT,"ym-filter",s);
+  }
+
+  if (s = var_InheritString( p_demux, CFG_PREFIX "ym-volmodel"), s) {
+    dbg(p_demux, "vlc-config -- ym-volmodel -- *%s*\n", s);
+    sc68_cntl(0,SC68_SET_OPT,"ym-volmodel",s);
+  }
+
+  i = var_InheritBool( p_demux, CFG_PREFIX "amiga-filter");
+  sc68_cntl(0,SC68_SET_OPT,"amiga-filter", i);
+  dbg(p_demux, "vlc-config -- amiga-filter -- *%s*\n", i?"On":"Off");
+
+  i = var_InheritInteger( p_demux, CFG_PREFIX "amiga-blend");
+  sc68_cntl(0,SC68_SET_OPT,"amiga-blend", i);
+  dbg(p_demux, "vlc-config -- amiga-blend -- *%d*\n", i);
+
+  /* How tracks are presented ? title or chapter ? */
+  i = var_InheritBool( p_demux, CFG_PREFIX "all-in-1" );
+  p_demux->p_sys->allin1 = i;
+  dbg(p_demux, "vlc-config -- sub-song mode -- *%s*\n",
+      p_demux->p_sys->allin1 ? "all-in-1" : "title-by-track");
+
+  /* aSID mode */
+  i = var_InheritInteger(p_demux, CFG_PREFIX "asid-mode");
+  dbg(p_demux, "vlc-config -- aSID mode -- *%d*\n", i);
+  i = sc68_cntl(0, SC68_SET_ASID, i);
+  p_demux->p_sys->asidify = i;
+  dbg(p_demux, "vlc-config -- aSIDify -- *%d*\n", i);
+
+  /* Sample rate */
+  i = var_InheritInteger(p_demux, CFG_PREFIX "samplerate");
+  i = sc68_cntl(0,SC68_SET_SPR, i);
+  p_demux->p_sys->sample_rate = i;
+  dbg(p_demux, "vlc-config -- sample-rate -- *%d*\n", i);
+
   /* Create sc68 instance */
   memset(&create68,0,sizeof(create68));
 #ifdef DEBUG
@@ -495,17 +562,6 @@ static int Open(vlc_object_t * p_this)
   /* Set sc68 cookie */
   sc68_cntl(p_demux->p_sys->sc68, SC68_SET_COOKIE, p_demux);
 
-  /* How tracks are presented ? title or chapter ? */
-  p_demux->p_sys->allin1 = var_InheritBool( p_demux, CFG_PREFIX "all-in-1" );
-  dbg(p_demux, "sub-song mode: %s\n",
-      p_demux->p_sys->allin1 ? "all-in-1" : "title-by-track");
-  p_demux->p_sys->asid   = var_InheritBool( p_demux, CFG_PREFIX "asid" );
-  dbg(p_demux, "asid mode: %d\n",
-      p_demux->p_sys->asid, p_demux->p_sys->asid);
-
-  p_demux->p_sys->sample_rate
-    = var_InheritInteger( p_demux, CFG_PREFIX "samplerate" );
-
   /* Load and prepare sc68 file */
   stream68 = vfs68_vlc_create(p_demux->s);
   if (unlikely(!stream68))
@@ -514,7 +570,6 @@ static int Open(vlc_object_t * p_this)
     goto error;
 
   /* Play all track from first for now */
-  sc68_cntl(p_demux->p_sys->sc68, SC68_SET_ASID, p_demux->p_sys->asid);
   if (sc68_play(p_demux->p_sys->sc68, 1, SC68_DEF_LOOP) == -1)
     goto error;
 
@@ -535,23 +590,33 @@ static int Open(vlc_object_t * p_this)
   dbg(p_demux, "number-of-track: %d\n", p_demux->p_sys->tracks);
   for (i = 0; i < tracks; ++i) {
     sc68_minfo_t * info = p_demux->p_sys->infos+i;
+    int can_asid;
     if (sc68_music_info(p_demux->p_sys->sc68, info, i+1, 0))
       continue;
-    p_demux->p_sys->asid_count = info->trk.asid;
+    can_asid = info->trk.ym &&
+      (info->trk.asid || p_demux->p_sys->asidify == SC68_ASID_FORCE);
+    dbg(p_demux, "track #%02d: can aSID ? -- *%s*\n",
+        i+1, can_asid ? "yes" : "no");
+    p_demux->p_sys->asid_count += info->trk.asid = can_asid;
   }
   dbg(p_demux, "asid-count: %d\n", p_demux->p_sys->asid_count);
 
+  /* Set aSID mode by default */
+  if (!p_demux->p_sys->asid_count)
+    p_demux->p_sys->asidify = SC68_ASID_OFF;
+  i = var_InheritBool(p_demux,CFG_PREFIX "asid-fav");
+  dbg(p_demux, "vlc-config -- favour aSID mode -- *%s*\n", i?"yes":"no");
+  i = i ? p_demux->p_sys->asidify : SC68_ASID_OFF;
+  i = sc68_cntl(p_demux->p_sys->sc68, SC68_SET_ASID, i);
+  p_demux->p_sys->asid = i & SC68_ASID_ON;
+
+  /* Set internal track */
   track = current_track(p_demux);
   if (track < 0)
     goto error;
   dbg(p_demux, "current-track: %d\n", p_demux->p_sys->track);
 
-  /* Get aSid mode */
-  p_demux->p_sys->asid = p_demux->p_sys->asid_count > 0
-    ? !!(sc68_cntl(p_demux->p_sys->sc68, SC68_GET_ASID) & SC68_ASID_ON)
-    : 0
-    ;
-  dbg(p_demux, "asid-mode: %d\n", p_demux->p_sys->asid);
+  dbg(p_demux, "aSID is *%s*\n", p_demux->p_sys->asid?"On":"Off");
 
   /* Setup Audio Elementary Stream. */
   p_demux->p_sys->pcm_per_loop = 512;
