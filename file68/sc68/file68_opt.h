@@ -1,16 +1,16 @@
 /**
  * @ingroup  file68_lib
  * @file     sc68/file68_opt.h
+ * @brief    Command line option manipulation header.
  * @author   Benjamin Gerard
  * @date     2009-02-04
- * @brief    Command line option manipulation header.
  */
-/* Time-stamp: <2013-07-22 00:15:47 ben> */
+/* Time-stamp: <2013-08-16 05:08:15 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _FILE68_OPT_H_
-#define _FILE68_OPT_H_
+#ifndef FILE68_OPT_H
+#define FILE68_OPT_H
 
 #ifndef FILE68_API
 # include "file68_api.h"
@@ -36,6 +36,19 @@ enum option68_e {
 };
 
 /**
+ * option type.
+ */
+typedef struct option68_s option68_t;
+
+/**
+ * option value.
+ */
+typedef union {
+  const char * str;                /**< Value for string argument.  */
+  int          num;                /**< Value for integer argument. */
+} value68_t;
+
+/**
  * Options help display function.
  *
  *  -# user data
@@ -45,27 +58,28 @@ enum option68_e {
  */
 typedef void (*option68_help_t)(void *, const char*, const char*, const char*);
 
-typedef struct option68_s option68_t;
+/**
+ * Callback on change value.
+ */
+typedef int (*option68_cb_t)(const option68_t *, value68_t *);
 
 /** Command line option description and parsing info. */
 struct option68_s {
-  int            has_arg; /**< @see option68_e. 1st complement => setted */
-  const char   * prefix;  /**< Key prefix.                               */
-  const char   * name;    /**< Key name (bare).                          */
-  const char   * cat;     /**< Category name.                            */
-  const char   * desc;    /**< Short description.                        */
-  union {
-    char       * str;     /**< Value for string argument.                */
-    int          num;     /**< Value for integer argument.               */
-  }              val;     /**< Melted value.                             */
+  option68_cb_t   onchange;    /**< Call on value change.           */
+  int             has_arg;     /**< @see option68_e. ~val => setted */
+  const char    * prefix;      /**< Key prefix.                     */
+  const char    * name;        /**< Key name (bare).                */
+  const char    * cat;         /**< Category name.                  */
+  const char    * desc;        /**< Sh-ort description.             */
+  value68_t       val;         /**< Option value.                   */
 
   /**
    * @name internals
    * @{
    */
-  int          prefix_len; /**< length of option68_t::prefix.            */
-  int          name_len;   /**< length of option68_t::name.              */
-  option68_t * next;       /**< Chain to next option.                    */
+  int          prefix_len;       /**< length of option68_t::prefix. */
+  int          name_len;         /**< length of option68_t::name.   */
+  option68_t * next;             /**< Chain to next option.         */
   /**
    * @}
    */
@@ -112,6 +126,16 @@ FILE68_API
  * @retval  option68_ERR on error
  */
 int option68_type(const option68_t * opt);
+
+FILE68_API
+/**
+ * Enumerate options.
+ *
+ * @param   idx     options index (0-based).
+ * @return  option
+ * @retval  0       not found
+ */
+option68_t * option68_enum(int idx);
 
 FILE68_API
 /**
@@ -173,6 +197,28 @@ FILE68_API
  * @retval  0    on error (or envvar does not exist)
  */
 const char * option68_getenv(option68_t * opt, int set);
+
+FILE68_API
+/**
+ * Add symbolic value.
+ *
+ * @param   key  symbolic value
+ * @param   val  integer value
+ * @retval  0    on success
+ * @retval  -1   on error
+ */
+int option68_add_symb(const char * key, int val);
+
+FILE68_API
+/**
+ * Get symbolic value.
+ *
+ * @param   key  symbolic value
+ * @param   val  pointer to integer for storage
+ * @retval  0    on success
+ * @retval  -1   on error
+ */
+int option68_get_symb(const char * key, int * val);
 
 /**
  * @}

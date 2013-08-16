@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-15 07:10:42 ben>
+ * Time-stamp: <2013-08-16 08:53:09 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -41,6 +41,7 @@
 #include <sc68/file68.h>
 #include <sc68/file68_msg.h>
 #include <sc68/file68_tag.h>
+#include <sc68/file68_opt.h>
 
 enum { ALLIN1 = 1 };
 
@@ -58,95 +59,98 @@ vfs68_t * vfs68_vlc_create(stream_t * vlc);
 # define vlc_meta_TrackTotal (vlc_meta_TrackID+1)
 #endif
 
+/*****************************************************************************
+ * Forward declarations
+ *****************************************************************************/
+
+static int vlc_init_sc68(void);
+static void vlc_shutdown_sc68(void);
+static int Open( vlc_object_t * );
+static void Close( vlc_object_t * );
+static int Demux( demux_t * );
+static int Control( demux_t *, int, va_list );
 static void msg(const int bit, void *userdata, const char *fmt, va_list list);
 static void meta_lut_sort(void);
+
+
+/*****************************************************************************
+ * Debug messages
+ *****************************************************************************/
+
+#ifdef DEBUG
+#define dbg _dbg
+static void _dbg(demux_t * demux, const char * fmt, ...) FMT23;
+static void _dbg(demux_t * demux, const char * fmt, ...)
+{
+  va_list list;
+  va_start(list,fmt);
+  msg(msg68_DEBUG, 0, fmt, list);
+  va_end(list);
+}
+#else
+#define dbg(demux,fmt,...)
+#endif
+
 
 /*****************************************************************************
  * Module descriptor
  *****************************************************************************/
-static int  Open  ( vlc_object_t * );
-static void Close ( vlc_object_t * );
-
-/* Init sc68 library (call once on load) */
-static int vlc_init_sc68(void)
-{
-  sc68_init_t init68;
-  char appname[] = "vlc";
-  char * argv[] = { appname };
-  meta_lut_sort();
-  memset(&init68,0,sizeof(init68));
-  init68.argc = sizeof(argv)/sizeof(*argv);
-  init68.argv = argv;
-#ifdef DEBUG
-  init68.debug_set_mask = msg68_DEBUG;
-  init68.debug_clr_mask = -1;
-  init68.msg_handler    = msg;
-#endif
-  return sc68_init(&init68);
-}
-
-/* Shutdown sc68 library (call once on unload) */
-static void vlc_shutdown_sc68(void)
-{
-  sc68_shutdown();
-}
 
 #define CFG_PREFIX "sc68-"
 
-#define ALLIN1_TEXT \
-  N_( "Sub-songs as chapters" )
-#define ALLIN1_LONGTEXT \
-  N_("Have sub-songs displayed as chapters instead of titles.")
-
-#define ASID_TEXT \
-  N_( "Favour aSid tracks" )
-#define ASID_LONGTEXT \
-  N_( "Play aSidified tracks over normal Atari tracks." )
-
-#define YMENGINE_TEXT \
-  N_( "Use BLEP YM-2149 emulator" )
-#define YMENGINE_LONGTEXT \
-  N_( "Choose BLEP (Band-Limited stEP) synthesis for the best quality. " \
-      "PULSE is sc68 legacy engine" )
 static const char *const ppsz_ymengine[] = {
   "blep", "pulse"
 };
-static const char *const ppsz_ymengine_text[] = {
-  "BLEP synthesis", "PULSE (sc68 legacy)"
-};
 
-#define YMFILTER_TEXT \
-  N_( "PULSE YM engine filter" )
-#define YMFILTER_LONGTEXT \
-  N_( "Signal filter for PULSE engine. "                                \
-      "2-poles is the best. "                                           \
-      "Avoid none it will discard some SFX." )
+static const char *const ppsz_ymengine_text[] = {
+  N_("BLEP synthesis"), N_("PULSE (sc68 legacy)")
+};
 
 static const char *const ppsz_ymfilter[] = {
   "2-poles", "mixed", "1-pole", "boxcar", "none"
 };
 
 static const char *const ppsz_ymfilter_text[] = {
-  "2 poles Butterworth", "4 tap boxcar + 1p-butterworth", "1 pole Butterworth",
-  "4 tap boxcar", "No filter"
+  "2 poles Butterworth", "4 tap boxcar + 1p-butterworth",
+  "1 pole Butterworth", "4 tap boxcar", "No filter"
+};
+
+static const char *const ppsz_ymvol[] = {
+  "atari","linear"
+};
+static const char *const ppsz_ymvol_text[] = {
+  N_("Atari-ST"), N_("Linear")
+};
+
+static const int blends[] = {
+  0x00, 0x2a, 0x54, 0x80, 0xab, 0xd5, 0xff
+};
+static const char *const blends_text[] = {
+  N_("L/R 100%"), N_("L/R 66%"), N_("L/R 33%"),
+  N_("Center"),
+  N_("R/L 33%"), N_("R/L 66%"), N_("R/L 100%"),
+};
+
+static const int sprs[] = {
+  22050, 44100, 48000, 96000
+};
+static const char *const sprs_text[] = {
+  N_("Low quality (22 Khz)"), N_("CD quality (44.1 Khz)"),
+  N_("DVD quality (48 Khz)"), N_("Studio quality (96 Khz)"),
 };
 
 
-#define YMVOLMODEL_TEXT \
-  N_( "Atari-ST volume model" )
-#define YMVOLMODEL_LONGTEXT \
-  N_( "Use a specially cooked YM channels mixer to "                    \
-      "sound more like an actual Atari-ST machine." )
-
-#define SPR_TEXT      N_( "Sampling rate" )
-#define SPR_LONGTEXT  N_( "Sampling rate in hertz" )
-
-/* TODO
-
-AMIGA BLEND
-AMIGA FILTER
-
-*/
+static int config_cb(vlc_object_t * p_this,      /* variable's object */
+                     char const * psz_name,      /* variable name */
+                     vlc_value_t oldval,         /* old value */
+                     vlc_value_t newval,         /* new value */
+                     void * data)                /* callback data */
+{
+  dbg(0, "config-callback\n");
+  /* '%s' old:'%s' new:'%s' data:'%p'\n", */
+  /*     psz_name, oldval.psz_string, newval.psz_string, data); */
+  return VLC_SUCCESS;
+}
 
 /* Declare VLC module */
 vlc_module_begin()
@@ -160,28 +164,81 @@ vlc_module_begin()
   set_subcategory( SUBCAT_INPUT_DEMUX );
   set_capability( "demux", 100);
   set_callbacks( Open, Close );
-  add_shortcut( "sc68" );
+  /* add_shortcut( "sc68" ); */ 
 
-  add_bool   ( CFG_PREFIX "all-in-1", true,
-               ALLIN1_TEXT, ALLIN1_LONGTEXT, true );
+  set_section( "General", N_("sc68 general options") );
 
-  add_bool   ( CFG_PREFIX "asid", false,
-               ASID_TEXT, ASID_LONGTEXT, true );
+  add_bool(
+    CFG_PREFIX "all-in-1",
+    true,
+    N_("Sub-songs as chapters"),
+    N_("Have sub-songs displayed as chapters instead of titles."),
+    true);
 
-  add_bool   ( CFG_PREFIX "volmodel", true,
-               YMVOLMODEL_TEXT, YMVOLMODEL_LONGTEXT, true );
+  add_bool(
+    CFG_PREFIX "asid",
+    false,
+    N_( "Favour aSid tracks" ),
+    N_( "Play aSidified tracks over normal Atari tracks." ),
+    true);
 
-  add_integer( CFG_PREFIX "samplerate", 44100,
-               SPR_TEXT, SPR_LONGTEXT, true );
+  add_integer_with_range(
+    CFG_PREFIX "samplerate",
+    44100, 8000, 96000,
+    N_("Sampling rate"),
+    N_( "Sampling rate in hertz"),
+    true);
+  change_integer_list(sprs,sprs_text);
 
-  add_string ( CFG_PREFIX "ym-engine", "blep",
-               YMENGINE_TEXT, YMENGINE_LONGTEXT, true );
-  change_string_list( ppsz_ymengine, ppsz_ymengine_text, 0 );
+  /* ---------------------------------------------------------------------- */
 
-  add_string ( CFG_PREFIX "ym-filter", "2-poles",
-               YMFILTER_TEXT, YMFILTER_LONGTEXT, true );
-  change_string_list( ppsz_ymfilter, ppsz_ymfilter_text, 0 );
+  set_section( "YM-2149", N_("Atari-ST soundchip simulation") );
 
+  add_string(
+    CFG_PREFIX "ym-engine",
+    "blep",
+    N_( "YM-2149 simulation model" ),
+    N_("Choose BLEP (Band-Limited stEP) synthesis for the best quality. "
+       "PULSE is sc68 legacy engine" ),
+    true);
+  change_string_list(ppsz_ymengine, ppsz_ymengine_text, 0)
+
+  add_string(
+    CFG_PREFIX "ym-filter",
+    "2-poles",
+    N_("YM-2149 filter (PULSE only)"),
+    N_("Signal filter for PULSE engine. "                              \
+       "2-poles is the best. "                                         \
+       "Avoid none it will discard some SFX."),
+    true);
+  change_string_list(ppsz_ymfilter, ppsz_ymfilter_text, 0);
+
+  add_string(
+    CFG_PREFIX "ym-volmodel",
+    "atari",
+    N_("YM-2149 volume model"),
+    N_("Atari-ST is a specially cooked YM channels mixer to "
+       "sound more like an actual Atari-ST machine."),
+    true);
+  change_string_list(ppsz_ymvol, ppsz_ymvol_text, 0);
+
+  /* ---------------------------------------------------------------------- */
+
+  set_section( "Amiga", N_("Amiga soundchip simulation") );
+
+  add_bool(
+    CFG_PREFIX "amiga-filter",
+    true,
+    N_("filter"),
+    N_("resampling filter"), true );
+
+  add_integer(
+    CFG_PREFIX "amiga-blend",
+    blends[2],
+    N_("L/R blend"),
+    N_("Setup Amiga channel left/right balance"),
+    true);
+  change_integer_list(blends,blends_text);
 
 #ifdef HAVE_FILEEXT
   fileext_Add( FILEEXT_POOL, "*.sc68;*.sndh;*.snd", FILEEXT_AUDIO );
@@ -189,12 +246,6 @@ vlc_module_begin()
 }
 vlc_module_end()
 
-/*****************************************************************************
- * Local prototypes
- *****************************************************************************/
-
-static int Demux  ( demux_t * );
-static int Control( demux_t *, int, va_list );
 
 /*****************************************************************************
  * Private data
@@ -218,29 +269,33 @@ struct demux_sys_t {
   vlc_meta_t      * meta;
 };
 
-/*****************************************************************************
- * Debug messages
- *****************************************************************************/
 
-#ifdef DEBUG
-#define dbg _dbg
-static void _dbg(demux_t * demux, const char * fmt, ...) FMT23;
-static void _dbg(demux_t * demux, const char * fmt, ...)
+/* Init sc68 library (call once on load) */
+static int vlc_init_sc68(void)
 {
-  va_list list;
-  va_start(list,fmt);
-  msg(msg68_DEBUG, 0, fmt, list);
-  va_end(list);
-}
-#else
-#define dbg(demux,fmt,...)
+  int res = 0;
+  sc68_init_t init68;
+  char appname[] = "vlc";
+  char * argv[] = { appname };
+
+  meta_lut_sort();
+  memset(&init68,0,sizeof(init68));
+  init68.argc = sizeof(argv)/sizeof(*argv);
+  init68.argv = argv;
+#ifdef DEBUG
+  init68.debug_set_mask = msg68_DEBUG;
+  init68.debug_clr_mask = -1;
+  init68.msg_handler    = msg;
 #endif
 
-static void flush_sc68_errors(demux_t * const p_demux)
+  res = sc68_init(&init68);
+  return res;
+}
+
+/* Shutdown sc68 library (call once on unload) */
+static void vlc_shutdown_sc68(void)
 {
-  /* sc68_error_flush(0); */
-  /* if (p_demux && p_demux->p_sys && p_demux->p_sys->sc68) */
-  /*   sc68_error_flush(p_demux->p_sys->sc68); */
+  sc68_shutdown();
 }
 
 /* Shutdown sc68 demux module private */
@@ -448,7 +503,8 @@ static int Open(vlc_object_t * p_this)
   dbg(p_demux, "asid mode: %d\n",
       p_demux->p_sys->asid, p_demux->p_sys->asid);
 
-  p_demux->p_sys->sample_rate = var_InheritInteger( p_demux, CFG_PREFIX "samplerate" );
+  p_demux->p_sys->sample_rate
+    = var_InheritInteger( p_demux, CFG_PREFIX "samplerate" );
 
   /* Load and prepare sc68 file */
   stream68 = vfs68_vlc_create(p_demux->s);
@@ -536,7 +592,7 @@ error:
   vfs68_destroy(stream68);
 
   /* flush sc68 engin error */
-  flush_sc68_errors(p_demux);
+  /* flush_sc68_errors(p_demux); */
 
   if (err != VLC_SUCCESS) {
     /* On error ... */
@@ -853,12 +909,9 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
     int track = (int) va_arg(args, int);
     int can_asid = 1 + (p_sys->asid_count > 0);
 
-    dbg(p_demux,"%s(%d)\n", qstr(i_query), track);
-
     if (p_sys->allin1) {
       p_sys->asid = track > 0 ;
       sc68_cntl(p_sys->sc68, SC68_SET_ASID, p_sys->asid);
-      dbg(p_demux,"%s(%d) -- asid=%d\n", qstr(i_query), track, p_sys->asid);
     } else {
       int trk;
       if (track >= p_sys->tracks) {
@@ -869,8 +922,6 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
         trk = 1 + track;
       }
       sc68_cntl(p_sys->sc68, SC68_SET_ASID, p_sys->asid);
-      dbg(p_demux,"%s(%d) -- asid=%d\n", qstr(i_query), track, p_sys->asid);
-      dbg(p_demux,"%s(%d) -- track=%d\n", qstr(i_query), track, trk);
       if (-1 == sc68_play(p_sys->sc68, trk, SC68_DEF_LOOP))
         break;
     }
@@ -886,10 +937,8 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
 
     dbg(p_demux,"%s(%d)\n", qstr(i_query), track);
 
-    if (!p_sys->allin1) {
-      dbg(p_demux,"%s(%d) NOT ALL IN ONE !!!\n", qstr(i_query), track);
+    if (!p_sys->allin1)
       break;
-    }
 
     if (track < 0 || track >= p_sys->tracks)
       break;

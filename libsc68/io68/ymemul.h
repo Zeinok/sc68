@@ -5,12 +5,12 @@
  * @date      1998/06/24
  * @brief     YM-2149 emulator header.
  */
-/* Time-stamp: <2013-07-24 06:04:58 ben> */
+/* Time-stamp: <2013-08-16 04:46:12 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
-#ifndef _IO68_YM_EMUL_H_
-#define _IO68_YM_EMUL_H_
+#ifndef IO68_YM_EMUL_H
+#define IO68_YM_EMUL_H
 
 #include "io68_api.h"
 #include "emu68/emu68.h"
@@ -147,7 +147,8 @@ enum ym_vol_e {
   YM_VOL_DEFAULT = 0,  /**< Use default volume model.              */
   YM_VOL_ATARIST,      /**< Atari-ST volume table.                 */
   YM_VOL_LINEAR,       /**< Linear mixing volume table.            */
-  YM_VOL_ATARIST_4BIT, /**< Atari-ST volume table (4bit).          */
+
+//  YM_VOL_ATARIST_4BIT, /**< Atari-ST volume table (4bit).          */
 };
 
 /**
@@ -555,4 +556,4 @@ int ym_clock(ym_t * const ym, int clock);
  *  @}
  */
 
-#endif /* #ifndef _IO68_YM_EMUL_H_ */
+#endif

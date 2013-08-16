@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 01:37:31 ben>
+ * Time-stamp: <2013-08-16 07:29:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -74,27 +74,39 @@ static inline void opt_unset(option68_t * opt)
 
 static inline int opt_set_bool(option68_t * opt, int val)
 {
-  opt_free_str(opt);
-  opt->has_arg = ~option68_BOL;
-  return opt->val.num = -!!val;
+  value68_t value;
+  value.num = -!!val;
+  if (!opt->onchange || !opt->onchange(opt, &value)) {
+    opt_free_str(opt);
+    opt->has_arg = ~option68_BOL;
+    opt->val.num = value.num;
+  }
+  return value.num;
 }
 
 static inline int opt_set_int(option68_t * opt, int val)
 {
-  opt_free_str(opt);
-  opt->has_arg = ~option68_INT;
-  return opt->val.num = val;
+  value68_t value;
+  value.num = val;
+  if (!opt->onchange || !opt->onchange(opt, &value)) {
+    opt_free_str(opt);
+    opt->has_arg = ~option68_INT;
+    opt->val.num = value.num;
+  }
+  return value.num;
 }
 
-static inline const char * opt_set_str(option68_t * opt, const char * val)
+static inline void opt_set_str(option68_t * opt, const char * val)
 {
-  opt_free_str(opt);
-  opt->val.str = strdup68(val);
-  if (opt->val.str)
-    opt->has_arg = ~option68_STR;
-  return opt->val.str;
+  value68_t value;
+  value.str = val;
+  if (!opt->onchange || !opt->onchange(opt, &value)) {
+    opt_free_str(opt);
+    opt->val.str = strdup68(value.str);
+    if (opt->val.str)
+      opt->has_arg = ~option68_STR;
+  }
 }
-
 
 static int opt_set_strtol(option68_t * opt, const char * val)
 {
@@ -106,23 +118,22 @@ static int opt_set_strtol(option68_t * opt, const char * val)
       ok  = 1;
       res = 1;
     }
-  } else if (!strcmp68(val,"yes")  ||
-             !strcmp68(val,"true") ||
-             !strcmp68(val,"on")) {
-    ok  = 1;
-    res = -1;
-  } else if (!strcmp68(val,"no")    ||
-             !strcmp68(val,"false") ||
-             !strcmp68(val,"off")) {
-    ok  = 1;
-    res = 0;
+  /* } else if (!strcmp68(val,"yes")  || */
+  /*            !strcmp68(val,"true") || */
+  /*            !strcmp68(val,"on")) { */
+  /*   ok  = 1; */
+  /*   res = -1; */
+  /* } else if (!strcmp68(val,"no")    || */
+  /*            !strcmp68(val,"false") || */
+  /*            !strcmp68(val,"off")) { */
+  /*   ok  = 1; */
+  /*   res = 0; */
   } else {
     ok = val[*val=='-'];
     if (ok >= '0' && ok <= '9') {
       res = strtol(val,0,0);
     } else {
-      ok = 0;
-      /* $$$ TODO */
+      ok = !option68_get_symb(val, &res);
     }
   }
 
@@ -436,4 +447,57 @@ void option68_help(void * cookie, option68_help_t fct)
       fct (cookie, option, envvar, opt->desc);
     }
   }
+}
+
+option68_t * option68_enum(int idx)
+{
+  option68_t * opt;
+
+  FOREACH_OPT(opt) {
+    if (!idx--)
+      return opt;
+  }
+  return 0;
+}
+
+static struct {
+  const char * key;
+  int val;
+} symb[16] = {
+  { "yes" , -1 },
+  { "true", -1 },
+  { "on",   -1 },
+  { "no",    0 },
+  { "false", 0 },
+  { "off",   0 }
+};
+
+static int n_symb = 6;
+
+int option68_get_symb(const char * key, int * val)
+{
+  int i;
+  for (i = 0; i<n_symb; ++i)
+    if (!strcmp68(key, symb[i].key)) {
+      *val = symb[i].val;
+      return 0;
+    }
+  return -1;
+}
+
+int option68_add_symb(const char * key, int val)
+{
+  int v;
+
+  if (!option68_get_symb(key,&v))
+    return -(v != val);
+  if (n_symb == sizeof(symb)/sizeof(*symb)) {
+    msg68_critical("option68: %s\n", "symbol table is full");
+    return -1;
+  }
+  symb[n_symb].key = key;
+  symb[n_symb].val = val;
+
+  n_symb++;
+  return 0;
 }

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2013-08-12 19:18:46 ben>
+ * Time-stamp: <2013-08-16 07:33:13 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -78,10 +78,10 @@ static struct {
   ym_puls_filter_t filter;
 } filters[] = {
   { "2-poles", filter_2pole },   /* first is default */
-  { "none",    filter_none  },
-  { "boxcar",  filter_boxcar},
+  { "mixed",   filter_mixed },
   { "1-pole",  filter_1pole },
-  { "mixed",   filter_mixed }
+  { "boxcar",  filter_boxcar},
+  { "none",    filter_none  },
 };
 static const int n_filters = sizeof(filters) / sizeof(*filters);
 static int default_filter = 0;
@@ -1112,41 +1112,47 @@ int ym_puls_setup(ym_t * const ym)
   return err;
 }
 
+static int onchange_filter(const option68_t * opt, value68_t * val)
+{
+  int i;
+
+  TRACE68(ym_cat,"ym-2149: change YM engine model to -- *%s*\n", val->str);
+
+  for (i=0; i<n_filters; ++i) {
+    if (!strcmp68(val->str, filters[i].name)) {
+      default_filter = i;
+      msg68_notice("ym-2149: default filter -- *%s*\n",
+                   filters[default_filter].name);
+      return 0;
+    }
+  }
+  msg68_warning("ym-2149: invalid filter -- *%s*\n", val->str);
+  return -1;
+}
+
 /* command line options option */
 static const char prefix[] = "sc68-";
 static const char engcat[] = "ym-puls";
 static option68_t opts[] = {
-  { option68_STR, prefix, "ym-filter", engcat,
-    "set ym-2149 filter [none|boxcar|mixed|1-pole|2-poles*]" },
+  {
+    onchange_filter,
+    option68_STR, prefix, "ym-filter", engcat,
+    "set ym-2149 filter [2-poles*|mixed|1-pole|boxcar|none]"
+  },
 };
 
 int ym_puls_options(int argc, char ** argv)
 {
-  option68_t * opt;
   const int n_opts = sizeof(opts) / sizeof(*opts);
 
-  /* Add local options */
+  /* Register ym-puls options */
   option68_append(opts, n_opts);
+
+  /* Default option values */
+  option68_set(opts+0, filters[default_filter].name);
 
   /* Parse options */
   argc = option68_parse(argc,argv,0);
-
-  /* --sc68-ym-filter= */
-  opt = option68_get("ym-filter",1);
-  if (opt) {
-    int i;
-    for (i=0; i<n_filters; ++i) {
-      if (!strcmp68(opt->val.str, filters[i].name)) {
-        default_filter = i;
-        break;
-      }
-    }
-    if (i == n_filters) {
-      msg68_warning("ym-2149: invalid filter -- *%s*\n", opt->val.str);
-    }
-  }
-  msg68_notice("ym-2149: default filter -- *%s* \n",
-               filters[default_filter].name);
 
   return argc;
 }

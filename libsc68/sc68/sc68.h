@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      2003/08/07
  */
-/* Time-stamp: <2013-08-14 05:51:59 ben> */
+/* Time-stamp: <2013-08-15 17:56:36 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -316,6 +316,9 @@ enum sc68_cntl_e {
   SC68_EMULATORS,                    /**< Get emulators array.      */
   SC68_CONFIG_LOAD,                  /**< Load and apply config.    */
   SC68_CONFIG_SAVE,                  /**< Save config               */
+  SC68_ENUM_OPT,                     /**< Enumerate options.        */
+  SC68_GET_OPT,                      /**< Get options.              */
+  SC68_SET_OPT,                      /**< Set options.              */
 };
 
 /**

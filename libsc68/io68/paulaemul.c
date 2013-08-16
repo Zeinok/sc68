@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 02:50:06 ben>
+ * Time-stamp: <2013-08-16 06:42:40 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -34,9 +34,12 @@
 # include "default_option68.h"
 #endif
 
-#include "io68/paulaemul.h"
+#include "paulaemul.h"
 #include "emu68/assert68.h"
+
 #include <sc68/file68_msg.h>
+#include <sc68/file68_opt.h>
+#include <sc68/file68_str.h>
 
 #ifndef DEBUG_PL_O
 # define DEBUG_PL_O 0
@@ -116,6 +119,62 @@ static paula_parms_t default_parms;
  /* big/little endian compliance */
 static int msw_first = 0;
 
+
+static int onchange_filter(const option68_t * opt, value68_t * val)
+{
+  paula_engine(0,!val->num?PAULA_ENGINE_SIMPLE:PAULA_ENGINE_LINEAR);
+  return 0;
+}
+
+static int onchange_blend(const option68_t * opt, value68_t * val)
+{
+  int v = val->num;
+  if (v < 0)
+    v = 0;
+  else if (v >= 256)
+    v = 255;
+  v -= 128;
+  v = ((v << 8) | (-(v&1)&255)) + 0x8000;
+  val->num = v;
+  return 0;
+}
+
+static int onchange_clock(const option68_t * opt, value68_t * val)
+{
+  int clock;
+  if (!strcmp68(val->str,"pal"))
+    clock = PAULA_CLOCK_PAL;
+  else if (!strcmp68(val->str,"ntsc"))
+    clock = PAULA_CLOCK_NTSC;
+  else
+    return -1;
+  paula_clock(0, clock);
+  return 0;
+}
+
+
+/* Command line options */
+static const char prefix[] = "sc68-";
+static const char engcat[] = "paula";
+static option68_t opts[] = {
+  {
+    onchange_filter,
+    option68_BOL, prefix, "amiga-filter", engcat,
+    "active paula resample filter"
+  },
+  {
+    onchange_blend,
+    option68_INT, prefix, "amiga-blend", engcat,
+    "left/right voices blending factor [0..255] {128:mono}"
+  },
+  {
+    onchange_clock,
+    option68_STR, prefix, "amiga-clock", engcat,
+    "paula clock [pal*|ntsc]"
+  }
+};
+
+
 /* ,-----------------------------------------------------------------.
  * |                         Paula init                              |
  * `-----------------------------------------------------------------'
@@ -139,7 +198,17 @@ int paula_init(int * argc, char ** argv)
   default_parms.clock  = PAULA_CLOCK_PAL;
   default_parms.hz     = SAMPLING_RATE_DEF;
 
-  /* $$$ TODO: parsing options paula options */
+  /* Register amiga options */
+  option68_append(opts,sizeof(opts)/sizeof(*opts));
+
+  /* Default option values */
+  option68_iset(opts+0,default_parms.engine!=PAULA_ENGINE_SIMPLE);
+  option68_iset(opts+1,32);
+  option68_set (opts+2,"pal");
+
+  /* Parse options */
+  *argc = option68_parse(*argc,argv,0);
+
   return 0;
 }
 
@@ -325,7 +394,6 @@ static void pl_info(paula_t * const paula)
 int paula_setup(paula_t * const paula,
                 paula_setup_t * const setup)
 {
-
   if (!paula || !setup || !setup->mem) {
     return -1;
   }

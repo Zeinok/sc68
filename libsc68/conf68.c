@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-09 18:17:43 ben>
+ * Time-stamp: <2013-08-16 05:05:28 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -124,22 +124,22 @@ static const config68_entry_t conftab[] = {
     "aSIDfier settings {0:off 1:safe 2:force}",
     {0},{2},{0}
   },
-  { 1,
-    "amiga-blend", CONFIG68_INT,
-    "Amiga left/right voices blending factor {32768:center}",
-    {0},{65535},{AMIGA_BLEND}
-  },
-  { 1,
+  /* { 1, */
+  /*   "amiga-blend", CONFIG68_INT, */
+  /*   "Amiga left/right voices blending factor {32768:center}", */
+  /*   {0},{65535},{AMIGA_BLEND} */
+  /* }, */
+  { 0,
     "force-track", CONFIG68_INT,
     "override default track {0:off}",
     {0}, {SC68_MAX_TRACK}, {FORCE_TRACK}
   },
-  { 1,
+  { 0,
     "force-loop", CONFIG68_INT,
     "override default loop {0:off -1:inf}",
     {-1}, {100}, {FORCE_LOOP}
   },
-  { 1,
+  { 0,
     "skip-time", CONFIG68_INT,
     "prevent short track from being played (in sec) {0:off}",
     {0}, {MAX_TIME}, {SKIP_TIME}

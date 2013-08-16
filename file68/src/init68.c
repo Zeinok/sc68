@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-09 21:27:58 ben>
+ * Time-stamp: <2013-08-16 01:15:54 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -96,12 +96,12 @@ static const char prefix[] = "sc68-";
  *
  */
 static option68_t opts[] = {
-  { option68_BOL,prefix,"no-debug",dbgcat,"disable all debug output"      },
-  { option68_STR,prefix,"debug"   ,dbgcat,"set debug features"            },
-  { option68_STR,prefix,"data"    ,rsccat,"shared (system) resource path" },
-  { option68_STR,prefix,"home"    ,rsccat,"private (user) resource path"  },
-  { option68_STR,prefix,"music"   ,rsccat,"music database path"           },
-  { option68_STR,prefix,"rmusic"  ,rsccat,"online music base URI"         }
+  {0,option68_BOL,prefix,"no-debug",dbgcat,"disable all debug output"      },
+  {0,option68_STR,prefix,"debug"   ,dbgcat,"set debug features"            },
+  {0,option68_STR,prefix,"data"    ,rsccat,"shared (system) resource path" },
+  {0,option68_STR,prefix,"home"    ,rsccat,"private (user) resource path"  },
+  {0,option68_STR,prefix,"music"   ,rsccat,"music database path"           },
+  {0,option68_STR,prefix,"rmusic"  ,rsccat,"online music base URI"         }
 };
 
 static char * convert_backslash(char * s) {

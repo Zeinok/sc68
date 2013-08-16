@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-14 05:22:24 ben>
+ * Time-stamp: <2013-08-16 05:35:13 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -927,6 +927,7 @@ int sc68_init(sc68_init_t * init)
 
   static option68_t debug_options[] = {
     {
+      0,
       option68_BOL, "sc68-","dbg68k","debug",
       "run m68K in debug mode"
     }
@@ -981,11 +982,11 @@ int sc68_init(sc68_init_t * init)
   option68_append(config68_options, config68_opt_count);
   init->argc = option68_parse(init->argc, init->argv, 0);
 
-  /* Load config */
-  config_load();
-
   /* Initialize emulators. */
   err = init_emu68(&init->argc, init->argv);
+
+  /* Load config */
+  config_load();
 
   /* Set default sampling rate. */
   set_spr(0, SC68_SPR_DEFAULT);
@@ -2388,6 +2389,31 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
     if (!config_save())
       res = 0;
     break;
+
+  case SC68_ENUM_OPT: {
+    option68_t * opt = option68_enum(va_arg(list, int));
+    res = option68_type(opt);
+    if (res != option68_ERR)
+      *va_arg(list,const  char **) = opt->name;
+  } break;
+
+  case SC68_SET_OPT: case SC68_GET_OPT: {
+    option68_t * opt = option68_get(va_arg(list, const char *), 1);
+    res = option68_type(opt);
+    switch (res) {
+    case option68_BOL: case option68_INT:
+      if (fct == SC68_GET_OPT)
+        *va_arg(list, int *) = opt->val.num;
+      else
+        option68_iset(opt, va_arg(list, int));
+      break;
+    case option68_STR:
+      if (fct == SC68_GET_OPT)
+        *va_arg(list,const  char **) = opt->val.str;
+      else
+        option68_set(opt, va_arg(list, const char *));
+    }
+  } break;
 
   case SC68_GET_PCM:
     res = get_pcm_fmt(sc68);
