@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-16 20:04:17 ben>
+ * Time-stamp: <2013-08-17 05:40:35 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -801,7 +801,8 @@ static const char * optcfg_get_str(config68_t * c,
     if ( config68_get(c, &idx, &key) == CONFIG68_STR ) {
       v = key;
       TRACE68(sc68_cat,
-              "libsc68: get config from cfg -- name='%s' val='%s'\n", name, v);
+              "libsc68: get config from cfg -- name='%s' val='%s'\n",
+              name, strnevernull68(v));
     }
   }
   return v;

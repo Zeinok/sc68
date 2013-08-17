@@ -4,6 +4,9 @@
 //
 
 #pragma once
+						 
+#define  _CRT_SECURE_NO_WARNINGS 1
+
 #include "foobar2000.h"
 #include "sc68/file68_vfs_def.h"
 #include "sc68/file68_vfs.h"

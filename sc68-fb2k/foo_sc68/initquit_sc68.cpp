@@ -55,7 +55,7 @@ public:
 
 	// On init: initialize sc68 library.
 	void on_init() {
-		static char * argv[] = { "sc68-fb2k" };
+		static char * argv[] = { "fb2k" };
 		sc68_init_t init;
 		memset(&init,0,sizeof(init));
 		init.argc = sizeof(argv)/sizeof(*argv);
@@ -69,9 +69,6 @@ public:
 		init.debug_set_mask = (1 << msg68_TRACE) - 1;
 #endif
 		if (sc68_init(&init)) {
-			const char *s;
-			while (s = sc68_error_get(0), s)
-				msg68_error("%s\n", s);
 		}
 		msg68_notice("SC68 component: %s - %s [%s]",
 			__DATE__, __TIME__,
