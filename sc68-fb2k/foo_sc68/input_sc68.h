@@ -32,3 +32,15 @@ public:
 	static bool g_is_our_content_type(const char *);
 	static bool g_is_our_path(const char *,const char *);
 };
+
+struct cmenu_def {
+	const GUID * guid;
+	const char * name;
+	const char * desc;
+};
+
+extern const struct cmenu_def asid_defs[];
+extern const struct cmenu_def engine_defs[];
+extern volatile int g_ym_engine;
+extern volatile int g_ym_filter;
+extern volatile int g_ym_asid;

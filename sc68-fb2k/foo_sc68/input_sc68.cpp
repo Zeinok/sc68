@@ -1,28 +1,28 @@
 /*
-* @file    input_sc68.cpp
-* @brief   sc68 foobar200 - implement foobar input component
-* @author  http://sourceforge.net/users/benjihan
-*
-* Copyright (C) 2013 Benjamin Gerard
-*
-* Time-stamp: <2013-06-03 16:04:24 ben>
-*
-* This program is free software: you can redistribute it and/or
-* modify it under the terms of the GNU General Public License as
-* published by the Free Software Foundation, either version 3 of the
-* License, or (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful, but
-* WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-* General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.
-*
-* If not, see <http://www.gnu.org/licenses/>.
-*
-*/
+ * @file    input_sc68.cpp
+ * @brief   sc68 foobar200 - implement foobar input component
+ * @author  http://sourceforge.net/users/benjihan
+ *
+ * Copyright (C) 2013 Benjamin Gerard
+ *
+ * Time-stamp: <2013-06-03 16:04:24 ben>
+ *
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.
+ *
+ * If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 #include "stdafx.h"
 
@@ -31,17 +31,14 @@ vfs68_t * vfs68_fb2k_create(service_ptr_t<file> p_file, const char * p_path,
 	t_input_open_reason p_reason, abort_callback & p_abort);
 
 // replay config set by menus
-volatile int g_ym_engine   = -1;
-volatile int g_ym_filter   = -1;
-volatile int g_ym_asid     = -1;
-volatile int g_ym_channels = 7;
+volatile int g_ym_engine   = 0; // YM engines (blep or pulse)
+volatile int g_ym_filter   = 0; // YM filters for pulse (not used yet)
+volatile int g_ym_asid     = 0; // aSID (ont/off/force)
 
 // C-Tor: create sc68 instance
 input_sc68::input_sc68() {
 	sc68_create_t create;
-
 	InterlockedIncrement(&g_instance);
-
 	ZeroMemory(&create, sizeof(create));
 	create.cookie = this;
 #ifdef _DEBUG
@@ -57,6 +54,7 @@ input_sc68::input_sc68() {
 	if (!m_sc68) {
 		throw exception_aborted();
 	}
+	sc68_cntl(m_sc68, SC68_SET_OPT, "ym-engine", !g_ym_engine ? "blep" : "pulse");
 }
 
 input_sc68::~input_sc68() {
@@ -162,6 +160,8 @@ t_filestats input_sc68::get_file_stats(abort_callback & p_abort)
 
 void input_sc68::decode_initialize(t_uint32 p_subsong,unsigned p_flags,abort_callback & p_abort)
 {
+	sc68_cntl(m_sc68, SC68_SET_ASID, g_ym_asid);
+
 	if (sc68_play(m_sc68, p_subsong, SC68_DEF_LOOP) < 0) {
 		throw exception_aborted();
 	}
@@ -186,6 +186,9 @@ bool input_sc68::decode_run(audio_chunk & p_chunk,abort_callback & p_abort)
 	//int         n = m_sampling_rate / m_fileinfo.rate;
 	//if (n > max) n = max;
 	int n = max;
+
+	sc68_cntl(m_sc68, SC68_SET_ASID, g_ym_asid);
+
 	int code = sc68_process(m_sc68, buf, &n);
 	if (code == SC68_ERROR)
 		throw exception_aborted();

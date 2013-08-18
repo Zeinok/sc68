@@ -68,7 +68,17 @@ public:
 #elif defined(_DEBUG)
 		init.debug_set_mask = (1 << msg68_TRACE) - 1;
 #endif
-		if (sc68_init(&init)) {
+		if (!sc68_init(&init)) {
+			const char * engine = 0;
+			g_ym_asid = sc68_cntl(0, SC68_GET_ASID);
+			msg68_debug("got default aSID: %d\n", g_ym_asid);
+			if (g_ym_asid < 0 || g_ym_asid > 2)
+				g_ym_asid = 0;
+			sc68_cntl(0, SC68_GET_OPT, "ym-engine", &engine);
+			if (engine) {
+				msg68_debug("got default engine: '%s'\n", engine);
+				g_ym_engine = !strcmp68(engine,"pulse");
+			}
 		}
 		msg68_notice("SC68 component: %s - %s [%s]",
 			__DATE__, __TIME__,
@@ -82,6 +92,8 @@ public:
 
 	// On quit: shutdown sc68 library
 	void on_quit() {
+		sc68_cntl(0,SC68_SET_ASID, g_ym_asid);
+		sc68_cntl(0,SC68_CONFIG_SAVE);
 		sc68_shutdown();
 	}
 };
