@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-10 01:34:57 ben>
+ * Time-stamp: <2013-08-25 06:40:33 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -70,12 +70,14 @@ static int tracklist_error(const char *command)
 static void print_option(void * data,
                          const char * option,
                          const char * envvar,
+                         const char * values,
                          const char * desc)
 {
-  fprintf(data,
-          "  %s or `$%s'\n"
-          "                      %c%s\n",
-          option, envvar,
+  fprintf(data,"  %s", option);
+  if (values && *values)
+    fprintf(data,"=%s", values);
+  fprintf(data,"\n"
+          "    %-16s %c%s\n", envvar,
           (desc[0]>='a' && desc[0]<='z') ? desc[0]-'a'+'A' : desc[0],
           desc+1);
 }
@@ -188,7 +190,7 @@ static int display_help(void)
      "  > 6/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #6\n");
 
   puts
-    ("Copyright (C) 1998-2011 Benjamin Gerard\n"
+    ("Copyright (C) 1998-2013 Benjamin Gerard.\n"
      "\n"
      "Visit <" PACKAGE_URL ">\n"
      "Report bugs to <" PACKAGE_BUGREPORT ">");

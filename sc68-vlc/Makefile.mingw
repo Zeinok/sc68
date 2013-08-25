@@ -20,9 +20,10 @@ endif
 ARCHBASE := $(shell realpath "$$HOME/_Arch")
 DEVEL    := $(shell realpath "$$HOME/_Code")
 CC	 := $(TOOLCHAIN)-gcc
-STRIP	 := $(TOOLCHAIN)-strip --strip-all
+STRIP	 := $(TOOLCHAIN)-strip
 SYSROOT  := /usr/$(TOOLCHAIN)/sys-root
 PREFIX   := $(ARCHBASE)/$(TOOLCHAIN)/vlc$(RELEASE)
+libexec  := $(PREFIX)/libexec
 
 VLCSDK     := $(shell realpath ./sdk)
 VLCDIR     := $(shell realpath "$(VLCSDK)/..")
@@ -86,13 +87,11 @@ libsc68_plugin.dll: $(obj)
 
 install: $(sos)
 #	test -e "$(VLCPLUGDIR)" || mkdir -pv "$(VLCPLUGDIR)"
-	install $^ "$(VLCPLUGDIR)"/
-
-strip: $(sos)
-	$(STRIP) $<
+	install --strip-program=$(STRIP) -s -D $^ "$(VLCPLUGDIR)"/$^
+	install --strip-program=$(STRIP) -s -D $^ "$(libexec)"/$^
 
 uninstall:
-	rm -f "$(VLCPLUGDIR)"/libsc68_*
+	rm -f "$(VLCPLUGDIR)"/libsc68_* "$(libexec)"/libsc68_*
 
 clean:
 	rm -f *.o *.so *.dll *.la *.a *.lo .libs/*

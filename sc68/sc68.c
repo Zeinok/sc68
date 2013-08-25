@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-15 06:39:46 ben>
+ * Time-stamp: <2013-08-25 06:39:50 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -185,15 +185,20 @@ static int print_version(void)
 /* Callback for option printing. */
 static void
 print_option(void * data,
-             const char * option, const char * envvar, const char * desc)
+             const char * option,
+             const char * envvar,
+             const char * values,
+             const char * desc)
 {
-  fprintf(data,
-          "  %s or `$%s'\n"
-          "                      %c%s\n",
-          option, envvar,
+  fprintf(data,"  %s", option);
+  if (values && *values)
+    fprintf(data,"=%s", values);
+  fprintf(data,"\n"
+          "    %-16s %c%s\n", envvar,
           (desc[0]>='a' && desc[0]<='z') ? desc[0]-'a'+'A' : desc[0],
           desc+1);
 }
+
 
 /* Callback for message category printing. */
 static void

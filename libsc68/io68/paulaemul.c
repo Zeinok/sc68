@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-16 06:42:40 ben>
+ * Time-stamp: <2013-08-25 17:01:44 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -126,64 +126,52 @@ static int onchange_filter(const option68_t * opt, value68_t * val)
   return 0;
 }
 
-static int onchange_blend(const option68_t * opt, value68_t * val)
-{
-  int v = val->num;
-  if (v < 0)
-    v = 0;
-  else if (v >= 256)
-    v = 255;
-  v -= 128;
-  v = ((v << 8) | (-(v&1)&255)) + 0x8000;
-  val->num = v;
-  return 0;
-}
+/* static int onchange_blend(const option68_t * opt, value68_t * val) */
+/* { */
+/*   int v = val->num; */
+/*   if (v < 0) */
+/*     v = 0; */
+/*   else if (v >= 256) */
+/*     v = 255; */
+/*   v -= 128; */
+/*   v = ((v << 8) | (-(v&1)&255)) + 0x8000; */
+/*   val->num = v; */
+/*   return 0; */
+/* } */
 
 static int onchange_clock(const option68_t * opt, value68_t * val)
 {
-  int clock;
-  if (!strcmp68(val->str,"pal"))
-    clock = PAULA_CLOCK_PAL;
-  else if (!strcmp68(val->str,"ntsc"))
-    clock = PAULA_CLOCK_NTSC;
-  else
-    return -1;
-  paula_clock(0, clock);
+  paula_clock(0,!val->num?PAULA_CLOCK_PAL:PAULA_CLOCK_NTSC);
   return 0;
 }
 
+static const char * f_clock[] = { "pal","ntsc" };
 
 /* Command line options */
-static const char prefix[] = "sc68-";
+/* static const char prefix[] = "sc68-"; */
+#define prefix NULL
 static const char engcat[] = "paula";
 static option68_t opts[] = {
-  {
-    onchange_filter,
-    option68_BOL, prefix, "amiga-filter", engcat,
-    "active paula resample filter"
-  },
-  {
-    onchange_blend,
-    option68_INT, prefix, "amiga-blend", engcat,
-    "left/right voices blending factor [0..255] {128:mono}"
-  },
-  {
-    onchange_clock,
-    option68_STR, prefix, "amiga-clock", engcat,
-    "paula clock [pal*|ntsc]"
-  }
+  OPT68_BOOL(prefix,"amiga-filter",engcat,
+             "active paula resample filter",1,onchange_filter),
+  OPT68_IRNG(prefix,"amiga-blend",engcat,
+             "left/right voices blending factor {128:mono}",
+             0,0xFF,1,0),
+  OPT68_ENUM(prefix,"amiga-clock",engcat,"paula clock",
+             f_clock,sizeof(f_clock)/sizeof(*f_clock),1,onchange_clock),
 };
-
+#undef prefix
 
 /* ,-----------------------------------------------------------------.
  * |                         Paula init                              |
  * `-----------------------------------------------------------------'
  */
 
-static const u32 tmp = 0x1234;
 
 int paula_init(int * argc, char ** argv)
 {
+  static const u32 msw = 0x1234;
+
   if (pl_cat == msg68_DEFAULT)
     pl_cat = msg68_cat("paula","amiga sound emulator", DEBUG_PL_O);
 
@@ -191,7 +179,7 @@ int paula_init(int * argc, char ** argv)
   init_volume();
 
   /* Setup little/big endian swap */
-  msw_first = !(*(const u8 *)&tmp);
+  msw_first = !(*(const u8 *)&msw);
 
   /* Set default default */
   default_parms.engine = PAULA_ENGINE_SIMPLE;
@@ -202,12 +190,14 @@ int paula_init(int * argc, char ** argv)
   option68_append(opts,sizeof(opts)/sizeof(*opts));
 
   /* Default option values */
-  option68_iset(opts+0,default_parms.engine!=PAULA_ENGINE_SIMPLE);
-  option68_iset(opts+1,32);
-  option68_set (opts+2,"pal");
+  option68_iset(opts+0, default_parms.engine!=PAULA_ENGINE_SIMPLE,
+                opt68_NOTSET,opt68_CFG);
+  option68_iset(opts+1, 0x50, opt68_NOTSET, opt68_CFG);
+  option68_iset(opts+2, default_parms.clock!=PAULA_CLOCK_PAL,
+                opt68_NOTSET,opt68_CFG);
 
   /* Parse options */
-  *argc = option68_parse(*argc,argv,0);
+  *argc = option68_parse(*argc,argv);
 
   return 0;
 }

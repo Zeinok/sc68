@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-16 07:24:48 ben>
+ * Time-stamp: <2013-08-25 17:05:05 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -162,31 +162,9 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 # define YM_ENGINE YM_ENGINE_BLEP
 #endif
 
-#ifndef DEF_ENGINE_STR
-# if YM_ENGINE == YM_ENGINE_BLEP
-#  define DEF_ENGINE_STR "[blep*|pulse|dump]"
-# elif YM_ENGINE == YM_ENGINE_PULSE
-#  define DEF_ENGINE_STR "[pulse*|blep|dump]"
-# elif YM_ENGINE == YM_ENGINE_DUMP
-#  define DEF_ENGINE_STR "[dump*|pulse|blep]"
-# else
-#  error unkwown default YM engine
-# endif
-#endif
-
 /* Select default volume table */
 #ifndef YM_VOLMODEL
 # define YM_VOLMODEL YM_VOL_ATARIST
-#endif
-
-#ifndef DEF_VOLMODEL_STR
-# if YM_VOLMODEL == YM_VOL_ATARIST
-#  define DEF_VOLMODEL_STR "[atari*|linear]"
-# elif YM_VOLMODEL == YM_VOL_LINEAR
-#  define DEF_VOLMODEL_STR "[linear*|atari]"
-# else
-#  error unkwown default YM volume model
-# endif
 #endif
 
 /* Default parameters */
@@ -195,55 +173,56 @@ static ym_parms_t default_parms;
 /* Max output level for volume tables. */
 static const int output_level = 0xCAFE;
 
+
+static const char f_pulse[]  = "pulse";
+static const char f_blep[]   = "blep";
+static const char f_dump[]   = "dump";
+static const char * f_engines[] = { f_blep, f_pulse, f_dump };
+
+static const char f_atari[]  = "atari";
+static const char f_linear[] = "linear";
+static const char * f_volumes[] = { f_atari, f_linear };
+
 static int onchange_engine(const option68_t *opt, value68_t * val)
 {
-  int k;
-
-  TRACE68(ym_cat,"ym-2149: change YM engine model to -- *%s*\n", val->str);
-
-  if (!strcmp(val->str,"pulse"))
-    k = YM_ENGINE_PULS;
-  else if (!strcmp(val->str,"blep"))
-    k = YM_ENGINE_BLEP;
-  else if (!strcmp(val->str,"dump"))
-    k = YM_ENGINE_DUMP;
-  else if (!strcmp(val->str,"default"))
-    k = YM_ENGINE_DEFAULT;
-  else
-    return -1;
-
-  ym_engine(0, k);
+  static int engs[3] = { YM_ENGINE_BLEP, YM_ENGINE_PULS, YM_ENGINE_DUMP };
+  assert(val->num >= 0 && val->num < 3);
+  ym_engine(0, engs[val->num]);
   return 0;
 }
 
 static int onchange_volume(const option68_t *opt, value68_t * val)
 {
-  if (!strcmp(val->str,"atari") || !strcmp(val->str,"default"))
-    default_parms.volmodel = YM_VOL_ATARIST;
-  else if (!strcmp(val->str,"linear"))
-    default_parms.volmodel = YM_VOL_LINEAR;
-  else
-    return -1;
+  static int vols[2] = { YM_VOL_ATARIST, YM_VOL_LINEAR };
+  assert(val->num >= 0 && val->num < 2);
+  default_parms.volmodel = vols[val->num];
+  return 0;
+}
+
+static int onchange_ymchans(const option68_t *opt, value68_t * val)
+{
+  val->num = ym_default_chans = val->num & 7;
   return 0;
 }
 
 /* Command line options */
-static const char prefix[] = "sc68-";
+/* static const char prefix[] = "sc68-"; */
+#define prefix 0
+
 static const char engcat[] = "ym-2149";
 static option68_t opts[] = {
-  {
-    onchange_engine,
-    option68_STR, prefix, "ym-engine", engcat,
-    "set ym-2149 engine " DEF_ENGINE_STR },
-  {
-    onchange_volume,
-    option68_STR, prefix, "ym-volmodel", engcat,
-    "set ym-2149 volume model " DEF_VOLMODEL_STR },
-  {
-    0,
-    option68_INT, prefix, "ym-chans", engcat,
-    "set ym-2149 active channel [bit-0:A ... bit-2:C]" }
+  OPT68_ENUM(prefix,"ym-engine",engcat,"set ym-2149 engine",
+             f_engines,sizeof(f_engines)/sizeof(*f_engines),
+             1,onchange_engine),
+  OPT68_ENUM(prefix,"ym-volmodel",engcat,
+             "set ym-2149 volume model",
+             f_volumes,sizeof(f_volumes)/sizeof(*f_volumes),
+             1,onchange_volume),
+  OPT68_IRNG(prefix,"ym-chans",engcat,
+             "set ym-2149 active channel {bit#0:A,bit#1:B,bit#2:C}",
+             0,7,1,onchange_ymchans)
 };
+#undef prefix
 
 static const char * ym_engine_name(int emul);
 static const char * ym_volmodel_name(int model);
@@ -264,12 +243,14 @@ int ym_init(int * argc, char ** argv)
   option68_append(opts,sizeof(opts)/sizeof(*opts));
 
   /* Default option values */
-  option68_set ( opts+0, ym_engine_name(default_parms.engine) );
-  option68_set ( opts+1, ym_volmodel_name(default_parms.volmodel) );
-  option68_iset( opts+2, ym_default_chans );
+  option68_set (opts+0, ym_engine_name(default_parms.engine),
+                opt68_NOTSET, opt68_CFG);
+  option68_set (opts+1, ym_volmodel_name(default_parms.volmodel),
+                opt68_NOTSET, opt68_CFG);
+  option68_iset(opts+2, ym_default_chans, opt68_NOTSET, opt68_CFG);
 
   /* Parse options */
-  *argc = option68_parse(*argc,argv,0);
+  *argc = option68_parse(*argc,argv);
 
   /* Set volume table (unique for all instance) */
   switch (default_parms.volmodel) {
@@ -408,9 +389,9 @@ static
 const char * ym_engine_name(int emul)
 {
   switch (emul) {
-  case YM_ENGINE_PULS:    return "pulse";
-  case YM_ENGINE_BLEP:    return "blep";
-  case YM_ENGINE_DUMP:    return "dump";
+  case YM_ENGINE_PULS:    return f_pulse;
+  case YM_ENGINE_BLEP:    return f_blep;
+  case YM_ENGINE_DUMP:    return f_dump;
   }
   return 0;
 }
@@ -491,8 +472,8 @@ static
 const char * ym_volmodel_name(int model)
 {
   switch (model) {
-  case YM_VOL_LINEAR:  return "linear";
-  case YM_VOL_ATARIST: return "atari";
+  case YM_VOL_LINEAR:  return f_linear;
+  case YM_VOL_ATARIST: return f_atari;
   }
   return 0;
 }
