@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-26 09:32:11 ben>
+ * Time-stamp: <2013-08-26 10:27:07 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -120,7 +120,6 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
     0x0A,                               /* envelop shape */
     0,0                                 /* oi a,b */
   };
-
 
   if (ym) {
     /* reset registers */
@@ -249,9 +248,6 @@ int ym_init(int * argc, char ** argv)
   case YM_VOL_LINEAR:
     ym_create_5bit_linear_table(ymout5, output_level);
     break;
-  /* case YM_VOL_ATARIST_4BIT: */
-  /*   ym_create_4bit_atarist_table(ymout5, output_level); */
-  /*   break; */
   case YM_VOL_DEFAULT:
   case YM_VOL_ATARIST:
   default:
@@ -303,9 +299,6 @@ void ym_writereg(ym_t * const ym,
   const int reg = ym->ctrl;
 
   if (reg >= 0 && reg < 16) {
-
-    /*TRACE68(ym_cat,"write #%X = %02X (%u)\n",reg,(int)(u8)val,ymcycle); */
-
     ym->shadow.index[reg] = val;
 
     switch(reg) {
@@ -365,8 +358,8 @@ int ym_active_channels(ym_t * const ym, const int clr, const int set)
     v = ( voice_mute & 1 ) | ( (voice_mute>>5) & 2 ) | ( (voice_mute>>10) & 4);
     v = ( (v & ~clr ) | set ) & 7;
     ym->voice_mute = ym_smsk_table[v];
-    msg68_notice(YMHD "active channels -- *%c%c%c*\n",
-               (v&1)?'A':'.', (v&2)?'B':'.', (v&4)?'C':'.');
+    TRACE68(ym_cat, YMHD "active channels -- *%c%c%c*\n",
+            (v&1)?'A':'.', (v&2)?'B':'.', (v&4)?'C':'.');
   }
   return v;
 }
@@ -399,7 +392,7 @@ int ym_engine(ym_t * const ym, int engine)
 
   default:
     /* Invalid values */
-    msg68_warning(YMHD "unknown ym-engine -- *%d*\n", engine);
+    /* msg68_warning(YMHD "unknown ym-engine -- *%d*\n", engine); */
   case YM_ENGINE_DEFAULT:
     /* Default values */
     engine = default_parms.engine;
@@ -409,8 +402,9 @@ int ym_engine(ym_t * const ym, int engine)
     /* Valid values */
     if (!ym) {
       default_parms.engine = engine;
-      msg68_notice(YMHD "default engine -- *%s*\n",
-                   ym_engine_name(engine));
+      TRACE68(ym_cat,
+              YMHD "default engine -- *%s*\n",
+              ym_engine_name(engine));
     } else {
       ym->engine = engine;
     }
@@ -437,15 +431,16 @@ int ym_clock(ym_t * const ym, int clock)
     clock = default_parms.clock;
 
   default:
-    if (clock != YM_CLOCK_ATARIST) {
-      msg68_warning(YMHD "unsupported clock -- *%u*\n",
-                    (unsigned int) clock);
-    }
+    /* if (clock != YM_CLOCK_ATARIST) { */
+    /*   msg68_warning(YMHD "unsupported clock -- *%u*\n", */
+    /*                 (unsigned int) clock); */
+    /* } */
     clock = YM_CLOCK_ATARIST;
     if (!ym) {
       default_parms.clock = clock;
-      msg68_notice(YMHD "default clock -- *%u*\n",
-                   (unsigned int) clock);
+      TRACE68(ym_cat,
+              YMHD "default clock -- *%u*\n",
+              (unsigned int) clock);
     } else {
       clock = ym->clock;
     }
@@ -480,7 +475,7 @@ int ym_volume_model(ym_t * const ym, int model)
     break;
 
   default:
-    msg68_warning(YMHD "unknown volume model -- %d\n", model);
+    /* msg68_warning(YMHD "unknown volume model -- %d\n", model); */
   case YM_VOL_DEFAULT:
     model = default_parms.volmodel;
   case YM_VOL_LINEAR:
@@ -495,8 +490,9 @@ int ym_volume_model(ym_t * const ym, int model)
       } else {
         ym_create_5bit_atarist_table(ymout5, output_level);
       }
-      msg68_notice(YMHD "default volume model -- *%s*\n",
-                 ym_volmodel_name(model));
+      TRACE68(ym_cat,
+              YMHD "default volume model -- *%s*\n",
+              ym_volmodel_name(model));
     }
     break;
   }
@@ -584,7 +580,8 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
     p->clock = default_parms.clock;
   }
 
-  TRACE68(ym_cat,YMHD "setup -- engine:%d rate:%d clock:%d level:%d\n",
+  TRACE68(ym_cat,
+          YMHD "setup -- engine:%d rate:%d clock:%d level:%d\n",
           p->engine,p->hz,p->clock,256);
 
   if (ym) {
@@ -601,8 +598,6 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
     ym->cb_sampling_rate = 0;
     ym_sampling_rate(ym, p->hz);
     ym->engine = p->engine;
-
-    TRACE68(ym_cat,YMHD "engine -- *%d*\n", p->engine);
 
     switch (p->engine) {
     case YM_ENGINE_PULS:
@@ -622,8 +617,8 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
       err = -1;
     }
     if (!err)
-      msg68_notice(YMHD "engine -- *%s*\n", ym_engine_name(ym->engine));
-
+      TRACE68(ym_cat,
+              YMHD "engine -- *%s*\n", ym_engine_name(ym->engine));
 
     /* at this point specific sampling rate callback can be call */
     ym_sampling_rate(ym, ym->hz);
@@ -631,8 +626,6 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
 
   /* Just for info print */
   ym_active_channels(ym,0,0);
-
-  msg68(ym_cat,YMHD "trace level -- *active*\n");
 
   return err ? err : ym_reset(ym, 0);
 }
@@ -645,7 +638,7 @@ void ym_cleanup(ym_t * const ym)
   TRACE68(ym_cat,"%s",YMHD "cleanup\n");
   if (ym) {
     if (ym->overflow)
-      msg68_critical(YMHD "write access buffer overflow -- *%u*\n",
+      msg68_critical(YMHD "write access buffer has overflow -- *%u*\n",
                      ym->overflow);
     if (ym->cb_cleanup)
       ym->cb_cleanup(ym);

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-16 19:43:12 ben>
+ * Time-stamp: <2013-08-26 15:55:54 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -119,8 +119,8 @@ static const char *const ppsz_ymfilter[] = {
 };
 
 static const char *const ppsz_ymfilter_text[] = {
-  "2 poles Butterworth", "4 tap boxcar + 1p-butterworth",
-  "1 pole Butterworth", "4 tap boxcar", "No filter"
+  N_("2 poles Butterworth"), N_("4 tap boxcar + 1p-butterworth"),
+  N_("1 pole Butterworth"), N_("4 tap boxcar"), N_("No filter")
 };
 
 static const char *const ppsz_ymvol[] = {
@@ -147,19 +147,6 @@ static const char *const sprs_text[] = {
   N_("DVD quality (48 Khz)"), N_("Studio quality (96 Khz)"),
 };
 
-
-static int config_cb(vlc_object_t * p_this,      /* variable's object */
-                     char const * psz_name,      /* variable name */
-                     vlc_value_t oldval,         /* old value */
-                     vlc_value_t newval,         /* new value */
-                     void * data)                /* callback data */
-{
-  dbg(0, "config-callback\n");
-  /* '%s' old:'%s' new:'%s' data:'%p'\n", */
-  /*     psz_name, oldval.psz_string, newval.psz_string, data); */
-  return VLC_SUCCESS;
-}
-
 /* Declare VLC module */
 vlc_module_begin()
 {
@@ -172,7 +159,9 @@ vlc_module_begin()
   set_subcategory( SUBCAT_INPUT_DEMUX );
   set_capability( "demux", 100);
   set_callbacks( Open, Close );
-  /* add_shortcut( "sc68" ); */
+  add_shortcut( "sc68" );
+
+  /* ---------------------------------------------------------------------- */
 
   set_section( "General", N_("sc68 general options") );
 
@@ -304,11 +293,10 @@ static int vlc_init_sc68(void)
   init68.argc = sizeof(argv)/sizeof(*argv);
   init68.argv = argv;
 #ifdef DEBUG
-  init68.debug_set_mask = (1<<msg68_DEBUG)|(1<<msg68_TRACE);
+  init68.debug_set_mask = (1<<(msg68_DEBUG+1))-1;
   init68.debug_clr_mask = -1;
   init68.msg_handler    = msg;
 #endif
-
   res = sc68_init(&init68);
   return res;
 }

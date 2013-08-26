@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-25 16:04:51 ben>
+ * Time-stamp: <2013-08-26 14:38:07 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -81,7 +81,7 @@ static char * get_reg_path(registry68_key_t key, char * kname,
     for (e=buffer; *e; ++e) {
       if (*e == '\\') *e = '/';
     }
-    if (e > buffer && e[-1] != '/')
+    if (e > buffer && e[-1] == '/')
       --e;
     *e = 0;
   }
@@ -255,7 +255,7 @@ int file68_init(int argc, char **argv)
       if(env && strlen(env)+sizeof(path) < sizeof(tmp)) {
         strcpy(tmp,env);
         strcat(tmp,path);
-        option68_set(opt,convert_backslash(tmp),opt68_ALWAYS,opt68_CFG);
+        option68_set(opt,tmp,opt68_ALWAYS,opt68_CFG);
       }
     }
     if (!option68_isset(opt)) {

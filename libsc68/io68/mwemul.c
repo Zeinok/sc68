@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-26 09:27:19 ben>
+ * Time-stamp: <2013-08-26 10:30:03 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -256,7 +256,7 @@ int mw_lmc_mixer(mw_t * const mw, int n)
       msg68_warning(MWHD "invalid LMC mixer mode -- 3\n");
     }
   }
-  TRACE68(mw_cat,MWHD "LMC mixer mode -- *%s*\n",
+  TRACE68(mw_cat, MWHD "LMC mixer mode -- *%s*\n",
           mixermode[mw->lmc.mixer]);
   return n;
 }
@@ -270,7 +270,7 @@ int mw_lmc_master(mw_t * const mw, int n)
     if (n <  0) n = 0;
     if (n > 40) n = 40;
     mw->lmc.master = 80 - (n << 1 );
-    TRACE68(mw_cat,MWHD "LMC -- master -- *-%02ddB*\n", mw->lmc.master);
+    TRACE68(mw_cat, MWHD "LMC -- master -- *-%02ddB*\n", mw->lmc.master);
   }
   return n;
 }
@@ -287,7 +287,7 @@ static int lmc_lr(mw_t * const mw, const int lr, int n)
     if (n > 20) n = 20;
     *pval = 40 - ( n << 1 );
     mw->lmc.lr = ( mw->lmc.left + mw->lmc.right ) >> 1;
-    TRACE68(mw_cat,MWHD "LMC -- %s channel -- *-%02ddB*\n",
+    TRACE68(mw_cat, MWHD "LMC -- %s channel -- *-%02ddB*\n",
             lr ? "left" : "right", *pval);
   }
   return n;
@@ -314,7 +314,7 @@ static int lmc_hl(mw_t * const mw, const int hl, int n)
     if (n <  0) n = 0;
     if (n > 12) n = 12;
     *pval = 12 - n;
-    TRACE68(mw_cat,MWHD "LMC -- %s pass filter -- *-%02ddB*\n",
+    TRACE68(mw_cat, MWHD "LMC -- %s pass filter -- *-%02ddB*\n",
             hl ? "high" : "low", *pval);
   }
   return n;
@@ -335,7 +335,7 @@ static int command_dispatcher(mw_t * const mw, int n)
   const int c = n & 0700;
   n -= c;
 
-  TRACE68(mw_cat,MWHD "dispatch -- %o:%02x\n", c>>6, n);
+  TRACE68(mw_cat, MWHD "dispatch -- %o:%02x\n", c>>6, n);
   switch(c) {
   case 0000:
     mw_lmc_mixer(mw, n&3);
@@ -356,7 +356,7 @@ static int command_dispatcher(mw_t * const mw, int n)
     mw_lmc_left(mw, n&31);
     break;
   default:
-    TRACE68(mw_cat,MWHD "unknown command -- %04o\n", c);
+    TRACE68(mw_cat, MWHD "unknown command -- %04o\n", c);
     return -1;
   }
   return 0;
@@ -373,7 +373,7 @@ int mw_command(mw_t * const mw)
   ctrl = ( mw->map[MW_CTRL] << 8 ) + mw->map[MW_CTRL+1];
   data = ( mw->map[MW_DATA] << 8 ) + mw->map[MW_DATA+1];
 
-  TRACE68(mw_cat,MWHD "shifting -- %04x:%04x\n", ctrl, data);
+  TRACE68(mw_cat, MWHD "shifting -- %04x:%04x\n", ctrl, data);
 
   /* Find first address */
   for(; ctrl && ( ctrl & 0xC000 ) != 0xC000; ctrl<<=1, data<<=1)
@@ -385,7 +385,7 @@ int mw_command(mw_t * const mw)
   } else {
     const uint_t addr = ( data >> 14 ) & 3;
     assert( ( ctrl & 0xC000 ) == 0xC000);
-    TRACE68(mw_cat,MWHD "address -- %d\n", addr);
+    TRACE68(mw_cat, MWHD "address -- %d\n", addr);
     if ( addr != 2 )
       return -1;
   }
@@ -397,7 +397,7 @@ int mw_command(mw_t * const mw)
   if (ctrl) {
     const uint_t cmd = (data >>7 ) & 0x1ff;
     assert( ( ctrl & 0xFF80 ) == 0xFF80 );
-    TRACE68(mw_cat,MWHD "command -- %04o\n", cmd);
+    TRACE68(mw_cat, MWHD "command -- %04o\n", cmd);
     return command_dispatcher(mw, cmd);
   } else {
     TRACE68(mw_cat,"%s",MWHD "command -- not found\n");
@@ -432,7 +432,7 @@ int mw_reset(mw_t * const mw)
   mw->ct = mw->end = 0;
   lmc_reset(mw);
 
-  msg68(mw_cat,MWHD "chip reset\n");
+  TRACE68(mw_cat, MWHD "%s\n", "chip reset");
   return 0;
 }
 
@@ -457,8 +457,8 @@ int mw_setup(mw_t * const mw,
   mw->log2mem = setup->log2mem;
   mw->ct_fix  = ( sizeof(mwct_t) << 3 ) - mw->log2mem;
 
-  msg68(mw_cat,MWHD "%d-bit memory, %d-bit precision\n",
-        setup->log2mem, mw->ct_fix);
+  TRACE68(mw_cat, MWHD "%d-bit memory, %d-bit precision\n",
+          setup->log2mem, mw->ct_fix);
   mw_reset(mw);
 
   return 0;

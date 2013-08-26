@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-12 00:12:52 ben>
+ * Time-stamp: <2013-08-26 10:11:32 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -894,6 +894,7 @@ void quit()
   wasc68_t * wasc68;
 
   wasc68 = lock();
+  sc68_cntl(0,SC68_CONFIG_SAVE);
   unlock(wasc68);
   CloseHandle(g_wasc68.lock);
   g_wasc68.lock = 0;

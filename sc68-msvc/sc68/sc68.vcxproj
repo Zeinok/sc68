@@ -147,7 +147,7 @@
     <ClInclude Include="..\..\libsc68\emu68\srdef68.h" />
     <ClInclude Include="..\..\libsc68\emu68\struct68.h" />
     <ClInclude Include="..\..\libsc68\emu68\type68.h" />
-    <ClInclude Include="..\..\libsc68\io68\default_option68.h" />
+    <ClInclude Include="..\..\libsc68\io68\default.h" />
     <ClInclude Include="..\..\libsc68\io68\io68.h" />
     <ClInclude Include="..\..\libsc68\io68\io68_api.h" />
     <ClInclude Include="..\..\libsc68\io68\mfpemul.h" />
