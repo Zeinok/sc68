@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-15 07:16:30 ben>
+ * Time-stamp: <2013-08-26 09:27:19 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -38,11 +38,7 @@
 # include "config.h"
 #endif
 
-#ifdef HAVE_CONFIG_OPTION68_H
-# include "config_option68.h"
-#else
-# include "default_option68.h"
-#endif
+#include "default.h"
 #include "mwemul.h"
 
 #include "emu68/assert68.h"
@@ -51,17 +47,18 @@
 #ifndef DEBUG_MW_O
 # define DEBUG_MW_O 0
 #endif
-int mw_cat = msg68_DEFAULT;
+static int mw_cat = msg68_DEFAULT;
+
 #define MWHD "ste-mw : "
 
 /* #define MW_CALCUL_TABLE 1 */
 
-#define MW_N_DECIBEL 121
-
-#define MW_MIX_FIX 10
-
-#define MW_STE_MULT ((1<<MW_MIX_FIX)/4)
-#define MW_YM_MULT  ((1<<MW_MIX_FIX)-MW_STE_MULT)
+enum {
+  MW_N_DECIBEL = 121,
+  MW_MIX_FIX   = 10,
+  MW_STE_MULT  = ((1<<MW_MIX_FIX)/4),
+  MW_YM_MULT   = ((1<<MW_MIX_FIX)-MW_STE_MULT)
+};
 
 #ifndef MW_CALCUL_TABLE
 
@@ -217,17 +214,13 @@ int mw_sampling_rate(mw_t * const mw, int hz)
     hz = default_parms.hz;
 
   default:
-    if (hz < SAMPLING_RATE_MIN) {
-      msg68_warning(MWHD "sampling rate out of range -- %dhz\n", hz);
-      hz = SAMPLING_RATE_MIN;
-    }
-    if (hz > SAMPLING_RATE_MAX) {
-      msg68_warning(MWHD "sampling rate out of range -- %dhz\n", hz);
-      hz = SAMPLING_RATE_MAX;
-    }
+    if (hz < SPR_MIN)
+      hz = SPR_MIN;
+    else if (hz > SPR_MAX)
+      hz = SPR_MAX;
     *(mw ? &mw->hz : &default_parms.hz) = hz;
-    msg68(mw_cat, MWHD "%s sampling rate -- *%dhz*\n",
-          mw ? "select" : "default", hz);
+    TRACE68(mw_cat, MWHD "%s sampling rate -- *%dhz*\n",
+            mw ? "select" : "default", hz);
     break;
   }
   return hz;
@@ -483,7 +476,7 @@ int mw_init(int * argc, char ** argv)
 
   /* Setup defaults */
   default_parms.engine = MW_ENGINE_LINEAR;
-  default_parms.hz     = SAMPLING_RATE_DEF;
+  default_parms.hz     = SPR_DEF;
 
   /* Init volume table */
   init_volume();

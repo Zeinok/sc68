@@ -3,9 +3,9 @@
  * @brief   YM-2149 emulator - YM-2149 pulse engine
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
+ * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-25 17:05:29 ben>
+ * Time-stamp: <2013-08-26 09:02:57 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,10 +28,12 @@
 # include "config.h"
 #endif
 
+#if 0
 #ifdef HAVE_CONFIG_OPTION68_H
 # include "config_option68.h"
 #else
 # include "default_option68.h"
+#endif
 #endif
 
 

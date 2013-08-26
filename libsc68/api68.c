@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-25 17:48:46 ben>
+ * Time-stamp: <2013-08-26 09:43:19 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,12 +28,7 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_IO68_CONFIG_OPTION68_H
-# include "io68/config_option68.h"
-#else
-# include "io68/default_option68.h"
-#endif
-
+#include "io68/default.h"
 #include <sc68/file68_vfs.h> /* Need vfs68.h before sc68.h */
 
 /* libsc68 includes */
@@ -96,12 +91,6 @@ enum {
   DISK_MAGIC = SC68_DISK_ID,
   /* Error message maximum length */
   ERRMAX = 96,
-  /* Default sampling rate */
-  SPR_DEF = SAMPLING_RATE_DEF,
-  /* Minimal sampling rate */
-  SPR_MIN = SAMPLING_RATE_MIN,
-  /* Maxinal sampling rate */
-  SPR_MAX = SAMPLING_RATE_MAX,
   /* Default amiga blend */
   AGA_BLEND = 0x50,
   /* Option "force-loop" off */
@@ -848,11 +837,9 @@ static int config_load(void)
 
 static int config_save(void)
 {
-  int err = -1;
-  if (config.loaded) {
-    err = config68_save(appname);
-    sc68_debug(0,"libsc68: save config -- %s\n", strok68(err));
-  }
+  int err
+    = config68_save(appname);
+  sc68_debug(0,"libsc68: save config -- %s\n", strok68(err));
   return err;
 }
 
@@ -876,7 +863,6 @@ static void config_update(const sc68_t * sc68)
       config.asid = SC68_ASID_FORCE;
     config.def_time_ms = sc68->time.def_ms;
     config.spr = sc68->mix.spr;
-    config.loaded = 1;
   }
 
   if (config.loaded) {
@@ -891,7 +877,7 @@ static void config_update(const sc68_t * sc68)
     optcfg_set_int("sampling-rate", config.spr);
   }
 
-  TRACE68(sc68_cat, "libsc68: %s\n", "config update");
+  TRACE68(sc68_cat, "libsc68: %s\n", "config updated");
 }
 
 
@@ -1039,7 +1025,9 @@ error_no_shutdown:
 
 void sc68_shutdown(void)
 {
-  config_save();
+  if (!config.loaded)    /* Save config if none has been loaded one */
+    config_save();
+
   if (sc68_init_flag) {
     sc68_init_flag = 0;
     file68_shutdown();

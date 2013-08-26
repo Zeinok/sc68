@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-25 17:39:49 ben>
+ * Time-stamp: <2013-08-26 09:36:50 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,12 +28,7 @@
 #include "config.h"
 #endif
 
-#ifdef HAVE_IO68_CONFIG_OPTION68_H
-# include "io68/config_option68.h"
-#else
-# include "io68/default_option68.h"
-#endif
-
+#include "io68/default.h"
 #include "conf68.h"
 
 /* file68 headers */
@@ -76,16 +71,13 @@ enum {
 /* exported */
 int config68_force_file = 0;
 
-/* int          config68_opt_count; */
-/* option68_t * config68_options; */
-
 static const char * f_asids[] = { "off","on","force" };
 
 static option68_t opts[] = {
 
   OPT68_IRNG(prefix,"sampling-rate",optcat,
              "sampling rate in Hz",
-             SAMPLING_RATE_MIN,SAMPLING_RATE_MAX,1,0),
+             SPR_MIN,SPR_MAX,1,0),
 
   OPT68_ENUM(prefix,"asid",optcat,
              "aSIDfier settings",

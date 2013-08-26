@@ -1,9 +1,9 @@
-# Time-stamp: <2011-09-10 13:54:58 ben>
+# Time-stamp: <2013-08-26 09:18:43 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |   io68 -- Makefile.am -- Use with automake to produce configure.in   |
 # |                                                                      |
-# |                 (C) 1998-2011 Benjamin Gerard                        |
+# |                 (C) 1998-2013 Benjamin Gerard                        |
 # |                                                                      |
 # |            <http://sourceforge.net/users/benjihan>                   |
 # |                                                                      |
@@ -19,8 +19,8 @@ mysources=\
  shifter_io.c ym_blep.c ym_dump.c ym_io.c ym_puls.c ymemul.c
 
 myheaders=\
- default_option68.h io68.h io68_api.h mfp_io.h mfpemul.h mw_io.h	\
- mwemul.h paula_io.h paulaemul.h shifter_io.h ym_blep.h ym_dump.h	\
+ default.h io68.h io68_api.h mfp_io.h mfpemul.h mw_io.h mwemul.h	\
+ paula_io.h paulaemul.h shifter_io.h ym_blep.h ym_dump.h		\
  ym_fixed_vol.h ym_io.h ym_puls.h ymemul.h ymout1c5bit.h ymoutorg.h	\
  ymout2k9.h
 

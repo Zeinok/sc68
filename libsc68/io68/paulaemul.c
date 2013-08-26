@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-25 17:01:44 ben>
+ * Time-stamp: <2013-08-26 09:25:32 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,12 +28,7 @@
 # include "config.h"
 #endif
 
-#ifdef HAVE_CONFIG_OPTION68_H
-# include "config_option68.h"
-#else
-# include "default_option68.h"
-#endif
-
+#include "default.h"
 #include "paulaemul.h"
 #include "emu68/assert68.h"
 
@@ -184,7 +179,7 @@ int paula_init(int * argc, char ** argv)
   /* Set default default */
   default_parms.engine = PAULA_ENGINE_SIMPLE;
   default_parms.clock  = PAULA_CLOCK_PAL;
-  default_parms.hz     = SAMPLING_RATE_DEF;
+  default_parms.hz     = SPR_DEF;
 
   /* Register amiga options */
   option68_append(opts,sizeof(opts)/sizeof(*opts));
@@ -249,17 +244,14 @@ int paula_sampling_rate(paula_t * const paula, int hz)
       hz = default_parms.hz;
 
   default:
-    if (hz < SAMPLING_RATE_MIN) {
-      hz = SAMPLING_RATE_MIN;
-    }
-    if (hz > SAMPLING_RATE_MAX) {
-      hz = SAMPLING_RATE_MAX;
-    }
-    if (!paula) {
+    if (hz < SPR_MIN)
+      hz = SPR_MIN;
+    else if (hz > SPR_MAX)
+      hz = SPR_MAX;
+    if (!paula)
       default_parms.hz = hz;
-    } else {
+    else
       set_clock(paula, paula->clock, hz);
-    }
     TRACE68(pl_cat,"paula  : %s sampling rate -- *%dhz*\n",
             paula ? "select" : "default", hz);
     break;
