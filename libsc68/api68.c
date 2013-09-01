@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-26 09:43:19 ben>
+ * Time-stamp: <2013-08-30 21:14:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -77,6 +77,8 @@ enum {
   INTR_ADDR = 0x800,
   /* TOS emulator */
   TRAP_ADDR = 0x500,
+  /* # of instructions for music play code */
+  TRAP_MAX_INST = 10000u,
   /* # of instructions for music play code */
   PLAY_MAX_INST = 1000000u,
   /* # of instructions for music init code */
@@ -463,6 +465,24 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
   sc68->irq.pc     = emu68->reg.pc;
   sc68->irq.vector = vector;
 
+  /* $$$ TEMP */
+#if 0
+  if (vector == HWTRACE_VECTOR) {
+    static int historic[256], idx;
+    if ((emu68->reg.pc & 1)) {
+      int j;
+      sc68_debug(sc68, "Address Error ! pc=0x%x\n", emu68->reg.pc);
+      for (j=0; j<256; ++j)
+        sc68_debug(sc68,"%08x%c",historic[(idx-1-j)&255],(j&7)==7 ? '\n':'-');
+
+      emu68->status = EMU68_HLT;
+    } else {
+      historic[idx] = emu68->reg.pc;
+      idx = (idx + 1) & 255;
+    }
+  }
+#endif
+
   /* Exit those really fast as they happen quiet a lot, specially
    * HWTRACE_VECTOR that happem every single instruction. */
   if ( vector == HWTRACE_VECTOR ||
@@ -665,9 +685,9 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
           "CPU emulator created");
 
   /* Install cookie and interruption handler (debug mode only). */
-  emu68_set_handler(sc68->emu68, (emu68_debug& 1 ) ? irqhandler : 0);
+  emu68_set_handler(sc68->emu68, (emu68_debug & 1) ? irqhandler : 0);
   emu68_set_cookie(sc68->emu68, sc68);
-  sc68->irq.pc     = 0xDEAD;
+  sc68->irq.pc     = 0xDEADDAD1;
   sc68->irq.vector = -1;
 
   /* Setup critical 68K registers (SR and SP) */
@@ -1407,7 +1427,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     sc68->emu68->cycle = 0;
     TRACE68(sc68_cat," -> Running trap init code -- $%06x ...\n",
             (unsigned) TRAP_ADDR);
-    status = finish(sc68, TRAP_ADDR, 0x2300, INIT_MAX_INST);
+    status = finish(sc68, TRAP_ADDR, 0x2300, TRAP_MAX_INST);
     if ( status != EMU68_NRM ) {
       error_addx(sc68,
                  "libsc68: abnormal 68K status %d (%s) in trap code\n",

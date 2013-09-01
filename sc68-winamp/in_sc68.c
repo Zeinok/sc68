@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-26 10:11:32 ben>
+ * Time-stamp: <2013-08-28 16:08:39 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -712,7 +712,7 @@ DWORD WINAPI playloop(LPVOID _wasc68)
       if (wasc68->code & SC68_CHANGE) {
         if (!wasc68->allin1)
           break;
-        /* sc68_music_info(wasc68->sc68, &wasc68->mi, -1, 0); */
+        /* sc68_music_info(wasc68->sc68, &wasc68->mi, SC68_CUR_TRACK, 0); */
         SendMessage(g_mod.hMainWindow,WM_WA_IPC,0,IPC_UPDTITLE);
         /* SendMessage(g_mod.hMainWindow, */
         /*             WM_WA_IPC, */

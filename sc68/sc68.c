@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-25 06:39:50 ben>
+ * Time-stamp: <2013-08-30 13:23:02 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -266,7 +266,7 @@ static int print_usage(void)
       "Visit <" PACKAGE_URL ">\n"
       "Report bugs to <" PACKAGE_BUGREPORT ">"
       );
-  return 1;
+  return 0;
 }
 
 /* Get filename extension */
@@ -388,7 +388,7 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
     Debug("Pass: #%5d, PCM: %4d/%4d, Code: %s,(%02x)\n",
           0, 0, 0, codestr(code), code);
     if (code != SC68_ERROR)
-      DisplayInfo(-1);
+      DisplayInfo(SC68_CUR_TRACK);
   }
 
   /* $$$ TEMP */
@@ -628,15 +628,14 @@ int main(int argc, char *argv[])
     goto exit;
   }
 
-  if (opt_verb < msg68_CRITICAL) opt_verb = msg68_CRITICAL;
-  if (opt_verb > msg68_TRACE)    opt_verb = msg68_TRACE;
+  if (opt_verb < msg68_CRITICAL) opt_verb = msg68_NEVER;
+  if (opt_verb > msg68_TRACE)    opt_verb = msg68_ALWAYS;
   msg68_cat_level(opt_verb);
 
   if (opt_list) {
     err = print_cats();
     goto exit;
   }
-
 
   /* Select input */
 
@@ -751,5 +750,5 @@ exit:
   sc68_destroy(sc68);
   sc68_shutdown();
 
-  return -!!err;
+  return !!err;
 }
