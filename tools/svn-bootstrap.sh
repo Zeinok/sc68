@@ -117,7 +117,7 @@ bootstrap_dir() {
     testfile "${dir}/../m4/${m4file}" || return 1
     testfile "${dir}/configure.ac"    || return 1
     testfile "${dir}/Makefile.am"     || return 1
-    testfile "${dir}/../AUTHORS"       || return 1
+    testfile "${dir}/../AUTHORS"      || return 1
     
     for obj in m4 AUTHORS README; do
 	test=false
@@ -125,6 +125,9 @@ bootstrap_dir() {
 	if test -e "${dir}/${obj}-${dir}"; then
 	    src="${dir}/${obj}-${dir}"
 	    lnk="${obj}-${dir}"
+	elif test -f "${dir}/${obj}"; then
+	    msg "keeping ${dir}/${obj}"
+	    continue
 	elif test -e "${obj}"; then
 	    src="${obj}"
 	    lnk="../${obj}"
