@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-26 14:38:07 ben>
+ * Time-stamp: <2013-08-30 10:35:00 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -190,6 +190,16 @@ int file68_init(int argc, char **argv)
   /* Options */
   option68_init();
 
+  option68_append(opts,sizeof(opts)/sizeof(*opts));
+  argc = option68_parse(argc, argv);
+
+  /* Check for --sc68-no-debug */
+  opt = option68_get("no-debug", opt68_ISSET);
+  if (opt && opt->val.num) {
+    /* Remove all debug messages whatsoever. */
+    msg68_set_handler(0);
+  }
+
   /* Zlib */
   vfs68_z_init();
 
@@ -216,16 +226,6 @@ int file68_init(int argc, char **argv)
 
   /* Loader */
   file68_loader_init();
-
-  option68_append(opts,sizeof(opts)/sizeof(*opts));
-  argc = option68_parse(argc, argv);
-
-  /* Check for --sc68-no-debug */
-  opt = option68_get("no-debug", opt68_ISSET);
-  if (opt && opt->val.num) {
-    /* Remove all debug messages whatsoever. */
-    msg68_set_handler(0);
-  }
 
 #ifdef NATIVE_WIN32
   /* Get share path from registry */

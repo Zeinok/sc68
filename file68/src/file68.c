@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-13 00:19:22 ben>
+ * Time-stamp: <2013-08-29 11:39:54 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -348,13 +348,24 @@ static int ice_is_magic(const char * buffer)
     && buffer[3] == '!';
 }
 
+static inline int sndh_inst(int c) {
+  return (c &0xFF00) == 0x6000          /* bra and bra.s */
+  || c == 0x4efa                        /* jmp (pc) */
+  || c == 0x4e75                        /* rts */
+  || c == 0x4e71                        /* nop */
+  ;
+}
+
 static int sndh_is_magic(const char *buffer, int max)
 {
-  const int start = 6;
+  const int start = 10;
   int i=0, v = 0;
-  if (max >= start) {
-    for (i=start, v = LPeekBE(buffer); i < max && v != sndh_cc;
-         v = ((v<<8)| (buffer[i++]&255)) & 0xFFFFFFFF)
+  if (max >= start
+      && sndh_inst(WPeekBE(buffer+0))
+      /* && sndh_inst(WPeekBE(buffer+4)) */
+      && sndh_inst(WPeekBE(buffer+8))) {
+    for (i=start, v = LPeekBE(buffer+i); i < max && v != sndh_cc;
+         v = ((v<<8) | (buffer[i++]&255)) & 0xFFFFFFFF)
       ;
   }
   i = (v == sndh_cc) ? i-4: 0;

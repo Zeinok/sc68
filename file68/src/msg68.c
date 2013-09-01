@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-25 12:06:47 ben>
+ * Time-stamp: <2013-08-30 10:29:15 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -316,13 +316,15 @@ void msg68_cat_free(int category)
 /* Set all predefined categories mask according to given level. */
 int msg68_cat_level(int category)
 {
-  int ret = -(category < msg68_CRITICAL || category > msg68_TRACE);
-  if (!ret) {
-    unsigned int v = msg68_bitmsk & ~((1<<(msg68_TRACE+1))-1);
-    v |= (1<<(category+1))-1;
-    msg68_bitmsk = v;
+  if (category == msg68_NEVER)
+    msg68_bitmsk &= ~((1<<(msg68_TRACE+1))-1);
+  else if (category == msg68_ALWAYS)
+    msg68_bitmsk |= ((1<<(msg68_TRACE+1))-1);
+  else if (category >= msg68_CRITICAL && category <= msg68_TRACE) {
+    msg68_bitmsk &= ~((1<<(msg68_TRACE+1))-1);
+    msg68_bitmsk |= (1<<(category+1))-1;
   }
-  return ret;
+  return msg68_bitmsk;
 }
 
 /* Get info on category */
