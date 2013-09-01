@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-25 06:40:33 ben>
+ * Time-stamp: <2013-08-30 19:40:45 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -82,7 +82,7 @@ static void print_option(void * data,
           desc+1);
 }
 
-static int display_help(void)
+static int display_help(int more)
 {
   puts
     ("Usage: info68 [OPTION] [--] <URI> track-list format ...\n"
@@ -98,11 +98,13 @@ static int display_help(void)
      "  -o --output=<URI>   Change output to file (- is stdout)\n"
      "  -A --all            Display all information and tags\n");
 
-  option68_help(stdout,print_option);
+  if (more) {
+    option68_help(stdout,print_option);
+    puts("");
+  }
 
   puts
-    ("\n"
-     "Track-list:\n"
+    ("Track-list:\n"
      "\n"
      "  syntax:\n"
      "\n"
@@ -130,7 +132,8 @@ static int display_help(void)
      "    `%T'         disk time in sec\n"
      "    `%Y'         formated disk time. Format \"TT MM:SS\"\n"
      "    `%H'         all tracks ORed hardware flags (see %h)\n"
-     "    `%F'         file format (sc68 or sndh)\n");
+     "    `%F'         file format (sc68 or sndh)\n"
+     "    `%~'         file hash code (unic-id)\n");
   puts
     ("  track-commands:\n"
      "\n"
@@ -216,12 +219,13 @@ static int display_version(void)
 
 static const char * HWflags(const hwflags68_t f)
 {
+  static const char hex[] = "0123456789ABCDEF";
   static char flags[] = "YSA0";
   flags[0] = f.bit.ym     ? 'Y' : 'y';
   flags[1] = f.bit.ste    ? 'S' : 's';
   flags[2] = f.bit.amiga  ? 'A' : 'a';
   flags[3] = f.bit.timers
-    ? '0'+f.bit.timera+(f.bit.timerb<<1)+(f.bit.timerc<<2)+(f.bit.timerd<<3)
+    ? hex[f.bit.timera+(f.bit.timerb<<1)+(f.bit.timerc<<2)+(f.bit.timerd<<3)]
     : '.'
     ;
   return flags;
@@ -245,10 +249,17 @@ static void PutI(vfs68_t *out, int v)
   PutS(out, buffer);
 }
 
-static void PutX(vfs68_t *out, int v)
+static void PutX(vfs68_t *out, unsigned int v)
 {
   char buffer[64];
   sprintf(buffer,"%x",v);
+  PutS(out, buffer);
+}
+
+static void PutX32(vfs68_t *out, unsigned int v)
+{
+  char buffer[64];
+  sprintf(buffer,"%08x",v&0xFFFFFFFF);
   PutS(out, buffer);
 }
 
@@ -352,7 +363,7 @@ int main(int argc, char ** argv)
       ++i;
       break;
     } else if (!strcmp(argv[i],"--help") || !strcmp(argv[i],"-h")) {
-      return display_help();
+      return display_help(1);
     } else if (!strcmp(argv[i],"--version") || !strcmp(argv[i],"-V")) {
       return display_version();
     } else if (!strcmp(argv[i],"--all") || !strcmp(argv[i],"-A")) {
@@ -399,6 +410,7 @@ int main(int argc, char ** argv)
     const char * key, * val;
 
     PutS(out,"file: ");     PutS(out,inname);     PutC(out,'\n');
+    PutS(out,"hash: ");     PutX32(out,d->hash);  PutC(out,'\n');
     PutS(out,"tracks: ");   PutI(out,d->nb_mus);  PutC(out,'\n');
     PutS(out,"default: ");  PutI(out,d->def_mus); PutC(out,'\n');
     PutS(out,"time-ms: ");  PutI(out,d->time_ms); PutC(out,'\n');
@@ -478,6 +490,9 @@ int main(int argc, char ** argv)
             break;
 
             /* DISK commands */
+          case '~':
+            PutX32(out,d->hash);
+            break;
           case '#':
             PutI(out,d->nb_mus);
             break;
