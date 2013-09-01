@@ -4,7 +4,7 @@
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
-;;; Time-stamp: <2013-07-17 22:51:22 ben>
+;;; Time-stamp: <2013-09-01 21:52:50 ben>
 
 
 ;;; Unhandled trap vector and function will execute a stop with a
@@ -15,39 +15,42 @@ StackSize = 1024
 STOP_VAL  = $2F20
 
 	;; This is the address used by libsc68/api.c but it should be
-	;; PIC anyway
+	;; PIC anyway. Still mksc68 rely on this code to be loaded at
+	;; 500 and timerc being at $502.w
+	
 	org	$500
+	bra.s	install_trap
+;;; !!!! timerc MUST BE at $502.w or mksc68 detection will FAILED !!! 
+timerc:
+	btst	#3,$fffffa17.w	; SEI or AEI ?
+	beq.s	.aei
+	move.b	#%11011111,$fffffa11.w ; release in service
+.aei:	
+	rte
+
 	
 ;;; Install trap vectors
 ;;; 
 install_trap:
 	movem.l	d0/a0-a2,-(a7)
 
-	;; Install our trap vectors
+	;; Install trap vectors for GEMDOS and XBIOS
 	lea	gemdos(pc),a0
 	move.l	a0,$84.w
 	lea	xbios(pc),a0
 	move.l	a0,$B8.w
-	lea	timerc(pc),a0
-	move.l	a0,$114.w
 
-if(0)
-	{
-	toto
-	;; Install trap vectors
-	lea	trap_0(pc),a0
-	lea	$80.w,a1
-	moveq	#15,d0
-.copy:
-	tst.l	(a1)
-	bne.s	.skip
-	move.l	a0,(a1)
-.skip:
-	addq	#4,a1
-	addq	#8,a0
-	dbf	d0,.copy
-	}	
-	
+	;; Install system timer C
+
+	;; tCdef:	dc.w	$114, $fa1d, $fa23, $0f15
+
+	clr.b	$fffffa1d.w	; stop timer-C and D (don't care)
+	lea	timerc(pc),a0
+	move.l	a0,$114.w	; interrupt vector
+	bset.b	#5,$fffffa09.w	; enable interrupt
+	bset.b	#5,$fffffa15.w	; unmask interrupt
+	move.b	#2457600/(64*200),$fffffa23.w
+	move.b  #$50,$fffffa1d.w ; prediv is 64
 
 	;; Init dummy malloc system
 	lea	malloc(pc),a0
@@ -411,21 +414,22 @@ xbtimer:
 	;; ===================================================
 	;; $$$ TEMP, right now only acknowledge stop timer
 	;;
-	tst.b	d1
-	bne.s	.cont
+	
+	;; tst.b	d1
+	;; bne.s	.cont
 
-	move.w	ti_datareg(a2),a4
-	move	(a6)+,d0
-	move.b	d0,(a4)
-	move	(a2),a2
-	move.l	(a6)+,(a2)
-	move.b	d4,(a5)
-	bra	trap_close
+	;; move.w	ti_datareg(a2),a4
+	;; move	(a6)+,d0
+	;; move.b	d0,(a4)
+	;; move	(a2),a2
+	;; move.l	(a6)+,(a2)
+	;; move.b	d4,(a5)
+	;; bra	trap_close
 	
 .cont:
-	stop	#STOP_VAL+$E
-	reset
-	bra	trap_close
+	;; stop	#STOP_VAL+$E
+	;; reset
+	;; bra	trap_close
 
 	;; 
 	;; $$$ END-TEMP
@@ -446,8 +450,11 @@ xbtimer:
 	lea	$fffffa00.w,a1
 	bset	d0,$07(a1,d1)
 	bset	d0,$13(a1,d1)
+	
+	;; This should not be needed as the Atari system is in SEI
+	;; mode. The program should take care of this if it wants to be
+	;; in AEI.
 	bset	#3,$17(a1)		; set MFP to AEI
-	bset	d6,d7
 
 	;; set vector and start
 	move	(a2),a2		; timer vector
@@ -456,9 +463,3 @@ xbtimer:
 	
 	bra	trap_close
 	
-timerc:
-	btst	#3,$fffffa17.w	; SEI or AEI ?
-	beq.s	.aei
-	move.b	#%11011111,$fffffa11.w	; release
-.aei:	
-	rte
