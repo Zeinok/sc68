@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-05 15:57:38 ben>
+ * Time-stamp: <2013-09-01 19:58:06 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -120,7 +120,7 @@ int dsk_load(const char * uri, int merge, int force)
   }
 
   /* Fix `not implemented' below at least if not a real merge. */
-  if (merge && !has_disk())
+  if (merge && !dsk_has_disk())
     merge = 0;
 
   if (!merge) {

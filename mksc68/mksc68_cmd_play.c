@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-09 18:32:59 ben>
+ * Time-stamp: <2013-08-30 14:41:38 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -83,7 +83,7 @@ static playinfo_t playinfo;             /* unique playinfo */
 static void play_info(playinfo_t * pi)
 {
   sc68_music_info_t info;
-  if (!sc68_music_info(pi->sc68,&info,-1,0)) {
+  if (!sc68_music_info(pi->sc68,&info,SC68_CUR_TRACK,0)) {
     int i, len = 11;
     msginf("%-*s : %d/%d\n",  len, "Track",   info.trk.track, info.tracks);
     msginf("%-*s : %s\n",     len, "Album",   info.album);
@@ -232,8 +232,9 @@ int dsk_stop(void)
 
   if (playinfo.isplaying) {
     if (playinfo.sc68) {
-      msgdbg("stop: signal stop to %s\n",
-             sc68_cntl(playinfo.sc68, SC68_GET_NAME));
+      const char * name = 0;
+      sc68_cntl(playinfo.sc68, SC68_GET_NAME, &name);
+      msgdbg("stop: signal stop to %s\n", name ? name : "(nil)");
       sc68_stop(playinfo.sc68);
     } else {
       pthread_cancel(playinfo.thread);
@@ -319,8 +320,13 @@ int run_play(cmd_t * cmd, int argc, char ** argv)
       str = optarg;
       if (!strcmp(str,"inf"))
         params.loop = SC68_INF_LOOP;
-      else if (isdigit((int)*str))
+      else if (!strcmp(str,"def"))
+        params.loop = SC68_DEF_LOOP;
+      else if (isdigit((int)*str)) {
         params.loop = strtol(str,0,0);
+        if (!params.loop)
+          params.loop = SC68_DEF_LOOP;
+      }
       break;
 
     case 'm':                           /* --memory    */
@@ -414,7 +420,7 @@ cmd_t cmd_play = {
   "The `play' command plays a track.\n"
   "\n"
   "OPTIONS\n"
-  "   -l --loop=N       Number of loop (-1:inf 0:def)\n"
+  "   -l --loop=N       Number of loop (or inf or def)\n"
   "   -s --seek=POS     Seek to this position.\n"
   "   -t --to=POS       End position.\n"
   "   -f --fg           Foreground play.\n"

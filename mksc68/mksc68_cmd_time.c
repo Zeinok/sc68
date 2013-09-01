@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-09 18:32:58 ben>
+ * Time-stamp: <2013-09-01 22:01:21 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -348,43 +348,6 @@ static const char * vectorname(int vector)
 {
   static char tmp[64];
   emu68_exception_name(vector,tmp);
-  /* switch (vector) { */
-  /* case HWBREAK_VECTOR:  return "hardware breakpoint"; */
-  /* case HWTRACE_VECTOR:  return "hardware trace"; */
-  /* case HWHALT_VECTOR:   return "processor halted"; */
-
-  /* case RESET_SP_VECTOR: */
-  /* case RESET_PC_VECTOR: return "reset"; */
-
-  /* case BUSERR_VECTOR:   return "bus error"; */
-  /* case ADRERR_VECTOR:   return "address error"; */
-  /* case ILLEGAL_VECTOR:  return "illegal"; */
-  /* case DIVIDE_VECTOR:   return "divide by zero"; */
-  /* case CHK_VECTOR:      return "chk"; */
-  /* case TRAPV_VECTOR:    return "trapv"; */
-
-  /* case PRIVV_VECTOR:    return "privilege violation"; */
-  /* case TRACE_VECTOR:    return "trace"; */
-  /* case LINEA_VECTOR:    return "line-A"; */
-  /* case LINEF_VECTOR:    return "line-f"; */
-  /* case SPURIOUS_VECTOR: return "spurious interrupt"; */
-
-  /*   /\* Not always true, depends on MFP VR register bits 4-7 *\/ */
-  /* case TIMER_A:         return "MFP timer-A"; */
-  /* case TIMER_B:         return "MFP timer-B"; */
-  /* case TIMER_C:         return "MFP timer-C"; */
-  /* case TIMER_D:         return "MFP timer-D"; */
-
-  /* default: */
-  /*   if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) { */
-  /*     sprintf(tmp,"trap #%d",vector-TRAP_VECTOR_0); */
-  /*   } else if (vector >= AUTO_VECTOR(0) && vector <= AUTO_VECTOR(7)) { */
-  /*     sprintf(tmp,"auto vector #%d",vector-AUTO_VECTOR(0)); */
-  /*   } else { */
-  /*     sprintf(tmp,"unknown vector #%d",vector); */
-  /*   } */
-  /* } */
-
   return tmp;
 }
 
@@ -393,6 +356,17 @@ static void timemeasure_hdl(emu68_t* const emu68, int vector, void * cookie)
 {
   measureinfo_t * mi = cookie;
   assert(mi == &measureinfo);
+
+  /* Detect and ignore system timer-C */
+  if (vector == TIMER_C) {
+    const addr68_t adr = vector << 2;
+    if ( ( (emu68->mem [ adr+0 ] << 24) |
+           (emu68->mem [ adr+1 ] << 16) |
+           (emu68->mem [ adr+2 ] <<  8) |
+           (emu68->mem [ adr+3 ] <<  0) ) == 0x502 )
+      return;
+  }
+
   if (vector >= 0 && vector < sizeof(mi->vector)/sizeof(*mi->vector)) {
     if (!mi->vector[vector].cnt ++)
       mi->vector[vector].fst = mi->curfrm;
@@ -420,7 +394,7 @@ static void access_range(measureinfo_t * mi)
     ;
   if (stack != endsp)
     msginf("S access range: 0x%06X .. 0x%06X\n",
-           stack, mi->emu68->reg.a[7]& mi->emu68->memmsk);
+           stack, mi->emu68->reg.a[7] & (unsigned) mi->emu68->memmsk);
   else
     msginf("S access range: none\n");
 
@@ -517,10 +491,12 @@ static int hook_ios(measureinfo_t * mi)
 
     if ( mi->emu68->mapped_io[line] == pio )
       msgdbg("hook io #%d '%-20s' addr:$%06x-%06x line:%02x\n",
-             i, ti->io.name, pio->addr_lo & 0xFFFFFF , pio->addr_hi & 0xFFFFFF, line);
+             i, ti->io.name, (unsigned) pio->addr_lo & 0xFFFFFF,
+             (unsigned) pio->addr_hi & 0xFFFFFF, line);
     else
       msgdbg("hook ?? #%d '%-20s' addr:$%06x-%06x line:%02x\n",
-             i, ti->io.name, mio->addr_lo & 0xFFFFFF , mio->addr_hi & 0xFFFFFF, line);
+             i, ti->io.name, (unsigned) mio->addr_lo & 0xFFFFFF,
+             (unsigned) mio->addr_hi & 0xFFFFFF, line);
 
     mi->emu68->mapped_io[line] = &ti->io;
   }
@@ -537,7 +513,8 @@ static int unhook_ios(measureinfo_t * mi)
     time_io_t * ti  = mi->timeios+i;
 
     msgdbg("unhook io #%d '%s' addr:$%06x-%06x line:%02x, counts:%u (%u/%u)\n",
-           i, ti->io.name, ti->io.addr_lo & 0xFFFFFF , ti->io.addr_hi & 0xFFFFFF,
+           i, ti->io.name, (unsigned) ti->io.addr_lo & 0xFFFFFF ,
+           (unsigned)  ti->io.addr_hi & 0xFFFFFF,
            line, ti->r+ti->w, ti->r, ti->w);
     if (mi->emu68->mapped_io[line] != &ti->io) {
       io68_t * mio = mi->emu68->mapped_io[line];
@@ -550,12 +527,11 @@ static int unhook_ios(measureinfo_t * mi)
              "tio: %p '%s' addr:$%06x-%06x\n"
              "mio: %p '%s' addr:$%06x-%06x\n"
              ,
-             mi->emu68->mapped_io[line], &ti->io,
-             i,
-             line,
-             pio, pio->name, pio->addr_lo, pio->addr_hi,
-             tio, tio->name, tio->addr_lo, tio->addr_hi,
-             mio, mio->name, mio->addr_lo, mio->addr_hi );
+             (void*)mi->emu68->mapped_io[line], (void*)&ti->io,
+             i, line,
+             (void*)pio,pio->name,(uint_t)pio->addr_lo,(uint_t)pio->addr_hi,
+             (void*)tio,tio->name,(uint_t)tio->addr_lo,(uint_t)tio->addr_hi,
+             (void*)mio,mio->name,(uint_t)mio->addr_lo,(uint_t)mio->addr_hi );
     }
 
     assert(mi->emu68->mapped_io[line] == &ti->io);
@@ -583,11 +559,17 @@ static void timemeasure_init(measureinfo_t * mi)
   if (!mi->sc68)
     return;
 
+  /* Force aSID off. */
+  sc68_cntl(mi->sc68, SC68_SET_ASID, SC68_ASID_OFF);
+
+  /* Retrieve emulator instance to hack them. */
   sc68_cntl(mi->sc68, SC68_EMULATORS, &mi->ios68);
   mi->emu68 = (emu68_t *)*mi->ios68++;
-  /* sc68_emulators(mi->sc68, &mi->emu68, &mi->ios68); */
 
+  /* Install our interrupt handler. */
   emu68_set_handler(mi->emu68, timemeasure_hdl);
+
+  /* Set our private data. */
   emu68_set_cookie(mi->emu68, mi);
 
   disk = dsk_get_disk();
@@ -902,13 +884,13 @@ int time_measure(measureinfo_t * mi, int trk,
   ts.tv_nsec = 0;
 
   msgdbg("time_measure() trk:%d, stp:%dms, max:%dms sil:%dms, time-out:%d\"\n",
-         trk, stp_ms, max_ms, sil_ms, ts.tv_sec);
+         trk, stp_ms, max_ms, sil_ms, (int)ts.tv_sec);
 
   assert(mi);
   assert(trk > 0 && trk <= tracks);
 
   if (trk <= 0 || trk > tracks) {
-    msgerr("track #%02 out of range\n", trk);
+    msgerr("track #%02d out of range\n", trk);
     goto error;
   }
 
@@ -929,7 +911,7 @@ int time_measure(measureinfo_t * mi, int trk,
   }
 
 #ifdef HAVE_PTHREAD_TIMEDJOIN_NP
-  msgdbg("time-measure thread created ... Waiting for %d seconds\n", ts.tv_sec);
+  msgdbg("time-measure thread created ... Waiting for %d seconds\n", (int)ts.tv_sec);
   ts.tv_sec += time(0);
   err = pthread_timedjoin_np(mi->thread, 0, &ts);
   if (err == ETIMEDOUT) {
@@ -937,7 +919,7 @@ int time_measure(measureinfo_t * mi, int trk,
     err = pthread_cancel(mi->thread);
   }
 #else
-  msgdbg("time-measure thread created ... Waiting for %d seconds\n", ts.tv_sec);
+  msgdbg("time-measure thread created ... Waiting for %d seconds\n", (int)ts.tv_sec);
   err = pthread_join(mi->thread, 0);
 #endif
   msgdbg("time-measure thread ended with: %d, %d\n", err, mi->code);

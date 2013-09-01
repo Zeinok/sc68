@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 03:09:38 ben>
+ * Time-stamp: <2013-09-01 20:06:59 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sc68/file68_msg.h>
+#include <sc68/file68_opt.h>
 
 #include <pthread.h>
 
@@ -127,6 +128,22 @@ void msg_callback(const int bit, void *data, const char *fmt, va_list list)
   pthread_mutex_unlock(&msglock);
 }
 
+/* HAXXX: should be eval when a message category is added/removed */
+static void eval_debug(void)
+{
+  static option68_t * opt;
+  /* HaXXX: force a call "debug" callback. */
+  if (!opt)
+    opt = option68_get("debug", opt68_ALWAYS);
+  if (opt && opt->org != opt68_UDF) {
+    char tmp[512];
+    strncpy(tmp, opt->val.str, sizeof(tmp));
+    tmp[sizeof(tmp)-1] = 0;
+    option68_unset(opt);
+    option68_set(opt, tmp, opt68_ALWAYS, opt->org);
+  }
+}
+
 #ifndef MKSC68_O
 # ifdef DEBUG
 #  define MKSC68_O 1
@@ -138,11 +155,12 @@ void msg_callback(const int bit, void *data, const char *fmt, va_list list)
 void msg_init(int level)
 {
   level += msg68_INFO;
-  if (level < msg68_CRITICAL) level = msg68_CRITICAL;
-  if (level > msg68_TRACE)    level = msg68_TRACE;
+  if (level < msg68_CRITICAL) level = msg68_NEVER;
+  if (level > msg68_TRACE)    level = msg68_ALWAYS;
   msg68_cat_level(level);
   mksc68_cat = msg68_cat("mksc68","sc68 maker",MKSC68_O);
   if (mksc68_cat == -1) mksc68_cat = msg68_DEFAULT;
+  eval_debug();
 }
 
 void msg_lock(void)

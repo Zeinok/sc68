@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-12 19:30:54 ben>
+ * Time-stamp: <2013-08-28 17:57:55 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -144,9 +144,9 @@ struct trap_s {
 };
 
 #ifndef HAVE_STPCPY
-/* Sometine we don't have stpcpy. That's weird and it is probably a
- * configuration problem regarding GLIBC features.
- * Anyway here is a very simple replacement.
+/* Sometimes we don't have stpcpy. That's weird and it is probably a
+ * configuration problem regarding GLIBC features.  Anyway here is a
+ * very simple replacement.
  */
 static char * stpcpy(char *dst, const char * src)
 {
@@ -465,8 +465,7 @@ static int rsp_event(gdb_t * const gdb)
       v = strtoul(end, &end, 16);
       if (!errno) {
         /* int l = (end-ptr)/\* , m = (1<<(l<<2))-1 *\/; */
-        msgdbg("COMMAND <write-register,%02d>\n",
-             n,v);
+        msgdbg("COMMAND <write-register,%02d,0x%x>\n",n,v);
         ptr = stpcpy(buf+1,"OK");
         if (n < 8)
           gdb->emu->reg.d[n] = v;
@@ -734,13 +733,13 @@ static int rsp_event(gdb_t * const gdb)
     case '1':
       /* hardware breakpoint. Unsupported by target according to gdb
        * which is really annoying if you ask me. gdb should not
-       * assume such things when conencted to any kind of remote
+       * assume such things when connected to any kind of remote
        * target.
        */
       if (remove) {
         int id = emu68_bp_find(gdb->emu,adr);
         if (id < 0) {
-          msgnot("could not find breakpoint to @ 0x%x\n", adr);
+          msgnot("could not find breakpoint @ 0x%x\n", adr);
           ptr = stpcpy(buf+1,"E03");
         } else {
           emu68_bp_del(gdb->emu, id);
@@ -748,11 +747,15 @@ static int rsp_event(gdb_t * const gdb)
         }
       } else {
         int id = emu68_bp_set(gdb->emu, -1, adr, 1, 1);
-        if (id < 0)
+        if (id < 0) {
+          msgnot("could not add breakpoint @ 0x%x\n", adr);
           ptr = stpcpy(buf+1,"E03");
+        } else
+          msgdbg("set breakpoint #%02d @ 0x%x\n", id, adr);
       }
       break;
     default:
+      msgdbg("unsupported breakpoint type '%c' @ 0x%x\n", type, adr);
       ptr = 0;                        /* unsupported */
       break;
     }
@@ -834,10 +837,26 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
 
   /* Escape this as fast as possible */
   if (vector == HWTRACE_VECTOR) {
-    if (!gdb->step || --gdb->step)
-      return gdb->run;
-    gdb->sigval = SIGVAL_TRAP;
-    SIGNAL(STOP,gdb->sigval,"trace");
+    /* static int oldpc; */
+    /* /\* $$$ TEMP *\/ */
+    /* if (((emu68_t*)emu)->reg.pc & 1) { */
+
+    /*   gdb->sigval = SIGVAL_BUS; */
+    /*   SIGNAL(STOP,gdb->sigval,"address-error"); */
+    /*   msgwrn("address error @%x previous pc: %x\n", */
+    /*          ((emu68_t*)emu)->reg.pc, oldpc); */
+
+    /* } else { */
+
+      if (!gdb->step || --gdb->step)
+        return gdb->run;
+      gdb->sigval = SIGVAL_TRAP;
+      SIGNAL(STOP,gdb->sigval,"trace");
+
+    /* } */
+
+    /* oldpc = ((emu68_t*)emu)->reg.pc; */
+
   }
 
   gdb->emu = emu;
@@ -974,13 +993,13 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
         j += 3;
       } else {
         line[j+2] = 0;
-        msgnot(" %-6x: %s\n", adr + (i & ~15), line);
+        msgnot(" %-6x: %s\n", (unsigned)adr + (i & ~15), line);
         j = 0;
       }
     }
     if (j) {
       line[j-1] = 0;
-      msgnot(" %-6x: %s\n", adr + (i & ~15), line);
+      msgnot(" %-6x: %s\n", (unsigned)adr + (i & ~15), line);
     }
   }
 

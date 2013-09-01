@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-30 14:04:27 ben>
+ * Time-stamp: <2013-09-01 19:12:53 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -32,7 +32,6 @@
 #include "mksc68_cli.h"
 #include "mksc68_cmd.h"
 #include "mksc68_dsk.h"
-//#include "mksc68_emu.h"
 #include "mksc68_eva.h"
 #include "mksc68_msg.h"
 #include "mksc68_opt.h"
@@ -40,6 +39,7 @@
 #include "mksc68_gdb.h"
 
 #include <sc68/sc68.h>
+#include <sc68/file68_opt.h>
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -54,7 +54,22 @@ int no_readline      = 0;               /* disable readline       */
 static int exit_code;                   /* last command exit code */
 static int exit_flag;                   /* break interpreter loop */
 
-static int print_usage(void)
+static void print_option(void * data,
+                         const char * option,
+                         const char * envvar,
+                         const char * values,
+                         const char * desc)
+{
+  printf("  %s", option);
+  if (values && *values)
+    printf("=%s", values);
+  printf("\n"
+         "    %-16s %c%s\n", envvar,
+         (desc[0]>='a' && desc[0]<='z') ? desc[0]-'a'+'A' : desc[0],
+         desc+1);
+}
+
+static int print_usage(int more)
 {
   puts
     ("Usage: " PACKAGE_NAME " [OPTION] URI...\n"
@@ -62,13 +77,18 @@ static int print_usage(void)
      "  sc68 file toolbox - to create or modify sc68 files\n"
      "\n"
      "Options:\n"
-     "  -h --help           Display this message and exit\n"
+     "  -h --help           Display this message and exit (-hh for more)\n"
      "  -V --version        Display sc68 version x.y.z and licence and exit\n"
      "  -v --verbose        Increase verbosity level\n"
      "  -q --quiet          Decrease verbosity level\n"
-     "  -n --no-readline    Don't use readline in interactive mode\n"
-     "\n"
-     "Copyright (C) 1998-2013 Benjamin Gerard\n"
+     "  -n --no-readline    Don't use readline in interactive mode\n");
+  if (more) {
+   option68_help(stdout,print_option);
+   puts("");
+  }
+
+  puts
+    ("Copyright (C) 1998-2013 Benjamin Gerard\n"
      "Visit <" PACKAGE_URL ">\n"
      "Report bugs to <" PACKAGE_BUGREPORT ">");
   return 1;
@@ -885,7 +905,7 @@ int main(int argc, char *argv[])
 
     switch (val) {
     case  -1: break;                    /* Scan finish   */
-    case 'h': opt_help = 1;    break;   /* --help        */
+    case 'h': opt_help++;      break;   /* --help        */
     case 'V': opt_vers = 1;    break;   /* --version     */
     case 'v': opt_verb++;      break;   /* --verbose     */
     case 'q': opt_verb--;      break;   /* --quiet       */
@@ -902,7 +922,7 @@ int main(int argc, char *argv[])
   i = i;
 
   if (opt_help) {
-    return print_usage();
+    return print_usage(opt_help > 1);
   }
 
   if (opt_vers) {
