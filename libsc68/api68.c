@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-30 21:14:37 ben>
+ * Time-stamp: <2013-09-02 17:00:55 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -85,8 +85,6 @@ enum {
   INIT_MAX_INST = 10000000u,
   /* default music time in seconds  */
   TIME_DEF = 3 * 60,
-  /* default music time in millisec */
-  TIMEMS_DEF = (TIME_DEF * 1000),
   /* sc68_t magic identifier value. */
   SC68_MAGIC = MK4CC('s','c','6','8'),
   /* disk68_t magic identifier value. */
@@ -848,7 +846,7 @@ static int config_load(void)
   set_CONFIG(force_loop,"force-loop");
 #endif
   set_CONFIG(asid,"asid");
-  set_CONFIG(def_time_ms,"default-time");
+  config.def_time_ms = optcfg_get_int("default-time", TIME_DEF) * 1000;
   set_CONFIG(spr,"sampling-rate");
 
   sc68_debug(0,"libsc68: load config -- %s\n", strok68(err));
@@ -893,7 +891,7 @@ static void config_update(const sc68_t * sc68)
     optcfg_set_int("force-loop",    config.force_loop);
 #endif
     optcfg_set_int("asid",          config.asid);
-    optcfg_set_int("default-time",  (config.def_time_ms+999)/1000);
+    optcfg_set_int("default-time",  (config.def_time_ms+999) / 1000u);
     optcfg_set_int("sampling-rate", config.spr);
   }
 
@@ -1096,7 +1094,7 @@ sc68_t * sc68_create(sc68_create_t * create)
     sc68->mix.spr = sc68_spr_def;
   }
   if (!sc68->time.def_ms) {
-    sc68->time.def_ms = TIMEMS_DEF;
+    sc68->time.def_ms = TIME_DEF * 1000;
   }
 
   /* aSIDifier. */

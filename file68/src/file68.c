@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-29 11:39:54 ben>
+ * Time-stamp: <2013-09-02 16:44:36 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -659,11 +659,11 @@ static int valid(disk68_t * mb)
         m->first_ms = fr_to_ms(m->first_fr, m->frq);
 
         m->hwflags.bit.ste    = !!(flags & TDB_STE);
-        /* Expect to have at least 1 unused timer set when the music
-         * use timers. An alternative would to always enable whatever
-         * it.
+        /* timers set means we have the timer information, not that
+         * any timer is actually used ! Previous assumption (at least
+         * 1 timer have to be unused) was wrong.
          */
-        m->hwflags.bit.timers = !!(flags & (TDB_TA+TDB_TB+TDB_TC+TDB_TD));
+        m->hwflags.bit.timers = 1;
         if (m->hwflags.bit.timers) {
           /* Invert the flag as timerdb knows about unused timers. */
           m->hwflags.bit.timera = ! (flags & TDB_TA);
@@ -744,7 +744,7 @@ static int valid(disk68_t * mb)
         ? 0 : m->tags.array[id].val;
     }
 
-    /* use data from previous music */
+#    /* use data from previous music */
     if (!m->data) {
       m->data   = (char *) pdata;       /* inherit music data */
       m->datasz = pdatasz;
@@ -937,7 +937,7 @@ enum {
 static int sndh_info(disk68_t * mb, int len)
 {
   const int unknowns_max = 8;
-  int i, vbl = 0, frq = 0, time = 0 , /* musicmon = 0,  */steonly = 0,
+  int i, vbl = 0, frq = 0, steonly = 0,
     unknowns = 0, fail = 0;
 
   char * b = mb->data;
@@ -1023,6 +1023,10 @@ static int sndh_info(disk68_t * mb, int len)
       int j, tracks;
       /* Time in second */
       if (! (tracks = mb->nb_mus) ) {
+        /* $$$ We could try to count the number de 16-word before the
+         * next tag, it could give us the number of song. Still it's
+         * would be pretty messed up. So let's assume 1 track for
+         * now. */
         msg68_warning("file68: sndh -- %s\n","got 'TIME' before track count");
         tracks = 1;
       }
@@ -1050,6 +1054,7 @@ static int sndh_info(disk68_t * mb, int len)
       t = i;
       /* assert(0); */
       if (! (tracks = mb->nb_mus) ) {
+        /* $$$ Same remark as 'TIME' tag. */
         msg68_warning("file68: sndh -- %s\n","got '!#SN' before track count");
         tracks = 1;
       }
@@ -1159,7 +1164,6 @@ static int sndh_info(disk68_t * mb, int len)
   if (mb->nb_mus > SC68_MAX_TRACK) {
     mb->nb_mus = SC68_MAX_TRACK;
   }
-  time *= 1000u;
 
   for (i=0; i<mb->nb_mus; ++i) {
     mb->mus[i].d0    = i+1;
