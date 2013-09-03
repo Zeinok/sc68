@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-01 22:01:21 ben>
+ * Time-stamp: <2013-09-03 23:42:27 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -176,6 +176,41 @@ static void time_wl(io68_t * pio) {
   ti->pio->w_long(ti->pio);
 }
 
+typedef struct
+{
+  io68_t io;
+  io68_t * pio;
+} mem_io_t;
+
+static void mem_rb(io68_t * pio) {
+  mem_io_t * mem = (mem_io_t *)pio;
+  mem->pio->r_byte(mem->pio);
+}
+
+static void mem_rw(io68_t * pio) {
+  mem_io_t * mem = (mem_io_t *)pio;
+  mem->pio->r_word(mem->pio);
+}
+
+static void mem_rl(io68_t * pio) {
+  mem_io_t * mem = (mem_io_t *)pio;
+  mem->pio->r_long(mem->pio);
+}
+
+static void mem_wb(io68_t * pio) {
+  mem_io_t * mem = (mem_io_t *)pio;
+  mem->pio->w_byte(mem->pio);
+}
+
+static void mem_ww(io68_t * pio) {
+  mem_io_t * mem = (mem_io_t *)pio;
+  mem->pio->w_word(mem->pio);
+}
+
+static void mem_wl(io68_t * pio) {
+  mem_io_t * mem = (mem_io_t *)pio;
+  mem->pio->w_long(mem->pio);
+}
 
 /* $$$ evil duplicated code from mem68.c */
 static void chkframe(emu68_t * const emu68, addr68_t addr, const int flags)
@@ -257,11 +292,9 @@ static void mw_wb(io68_t * pio) {
 
 static void mw_ww(io68_t * pio) {
   time_io_t * ti = (time_io_t *)pio;
-
   if ( !(pio->emu68->bus_addr & 1) ) {
     mw_wreg(ti,pio->emu68->bus_addr+1, pio->emu68->bus_data & 255);
   }
-
   ++ti->w;
   ++ti->a;
   ti->pio->w_word(ti->pio);
@@ -269,7 +302,6 @@ static void mw_ww(io68_t * pio) {
 
 static void mw_wl(io68_t * pio) {
   time_io_t * ti = (time_io_t *)pio;
-
   if ( !(pio->emu68->bus_addr & 1) ) {
     mw_wreg(ti,pio->emu68->bus_addr+1, (pio->emu68->bus_data>>16) & 255);
     mw_wreg(ti,pio->emu68->bus_addr+3,  pio->emu68->bus_data      & 255);
@@ -304,8 +336,8 @@ struct measureinfo_s {
   unsigned sil_ms;          /* length of silence      */
 
   /* results */
-  addr68_t minaddr;     /* lower memory location used by htis track */
-  addr68_t maxaddr;     /* upper memory location used by htis track */
+  addr68_t minaddr;     /* lower memory location used by this track */
+  addr68_t maxaddr;     /* upper memory location used by this track */
   unsigned frames;      /* last frame of the music                  */
   unsigned timems;      /* corresponding time in ms                 */
   unsigned loopfr;      /* loop duration in frames                  */
@@ -317,8 +349,9 @@ struct measureinfo_s {
   unsigned tb:1;        /* MFP Timer-B used by this track           */
   unsigned tc:1;        /* MFP Timer-C used by this track           */
   unsigned td:1;        /* MFP Timer-D used by this track           */
-  unsigned pl:1;        /* Amiga/Paulaused by this track            */
+  unsigned pl:1;        /* Amiga/Paula used by this track           */
   time_io_t timeios[5]; /* hooked IOs                               */
+  mem_io_t  memio;
   struct {
     unsigned cnt;
     unsigned fst;
@@ -328,6 +361,10 @@ struct measureinfo_s {
 };
 
 static measureinfo_t measureinfo;
+
+enum {
+  EMU68_I = EMU68_X << 1
+};
 
 enum {
   YM = 0,
@@ -381,7 +418,7 @@ static void access_range(measureinfo_t * mi)
 {
   unsigned i,j;
   unsigned stack;
-  unsigned start = mi->location & mi->emu68->memmsk;
+  unsigned start = 0x1000 /* mi->location & mi->emu68->memmsk */;
   unsigned endsp = ( mi->emu68->reg.a[7] - 1 ) & mi->emu68->memmsk;
 
   struct {
@@ -460,6 +497,18 @@ static int hook_ios(measureinfo_t * mi)
 {
   int i;
 
+  mi->memio.io.r_byte = mem_rb;            /* hook memory access handler */
+  mi->memio.io.r_word = mem_rw;
+  mi->memio.io.r_long = mem_rl;
+  mi->memio.io.w_byte = mem_wb;
+  mi->memio.io.w_word = mem_ww;
+  mi->memio.io.w_long = mem_wl;
+  mi->memio.pio = mi->emu68->memio;
+  snprintf(mi->memio.io.name,sizeof(mi->memio.io.name),
+           "*%s", mi->emu68->memio->name);
+  mi->emu68->memio = &mi->memio.io;
+  msgdbg("hook memio '%-14s'\n", mi->memio.io.name);
+
   for (i=0; i<5; ++i) {
     io68_t    * pio = mi->ios68[i], * mio;
     int        line = (pio->addr_lo>>8) & 0xFF;
@@ -470,7 +519,7 @@ static int hook_ios(measureinfo_t * mi)
     ti->r = ti->w = 0;                  /* reset counters   */
 
     /* create new hooked io */
-    snprintf(ti->io.name,sizeof(ti->io.name),"H: %s", mio->name);
+    snprintf(ti->io.name,sizeof(ti->io.name),"*%s", mio->name);
     ti->io.addr_lo = pio->addr_lo;
     ti->io.addr_hi = pio->addr_hi;
 
@@ -490,11 +539,11 @@ static int hook_ios(measureinfo_t * mi)
     ti->io.emu68  = mi->emu68;
 
     if ( mi->emu68->mapped_io[line] == pio )
-      msgdbg("hook io #%d '%-20s' addr:$%06x-%06x line:%02x\n",
+      msgdbg("hook io #%d '%-14s' addr:$%06x-%06x #%02x\n",
              i, ti->io.name, (unsigned) pio->addr_lo & 0xFFFFFF,
              (unsigned) pio->addr_hi & 0xFFFFFF, line);
     else
-      msgdbg("hook ?? #%d '%-20s' addr:$%06x-%06x line:%02x\n",
+      msgdbg("hook ?? #%d '%-14s' addr:$%06x-%06x #%02x\n",
              i, ti->io.name, (unsigned) mio->addr_lo & 0xFFFFFF,
              (unsigned) mio->addr_hi & 0xFFFFFF, line);
 
@@ -507,12 +556,23 @@ static int unhook_ios(measureinfo_t * mi)
 {
   int i;
 
+
+  if (mi->emu68->memio == &mi->memio.io) {
+    msgdbg("unhook memio '%-14s'\n", mi->memio.io.name);
+    mi->emu68->memio = mi->memio.pio;
+    mi->memio.pio = 0;
+  } else {
+    msgwrn("Can not unhook memio '%s', hooked to '%s'\n",
+           mi->memio.io.name,
+           mi->memio.pio ? mi->memio.pio->name : "(nil)");
+  }
+
   for (i=0; i<5; ++i) {
     io68_t    * pio = mi->ios68[i];
     int        line = (pio->addr_lo>>8) & 0xFF;
     time_io_t * ti  = mi->timeios+i;
 
-    msgdbg("unhook io #%d '%s' addr:$%06x-%06x line:%02x, counts:%u (%u/%u)\n",
+    msgdbg("unhook io #%d '%-14s' addr:$%06x-%06x #%02x, counts:%u (%u/%u)\n",
            i, ti->io.name, (unsigned) ti->io.addr_lo & 0xFFFFFF ,
            (unsigned)  ti->io.addr_hi & 0xFFFFFF,
            line, ti->r+ti->w, ti->r, ti->w);
@@ -522,7 +582,7 @@ static int unhook_ios(measureinfo_t * mi)
 
       msgerr("%p != %p\n"
              "i:%d\n"
-             "line:%02x\n"
+             "#%02x\n"
              "pio: %p '%s' addr:$%06x-%06x\n"
              "tio: %p '%s' addr:$%06x-%06x\n"
              "mio: %p '%s' addr:$%06x-%06x\n"

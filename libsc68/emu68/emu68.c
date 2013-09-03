@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-17 00:53:16 ben>
+ * Time-stamp: <2013-09-03 20:46:35 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -336,9 +336,9 @@ static inline void step68(emu68_t * const emu68)
   u8 * mem;
 
   assert( emu68->status == EMU68_NRM );
-
+  emu68->inst_pc = REG68.pc;
   /* Save the sr and rise the trace exception if needed. */
-  if ( ((emu68->save_sr = emu68->reg.sr) & SR_T) ) {
+  if ( ((emu68->inst_sr = emu68->reg.sr) & SR_T) ) {
     inl_exception68(emu68, TRACE_VECTOR, -1);
     if (emu68->status != EMU68_NRM)
       return;
@@ -665,6 +665,8 @@ int emu68_bp_find(emu68_t * const emu68, addr68_t addr)
  * `-----------------------------------------------------------------'
  */
 
+extern io68_t * mem68_io(void);
+
 static emu68_parms_t def_parms;
 
 emu68_t * emu68_create(emu68_parms_t * const parms)
@@ -694,10 +696,12 @@ emu68_t * emu68_create(emu68_parms_t * const parms)
   memsize = 1 << p->log2mem;
   membyte = sizeof(emu68_t) + (memsize << !!p->debug);
   emu68   = emu68_alloc(membyte);
-  if (!emu68) {
+  if (!emu68)
     goto error;
-  }
-  memset(emu68,0,membyte);
+
+  memset(emu68,0,sizeof(emu68_t));
+  /* memset(emu68,0,membyte); */
+
   strncpy(emu68->name,p->name?p->name:"emu68",sizeof(emu68->name)-1);
   emu68->clock = p->clock;
 
@@ -705,8 +709,10 @@ emu68_t * emu68_create(emu68_parms_t * const parms)
   emu68->memmsk  = memsize-1;
   if (p->debug) {
     emu68->chk = emu68->mem + memsize+8;
+    emu68->memio = mem68_io();
+    if (emu68->memio)
+      emu68->memio->emu68 = emu68;
   }
-
   emu68_mem_init(emu68);
   emu68_reset(emu68);
 
@@ -718,6 +724,8 @@ emu68_t * emu68_duplicate(emu68_t * emu68src, const char * dupname)
 {
   emu68_parms_t parms;
   emu68_t * emu68 = 0;
+
+  assert(!"This function needs rework");
 
   assert(emu68src);
   if (!emu68src)
@@ -748,6 +756,8 @@ emu68_t * emu68_duplicate(emu68_t * emu68src, const char * dupname)
   /* Copy breakpoints */
   memcpy(emu68->breakpoints, emu68src->breakpoints, sizeof(emu68->breakpoints));
 
+  /* TODO: all related IO stuff */
+
 error:
   return emu68;
 }
@@ -757,6 +767,7 @@ void emu68_destroy(emu68_t * const emu68)
 {
   if (emu68) {
     emu68_ioplug_destroy_all(emu68);
+    emu68_mem_destroy(emu68);
     emu68_free(emu68);
   }
 }
@@ -789,6 +800,8 @@ void emu68_reset(emu68_t * const emu68)
     emu68->instructions = 0;
     emu68->finish_sp    = -1;
     emu68->status       = EMU68_NRM;
+
+    emu68->inst_sr = emu68->inst_pc = -1;
   }
 }
 

@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      1999/03/13
  */
-/* Time-stamp: <2013-08-28 17:48:33 ben> */
+/* Time-stamp: <2013-09-03 18:24:19 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -411,6 +411,12 @@ EMU68_EXTERN
  *  @see emu68_mem_reset()
  */
 void emu68_mem_init(emu68_t * const emu68);
+
+EMU68_EXTERN
+/**
+ *  Destroy memory quick access table.
+ */
+void emu68_mem_destroy(emu68_t * const emu68);
 
 EMU68_EXTERN
 /**

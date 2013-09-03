@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-28 17:57:55 ben>
+ * Time-stamp: <2013-09-03 17:39:32 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -837,26 +837,10 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
 
   /* Escape this as fast as possible */
   if (vector == HWTRACE_VECTOR) {
-    /* static int oldpc; */
-    /* /\* $$$ TEMP *\/ */
-    /* if (((emu68_t*)emu)->reg.pc & 1) { */
-
-    /*   gdb->sigval = SIGVAL_BUS; */
-    /*   SIGNAL(STOP,gdb->sigval,"address-error"); */
-    /*   msgwrn("address error @%x previous pc: %x\n", */
-    /*          ((emu68_t*)emu)->reg.pc, oldpc); */
-
-    /* } else { */
-
-      if (!gdb->step || --gdb->step)
-        return gdb->run;
-      gdb->sigval = SIGVAL_TRAP;
-      SIGNAL(STOP,gdb->sigval,"trace");
-
-    /* } */
-
-    /* oldpc = ((emu68_t*)emu)->reg.pc; */
-
+    if (!gdb->step || --gdb->step)
+      return gdb->run;
+    gdb->sigval = SIGVAL_TRAP;
+    SIGNAL(STOP,gdb->sigval,"trace");
   }
 
   gdb->emu = emu;
@@ -869,8 +853,13 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
      */
     int sigval = SIGVAL_0;
 
+#if 0
     sr = Wpeek(gdb->emu, gdb->emu->reg.a[7]);
     pc = Lpeek(gdb->emu, gdb->emu->reg.a[7]+2);
+#else
+    sr = gdb->emu->inst_sr;
+    pc = gdb->emu->inst_pc;
+#endif
 
     switch (vector) {
     case BUSERR_VECTOR: case ADRERR_VECTOR:
@@ -916,8 +905,8 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
     /***********************************************************************
      * Private exceptions
      */
-    sr = gdb->emu->reg.sr;
-    pc = gdb->emu->reg.pc;
+    sr = gdb->emu->inst_sr;
+    pc = gdb->emu->inst_pc;
 
     if (vector < HWTRACE_VECTOR) {
       /* Got a breakpoint ! */
@@ -937,7 +926,7 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
                num, irqname, pc);
       } else {
         sprintf (irqname,"stop-#%04x",sr);
-        if ((sr & 0x0700) == 0x0700 && !(gdb->emu->save_sr & SR_T)) {
+        if ((sr & 0x0700) == 0x0700 && !(gdb->emu->inst_sr & SR_T)) {
           /* Stop a IPL 7, trace mode not set. It's a lock */
           msgnot("stop #0x%04x processor will not quit stop mode !\n", sr);
         }

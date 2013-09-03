@@ -1,4 +1,4 @@
-# Time-stamp: <2011-09-10 13:49:34 ben>
+# Time-stamp: <2013-09-03 21:54:04 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  desa68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -25,7 +25,7 @@ if SOURCE_DESA68
 DESA68_LA  = $(desa68_dir)/libdesa68.la
 @SET_MAKE@
 $(desa68_dir)/libdesa68.la:
-	cd "$(desa68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libdesa68.la
+	$(MAKE) -C "$(desa68_dir)" $(AM_MAKEFLAGS) libdesa68.la
 else
 DESA68_LA  = 
 endif
@@ -34,7 +34,7 @@ if SOURCE_FILE68
 FILE68_LA = $(file68_dir)/libfile68.la
 @SET_MAKE@
 $(file68_dir)/libfile68.la:
-	$(MAKE) -C $(file68_dir) libfile68.la
+	$(MAKE) -C "$(file68_dir)" libfile68.la
 else
 FILE68_LA =
 endif

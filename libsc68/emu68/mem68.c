@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-03 05:03:50 ben>
+ * Time-stamp: <2013-09-03 23:39:02 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -85,14 +85,86 @@ static void chkframe_l(emu68_t * const emu68, const int flags)
  * `--------------------------------------------------------'
  */
 
-static void dummy_read  (io68_t * const io) {}
-static void dummy_write (io68_t * const io) {}
+static void memchk_rb(io68_t * const io) {
+  emu68_t * const emu68 = io->emu68;
+  const addr68_t addr = emu68->bus_addr;
 
-static io68_t dummy_io = {
-  0,"Onboard-Memory",0,0,
-  dummy_read,dummy_read,dummy_read,
-  dummy_write,dummy_write,dummy_write,
+  emu68->bus_data = emu68->mem[addr&MEMMSK68];
+  chkframe_b(emu68, EMU68_R);
+}
+
+static void memchk_rw(io68_t * const io) {
+  emu68_t * const emu68 = io->emu68;
+  const u8 * const mem = emu68->mem+(emu68->bus_addr&MEMMSK68);
+  emu68->bus_data = (mem[0]<<8) + mem[1];
+  chkframe_w(emu68, EMU68_R);
+}
+
+static void memchk_rl(io68_t * const io) {
+  emu68_t * const emu68 = io->emu68;
+  const u8 * const mem = emu68->mem+(emu68->bus_addr&MEMMSK68);
+  emu68->bus_data = (mem[0]<<24) + (mem[1]<<16) + (mem[2]<<8) + mem[3];
+  chkframe_l(emu68, EMU68_R);
+}
+
+static void memchk_wb(io68_t * const io) {
+  emu68_t * const emu68 = io->emu68;
+  const addr68_t addr = emu68->bus_addr;
+  emu68->mem[addr&MEMMSK68] = emu68->bus_data;
+  chkframe_b(emu68, EMU68_W);
+}
+
+static void memchk_ww(io68_t * const io)
+{
+  emu68_t * const emu68 = io->emu68;
+  u8 * mem = emu68->mem + (emu68->bus_addr&MEMMSK68);
+  int68_t v = emu68->bus_data;
+  mem[1] = v; v>>=8; mem[0] = v;
+  chkframe_w(emu68, EMU68_W);
+}
+
+static void memchk_wl(io68_t * const io)
+{
+  emu68_t * const emu68 = io->emu68;
+  u8 * mem = emu68->mem + (emu68->bus_addr&MEMMSK68);
+  int68_t v = emu68->bus_data;
+  mem[3] = v; v>>=8; mem[2] = v; v>>=8; mem[1] = v; v>>=8; mem[0] = v;
+  chkframe_l(emu68, EMU68_W);
+}
+
+static void dummy_ra(io68_t * const io)
+{
+  assert(!"read access to dummy IO");
+}
+
+static void dummy_wa(io68_t * const io)
+{
+  assert(!"write access to dummy IO");
+}
+
+static const io68_t dummy_io = {
+  0,"Fault",0,0,
+  dummy_ra,dummy_ra,dummy_ra,
+  dummy_wa,dummy_wa,dummy_wa,
 };
+
+static int  memchk_reset(io68_t * const io) { return 0; }
+static void memchk_destroy(io68_t * const io) { emu68_free(io); }
+
+static const io68_t memory_io = {
+  0,"RAM",0,0,
+  memchk_rb,memchk_rw,memchk_rl,
+  memchk_wb,memchk_ww,memchk_wl,
+  0,0,0,memchk_reset,memchk_destroy
+};
+
+io68_t * mem68_io(void)
+{
+  io68_t * io = emu68_alloc(sizeof(memory_io));
+  if (io)
+    *io = memory_io;
+  return io;
+}
 
 
 /* ,--------------------------------------------------------.
@@ -103,14 +175,14 @@ static io68_t dummy_io = {
 void mem68_read_b(emu68_t * const emu68)
 {
   const addr68_t addr = emu68->bus_addr;
+
   if (ISIO68(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->r_byte(io);
-  } else {
+  } else if (!emu68->memio) {
     emu68->bus_data = emu68->mem[addr&MEMMSK68];
-    if (emu68->chk) {
-      chkframe_b(emu68, EMU68_R);
-    }
+  } else {
+    emu68->memio->r_byte(emu68->memio);
   }
 }
 
@@ -120,12 +192,11 @@ void mem68_read_w(emu68_t * const emu68)
   if (ISIO68(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->r_word(io);
-  } else {
+  } else if (!emu68->memio) {
     const u8 * const mem = emu68->mem+(addr&MEMMSK68);
     emu68->bus_data = (mem[0]<<8) + mem[1];
-    if (emu68->chk) {
-      chkframe_w(emu68, EMU68_R);
-    }
+  } else {
+    emu68->memio->r_word(emu68->memio);
   }
 }
 
@@ -135,15 +206,13 @@ void mem68_read_l(emu68_t * const emu68)
   if (ISIO68(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->r_long(io);
-  } else {
+  } else if (!emu68->memio) {
     const u8 * const mem = emu68->mem+(addr&MEMMSK68);
     emu68->bus_data = (mem[0]<<24) + (mem[1]<<16) + (mem[2]<<8) + mem[3];
-    if (emu68->chk) {
-      chkframe_l(emu68, EMU68_R);
-    }
+  } else {
+    emu68->memio->r_long(emu68->memio);
   }
 }
-
 
 /* ,--------------------------------------------------------.
  * |                   Write functions                      |
@@ -156,11 +225,10 @@ void mem68_write_b(emu68_t * const emu68)
   if (ISIO68(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->w_byte(io);
-  } else {
+  } else if (!emu68->memio) {
     emu68->mem[addr&MEMMSK68] = emu68->bus_data;
-    if (emu68->chk) {
-      chkframe_b(emu68, EMU68_W);
-    }
+  } else {
+    emu68->memio->w_byte(emu68->memio);
   }
 }
 
@@ -170,13 +238,12 @@ void mem68_write_w(emu68_t * const emu68)
   if (ISIO68(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->w_word(io);
-  } else {
+  } else if (!emu68->memio) {
     u8 * mem = emu68->mem + (addr&MEMMSK68);
     int68_t v = emu68->bus_data;
     mem[1] = v; v>>=8; mem[0] = v;
-    if (emu68->chk) {
-      chkframe_w(emu68, EMU68_W);
-    }
+  } else {
+    emu68->memio->w_word(emu68->memio);
   }
 }
 
@@ -186,13 +253,12 @@ void mem68_write_l(emu68_t * const emu68)
   if (ISIO68(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->w_long(io);
-  } else {
+  } else if (!emu68->memio) {
     u8 * mem = emu68->mem + (addr&MEMMSK68);
     int68_t v = emu68->bus_data;
     mem[3] = v; v>>=8; mem[2] = v; v>>=8; mem[1] = v; v>>=8; mem[0] = v;
-    if (emu68->chk) {
-      chkframe_l(emu68, EMU68_W);
-    }
+  } else {
+    emu68->memio->w_long(emu68->memio);
   }
 }
 
@@ -306,21 +372,31 @@ void emu68_mem_init(emu68_t * const emu68)
   emu68_mem_reset(emu68);
 }
 
-/* Reset memory quick acces table for SC68
+void emu68_mem_destroy(emu68_t * const emu68)
+{
+  if (emu68 && emu68->memio) {
+    if (emu68->memio->destroy)
+      emu68->memio->destroy(emu68->memio);
+    else
+      free(emu68->memio);
+    emu68->memio = 0;
+  }
+}
+
+/* Reset memory quick acces table
  */
 void emu68_mem_reset(emu68_t * const emu68)
 {
   if (emu68) {
     int i;
-    for(i=0; i<256; i++) {
-      emu68_mem_reset_area(emu68, (u8)i);
-    }
+    for(i=0; i<256; i++)
+      emu68->mapped_io[i] = (io68_t *)&dummy_io;
   }
 }
 
-/*  Reset memory acces control area to normal state :
+/* Reset memory acces control area to normal state :
  */
 void emu68_mem_reset_area(emu68_t * const emu68, u8 area)
 {
-  emu68->mapped_io[area] = &dummy_io;
+  emu68->mapped_io[area] = (io68_t *)&dummy_io;
 }
