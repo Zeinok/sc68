@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-03 20:46:35 ben>
+ * Time-stamp: <2013-09-04 22:58:21 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -369,20 +369,6 @@ static inline void step68(emu68_t * const emu68)
   (line_func[line])(emu68, reg9, opw);
 }
 
-/* $$$ evil duplicated code from mem68.c */
-static void chkframe(emu68_t * const emu68, addr68_t addr, const int flags)
-{
-  int oldchk;
-
-  assert ( ! (addr & 0x800000) );
-  addr &= MEMMSK68;
-  oldchk = emu68->chk[addr];
-  if ( ( oldchk & flags ) != flags ) {
-    emu68->framechk |= flags;
-    emu68->chk[addr] = oldchk|flags;
-  }
-}
-
 static inline int valid_bp(const unsigned int id) {
   return id < 31u;
 }
@@ -391,7 +377,7 @@ static inline int free_bp(const emu68_t * const emu68, const int id) {
   return !emu68->breakpoints[id].count;
 }
 
-/* Run a single step emulation with all pogramm controls. */
+/* Run a single step emulation with all program controls. */
 static inline int controlled_step68(emu68_t * const emu68)
 {
   assert( emu68->status == EMU68_NRM );
@@ -473,7 +459,7 @@ int emu68_step(emu68_t * const emu68, uint68_t inst)
 
   if (emu68) {
     if (inst == EMU68_STEP) {
-      emu68->framechk = 0;
+      emu68->frm_chk_fl = 0;
       emu68->status = EMU68_NRM;
     }
 
@@ -504,8 +490,8 @@ int emu68_finish(emu68_t * const emu68, uint68_t instructions)
 
 
   if (instructions != EMU68_CONT) {
-    emu68->finish_sp = REG68.a[7];
-    emu68->framechk  = 0;
+    emu68->finish_sp    = REG68.a[7];
+    emu68->frm_chk_fl   = 0;
     emu68->instructions = instructions;
   }
 
@@ -743,7 +729,12 @@ emu68_t * emu68_duplicate(emu68_t * emu68src, const char * dupname)
   /* Copy registers and status */
   emu68->reg          = emu68src->reg;
   emu68->cycle        = emu68src->cycle;
-  emu68->framechk     = emu68src->framechk;
+
+  /* Copy memory access control stuff */
+  emu68->frm_chk_fl   = emu68src->frm_chk_fl;
+  emu68->fst_chk      = emu68src->fst_chk;
+  emu68->lst_chk      = emu68src->lst_chk;
+
   emu68->instructions = emu68src->instructions;
   emu68->finish_sp    = emu68src->finish_sp;
   emu68->status       = emu68src->status;
@@ -796,7 +787,7 @@ void emu68_reset(emu68_t * const emu68)
     REG68.usp    = REG68.a[7];
 
     emu68->cycle        = 0;
-    emu68->framechk     = 0;
+    emu68->frm_chk_fl   = 0;
     emu68->instructions = 0;
     emu68->finish_sp    = -1;
     emu68->status       = EMU68_NRM;

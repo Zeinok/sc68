@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-02 17:00:55 ben>
+ * Time-stamp: <2013-09-05 01:06:49 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -175,7 +175,8 @@ struct _sc68_s {
 
 /** IRQ handler. */
   struct {
-    int pc;                   /**< value of PC at last IRQ.              */
+    int pc;                   /**< value of PC for last IRQ.             */
+    int sr;                   /**< value of sr for lasr IRQ.             */
     int vector;               /**< what was the last IRQ type.           */
     int sysfct;               /**< Last gemdos/bios/xbios function       */
   } irq;
@@ -460,26 +461,9 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
   u32     sr, pc;
 
   /* Store last interruption */
-  sc68->irq.pc     = emu68->reg.pc;
+  sc68->irq.pc     = emu68->inst_pc;   /* or real register values ? */
+  sc68->irq.sr     = emu68->inst_sr;   /* or real register values ? */
   sc68->irq.vector = vector;
-
-  /* $$$ TEMP */
-#if 0
-  if (vector == HWTRACE_VECTOR) {
-    static int historic[256], idx;
-    if ((emu68->reg.pc & 1)) {
-      int j;
-      sc68_debug(sc68, "Address Error ! pc=0x%x\n", emu68->reg.pc);
-      for (j=0; j<256; ++j)
-        sc68_debug(sc68,"%08x%c",historic[(idx-1-j)&255],(j&7)==7 ? '\n':'-');
-
-      emu68->status = EMU68_HLT;
-    } else {
-      historic[idx] = emu68->reg.pc;
-      idx = (idx + 1) & 255;
-    }
-  }
-#endif
 
   /* Exit those really fast as they happen quiet a lot, specially
    * HWTRACE_VECTOR that happem every single instruction. */
@@ -519,9 +503,8 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
    */
   if ( vector < 0x100 ) {
     /* normal vectors, get sr and pc from the stack */
-    sr = Wpeek(emu68, emu68->reg.a[7]);
-    pc = Lpeek(emu68, emu68->reg.a[7]+2);
-    sc68->irq.pc = pc;
+    sc68->irq.sr = sr = Wpeek(emu68, emu68->reg.a[7]);
+    sc68->irq.pc = pc = Lpeek(emu68, emu68->reg.a[7]+2);
 
     if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
       subvec = vector - TRAP_VECTOR(0);
@@ -685,8 +668,12 @@ static int init68k(sc68_t * sc68, int log2mem, int emu68_debug)
   /* Install cookie and interruption handler (debug mode only). */
   emu68_set_handler(sc68->emu68, (emu68_debug & 1) ? irqhandler : 0);
   emu68_set_cookie(sc68->emu68, sc68);
-  sc68->irq.pc     = 0xDEADDAD1;
+
+  /* Some invalid values. */
+  sc68->irq.sysfct = -1;
+  sc68->irq.sr     = -1;
   sc68->irq.vector = -1;
+  sc68->irq.pc     = 0xDEADDAD1;
 
   /* Setup critical 68K registers (SR and SP) */
   sc68->emu68->reg.sr   = 0x2000;
@@ -1287,28 +1274,34 @@ static void stop_track(sc68_t * sc68, const int real_stop)
 static int finish(sc68_t * sc68, addr68_t pc, int sr, uint68_t maxinst)
 {
   int status;
+  emu68_t * const emu68 = sc68->emu68;
 
-  sc68->emu68->reg.pc  = pc;
-  sc68->emu68->reg.sr  = sr;
-  sc68->emu68->reg.a[7] = sc68->emu68->memmsk+1-16;
-  emu68_pushl(sc68->emu68, 0);
+  emu68->reg.pc  = pc;
+  emu68->reg.sr  = sr;
+  emu68->reg.a[7] = emu68->memmsk+1-16;
+  emu68_pushl(emu68, 0);
 
-  status = emu68_finish(sc68->emu68, maxinst);
+  status = emu68_finish(emu68, maxinst);
   while (status == EMU68_STP) {
     sc68_debug(sc68,
                "libsc68: stop #$%04X ignored @ $%6X\n",
-               sc68->emu68->reg.sr, sc68->emu68->reg.pc);
-    status = emu68_finish(sc68->emu68, EMU68_CONT);
+               emu68->reg.sr, emu68->reg.pc);
+    status = emu68_finish(emu68, EMU68_CONT);
   }
 
   if (status != EMU68_NRM) {
     char irqname[32];
-    if (status == EMU68_HLT && (sc68->emu68->reg.sr & 0X3F00) == 0X2F00) {
+    if (status == EMU68_HLT && (emu68->reg.sr & 0X3F00) == 0X2F00) {
       addr68_t vaddr;
-      sc68->irq.vector = sc68->emu68->reg.sr & 0xFF;
-      strcpy(irqname,"NC-");
+
+      sc68->irq.vector = emu68->reg.sr & 0xFF;
+      strcpy(irqname,"NC-");            /* Non-Catched Exception */
       except_name(sc68->irq.vector,irqname+3);
-      vaddr = Lpeek(sc68->emu68, sc68->irq.vector * 4);
+      vaddr = Lpeek(emu68, sc68->irq.vector * 4);
+      if (sc68->irq.sr == -1) {
+        sc68->irq.sr = Wpeek(emu68, emu68->reg.a[7]);
+        sc68->irq.pc = Lpeek(emu68, emu68->reg.a[7]+2);
+      }
       if (vaddr != INTR_ADDR + sc68->irq.vector * 8)
         strcpy(irqname,"CH-");
       if (sc68->irq.vector >= TRAP_VECTOR(0) &&
@@ -1317,7 +1310,7 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr, uint68_t maxinst)
         if (trap_type[n])
           sprintf(irqname+3, "%s-$%X", trap_type[n], sc68->irq.sysfct);
       }
-    } else if (status == EMU68_BRK && !sc68->emu68->instructions) {
+    } else if (status == EMU68_BRK && !emu68->instructions) {
       strcpy(irqname,"inst-overflow");
     } else {
       except_name(sc68->irq.vector,irqname);
@@ -1328,7 +1321,7 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr, uint68_t maxinst)
                " $%X/$%04X irq#%d (%s) @$%X\n",
                sc68->mix.pass_count, (unsigned) pc,
                emu68_status_name(status), status,
-               (unsigned) sc68->emu68->reg.pc, (unsigned) sc68->emu68->reg.sr,
+               (unsigned) emu68->reg.pc, (unsigned) emu68->reg.sr,
                sc68->irq.vector, irqname, (unsigned) sc68->irq.pc);
   }
   return status;

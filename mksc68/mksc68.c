@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-01 19:12:53 ben>
+ * Time-stamp: <2013-09-04 19:43:39 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -50,6 +50,7 @@
 
 int is_interactive   = 0;               /* running in a terminal? */
 int no_readline      = 0;               /* disable readline       */
+int exit_on_fail     = 0;               /* exit on command fail   */
 
 static int exit_code;                   /* last command exit code */
 static int exit_flag;                   /* break interpreter loop */
@@ -81,7 +82,10 @@ static int print_usage(int more)
      "  -V --version        Display sc68 version x.y.z and licence and exit\n"
      "  -v --verbose        Increase verbosity level\n"
      "  -q --quiet          Decrease verbosity level\n"
-     "  -n --no-readline    Don't use readline in interactive mode\n");
+     "  -x --fail-exit      Exit if a command fails\n"
+     "  -n --no-readline    Don't use readline in interactive mode\n"
+      );
+
   if (more) {
    option68_help(stdout,print_option);
    puts("");
@@ -860,6 +864,10 @@ static int interactive(void)
         continue;
     }
     exit_code = cmd_run(argc, argv);
+    if (exit_code && exit_on_fail) {
+      msgdbg("Exit on fail (%s => %d)\n",argv[0],exit_code);
+      exit_flag = 1;
+    }
   }
   dsk_stop();
 
@@ -880,6 +888,7 @@ int main(int argc, char *argv[])
     {"verbose",     0, 0, 'v'},
     {"quiet",       0, 0, 'q'},
     {"no-readline", 0, 0, 'n'},
+    {"fail-exit",   0, 0, 'x'},
     {0,0,0,0}
   };
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
@@ -905,11 +914,12 @@ int main(int argc, char *argv[])
 
     switch (val) {
     case  -1: break;                    /* Scan finish   */
-    case 'h': opt_help++;      break;   /* --help        */
-    case 'V': opt_vers = 1;    break;   /* --version     */
-    case 'v': opt_verb++;      break;   /* --verbose     */
-    case 'q': opt_verb--;      break;   /* --quiet       */
-    case 'n': no_readline = 1; break;   /* --no-readline */
+    case 'h': opt_help++;       break;  /* --help        */
+    case 'V': opt_vers = 1;     break;  /* --version     */
+    case 'v': opt_verb++;       break;  /* --verbose     */
+    case 'q': opt_verb--;       break;  /* --quiet       */
+    case 'n': no_readline = 1;  break;  /* --no-readline */
+    case 'x': exit_on_fail = 1; break;  /* --exit-fail   */
     case '?':                       /* Unknown or missing parameter */
       goto error;
     default:

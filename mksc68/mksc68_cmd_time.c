@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-03 23:42:27 ben>
+ * Time-stamp: <2013-09-04 22:38:10 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -111,7 +111,7 @@ static unsigned ms2fr(unsigned ms, unsigned cpf_or_hz, unsigned clk)
   fr  *= clk;                            /* number of millicycle  */
   cpf *= 1000u;
   fr  += cpf >> 1;
-  fr  /= cpf;                            /* number of milliframe  */
+  fr  /= cpf;                            /* number of frame       */
 
   return (unsigned) fr;
 }
@@ -212,19 +212,6 @@ static void mem_wl(io68_t * pio) {
   mem->pio->w_long(mem->pio);
 }
 
-/* $$$ evil duplicated code from mem68.c */
-static void chkframe(emu68_t * const emu68, addr68_t addr, const int flags)
-{
-  int oldchk;
-
-  addr &= MEMMSK68;
-  oldchk = emu68->chk[addr];
-  if ( ( oldchk & flags ) != flags ) {
-    emu68->framechk |= flags;
-    emu68->chk[addr] = oldchk|flags;
-  }
-}
-
 static void chkframe_range(emu68_t * const emu68,
                            addr68_t from, addr68_t to, const int flags)
 {
@@ -257,14 +244,12 @@ static void mw_wreg(time_io_t * const io, int adr, unsigned int val)
     io->mw.bas = (io->mw.bas & 0xFFFF00FF) | (val <<  8) | (2<<24); break;
   case 0x07: /* MW_BASL */
     io->mw.bas = (io->mw.bas & 0xFFFFFF00) | val         | (1<<24); break;
-
   case 0x0f: /* MW_ENDH */
     io->mw.end = (io->mw.end & 0xFF00FFFF) | (val << 16) | (4<<24); break;
   case 0x11: /* MW_ENDM */
     io->mw.end = (io->mw.end & 0xFFFF00FF) | (val <<  8) | (2<<24); break;
   case 0x13: /* MW_ENDL */
     io->mw.end = (io->mw.end & 0xFFFFFF00) | val         | (1<<24); break;
-
   case 0x21: /* MW_MODE */
     io->mw.mod = val; break;
   }
@@ -273,7 +258,6 @@ static void mw_wreg(time_io_t * const io, int adr, unsigned int val)
        (io->mw.bas & msk) == msk &&
        (io->mw.end & msk) == msk &&
        io->mw.bas < io->mw.end) {
-
     io->mw.bas &= 0xFFFFFF;
     io->mw.end &= 0xFFFFFF;
     /* msgdbg("MW-CHK %06x .. %06x\n", io->mw.bas, io->mw.end); */
@@ -556,49 +540,36 @@ static int unhook_ios(measureinfo_t * mi)
 {
   int i;
 
-
   if (mi->emu68->memio == &mi->memio.io) {
     msgdbg("unhook memio '%-14s'\n", mi->memio.io.name);
     mi->emu68->memio = mi->memio.pio;
     mi->memio.pio = 0;
-  } else {
-    msgwrn("Can not unhook memio '%s', hooked to '%s'\n",
-           mi->memio.io.name,
-           mi->memio.pio ? mi->memio.pio->name : "(nil)");
   }
 
   for (i=0; i<5; ++i) {
     io68_t    * pio = mi->ios68[i];
     int        line = (pio->addr_lo>>8) & 0xFF;
     time_io_t * ti  = mi->timeios+i;
-
-    msgdbg("unhook io #%d '%-14s' addr:$%06x-%06x #%02x, counts:%u (%u/%u)\n",
-           i, ti->io.name, (unsigned) ti->io.addr_lo & 0xFFFFFF ,
-           (unsigned)  ti->io.addr_hi & 0xFFFFFF,
-           line, ti->r+ti->w, ti->r, ti->w);
-    if (mi->emu68->mapped_io[line] != &ti->io) {
-      io68_t * mio = mi->emu68->mapped_io[line];
-      io68_t * tio = &ti->io;
-
-      msgerr("%p != %p\n"
-             "i:%d\n"
-             "#%02x\n"
-             "pio: %p '%s' addr:$%06x-%06x\n"
-             "tio: %p '%s' addr:$%06x-%06x\n"
-             "mio: %p '%s' addr:$%06x-%06x\n"
-             ,
-             (void*)mi->emu68->mapped_io[line], (void*)&ti->io,
-             i, line,
-             (void*)pio,pio->name,(uint_t)pio->addr_lo,(uint_t)pio->addr_hi,
-             (void*)tio,tio->name,(uint_t)tio->addr_lo,(uint_t)tio->addr_hi,
-             (void*)mio,mio->name,(uint_t)mio->addr_lo,(uint_t)mio->addr_hi );
+    if (mi->emu68->mapped_io[line] == &ti->io) {
+      msgdbg("unhook io #%d '%-14s' addr:$%06x-%06x #%02x, counts:%u (%u/%u)\n",
+             i, ti->io.name, (unsigned) ti->io.addr_lo & 0xFFFFFF ,
+             (unsigned)  ti->io.addr_hi & 0xFFFFFF,
+             line, ti->r+ti->w, ti->r, ti->w);
+      mi->emu68->mapped_io[line] = ti->pio;
     }
-
-    assert(mi->emu68->mapped_io[line] == &ti->io);
-    mi->emu68->mapped_io[line] = ti->pio;
   }
   return 0;
 }
+
+enum {
+  EXIT_OK      = 0,                     /* exit success */
+  EXIT_GENERIC,                         /* exit with generic error */
+  EXIT_INIT,                            /* error during init */
+  EXIT_PLAY,                            /* error during play */
+  EXIT_LOOP,                            /* error during loop */
+  EXIT_MAX_PASS,                        /* could not find a loop */
+  EXIT_ST_WRONG,                        /* unexpected error  */
+};
 
 static void timemeasure_init(measureinfo_t * mi)
 {
@@ -608,7 +579,7 @@ static void timemeasure_init(measureinfo_t * mi)
   int sampling;
 
   mi->isplaying = 2;
-  mi->code      = -1;
+  mi->code      = EXIT_INIT;
 
   memset(&create68,0,sizeof(create68));
   create68.name        = "mksc68-time";
@@ -635,6 +606,7 @@ static void timemeasure_init(measureinfo_t * mi)
   disk = dsk_get_disk();
   if (sc68_open(mi->sc68, disk) < 0)
     return;
+
   mus = &disk->mus[mi->track-1];
   mi->replayhz = mus->frq;
   mi->location = mus->a0;
@@ -656,7 +628,7 @@ static void timemeasure_init(measureinfo_t * mi)
     return;
   mi->sampling = sampling;
 
-  mi->code = 0;
+  mi->code = EXIT_OK;
 }
 
 
@@ -683,7 +655,7 @@ static void timemeasure_run(measureinfo_t * mi)
   int      updated;           /* has been updated this pass ?       */
 
   mi->isplaying = 1;
-  mi->code      = -1;
+  mi->code      = EXIT_OK;
 
   msgdbg("time-measure: run [track:%d max:%d stp:%d sil:%d spr:%u hz:%u]\n",
          mi->track, mi->max_ms, mi->stp_ms, mi->sil_ms,
@@ -694,6 +666,11 @@ static void timemeasure_run(measureinfo_t * mi)
   cpf = cycle_per_frame( mi->replayhz, mi->emu68->clock );
 
   sli_cnt = frm_cnt = 0;
+
+  /* The trick to measure loop length is to run up to the previously
+   * detected end, reset the menory access flags and continue as if it
+   * were a new song.
+   */
   if (mi->startfr) {
     mi->startms = fr2ms(mi->startfr, cpf, mi->emu68->clock);
     msgdbg("time-measure: now measuring loop, skipping %u frames (%s)\n",
@@ -704,19 +681,31 @@ static void timemeasure_run(measureinfo_t * mi)
       ++sli_cnt;
       if (code & SC68_IDLE)
         continue;
-      if (code & (SC68_CHANGE|SC68_END))
-        msgwrn("sc68_process() returns an wrong return code (%x) at frame %u (%s)\n",
-               code, frm_cnt, str_timefmt(str,32,fr2ms(frm_cnt, cpf, mi->emu68->clock)));
+      if (code & (SC68_CHANGE|SC68_END)) {
+        msgwrn(
+          "sc68_process() returns an wrong return code (%x) at frame %u (%s)\n",
+          code, frm_cnt,
+          str_timefmt(str,32,fr2ms(frm_cnt, cpf, mi->emu68->clock))
+          );
+        mi->code = EXIT_ST_WRONG;
+        break;
+      }
       assert( (code & (SC68_CHANGE|SC68_END)) == 0 );
       assert( n == slice );
       if (++frm_cnt == mi->startfr)
         break;
     }
+    if (code == SC68_ERROR)
+      mi->code = EXIT_LOOP;
+    if (mi->code != EXIT_OK)
+      return;
+
     emu68_chkset(mi->emu68, 0, 0, 0);   /* reset memory access flags */
     msgdbg("time-measure: %u frames skipped\n", frm_cnt);
   }
 
-  sil_val = (mi->sil_ms > 0) ? 0x40 * slice * 2 : 0; /* 0 won't trigger silent detection */
+  /* sil_val==0 won't trigger silent detection */
+  sil_val = (mi->sil_ms > 0) ? 0x40 * slice * 2 : 0;
   sil_frm = sil_nop;
 
   sil_max = ms2fr(mi->sil_ms, cpf, mi->emu68->clock);
@@ -738,9 +727,15 @@ static void timemeasure_run(measureinfo_t * mi)
          code = sc68_process(mi->sc68,buf,&n),
          code != SC68_ERROR ) {
     ++sli_cnt;
-    if (code & (SC68_CHANGE|SC68_END))
-      msgwrn("sc68_process() returns an wrong return code (%x) at frame %u (%s)\n",
-             code, frm_cnt, str_timefmt(str,32,fr2ms(frm_cnt, cpf, mi->emu68->clock)));
+    if (code & (SC68_CHANGE|SC68_END)) {
+      msgwrn(
+        "sc68_process() returns an wrong return code (%x) at frame %u (%s)\n",
+             code, frm_cnt,
+             str_timefmt(str,32,fr2ms(frm_cnt, cpf, mi->emu68->clock))
+        );
+      mi->code = EXIT_ST_WRONG;
+      break;
+    }
     assert( (code & (SC68_CHANGE|SC68_END)) == 0 );
     assert( n == slice );
 
@@ -803,13 +798,24 @@ static void timemeasure_run(measureinfo_t * mi)
     /* If no emulation pass has been run by sc68_process() we are done here */
     if (code & SC68_IDLE) continue;
 
-    if (mi->emu68->framechk) {
+    if (mi->emu68->frm_chk_fl) {
       /* something as change here */
       upd_frm = frm_cnt;
       updated = 1;
-      /* msgdbg("update detected at frame %d (%s)\n", */
-      /*        (unsigned) upd_frm, */
-      /*        str_timefmt(str+0x00,0x200,fr2ms(upd_frm, cpf, mi->emu68->clock))); */
+
+      msgdbg("AC #%d (%s) %c%c%c:%06x/%06x %c%c%c:%06x/%06x\n",
+             (unsigned) upd_frm,
+             str_timefmt(str+0x00,0x200,fr2ms(upd_frm, cpf, mi->emu68->clock)),
+             (mi->emu68->fst_chk.fl & EMU68_X) ? 'X' : '.',
+             (mi->emu68->fst_chk.fl & EMU68_W) ? 'W' : '.',
+             (mi->emu68->fst_chk.fl & EMU68_R) ? 'R' : '.',
+             (unsigned)mi->emu68->fst_chk.pc,
+             (unsigned)mi->emu68->fst_chk.ad,
+             (mi->emu68->lst_chk.fl & EMU68_X) ? 'X' : '.',
+             (mi->emu68->lst_chk.fl & EMU68_W) ? 'W' : '.',
+             (mi->emu68->lst_chk.fl & EMU68_R) ? 'R' : '.',
+             (unsigned)mi->emu68->lst_chk.pc,
+             (unsigned)mi->emu68->lst_chk.ad);
     }
 
     /* That was a new frame. Let's do the memory access checking trick. */
@@ -817,6 +823,7 @@ static void timemeasure_run(measureinfo_t * mi)
 
     if ( frm_cnt > frm_max ) {
       msgerr("reach max limit (%ufr %ums)\n", frm_max, mi->max_ms);
+      mi->code = EXIT_MAX_PASS;
       break;
     }
 
@@ -838,13 +845,22 @@ static void timemeasure_run(measureinfo_t * mi)
     }
   }
 
+  if (code == SC68_ERROR)
+    mi->code = EXIT_PLAY;
+
+  if (mi->code != EXIT_OK)
+    return;
 
   /* Got only silent ? */
   if (sil_frm < 4) {
     msgwrn("Is this a song of silent ???\n");
   }
 
-  /* Don't want to do this while computing loops */
+  /* Don't want to do this while computing loops.
+   *
+   * $$$ Ben: Or do we ? At least access range might help to detect
+   *          some errors.
+   */
   if (!mi->startms) {
     /* memory access */
     access_range(mi);
@@ -889,9 +905,7 @@ static void timemeasure_run(measureinfo_t * mi)
     msgdbg("set time: %u fr (%s) -- loop: %u fr (%s)\n",
            mi->frames, str_timefmt(str+0x00, 32, mi->timems),
            mi->loopfr, str_timefmt(str+0x20, 32, mi->loopms) );
-    mi->code   = 0;
   }
-
 }
 
 static void timemeasure_end(measureinfo_t * mi)
@@ -915,11 +929,11 @@ static void * time_thread(void * userdata)
   assert( mi == &measureinfo );
 
   timemeasure_init(mi);
-  if (!mi->code)
+  if (mi->code == EXIT_OK)
     timemeasure_run(mi);
   timemeasure_end(mi);
 
-  if (!mi->code && mi->loopfr) {
+  if (mi->code == EXIT_OK && mi->loopfr) {
     unsigned startfr = mi->frames;
     timemeasure_init(mi);
     if (!mi->code) {
@@ -943,7 +957,7 @@ int time_measure(measureinfo_t * mi, int trk,
   ts.tv_sec  = 180;
   ts.tv_nsec = 0;
 
-  msgdbg("time_measure() trk:%d, stp:%dms, max:%dms sil:%dms, time-out:%d\"\n",
+  msgdbg("time_measure() trk:%d, stp:%dms, max:%dms sil:%dms, time-out:%d\n",
          trk, stp_ms, max_ms, sil_ms, (int)ts.tv_sec);
 
   assert(mi);
@@ -971,7 +985,8 @@ int time_measure(measureinfo_t * mi, int trk,
   }
 
 #ifdef HAVE_PTHREAD_TIMEDJOIN_NP
-  msgdbg("time-measure thread created ... Waiting for %d seconds\n", (int)ts.tv_sec);
+  msgdbg("time-measure thread created ... Waiting for %d seconds\n",
+         (int)ts.tv_sec);
   ts.tv_sec += time(0);
   err = pthread_timedjoin_np(mi->thread, 0, &ts);
   if (err == ETIMEDOUT) {
@@ -979,7 +994,8 @@ int time_measure(measureinfo_t * mi, int trk,
     err = pthread_cancel(mi->thread);
   }
 #else
-  msgdbg("time-measure thread created ... Waiting for %d seconds\n", (int)ts.tv_sec);
+  msgdbg("time-measure thread created ... Waiting for %d seconds\n",
+         (int)ts.tv_sec);
   err = pthread_join(mi->thread, 0);
 #endif
   msgdbg("time-measure thread ended with: %d, %d\n", err, mi->code);

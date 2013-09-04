@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      1999/03/13
  */
-/* Time-stamp: <2013-09-03 18:24:19 ben> */
+/* Time-stamp: <2013-09-04 20:50:20 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -399,6 +399,65 @@ int68_t mem68_popw(emu68_t * const emu68);
 /**
  * @}
  */
+
+
+/**
+ * Test for direct memory access or IO quick table access
+ */
+static inline int mem68_is_io(const addr68_t addr) {
+  return addr & 0x800000;
+}
+
+/**
+ * Set memory access check flags.
+ */
+static inline void chkframe(emu68_t * const emu68,
+                            addr68_t addr, const int flags)
+{
+  int chgchk, newchk;
+  /* assert( ! mem68_is_io(addr) ); */
+  addr &= MEMMSK68;
+  chgchk  = emu68->chk[addr];           /* current value */
+  newchk  = chgchk | flags;             /* new value */
+  chgchk ^= newchk;                     /* what's changed ? */
+  if (chgchk) {
+    emu68->lst_chk.pc = emu68->inst_pc;
+    emu68->lst_chk.ad = addr;
+    emu68->lst_chk.fl = chgchk;
+    if (!emu68->frm_chk_fl)
+      emu68->fst_chk = emu68->lst_chk;
+    emu68->frm_chk_fl |= chgchk;
+    emu68->chk[addr] = newchk;
+  }
+}
+
+static inline void chk_buseven(emu68_t * const emu68)
+{
+  if (emu68->bus_addr & 1)
+    ;
+}
+
+static inline void chkframe_b(emu68_t * const emu68, const int flags)
+{
+  chkframe(emu68, emu68->bus_addr, flags);
+}
+
+static inline void chkframe_w(emu68_t * const emu68, const int flags)
+{
+  chk_buseven(emu68);
+  chkframe(emu68, emu68->bus_addr+0, flags);
+  chkframe(emu68, emu68->bus_addr+1, flags);
+}
+
+static inline void chkframe_l(emu68_t * const emu68, const int flags)
+{
+  chk_buseven(emu68);
+  chkframe(emu68, emu68->bus_addr+0, flags);
+  chkframe(emu68, emu68->bus_addr+1, flags);
+  chkframe(emu68, emu68->bus_addr+2, flags);
+  chkframe(emu68, emu68->bus_addr+3, flags);
+}
+
 
 EMU68_EXTERN
 /**

@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      1999-03-13
  */
-/* Time-stamp: <2013-09-03 20:00:45 ben> */
+/* Time-stamp: <2013-09-04 16:27:27 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -203,7 +203,14 @@ struct emu68_s {
   /* Memory access. */
   addr68_t bus_addr;        /**< bus address for memory access.     */
   int68_t  bus_data;        /**< bus data for memory access.        */
-  int      framechk;        /**< ORed chk change for current frame. */
+
+
+  int      frm_chk_fl;      /**< ORed chk change for current frame. */
+  struct {
+    unsigned pc;
+    unsigned ad;
+    int fl;
+  } fst_chk, lst_chk;
   u8     * chk;             /**< Access-Control-Memory buffer.      */
 
   emu68_bp_t breakpoints[31];           /**< Hardware breakpoints.  */

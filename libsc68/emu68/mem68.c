@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-03 23:39:02 ben>
+ * Time-stamp: <2013-09-05 00:53:48 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -31,43 +31,6 @@
 
 #include "mem68.h"
 #include "assert68.h"
-
-/** Test for direct memory access or IO quick table access */
-#define ISIO68(ADDR) ((ADDR)&0x800000)
-
-/* Set memory access check flags. */
-static void chkframe(emu68_t * const emu68, addr68_t addr, const int flags)
-{
-  int oldchk;
-
-  assert( ! ISIO68(addr) );
-  addr &= MEMMSK68;
-  oldchk = emu68->chk[addr];
-  if ( ( oldchk & flags ) != flags ) {
-    emu68->framechk |= flags;
-    emu68->chk[addr] = oldchk|flags;
-  }
-}
-
-static void chkframe_b(emu68_t * const emu68, const int flags)
-{
-  chkframe(emu68, emu68->bus_addr, flags);
-}
-
-static void chkframe_w(emu68_t * const emu68, const int flags)
-{
-  chkframe(emu68, emu68->bus_addr+0, flags);
-  chkframe(emu68, emu68->bus_addr+1, flags);
-}
-
-static void chkframe_l(emu68_t * const emu68, const int flags)
-{
-  chkframe(emu68, emu68->bus_addr+0, flags);
-  chkframe(emu68, emu68->bus_addr+1, flags);
-  chkframe(emu68, emu68->bus_addr+2, flags);
-  chkframe(emu68, emu68->bus_addr+3, flags);
-}
-
 
 /* ,--------------------------------------------------------.
  * |                                                        |
@@ -176,7 +139,7 @@ void mem68_read_b(emu68_t * const emu68)
 {
   const addr68_t addr = emu68->bus_addr;
 
-  if (ISIO68(addr)) {
+  if (mem68_is_io(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->r_byte(io);
   } else if (!emu68->memio) {
@@ -189,7 +152,7 @@ void mem68_read_b(emu68_t * const emu68)
 void mem68_read_w(emu68_t * const emu68)
 {
   const addr68_t addr = emu68->bus_addr;
-  if (ISIO68(addr)) {
+  if (mem68_is_io(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->r_word(io);
   } else if (!emu68->memio) {
@@ -203,7 +166,7 @@ void mem68_read_w(emu68_t * const emu68)
 void mem68_read_l(emu68_t * const emu68)
 {
   const addr68_t addr = emu68->bus_addr;
-  if (ISIO68(addr)) {
+  if (mem68_is_io(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->r_long(io);
   } else if (!emu68->memio) {
@@ -222,7 +185,7 @@ void mem68_read_l(emu68_t * const emu68)
 void mem68_write_b(emu68_t * const emu68)
 {
   const addr68_t addr = emu68->bus_addr;
-  if (ISIO68(addr)) {
+  if (mem68_is_io(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->w_byte(io);
   } else if (!emu68->memio) {
@@ -235,7 +198,7 @@ void mem68_write_b(emu68_t * const emu68)
 void mem68_write_w(emu68_t * const emu68)
 {
   const addr68_t addr = emu68->bus_addr;
-  if (ISIO68(addr)) {
+  if (mem68_is_io(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->w_word(io);
   } else if (!emu68->memio) {
@@ -250,7 +213,7 @@ void mem68_write_w(emu68_t * const emu68)
 void mem68_write_l(emu68_t * const emu68)
 {
   const addr68_t addr = emu68->bus_addr;
-  if (ISIO68(addr)) {
+  if (mem68_is_io(addr)) {
     io68_t * const io = emu68->mapped_io[(u8)((addr)>>8)];
     io->w_long(io);
   } else if (!emu68->memio) {
@@ -268,46 +231,48 @@ void mem68_write_l(emu68_t * const emu68)
  *   as long I don't try to make 68000 execute
  *   @ IO address, I assume it is not possible !
  */
-
 int68_t mem68_nextw(emu68_t * const emu68)
 {
-  int68_t v;
-  u8 *mem;
-
-  assert( ! ISIO68(REG68.pc) );
-
-  mem = emu68->mem + ( REG68.pc & MEMMSK68 );
-  v  = (int68_t)(s8)mem[0]<<8;
-  v |=              mem[1];
-
-  if ( emu68->chk ) {
-    chkframe(emu68, REG68.pc+0, EMU68_R);
-    chkframe(emu68, REG68.pc+1, EMU68_R);
-  }
+  const addr68_t const addr = REG68.pc;
+  io68_t * const io =
+    mem68_is_io(addr)
+    ? emu68->mapped_io[(u8)((addr)>>8)]
+    : emu68->memio
+    ;
   REG68.pc += 2;
-  return v;
+
+  if (!io) {
+    u8 * const mem = emu68->mem + ( addr & MEMMSK68 );
+    return ( (int68_t) (s8)mem[0] << 8 ) | mem[1];
+  } else {
+    emu68->bus_addr = addr;
+    io->r_word(io);
+    return (int68_t)(s16)emu68->bus_data;
+  }
 }
 
 int68_t mem68_nextl(emu68_t * const emu68)
 {
-  int68_t v;
-  u8 *mem;
-
-  assert( ! ISIO68(REG68.pc) );
-
-  mem = emu68->mem + ( REG68.pc & MEMMSK68 );
-  v  = (int68_t)(s8)mem[0]<<24;
-  v |=              mem[1]<<16;
-  v |=              mem[2]<< 8;
-  v |=              mem[3];
-  if ( emu68->chk ) {
-    chkframe(emu68, REG68.pc+0, EMU68_R);
-    chkframe(emu68, REG68.pc+1, EMU68_R);
-    chkframe(emu68, REG68.pc+2, EMU68_R);
-    chkframe(emu68, REG68.pc+3, EMU68_R);
-  }
+  const addr68_t const addr = REG68.pc;
+  io68_t * const io =
+    mem68_is_io(addr)
+    ? emu68->mapped_io[(u8)((addr)>>8)]
+    : emu68->memio
+    ;
   REG68.pc += 4;
-  return v;
+
+  if (!io) {
+    u8 * const mem= emu68->mem + ( addr & MEMMSK68 );
+    return
+      ( (int68_t)(s8)mem[0] << 24 ) |
+      ( (int68_t)    mem[1] << 16 ) |
+      ( (int68_t)    mem[2] <<  8 ) |
+      (              mem[3]       ) ;
+  } else {
+    emu68->bus_addr = addr;
+    io->r_long(io);
+    return (int68_t)(s32)emu68->bus_data;
+  }
 }
 
 void mem68_pushw(emu68_t * const emu68, const int68_t v)
