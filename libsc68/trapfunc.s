@@ -4,7 +4,7 @@
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
-;;; Time-stamp: <2013-09-01 21:52:50 ben>
+;;; Time-stamp: <2013-09-06 02:45:19 ben>
 
 
 ;;; Unhandled trap vector and function will execute a stop with a
@@ -41,14 +41,18 @@ install_trap:
 	move.l	a0,$B8.w
 
 	;; Install system timer C
+	;; 
+	;; $$$ TEMP: enable interuptions for A/B/D (not started)
 
-	;; tCdef:	dc.w	$114, $fa1d, $fa23, $0f15
-
-	clr.b	$fffffa1d.w	; stop timer-C and D (don't care)
+	lea	$fffffa00.w,a1
+	clr.b	$19(a1)		; stop timer-A
+	clr.b	$1b(a1)		; stop timer-B
+	clr.b	$1d(a1)		; stop timer-C/D
 	lea	timerc(pc),a0
 	move.l	a0,$114.w	; interrupt vector
-	bset.b	#5,$fffffa09.w	; enable interrupt
-	bset.b	#5,$fffffa15.w	; unmask interrupt
+	move.w	#$2130,d0	; set TA/TB/TC/TD
+	movep.w	d0,$07(a1)	; IER
+	movep.w	d0,$13(a1)	; IMR
 	move.b	#2457600/(64*200),$fffffa23.w
 	move.b  #$50,$fffffa1d.w ; prediv is 64
 

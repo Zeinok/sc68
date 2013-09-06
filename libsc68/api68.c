@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-05 01:06:49 ben>
+ * Time-stamp: <2013-09-06 02:53:58 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -1821,8 +1821,14 @@ int sc68_process(sc68_t * sc68, void * buf16st, int * _n)
 
         /* Run 68K emulator */
         status = finish(sc68, sc68->playaddr+8, 0x2300, PLAY_MAX_INST);
-        if (status == EMU68_NRM)
+        if (status == EMU68_NRM) {
+          /* $$$ Fix some replays (tao's intensity 200 for one) that
+             assumes the music driver is running under interruption
+             and do not restore the SR by themself. Need to be sure
+             this does not disrupt other musics. */
+          sc68->emu68->reg.sr = 0x2300;
           status = emu68_interrupt(sc68->emu68, sc68->mix.cycleperpass);
+        }
         if (status != EMU68_NRM) {
           error_addx(sc68,
                      "libsc68: abnormal 68K status %d (%s) in play pass %u\n",
