@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-04 22:38:10 ben>
+ * Time-stamp: <2013-09-07 03:06:17 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -334,6 +334,8 @@ struct measureinfo_s {
   unsigned tc:1;        /* MFP Timer-C used by this track           */
   unsigned td:1;        /* MFP Timer-D used by this track           */
   unsigned pl:1;        /* Amiga/Paula used by this track           */
+  hwflags68_t hwflags;  /* Save track hardware flags                */
+
   time_io_t timeios[5]; /* hooked IOs                               */
   mem_io_t  memio;
   struct {
@@ -402,13 +404,14 @@ static void access_range(measureinfo_t * mi)
 {
   unsigned i,j;
   unsigned stack;
-  unsigned start = 0x1000 /* mi->location & mi->emu68->memmsk */;
+  unsigned start = mi->location & mi->emu68->memmsk;
   unsigned endsp = ( mi->emu68->reg.a[7] - 1 ) & mi->emu68->memmsk;
 
   struct {
     unsigned min, max;
-  } mod[4];
+  } mod[4];                             /* R,W,X,A */
 
+  /* Walk the stack */
   for ( stack = endsp;
         stack >= start && ( mi->emu68->chk[stack] & ( EMU68_R | EMU68_W ) );
         --stack)
@@ -481,7 +484,8 @@ static int hook_ios(measureinfo_t * mi)
 {
   int i;
 
-  mi->memio.io.r_byte = mem_rb;            /* hook memory access handler */
+/* hook memory access handler */
+  mi->memio.io.r_byte = mem_rb;
   mi->memio.io.r_word = mem_rw;
   mi->memio.io.r_long = mem_rl;
   mi->memio.io.w_byte = mem_wb;
@@ -551,7 +555,7 @@ static int unhook_ios(measureinfo_t * mi)
     int        line = (pio->addr_lo>>8) & 0xFF;
     time_io_t * ti  = mi->timeios+i;
     if (mi->emu68->mapped_io[line] == &ti->io) {
-      msgdbg("unhook io #%d '%-14s' addr:$%06x-%06x #%02x, counts:%u (%u/%u)\n",
+      msgdbg("unhook io #%d '%-14s' addr:$%06x-%06x #%02x, %u/%u/%u\n",
              i, ti->io.name, (unsigned) ti->io.addr_lo & 0xFFFFFF ,
              (unsigned)  ti->io.addr_hi & 0xFFFFFF,
              line, ti->r+ti->w, ti->r, ti->w);
@@ -567,6 +571,8 @@ enum {
   EXIT_INIT,                            /* error during init */
   EXIT_PLAY,                            /* error during play */
   EXIT_LOOP,                            /* error during loop */
+  EXIT_SILENT,                          /* only silence */
+  EXIT_NOHW,                            /* no relevant hardware found */
   EXIT_MAX_PASS,                        /* could not find a loop */
   EXIT_ST_WRONG,                        /* unexpected error  */
 };
@@ -610,9 +616,17 @@ static void timemeasure_init(measureinfo_t * mi)
   mus = &disk->mus[mi->track-1];
   mi->replayhz = mus->frq;
   mi->location = mus->a0;
+  mi->hwflags  = mus->hwflags;          /* Save hwflags */
 
-  if ( mus->hwflags.bit.ym )
-    mus->hwflags.bit.ste = 1; /* Force STE on YM (silence detection) */
+  /* Set all hardware flags. */
+  if (mus->hwflags.bit.amiga) {
+    mus->hwflags.all = 0;
+    mus->hwflags.bit.amiga = 1;
+  } else {
+    mus->hwflags.all = 0;
+    mus->hwflags.bit.ym     = 1;
+    mus->hwflags.bit.ste    = 1;
+  }
 
   if (sc68_play(mi->sc68, mi->track, SC68_INF_LOOP) < 0)
     return;
@@ -853,27 +867,38 @@ static void timemeasure_run(measureinfo_t * mi)
 
   /* Got only silent ? */
   if (sil_frm < 4) {
-    msgwrn("Is this a song of silent ???\n");
+    msgwrn("is this a song of silent ???\n");
+    /* $$$ Do we want this to be an error ? */
+    mi->code = EXIT_SILENT;
+    return;
   }
 
   /* Don't want to do this while computing loops.
    *
    * $$$ Ben: Or do we ? At least access range might help to detect
-   *          some errors.
+   *          some errors. In the other hand it might also be a
+   *          problem.
    */
   if (!mi->startms) {
     /* memory access */
     access_range(mi);
     access_timers(mi);
     access_ios(mi);
-
-    /* Display interrupt vectors */
-    for (i=0; i<sizeof(mi->vector)/sizeof(*mi->vector); ++i)
-      if (mi->vector[i].cnt)
-        msginf("vector #%03d \"%s\" triggered %d times fist:%u last:%u\n",
-               i, vectorname(i),
-               mi->vector[i].cnt, mi->vector[i].fst, mi->vector[i].lst);
   }
+
+  /* Display interrupt vectors */
+  for (i=0; i<sizeof(mi->vector)/sizeof(*mi->vector); ++i)
+    if (mi->vector[i].cnt)
+      msginf("vector #%03d \"%s\" triggered %d times fist:%u last:%u\n",
+             i, vectorname(i),
+             mi->vector[i].cnt, mi->vector[i].fst, mi->vector[i].lst);
+
+  if (!mi->ym && !mi->mw && !mi->pl) {
+    msgerr("no relevant hardware detected ???\n");
+    mi->code = EXIT_NOHW;
+    return;
+  }
+
 
   if (mi->frames) {
     unsigned frames, timems;
@@ -934,7 +959,7 @@ static void * time_thread(void * userdata)
   timemeasure_end(mi);
 
   if (mi->code == EXIT_OK && mi->loopfr) {
-    unsigned startfr = mi->frames;
+    unsigned const startfr = mi->frames;
     timemeasure_init(mi);
     if (!mi->code) {
       mi->startfr = startfr;
@@ -952,7 +977,9 @@ int time_measure(measureinfo_t * mi, int trk,
                  int stp_ms, int max_ms, int sil_ms)
 {
   int ret = -1, err;
-  int tracks = dsk_get_tracks();
+  const int    tracks = dsk_get_tracks();
+  disk68_t  * const d = dsk_get_disk();
+  music68_t * const m = d->mus + trk - 1;
   struct timespec ts;
   ts.tv_sec  = 180;
   ts.tv_nsec = 0;
@@ -999,13 +1026,12 @@ int time_measure(measureinfo_t * mi, int trk,
   err = pthread_join(mi->thread, 0);
 #endif
   msgdbg("time-measure thread ended with: %d, %d\n", err, mi->code);
+
+
   ret = err ? -1 : mi->code;
   if (!ret) {
-    disk68_t  * d = dsk_get_disk();
-    music68_t * m = d->mus+trk-1;
     char        s1[32],s2[32],s3[32],s4[32];
     unsigned    total_fr, total_ms;
-
 
     m->first_fr = mi->frames;
     m->first_ms = mi->timems;
@@ -1017,16 +1043,16 @@ int time_measure(measureinfo_t * mi, int trk,
     m->has.time = 1;
     m->has.loop = 1;
 
-    m->hwflags.all           = 0;
-    m->hwflags.bit.ym        = mi->ym;
-    m->hwflags.bit.ste       = mi->mw;
-    m->hwflags.bit.amiga     = mi->pl;
-    m->hwflags.bit.stechoice = 0;
-    m->hwflags.bit.timers    = 1;
-    m->hwflags.bit.timera    = mi->ta;
-    m->hwflags.bit.timerb    = mi->tb;
-    m->hwflags.bit.timerc    = mi->tc;
-    m->hwflags.bit.timerd    = mi->td;
+    mi->hwflags.all           = 0;
+    mi->hwflags.bit.ym        = mi->ym;
+    mi->hwflags.bit.ste       = mi->mw;
+    mi->hwflags.bit.amiga     = mi->pl;
+    mi->hwflags.bit.stechoice = 0;
+    mi->hwflags.bit.timers    = 1;
+    mi->hwflags.bit.timera    = mi->ta;
+    mi->hwflags.bit.timerb    = mi->tb;
+    mi->hwflags.bit.timerc    = mi->tc;
+    mi->hwflags.bit.timerd    = mi->td;
 
     /* mi->minaddr; */
     /* mi->maxaddr; */
@@ -1037,12 +1063,19 @@ int time_measure(measureinfo_t * mi, int trk,
            m->loops-1,
            m->loops_ms ? str_timefmt(s2,sizeof(s2),m->loops_ms) : "no loop",
            str_timefmt(s3,sizeof(s3),/* m-> */total_ms),
-           str_hardware(s4,sizeof(s4),m->hwflags.all)
+           str_hardware(s4,sizeof(s4),mi->hwflags.all)
       );
   }
+
+  /* Restore hardware flags (either unmodified in case of error, or
+   * detected in case of success. */
+  m->hwflags = mi->hwflags;
+
+  /* Just clean up the struct. */
   memset(mi,0,sizeof(*mi));
 
 error:
+
   return ret;
 }
 

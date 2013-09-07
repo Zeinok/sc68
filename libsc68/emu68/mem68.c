@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-05 00:53:48 ben>
+ * Time-stamp: <2013-09-06 23:01:24 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -30,6 +30,8 @@
 #endif
 
 #include "mem68.h"
+#include "error68.h"
+#include "emu68.h"
 #include "assert68.h"
 
 /* ,--------------------------------------------------------.
@@ -44,14 +46,14 @@
 
 
 /* ,--------------------------------------------------------.
- * |                      Dummy IO                          |
+ * |                      Debug IO                          |
  * `--------------------------------------------------------'
  */
 
 static void memchk_rb(io68_t * const io) {
   emu68_t * const emu68 = io->emu68;
   const addr68_t addr = emu68->bus_addr;
-
+  assert(emu68->chk);
   emu68->bus_data = emu68->mem[addr&MEMMSK68];
   chkframe_b(emu68, EMU68_R);
 }
@@ -59,6 +61,7 @@ static void memchk_rb(io68_t * const io) {
 static void memchk_rw(io68_t * const io) {
   emu68_t * const emu68 = io->emu68;
   const u8 * const mem = emu68->mem+(emu68->bus_addr&MEMMSK68);
+  assert(emu68->chk);
   emu68->bus_data = (mem[0]<<8) + mem[1];
   chkframe_w(emu68, EMU68_R);
 }
@@ -66,6 +69,7 @@ static void memchk_rw(io68_t * const io) {
 static void memchk_rl(io68_t * const io) {
   emu68_t * const emu68 = io->emu68;
   const u8 * const mem = emu68->mem+(emu68->bus_addr&MEMMSK68);
+  assert(emu68->chk);
   emu68->bus_data = (mem[0]<<24) + (mem[1]<<16) + (mem[2]<<8) + mem[3];
   chkframe_l(emu68, EMU68_R);
 }
@@ -73,6 +77,7 @@ static void memchk_rl(io68_t * const io) {
 static void memchk_wb(io68_t * const io) {
   emu68_t * const emu68 = io->emu68;
   const addr68_t addr = emu68->bus_addr;
+  assert(emu68->chk);
   emu68->mem[addr&MEMMSK68] = emu68->bus_data;
   chkframe_b(emu68, EMU68_W);
 }
@@ -82,6 +87,7 @@ static void memchk_ww(io68_t * const io)
   emu68_t * const emu68 = io->emu68;
   u8 * mem = emu68->mem + (emu68->bus_addr&MEMMSK68);
   int68_t v = emu68->bus_data;
+  assert(emu68->chk);
   mem[1] = v; v>>=8; mem[0] = v;
   chkframe_w(emu68, EMU68_W);
 }
@@ -91,44 +97,97 @@ static void memchk_wl(io68_t * const io)
   emu68_t * const emu68 = io->emu68;
   u8 * mem = emu68->mem + (emu68->bus_addr&MEMMSK68);
   int68_t v = emu68->bus_data;
+  assert(emu68->chk);
   mem[3] = v; v>>=8; mem[2] = v; v>>=8; mem[1] = v; v>>=8; mem[0] = v;
   chkframe_l(emu68, EMU68_W);
 }
 
-static void dummy_ra(io68_t * const io)
+/* ,--------------------------------------------------------.
+ * |                      Fault IO                          |
+ * `--------------------------------------------------------'
+ */
+
+static void fault_rab(io68_t * const io)
 {
-  assert(!"read access to dummy IO");
+  emu68_t * const emu68 = io->emu68;
+  assert(emu68);
+  emu68_error_add(emu68, "Invalid byte R access pc:$%06x $%08x",
+                  (unsigned)(u32)emu68->inst_pc,
+                  (unsigned)(u32)emu68->bus_addr);
+  emu68->bus_data = -1;
+  emu68->status = EMU68_HLT;
 }
 
-static void dummy_wa(io68_t * const io)
+static void fault_raw(io68_t * const io)
 {
-  assert(!"write access to dummy IO");
+  emu68_t * const emu68 = io->emu68;
+  assert(emu68);
+  emu68_error_add(emu68, "Invalid word R access pc:$%06x $%08x",
+                  (unsigned)(u32)emu68->inst_pc,
+                  (unsigned)(u32)emu68->bus_addr);
+  emu68->bus_data = -1;
+  emu68->status = EMU68_HLT;
 }
 
-static const io68_t dummy_io = {
+static void fault_ral(io68_t * const io)
+{
+  emu68_t * const emu68 = io->emu68;
+  assert(emu68);
+  emu68_error_add(emu68, "Invalid long R access pc:$%06x $%08x",
+                  (unsigned)(u32)emu68->inst_pc,
+                  (unsigned)(u32)emu68->bus_addr);
+  emu68->bus_data = -1;
+  emu68->status = EMU68_HLT;
+}
+
+static void fault_wab(io68_t * const io)
+{
+  emu68_t * const emu68 = io->emu68;
+  assert(emu68);
+  emu68_error_add(emu68, "Invalid byte W access pc:$%06x $%08x <- $%02x",
+                  (unsigned)(u32)emu68->inst_pc,
+                  (unsigned)(u32)emu68->bus_addr,
+                  (unsigned)(u8)emu68->bus_data);
+  emu68->status = EMU68_HLT;
+}
+
+static void fault_waw(io68_t * const io)
+{
+  emu68_t * const emu68 = io->emu68;
+  assert(emu68);
+  emu68_error_add(emu68, "Invalid word W access pc:$%06x $%08x <- $%02x",
+                  (unsigned)(u32)emu68->inst_pc,
+                  (unsigned)(u32)emu68->bus_addr,
+                  (unsigned)(u16)emu68->bus_data);
+  emu68->status = EMU68_HLT;
+}
+
+static void fault_wal(io68_t * const io)
+{
+  emu68_t * const emu68 = io->emu68;
+  assert(emu68);
+  emu68_error_add(emu68, "Invalid long W access pc:$%06x $%08x <- $%02x",
+                  (unsigned)(u32)emu68->inst_pc,
+                  (unsigned)(u32)emu68->bus_addr,
+                  (unsigned)(u32)emu68->bus_data);
+  emu68->status = EMU68_HLT;
+}
+
+static void no_destroy(io68_t * const io) {}
+
+static const io68_t fault_io = {
   0,"Fault",0,0,
-  dummy_ra,dummy_ra,dummy_ra,
-  dummy_wa,dummy_wa,dummy_wa,
+  fault_rab,fault_raw,fault_ral,
+  fault_wab,fault_waw,fault_wal,
+  0,0,0,0,no_destroy
 };
 
-static int  memchk_reset(io68_t * const io) { return 0; }
-static void memchk_destroy(io68_t * const io) { emu68_free(io); }
-
-static const io68_t memory_io = {
+static const io68_t ram_io = {
   0,"RAM",0,0,
   memchk_rb,memchk_rw,memchk_rl,
   memchk_wb,memchk_ww,memchk_wl,
-  0,0,0,memchk_reset,memchk_destroy
+  0,0,0,0,no_destroy
 };
-
-io68_t * mem68_io(void)
-{
-  io68_t * io = emu68_alloc(sizeof(memory_io));
-  if (io)
-    *io = memory_io;
-  return io;
-}
-
 
 /* ,--------------------------------------------------------.
  * |                   Read functions                       |
@@ -334,16 +393,29 @@ int68_t emu68_popw(emu68_t * const emu68)
  */
 void emu68_mem_init(emu68_t * const emu68)
 {
+  if (emu68) {
+    /* Copy RAM and Fault IOs for private use. */
+    emu68->ramio = ram_io;
+    emu68->ramio.emu68 = emu68;
+    emu68->ramio.addr_lo = 0;
+    emu68->ramio.addr_hi = emu68->memmsk;
+
+    emu68->errio = fault_io;
+    emu68->errio.emu68 = emu68;
+    emu68->errio.addr_lo = mem68_is_io(0xFFFFFF);
+    emu68->errio.addr_hi = 0xFFFFFFFF;
+
+    emu68->memio = (emu68->chk) ? &emu68->ramio : 0;
+  }
   emu68_mem_reset(emu68);
 }
 
 void emu68_mem_destroy(emu68_t * const emu68)
 {
-  if (emu68 && emu68->memio) {
-    if (emu68->memio->destroy)
-      emu68->memio->destroy(emu68->memio);
-    else
-      free(emu68->memio);
+  if (emu68) {
+    emu68->errio.emu68 = 0;
+    emu68->ramio.emu68 = 0;
+    io68_destroy(emu68->memio);
     emu68->memio = 0;
   }
 }
@@ -355,7 +427,7 @@ void emu68_mem_reset(emu68_t * const emu68)
   if (emu68) {
     int i;
     for(i=0; i<256; i++)
-      emu68->mapped_io[i] = (io68_t *)&dummy_io;
+      emu68_mem_reset_area(emu68, i);
   }
 }
 
@@ -363,5 +435,5 @@ void emu68_mem_reset(emu68_t * const emu68)
  */
 void emu68_mem_reset_area(emu68_t * const emu68, u8 area)
 {
-  emu68->mapped_io[area] = (io68_t *)&dummy_io;
+  emu68->mapped_io[area] = &emu68->errio;
 }

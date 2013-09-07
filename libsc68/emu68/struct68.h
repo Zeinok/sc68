@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      1999-03-13
  */
-/* Time-stamp: <2013-09-04 16:27:27 ben> */
+/* Time-stamp: <2013-09-06 18:52:05 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -198,12 +198,13 @@ struct emu68_s {
   io68_t * iohead;                    /**< Head of IO-list.         */
   io68_t * interrupt_io;              /**< Current interuptible IO. */
   io68_t * mapped_io[256];
-  io68_t * memio; /**< io used only in debug mode (access control). */
+  io68_t * memio;
+  io68_t   ramio; /**< io used only in debug mode (access control). */
+  io68_t   errio; /**< io used invalid address                      */
 
   /* Memory access. */
   addr68_t bus_addr;        /**< bus address for memory access.     */
   int68_t  bus_data;        /**< bus data for memory access.        */
-
 
   int      frm_chk_fl;      /**< ORed chk change for current frame. */
   struct {

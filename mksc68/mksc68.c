@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-04 19:43:39 ben>
+ * Time-stamp: <2013-09-07 04:35:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -84,6 +84,7 @@ static int print_usage(int more)
      "  -q --quiet          Decrease verbosity level\n"
      "  -x --fail-exit      Exit if a command fails\n"
      "  -n --no-readline    Don't use readline in interactive mode\n"
+     "  -i --interactive    Interactive mode\n"
       );
 
   if (more) {
@@ -833,18 +834,12 @@ static char * prompt(void)
 }
 
 
-/*
- *
- *
- *
- */
 static int interactive(void)
 {
   char * argx[32], ** argv = argx;
   int    argc;
 
-  msgdbg("mksc68 is going interactive\n");
-  is_interactive = 1;
+  msgdbg("mksc68 is going %sinteractive\n",is_interactive?"":"non ");
 
   while (!exit_flag) {
     prompt();
@@ -889,6 +884,7 @@ int main(int argc, char *argv[])
     {"quiet",       0, 0, 'q'},
     {"no-readline", 0, 0, 'n'},
     {"fail-exit",   0, 0, 'x'},
+    {"interactive", 0, 0, 'i'},
     {0,0,0,0}
   };
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
@@ -913,13 +909,16 @@ int main(int argc, char *argv[])
       opt_get(argc, argv, shortopts, longopts, &longindex);
 
     switch (val) {
-    case  -1: break;                    /* Scan finish   */
-    case 'h': opt_help++;       break;  /* --help        */
-    case 'V': opt_vers = 1;     break;  /* --version     */
-    case 'v': opt_verb++;       break;  /* --verbose     */
-    case 'q': opt_verb--;       break;  /* --quiet       */
-    case 'n': no_readline = 1;  break;  /* --no-readline */
-    case 'x': exit_on_fail = 1; break;  /* --exit-fail   */
+    case  -1: break;                      /* Scan finish   */
+    case 'h': opt_help++;       break;    /* --help        */
+    case 'V': opt_vers = 1;     break;    /* --version     */
+    case 'v': opt_verb++;       break;    /* --verbose     */
+    case 'q': opt_verb--;       break;    /* --quiet       */
+    case 'n': no_readline = 1;  break;    /* --no-readline */
+    case 'x': exit_on_fail = 1;   break;  /* --exit-fail   */
+    case 'i':                             /* --interactive   */
+      is_interactive = 1;
+      break;
     case '?':                       /* Unknown or missing parameter */
       goto error;
     default:
@@ -939,6 +938,9 @@ int main(int argc, char *argv[])
     return print_version();
   }
 
+  if (!is_interactive)
+    no_readline = 1;
+
   msg_init(opt_verb);
   if (err = add_commands(), err)
     goto error;
@@ -952,7 +954,6 @@ int main(int argc, char *argv[])
   }
 
   err = interactive();
-
 
 error:
   sc68_shutdown();

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-06 02:53:58 ben>
+ * Time-stamp: <2013-09-06 21:50:17 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -485,7 +485,7 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
 
   switch (savest) {
   case EMU68_NRM:
-    /* Assume break, set back to NRM only hen the exception is known */
+    /* Assume break, set back to NRM only if the exception is known */
     emu68->status = EMU68_BRK;
     break;
 
@@ -1291,6 +1291,12 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr, uint68_t maxinst)
 
   if (status != EMU68_NRM) {
     char irqname[32];
+    const char * s;
+
+    /* Might have some error stacked in emu68. */
+    while (s = emu68_error_get(emu68), s)
+      error_addx(sc68,"libsc68: %s\n", s);
+
     if (status == EMU68_HLT && (emu68->reg.sr & 0X3F00) == 0X2F00) {
       addr68_t vaddr;
 
@@ -1366,6 +1372,8 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
   if (emu68_debugmode(sc68->emu68)) {
     TRACE68(sc68_cat," -> %s\n","clear 68k memory");
     emu68_memset(sc68->emu68,0,0,0);
+    /* This is done by emu68_reset() */
+    /* emu68_chkset(sc68->emu68,0,0,0); */
   }
   memptr = emu68_memptr(sc68->emu68,0,0x1000);
 
@@ -1535,7 +1543,8 @@ static int change_track(sc68_t * sc68, int track)
   m = d->mus + track - 1;
 
   /* ReInit 68K & IO */
-  reset_emulators(sc68, &m->hwflags);
+  if (reset_emulators(sc68, &m->hwflags) != SC68_OK)
+    return SC68_ERROR;
 
   /* Set music replay address in 68K memory. */
   sc68->playaddr = a0 = m->a0;
