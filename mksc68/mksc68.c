@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-07 04:35:37 ben>
+ * Time-stamp: <2013-09-07 18:16:33 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -84,7 +84,7 @@ static int print_usage(int more)
      "  -q --quiet          Decrease verbosity level\n"
      "  -x --fail-exit      Exit if a command fails\n"
      "  -n --no-readline    Don't use readline in interactive mode\n"
-     "  -i --interactive    Interactive mode\n"
+     "  -i --interactive    Force interactive mode (default autodetect tty)\n"
       );
 
   if (more) {
@@ -873,7 +873,7 @@ static int opt_vers, opt_help, opt_verb;
 
 int main(int argc, char *argv[])
 {
-  int err = -1, i;
+  int err = -1, i, ifd;
   sc68_init_t   init68;
   char exe_name[] = "mksc68"; /* not read-only or basename() might fault */
 
@@ -902,6 +902,18 @@ int main(int argc, char *argv[])
   }
   argc = init68.argc;
   argv = init68.argv;
+
+#ifdef HAVE_ISATTY
+# ifdef HAVE_FILENO
+  ifd = fileno(stdin);                  /* Get fd of stdin */
+# else
+  ifd = 0;                            /* Let's assume stdin is fd 0 */
+# endif
+  if (isatty(ifd) == 1)
+    is_interactive = 1;
+  else
+    no_readline = 1;
+#endif
 
   while (1) {
     int longindex;
