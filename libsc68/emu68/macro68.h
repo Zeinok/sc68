@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      1999/13/03
  */
-/* Time-stamp: <2013-08-04 23:07:54 ben> */
+/* Time-stamp: <2013-09-08 22:48:57 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -143,9 +143,9 @@
 #define EORB(S, A, B)  S = _EOR68(A, B)
 #define EORW(S, A, B)  S = _EOR68(A, B)
 #define EORL(S, A, B)  S = _EOR68(A, B)
-#define NOTB(S, A)     S = _NOT68(A)
-#define NOTW(S, A)     S = _NOT68(A)
-#define NOTL(S, A)     S = _NOT68(A)
+#define NOTB(S, A)     S = _NOT68(A|~NRM_BYTE_MSK)
+#define NOTW(S, A)     S = _NOT68(A|~NRM_WORD_MSK)
+#define NOTL(S, A)     S = _NOT68(A|~NRM_LONG_MSK)
 
 
 #define BYTE_SR_X ( (int68_t)(REG68.sr&SR_X) << (BYTE_FIX-SR_X_BIT) )
