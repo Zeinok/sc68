@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-03 17:39:32 ben>
+ * Time-stamp: <2013-09-08 22:20:52 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -115,6 +115,12 @@ struct gdb_s {
   int            run;                   /* run mode                    */
   int            vector;                /* last interrupt vector       */
   int            sigval;                /* last signal                 */
+
+  struct {
+    unsigned int ontimer_break;
+  } opt;
+
+
   const char   * msg;                   /* last message                */
   char           buf[1024];             /* buffer for send/recv        */
 };
@@ -465,7 +471,7 @@ static int rsp_event(gdb_t * const gdb)
       v = strtoul(end, &end, 16);
       if (!errno) {
         /* int l = (end-ptr)/\* , m = (1<<(l<<2))-1 *\/; */
-        msgdbg("COMMAND <write-register,%02d,0x%x>\n",n,v);
+        /* msgdbg("COMMAND <write-register,%02d,0x%x>\n",n,v); */
         ptr = stpcpy(buf+1,"OK");
         if (n < 8)
           gdb->emu->reg.d[n] = v;
@@ -517,7 +523,7 @@ static int rsp_event(gdb_t * const gdb)
       if (!errno) {
         u8 * mem;
         int i /* ,n = (max - buf - 4) >> 1 */;
-        msgdbg("COMMAND <memory-%cet,0x%06x,%d>\n",read["sg"],adr,len);
+        /* msgdbg("COMMAND <memory-%cet,0x%06x,%d>\n",read["sg"],adr,len); */
 
         mem = emu68_memptr(gdb->emu, adr, len);
         if (!mem) {
@@ -689,12 +695,12 @@ static int rsp_event(gdb_t * const gdb)
      * Z type,addr,kind (insert breakpoint)
      */
 
-    static const char * types[5] = {
-      "software-breakpoint",
-      "hardware-breakpoint",
-      "write-watchpoint",
-      "read-watchpoint",
-      "access-watchpoint" };
+    /* static const char * types[5] = { */
+    /*   "software-breakpoint", */
+    /*   "hardware-breakpoint", */
+    /*   "write-watchpoint", */
+    /*   "read-watchpoint", */
+    /*   "access-watchpoint" }; */
 
 
     int remove = *ptr++ == 'z';
@@ -722,10 +728,11 @@ static int rsp_event(gdb_t * const gdb)
         break;
       }
     }
+    kind = kind;
 
-    msgdbg("COMMAND <%s-%s,%x,%d%s>\n",
-         remove?"remove":"insert", types[type-'0'],
-         adr, kind, ptr);
+    /* msgdbg("COMMAND <%s-%s,%x,%d%s>\n", */
+    /*      remove?"remove":"insert", types[type-'0'], */
+    /*      adr, kind, ptr); */
 
     switch (type) {
     case '0':
@@ -743,15 +750,16 @@ static int rsp_event(gdb_t * const gdb)
           ptr = stpcpy(buf+1,"E03");
         } else {
           emu68_bp_del(gdb->emu, id);
-          msgdbg("delete breakpoint #%02d @ 0x%x\n", id, adr);
+          /* msgdbg("delete breakpoint #%02d @ 0x%x\n", id, adr); */
         }
       } else {
         int id = emu68_bp_set(gdb->emu, -1, adr, 1, 1);
         if (id < 0) {
           msgnot("could not add breakpoint @ 0x%x\n", adr);
           ptr = stpcpy(buf+1,"E03");
-        } else
-          msgdbg("set breakpoint #%02d @ 0x%x\n", id, adr);
+        } else {
+          /* msgdbg("set breakpoint #%02d @ 0x%x\n", id, adr); */
+        }
       }
       break;
     default:
@@ -788,7 +796,7 @@ static int rsp_event(gdb_t * const gdb)
         ptr = stpcpy(buf+1,"E01");
         break;
       }
-      msgdbg("COMMAND <%s-at,%02d,%06x>\n", step ? "step" : "continue", sig, adr);
+      /* msgdbg("COMMAND <%s-at,%02d,%06x>\n", step ? "step" : "continue", sig, adr); */
       gdb->emu->reg.pc = adr;
     }
 
@@ -879,13 +887,25 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
        * register bits 4-7
        */
     case 0X134 >> 2: /* Timer-A */
-      strcpy(fctname," timer-A"); break;
+      strcpy(fctname," timer-A");
+      if (gdb->opt.ontimer_break)
+        sigval = SIGVAL_TRAP;
+      break;
     case 0X120 >> 2: /* Timer-B */
-      strcpy(fctname," timer-B"); break;
+      strcpy(fctname," timer-B");
+      if (gdb->opt.ontimer_break)
+        sigval = SIGVAL_TRAP;
+      break;
     case 0X114 >> 2: /* Timer-C */
-      strcpy(fctname," timer-C"); break;
+      strcpy(fctname," timer-C");
+      if (gdb->opt.ontimer_break)
+        sigval = SIGVAL_TRAP;
+      break;
     case 0X110 >> 2: /* Timer-D */
-      strcpy(fctname," timer-D"); break;
+      strcpy(fctname," timer-D");
+      if (gdb->opt.ontimer_break)
+        sigval = SIGVAL_TRAP;
+      break;
 
     case SPURIOUS_VECTOR:
     default:
@@ -1078,6 +1098,10 @@ gdb_t * gdb_create(void)
 
     if (gdb->fd == -1)
       goto error;
+
+    /* $$$ TEMP: options need to be set with gdb command */
+    gdb->opt.ontimer_break = 1;
+
   }
   return gdb;
 
