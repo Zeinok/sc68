@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-06 21:50:17 ben>
+ * Time-stamp: <2013-09-08 13:39:58 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -990,7 +990,8 @@ int sc68_init(sc68_init_t * init)
     appname_from_path(init->argv[0], appname, sizeof(appname));
   if (!appname[0])
     strcpy(appname,"sc68");
-  init->argv[0] = appname;
+  if (init->argc > 0 && init->argv)
+    init->argv[0] = appname;
 
   /* Intialize file68. */
   init->argc = file68_init(init->argc, init->argv);

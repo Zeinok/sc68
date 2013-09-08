@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-07 03:06:17 ben>
+ * Time-stamp: <2013-09-08 01:49:12 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -1083,7 +1083,7 @@ static
 int run_time(cmd_t * cmd, int argc, char ** argv)
 {
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
-  int ret = -1, i, track, tracks;
+  int ret = EXIT_GENERIC, i, track, tracks;
   const char * tracklist = 0;
   int /* seek_mode = 0,seek, dur_mode, duration, */ a, b;
 
@@ -1109,10 +1109,9 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
       }
       tracklist = optarg;
       /* check track-list syntax */
-      while ( ret = str_tracklist(&tracklist, &a, &b), ret > 0 ) {
-        msgdbg("track interval %d-%d\n",a,b);
-      }
-      if (ret)
+      while (i = str_tracklist(&tracklist, &a, &b), i > 0)
+        ;
+      if (i)
         goto error;
       tracklist = optarg;
       break;
@@ -1157,10 +1156,8 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
   } else {
     ret = 0;
     while (!ret && str_tracklist(&tracklist, &a, &b) > 0 ) {
-      msgdbg("time: %d to %d\n",a,b);
       for (; !ret && a <= b; ++a) {
         ret = time_measure(&measureinfo, a, stp_ms, max_ms, sil_ms);
-        msgdbg("time #%d -> %d\n",a,ret);
       }
     }
   }
