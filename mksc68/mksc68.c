@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-07 23:46:37 ben>
+ * Time-stamp: <2013-09-08 21:59:03 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -47,6 +47,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 
 int is_interactive   = 0;               /* running in a terminal? */
 int no_readline      = 0;               /* disable readline       */

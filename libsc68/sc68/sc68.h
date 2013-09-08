@@ -1,3 +1,4 @@
+
 /**
  * @ingroup   sc68_lib
  * @file      sc68/sc68.h

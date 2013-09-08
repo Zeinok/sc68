@@ -4,7 +4,7 @@
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
-;;; Time-stamp: <2013-09-06 02:45:19 ben>
+;;; Time-stamp: <2013-09-08 20:19:43 ben>
 
 
 ;;; Unhandled trap vector and function will execute a stop with a
@@ -18,7 +18,8 @@ STOP_VAL  = $2F20
 	;; PIC anyway. Still mksc68 rely on this code to be loaded at
 	;; 500 and timerc being at $502.w
 	
-	org	$500
+	org	$1000
+	
 	bra.s	install_trap
 ;;; !!!! timerc MUST BE at $502.w or mksc68 detection will FAILED !!! 
 timerc:
@@ -458,7 +459,7 @@ xbtimer:
 	;; This should not be needed as the Atari system is in SEI
 	;; mode. The program should take care of this if it wants to be
 	;; in AEI.
-	bset	#3,$17(a1)		; set MFP to AEI
+	;; bclr	#3,$17(a1)	; set MFP to AEI
 
 	;; set vector and start
 	move	(a2),a2		; timer vector

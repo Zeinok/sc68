@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-08 01:49:12 ben>
+ * Time-stamp: <2013-09-08 21:34:07 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -48,9 +48,12 @@
 #include <errno.h>
 #include <pthread.h>
 
-#define MAX_TIME     (60 * 60 * 1000)   /*  */
-#define SILENCE_TIME (5 * 1000)         /*  */
-#define PASS_TIME    (3 * 60 * 1000)    /*  */
+enum {
+  TRAP_ADDR    = 0x1000,           /* see libsc68/api68.c           */
+  MAX_TIME     = 60 * 60 * 1000,   /* default max time              */
+  SILENCE_TIME = 5 * 1000,         /* default silent time           */
+  PASS_TIME    = 3 * 60 * 1000     /* default search time increment */
+};
 
 static const opt_t longopts[] = {
   { "help",       0, 0, 'h' },
@@ -386,7 +389,7 @@ static void timemeasure_hdl(emu68_t* const emu68, int vector, void * cookie)
     if ( ( (emu68->mem [ adr+0 ] << 24) |
            (emu68->mem [ adr+1 ] << 16) |
            (emu68->mem [ adr+2 ] <<  8) |
-           (emu68->mem [ adr+3 ] <<  0) ) == 0x502 )
+           (emu68->mem [ adr+3 ] <<  0) ) == (TRAP_ADDR+2) )
       return;
   }
 

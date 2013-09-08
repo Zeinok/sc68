@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-06 23:01:24 ben>
+ * Time-stamp: <2013-09-08 21:15:07 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -32,6 +32,7 @@
 #include "mem68.h"
 #include "error68.h"
 #include "emu68.h"
+#include "io68/io68.h"
 #include "assert68.h"
 
 /* ,--------------------------------------------------------.

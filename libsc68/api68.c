@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-08 13:39:58 ben>
+ * Time-stamp: <2013-09-08 21:59:10 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -73,10 +73,10 @@
 enum {
   /* Internal use for get_pos() and set_pos() */
   SC68_POS_PLAY, SC68_POS_TRACK,  SC68_POS_DISK,
-  /* Exception handler to catch badly initialize exception */
+  /* Exception handler to catch badly initialized exceptions */
   INTR_ADDR = 0x800,
   /* TOS emulator */
-  TRAP_ADDR = 0x500,
+  TRAP_ADDR = 0x1000,
   /* # of instructions for music play code */
   TRAP_MAX_INST = 10000u,
   /* # of instructions for music play code */
@@ -259,6 +259,12 @@ static inline const char * ok_int(const int err) {
 
 static inline const char * never_null(const char * ptr) {
   return ptr ? ptr : "(nil)";
+}
+
+static inline int overlap(unsigned a, unsigned na, int b, int nb)
+{
+  na += a; nb += b;
+  return a <= b ? na > b : nb > a;
 }
 
 static inline int is_magic(const sc68_t * const sc68) {
@@ -1337,7 +1343,7 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr, uint68_t maxinst)
 static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
 {
   u8 * memptr;
-  const addr68_t base = INTR_ADDR;
+  const int base = INTR_ADDR;
   int i;
 
   assert(sc68);
@@ -1378,13 +1384,14 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
   }
   memptr = emu68_memptr(sc68->emu68,0,0x1000);
 
-  TRACE68(sc68_cat," -> exception detection code in $%06x\n", INTR_ADDR);
+  TRACE68(sc68_cat," -> exception detection code in $%06x\n",
+          (unsigned)base);
 
   /* Install non initialized exception detection code. */
   for (i=0; i<256; ++i) {
-    addr68_t vector = base + i*8;
+    int vector = base + i*8;
 
-    /* setup vector */
+    /* setup vector [$000..$400] */
     memptr[ (i<<2) + 0 ] = vector >> 24;
     memptr[ (i<<2) + 1 ] = vector >> 16;
     memptr[ (i<<2) + 2 ] = vector >>  8;
@@ -1420,7 +1427,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
             (unsigned) TRAP_ADDR, (unsigned) (TRAP_ADDR+sizeof(trap_func)-1));
 
     /* Ensure trap emulator do not override exception handler */
-    assert(sizeof(trap_func) <= INTR_ADDR-TRAP_ADDR);
+    assert(!overlap(INTR_ADDR, 256*8, TRAP_ADDR, sizeof(trap_func)));
 
     /* Install trap emulator */
     emu68_memput(sc68->emu68, TRAP_ADDR, trap_func, sizeof(trap_func));
