@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-26 09:36:50 ben>
+ * Time-stamp: <2013-09-10 19:13:16 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -82,6 +82,11 @@ static option68_t opts[] = {
   OPT68_ENUM(prefix,"asid",optcat,
              "aSIDfier settings",
              f_asids,sizeof(f_asids)/sizeof(*f_asids),1,0),
+
+#ifdef WITH_FORCE_HW
+  OPT68_IRNG(prefix,"force-hw",optcat,"override track hardware {0:off}",
+             0,511,0,0),
+#endif
 
 #ifdef WITH_FORCE
   OPT68_IRNG(prefix,"force-track",optcat,"override default track {0:off}",

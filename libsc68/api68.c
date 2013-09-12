@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-08 21:59:10 ben>
+ * Time-stamp: <2013-09-12 05:47:58 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -99,6 +99,18 @@ enum {
   CFG_LOOP_INF = -1,
 };
 
+/* Hardware table */
+static const char * hwtable[8] = {
+  "none",
+  "Yamaha-2149",
+  "MicroWire (STE)",
+  "Yamaha-2149 & MicroWire (STE)",
+  "Amiga/Paula",
+  "Yamaha-2149 & Amiga/Paula",
+  "MicroWire (STE) & Amiga/Paula",
+  "Yamaha-2149 & MicroWire (STE) & Amiga/Paula",
+};
+
 /* Atari-ST trap emulator (see trap.s)
  */
 static u8 trap_func[] = {
@@ -118,6 +130,9 @@ static struct {
 #ifdef WITH_FORCE
   int force_track;
   int force_loop;
+#endif
+#ifdef WITH_FORCE_HW
+  int force_hw;
 #endif
   int asid;
   int def_time_ms;
@@ -817,6 +832,9 @@ static void config_default(void)
   config.force_track  = 0;
   config.force_loop   = CFG_LOOP_DEF;
 #endif
+#ifdef WITH_FORCE_HW
+  config.force_hw     = 0;
+#endif
   config.asid         = 0;
   config.def_time_ms  = TIME_DEF * 1000;
   config.spr          = SPR_DEF;
@@ -837,6 +855,9 @@ static int config_load(void)
 #ifdef WITH_FORCE
   set_CONFIG(force_track,"force-track");
   set_CONFIG(force_loop,"force-loop");
+#endif
+#ifdef WITH_FORCE_HW
+  set_CONFIG(force_hw,"force-hw");
 #endif
   set_CONFIG(asid,"asid");
   config.def_time_ms = optcfg_get_int("default-time", TIME_DEF) * 1000;
@@ -882,6 +903,9 @@ static void config_update(const sc68_t * sc68)
 #ifdef WITH_FORCE
     optcfg_set_int("force-track",   config.force_track);
     optcfg_set_int("force-loop",    config.force_loop);
+#endif
+#ifdef WITH_FORCE_HW
+    optcfg_set_int("force-hw",      config.force_hw);
 #endif
     optcfg_set_int("asid",          config.asid);
     optcfg_set_int("default-time",  (config.def_time_ms+999) / 1000u);
@@ -1360,18 +1384,18 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     emu68_set_interrupt_io(sc68->emu68, sc68->paulaio);
   }
   if (hw->bit.ym) {
-    TRACE68(sc68_cat," -> %s\n","add SHIFTER hardware");
-    emu68_ioplug(sc68->emu68, sc68->shifterio);
     TRACE68(sc68_cat," -> %s\n","add YM hardware");
     emu68_ioplug(sc68->emu68, sc68->ymio);
+  }
+  if (hw->bit.ym|hw->bit.ste) {
+    TRACE68(sc68_cat," -> %s\n","add MW (STE) hardware");
+    emu68_ioplug(sc68->emu68, sc68->mwio);
+    TRACE68(sc68_cat," -> %s\n","add SHIFTER hardware");
+    emu68_ioplug(sc68->emu68, sc68->shifterio);
     TRACE68(sc68_cat," -> %s\n","add MFP hardware");
     emu68_ioplug(sc68->emu68, sc68->mfpio);
     TRACE68(sc68_cat," -> %s\n","set MFP as interruption");
     emu68_set_interrupt_io(sc68->emu68, sc68->mfpio);
-  }
-  if (hw->bit.ste) {
-    TRACE68(sc68_cat," -> %s\n","add MW (STE) hardware");
-    emu68_ioplug(sc68->emu68, sc68->mwio);
   }
   emu68_reset(sc68->emu68);
 
@@ -1549,6 +1573,16 @@ static int change_track(sc68_t * sc68, int track)
 
   d = sc68->disk;
   m = d->mus + track - 1;
+
+  /* Ugly hack needed by some tools. Usually not compiled */
+#ifdef WITH_FORCE_HW
+  if (config.force_hw && config.force_hw != m->hwflags.all) {
+    msg68_notice("Forcing hardware %03x(%s) -> %03x(%s)\n",
+                 (unsigned)m->hwflags.all, hwtable[m->hwflags.all&7],
+                 (unsigned)config.force_hw, hwtable[config.force_hw&7]);
+    ((music68_t *)m)->hwflags.all = config.force_hw;
+  }
+#endif
 
   /* ReInit 68K & IO */
   if (reset_emulators(sc68, &m->hwflags) != SC68_OK)
@@ -2173,16 +2207,6 @@ static int get_len(sc68_t * sc68, int track)
 static void music_info(sc68_t * sc68, sc68_music_info_t * f, const disk68_t * d,
                        int track, int loops)
 {
-  static const char * hwtable[8] = {
-    "none",
-    "Yamaha-2149",
-    "MicroWire (STE)",
-    "Yamaha-2149 & MicroWire (STE)",
-    "Amiga/Paula",
-    "Yamaha-2149 & Amiga/Paula",
-    "MicroWire (STE) & Amiga/Paula",
-    "Yamaha-2149 & MicroWire (STE) & Amiga/Paula",
-  };
   const music68_t * m;
 
   assert(f);
