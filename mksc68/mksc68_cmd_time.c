@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-08 21:34:07 ben>
+ * Time-stamp: <2013-09-13 18:38:32 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -55,6 +55,51 @@ enum {
   PASS_TIME    = 3 * 60 * 1000     /* default search time increment */
 };
 
+enum {
+  EXIT_OK      = 0,                     /* exit success */
+  EXIT_GENERIC,                         /* exit with generic error */
+  EXIT_INIT,                            /* error during init */
+  EXIT_PLAY,                            /* error during play */
+  EXIT_LOOP,                            /* error during loop */
+  EXIT_SILENT,                          /* only silence */
+  EXIT_NOHW,                            /* no relevant hardware found */
+  EXIT_MAX_PASS,                        /* could not find a loop */
+  EXIT_ST_WRONG,                        /* unexpected error  */
+};
+
+enum {
+  EMU68_I = EMU68_X << 1
+};
+
+enum {
+  YM = 0,
+  MW,
+  PAULA,
+  SHIFTER,
+  MFP
+};
+
+typedef struct {
+  unsigned ym:1;        /* YM used by this music                    */
+  unsigned mw:1;        /* mw used by this music                    */
+  unsigned pl:1;        /* Amiga/Paula used by this track           */
+  unsigned sh:1;        /* shifter has been access                  */
+  unsigned mk:1;        /* mfp has been access                      */
+
+  unsigned ta:1;        /* MFP Timer-A used by this track           */
+  unsigned tb:1;        /* MFP Timer-B used by this track           */
+  unsigned tc:1;        /* MFP Timer-C used by this track           */
+  unsigned td:1;        /* MFP Timer-D used by this track           */
+} hw_t;
+
+
+enum {
+  TIMER_A = 0X134 >> 2,
+  TIMER_B = 0X120 >> 2,
+  TIMER_C = 0X114 >> 2,
+  TIMER_D = 0X110 >> 2
+};
+
 static const opt_t longopts[] = {
   { "help",       0, 0, 'h' },
   { "tracks",     1, 0, 't' },          /* track-list              */
@@ -64,6 +109,76 @@ static const opt_t longopts[] = {
   { 0,0,0,0 }
 };
 
+
+typedef struct {
+  int bas;
+  int end;
+  int act;
+  int mod;
+} mw_reg_t;
+
+typedef struct
+{
+  io68_t   io;
+  unsigned r;
+  unsigned w;
+  unsigned a;
+  mw_reg_t mw;
+  io68_t * pio;
+} time_io_t;
+
+typedef struct
+{
+  io68_t io;
+  io68_t * pio;
+} mem_io_t;
+
+typedef struct measureinfo_s measureinfo_t;
+
+struct measureinfo_s {
+  int           code;       /* return code */
+  volatile int  isplaying;  /* 0:stoped 1:playing 2:init 3:shutdown */
+  pthread_t     thread;     /* thread instance.  */
+
+  int           track;      /* track to measure. */
+  sc68_t      * sc68;       /* sc68 instance.    */
+  emu68_t     * emu68;      /* emu68 instance.   */
+  io68_t     ** ios68;      /* other chip.       */
+
+  unsigned sampling;        /* sampling rate (in hz) */
+  unsigned replayhz;        /* replay rate (in hz)   */
+  unsigned location;        /* memory start address  */
+
+  unsigned startfr;         /* starting frame (loop)  */
+  unsigned startms;         /* corrsponding ms        */
+
+  unsigned max_ms;          /* maximum search time    */
+  unsigned stp_ms;          /* search depth increment */
+  unsigned sil_ms;          /* length of silence      */
+
+  /* results */
+  addr68_t minaddr;     /* lower memory location used by this track */
+  addr68_t maxaddr;     /* upper memory location used by this track */
+  unsigned frames;      /* last frame of the music                  */
+  unsigned timems;      /* corresponding time in ms                 */
+  unsigned loopfr;      /* loop duration in frames                  */
+  unsigned loopms;      /* correponding time in ms                  */
+  unsigned curfrm;      /* current frame counter                    */
+
+  hw_t     hw;                        /* hardware used by play pass */
+  hw_t     init_hw;                   /* hardware uses by init pass */
+
+  hwflags68_t hwflags;  /* Save track hardware flags                */
+
+  time_io_t timeios[5]; /* hooked IOs access                        */
+  mem_io_t  memio;      /* hooked RAM access                        */
+  struct {
+    unsigned cnt;
+    unsigned fst;
+    unsigned lst;
+  } vector[260];
+
+};
 
 #ifndef EMU68_ATARIST_CLOCK
 # define EMU68_ATARIST_CLOCK (8010613u&~3u)
@@ -119,23 +234,6 @@ static unsigned ms2fr(unsigned ms, unsigned cpf_or_hz, unsigned clk)
   return (unsigned) fr;
 }
 
-typedef struct {
-  int bas;
-  int end;
-  int act;
-  int mod;
-} mw_reg_t;
-
-typedef struct
-{
-  io68_t   io;
-  unsigned r;
-  unsigned w;
-  unsigned a;
-  mw_reg_t mw;
-  io68_t * pio;
-} time_io_t;
-
 static void time_rb(io68_t * pio) {
   time_io_t * ti = (time_io_t *)pio;
   ++ti->r;
@@ -178,12 +276,6 @@ static void time_wl(io68_t * pio) {
   ++ti->a;
   ti->pio->w_long(ti->pio);
 }
-
-typedef struct
-{
-  io68_t io;
-  io68_t * pio;
-} mem_io_t;
 
 static void mem_rb(io68_t * pio) {
   mem_io_t * mem = (mem_io_t *)pio;
@@ -298,77 +390,7 @@ static void mw_wl(io68_t * pio) {
   ti->pio->w_long(ti->pio);
 }
 
-
-typedef struct measureinfo_s measureinfo_t;
-
-struct measureinfo_s {
-  int           code;       /* return code */
-  volatile int  isplaying;  /* 0:stoped 1:playing 2:init 3:shutdown */
-  pthread_t     thread;     /* thread instance.  */
-
-  int           track;      /* track to measure. */
-  sc68_t      * sc68;       /* sc68 instance.    */
-  emu68_t     * emu68;      /* emu68 instance.   */
-  io68_t     ** ios68;      /* other chip.       */
-
-  unsigned sampling;        /* sampling rate (in hz) */
-  unsigned replayhz;        /* replay rate (in hz)   */
-  unsigned location;        /* memory start address  */
-
-  unsigned startfr;         /* starting frame (loop)  */
-  unsigned startms;         /* corrsponding ms        */
-
-  unsigned max_ms;          /* maximum search time    */
-  unsigned stp_ms;          /* search depth increment */
-  unsigned sil_ms;          /* length of silence      */
-
-  /* results */
-  addr68_t minaddr;     /* lower memory location used by this track */
-  addr68_t maxaddr;     /* upper memory location used by this track */
-  unsigned frames;      /* last frame of the music                  */
-  unsigned timems;      /* corresponding time in ms                 */
-  unsigned loopfr;      /* loop duration in frames                  */
-  unsigned loopms;      /* correponding time in ms                  */
-  unsigned curfrm;      /* current frame counter                    */
-  unsigned ym:1;        /* YM used by this music                    */
-  unsigned mw:1;        /* mw used by this music                    */
-  unsigned ta:1;        /* MFP Timer-A used by this track           */
-  unsigned tb:1;        /* MFP Timer-B used by this track           */
-  unsigned tc:1;        /* MFP Timer-C used by this track           */
-  unsigned td:1;        /* MFP Timer-D used by this track           */
-  unsigned pl:1;        /* Amiga/Paula used by this track           */
-  hwflags68_t hwflags;  /* Save track hardware flags                */
-
-  time_io_t timeios[5]; /* hooked IOs                               */
-  mem_io_t  memio;
-  struct {
-    unsigned cnt;
-    unsigned fst;
-    unsigned lst;
-  } vector[260];
-
-};
-
 static measureinfo_t measureinfo;
-
-enum {
-  EMU68_I = EMU68_X << 1
-};
-
-enum {
-  YM = 0,
-  MW,
-  SHIFTER,
-  PAULA,
-  MFP
-};
-
-enum timer_e {
-  TIMER_A = 0X134 >> 2,
-  TIMER_B = 0X120 >> 2,
-  TIMER_C = 0X114 >> 2,
-  TIMER_D = 0X110 >> 2
-};
 
 static const char * vectorname(int vector)
 {
@@ -378,27 +400,6 @@ static const char * vectorname(int vector)
 }
 
 
-static void timemeasure_hdl(emu68_t* const emu68, int vector, void * cookie)
-{
-  measureinfo_t * mi = cookie;
-  assert(mi == &measureinfo);
-
-  /* Detect and ignore system timer-C */
-  if (vector == TIMER_C) {
-    const addr68_t adr = vector << 2;
-    if ( ( (emu68->mem [ adr+0 ] << 24) |
-           (emu68->mem [ adr+1 ] << 16) |
-           (emu68->mem [ adr+2 ] <<  8) |
-           (emu68->mem [ adr+3 ] <<  0) ) == (TRAP_ADDR+2) )
-      return;
-  }
-
-  if (vector >= 0 && vector < sizeof(mi->vector)/sizeof(*mi->vector)) {
-    if (!mi->vector[vector].cnt ++)
-      mi->vector[vector].fst = mi->curfrm;
-    mi->vector[vector].lst = mi->curfrm;
-  }
-}
 
 extern void sc68_emulators(sc68_t *, emu68_t **, io68_t ***);
 
@@ -467,27 +468,29 @@ static void access_range(measureinfo_t * mi)
 }
 
 /* Timers use */
-static void access_timers(measureinfo_t * mi)
+static void access_timers(measureinfo_t * mi, hw_t * hw)
 {
-  mi->ta = mi->vector[TIMER_A].cnt > 0;
-  mi->tb = mi->vector[TIMER_B].cnt > 0;
-  mi->tc = mi->vector[TIMER_C].cnt > 0;
-  mi->td = mi->vector[TIMER_D].cnt > 0;
+  hw->ta = mi->vector[TIMER_A].cnt > 0;
+  hw->tb = mi->vector[TIMER_B].cnt > 0;
+  hw->tc = mi->vector[TIMER_C].cnt > 0;
+  hw->td = mi->vector[TIMER_D].cnt > 0;
 }
 
 /* IO chip access */
-static void access_ios(measureinfo_t * mi)
+static void access_ios(measureinfo_t * mi, hw_t * hw)
 {
-  mi->ym = mi->timeios[YM].a    > 0;
-  mi->pl = mi->timeios[PAULA].a > 0;
-  mi->mw = mi->timeios[MW].a    > 0;
+  hw->ym = mi->timeios[YM].a      > 0;
+  hw->mw = mi->timeios[MW].a      > 0;
+  hw->pl = mi->timeios[PAULA].a   > 0;
+  hw->sh = mi->timeios[SHIFTER].a > 0;
+  hw->mk = mi->timeios[MFP].a     > 0;
 }
 
 static int hook_ios(measureinfo_t * mi)
 {
   int i;
 
-/* hook memory access handler */
+  /* hook memory access handler */
   mi->memio.io.r_byte = mem_rb;
   mi->memio.io.r_word = mem_rw;
   mi->memio.io.r_long = mem_rl;
@@ -568,17 +571,29 @@ static int unhook_ios(measureinfo_t * mi)
   return 0;
 }
 
-enum {
-  EXIT_OK      = 0,                     /* exit success */
-  EXIT_GENERIC,                         /* exit with generic error */
-  EXIT_INIT,                            /* error during init */
-  EXIT_PLAY,                            /* error during play */
-  EXIT_LOOP,                            /* error during loop */
-  EXIT_SILENT,                          /* only silence */
-  EXIT_NOHW,                            /* no relevant hardware found */
-  EXIT_MAX_PASS,                        /* could not find a loop */
-  EXIT_ST_WRONG,                        /* unexpected error  */
-};
+static void timemeasure_hdl(emu68_t* const emu68, int vector, void * cookie)
+{
+  measureinfo_t * mi = cookie;
+  assert(mi == &measureinfo);
+
+  /* Detect and ignore system timer-C */
+  if (vector == TIMER_C) {
+    const addr68_t adr = vector << 2;
+    if ( ( (emu68->mem [ adr+0 ] << 24) |
+           (emu68->mem [ adr+1 ] << 16) |
+           (emu68->mem [ adr+2 ] <<  8) |
+           (emu68->mem [ adr+3 ] <<  0) ) == (TRAP_ADDR+2) )
+      return;
+  }
+
+  if (vector == HWINIT_VECTOR)
+    hook_ios(mi);
+  else if (vector >= 0 && vector < sizeof(mi->vector)/sizeof(*mi->vector)) {
+    if (!mi->vector[vector].cnt ++)
+      mi->vector[vector].fst = mi->curfrm;
+    mi->vector[vector].lst = mi->curfrm;
+  }
+}
 
 static void timemeasure_init(measureinfo_t * mi)
 {
@@ -623,21 +638,18 @@ static void timemeasure_init(measureinfo_t * mi)
 
   /* Set all hardware flags. */
   if (mus->hwflags.bit.amiga) {
-    mus->hwflags.all = 0;
+    mus->hwflags.all       = 0;
     mus->hwflags.bit.amiga = 1;
   } else {
-    mus->hwflags.all = 0;
-    mus->hwflags.bit.ym     = 1;
-    mus->hwflags.bit.ste    = 1;
+    mus->hwflags.all       = 0;
+    mus->hwflags.bit.ym    = 1;
+    mus->hwflags.bit.ste   = 1;
   }
 
   if (sc68_play(mi->sc68, mi->track, SC68_INF_LOOP) < 0)
     return;
 
   if (sc68_process(mi->sc68,0,0) == SC68_ERROR)
-    return;
-
-  if (hook_ios(mi))
     return;
 
   sampling = sc68_cntl(mi->sc68, SC68_GET_SPR);
@@ -885,8 +897,8 @@ static void timemeasure_run(measureinfo_t * mi)
   if (!mi->startms) {
     /* memory access */
     access_range(mi);
-    access_timers(mi);
-    access_ios(mi);
+    access_timers(mi,&mi->hw);
+    access_ios(mi,&mi->hw);
   }
 
   /* Display interrupt vectors */
@@ -896,7 +908,7 @@ static void timemeasure_run(measureinfo_t * mi)
              i, vectorname(i),
              mi->vector[i].cnt, mi->vector[i].fst, mi->vector[i].lst);
 
-  if (!mi->ym && !mi->mw && !mi->pl) {
+  if (!mi->hw.ym && !mi->hw.mw && !mi->hw.pl) {
     msgerr("no relevant hardware detected ???\n");
     mi->code = EXIT_NOHW;
     return;
@@ -1047,15 +1059,15 @@ int time_measure(measureinfo_t * mi, int trk,
     m->has.loop = 1;
 
     mi->hwflags.all           = 0;
-    mi->hwflags.bit.ym        = mi->ym;
-    mi->hwflags.bit.ste       = mi->mw;
-    mi->hwflags.bit.amiga     = mi->pl;
+    mi->hwflags.bit.ym        = mi->hw.ym;
+    mi->hwflags.bit.ste       = mi->hw.mw;
+    mi->hwflags.bit.amiga     = mi->hw.pl;
     mi->hwflags.bit.stechoice = 0;
     mi->hwflags.bit.timers    = 1;
-    mi->hwflags.bit.timera    = mi->ta;
-    mi->hwflags.bit.timerb    = mi->tb;
-    mi->hwflags.bit.timerc    = mi->tc;
-    mi->hwflags.bit.timerd    = mi->td;
+    mi->hwflags.bit.timera    = mi->hw.ta;
+    mi->hwflags.bit.timerb    = mi->hw.tb;
+    mi->hwflags.bit.timerc    = mi->hw.tc;
+    mi->hwflags.bit.timerd    = mi->hw.td;
 
     /* mi->minaddr; */
     /* mi->maxaddr; */

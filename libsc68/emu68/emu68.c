@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-08 21:53:19 ben>
+ * Time-stamp: <2013-09-13 18:49:51 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -138,7 +138,7 @@ emu68_handler_t emu68_get_handler(emu68_t * const emu68)
 const char * emu68_exception_name(unsigned int vector, char * buf)
 {
   static const char * xtra_names[] = {
-    "hw-trace", "hw-halt", "hw-stop", "hw-reset"
+    "hw-trace", "hw-halt", "hw-stop", "hw-reset", "hw-init"
   };
 
   static const char * xcpt_names[] = {
@@ -695,6 +695,9 @@ emu68_t * emu68_create(emu68_parms_t * const parms)
   emu68->memmsk  = memsize-1;
   emu68->chk     = p->debug ? emu68->mem + memsize + 8 : 0;
   emu68_mem_init(emu68);
+  /* Notice that emu68_reset() triggers the HWVECTOR_INIT exception
+   * but it won't be catch by the user as as at this point it is null.
+   */
   emu68_reset(emu68);
 
 error:
@@ -804,6 +807,9 @@ void emu68_reset(emu68_t * const emu68)
     /* Reset memory access control flags */
     if (emu68->chk)
       memset(emu68->chk, 0, emu68->memmsk+1);
+
+    /* Notify init is complete */
+    inl_exception68(emu68, HWINIT_VECTOR, -1);
   }
 }
 

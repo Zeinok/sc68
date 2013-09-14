@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      1999/13/03
  */
-/* Time-stamp: <2013-08-04 23:12:04 ben> */
+/* Time-stamp: <2013-09-13 18:01:56 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -38,8 +38,10 @@ enum emu68_vector_e {
   HWHALT_VECTOR   = 0x121, /**< Report processor halted.                */
   HWSTOP_VECTOR   = 0x122, /**< Report processor suspended (stop).      */
   HWRESET_VECTOR  = 0x123, /**< Report IO reset (reset).                */
+  HWINIT_VECTOR   = 0x124, /**< Report a hardware reset (emu68_reset).  */
 
   PRIVATE_VECTOR  = 0x200, /**< First private vector for users.         */
+
   /* Real 68k vectors. */
   RESET_VECTOR    = 0x000, /**< External (hardware) reset.              */
   RESET_SP_VECTOR = 0x000, /**< Initial interrupt stack pointer.        */

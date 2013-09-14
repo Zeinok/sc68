@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-12 05:47:58 ben>
+ * Time-stamp: <2013-09-13 18:04:10 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -546,7 +546,6 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
     }
 
     switch (vector) {
-
     case HWSTOP_VECTOR:
       if ( (sr & 0x3F00) == 0x2F00 ) {
         /* SR bit#11 (always 0) is used by our special code to catch
@@ -574,6 +573,7 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
     case HWBREAK_VECTOR:
       break;
 
+    case HWINIT_VECTOR:
     case HWHALT_VECTOR:
     case HWRESET_VECTOR:
       /* Recieve the reset vector when reset instruction has just been
@@ -1584,7 +1584,7 @@ static int change_track(sc68_t * sc68, int track)
   }
 #endif
 
-  /* ReInit 68K & IO */
+  /* Reset 68K & IO */
   if (reset_emulators(sc68, &m->hwflags) != SC68_OK)
     return SC68_ERROR;
 
