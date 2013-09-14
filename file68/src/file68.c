@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-02 16:44:36 ben>
+ * Time-stamp: <2013-09-14 06:15:27 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -744,7 +744,7 @@ static int valid(disk68_t * mb)
         ? 0 : m->tags.array[id].val;
     }
 
-#    /* use data from previous music */
+    /* use data from previous music */
     if (!m->data) {
       m->data   = (char *) pdata;       /* inherit music data */
       m->datasz = pdatasz;
@@ -921,17 +921,6 @@ static int st_isdigit( int c )
   return c >= '0' && c <= '9';
 }
 
-/* sndh extra disk tag */
-enum {
-  SNDH_YEAR_ID,
-};
-
-/* sndh extra track tag */
-enum {
-  SNDH_RIPP_ID,
-  SNDH_CONV_ID,
-};
-
 /* @see http://sndh.atari.org/fileformat.php
  */
 static int sndh_info(disk68_t * mb, int len)
@@ -939,6 +928,7 @@ static int sndh_info(disk68_t * mb, int len)
   const int unknowns_max = 8;
   int i, vbl = 0, frq = 0, steonly = 0,
     unknowns = 0, fail = 0;
+  int dtag = 0, ttag = 0;
 
   char * b = mb->data;
   char empty_tag[4] = { 0, 0, 0, 0 };
@@ -1001,19 +991,35 @@ static int sndh_info(disk68_t * mb, int len)
       p = &mb->tags.tag.title.val;
     } else if (!memcmp(b+i,"RIPP",4)) {
       /* Ripper */
-      t = i; s = i += 4;
-      mb->mus[0].tags.tag.custom[SNDH_RIPP_ID].key = tagstr.ripper;
-      p = &mb->mus[0].tags.tag.custom[SNDH_RIPP_ID].val;
+      if (ttag < TAG68_ID_CUSTOM_MAX) {
+        t = i; s = i += 4;
+        mb->mus[0].tags.tag.custom[ttag].key = tagstr.ripper;
+        p = &mb->mus[0].tags.tag.custom[ttag++].val;
+      }
     } else if (!memcmp(b+i,"CONV",4)) {
       /* Converter */
-      t = i; s = i += 4;
-      mb->mus[0].tags.tag.custom[SNDH_CONV_ID].key = tagstr.converter;
-      p = &mb->mus[0].tags.tag.custom[SNDH_CONV_ID].val;
+      if (ttag < TAG68_ID_CUSTOM_MAX) {
+        t = i; s = i += 4;
+        mb->mus[0].tags.tag.custom[ttag].key = tagstr.converter;
+        p = &mb->mus[0].tags.tag.custom[ttag++].val;
+      }
     } else if (!memcmp(b+i, "YEAR", 4)) {
       /* year */
-      t = i; s = i += 4;
-      mb->tags.tag.custom[SNDH_YEAR_ID].key = tagstr.year;
-      p = &mb->tags.tag.custom[SNDH_YEAR_ID].val;
+      if (dtag < TAG68_ID_CUSTOM_MAX) {
+        t = i; s = i += 4;
+        mb->tags.tag.custom[dtag].key = tagstr.year;
+        p = &mb->tags.tag.custom[dtag++].val;
+      }
+#if 0 /* Does not happen probably just a typo in the sndh format doc. */
+    } else if ( (ctypes & 0x0F00) == 0x0F00 && is_year(b+i) && !b[4] ) {
+      assert(0);
+      /* match direct a YEAR */
+      if (dtag < TAG68_ID_CUSTOM_MAX) {
+        t = i; s = i += 4;
+        mb->tags.tag.custom[dtag].key = tagstr.year;
+        mb->tags.tag.custom[dtag++].val = b;
+      }
+#endif
     } else if (!memcmp(b+i,"MuMo",4)) {
       /* MusicMon ???  */
       msg68_warning("file68: sndh -- %s\n","what to do with 'MuMo' tag ?");

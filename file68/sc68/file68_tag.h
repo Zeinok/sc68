@@ -5,7 +5,7 @@
  * @date     2011-10-03
  * @brief    Metatags definition header file.
  */
-/* Time-stamp: <2013-08-12 22:02:18 ben> */
+/* Time-stamp: <2013-09-14 05:50:46 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -26,14 +26,18 @@ typedef struct {
 } tag68_t;
 
 enum {
-  TAG68_ID_TITLE  = 0,                  /**< Album or track name.      */
-  TAG68_ID_ARTIST,                      /**< Artist full name.         */
-  TAG68_ID_GENRE,                       /**< Genre is for tracks only. */
-  TAG68_ID_CUSTOM,                      /**< First custom metatag.     */
+  TAG68_ID_TITLE  = 0,               /**< Album or track name.      */
+  TAG68_ID_ARTIST,                   /**< Artist full name.         */
+  TAG68_ID_GENRE,                    /**< Genre is for tracks only. */
+  TAG68_ID_CUSTOM,                   /**< First custom metatag.     */
   TAG68_ID_ALBUM  = TAG68_ID_TITLE,
   TAG68_ID_AUTHOR = TAG68_ID_ARTIST,
-  TAG68_ID_FORMAT = TAG68_ID_GENRE,     /**< FORMAT is for album only. */
-  TAG68_ID_MAX    = 12                  /**< Maximum number of tag.    */
+  TAG68_ID_FORMAT = TAG68_ID_GENRE,  /**< FORMAT is for album only. */
+  TAG68_ID_MAX    = 12,              /**< Maximum number of tag.    */
+
+  /** Maximun number of custom tag. */
+  TAG68_ID_CUSTOM_MAX =  TAG68_ID_MAX-TAG68_ID_CUSTOM
+
 };
 
 /**
