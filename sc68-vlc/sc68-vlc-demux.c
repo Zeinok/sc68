@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-26 15:55:54 ben>
+ * Time-stamp: <2013-09-14 17:39:06 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -285,16 +285,17 @@ static int vlc_init_sc68(void)
 {
   int res = 0;
   sc68_init_t init68;
-  char appname[] = "vlc";
-  char * argv[] = { appname };
+  static char appname[] = "vlc";
+  /* static char message[] = "--sc68-debug=+loader"; */
+  char * argv[] = { appname/* , message */ };
 
   meta_lut_sort();
   memset(&init68,0,sizeof(init68));
   init68.argc = sizeof(argv)/sizeof(*argv);
   init68.argv = argv;
-#ifdef DEBUG
-  init68.debug_set_mask = (1<<(msg68_DEBUG+1))-1;
   init68.debug_clr_mask = -1;
+#ifdef DEBUG
+  init68.debug_set_mask = ((1<<(msg68_DEBUG+1))-1);
   init68.msg_handler    = msg;
 #endif
   res = sc68_init(&init68);
@@ -458,35 +459,36 @@ static int Open(vlc_object_t * p_this)
 
   es_format_t fmt;
 
-  dbg(p_demux,"Open() {");
+  dbg(p_demux,"Open()");
 
   /* assert(!p_demux->sc68); */
 
   /* Check if we are dealing with a sc68 file */
-  if (stream_Peek(p_demux->s, &p_peek, 16) < 16) {
+  if (i = stream_Peek(p_demux->s, &p_peek, 16), i < 16) {
+    dbg(p_demux,"Can't peek (%d)",i);
     goto exit;
   }
+  dbg(p_demux,"Have peek %d bytes\n",i);
 
   /* Fast check for our files ... */
   /* TODO: Gzip                   */
   if (!memcmp(p_peek, "SC68", 4)) {
-    /* msg_Dbg(p_demux,"SC68 4cc detected"); */
-  } else if (!memcmp(p_peek, "ICE!", 4)) {
-    /* msg_Dbg(p_demux,"ICE! 4cc detected"); */
+    dbg(p_demux,"SC68 4cc detected");
+  } else if (!memcmp(p_peek, "ICE!", 4)||!memcmp(p_peek, "Ice!", 4)) {
+    dbg(p_demux,"ICE! 4cc detected");
   } else if (!memcmp(p_peek+12, "SNDH", 4)) {
-    /* msg_Dbg(p_demux,"SNDH 4cc detected"); */
+    dbg(p_demux,"SNDH 4cc detected");
   } else if (!memcmp(p_peek, "\037\213\010", 3)) {
-    /* msg_Dbg(p_demux,"GZIP detected"); */
+    dbg(p_demux,"GZIP detected");
   } else {
-    msg_Dbg(p_demux,"Not sc68 ? '%02x-%02x-%02x-%02x' ?",
-            p_peek[0], p_peek[1], p_peek[2], p_peek[3]);
+    dbg(p_demux,"Not sc68 ? '%02x-%02x-%02x-%02x' ?",
+        p_peek[0], p_peek[1], p_peek[2], p_peek[3]);
     goto exit;
   }
 
   p_demux->p_sys = (demux_sys_t*) calloc (1, sizeof(demux_sys_t));
   if (unlikely(!p_demux->p_sys))
     goto error;
-
 
   /***********************************************************************
   * Apply VLC config
