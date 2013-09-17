@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-08 13:42:20 ben>
+ * Time-stamp: <2013-09-15 13:10:36 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -415,14 +415,16 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
     int n = max;
     int dsk_len,  dsk_pos;
     int trk_len, trk_pos;
-    int track, tracks;
+    int track, tracks, loops, loop;
 
-    track     = sc68_cntl(sc68,SC68_GET_TRACK);
-    tracks    = sc68_cntl(sc68,SC68_GET_TRACKS);
-    dsk_pos  = sc68_cntl(sc68,SC68_GET_DSKPOS);
-    dsk_len  = sc68_cntl(sc68,SC68_GET_DSKLEN);
+    track   = sc68_cntl(sc68,SC68_GET_TRACK);
+    tracks  = sc68_cntl(sc68,SC68_GET_TRACKS);
+    dsk_pos = sc68_cntl(sc68,SC68_GET_DSKPOS);
+    dsk_len = sc68_cntl(sc68,SC68_GET_DSKLEN);
     trk_pos = sc68_cntl(sc68,SC68_GET_POS);
     trk_len = sc68_cntl(sc68,SC68_GET_LEN);
+    loop    = sc68_cntl(sc68,SC68_GET_LOOP)+1;
+    loops   = sc68_cntl(sc68,SC68_GET_LOOPS);
 
     code = sc68_process(sc68, buffer, &n);
 
@@ -430,17 +432,15 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
       last_dskpos = dsk_pos;
       Print("\r%s ~ %s ** %s ~ %s",
             strtime68(tmp1, track , trk_pos/1000u),
-            strtime68(tmp2, track , trk_len/1000u),
-            strtime68(tmp3, tracks, dsk_pos/1000u),
-            strtime68(tmp4, tracks, dsk_len/1000u));
+            strtime68(tmp2, loop  , trk_len/1000u),
+            strtime68(tmp3, tracks,      dsk_pos/1000u),
+            strtime68(tmp4, loops , dsk_len/1000u));
     }
     if (code == SC68_ERROR)
       break;
 
     if (code & SC68_LOOP) {
       last_dskpos = dsk_pos - 1000;
-      Debug("\nLoop: #%d/%d\n",
-            sc68_cntl(sc68, SC68_GET_LOOP),sc68_cntl(sc68, SC68_GET_LOOPS));
     }
 
     if (code & SC68_CHANGE) {

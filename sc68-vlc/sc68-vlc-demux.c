@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-14 17:39:06 ben>
+ * Time-stamp: <2013-09-17 08:32:22 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -496,25 +496,25 @@ static int Open(vlc_object_t * p_this)
 
   if (s = var_InheritString( p_demux, CFG_PREFIX "ym-engine"), s) {
     dbg(p_demux, "vlc-config -- ym-engine -- *%s*\n", s);
-    sc68_cntl(0,SC68_SET_OPT,"ym-engine",s);
+    sc68_cntl(0,SC68_SET_OPT_STR,"ym-engine",s);
   }
 
   if (s = var_InheritString( p_demux, CFG_PREFIX "ym-filter"), s) {
     dbg(p_demux, "vlc-config -- ym-filter -- *%s*\n", s);
-    sc68_cntl(0,SC68_SET_OPT,"ym-filter",s);
+    sc68_cntl(0,SC68_SET_OPT_STR,"ym-filter",s);
   }
 
   if (s = var_InheritString( p_demux, CFG_PREFIX "ym-volmodel"), s) {
     dbg(p_demux, "vlc-config -- ym-volmodel -- *%s*\n", s);
-    sc68_cntl(0,SC68_SET_OPT,"ym-volmodel",s);
+    sc68_cntl(0,SC68_SET_OPT_STR,"ym-volmodel",s);
   }
 
   i = var_InheritBool( p_demux, CFG_PREFIX "amiga-filter");
-  sc68_cntl(0,SC68_SET_OPT,"amiga-filter", i);
+  sc68_cntl(0,SC68_SET_OPT_INT,"amiga-filter", i);
   dbg(p_demux, "vlc-config -- amiga-filter -- *%s*\n", i?"On":"Off");
 
   i = var_InheritInteger( p_demux, CFG_PREFIX "amiga-blend");
-  sc68_cntl(0,SC68_SET_OPT,"amiga-blend", i);
+  sc68_cntl(0,SC68_SET_OPT_INT,"amiga-blend", i);
   dbg(p_demux, "vlc-config -- amiga-blend -- *%d*\n", i);
 
   /* How tracks are presented ? title or chapter ? */

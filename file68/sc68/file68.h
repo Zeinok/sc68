@@ -5,7 +5,7 @@
  * @date     1998-09-03
  * @brief    Music file header.
  */
-/* Time-stamp: <2013-08-12 22:02:31 ben> */
+/* Time-stamp: <2013-09-17 07:36:39 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -136,7 +136,7 @@ typedef struct {
  *
  *  The disk68_t structure is the memory representation for an SC68
  *  disk.  Each SC68 file could several music or tracks, in the limit
- *  of a maximum of 32 tracks per file. Each music is independant, but
+ *  of a maximum of 63 tracks per file. Each music is independant, but
  *  some information, including music data, could be inherit from
  *  previous track. In a general case, tracks are grouped by theme,
  *  that could be a demo or a game.
@@ -239,7 +239,7 @@ FILE68_API
  * @param  key    tag name
  *
  * @return allocated copy of tag value
- * @retval  0  tag is not set or copy failed.
+ * @retval 0  tag is not set or copy failed.
  *
  * @note  The caller have to free the returned string by itself.
  * @todo Implements the dynamic part and use it in mksc68 and info68.

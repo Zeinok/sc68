@@ -223,11 +223,20 @@ typedef struct {
   sc68_cinfo_t dsk;      /**< disk info.                         */
   sc68_cinfo_t trk;      /**< track info (MUST BE behind dsk).   */
 
+  /** Predefined tags
+   *
+   *  @warning album must be first and _lasttag last.
+   */
   char * album;          /**< Points to disk's title tag.        */
   char * title;          /**< Points to track's title tag.       */
   char * artist;         /**< Points to track's artist tag.      */
   char * format;         /**< Points to disk's format tag.       */
-  char * genre;          /**< Point to track's genre  tag.       */
+  char * genre;          /**< Points to track's genre tag.       */
+  char * year;           /**< Points to "year" tag.              */
+  char * ripper;         /**< Points to "ripper" tag.            */
+  char * converter;      /**< Points to "converter" tag.         */
+  char * _lasttag;       /**< Last predefined tag.               */
+
 } sc68_music_info_t, sc68_minfo_t;
 
 /**
@@ -319,7 +328,8 @@ enum sc68_cntl_e {
   SC68_CONFIG_SAVE,                  /**< Save config               */
   SC68_ENUM_OPT,                     /**< Enumerate options.        */
   SC68_GET_OPT,                      /**< Get options.              */
-  SC68_SET_OPT,                      /**< Set options.              */
+  SC68_SET_OPT_STR,                  /**< Set options (string).     */
+  SC68_SET_OPT_INT,                  /**< Set options (integer).    */
 };
 
 /**

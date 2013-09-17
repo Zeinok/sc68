@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      1999/03/13
  */
-/* Time-stamp: <2013-08-05 01:22:32 ben> */
+/* Time-stamp: <2013-09-17 08:55:53 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -402,7 +402,7 @@ EMU68_API
  * @param  emu68  emulator instance
  * @return poped 32-bit value
  */
-int68_t emu68_popl(emu68_t * emu68);
+int68_t emu68_popl(emu68_t * const emu68);
 
 EMU68_API
 /**
@@ -410,7 +410,7 @@ EMU68_API
  * @param  emu68  emulator instance
  * @return poped 16-bit value
  */
-int68_t emu68_popw(emu68_t * emu68);
+int68_t emu68_popw(emu68_t * const emu68);
 
 EMU68_API
 /**

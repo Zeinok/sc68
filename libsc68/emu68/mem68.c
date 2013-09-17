@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-08 21:15:07 ben>
+ * Time-stamp: <2013-09-17 08:57:01 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -293,7 +293,7 @@ void mem68_write_l(emu68_t * const emu68)
  */
 int68_t mem68_nextw(emu68_t * const emu68)
 {
-  const addr68_t const addr = REG68.pc;
+  const addr68_t addr = REG68.pc;
   io68_t * const io =
     mem68_is_io(addr)
     ? emu68->mapped_io[(u8)((addr)>>8)]
@@ -313,7 +313,7 @@ int68_t mem68_nextw(emu68_t * const emu68)
 
 int68_t mem68_nextl(emu68_t * const emu68)
 {
-  const addr68_t const addr = REG68.pc;
+  const addr68_t addr = REG68.pc;
   io68_t * const io =
     mem68_is_io(addr)
     ? emu68->mapped_io[(u8)((addr)>>8)]

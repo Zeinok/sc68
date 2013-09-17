@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-17 04:34:32 ben>
+ * Time-stamp: <2013-09-17 04:59:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -129,6 +129,9 @@ static int extract(const char * uri, int track, int fmt, const void ** ptr_data)
       goto error;
     break;
   }
+
+  size = vfs68_tell(vfs);
+  msginf("saved track #%d into \"%s\" (%d bytes)\n", track, uri, size);
 
   ret = EXIT_OK;
 error:

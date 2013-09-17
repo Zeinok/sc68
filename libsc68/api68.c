@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-13 18:04:10 ben>
+ * Time-stamp: <2013-09-17 09:00:01 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -276,7 +276,7 @@ static inline const char * never_null(const char * ptr) {
   return ptr ? ptr : "(nil)";
 }
 
-static inline int overlap(unsigned a, unsigned na, int b, int nb)
+static inline int overlap(unsigned a, unsigned na, unsigned b, unsigned nb)
 {
   na += a; nb += b;
   return a <= b ? na > b : nb > a;
@@ -1406,6 +1406,10 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     /* This is done by emu68_reset() */
     /* emu68_chkset(sc68->emu68,0,0,0); */
   }
+  else
+    /* Cleare system varaible */
+    emu68_memset(sc68->emu68,0x400,0,INTR_ADDR-0x400);
+
   memptr = emu68_memptr(sc68->emu68,0,0x1000);
 
   TRACE68(sc68_cat," -> exception detection code in $%06x\n",
@@ -1437,11 +1441,6 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     memptr[ vector + 6 ] = 0x4e; /* RTE                          */
     memptr[ vector + 7 ] = 0x73;
   }
-
-  /* $$$ Legacy fix for Zound Dragger. Would be good to get rid of
-   * this. */
-  memptr[0x41a] = 0x00;
-  memptr[0x41b] = 0x10;
 
   /* Install TOS trap emulator unless AMIGA */
   if (!hw->bit.amiga) {
@@ -2204,10 +2203,21 @@ static int get_len(sc68_t * sc68, int track)
 }
 
 
+/* Get a tag. Favor track tag over disk one */
+static
+char * tag_get_any(const disk68_t * d, int track, const char * key)
+{
+  const char * val = file68_tag_get(d,track,key);
+  if (!val)
+    val = file68_tag_get(d,0,key);
+  return (char *)val;
+}
+
 static void music_info(sc68_t * sc68, sc68_music_info_t * f, const disk68_t * d,
                        int track, int loops)
 {
   const music68_t * m;
+  int i, maxtag = &f->_lasttag - &f->album;
 
   assert(f);
   assert(in_disk(d, track));
@@ -2241,11 +2251,25 @@ static void music_info(sc68_t * sc68, sc68_music_info_t * f, const disk68_t * d,
   f->trk.tags  = file68_tag_count(d, track);
   f->trk.tag   = (sc68_tag_t *) m->tags.array;
 
+
+  /* Clear all tags. */
+  for (i=0; i < maxtag; ++i)
+    (&f->album)[i] = 0;
+
   f->album     = d->tags.tag.title.val;
   f->title     = m->tags.tag.title.val;
   f->artist    = m->tags.tag.artist.val;
   f->format    = d->tags.tag.genre.val;
   f->genre     = m->tags.tag.genre.val;
+  f->year      = tag_get_any(d, track, TAG68_YEAR);
+  f->ripper    = tag_get_any(d, track, TAG68_RIPPER);
+  f->converter = tag_get_any(d, track, TAG68_CONVERTER);
+
+  /* Replace null pointers by empty strings. */
+  for (i=0; i < maxtag; ++i)
+    if (!(&f->album)[i])
+      (&f->album)[i] = "";
+
 }
 
 
@@ -2450,17 +2474,24 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
 
   case SC68_GET_OPT: {
     option68_t * opt = option68_get(va_arg(list, const char *), opt68_ISSET);
-    if (opt->type == opt68_STR)
-      *va_arg(list,const  char **) = opt->val.str;
-    else
-      *va_arg(list, int *) = opt->val.num;
+    if (opt) {
+      if (opt->type == opt68_STR)
+        *va_arg(list,const  char **) = opt->val.str;
+      else
+        *va_arg(list, int *) = opt->val.num;
+      res = 0;
+    }
   } break;
 
-  case SC68_SET_OPT: {
+  case SC68_SET_OPT_STR: {
     option68_t * opt = option68_get(va_arg(list, const char *), opt68_ALWAYS);
-    if (opt->type == opt68_STR)
+    res =
       option68_set(opt, va_arg(list, const char *), opt68_ALWAYS, opt68_APP);
-    else
+  } break;
+
+  case SC68_SET_OPT_INT: {
+    option68_t * opt = option68_get(va_arg(list, const char *), opt68_ALWAYS);
+    res =
       option68_iset(opt, va_arg(list, int), opt68_ALWAYS, opt68_APP);
   } break;
 
