@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-31 10:49:00 ben>
+ * Time-stamp: <2013-09-16 18:44:57 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -690,7 +690,7 @@ static int rPreSource(void)
     if (test_jmp_table) {
       /* instruction size greater than jump table row OR
          not BRA or RTS or nop : end of jump table */
-      if (inst_size > test_jmp_table ||
+      if (/* inst_size > test_jmp_table || */
           ! ( desa.status & (DESA68_BRA|DESA68_BSR|DESA68_RTS|DESA68_NOP))) {
         return 0;
       }
