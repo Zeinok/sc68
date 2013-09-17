@@ -4,7 +4,7 @@
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
-;;; Time-stamp: <2013-09-08 20:19:43 ben>
+;;; Time-stamp: <2013-09-17 09:11:46 ben>
 
 
 ;;; Unhandled trap vector and function will execute a stop with a
@@ -14,6 +14,12 @@
 StackSize = 1024	
 STOP_VAL  = $2F20
 
+;;; Machine definitions for '_MCH' cookie
+MACHINE_FALCON30	= $00030000
+MACHINE_STE 		= $00010000
+MACHINE_MEGA_STE	= $00010010
+MACHINE_TT		= $00020000
+	
 	;; This is the address used by libsc68/api.c but it should be
 	;; PIC anyway. Still mksc68 rely on this code to be loaded at
 	;; 500 and timerc being at $502.w
@@ -21,7 +27,7 @@ STOP_VAL  = $2F20
 	org	$1000
 	
 	bra.s	install_trap
-;;; !!!! timerc MUST BE at $502.w or mksc68 detection will FAILED !!! 
+;;; !!!! timerc MUST BE at ORG+2 or mksc68 detection will FAILED !!! 
 timerc:
 	btst	#3,$fffffa17.w	; SEI or AEI ?
 	beq.s	.aei
@@ -35,6 +41,16 @@ timerc:
 install_trap:
 	movem.l	d0/a0-a2,-(a7)
 
+	;; Used by Zounddrager for fade out
+	move.w	#16,$41a.w
+
+	;; Install cookie jar for machine detection
+	;;
+	;; $$$ Disable ATM because it breaks sndh quartet replay
+	;; 
+	;; lea	cookie_jar(pc),a0
+	;; move.l	a0,$5a0.w
+
 	;; Install trap vectors for GEMDOS and XBIOS
 	lea	gemdos(pc),a0
 	move.l	a0,$84.w
@@ -42,20 +58,15 @@ install_trap:
 	move.l	a0,$B8.w
 
 	;; Install system timer C
-	;; 
-	;; $$$ TEMP: enable interuptions for A/B/D (not started)
-
 	lea	$fffffa00.w,a1
-	clr.b	$19(a1)		; stop timer-A
-	clr.b	$1b(a1)		; stop timer-B
 	clr.b	$1d(a1)		; stop timer-C/D
 	lea	timerc(pc),a0
 	move.l	a0,$114.w	; interrupt vector
-	move.w	#$2130,d0	; set TA/TB/TC/TD
+	move.w	#$0020,d0	; set TC bit only (all-timer=$2130)
 	movep.w	d0,$07(a1)	; IER
 	movep.w	d0,$13(a1)	; IMR
-	move.b	#2457600/(64*200),$fffffa23.w
-	move.b  #$50,$fffffa1d.w ; prediv is 64
+	move.b	#2457600/(64*200),$fffffa23.w ; $c0 for 200hz timer
+	move.b  #$50,$fffffa1d.w ; start TC with  prediv 64
 
 	;; Init dummy malloc system
 	lea	malloc(pc),a0
@@ -416,35 +427,10 @@ xbtimer:
 	and	d0,d1
 	or	d1,d4		; d4: ctrl register (ready)
 
-	;; ===================================================
-	;; $$$ TEMP, right now only acknowledge stop timer
-	;;
-	
-	;; tst.b	d1
-	;; bne.s	.cont
-
-	;; move.w	ti_datareg(a2),a4
-	;; move	(a6)+,d0
-	;; move.b	d0,(a4)
-	;; move	(a2),a2
-	;; move.l	(a6)+,(a2)
-	;; move.b	d4,(a5)
-	;; bra	trap_close
-	
-.cont:
-	;; stop	#STOP_VAL+$E
-	;; reset
-	;; bra	trap_close
-
-	;; 
-	;; $$$ END-TEMP
-	;; ===================================================
-
-	
+	;; set timer count (data register)
 	move.w	ti_datareg(a2),a4 ; a4: data reg addr
 	move	(a6)+,d0
 	move.b	d0,(a4)		; data reg (done)
-
 
 	;; set intena and intmsk
 	moveq	#$7,d0
@@ -468,3 +454,5 @@ xbtimer:
 	
 	bra	trap_close
 	
+cookie_jar:
+	dc.l	"_MCH",MACHINE_STE,0
