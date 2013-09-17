@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-08 22:20:52 ben>
+ * Time-stamp: <2013-09-15 21:00:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -932,6 +932,8 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
       /* Got a breakpoint ! */
       gdb->sigval = SIGVAL_TRAP;
       SIGNAL(STOP,gdb->sigval,"breakpoint");
+    } else if (vector == HWINIT_VECTOR) {
+      msgnot("%s\n","68K has been reset\n");
     } else if (vector == HWHALT_VECTOR) {
       gdb->sigval = SIGVAL_ABRT;
       STATUS(EXIT, HALT, "halted");
@@ -954,7 +956,7 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
         SIGNAL(STOP, gdb->sigval, "stopped");
       }
     } else if (vector != HWTRACE_VECTOR) {
-      /* Unhamdled special exception */
+      /* Unhandled special exception */
       gdb->sigval = SIGVAL_0;
       SIGNAL(STOP,gdb->sigval,"private exception");
     }

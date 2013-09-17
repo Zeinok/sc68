@@ -1,4 +1,4 @@
-# Time-stamp: <2013-07-16 13:26:04 ben>
+# Time-stamp: <2013-09-17 03:43:00 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  mksc68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -51,7 +51,7 @@ sources = mksc68.c mksc68_opt.c mksc68_msg.c mksc68_cmd.c		\
 mksc68_cli.c mksc68_dsk.c mksc68_gdb.c mksc68_str.c mksc68_tag.c	\
 mksc68_cmd_new.c mksc68_cmd_load.c mksc68_cmd_play.c			\
 mksc68_cmd_time.c mksc68_cmd_tag.c mksc68_cmd_msg.c mksc68_cmd_save.c	\
-mksc68_cmd_info.c mksc68_cmd_gdb.c
+mksc68_cmd_info.c mksc68_cmd_gdb.c mksc68_cmd_extract.c
 
 headers = mksc68_cli.h mksc68_cmd.h mksc68_def.h mksc68_dsk.h		\
 mksc68_eva.h mksc68_gdb.h mksc68_msg.h mksc68_opt.h mksc68_str.h	\

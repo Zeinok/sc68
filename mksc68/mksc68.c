@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-08 21:59:03 ben>
+ * Time-stamp: <2013-09-17 03:42:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -228,7 +228,7 @@ static int run_error(cmd_t * me, int argc, char ** argv)
 }
 
 extern cmd_t cmd_new, cmd_load, cmd_play, cmd_stop, cmd_msg, cmd_tag;
-extern cmd_t cmd_time, cmd_save, cmd_info, cmd_gdb;
+extern cmd_t cmd_time, cmd_save, cmd_info, cmd_gdb, cmd_extract;
 static cmd_t
 cmd_exit = {
   run_exit, "exit",  "x", "[exit-code]",   "exit command interpreter" },
@@ -257,6 +257,7 @@ static cmd_t *commands[] = {
   &cmd_new,
   &cmd_load,
   &cmd_save,
+  &cmd_extract,
 
   &cmd_info,
   &cmd_tag,

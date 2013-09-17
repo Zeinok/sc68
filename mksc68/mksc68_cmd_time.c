@@ -1,3 +1,4 @@
+
 /*
  * @file    mksc68_cmd_time.c
  * @brief   the "time" command
@@ -5,7 +6,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-13 18:38:32 ben>
+ * Time-stamp: <2013-09-17 01:26:38 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -102,7 +103,6 @@ enum {
 
 static const opt_t longopts[] = {
   { "help",       0, 0, 'h' },
-  { "tracks",     1, 0, 't' },          /* track-list              */
   { "max-time",   1, 0, 'M' },          /* max search time         */
   { "pass-time",  1, 0, 'p' },          /* search pass time        */
   { "silent",     1, 0, 's' },          /* silent detection length */
@@ -1097,11 +1097,10 @@ error:
 static
 int run_time(cmd_t * cmd, int argc, char ** argv)
 {
+  int ret = EXIT_GENERIC;
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
-  int ret = EXIT_GENERIC, i, track, tracks;
+  int i, tracks;
   const char * tracklist = 0;
-  int /* seek_mode = 0,seek, dur_mode, duration, */ a, b;
-
   int max_ms = MAX_TIME, sil_ms = SILENCE_TIME, stp_ms = PASS_TIME;
 
 
@@ -1117,19 +1116,19 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
     case 'h':                           /* --help */
       help(argv[0]); return 0;
 
-    case 't':                           /* --tracks    */
-      if (tracklist) {
-        msgerr("multiple track-list not allowed.\n");
-        goto error;
-      }
-      tracklist = optarg;
-      /* check track-list syntax */
-      while (i = str_tracklist(&tracklist, &a, &b), i > 0)
-        ;
-      if (i)
-        goto error;
-      tracklist = optarg;
-      break;
+    /* case 't':                           /\* --tracks    *\/ */
+    /*   if (tracklist) { */
+    /*     msgerr("multiple track-list not allowed.\n"); */
+    /*     goto error; */
+    /*   } */
+    /*   tracklist = optarg; */
+    /*   /\* check track-list syntax *\/ */
+    /*   while (i = str_tracklist(&tracklist, &a, &b), i > 0) */
+    /*     ; */
+    /*   if (i) */
+    /*     goto error; */
+    /*   tracklist = optarg; */
+    /*   break; */
 
     case 'M':                           /* --max-time  */
       if (str_time_stamp((const char**)&optarg, &max_ms))
@@ -1153,8 +1152,9 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
     if (val == -1) break;
   }
   i = optind;
-  if (i < argc)
-    msgwrn("%d extra parameters ignored\n", argc-i);
+
+  /* if (i < argc) */
+  /*   msgwrn("%d extra parameters ignored\n", argc-i); */
 
   if (!dsk_has_disk()) {
     msgerr("no disk loaded\n");
@@ -1164,18 +1164,28 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
     msgerr("disk has no track\n");
     goto error;
   }
-  track = dsk_trk_get_current();
 
-  if (!tracklist) {
+  if (i == argc) {
+    int track = dsk_trk_get_current();
     ret = time_measure(&measureinfo, track, stp_ms, max_ms, sil_ms);
   } else {
-    ret = 0;
-    while (!ret && str_tracklist(&tracklist, &a, &b) > 0 ) {
-      for (; !ret && a <= b; ++a) {
+    int a, b, e;
+
+    tracklist = argv[i++];
+    if (i < argc)
+      msgwrn("%d extra parameters ignored\n", argc-i);
+
+    while (e = str_tracklist(&tracklist, &a, &b), e > 0) {
+      for (; a <= b; ++a) {
         ret = time_measure(&measureinfo, a, stp_ms, max_ms, sil_ms);
+        if (ret) goto validate;
       }
     }
+    if (e < 0)
+      goto error;
   }
+
+validate:
   dsk_validate();
 
 error:
@@ -1186,14 +1196,16 @@ cmd_t cmd_time = {
   /* run */ run_time,
   /* com */ "time",
   /* alt */ 0,
-  /* use */ "[opts]",
+  /* use */ "[opts] [TRACKS ...]",
   /* des */ "Autodetect track duration",
   /* hlp */
   "The `time' command run sc68 music emulator in a special way that allows\n"
-  "to autodetect track duration.\n"
+  "to autodetect tracks duration.\n"
+  "\n"
+  "TRACKS\n"
+  "   List of tracks (eg: 1,2-5,7), or all\n"
   "\n"
   "OPTIONS\n"
-  "   -t --tracks=TRACKS  List of tracks (default is current track).\n"
   "   -s --silent=MS      Duration for silent detection (0:disable).\n"
   "   -M --max-time=MS    Maximum time.\n"
   "   -p --pass-time=MS   Search pass duration."
