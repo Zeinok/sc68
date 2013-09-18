@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-18 05:01:39 ben>
+ * Time-stamp: <2013-09-18 08:04:17 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -89,6 +89,31 @@ static int SetEnable(HWND hdlg, int id, int enable)
   return (!!res);
 }
 
+static int SetVisible(HWND hdlg, int id, int visible)
+{
+  LRESULT res = 0;
+
+  res = ShowWindow(GetDlgItem(hdlg, id), visible ? SW_SHOW : SW_HIDE);
+  return (!!res);
+}
+
+static int SetTrackList(HWND hdlg, const int t, const int n)
+{
+  HWND hcb = GetDlgItem(hdlg, IDC_INF_TRACK);
+  int i;
+
+  SendMessage(hcb, (UINT)CB_RESETCONTENT,(WPARAM) 0,(LPARAM) 0);
+  for (i = 1; i <= n; ++i) {
+    char t[3];
+    t[0] = '0' + i / 10; t[1] = '0' + i % 10; t[2] = 0;
+    SendMessage(hcb,(UINT) CB_ADDSTRING,(WPARAM) 0,(LPARAM) t);
+  }
+  if (t > 0 && t <= n)
+    SendMessage(hcb, CB_SETCURSEL, (WPARAM)t-1, (LPARAM)0);
+  return 0;
+}
+
+
 static int SetInfo(HWND hdlg, const sc68_music_info_t * inf)
 {
   SetIconText(hdlg, IDC_INF_ALBUM,     inf->album);
@@ -98,18 +123,43 @@ static int SetInfo(HWND hdlg, const sc68_music_info_t * inf)
   SetIconText(hdlg, IDC_INF_FORMAT,    inf->format);
   SetIconText(hdlg, IDC_INF_RIPPER,    inf->ripper);
   SetIconText(hdlg, IDC_INF_CONVERTER, inf->converter);
-  SetIconText(hdlg, IDC_INF_HARDWARE,  inf->trk.hw);
+  SetIconText(hdlg, IDC_INF_YEAR,      inf->year);
+  /* SetIconText(hdlg, IDC_INF_HARDWARE,  inf->trk.hw); */
   SetIconText(hdlg, IDC_INF_TIME,      inf->trk.time+3);
 
-  /* SetIconText(hdlg, IDC_INFTTIME, inf->time); */
+  SetVisible(hdlg, IDC_INF_AMIGA, 0 ^ inf->trk.amiga);
+  SetVisible(hdlg, IDC_INF_YM,    1 ^ inf->trk.amiga);
+  SetVisible(hdlg, IDC_INF_STE,   1 ^ inf->trk.amiga);
+  SetVisible(hdlg, IDC_INF_ASID,  1 ^ inf->trk.amiga);
+
+  SetEnable(hdlg,  IDC_INF_AMIGA,inf->trk.amiga);
+  SetEnable(hdlg,  IDC_INF_YM,   inf->trk.ym);
+  SetEnable(hdlg,  IDC_INF_STE,  inf->trk.ste);
+  SetEnable(hdlg,  IDC_INF_ASID, inf->trk.asid);
+
   /* SetIconText(hdlg, IDC_INFTREPLAY, inf->replay); */
   /* SetIconFormat(hdlg, IDC_INFTRATE, " %d Hz",inf->rate); */
   /* SetIconFormat(hdlg, IDC_INFTLOADADDR, " $%X", inf->addr); */
-  /* SetEnable(hdlg, IDC_INFHWYM,  inf->hw.ym); */
-  /* SetEnable(hdlg, IDC_INFHWMW,  inf->hw.ste); */
-  /* SetEnable(hdlg, IDC_INFHWAGA, inf->hw.amiga); */
   return 0;
 }
+
+static int NoInfo(HWND hdlg)
+{
+  sc68_music_info_t info;
+  memset(&info,0,sizeof(info));
+  info.album = info.artist = info.title = info.genre =
+    info.format = info.ripper = info.converter = "N/A";
+  strcpy(info.trk.time,"-- --:--");
+
+  int ComboBox_DeleteString(
+  HWND hwndCtl,
+  int index
+);
+
+
+  return SetInfo(hdlg, &info);
+}
+
 
 // Change cookie, return previous
 static sc68_disk_t ChangeDisk(HWND hdlg, sc68_disk_t d)
@@ -125,33 +175,18 @@ static sc68_disk_t GetDisk(HWND hdlg)
 
 static int SetDiskInfo(HWND hdlg, const char * uri)
 {
-  static const char error[] = "Not an sc68 file";
-  sc68_disk_t d;
-  int min = 0, max = 0, pos = 0;
+  sc68_disk_t d = GetDisk(hdlg);
+  sc68_music_info_t info;
 
   SetIconText(hdlg,IDC_INF_URI, uri);
-  d = GetDisk(hdlg);
-
-  if (d) {
-    sc68_music_info_t info;
-    if (sc68_music_info(0, &info, 1, d) < 0) {
-      return -1;
-    }
+  if (d && !sc68_music_info(0, &info, 1, d)) {
+    SetTrackList(hdlg, info.trk.track, info.tracks);
     SetInfo(hdlg,&info);
-    /* SetIconText(hdlg,IDC_DNAME, info.title); */
-    /* SetIconText(hdlg,IDC_DTIME, info.time); */
-    /* SetTrackInfo(hdlg, d, pos = 0); */
-    /* max = info.tracks-1; */
   } else {
-    /* SetIconText(hdlg,IDC_DNAME, error); */
-    /* SetIconText(hdlg,IDC_DTIME, ""); */
-    /* SetTrackInfo(hdlg, 0, 0); */
+    SetTrackList(hdlg, 0, 0);
+    NoInfo(hdlg);
   }
-  /* SendDlgItemMessage(hdlg, IDC_TUP,UDM_SETRANGE32, min, max); */
-  /* SendDlgItemMessage(hdlg, IDC_TUP,UDM_SETPOS, 0, (LPARAM) MAKELONG((short)pos, 0)); */
-
-  /* SetIconText(hdlg, IDOK, endMsg[rand() % (sizeof(endMsg)/ sizeof(*endMsg))]); */
-  /* SetFocus(GetDlgItem(hdlg, IDC_TUP)); */
+  SetFocus(GetDlgItem(hdlg, IDOK));
   return 0;
 }
 
@@ -173,21 +208,18 @@ static BOOL CALLBACK DialogProc(
   HWND hdlg,      // handle to dialog box
   UINT uMsg,      // message
   WPARAM wParam,  // first message parameter
-  LPARAM lParam   // second message parameter
-  )
+  LPARAM lParam)  // second message parameter
 {
 
   switch(uMsg)
   {
-  case WM_INITDIALOG:
-  {
+  case WM_INITDIALOG: {
     ChangeFile(hdlg, (char *)lParam);
     ShowWindow(hdlg, SW_SHOW);
     UpdateWindow(hdlg);
   } return 1;
 
-  case WM_COMMAND:
-  {
+  case WM_COMMAND: {
     int wNotifyCode = HIWORD(wParam); // notification code
     int wID = LOWORD(wParam);         // item, control, or accelerator identifier
     HWND hwndCtl = (HWND) lParam;     // handle of control
@@ -196,31 +228,19 @@ static BOOL CALLBACK DialogProc(
     case IDOK:
       DestroyWindow (hdlg);
       break;
-    }
-  } return 0;
-
-#if 0
-  case WM_VSCROLL:
-  {
-    int nScrollCode = (int) LOWORD(wParam);   // scroll bar value
-    short nPos = (short int) HIWORD(wParam);  // scroll box position
-    HWND hwndScrollBar = (HWND) lParam;       // handle to scroll bar
-    if (hwndScrollBar != GetDlgItem(hdlg, IDC_TUP)) {
-      return 0; // Safe net, should not happen.
-    } else {
-      api68_disk_t d = GetDisk(hdlg);
-      if (!d) {
-        return 0;
-      }
-
-      switch (nScrollCode) {
-      case SB_THUMBPOSITION:
-        SetTrackInfo(hdlg, d, nPos);
-        break;
+    case IDC_INF_TRACK:
+      if (HIWORD(wParam) == CBN_SELCHANGE) {
+        sc68_music_info_t info;
+        sc68_disk_t d = GetDisk(hdlg);
+        int track = SendMessage((HWND) lParam, (UINT) CB_GETCURSEL,
+                                (WPARAM) 0, (LPARAM) 0);
+        if (track >= 0 && !sc68_music_info(0, &info, track+1, d))
+          SetInfo(hdlg,&info);
+        else
+          NoInfo(hdlg);
       }
     }
   } return 0;
-#endif
 
   case WM_DESTROY:
   {
@@ -231,7 +251,6 @@ static BOOL CALLBACK DialogProc(
   case WM_CLOSE:
     DestroyWindow (hdlg);
     return 0;
-
   }
 
   return 0;

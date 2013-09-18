@@ -1,11 +1,11 @@
-/*
+/* 
  * @file    in_sc68.c
  * @brief   sc68-ng plugin for winamp 5.5
  * @author  http://sourceforge.net/users/benjihan
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-28 16:08:39 ben>
+ * Time-stamp: <2013-09-18 05:56:04 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -152,6 +152,7 @@ static void stop();
 static void getfileinfo(const in_char *, in_char *, int *);
 static void seteq(int, char *, int);
 
+extern int fileinfo_dialog(HINSTANCE hinst, HWND hwnd, const char * uri);
 /*******************************************************************************
  * Debug
  ******************************************************************************/
@@ -160,7 +161,7 @@ static void dbg_va(const char * fmt, va_list list)
 {
   char s[1024];
   vsnprintf(s, sizeof(s), fmt, list);
-    OutputDebugString(s);
+  OutputDebugString(s);
 }
 
 static void dbg(const char * fmt, ...)
@@ -273,11 +274,13 @@ static
 /*******************************************************************************
  * INFO DIALOG
  ******************************************************************************/
-int infobox(const char *fn, HWND hwnd)
+int infobox(const char * uri, HWND hwnd)
 {
+  fileinfo_dialog(g_mod.hDllInstance, hwnd, uri);
+  return INFOBOX_UNCHANGED;
+
 /* #define INFOBOX_EDITED 0 */
 /* #define INFOBOX_UNCHANGED 1 */
-  return INFOBOX_UNCHANGED;
 }
 
 static
