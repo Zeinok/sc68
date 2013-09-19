@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-18 05:56:04 ben>
+ * Time-stamp: <2013-09-19 08:35:20 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -153,6 +153,8 @@ static void getfileinfo(const in_char *, in_char *, int *);
 static void seteq(int, char *, int);
 
 extern int fileinfo_dialog(HINSTANCE hinst, HWND hwnd, const char * uri);
+extern int config_dialog(HINSTANCE hinst, HWND hwnd);
+
 /*******************************************************************************
  * Debug
  ******************************************************************************/
@@ -250,22 +252,38 @@ static
 /*******************************************************************************
  * CONFIG DIALOG
  ******************************************************************************/
-void config(HWND hwndParent)
+void config(HWND hwnd)
 {
-  MessageBox(hwndParent,
-             "No configuration yet",
-             "Configuration",
-             MB_OK);
+  if (config_dialog(g_mod.hDllInstance, hwnd) < 0)
+    MessageBox(hwnd,
+               "No configuration yet",
+               "sc68 for winamp",
+               MB_OK);
+  else
+    sc68_cntl(0, SC68_CONFIG_SAVE);
 }
 
 static
 /*******************************************************************************
  * ABOUT DIALOG
  ******************************************************************************/
-void about(HWND hwndParent)
+void about(HWND hwnd)
 {
-  MessageBox(hwndParent,
-             "sc68 - Atari ST and Amiga music player, by Benjamin Gerard",
+  char temp[512];
+  snprintf(temp,sizeof(temp),
+           "sc68 for winamp\n"
+           "Atari ST and Amiga music player\n"
+           "using %s and %s"
+#ifdef DEBUG
+           "\n" " !!! DEBUG Build !!! "
+#endif
+#ifndef NDEBUG
+           "\n" "buid on " __DATE__
+#endif
+           "\n(C) 1998-2013 Benjamin Gerard",
+           sc68_versionstr(),file68_versionstr());
+  MessageBox(hwnd,
+             temp,
              "About sc68 for winamp",
              MB_OK);
 }

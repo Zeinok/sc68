@@ -24,4 +24,6 @@
 #define IDC_INF_YMVOLUME                        1070
 #define IDC_INF_AGABLEND                        1071
 #define IDC_INF_AGAFILTER                       1072
-#define IDC_INF_SPR                             1074
+#define IDC_INF_DEFTIME                         1076
+#define IDC_SPIN_DEFTIME                        1081
+#define IDC_INF_SPR                             1083

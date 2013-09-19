@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-18 08:04:17 ben>
+ * Time-stamp: <2013-09-19 09:28:18 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -36,6 +36,7 @@
 #include <commctrl.h>
 
 #include "resource.h"
+#include "dlg.c"
 
 /* Standard */
 #include <math.h>
@@ -47,54 +48,16 @@
 /* sc68 */
 #include "sc68/sc68.h"
 
+
 static BOOL CALLBACK DialogProc(HWND,UINT,WPARAM,LPARAM);
 
 /* Only exported function. */
 int fileinfo_dialog(HINSTANCE hinst, HWND hwnd, const char * uri)
 {
-  HWND hdlg;
-  hdlg = CreateDialogParam(hinst, (LPCTSTR)IDD_DLG_FILEINFO,
+  HWND hdlg
+    = CreateDialogParam(hinst, (LPCTSTR)IDD_DLG_FILEINFO,
                            hwnd, (DLGPROC)DialogProc, (LPARAM)uri);
   return hdlg ? 0 : -1;
-}
-
-static int SetText(HWND hdlg, int id, const char *new_text)
-{
-  LRESULT res;
-  WPARAM wParam = 0;
-  LPARAM lParam = (LPARAM)new_text;
-  res = SendDlgItemMessage(hdlg, id, WM_SETTEXT, wParam, lParam);
-  return (!!res);
-}
-
-static int SetIconText(HWND hdlg, int id, const char *new_text)
-{
-  return SetText(hdlg, id, new_text);
-}
-
-static int SetIconFormat(HWND hdlg, int id, const char *format, int n)
-{
-  char buffer[128];
-  _snprintf(buffer,sizeof(buffer), format, n);
-  buffer[sizeof(buffer)-1] = 0;
-  return SetText(hdlg, id, buffer);
-}
-
-
-static int SetEnable(HWND hdlg, int id, int enable)
-{
-  LRESULT res;
-  res = SendDlgItemMessage(hdlg, id, BM_SETCHECK, !!enable, 0);
-  EnableWindow(GetDlgItem(hdlg,id),!!enable);
-  return (!!res);
-}
-
-static int SetVisible(HWND hdlg, int id, int visible)
-{
-  LRESULT res = 0;
-
-  res = ShowWindow(GetDlgItem(hdlg, id), visible ? SW_SHOW : SW_HIDE);
-  return (!!res);
 }
 
 static int SetTrackList(HWND hdlg, const int t, const int n)
@@ -113,33 +76,32 @@ static int SetTrackList(HWND hdlg, const int t, const int n)
   return 0;
 }
 
-
 static int SetInfo(HWND hdlg, const sc68_music_info_t * inf)
 {
-  SetIconText(hdlg, IDC_INF_ALBUM,     inf->album);
-  SetIconText(hdlg, IDC_INF_ARTIST,    inf->artist);
-  SetIconText(hdlg, IDC_INF_TITLE ,    inf->title);
-  SetIconText(hdlg, IDC_INF_GENRE,     inf->genre);
-  SetIconText(hdlg, IDC_INF_FORMAT,    inf->format);
-  SetIconText(hdlg, IDC_INF_RIPPER,    inf->ripper);
-  SetIconText(hdlg, IDC_INF_CONVERTER, inf->converter);
-  SetIconText(hdlg, IDC_INF_YEAR,      inf->year);
-  /* SetIconText(hdlg, IDC_INF_HARDWARE,  inf->trk.hw); */
-  SetIconText(hdlg, IDC_INF_TIME,      inf->trk.time+3);
+  SetText(hdlg, IDC_INF_ALBUM,     inf->album);
+  SetText(hdlg, IDC_INF_ARTIST,    inf->artist);
+  SetText(hdlg, IDC_INF_TITLE ,    inf->title);
+  SetText(hdlg, IDC_INF_GENRE,     inf->genre);
+  SetText(hdlg, IDC_INF_FORMAT,    inf->format);
+  SetText(hdlg, IDC_INF_RIPPER,    inf->ripper);
+  SetText(hdlg, IDC_INF_CONVERTER, inf->converter);
+  SetText(hdlg, IDC_INF_YEAR,      inf->year);
+  SetText(hdlg, IDC_INF_TIME,      inf->trk.time+3);
 
   SetVisible(hdlg, IDC_INF_AMIGA, 0 ^ inf->trk.amiga);
   SetVisible(hdlg, IDC_INF_YM,    1 ^ inf->trk.amiga);
   SetVisible(hdlg, IDC_INF_STE,   1 ^ inf->trk.amiga);
   SetVisible(hdlg, IDC_INF_ASID,  1 ^ inf->trk.amiga);
 
-  SetEnable(hdlg,  IDC_INF_AMIGA,inf->trk.amiga);
-  SetEnable(hdlg,  IDC_INF_YM,   inf->trk.ym);
-  SetEnable(hdlg,  IDC_INF_STE,  inf->trk.ste);
-  SetEnable(hdlg,  IDC_INF_ASID, inf->trk.asid);
+  SetEnable(hdlg,  IDC_INF_AMIGA,0);
+  SetEnable(hdlg,  IDC_INF_YM,   0);
+  SetEnable(hdlg,  IDC_INF_STE,  0);
+  SetEnable(hdlg,  IDC_INF_ASID, 0);
 
-  /* SetIconText(hdlg, IDC_INFTREPLAY, inf->replay); */
-  /* SetIconFormat(hdlg, IDC_INFTRATE, " %d Hz",inf->rate); */
-  /* SetIconFormat(hdlg, IDC_INFTLOADADDR, " $%X", inf->addr); */
+  SetCheck(hdlg,  IDC_INF_AMIGA,inf->trk.amiga);
+  SetCheck(hdlg,  IDC_INF_YM,   inf->trk.ym);
+  SetCheck(hdlg,  IDC_INF_STE,  inf->trk.ste);
+  SetCheck(hdlg,  IDC_INF_ASID, inf->trk.asid);
   return 0;
 }
 
@@ -150,16 +112,8 @@ static int NoInfo(HWND hdlg)
   info.album = info.artist = info.title = info.genre =
     info.format = info.ripper = info.converter = "N/A";
   strcpy(info.trk.time,"-- --:--");
-
-  int ComboBox_DeleteString(
-  HWND hwndCtl,
-  int index
-);
-
-
   return SetInfo(hdlg, &info);
 }
-
 
 // Change cookie, return previous
 static sc68_disk_t ChangeDisk(HWND hdlg, sc68_disk_t d)
@@ -178,7 +132,7 @@ static int SetDiskInfo(HWND hdlg, const char * uri)
   sc68_disk_t d = GetDisk(hdlg);
   sc68_music_info_t info;
 
-  SetIconText(hdlg,IDC_INF_URI, uri);
+  SetText(hdlg,IDC_INF_URI, uri);
   if (d && !sc68_music_info(0, &info, 1, d)) {
     SetTrackList(hdlg, info.trk.track, info.tracks);
     SetInfo(hdlg,&info);
