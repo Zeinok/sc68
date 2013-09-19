@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-06 21:11:50 ben>
+ * Time-stamp: <2013-09-19 01:51:54 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -119,7 +119,8 @@ void emu68_ioplug(emu68_t * const emu68, io68_t * const io)
     ++emu68->nio;
     for (i=(u8)(io->addr_lo>>8); i<=(u8)(io->addr_hi>>8); ++i) {
       /* To be sure we don't overlap IOs */
-      assert(emu68->mapped_io[i] == &emu68->errio);
+      assert(emu68->mapped_io[i] == &emu68->errio ||
+             emu68->mapped_io[i] == &emu68->nopio );
       emu68->mapped_io[i] = io;
     }
   }

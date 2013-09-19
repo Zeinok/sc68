@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-17 09:00:01 ben>
+ * Time-stamp: <2013-09-19 08:04:48 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -2454,13 +2454,13 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
 
   case SC68_CONFIG_LOAD:
     if (!config_load()) {
-      res = 0;
       config_apply(sc68);
+      res = 0;
     }
     break;
 
   case SC68_CONFIG_SAVE:
-    config_update(sc68);
+    /* config_update(sc68); */
     if (!config_save())
       res = 0;
     break;

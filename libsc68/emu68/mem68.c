@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-17 08:57:01 ben>
+ * Time-stamp: <2013-09-19 01:56:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -174,6 +174,8 @@ static void fault_wal(io68_t * const io)
   emu68->status = EMU68_HLT;
 }
 
+static void nop_rwa(io68_t * const io) {}
+
 static void no_destroy(io68_t * const io) {}
 
 static const io68_t fault_io = {
@@ -189,6 +191,14 @@ static const io68_t ram_io = {
   memchk_wb,memchk_ww,memchk_wl,
   0,0,0,0,no_destroy
 };
+
+static const io68_t nop_io = {
+  0,"NOP",0,0,
+  nop_rwa,nop_rwa,nop_rwa,
+  nop_rwa,nop_rwa,nop_rwa,
+  0,0,0,0,no_destroy
+};
+
 
 /* ,--------------------------------------------------------.
  * |                   Read functions                       |
@@ -406,6 +416,11 @@ void emu68_mem_init(emu68_t * const emu68)
     emu68->errio.addr_lo = mem68_is_io(0xFFFFFF);
     emu68->errio.addr_hi = 0xFFFFFFFF;
 
+    emu68->nopio = nop_io;
+    emu68->nopio.emu68 = emu68;
+    emu68->nopio.addr_lo = mem68_is_io(0xFFFFFF);
+    emu68->nopio.addr_hi = 0xFFFFFFFF;
+
     emu68->memio = (emu68->chk) ? &emu68->ramio : 0;
   }
   emu68_mem_reset(emu68);
@@ -436,5 +451,6 @@ void emu68_mem_reset(emu68_t * const emu68)
  */
 void emu68_mem_reset_area(emu68_t * const emu68, u8 area)
 {
-  emu68->mapped_io[area] = &emu68->errio;
+  emu68->mapped_io[area] =
+    emu68->chk ? &emu68->errio : &emu68->nopio;
 }

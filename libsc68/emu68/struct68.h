@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      1999-03-13
  */
-/* Time-stamp: <2013-09-06 18:52:05 ben> */
+/* Time-stamp: <2013-09-19 01:42:43 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -200,7 +200,8 @@ struct emu68_s {
   io68_t * mapped_io[256];
   io68_t * memio;
   io68_t   ramio; /**< io used only in debug mode (access control). */
-  io68_t   errio; /**< io used invalid address                      */
+  io68_t   errio; /**< io used for invalid address in debug mode.   */
+  io68_t   nopio; /**< io used for invalid address in normal mode.  */
 
   /* Memory access. */
   addr68_t bus_addr;        /**< bus address for memory access.     */
@@ -210,9 +211,9 @@ struct emu68_s {
   struct {
     unsigned pc;
     unsigned ad;
-    int fl;
+    int      fl;
   } fst_chk, lst_chk;
-  u8     * chk;             /**< Access-Control-Memory buffer.      */
+  u8       * chk;           /**< Access-Control-Memory buffer.      */
 
   emu68_bp_t breakpoints[31];           /**< Hardware breakpoints.  */
 
