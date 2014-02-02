@@ -28,16 +28,19 @@ QUICK-START
         - autoconf >= 2.63
         - automake >= 1.11
         - libtool  >= 2.2.6
+	- texinfo (makeinfo)
         - help2man
         - texinfo2man
+
             This  tools  is part  of  indent  package  but it  is  not
-            installed  by most  distrib.  A copy  of  the source  file
+            installed by  most distribs.   A copy  of the  source file
             texinfo2man.c has  been added for conveniency  to sc68 SVN
             repository in  tools/ directory. You can  for instance run
-            'make'  there and install  'texinfo2man' anywhere  in your
+            'make' there  and install  'texinfo2man' anywhere  in your
             exec PATH.
 
         - as68
+
             as68 is a 68000 macro assembler compatible with HISOFT(tm)
             GenST(tm).  It  is  used  to  assemble  libsc68  TOS  trap
             emulator.  It is  part of  sc68. You  can use  any working
