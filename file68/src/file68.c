@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-14 06:15:27 ben>
+ * Time-stamp: <2013-09-24 23:25:05 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -936,7 +936,13 @@ static int sndh_info(disk68_t * mb, int len)
   /* Default */
   mb->mus[0].data   = b;
   mb->mus[0].datasz = len;
+
+#if 1
   mb->nb_mus = -1; /* Make validate failed */
+#else
+  mb->nb_mus = 1; /* Assume default of 1 track */
+#endif
+
   mb->mus[0].replay = 0;
 
   i = sndh_is_magic(b, len);
@@ -1028,7 +1034,7 @@ static int sndh_info(disk68_t * mb, int len)
     } else if (!memcmp(b+i,"TIME",4)) {
       int j, tracks;
       /* Time in second */
-      if (! (tracks = mb->nb_mus) ) {
+      if ( (tracks = mb->nb_mus) <= 0 ) {
         /* $$$ We could try to count the number de 16-word before the
          * next tag, it could give us the number of song. Still it's
          * would be pretty messed up. So let's assume 1 track for
@@ -1059,7 +1065,7 @@ static int sndh_info(disk68_t * mb, int len)
       int j, tracks, max = 0;
       t = i;
       /* assert(0); */
-      if (! (tracks = mb->nb_mus) ) {
+      if ( (tracks = mb->nb_mus) <= 0 ) {
         /* $$$ Same remark as 'TIME' tag. */
         msg68_warning("file68: sndh -- %s\n","got '!#SN' before track count");
         tracks = 1;
