@@ -20,7 +20,7 @@ QUICK-START
 
   -2- Get sc68 source tree
 
-      $ svn co https://sc68.svn.sourceforge.net/svnroot/sc68 sc68
+      $ svn checkout http://svn.code.sf.net/p/sc68/code/ sc68-code
 
   -3- Prepare source tree (bootstapping)
 
@@ -105,6 +105,6 @@ HACKING
 
 LINKS
 
-  svn repository : https://sc68.svn.sourceforge.net/svnroot/sc68
-  browse svn     : http://sc68.svn.sourceforge.net/viewvc/sc68/
+  svn repository : http://svn.code.sf.net/p/sc68/code
+  browse svn     : http://sourceforge.net/p/sc68/code/HEAD/tree
   sc68 project   : http://sourceforge.net/projects/sc68
