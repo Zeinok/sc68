@@ -5,7 +5,7 @@
 ;
 ; by Benjamin Gerard <https://sourceforge.net/users/benjihan>
 ;
-; Time-stamp: <2013-12-23 12:06:59 ben>
+; Time-stamp: <2013-12-30 19:16:56 ben>
 ;
 
 ;;; TODO: supported replay rates
@@ -563,6 +563,7 @@ ym_ad1:	rs.w	1		; increment #1
 ym_an2:	rs.w	1		; angle #2
 ym_ad2:	rs.w	1		; increment #2
 ym_sid:	rs.w	1		; Cyclic ratio
+ym_esd:	rs.w	1		; Effective SID
 ym_lat:	rs.w	1		; aSID latch
 ym_chd:	rs.w	1		; current chord
 ym_cct:	rs.w	1		; change chord counter
@@ -858,9 +859,9 @@ aSIDvoicify:
 	;; period/volume
 	movem.w	ym_per(a6),d0-d1
 
-	;; ;; Don't aSIDify 0 volume
-	;; and.b	#$f,d1
-	;; beq	.noA
+	;; 
+	and.w	#$f,d1
+	;; beq	.noA		;; Don't aSIDify 0 volume
 				;; Don't aSIDdify high pitched note
 	cmp.w	#PERIOD_MIN,d0
 	ble	.noA
@@ -910,6 +911,11 @@ aSIDvoicify:
 
 .ok_d5:
 	move	d5,ym_sid(a6)	; new sid !
+	tst.b	d5
+	smi	d3
+	eor.b	d3,d5		; $80-$7f ... $ff -> $00
+	move	d5,ym_esd(a6)	; new effective sid !
+
 
 	;; timer control/data
 	move	d0,d3
@@ -930,6 +936,7 @@ aSIDvoicify:
 	move	d2,d4		; [N]
 	
 	mulu	ym_sid(a6),d2
+	;; mulu	ym_esd(a6),d2
 	lsr.w	#8,d2		; [V]
 	seq	d5
 	sub.b	d5,d2		; if 0 -> 1
@@ -942,7 +949,42 @@ aSIDvoicify:
 	
 	;; Set volumes
  	move.b	d1,timer_volH+2(a2)	; set volume HI
- 	clr.b	timer_volL+2(a2)	; set volume LO
+
+	
+	;; Try to compensated for power lost by adjusting the SID low
+	;; level.
+
+	;; move	ym_sid(a6),d5		; 0-255
+	;; sub.b	#128,d5			; -128-127
+	;; smi	d0
+	;; eor.b	d0,d5			; 0-127
+	;; and	#15,d1
+	;; mulu	d1,d5			; 0-1905
+	;; lsr	#4+4,d5			; 
+
+
+	;; moveq	#15,d5
+	;; sub	d1,d5	      		; 15-vol
+	;; lsl	#4,d5			; $f0..$00
+	;; sub	ym_esd(a6),d5		; 0-127
+	;; asr	#4,d5
+	;; spl	d0
+	;; and	d0,d5
+	
+	move	ym_esd(a6),d5		; 0-127
+	mulu	d1,d5			; 0-1905
+	lsr	#4+4,d5			; 0-7
+
+	;; move	ym_esd(a6),d5		; 0-127
+	;; lsr	#4,d5			; 0-7
+
+	;; move	ym_esd(a6),d5		; 0-127
+	;; lsr	#3,d5			; 0-15
+	;; add	d1,d5			; 0-30
+	;; lsr	#2,d5			; 0-7
+
+	move.b	d5,timer_volL+2(a2)	; set volume LO
+ 	;; clr.b	timer_volL+2(a2)	; set volume LO
 
 	;; Set data reg in routines
 	move.b	d2,timer_dataH(a2)
@@ -973,17 +1015,17 @@ aSIDvoicify:
 	
 .no_progA:
 	;; Not programmed, we should take care to retrieve good level
-	move.w	(a2),a1		; vector addr
-	move.l	(a1),d5		; current routine
 
-	sub.l	a3,d5		; 0:next routine is HI, current is LO
-	sne	d5
-	and.b	d5,d1
-	
 	moveq	#8,d2
 	add.b	d6,d2
-	swap	d2
-	move.b	d1,d2
+	swap	d2		; $..VR....
+	move.b	timer_volL+2(a2),d2
+	move.w	(a2),a1		; vector addr
+	move.l	(a1),d5		; current routine
+	sub.l	a3,d5		; 0 -> next routine is HI, current is LO
+	beq.s	.oklow
+	move.b	timer_volH+2(a2),d2
+.oklow:	
 	lsl.l	#8,d2
 	move.l	d2,$ffff8800.w
 	
