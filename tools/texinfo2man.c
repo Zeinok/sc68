@@ -253,13 +253,26 @@ main (int argc, char *argv[])
     char buf[1024];
     int line_no = 0;
 
+    if (argc < 3) {
+      puts("Usage: texinfo2man <template> <texinfo>");
+      return 1;
+    }
+
     texinfoname = argv[2];
 
     in = fopen (argv[2], "r");
+    if (!in) {
+      perror(argv[2]);
+      return 2;
+    }
     process_texi (in);
     fclose (in);
 
     in = fopen (argv[1], "r");
+    if (!in) {
+      perror(argv[1]);
+      return 2;
+    }
 
     while (fgets (buf, sizeof (buf), in))
     {
