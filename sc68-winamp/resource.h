@@ -4,6 +4,8 @@
 
 #define IDD_DLG_FILEINFO                        102
 #define IDD_DLG_CONFIG                          104
+#define IDD_DLG_TRACKSELECT                     107
+#define IDC_UFI                                 1001
 #define IDC_INF_URI                             1003
 #define IDC_INF_FORMAT                          1005
 #define IDC_INF_GENRE                           1009
@@ -25,5 +27,10 @@
 #define IDC_INF_AGABLEND                        1071
 #define IDC_INF_AGAFILTER                       1072
 #define IDC_INF_DEFTIME                         1076
-#define IDC_SPIN_DEFTIME                        1081
+#define IDC_SPIN_DEFTIME                        1077
 #define IDC_INF_SPR                             1083
+#define IDC_SEL_ALBUM                           1085
+#define IDC_SEL_ALLTRACKS                       1086
+#define IDC_SEL_SINGLETRACK                     1087
+#define IDC_SEL_REMEMBER                        1090
+#define IDC_SEL_TRACKLIST                       1092

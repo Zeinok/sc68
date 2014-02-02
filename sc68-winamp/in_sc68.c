@@ -1,11 +1,11 @@
-/* 
+/*
  * @file    in_sc68.c
- * @brief   sc68-ng plugin for winamp 5.5
+ * @brief   sc68-ng plugin for winamp 5.5 - main
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2013 Benjamin Gerard
+ * Copyright (C) 1998-2014 Benjamin Gerard
  *
- * Time-stamp: <2013-09-19 08:35:20 ben>
+ * Time-stamp: <2014-02-02 19:57:58 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -29,13 +29,8 @@
 #include "config.h"
 #endif
 
-#ifndef NOVTABLE
-# define NOVTABLE
-#endif
-
-#ifndef _GNU_SOURCE
-# define _GNU_SOURCE
-#endif
+/* winamp sc68 declarations */
+#include "wasc68.h"
 
 /* libc */
 #include <stdio.h>
@@ -43,8 +38,11 @@
 
 /* sc68 */
 #include <sc68/sc68.h>
+#include <sc68/file68.h>
 #include <sc68/file68_features.h>
 #include <sc68/file68_str.h>
+#include <sc68/file68_msg.h>
+#include <sc68/file68_opt.h>
 
 /* windows */
 #include <windows.h>
@@ -101,30 +99,9 @@ static struct wasc68_s {
 
   int         zero_B; /* zeroed to this point */
 
-  /* Sample buffer (x2 for DSP) */
-  char        spl[576*2*2*2];
+  /* Sample buffer (16bit x 2 channels x 2 for DSP) */
+  BYTE        spl[576*2*2*2];
 } g_wasc68;
-
-
-/*******************************************************************************
- * Cache
- ******************************************************************************/
-
-enum {
-  MAX_CACHED_DISK = 8
-};
-
-static struct {
-  HANDLE lock;                          /* lock disk cache */
-  struct cache_entry {
-    int ref;                            /* reference count */
-    char * uri;                         /* uri  (key)      */
-    sc68_disk_t disk;                   /* disk (val)      */
-  } e [MAX_CACHED_DISK];
-} g_cache;
-
-static sc68_disk_t wasc68_get_disk(const char * uri);
-static void        wasc68_rel_disk(sc68_disk_t disk, int dont_keep);
 
 /*******************************************************************************
  * Declaration
@@ -132,7 +109,6 @@ static void        wasc68_rel_disk(sc68_disk_t disk, int dont_keep);
 
 /* The decode thread */
 static DWORD WINAPI playloop(LPVOID b);
-static void dump_music_info(const sc68_music_info_t * const mi, const char * uri);
 static void init();
 static void quit();
 static void config(HWND);
@@ -152,32 +128,13 @@ static void stop();
 static void getfileinfo(const in_char *, in_char *, int *);
 static void seteq(int, char *, int);
 
-extern int fileinfo_dialog(HINSTANCE hinst, HWND hwnd, const char * uri);
-extern int config_dialog(HINSTANCE hinst, HWND hwnd);
+EXTERN int fileinfo_dialog(HINSTANCE hinst, HWND hwnd, const char * uri);
+EXTERN int config_dialog(HINSTANCE hinst, HWND hwnd);
 
 /*******************************************************************************
  * Debug
  ******************************************************************************/
-
-static void dbg_va(const char * fmt, va_list list)
-{
-  char s[1024];
-  vsnprintf(s, sizeof(s), fmt, list);
-  OutputDebugString(s);
-}
-
-static void dbg(const char * fmt, ...)
-{
-  va_list list;
-  va_start(list,fmt);
-  dbg_va(fmt,list);
-  va_end(list);
-}
-
-static void msg(const int bit, void *userdata, const char *fmt, va_list list)
-{
-  dbg_va(fmt,list);
-}
+int wasc68_cat = msg68_NEVER;
 
 /*******************************************************************************
  * LOCKS
@@ -189,21 +146,23 @@ static wasc68_t * lock(void) {
     ;
 }
 
-static int cache_lock(void) {
-  return WaitForSingleObject(g_cache.lock, INFINITE) == WAIT_OBJECT_0;
-}
-
 static void unlock(wasc68_t * wasc68) {
   if (wasc68)
     ReleaseMutex(wasc68->lock);
 }
 
-static void cache_unlock(void) {
-  ReleaseMutex(g_cache.lock);
+void set_asid(int asid) {
+  wasc68_t * wasc68 = lock();
+  if (wasc68) {
+    DBG("set asid mode %d\n", asid);
+    sc68_cntl(wasc68->sc68,SC68_SET_ASID,asid);
+    if (wasc68->sc68)
+      sc68_cntl(0,SC68_SET_ASID,asid);
+    unlock(wasc68);
+  }
 }
 
-
-static
+/* static */
 /*******************************************************************************
  * THE INPUT MODULE
  ******************************************************************************/
@@ -211,7 +170,7 @@ In_Module g_mod =
 {
   IN_VER,               /* Input plugin version as defined in in2.h */
   (char*)
-  "sc68 - Atari-ST & Amiga music player", /* Description */
+  "sc68 (Atari ST & Amiga music) v" PACKAGE_VERSION, /* Description */
   0,                          /* hMainWindow (filled in by winamp)  */
   0,                          /* hDllInstance (filled in by winamp) */
   (char*)
@@ -280,8 +239,9 @@ void about(HWND hwnd)
 #ifndef NDEBUG
            "\n" "buid on " __DATE__
 #endif
-           "\n(C) 1998-2013 Benjamin Gerard",
+           "\n(C) 1998-2014 Benjamin Gerard",
            sc68_versionstr(),file68_versionstr());
+
   MessageBox(hwnd,
              temp,
              "About sc68 for winamp",
@@ -296,9 +256,6 @@ int infobox(const char * uri, HWND hwnd)
 {
   fileinfo_dialog(g_mod.hDllInstance, hwnd, uri);
   return INFOBOX_UNCHANGED;
-
-/* #define INFOBOX_EDITED 0 */
-/* #define INFOBOX_UNCHANGED 1 */
 }
 
 static
@@ -382,11 +339,29 @@ int getoutputtime()
 {
   int ms = 0;
   wasc68_t * wasc68;
+
   if (wasc68 = lock(), wasc68) {
-    ms = wasc68->position +
-      + g_mod.outMod->GetOutputTime()
-      - g_mod.outMod->GetWrittenTime()
-      ;
+    ms = g_mod.outMod->GetOutputTime();
+
+    /* DBG("Otime:%d Wtime:%d Dpos:%d Ppos:%d Tpos:%d\n", */
+    /*     g_mod.outMod->GetOutputTime(), */
+    /*     g_mod.outMod->GetWrittenTime(), */
+    /*     sc68_cntl(wasc68->sc68, SC68_GET_PLAYPOS), */
+    /*     sc68_cntl(wasc68->sc68, SC68_GET_DSKPOS), */
+    /*     sc68_cntl(wasc68->sc68, SC68_GET_POS) */
+    /*   ); */
+
+    /* wasc68->position */
+    /*   + g_mod.outMod->GetOutputTime() */
+    /*   - g_mod.outMod->GetWrittenTime(); */
+    /* if (wasc68->allin1) */
+    /*   ms = sc68_cntl(wasc68->sc68, SC68_GET_DSKPOS); */
+    /* ms += sc68_cntl(wasc68->sc68, SC68_GET_PLAYPOS); */
+    /* ms -= g_mod.outMod->GetWrittenTime(); */
+    /* ms = wasc68->position + */
+    /*   + g_mod.outMod->GetOutputTime() */
+    /*   - g_mod.outMod->GetWrittenTime() */
+    /*   ; */
     unlock(wasc68);
   }
   return ms;
@@ -398,15 +373,9 @@ static
  ******************************************************************************/
 void setoutputtime(int ms)
 {
-/* Not supported ATM */
-#if 0
-  wasc68_t * wasc68;
-  if (wasc68 = lock(), wasc68) {
-    ms = sc68_seek(wasc68->sc68, SC68_SEEK_PLAY, ms, 0);
-    dbg("wasc68::setoutputtime - seek => [%d ms] \n",ms);
-    unlock(wasc68);
-  }
-#endif
+/* Not supported ATM.
+ * It has to signal the play thread it has to seek.
+ */
 }
 
 static
@@ -502,7 +471,6 @@ int play(const char *fn)
 {
   int err = 1;
   wasc68_t * wasc68;
-  sc68_disk_t disk;
 
   if (!fn || !*fn)
     return -1;
@@ -515,9 +483,8 @@ int play(const char *fn)
     goto inused;
 
   memset(&wasc68->zero_A, 0, (char *)&wasc68->zero_B-(char *)&wasc68->zero_A);
-  /* dbg("wasc68::play - cleared\n"); */
 
-  /* ony mode supported ATM */
+  /* Only mode supported ATM */
   wasc68->allin1 = 1;
 
   /* Create sc68 emulator instance */
@@ -555,7 +522,7 @@ int play(const char *fn)
   /* dump_music_info(&wasc68->mi, wasc68->uri); */
 
   /* Init output module */
-  wasc68->maxlatency = g_mod.outMod->Open(wasc68->samplerate, 2, 16, -1, -1);
+  wasc68->maxlatency = g_mod.outMod->Open(wasc68->samplerate, 2, 16, 0, 0);
   if (wasc68->maxlatency < 0) {
     goto exit;
   }
@@ -598,6 +565,8 @@ const char * get_tag(const sc68_cinfo_t * const cinfo, const char * const key)
   return 0;
 }
 
+#if 0
+
 static
 void updatetrack(wasc68_t * wasc68)
 {
@@ -635,6 +604,7 @@ void dump_music_info(const sc68_music_info_t * const mi, const char * uri)
         mi->trk.tag[j].val);
   dbg("%s\n", "========================");
 }
+#endif
 
 static void xfinfo(char *title, int *msptr, sc68_t *sc68, sc68_disk_t disk)
 {
@@ -642,7 +612,7 @@ static void xfinfo(char *title, int *msptr, sc68_t *sc68, sc68_disk_t disk)
   sc68_music_info_t tmpmi, * const mi = &tmpmi;
 
   if (sc68_music_info(sc68, mi,
-                      sc68 ? SC68_CUR_TRACK :SC68_DEF_TRACK, disk))
+                      sc68 ? SC68_CUR_TRACK : SC68_DEF_TRACK, disk))
     return;
 
   if (title) {
@@ -675,7 +645,7 @@ static
  ******************************************************************************/
 void getfileinfo(const in_char * uri, in_char * title, int * msptr)
 {
-  const int max = GETFILEINFO_TITLE_LENGTH;
+  /* const int max = GETFILEINFO_TITLE_LENGTH; */
 
   if (title)
     *title = 0;
@@ -693,9 +663,9 @@ void getfileinfo(const in_char * uri, in_char * title, int * msptr)
   } else {
     /* some other disk */
     sc68_disk_t disk;
-    if (disk = wasc68_get_disk(uri), disk) {
+    if (disk = wasc68_cache_get(uri), disk) {
       xfinfo(title, msptr, 0, disk);
-      wasc68_rel_disk(disk, 0);
+      wasc68_cache_release(disk, 0);
     }
   }
 }
@@ -708,21 +678,21 @@ DWORD WINAPI playloop(LPVOID _wasc68)
 {
   wasc68_t * wasc68 = (wasc68_t *)_wasc68;
   const int get_pos =
-    wasc68->allin1 ? SC68_GET_PLAYPOS :SC68_GET_POS;
+    wasc68->allin1 ? SC68_GET_PLAYPOS : SC68_GET_POS;
 
   while (!wasc68->stop_req) {
-    int seeking = 0, l;
+    int l;
 
     wasc68->position = sc68_cntl(wasc68->sc68, get_pos);
 
-    if (seeking)
-      g_mod.outMod->Flush(wasc68->position);
+    /* if (seeking) */
+    /*   g_mod.outMod->Flush(wasc68->position); */
 
-    if (g_mod.outMod->CanWrite() >= (576 << (2+!!g_mod.dsp_isactive())) ) {
+    if (g_mod.outMod->CanWrite() >= (576 << (2+!!g_mod.dsp_isactive()))) {
       /* CanWrite() returns the number of bytes you can write, so we
          check that to the block size. the reason we multiply the
-         block size by two if g_mod.dsp_isactive() is that DSP plug-ins
-         can change it by up to a factor of two (for tempo
+         block size by two if g_mod.dsp_isactive() is that DSP
+         plug-ins can change it by up to a factor of two (for tempo
          adjustment).
       */
       int n = 576;
@@ -733,8 +703,10 @@ DWORD WINAPI playloop(LPVOID _wasc68)
       if (wasc68->code & SC68_CHANGE) {
         if (!wasc68->allin1)
           break;
+
         /* sc68_music_info(wasc68->sc68, &wasc68->mi, SC68_CUR_TRACK, 0); */
         SendMessage(g_mod.hMainWindow,WM_WA_IPC,0,IPC_UPDTITLE);
+
         /* SendMessage(g_mod.hMainWindow, */
         /*             WM_WA_IPC, */
         /*             (WPARAM)(char*)"title", */
@@ -752,7 +724,7 @@ DWORD WINAPI playloop(LPVOID _wasc68)
         : n ) << 2;
 
       /* Write the pcm data to the output system */
-      g_mod.outMod->Write(wasc68->spl, l);
+      g_mod.outMod->Write((char*)wasc68->spl, l);
     }
     else {
       Sleep(20);                        /* wait a while */
@@ -776,6 +748,12 @@ DWORD WINAPI playloop(LPVOID _wasc68)
   return 0;
 }
 
+static int onchange_ufi(const option68_t * opt, value68_t * val)
+{
+  use_ufi = !!val->num;
+  DBG("UFI changed to %s\n",use_ufi?"On":"Off");
+  return 0;
+}
 
 static
 /*******************************************************************************
@@ -783,25 +761,38 @@ static
  ******************************************************************************/
 void init()
 {
+  static option68_t opt_ufi =
+    OPT68_BOOL(0,"ufi","winamp","Unified file info dialog",1,onchange_ufi);
+
   sc68_init_t init68;
+  const int debug =
+#ifdef DEBUG
+    1
+#else
+    0
+#endif
+    ;
 
   memset(&init68,0,sizeof(init68));
   init68.argv = argv;
   init68.argc = sizeof(argv) / sizeof(*argv);
-#ifdef DEBUG
-  init68.debug_set_mask =  0;
-  init68.debug_clr_mask =  0;
-  init68.msg_handler = (sc68_msg_t)msg;
+#ifndef NDEBUG
+  wasc68_cat = msg68_cat("winamp", "winamp input plugin", debug);
+  init68.debug_set_mask = debug << wasc68_cat;
+  init68.debug_clr_mask = 0;
+  init68.msg_handler = (sc68_msg_t) msgfct;
 #endif
+  init68.flags.no_load_config = 1;      /* disable config load */
   sc68_init(&init68);
+  option68_append(&opt_ufi, 1);         /* add our own options */
+  sc68_cntl(0,SC68_CONFIG_LOAD);
 
   /* clear and init private */
   memset(&g_wasc68,0,sizeof(g_wasc68));
   g_wasc68.lock = CreateMutex(NULL, FALSE, NULL);
 
   /* clear and init cacke */
-  memset(&g_cache,0,sizeof(g_cache));
-  g_cache.lock = CreateMutex(NULL, FALSE, NULL);
+  wasc68_cache_init();
 
 #ifdef WITH_API_SERVICE
   /* Get WASABI service */
@@ -867,7 +858,7 @@ void init()
   if (g_service) {
     int i, n, j;
     waServiceFactory * s;
-    dbg("wasc68::init -- SVC api <%p>\n", g_service);
+    DBG("SVC api <%p>\n", g_service);
 
     for (j=0; fcc[j] != -1; ++j) {
       char cc[5];
@@ -875,35 +866,35 @@ void init()
       cc[2] = fcc[j]>> 8; cc[3] = fcc[j]; cc[4] = 0;
 
       n = g_service->service_getNumServices(fcc[j]);
-      dbg("wasc68::init -- [%s] got %d service(s)\n", cc, n);
+      DBG("[%s] got %d service(s)\n", cc, n);
       for (s = g_service->service_enumService(fcc[j], i=0);
            s;
            s = g_service->service_enumService(fcc[j], ++i)) {
-        dbg("wasc68::init -- [%s] #%02d SVC factory  '%s'\n",
+        DBG("[%s] #%02d SVC factory  '%s'\n",
             cc, i, s ? s->getServiceName() : "(nil)");
       }
     }
 
     s = g_service->service_getServiceByGuid(languageApiGUID);
     if (s) {
-      dbg("wasc68::init -- service factory lang %p '%s'\n",
+      DBG("service factory lang %p '%s'\n",
           s, s?s->getServiceName():"(nil)");
     } else {
-      dbg("wasc68::init -- don't have service factory lang\n");
+      DBG("don't have service factory lang\n");
     }
 
     s = g_service->service_getServiceByGuid(memMgrApiServiceGuid);
     if (s) {
-      dbg("wasc68::init -- service factory memman %p '%s'\n",
+      DBG("service factory memman %p '%s'\n",
           s, s?s->getServiceName():"(nil)");
     } else {
-      dbg("wasc68::init -- don't have service memman lang\n");
+      DBG("don't have service memman lang\n");
     }
     //if (sf) WASABI_API_LNG = reinterpret_cast<api_language*>(sf->getInterface());
 
   }
 #endif
-
+  DBG("init completed\n");
 }
 
 static
@@ -914,169 +905,19 @@ void quit()
 {
   wasc68_t * wasc68;
 
+  DBG("\n");
   wasc68 = lock();
   sc68_cntl(0,SC68_CONFIG_SAVE);
   unlock(wasc68);
   CloseHandle(g_wasc68.lock);
   g_wasc68.lock = 0;
   memset(&g_wasc68,0,sizeof(g_wasc68));
-
-  /* Clean the cache */
-  if (cache_lock()) {
-    int i;
-    for (i=0; i<MAX_CACHED_DISK; ++i) {
-      if (g_cache.e[i].ref > 0) {
-        dbg("wasc68::quit -- cache #%d has %d references\n",
-            i, g_cache.e[i].ref);
-        continue;
-      }
-      g_cache.e[i].ref = 0;
-      if (g_cache.e[i].uri) {
-        dbg("wasc68::quit -- cache - #%d %d <%p> '%s'",
-            i, g_cache.e[i].ref, g_cache.e[i].disk,g_cache.e[i].uri);
-        free(g_cache.e[i].uri);
-        g_cache.e[i].uri = 0;
-      }
-      sc68_disk_free(g_cache.e[i].disk);
-      g_cache.e[i].disk = 0;
-    }
-    cache_unlock();
-    memset(&g_cache,0,sizeof(g_cache));
-  }
+  wasc68_cache_kill();
+  msg68_cat_free(wasc68_cat);
+  wasc68_cat = msg68_NEVER;
   sc68_shutdown();
+
 }
-
-/*******************************************************************************
- * Disk cache
- ******************************************************************************/
-
-static void  wasc68_rel_disk(sc68_disk_t disk, int dont_keep)
-{
-  if (!disk) return;                    /* safety net */
-
-  if (cache_lock()) {
-    int i;
-    for (i = 0; i < MAX_CACHED_DISK; ++i) {
-      if (disk != g_cache.e[i].disk)
-        continue;
-      if (--g_cache.e[i].ref <= 0) {
-        if (dont_keep) {
-          /* dbg("wasc68::get_disk -- cache - #%d %d <%p> '%s'\n", */
-          /*     i, g_cache.e[i].ref, g_cache.e[i].disk, g_cache.e[i].uri); */
-          free(g_cache.e[i].uri);
-          g_cache.e[i].uri = 0;
-          sc68_disk_free(g_cache.e[i].disk);
-          g_cache.e[i].disk = 0;
-        }
-        if (g_cache.e[i].ref != 0) {
-          dbg("wasc68::rel_disk -- !!! reference is %d !!! \n",
-              g_cache.e[i].ref);
-          g_cache.e[i].ref = 0;
-        }
-      } else {
-        /* dbg("wasc68::get_disk -- cache ~ #%d %d <%p> '%s'\n", */
-        /*     i, g_cache.e[i].ref, g_cache.e[i].disk, g_cache.e[i].uri); */
-      }
-      break;
-    }
-    cache_unlock();
-    if (i == MAX_CACHED_DISK) {
-      /* Disk was not cached */
-      /* dbg("wasc68::get_disk -- cache miss <%p>\n", disk); */
-      sc68_disk_free(disk);
-    }
-  } else {
-    dbg("wasc68::rel_disk -- %s\n", "cache lock failed");
-  }
-}
-
-static sc68_disk_t wasc68_get_disk(const char * uri)
-{
-  sc68_disk_t disk = 0;
-
-  if (!uri || !*uri) {
-    dbg("wasc68::get_disk -- %s\n", "no uri");
-    return 0;
-  }
-
-  if (cache_lock()) {
-    int i, j, k ;
-    for (i = 0, j = k = -1; i < MAX_CACHED_DISK; ++i) {
-      if (!g_cache.e[i].disk) {
-        if (j < 0) j = i;           /* keep track of 1st free entry */
-      } else if (!strcmp(uri, g_cache.e[i].uri)) {
-        disk = g_cache.e[i].disk;
-        g_cache.e[i].ref++;
-        /* dbg("wasc68::get_disk -- cache = #%d %d <%p> '%s'\n", */
-        /*     i, g_cache.e[i].ref,g_cache.e[i].disk,g_cache.e[i].uri); */
-        break;
-      } else if (k < 0 && ! g_cache.e[i].ref)
-        k =i;               /* keep track of 1st unreferenced entry */
-    }
-
-    /* Did not find this uri in cache, load the disk. */
-    if (!disk) {
-      disk = sc68_load_disk_uri(uri);
-      if (disk) {
-        /* Free or unreferenced entry ? */
-        i = j >= 0 ? j : k;
-        /* Have a free entry in the cache ? */
-        if (i >= 0) {
-          free(g_cache.e[i].uri);
-          sc68_disk_free(g_cache.e[i].disk);
-          g_cache.e[i].disk = 0;
-          g_cache.e[i].uri = 0;
-          g_cache.e[i].uri = strdup(uri);
-          if (g_cache.e[i].uri) {
-            g_cache.e[i].ref  = 1;
-            g_cache.e[i].disk = disk;
-            /* dbg("wasc68::get_disk -- cache + #%d %d <%p> '%s'\n", */
-            /*     i, g_cache.e[i].ref,g_cache.e[i].disk,g_cache.e[i].uri); */
-          } else {
-            dbg("wasc68::get_disk -- cache alloc failed -- '%s'\n", uri);
-          }
-        } else {
-          dbg("wasc68::get_disk -- cache full -- '%s'\n", uri);
-        }
-      } else {
-        dbg("wasc68::get_disk -- '%s' -- %s\n",
-            uri,
-            "could not cache (load failed)");
-      }
-    }
-    cache_unlock();
-  } else {
-    dbg("wasc68::get_disk -- cache lock failed -- '%s'\n", uri);
-    disk = sc68_load_disk_uri(uri);
-  }
-  /* dbg("wasc68::get_disk -- '%s' -- <%p>\n", uri, disk); */
-
-  return disk;
-}
-
-/*******************************************************************************
- * EXPORTED SYMBOL
- ******************************************************************************/
-
-#ifdef __cplusplus
-# define EXPORT extern "C" __declspec(dllexport)
-#else
-# define EXPORT __declspec(dllexport)
-#endif
-
-EXPORT
-In_Module *winampGetInModule2()
-{
-  return &g_mod;
-}
-
-
-/* static const struct tagtr_s */
-/*   const char * winamp; */
-/*   const char * sc68; */
-/* } tagtr[] = { */
-/*     {   }, */
-/*   }; */
 
 static int xinfo(const char *data, char *dest, size_t destlen,
                  sc68_t * sc68, sc68_disk_t disk)
@@ -1152,7 +993,7 @@ static int xinfo(const char *data, char *dest, size_t destlen,
     /* Other interresting tag we might handle someday: */
     /* "rating" "albumartist" "year" "publisher" "comment" "lossless"
      * "bpm" */
-    dbg("wasc68::%s unhandled TAG '%s'\n", __FUNCTION__, data);
+    DBG("unhandled TAG '%s'\n", data);
   }
 
   if (!value)
@@ -1165,40 +1006,37 @@ static int xinfo(const char *data, char *dest, size_t destlen,
   return 1;
 }
 
+
 /**
+ * Provides the extended meta tag support of winamp.
+ *
+ * @param  uri   URI or file to get info from (0 or empty for playing)
+ * @param  data  Tag name
+ * @param  dest  Buffer for tag value
+ * @param  max   Size of dest buffer
+ *
  * @retval 1 tag handled
  * @retval 0 unsupported tag
  */
 EXPORT
 int winampGetExtendedFileInfo(const char *uri,
-                              const char *data, char *dest, size_t destlen)
+                              const char *data,
+                              char *dest, size_t max)
 {
   sc68_disk_t disk;
   int res = 0;
 
-  if (!uri || !*uri) {
-    wasc68_t * wasc68;
-
-    if (wasc68 = lock(), wasc68) {
-      res = xinfo(data, dest, destlen, wasc68->sc68, 0);
-      unlock(wasc68);
-    } else {
-      dbg("wasc68::xinfo -- %s\n", "lock failed");
+  if (data && *data && dest && max > 2) {
+    if (!uri || !*uri) {
+      wasc68_t * wasc68;
+      if (wasc68 = lock(), wasc68) {
+        res = xinfo(data, dest, max, wasc68->sc68, 0);
+        unlock(wasc68);
+      }
+    } else if (disk = wasc68_cache_get(uri), disk) {
+      res = xinfo(data, dest, max, 0, disk);
+      wasc68_cache_release(disk, 0);
     }
-  } else if (disk = wasc68_get_disk(uri), disk) {
-    res = xinfo(data, dest, destlen, 0, disk);
-    wasc68_rel_disk(disk, 0);
-  } else {
-    dbg("wasc68::xinfo -- failed to load '%s'\n", uri);
   }
   return res;
-}
-
-/*******************************************************************************
- * DLL stuff
- ******************************************************************************/
-
-BOOL WINAPI _DllMainCRTStartup(HANDLE instance, ULONG reason, LPVOID lp)
-{
-  return TRUE;
 }

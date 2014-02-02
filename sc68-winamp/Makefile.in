@@ -2,9 +2,9 @@
 #
 # sc68-winamp @configure_input@
 #
-# (C) 2013 https://sourceforge.net/users/benjihan
+# (C) 2013-2014 https://sourceforge.net/users/benjihan
 #
-# Time-stamp: <2013-09-19 02:02:44 ben>
+# Time-stamp: <2014-01-24 16:18:39 ben>
 
 # Autoconf stuff
 prefix       := @prefix@
@@ -49,9 +49,13 @@ WINDRES      := $(CC:%gcc=%windres)
 
 VPATH = @srcdir@
 
+OBJS := in_sc68.o transcoder.o resource.o fileinfo.o configdlg.o	\
+ dll.o dbg.o tracksel.o cache.o
+
+
 all: in_sc68.dll
 
-in_sc68.dll: in_sc68.o resource.o fileinfo.o configdlg.o
+in_sc68.dll: $(OBJS)
 	$(CC) -shared -o $@ $^ -static-libgcc -static $(LDFLAGS)
 
 %.o: %.rc

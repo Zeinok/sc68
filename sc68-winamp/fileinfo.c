@@ -1,11 +1,11 @@
 /*
  * @file    fileinfo.c
- * @brief   sc68-ng plugin for winamp 5.5
+ * @brief   sc68-ng plugin for winamp 5.5 - file info dialog
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2013 Benjamin Gerard
+ * Copyright (C) 1998-2014 Benjamin Gerard
  *
- * Time-stamp: <2013-09-19 09:28:18 ben>
+ * Time-stamp: <2014-01-25 13:24:49 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -29,25 +29,28 @@
 #include "config.h"
 #endif
 
+/* winamp sc68 declarations */
+#include "wasc68.h"
+
 /* windows */
 #include <windows.h>
 #include <mmreg.h>
 #include <msacm.h>
 #include <commctrl.h>
 
-#include "resource.h"
-#include "dlg.c"
-
-/* Standard */
+/* libc */
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
 
+/* resource */
+#include "resource.h"
+#include "dlg.c"
+
 /* sc68 */
 #include "sc68/sc68.h"
-
 
 static BOOL CALLBACK DialogProc(HWND,UINT,WPARAM,LPARAM);
 
@@ -56,7 +59,7 @@ int fileinfo_dialog(HINSTANCE hinst, HWND hwnd, const char * uri)
 {
   HWND hdlg
     = CreateDialogParam(hinst, (LPCTSTR)IDD_DLG_FILEINFO,
-                           hwnd, (DLGPROC)DialogProc, (LPARAM)uri);
+                        hwnd, (DLGPROC)DialogProc, (LPARAM)uri);
   return hdlg ? 0 : -1;
 }
 
@@ -115,13 +118,13 @@ static int NoInfo(HWND hdlg)
   return SetInfo(hdlg, &info);
 }
 
-// Change cookie, return previous
+/* Change cookie, return previous */
 static sc68_disk_t ChangeDisk(HWND hdlg, sc68_disk_t d)
 {
   return (sc68_disk_t) SetWindowLong(hdlg, DWL_USER, (LONG)d);
 }
 
-// Get cookie
+/* Get cookie */
 static sc68_disk_t GetDisk(HWND hdlg)
 {
   return (sc68_disk_t) GetWindowLong(hdlg, DWL_USER);
@@ -167,26 +170,29 @@ static BOOL CALLBACK DialogProc(
 
   switch(uMsg)
   {
-  case WM_INITDIALOG: {
+
+  case WM_INITDIALOG:
     ChangeFile(hdlg, (char *)lParam);
     ShowWindow(hdlg, SW_SHOW);
     UpdateWindow(hdlg);
-  } return 1;
+    return 1;
 
   case WM_COMMAND: {
-    int wNotifyCode = HIWORD(wParam); // notification code
+    /* int wNotifyCode = HIWORD(wParam); // notification code */
     int wID = LOWORD(wParam);         // item, control, or accelerator identifier
     HWND hwndCtl = (HWND) lParam;     // handle of control
 
     switch(wID) {
+
     case IDOK:
       DestroyWindow (hdlg);
       break;
+
     case IDC_INF_TRACK:
       if (HIWORD(wParam) == CBN_SELCHANGE) {
         sc68_music_info_t info;
         sc68_disk_t d = GetDisk(hdlg);
-        int track = SendMessage((HWND) lParam, (UINT) CB_GETCURSEL,
+        int track = SendMessage(hwndCtl, (UINT) CB_GETCURSEL,
                                 (WPARAM) 0, (LPARAM) 0);
         if (track >= 0 && !sc68_music_info(0, &info, track+1, d))
           SetInfo(hdlg,&info);
@@ -194,17 +200,15 @@ static BOOL CALLBACK DialogProc(
           NoInfo(hdlg);
       }
     }
-  } return 0;
+  } break;
 
   case WM_DESTROY:
-  {
-    sc68_disk_t d = ChangeDisk(hdlg,0);
-    sc68_disk_free(d);
-  } return 0;
+    sc68_disk_free(ChangeDisk(hdlg,0));
+    break;
 
   case WM_CLOSE:
     DestroyWindow (hdlg);
-    return 0;
+    break;
   }
 
   return 0;

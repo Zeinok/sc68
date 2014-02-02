@@ -1,11 +1,11 @@
 /*
  * @file    dlg.c
- * @brief   sc68-ng plugin for winamp 5.5
+ * @brief   sc68-ng plugin for winamp 5.5 - common dialog functions
  * @author  http://sourceforge.net/users/benjihan
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-19 09:39:20 ben>
+ * Time-stamp: <2014-01-20 09:00:14 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
