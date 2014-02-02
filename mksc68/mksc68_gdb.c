@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-15 21:00:18 ben>
+ * Time-stamp: <2013-09-22 08:48:35 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -1102,7 +1102,7 @@ gdb_t * gdb_create(void)
       goto error;
 
     /* $$$ TEMP: options need to be set with gdb command */
-    gdb->opt.ontimer_break = 1;
+    gdb->opt.ontimer_break = 0;
 
   }
   return gdb;
