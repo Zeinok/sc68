@@ -81,19 +81,21 @@ enum {
   MFP
 };
 
-typedef struct {
-  unsigned ym:1;        /* YM used by this music                    */
-  unsigned mw:1;        /* mw used by this music                    */
-  unsigned pl:1;        /* Amiga/Paula used by this track           */
-  unsigned sh:1;        /* shifter has been access                  */
-  unsigned mk:1;        /* mfp has been access                      */
+typedef union {
+  unsigned all;
+  struct {
+    unsigned ym:1;      /* YM used by this music                    */
+    unsigned mw:1;      /* mw used by this music                    */
+    unsigned pl:1;      /* Amiga/Paula used by this track           */
+    unsigned sh:1;      /* shifter has been access                  */
+    unsigned mk:1;      /* mfp has been access                      */
 
-  unsigned ta:1;        /* MFP Timer-A used by this track           */
-  unsigned tb:1;        /* MFP Timer-B used by this track           */
-  unsigned tc:1;        /* MFP Timer-C used by this track           */
-  unsigned td:1;        /* MFP Timer-D used by this track           */
+    unsigned ta:1;      /* MFP Timer-A used by this track           */
+    unsigned tb:1;      /* MFP Timer-B used by this track           */
+    unsigned tc:1;      /* MFP Timer-C used by this track           */
+    unsigned td:1;      /* MFP Timer-D used by this track           */
+  } bit;
 } hw_t;
-
 
 enum {
   TIMER_A = 0X134 >> 2,
@@ -167,7 +169,7 @@ struct measureinfo_s {
   unsigned curfrm;      /* current frame counter                    */
 
   hw_t     hw;                        /* hardware used by play pass */
-  hw_t     init_hw;                   /* hardware uses by init pass */
+  /* hw_t     init_hw; */             /* hardware uses by init pass */
 
   hwflags68_t hwflags;  /* Save track hardware flags                */
 
@@ -471,20 +473,20 @@ static void access_range(measureinfo_t * mi)
 /* Timers use */
 static void access_timers(measureinfo_t * mi, hw_t * hw)
 {
-  hw->ta = mi->vector[TIMER_A].cnt > 0;
-  hw->tb = mi->vector[TIMER_B].cnt > 0;
-  hw->tc = mi->vector[TIMER_C].cnt > 0;
-  hw->td = mi->vector[TIMER_D].cnt > 0;
+  hw->bit.ta = mi->vector[TIMER_A].cnt > 0;
+  hw->bit.tb = mi->vector[TIMER_B].cnt > 0;
+  hw->bit.tc = mi->vector[TIMER_C].cnt > 0;
+  hw->bit.td = mi->vector[TIMER_D].cnt > 0;
 }
 
 /* IO chip access */
 static void access_ios(measureinfo_t * mi, hw_t * hw)
 {
-  hw->ym = mi->timeios[YM].a      > 0;
-  hw->mw = mi->timeios[MW].a      > 0;
-  hw->pl = mi->timeios[PAULA].a   > 0;
-  hw->sh = mi->timeios[SHIFTER].a > 0;
-  hw->mk = mi->timeios[MFP].a     > 0;
+  hw->bit.ym = mi->timeios[YM].a      > 0;
+  hw->bit.mw = mi->timeios[MW].a      > 0;
+  hw->bit.pl = mi->timeios[PAULA].a   > 0;
+  hw->bit.sh = mi->timeios[SHIFTER].a > 0;
+  hw->bit.mk = mi->timeios[MFP].a     > 0;
 }
 
 static int hook_ios(measureinfo_t * mi)
@@ -628,10 +630,12 @@ static void timemeasure_init(measureinfo_t * mi)
   /* Set our private data. */
   emu68_set_cookie(mi->emu68, mi);
 
+  /* open the disk */
   disk = dsk_get_disk();
   if (sc68_open(mi->sc68, disk) < 0)
     return;
 
+  /* retrieve music/track info. */
   mus = &disk->mus[mi->track-1];
   mi->replayhz = mus->frq;
   mi->location = mus->a0;
@@ -644,19 +648,28 @@ static void timemeasure_init(measureinfo_t * mi)
   } else {
     mus->hwflags.all       = 0;
     mus->hwflags.bit.ym    = 1;
-    mus->hwflags.bit.ste   = 1;
+    mus->hwflags.bit.ste   = 1;         /* force STE */
   }
 
   if (sc68_play(mi->sc68, mi->track, SC68_INF_LOOP) < 0)
-    return;
-
-  if (sc68_process(mi->sc68,0,0) == SC68_ERROR)
     return;
 
   sampling = sc68_cntl(mi->sc68, SC68_GET_SPR);
   if (sampling <= 0)
     return;
   mi->sampling = sampling;
+
+  /* Run the music init code. */
+  if (sc68_process(mi->sc68,0,0) == SC68_ERROR)
+    return;
+
+  /* Compute access after init. */
+  access_range(mi);
+  access_timers(mi,&mi->hw);
+  access_ios(mi,&mi->hw);
+
+  /* reset memory access flags after init. */
+  emu68_chkset(mi->emu68, 0, 0, 0);
 
   mi->code = EXIT_OK;
 }
@@ -684,25 +697,21 @@ static void timemeasure_run(measureinfo_t * mi)
   unsigned sli_cnt;           /* slices counter                     */
   int      updated;           /* has been updated this pass ?       */
 
+  memset(buf,0,sizeof(buf));
+  sli_cnt = frm_cnt = 0;
   mi->isplaying = 1;
   mi->code      = EXIT_OK;
-
-  msgdbg("time-measure: run [track:%d max:%d stp:%d sil:%d spr:%u hz:%u]\n",
-         mi->track, mi->max_ms, mi->stp_ms, mi->sil_ms,
+  cpf = cycle_per_frame(mi->replayhz, mi->emu68->clock);
+  mi->startms   = fr2ms(mi->startfr, cpf, mi->emu68->clock);
+  msgdbg("time-measure: run [track:%d skp:%d max:%d stp:%d sil:%d spr:%u hz:%u]\n",
+         mi->track, mi->startms, mi->max_ms, mi->stp_ms, mi->sil_ms,
          mi->sampling, mi->replayhz);
-
-  memset(buf,0,sizeof(buf));
-
-  cpf = cycle_per_frame( mi->replayhz, mi->emu68->clock );
-
-  sli_cnt = frm_cnt = 0;
 
   /* The trick to measure loop length is to run up to the previously
    * detected end, reset the menory access flags and continue as if it
    * were a new song.
    */
   if (mi->startfr) {
-    mi->startms = fr2ms(mi->startfr, cpf, mi->emu68->clock);
     msgdbg("time-measure: now measuring loop, skipping %u frames (%s)\n",
            mi->startfr, str_timefmt(str+0x00, 0x20, mi->startms));
     while (n = slice,
@@ -909,7 +918,7 @@ static void timemeasure_run(measureinfo_t * mi)
              i, vectorname(i),
              mi->vector[i].cnt, mi->vector[i].fst, mi->vector[i].lst);
 
-  if (!mi->hw.ym && !mi->hw.mw && !mi->hw.pl) {
+  if (!mi->hw.bit.ym && !mi->hw.bit.mw && !mi->hw.bit.pl) {
     msgerr("no relevant hardware detected ???\n");
     mi->code = EXIT_NOHW;
     return;
@@ -963,23 +972,52 @@ static void timemeasure_end(measureinfo_t * mi)
   mi->isplaying = 0;
 }
 
+static inline addr68_t mymin(const addr68_t a, const addr68_t b)
+{
+  return a < b ? a : b;
+}
+
+static inline addr68_t mymax(const addr68_t a, const addr68_t b)
+{
+  return a > b ? a : b;
+}
+
 static void * time_thread(void * userdata)
 {
   measureinfo_t * mi = (measureinfo_t *) userdata;
+  addr68_t range_min, range_max;
+  hw_t hardware;
 
   assert( mi == &measureinfo );
 
+  /* First pass detects the music time. */
   timemeasure_init(mi);
-  if (mi->code == EXIT_OK)
+  range_min = mi->minaddr;
+  range_max = mi->maxaddr;
+  hardware  = mi->hw;
+
+  if (mi->code == EXIT_OK) {
     timemeasure_run(mi);
+    range_min = mymin(range_min,mi->minaddr);
+    range_max = mymax(range_max,mi->maxaddr);
+    hardware.all |= mi->hw.all;
+  }
   timemeasure_end(mi);
 
   if (mi->code == EXIT_OK && mi->loopfr) {
-    unsigned const startfr = mi->frames;
+    const unsigned startfr = mi->frames;
+    /* Second pass detects the loop time. */
     timemeasure_init(mi);
     if (!mi->code) {
+      range_min = mymin(range_min,mi->minaddr);
+      range_max = mymax(range_max,mi->maxaddr);
+      hardware.all |= mi->hw.all;
+
       mi->startfr = startfr;
       timemeasure_run(mi);
+      mi->minaddr = mymin(range_min,mi->minaddr);
+      mi->maxaddr = mymax(range_max,mi->maxaddr);
+      mi->hw.all |= hardware.all;
     }
     timemeasure_end(mi);
   }
@@ -1043,7 +1081,6 @@ int time_measure(measureinfo_t * mi, int trk,
 #endif
   msgdbg("time-measure thread ended with: %d, %d\n", err, mi->code);
 
-
   ret = err ? -1 : mi->code;
   if (!ret) {
     char        s1[32],s2[32],s3[32],s4[32];
@@ -1060,15 +1097,15 @@ int time_measure(measureinfo_t * mi, int trk,
     m->has.loop = 1;
 
     mi->hwflags.all           = 0;
-    mi->hwflags.bit.ym        = mi->hw.ym;
-    mi->hwflags.bit.ste       = mi->hw.mw;
-    mi->hwflags.bit.amiga     = mi->hw.pl;
+    mi->hwflags.bit.ym        = mi->hw.bit.ym;
+    mi->hwflags.bit.ste       = mi->hw.bit.mw;
+    mi->hwflags.bit.amiga     = mi->hw.bit.pl;
     mi->hwflags.bit.stechoice = 0;
     mi->hwflags.bit.timers    = 1;
-    mi->hwflags.bit.timera    = mi->hw.ta;
-    mi->hwflags.bit.timerb    = mi->hw.tb;
-    mi->hwflags.bit.timerc    = mi->hw.tc;
-    mi->hwflags.bit.timerd    = mi->hw.td;
+    mi->hwflags.bit.timera    = mi->hw.bit.ta;
+    mi->hwflags.bit.timerb    = mi->hw.bit.tb;
+    mi->hwflags.bit.timerc    = mi->hw.bit.tc;
+    mi->hwflags.bit.timerd    = mi->hw.bit.td;
 
     /* mi->minaddr; */
     /* mi->maxaddr; */
