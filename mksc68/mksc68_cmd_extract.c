@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-17 04:59:37 ben>
+ * Time-stamp: <2013-09-23 06:48:35 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -180,7 +180,7 @@ int run_extract(cmd_t * cmd, int argc, char ** argv)
     goto error;
   }
   filebase = argv[i++];
-  ext = ( format == 'b' ) ? ".bin" : ".s";
+  ext = ( format == 'b' ) ? ".mus" : ".s";
   if (filebase[0] == '-' && !filebase[1])
     filebase = "stdout:";
 
@@ -231,7 +231,7 @@ cmd_t cmd_extract = {
   "\n"
   "OPTIONS\n"
   "   -s --single  only save identical data once.\n"
-  "   -b --binary  output a binary file (default).\n"
-  "   -a --asm     output 68k assembler compatible data.\n"
-  "   -A --ascii   output 68k assembler with ASCII.\n"
+  "   -b --binary  output binary (.mus) files (default).\n"
+  "   -a --asm     output 68k assembler (.s) compatible data.\n"
+  "   -A --ascii   output 68k assembler (.s) with ASCII.\n"
 };
