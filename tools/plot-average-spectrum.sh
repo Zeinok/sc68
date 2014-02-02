@@ -2,18 +2,33 @@
 #
 # Nice plot of average spectrum of all variantes of the ym-2149 engine
 #
-# $Id$
+# by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 #
 
 me=$(basename "$0" .sh)
 here=$(dirname "$0")
 here=$(cd "$dirname"; pwd)
 PATH="$here:$PATH"
+verb=0
 
-frq=44100
+frq=48000
 fft=1024
 sec=30
 typ=""
+
+emsg() {
+    echo "$me: $@" 1>&2
+}
+
+dcat() {
+    sed -e 's/^/>> /' 1>&4
+}
+
+dmsg() {
+    echo "$@" | dcat
+}
+
+
 
 usage() {
     cat <<EOF
@@ -28,6 +43,7 @@ Options:
   -s <size>  FFT size ($fft)
   -t <sec>   Duration ($sec seconds)
   -o <type>  [png|svg]
+  -v         Verbose
 
 Require:
 
@@ -41,13 +57,14 @@ EOF
 # Options #
 ###########
 
-opts="hr:s:t:o:"
+opts="vhr:s:t:o:"
 getopt -Q -n "$me" -o ${opts}  -- "$@" || exit 255
 eval set -- `getopt -n "$me" -o  ${opts} -- "$@"`
 
 while [ $# -gt 0 ] && [ "$1" != "--" ]; do
     case "$1" in
 	-h) usage;;
+	-v) let verb++;;
 	-i) typ="";;
 	-r) shift; frq="$1";;
 	-s) shift; fft="$1";;
@@ -56,15 +73,46 @@ while [ $# -gt 0 ] && [ "$1" != "--" ]; do
     esac
     shift
 done
-shift
+[ $1 = "--" ] && shift
+
+echo $# $@
+
+case $# in
+    0) emsg "missing argument. Try -h."; exit 1;;
+    1) input="$1"; shift
+	if [ ! -r "${input}" ]; then
+	    emsg "missing file -- $input" 1>&2
+	    exit 2;
+	fi
+	;;
+    *) emsg "too many arguments. Try -h."; exit 1;;
+esac
+
+if [ $verb -lt 2 ]; then
+    exec 4>/dev/null
+else
+    exec 4>&1
+fi
+
+dmsg "Debug is ON"
+
 
 ###########
 # Require #
 ###########
 
+if [ `basename "$here"` = tools ] &&
+    [ -d "$here/../contrib" ]; then
+    PATH="$(cd "$here/../contrib" && pwd):$PATH"
+fi
+
+which sed     >/dev/null || exit 255
+which wc      >/dev/null || exit 255
 which sc68    >/dev/null || exit 255
 which gnuplot >/dev/null || exit 255
 which dump-average-spectrum.py >/dev/null || exit 255
+
+dmsg "Have all required tools"
 
 ########################################
 # variantes: engine filter color label #
@@ -79,21 +127,45 @@ variantes=(
     "orig 2-pole  red     2-pole filter"
 )
 
-input="$1"
-bname=$(basename "$1")
+bname=$(basename "$input")
 nude=${bname%.*}
 pcms=$(($sec*$frq))
 
+dmsg "nude: $nude"
+dmsg "pcms: $pcms"
+
 function do_variant() {
     local  eng="$1" filter="$2" color="$3" label tmp
+
+    dcat<<EOF
+
+=======================================
+VARIANT:
+ engine : $eng
+ filter : $filter
+ color  : $color
+ s-rate : $frq hz
+ fft    : $fft
+ time   : $sec" ($pcms pcm)
+
+EOF
+
     shift 3
     label="$*"
     tmp=`mktemp`
 
-    sc68 -qqqqcr$frq --sc68-ym-engine=$eng --sc68-ym-filter=$filter \
-	-- "$input" |
+    dmsg "Generate PCM into $tmp"
+    sc68 -qq -c -r$frq -linf \
+	--ym-engine=$eng --ym-filter=$filter --sc68-debug=0 \
+	-- "$input"  |
     dd bs=4 count=$pcms |
-    dump-average-spectrum.py /dev/stdin $fft $frq 2>/dev/null >$tmp
+    dump-average-spectrum.py /dev/stdin $fft $frq 2>/dev/null | tee $tmp
+
+
+    wc -c "$tmp" | dcat
+
+
+
     echo $tmp
 }
 
@@ -146,4 +218,6 @@ unset multiplot
 quit
 EOF
     fi
-    ) | gnuplot
+    )
+
+# | gnuplot

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-03 15:34:42 ben>
+ * Time-stamp: <2013-10-01 19:16:39 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -33,7 +33,9 @@
 #include "emu68/struct68.h"
 #include "emu68/assert68.h"
 
-/* #include <sc68/msg68.h> */
+#include <sc68/file68_msg.h>
+extern int mw_cat;
+#define MWHD "ste-mw : "
 
 typedef struct {
   io68_t io;
@@ -54,7 +56,8 @@ static int68_t _mw_readB(mw_io68_t * const mwio, const u8 addr)
   case MW_CTM:
     return (u8) ( ct >> 8  );
   case MW_CTL:
-    return (u8) ct;
+    /* whatever mono/stereo the counter always return even address */
+    return ct & 0xFE;
   }
   return (addr >= 0 && addr < 64)
     ? mwio->mw.map[addr]
@@ -64,7 +67,7 @@ static int68_t _mw_readB(mw_io68_t * const mwio, const u8 addr)
 
 static int68_t _mw_readW(mw_io68_t * const mwio, const u8 addr)
 {
-  switch (mwio->io.emu68->bus_addr) {
+  switch (addr) {
   case MW_DATA: case MW_CTRL:
     return ( mwio->mw.map[addr+0] << 8 ) + mwio->mw.map[addr+1];
     break;
@@ -76,18 +79,18 @@ static void mwio_readB(io68_t * const io)
 {
   io->emu68->bus_data =
     _mw_readB((mw_io68_t *)io, io->emu68->bus_addr);
-/*   msg68_debug("ste-mw : read BYTE [%06x] => %02x\n", */
-/*               io->emu68->bus_addr & 0xFFFFFF, */
-/*               io->emu68->bus_data & 0xFFFFFFFF); */
+  TRACE68(mw_cat, MWHD "read BYTE [%06x] => %02x\n",
+          (unsigned)io->emu68->bus_addr & 0xFFFFFF,
+          (unsigned)io->emu68->bus_data & 0xFF);
 }
 
 static void mwio_readW(io68_t * const io)
 {
   io->emu68->bus_data =
     _mw_readW((mw_io68_t *)io, io->emu68->bus_addr);
-/*   msg68_debug("ste-mw : read WORD [%06x] => %04x\n", */
-/*               io->emu68->bus_addr & 0xFFFFFF, */
-/*               io->emu68->bus_data & 0xFFFF); */
+  TRACE68(mw_cat, MWHD "read WORD [%06x] => %04x\n",
+          (unsigned)io->emu68->bus_addr & 0xFFFFFF,
+          (unsigned)io->emu68->bus_data & 0xFFFF);
 }
 
 static void mwio_readL(io68_t * const io)
@@ -97,9 +100,9 @@ static void mwio_readL(io68_t * const io)
     |
     ( _mw_readW((mw_io68_t *)io, io->emu68->bus_addr+2)       )
     ;
-/*   msg68_debug("ste-mw : read LONG [%06x] => %08x\n", */
-/*               io->emu68->bus_addr & 0xFFFFFF, */
-/*               io->emu68->bus_data & 0xFFFFFFFF); */
+  TRACE68(mw_cat, MWHD "read LONG [%06x] => %08x\n",
+          (unsigned)io->emu68->bus_addr & 0xFFFFFF,
+          (unsigned)io->emu68->bus_data & 0xFFFFFFFF);
 }
 
 static void _mw_writeB(mw_io68_t * const mwio, const u8 addr, int68_t v)
@@ -128,6 +131,7 @@ static void _mw_writeB(mw_io68_t * const mwio, const u8 addr, int68_t v)
     break;
 
   case MW_CTH: case MW_CTM: case MW_CTL:
+    /* write to counter register does nothing */
     return;
 
   }
@@ -153,17 +157,16 @@ static void _mw_writeW(mw_io68_t * const mwio, const u8 addr, int68_t v)
 static void _mw_writeL(mw_io68_t * const mwio, const u8 addr, int68_t v)
 {
   if (addr == MW_DATA) {
-    /* Write both Ctrl and Data register .... My guess is that someone
-     * tries to run a command this way (which seems buggy in real
-     * world).
+    /* Write both Ctrl and Data registers .... My guess is that
+     * someone tries to run a command this way, which is not the
+     * proper way to do it in the real world. Anyway we'll do as if it
+     * works.
      */
     mwio->mw.map[MW_DATA+0] = v >> 24;
     mwio->mw.map[MW_DATA+1] = v >> 16;
     mwio->mw.map[MW_CTRL+2] = v >>  8;
     mwio->mw.map[MW_CTRL+3] = v;
-
     mw_command(&mwio->mw);
-
   } else if ( !(addr & 1) ) {
     /* Any other (even) long access are translate to word access */
     _mw_writeW(mwio, addr+0, v >> 16);
@@ -173,27 +176,27 @@ static void _mw_writeL(mw_io68_t * const mwio, const u8 addr, int68_t v)
 
 static void mwio_writeB(io68_t * const io)
 {
-/*   msg68_debug("ste-mw : write BYTE [%06x] <= %02x\n", */
-/*               io->emu68->bus_addr & 0xFFFFFF, */
-/*               io->emu68->bus_data & 0xFF); */
+  TRACE68(mw_cat, MWHD "write BYTE [%06x] <= %02x\n",
+          (unsigned)io->emu68->bus_addr & 0xFFFFFF,
+          (unsigned)io->emu68->bus_data & 0xFF);
   _mw_writeB((mw_io68_t *)io,
              io->emu68->bus_addr, io->emu68->bus_data);
 }
 
 static void mwio_writeW(io68_t * const io)
 {
-/*   msg68_debug("ste-mw : write WORD [%06x] <= %04x\n", */
-/*               io->emu68->bus_addr & 0xFFFFFF, */
-/*               io->emu68->bus_data & 0xFFFF); */
+  TRACE68(mw_cat, MWHD "write WORD [%06x] <= %04x\n",
+          (unsigned)io->emu68->bus_addr & 0xFFFFFF,
+          (unsigned)io->emu68->bus_data & 0xFFFF);
   _mw_writeW((mw_io68_t *)io,
              io->emu68->bus_addr, io->emu68->bus_data);
 }
 
 static void mwio_writeL(io68_t * const io)
 {
-/*   msg68_debug("ste-mw : write LONG [%06x] <= %08x\n", */
-/*               io->emu68->bus_addr & 0xFFFFFF, */
-/*               io->emu68->bus_data & 0xFFFFFFFF); */
+  TRACE68(mw_cat, MWHD "write LONG [%06x] <= %08x\n",
+          (unsigned)io->emu68->bus_addr & 0xFFFFFF,
+          (unsigned)io->emu68->bus_data & 0xFFFFFFFF);
   _mw_writeL((mw_io68_t *)io,
              io->emu68->bus_addr, io->emu68->bus_data);
 }
@@ -227,7 +230,7 @@ static void mwio_destroy(io68_t * const io)
 
 static io68_t mw_io = {
   0,
-  "STE-MicroWire",
+  "STE-Sound",
   0xFFFF8900, 0xFFFF8925,
   mwio_readB,  mwio_readW,  mwio_readL,
   mwio_writeB, mwio_writeW, mwio_writeL,

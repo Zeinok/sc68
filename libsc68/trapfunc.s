@@ -4,30 +4,31 @@
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
-;;; Time-stamp: <2013-09-17 09:11:46 ben>
+;;; Time-stamp: <2013-11-18 10:22:07 ben>
 
 
-;;; Unhandled trap vector and function will execute a stop with a
-;;; special value followed by a reset. The value is used to detect
-;;; this code and to identify which vector was called.
+	;; Unhandled trap vector and function will execute a stop with a
+	;; special value followed by a reset. The value is used to detect
+	;; this code and to identify which vector was called.
 
 StackSize = 1024	
 STOP_VAL  = $2F20
 
-;;; Machine definitions for '_MCH' cookie
+	;; Machine definitions for '_MCH' cookie
 MACHINE_FALCON30	= $00030000
 MACHINE_STE 		= $00010000
 MACHINE_MEGA_STE	= $00010010
 MACHINE_TT		= $00020000
-	
+
 	;; This is the address used by libsc68/api.c but it should be
 	;; PIC anyway. Still mksc68 rely on this code to be loaded at
-	;; 500 and timerc being at $502.w
+	;; $1000 and timerc being at $1002
 	
 	org	$1000
 	
 	bra.s	install_trap
-;;; !!!! timerc MUST BE at ORG+2 or mksc68 detection will FAILED !!! 
+
+	;; timerc MUST BE at ORG+2 or mksc68 detection will FAILED
 timerc:
 	btst	#3,$fffffa17.w	; SEI or AEI ?
 	beq.s	.aei
@@ -393,9 +394,9 @@ ti_ctrlreg:	rs.w	1
 ti_datareg:	rs.w	1
 ti_mask:	rs.b	1
 ti_channel:	rs.b	1
-ti_sz:	rs.b	0	
+ti_sz:		rs.b	0	
 
-; vector, ctrl-reg, data-reg, msk.b+chan.q+bit.q
+;;; vector, ctrl-reg, data-reg, msk.b+chan.q+bit.q
 timers:
 tAdef:	dc.w	$134, $fa19, $fa1f, $f005
 tBdef:	dc.w	$120, $fa1b, $fa21, $f000

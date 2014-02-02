@@ -1,4 +1,3 @@
-
 /**
  * @ingroup   sc68_lib
  * @file      sc68/sc68.h
@@ -6,9 +5,9 @@
  * @author    Benjamin Gerard
  * @date      2003/08/07
  */
-/* Time-stamp: <2013-08-15 17:56:36 ben> */
+/* Time-stamp: <2014-01-30 16:35:01 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (C) 1998-2014 Benjamin Gerard */
 
 #ifndef SC68_SC68_H
 #define SC68_SC68_H
@@ -156,6 +155,11 @@ typedef struct {
 
   /** command line arguments */
   char ** argv;
+
+  struct init_flags {
+    unsigned int no_load_config : 1;
+    unsigned int no_save_config : 1;
+  } flags;
 
 } sc68_init_t;
 

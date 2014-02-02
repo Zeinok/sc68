@@ -1,5 +1,10 @@
 #!/usr/bin/python
-# dump average spectrum of a .wav file
+#
+# dump average spectrum of a raw pcm file
+#
+# by Antti Lankila
+#
+
 from scipy.signal import get_window, fft
 from scipy import array
 import math, sys, struct
@@ -50,4 +55,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-26 10:30:03 ben>
+ * Time-stamp: <2013-10-01 21:08:06 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -47,7 +47,9 @@
 #ifndef DEBUG_MW_O
 # define DEBUG_MW_O 0
 #endif
-static int mw_cat = msg68_DEFAULT;
+
+/* static */
+int mw_cat = msg68_DEFAULT;
 
 #define MWHD "ste-mw : "
 
@@ -228,10 +230,10 @@ int mw_sampling_rate(mw_t * const mw, int hz)
 
 /* ,-----------------------------------------------------------------.
  * | Set master volume   0=-80 Db, 40=0 Db                           |
- * | Set left volume     0=-40 Db, 40=0 Db                           |
- * | Set right volume    0=-40 Db, 40=0 Db                           |
- * | Set high frequency  0=-12 Db, 40=12 Db                          |
- * | Set low  frequency  0=-12 Db, 40=12 Db                          |
+ * | Set left volume     0=-40 Db, 20=0 Db                           |
+ * | Set right volume    0=-40 Db, 20=0 Db                           |
+ * | Set trebble         0=-12 Db, 6=0 Db, 12=12 Db                          |
+ * | Set bass  0=-12 Db, 40=12 Db                          |
  * | Set mixer type : 0=-12 Db 1=YM+STE 2=STE-only 3=reserved        |
  * `-----------------------------------------------------------------'
  */
@@ -253,7 +255,7 @@ int mw_lmc_mixer(mw_t * const mw, int n)
     if (n != 3) {
       mw->db_conv = table[n];
     } else {
-      msg68_warning(MWHD "invalid LMC mixer mode -- 3\n");
+      msg68_warning(MWHD "invalid LMC mixer mode -- %d\n", n);
     }
   }
   TRACE68(mw_cat, MWHD "LMC mixer mode -- *%s*\n",
@@ -269,7 +271,7 @@ int mw_lmc_master(mw_t * const mw, int n)
   } else {
     if (n <  0) n = 0;
     if (n > 40) n = 40;
-    mw->lmc.master = 80 - (n << 1 );
+    mw->lmc.master = 80 - (n << 1);
     TRACE68(mw_cat, MWHD "LMC -- master -- *-%02ddB*\n", mw->lmc.master);
   }
   return n;
@@ -285,7 +287,7 @@ static int lmc_lr(mw_t * const mw, const int lr, int n)
   } else {
     if (n <  0) n = 0;
     if (n > 20) n = 20;
-    *pval = 40 - ( n << 1 );
+    *pval = 40 - (n << 1);
     mw->lmc.lr = ( mw->lmc.left + mw->lmc.right ) >> 1;
     TRACE68(mw_cat, MWHD "LMC -- %s channel -- *-%02ddB*\n",
             lr ? "left" : "right", *pval);
@@ -333,9 +335,9 @@ int mw_lmc_low(mw_t * const mw, int n)
 static int command_dispatcher(mw_t * const mw, int n)
 {
   const int c = n & 0700;
-  n -= c;
+  n &= 077;
 
-  TRACE68(mw_cat, MWHD "dispatch -- %o:%02x\n", c>>6, n);
+  TRACE68(mw_cat, MWHD "dispatch -- %o:%02x\n", c>>6, (unsigned)n);
   switch(c) {
   case 0000:
     mw_lmc_mixer(mw, n&3);
@@ -356,7 +358,7 @@ static int command_dispatcher(mw_t * const mw, int n)
     mw_lmc_left(mw, n&31);
     break;
   default:
-    TRACE68(mw_cat, MWHD "unknown command -- %04o\n", c);
+    TRACE68(mw_cat, MWHD "unknown command -- %o:%02x\n", c>>6, (unsigned)n);
     return -1;
   }
   return 0;
@@ -364,46 +366,46 @@ static int command_dispatcher(mw_t * const mw, int n)
 
 int mw_command(mw_t * const mw)
 {
-  uint_t ctrl, data;
+  uint_t ctrl, data, comm, bits, mask;
 
-  if (!mw) {
+  if (!mw)
     return -1;
-  }
 
   ctrl = ( mw->map[MW_CTRL] << 8 ) + mw->map[MW_CTRL+1];
   data = ( mw->map[MW_DATA] << 8 ) + mw->map[MW_DATA+1];
 
-  TRACE68(mw_cat, MWHD "shifting -- %04x:%04x\n", ctrl, data);
+  /* Clear data, keep control.
+   * Normally data is shifted left until it clears whereas control
+   * rotated left until it's back to its orginal value.
+   */
+  mw->map[MW_DATA] = mw->map[MW_DATA+1] = 0;
 
-  /* Find first address */
-  for(; ctrl && ( ctrl & 0xC000 ) != 0xC000; ctrl<<=1, data<<=1)
-    ;
+  TRACE68(mw_cat, MWHD "shifting -- %04x/%04x\n", data, ctrl);
 
-  if (!ctrl) {
-    TRACE68(mw_cat,"%s",MWHD "address -- not found\n");
+  for (bits=comm=0, mask=0x8000; bits != 11 && mask; mask >>= 1)
+    if (ctrl & mask) {
+      comm = (comm << 1) | !!(data & mask);
+      ++bits;
+    }
+  if (bits != 11) {
+    msg68_warning(MWHD "missing bits -- %04x/%04x\n", data, ctrl);
+    assert(bits == 11);
     return -1;
-  } else {
-    const uint_t addr = ( data >> 14 ) & 3;
-    assert( ( ctrl & 0xC000 ) == 0xC000);
-    TRACE68(mw_cat, MWHD "address -- %d\n", addr);
-    if ( addr != 2 )
-      return -1;
+  }
+  if (mask && (ctrl & (mask-1))) {
+    msg68_warning(MWHD "too many bits -- %04x/%04x\n", data, ctrl);
+    assert(0);
   }
 
-  for (ctrl<<=2, data<<=2; ctrl && ( ctrl & 0xFF80 ) != 0xFF80;
-       ctrl<<=1, data<<=1)
-    ;
-
-  if (ctrl) {
-    const uint_t cmd = (data >>7 ) & 0x1ff;
-    assert( ( ctrl & 0xFF80 ) == 0xFF80 );
-    TRACE68(mw_cat, MWHD "command -- %04o\n", cmd);
-    return command_dispatcher(mw, cmd);
-  } else {
-    TRACE68(mw_cat,"%s",MWHD "command -- not found\n");
+  if ( (comm & 03000) != 02000 ) {
+    msg68_warning(MWHD "wrong address (%d) -- %04x/%04x\n",
+                  comm>>9, data,ctrl);
+    assert(0);
+    return -1;
   }
 
-  return -1;
+  return
+    command_dispatcher(mw, comm & 0777);
 }
 
 
@@ -415,11 +417,11 @@ int mw_command(mw_t * const mw)
 static void lmc_reset(mw_t * const mw)
 {
   mw_lmc_mixer(mw,MW_MIXER_BOTH);
-  mw_lmc_master(mw,40);
-  mw_lmc_left(mw,20);
-  mw_lmc_right(mw,20);
-  mw_lmc_high(mw,12);
-  mw_lmc_low(mw,12);
+  mw_lmc_master(mw,40);                 /* 0db */
+  mw_lmc_left(mw,20);                   /* 0db */
+  mw_lmc_right(mw,20);                  /* 0db */
+  mw_lmc_high(mw,6);                    /* 0db */
+  mw_lmc_low(mw,6);                     /* 0db */
 }
 
 int mw_reset(mw_t * const mw)
@@ -472,7 +474,7 @@ int mw_setup(mw_t * const mw,
 int mw_init(int * argc, char ** argv)
 {
   if (mw_cat == msg68_DEFAULT)
-    mw_cat = msg68_cat("mw","microwire emulator", DEBUG_MW_O);
+    mw_cat = msg68_cat("ste","STE sound (DMA/Microwire/LMC1992)", DEBUG_MW_O);
 
   /* Setup defaults */
   default_parms.engine = MW_ENGINE_LINEAR;
@@ -679,7 +681,7 @@ static void mix_ste(mw_t * const mw, s32 *b, int n)
 }
 
 /* ,-----------------------------------------------------------------.
- * |                      Microwire process                         |
+ * |                      STE sound process                          |
  * `-----------------------------------------------------------------'
  */
 

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-10-04 20:03:38 ben>
+ * Time-stamp: <2013-10-04 21:08:47 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -250,12 +250,12 @@ static int print_usage(void)
     (
       "\n"
       "URI:\n"
-      "  stdin://<name>      Standard input\n"
-      "  stdout://<name>     Standard output\n"
-      "  sterr://<name>      Standard error\n"
-      "  null://<name>       Null/Zero\n"
-      "  <path> or file://path\n"
-      "   or local://path    Local file\n"
+      "  stdin:<name>      Standard input\n"
+      "  stdout:<name>     Standard output\n"
+      "  stderr:<name>     Standard error\n"
+      "  null:<name>       Null/Zero\n"
+      "  <path> or file://path or local://path\n"
+      "                    Local file\n"
       "  http://path or ftp://path\n"
       "   or others          Remote scheme (see curl)\n"
       "  sc68://author/hw/title[/:track[:loop:[time]]]\n"

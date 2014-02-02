@@ -46,7 +46,7 @@ input_sc68::input_sc68() {
 #else
 	create.emu68_debug = 0;
 #endif
-	create.log2mem = 17;
+	create.log2mem = 19;
 	create.name = m_name;
 	_snprintf(m_name,sizeof(m_name),"fb2k#%05d", ++g_counter);
 	create.sampling_rate = 44100;
@@ -93,7 +93,6 @@ void input_sc68::open(service_ptr_t<file> p_filehint, const char * p_path, t_inp
 	sc68_music_info(m_sc68, &m_fileinfo, 1, 0);
 	dbg(m_sc68,"SC68 component: as loaded <%s> <%s>\n", m_fileinfo.album, m_fileinfo.title);
 }
-
 //! See: input_info_reader::get_subsong_count(). Valid after open() with any reason.
 unsigned input_sc68::get_subsong_count() {
 	//dbg(m_sc68,"SC68 component: get subsong count <%d>", m_fileinfo.tracks);

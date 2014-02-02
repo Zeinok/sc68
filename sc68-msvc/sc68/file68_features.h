@@ -1,3 +1,4 @@
+/* file68_features for sc68-msvc */
 #ifndef FILE68_FEATURES_H
 #define FILE68_FEATURES_H
 

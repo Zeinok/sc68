@@ -1,6 +1,6 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2013-08-14 00:25:09 ben>
+dnl# Time-stamp: <2014-01-17 13:28:19 ben>
 dnl#
 dnl# autoconf macros
 dnl#

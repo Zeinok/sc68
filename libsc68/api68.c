@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-19 08:04:48 ben>
+ * Time-stamp: <2014-01-30 17:03:14 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -122,17 +122,25 @@ static u8 trap_func[] = {
 static const char * trap_type[16] =
 { 0, "gemdos", 0, 0, 0, 0 , 0, 0, 0, 0 , 0, 0, 0, "bios" , "xbios", 0 };
 
+
+/** Init flags, */
+static struct init_flags initflags;
+/* struct { */
+/*   unsigned int load_oninit : 1; */
+/*   unsigned int save_onexit : 1; */
+/* } initflags; */
+
 /** sc68 config */
 static struct {
-  int loaded;
-  int allow_remote;
+  unsigned int loaded      : 1;
+  unsigned int allow_remote: 1;
+#ifdef WITH_FORCE_HW
+  unsigned int force_hw    : 1;
+#endif
   int aga_blend;
 #ifdef WITH_FORCE
   int force_track;
   int force_loop;
-#endif
-#ifdef WITH_FORCE_HW
-  int force_hw;
 #endif
   int asid;
   int def_time_ms;
@@ -170,7 +178,6 @@ struct _sc68_s {
   int            cfg_track;   /**< from config "force-track".            */
   int            cfg_loop;    /**< from config "force-loop".             */
 #endif
-  int            cfg_asid;    /**< from config "asid".                   */
 
   unsigned int   playaddr;    /**< Current play address in 68 memory.    */
   int            seek_to;     /**< Seek to this time (-1:n/a)            */
@@ -825,24 +832,20 @@ static void optcfg_set_str(const char * name, const char * v)
 
 static void config_default(void)
 {
-  config.loaded       = 0;
+  memset(&config,0,sizeof(config));
   config.allow_remote = 1;
   config.aga_blend    = AGA_BLEND;
 #ifdef WITH_FORCE
-  config.force_track  = 0;
   config.force_loop   = CFG_LOOP_DEF;
 #endif
-#ifdef WITH_FORCE_HW
-  config.force_hw     = 0;
-#endif
-  config.asid         = 0;
   config.def_time_ms  = TIME_DEF * 1000;
   config.spr          = SPR_DEF;
 }
 
 #define set_CONFIG(KEY,NAME) config.KEY = optcfg_get_int(NAME,config.KEY)
 
-static int config_load(void)
+/* Load config for this application. */
+static int config_load(const char * appname)
 {
   int err;
 
@@ -867,7 +870,8 @@ static int config_load(void)
   return err;
 }
 
-static int config_save(void)
+/* Save config for this application. */
+static int config_save(const char * appname)
 {
   int err
     = config68_save(appname);
@@ -875,7 +879,8 @@ static int config_save(void)
   return err;
 }
 
-/* update config values with current sc68 ones. */
+#if 0
+/* Update config values with current sc68 ones. */
 static void config_update(const sc68_t * sc68)
 {
   if (is_sc68(sc68)) {
@@ -890,9 +895,11 @@ static void config_update(const sc68_t * sc68)
     else if (sc68->cfg_loop > 0)
       config.force_loop = sc68->cfg_loop;
 #endif
-    config.asid = sc68->cfg_asid & (SC68_ASID_ON|SC68_ASID_FORCE);
-    if (config.asid == (SC68_ASID_ON|SC68_ASID_FORCE))
-      config.asid = SC68_ASID_FORCE;
+
+    /* config.asid = sc68->cfg_asid & (SC68_ASID_ON|SC68_ASID_FORCE); */
+    /* if (config.asid == (SC68_ASID_ON|SC68_ASID_FORCE)) */
+    /*   config.asid = SC68_ASID_FORCE; */
+
     config.def_time_ms = sc68->time.def_ms;
     config.spr = sc68->mix.spr;
   }
@@ -915,6 +922,7 @@ static void config_update(const sc68_t * sc68)
   TRACE68(sc68_cat, "libsc68: %s\n", "config updated");
 }
 
+#endif
 
 static int aga_blend(int v)
 {
@@ -922,7 +930,7 @@ static int aga_blend(int v)
   return ((v << 8) | (-(v&1)&255)) + 0x8000;
 }
 
-/* Apply config to sc68 instance */
+/* Apply config to sc68 instance. */
 static void config_apply(sc68_t * sc68)
 {
   if (is_sc68(sc68)) {
@@ -941,7 +949,7 @@ static void config_apply(sc68_t * sc68)
     else if (config.force_loop > 0)
       sc68->cfg_loop      = config.force_loop;
 #endif
-    sc68->cfg_asid      = config.asid;
+    /* sc68->cfg_asid      = config.asid; */
     sc68->time.def_ms   = config.def_time_ms;
     sc68->mix.spr       = config.spr;
     TRACE68(sc68_cat,
@@ -1027,12 +1035,15 @@ int sc68_init(sc68_init_t * init)
   init->argc = file68_init(init->argc, init->argv);
   eval_debug();
 
-  /* Init config module */
+  /* Init config module. */
   init->argc = config68_init(init->argc, init->argv);
   eval_debug();
   config_default();
 
-  /* Add and parse local options */
+  /* Setup init flags. */
+  initflags = init->flags;
+
+  /* Add and parse local options. */
   option68_append(debug_options,sizeof(debug_options)/sizeof(*debug_options));
   init->argc = option68_parse(init->argc, init->argv);
 
@@ -1041,7 +1052,11 @@ int sc68_init(sc68_init_t * init)
   eval_debug();
 
   /* Load config */
-  config_load();
+  if (!initflags.no_load_config)
+    config_load(appname);
+  else
+    sc68_debug(0,"libsc68: don't load config as requested\n");
+
 
   /* Set default sampling rate. */
   set_spr(0, SC68_SPR_DEFAULT);
@@ -1061,8 +1076,12 @@ error_no_shutdown:
 
 void sc68_shutdown(void)
 {
-  if (!config.loaded)    /* Save config if none has been loaded one */
-    config_save();
+  /* Save config unless it was not loaded or application requested
+   * otherwise. */
+  if (!config.loaded && !initflags.no_save_config)
+    config_save(appname);
+  else
+    sc68_debug(0,"libsc68: don't save config as requested\n");
 
   if (sc68_init_flag) {
     sc68_init_flag = 0;
@@ -1116,17 +1135,17 @@ sc68_t * sc68_create(sc68_create_t * create)
   }
 
   /* aSIDifier. */
-  switch (sc68->cfg_asid) {
+  switch (config.asid) {
   case SC68_ASID_ON:
     sc68->asid = SC68_ASID_ON; break;
-  case SC68_ASID_FORCE:
+  case SC68_ASID_FORCE: case SC68_ASID_ON | SC68_ASID_FORCE:
     sc68->asid = SC68_ASID_ON | SC68_ASID_FORCE; break;
   case SC68_ASID_OFF:
   default:
     sc68->asid = SC68_ASID_OFF; break;
   }
   TRACE68(sc68_cat,"libsc68: config-asid=%d asid-flags=%d\n",
-          sc68->cfg_asid,sc68->asid);
+          config.asid,sc68->asid);
 
   /* Create 68k emulator and pals. */
   if (init68k(sc68, create->log2mem, create->emu68_debug | dbg68k)) {
@@ -1412,7 +1431,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
 
   memptr = emu68_memptr(sc68->emu68,0,0x1000);
 
-  TRACE68(sc68_cat," -> exception detection code in $%06x\n",
+  TRACE68(sc68_cat," -> exception detection code @$%06x\n",
           (unsigned)base);
 
   /* Install non initialized exception detection code. */
@@ -1505,6 +1524,10 @@ static int aSIDifier(sc68_t * sc68, const music68_t * m)
   if ( ! m->hwflags.bit.ym )
     goto done;
 
+  /* Config is OFF and instance is OFF */
+  if (config.asid == SC68_ASID_OFF && sc68->asid == SC68_ASID_OFF)
+    goto done;
+
   /* Not forced and can't safely aSid */
   if ( ! ( sc68->asid & SC68_ASID_FORCE ) &&
        ! trk_can_asid(m) )
@@ -1529,6 +1552,18 @@ done:
   return res;
 }
 
+
+static int log2hz(int hz)
+{
+  if (hz < 75)
+    hz = 0;
+  else if (hz < 150)
+    hz = 1;
+  else
+    hz = 2;
+  return hz;
+}
+
 static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
 {
   int status;
@@ -1540,6 +1575,8 @@ static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
   sc68->emu68->reg.d[0] = m->d0;
   sc68->emu68->reg.d[1] = !m->hwflags.bit.ste;
   sc68->emu68->reg.d[2] = m->datasz;
+  sc68->emu68->reg.d[6] = log2hz(m->frq);
+
   sc68->emu68->reg.a[0] = a0;
   sc68->emu68->reg.a[6] = a6;           /* original replay address  */
   sc68->emu68->reg.d[7] = sc68->asid_timers;
@@ -2138,7 +2175,7 @@ static int get_pos(sc68_t * sc68, int origin)
     switch (origin) {
 
     case SC68_POS_PLAY:                 /* Position since sc68_play() */
-      pos = sc68->time.elapsed_ms;
+      pos = sc68->time.origin_ms;
       break;
 
     case SC68_POS_DISK:                 /* Position in the entire disk */
@@ -2453,7 +2490,7 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
     break;
 
   case SC68_CONFIG_LOAD:
-    if (!config_load()) {
+    if (!config_load(appname)) {
       config_apply(sc68);
       res = 0;
     }
@@ -2461,7 +2498,7 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
 
   case SC68_CONFIG_SAVE:
     /* config_update(sc68); */
-    if (!config_save())
+    if (!config_save(appname))
       res = 0;
     break;
 

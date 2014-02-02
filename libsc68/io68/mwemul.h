@@ -5,7 +5,7 @@
  * @date      1999/03/20
  * @brief     STE sound emulator header.
  */
-/* Time-stamp: <2013-08-03 15:19:30 ben> */
+/* Time-stamp: <2013-09-21 12:35:33 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -108,7 +108,7 @@ typedef uint68_t mwct_t;
  * Microwire emulator instance.
  */
 typedef struct {
-  u8 map[0x40];   /**< Microwire register array.                    */
+  u8 map[0x40];   /**< STE register array.                          */
   mwct_t ct;      /**< DMA current location (ct_fix fixed point).   */
   mwct_t end;     /**< DMA end point location (ct_fix fixed point). */
 

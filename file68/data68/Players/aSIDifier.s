@@ -5,7 +5,7 @@
 ;
 ; by Benjamin Gerard <https://sourceforge.net/users/benjihan>
 ;
-; Time-stamp: <2013-12-30 19:16:56 ben>
+; Time-stamp: <2013-12-30 20:50:18 ben>
 ;
 
 ;;; TODO: supported replay rates

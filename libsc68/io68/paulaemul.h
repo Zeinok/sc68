@@ -5,7 +5,7 @@
  * @author    Benjamin Gerard
  * @date      1998/07/18
  */
-/* Time-stamp: <2013-08-16 05:05:14 ben> */
+/* Time-stamp: <2013-09-23 18:51:15 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -68,7 +68,7 @@
  *  +0 (L) START  [00000000 00000xxx xxxxxxxx xxxxxxx0] start address (even).
  *  +4 (W) LENGHT [xxxxxxxx xxxxxxxx] Length in word (0=010000).
  *  +6 (W) PERIOD [0000xxxx xxxxxxxx] Period (in paula cycle).
- *  +8 (B) VOLUME [0xxxxxxx] Volume [0-64] (presume value > 64 => 64).
+ *  +8 (W) VOLUME [0xxxxxxx] Volume [0-64] (presume value > 64 => 64).
  *  @endcode
  *
  *

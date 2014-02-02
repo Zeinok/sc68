@@ -1,5 +1,9 @@
 #!/usr/bin/python
-
+#
+# Compute sime integral table for BLEP.
+#
+# by Antti Lankila
+#
 import math
 import sys
 from scipy import array, exp
@@ -175,4 +179,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
