@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-16 18:44:57 ben>
+ * Time-stamp: <2013-09-20 04:26:44 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -1195,23 +1195,16 @@ int main(int argc, char **argv)
 
   /* Verify if input is an sc68 file */
 #ifdef USE_FILE68
-  if (!no_sc68 /* && !file68_verify_uri(fname) */) {
+  if (!no_sc68 && (d = file68_load_uri(fname))) {
     music68_t * m;
     debugmsg("sourcer68: sc68 file detected\n");
     tosreloc = TOS_RELOC_NEVER;
-
-    d = file68_load_uri(fname);
-    if (!d) {
-      return SpoolError(4);
-    }
     m = d->mus+(d->def_mus%(unsigned)d->nb_mus);
     debugmsg("sourcer68: sc68 using default music %d/%d\n",
              d->def_mus,d->nb_mus);
-
     if (m->replay) {
       debugmsg("sourcer68: sc68 use external replay '%s'\n",
                m->replay);
-
       error_add(0, "Music with external replay (%s) not yet supported",
                 m->replay);
       return SpoolError(4);
