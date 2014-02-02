@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-10-01 15:18:56 ben>
+ * Time-stamp: <2013-10-16 11:36:36 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -377,7 +377,7 @@ int isread(vfs68_t * const is, void * data, int len, unsigned int * hptr)
 {
   int read = vfs68_read(is, data, len);
   if (read > 0 && hptr) {
-    unsigned int h = *hptr;
+    uint32_t h = *hptr;
     int n = read;
     uint8_t * k = (uint8_t *) data;
     do {
