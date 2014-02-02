@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-29 18:11:11 ben>
+ * Time-stamp: <2013-09-24 10:10:46 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -259,7 +259,7 @@ enum {
 int main(int argc, char *argv[])
 {
   int err = ERR_UNDEFINED;
-  int mode = 0, oneop = 0, sens = 0;
+  int mode = 0, oneop = 0, sens = 0, oldid = 0;
 
   char * finp = 0, *fout = 0;
   char * ibuffer = 0, * obuffer = 0;
@@ -334,8 +334,9 @@ int main(int argc, char *argv[])
       case 'd': case 't': case 'T':
         /* case 'c': */
         sens = 'd';
-      case 'p': case 'P': case 's':
-
+      case 'P':
+        oldid = 1;
+      case 'p': case 's':
         if (!sens) sens = 'p';
         if (mode != 0) {
           error("only one mode can be specified.\n");
@@ -525,6 +526,9 @@ int main(int argc, char *argv[])
       goto error;
     }
     olen = csize;
+
+    /* Patch ICE magic to fit requested */
+    memcpy(obuffer+1,oldid ? "ce" : "CE", 2);
 
     err = 0;
     if (mode != 's') {
