@@ -5,15 +5,15 @@
 ;
 ; by Benjamin Gerard <https://sourceforge.net/users/benjihan>
 ;
-; Time-stamp: <2013-12-22 21:51:43 ben>
+; Time-stamp: <2013-12-23 12:06:59 ben>
 ;
 
 ;;; TODO: supported replay rates
 
 
 NOISE_LATCH   = 5
-NOSOUND_LATCH = 3
-BUZZ_LATCH    = 2
+NOSOUND_LATCH = 4
+BUZZ_LATCH    = 4
 ARPE_LATCH    = 1
 PERIOD_MIN    = 6
 	
@@ -42,11 +42,11 @@ aSid_activ:
 ;;; 
 ;;; Init code:
 ;;; 
-;;; - init aSIDfier
-;;; - save MFP
+;;; - init aSIDfier.
+;;; - save MFP.
 ;;; - run music replay init code.
 ;;; 
-;;; IN:
+;;; In:
 ;;; 
 ;;;  specific to aSIDifier:
 ;;;	a6: original music replay [+0 init, +4 stop, +8 play]
@@ -62,26 +62,24 @@ aSid_activ:
 ;;;	d1: ste-selection (0:stf, 1:ste)
 ;;;	d2: music data size (size of buffer pointed by a0)
 ;;; 
-;;; OUT:
+;;; Out:
 ;;; 	none, all registers restored 
 	
 init:
+	;; save/push registers
 	movem.l	d0-a6,-(a7)
-
-	;; Clear some buffers	
-	movem.l	d0/a0,-(a7)
 
 	;; Clear timer
 	lea	timers(pc),a0
-	move.w	#timer_sz*4,d0
+	moveq.l	#timer_sz*4,d0
 	bsr	clear
 
-	;; Clear voice info
+	;; Clear voices info
 	lea	ym_status(pc),a0
-	moveq	#ym_sz,d0
+	moveq.l	#ym_sz,d0
 	bsr	clear
 
-	;; Init timings (depend on replay rate)
+	;; Init latch timings (depend on replay rate)
 	and	#3,d6
 	
 	lea	aSIDtimings(pc),a0
@@ -102,8 +100,6 @@ init:
 	lsl	d6,d0
 	move.w	d0,(a0)+
 	
-	movem.l	(a7)+,d0/a0
-	
 	;; init timer tables
 	bsr	init_timers
 	
@@ -115,10 +111,15 @@ init:
 	
 	;; save MFP
 	bsr	save_mfp
-	
-	;; call music init 
+
+	;; set nusic pointer
 	lea	music_ptr(pc),a5
 	move.l	a6,(a5)
+	
+	;; restore registers
+	movem.l	(a7),d0-a5
+
+	;; call music init
 	jsr	(a6)
 
 	;; set active to enable
@@ -146,7 +147,8 @@ init:
 	move.l	d1,timer_volL(a1)
 	lea	ym_vsz(a0),a0
 	dbf	d0,.lp_voice
-	
+
+	;; restore/pop registers
 	movem.l	(a7)+,d0-a6
 	rts
 
@@ -155,16 +157,17 @@ init:
 ;;; 
 ;;; Exit code:
 ;;; 
-;;; - Run music stop code
-;;; - Stop aSIDifier
-;;; - restore MFP
-;;; - cut YM
+;;; - run music stop code.
+;;; - stop aSIDifier.
+;;; - restore MFP.
+;;; - cut YM.
 ;;;
-;;; IN:	none
-;;; OUT:	none
+;;; In:  none
+;;; Out: none
 ;;; 
+
 exit:
-	movem.l	d0-a6, -(a7)
+	movem.l	d0-a6,-(a7)
 	
 	lea	music_ptr(pc),a6
 	move.l	(a6),d0
@@ -201,7 +204,6 @@ exit:
 	move	(a7)+,sr
 	
 .exit:
-	
 	movem.l	(a7)+,d0-a6
 	rts
 	
@@ -215,6 +217,7 @@ exit:
 ;;;   YM status prior to run the replay code (some players need that,
 ;;;   I don't remember which specifically).
 ;;; 
+
 play:
 	;; check music ptr
 	move.l	music_ptr(pc),d0
@@ -270,7 +273,8 @@ play:
 ;;; Disable timers:
 ;;;
 ;;;   Disable timer interruptions on aSidfied voices
-	
+;;;
+
 disable_timers:
 	movem.l	d0-d2/a0-a2,-(a7)
 	move	sr,-(a7)
@@ -303,7 +307,8 @@ disable_timers:
 ;;; YM restore:
 ;;;
 ;;;   Restore YM registers modified by aSid (7,8,9,A).
-	
+;;;
+
 ym_restore:
 	move.l	a1,-(a7)
 	move	d7,-(a7)
@@ -334,11 +339,12 @@ ym_restore:
 ;;;
 ;;; Init timer:
 ;;;
-;;;    - Init timers table
-;;;    - Assign timers to voices
+;;;    - Init timers table.
+;;;    - Assign timers to voices.
 ;;; 
 ;;; In:  d7: timer assignment ('ACDB')
-	
+;;;
+
 init_timers:
 	movem.l	d0-a6,-(a7)
 
@@ -387,17 +393,34 @@ init_timers:
 	movem.l	(a7)+,d0-a6
 	rts
 
-; clear memory block
-; 
-; IN:
-; 	a0: memory to clear
-;	d0: number of bytes (word)
-; 
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;;
+;;; clear memory block
+;;; 
+;;; In:	a0.l:	memory to clear (aligned)
+;;;	d0.l:	number of bytes (word)
+;;;
+
 clear:
+	movem.l	d0-d1/a0,-(a7)
+	moveq	#3,d1
+	and.l	d0,d1
+	lsr.l	#2,d0
+	beq.s	.nolong
 	subq.w	#1,d0
 .clr:
-	clr.b	(a0)+
+	clr.l	(a0)+
 	dbf	d0,.clr
+.nolong:
+	lsr	#1,d1
+	beq.s	.noword
+	clr.w	(a0)+
+.noword:
+	bcc.s	.nobyte
+	clr.b	(a0)+
+.nobyte:	
+	movem.l	(a7)+,d0-d1/a0
 	rts
 	
 ;;; ------------------------------------------------------------
@@ -425,9 +448,13 @@ mfp_size:	rs.b	0
 mfp_buffer:
 	ds.b	mfp_size
 	even
-	
-; Save MFP interruption.
-; 
+
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;;
+;;; Save MFP interruption.
+;;; 
+
 save_mfp:
 	movem.l	d0-d1/a0-a3,-(a7)
 	move	sr,-(a7)
@@ -465,8 +492,12 @@ save_mfp:
 	
 	rts
 
-; Restore MFP interruption
-; 
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;;
+;;; Restore MFP interruption.
+;;; 
+
 restore_mfp:
 	movem.l	d0-d1/a0-a4,-(a7)
 	
@@ -549,14 +580,17 @@ ym_status:
 	ds.b	ym_sz
 
 
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;;
 ;;; Get YM status (periods,volumes and mixer)
 ;;; 
-;;; output:
-;;;
-;;; d0,d1: voice-A per,vol
-;;; d2,d3: voice-B per,vol
-;;; d4,d5: voice-C per,vol
-;;; d7:    mixer
+;;; Out:
+;;; 	d0,d1: voice-A per,vol
+;;;	d2,d3: voice-B per,vol
+;;;	d4,d5: voice-C per,vol
+;;;	d7:    mixer
+
 get_ym_status:
 	lea	$ffff8800.w,a0
 
@@ -783,7 +817,7 @@ CHORD_STP_MSK	=	$1FF
 chord_step:	MACRO
 	{
 	dc.w	((\1&CHORD_STP_MSK)+CHORD_STP_MIN);; *(1-(\2&2))
-	print	((\1&CHORD_STP_MSK)+CHORD_STP_MIN);; *(1-(\2&2))
+	;; print	((\1&CHORD_STP_MSK)+CHORD_STP_MIN);; *(1-(\2&2))
 	}
 	
 RND_1	=	0
@@ -798,15 +832,17 @@ RND_2	=	(RND_2<<3)+(RND_2>>5)^RND_1
 	}
 
 
+;;; ------------------------------------------------------------
+;;; ------------------------------------------------------------
+;;; 
 ;;; aSIDify one voice.
 ;;; 
-;;; IN:
-;;; 
+;;; In:
 ;;;	d6: num voice
 ;;;	a6: voice struct
 ;;;	d7: current SIDfied flags
 ;;; 
-;;; OUT:
+;;; Out:
 ;;;	d7: new SIDfied flags
 ;;; 
 aSIDvoicify:
@@ -845,8 +881,6 @@ aSIDvoicify:
 	;; bra.s	.smooth_d5
 	;; reset
 	;; >> TEMP
-
-
 	
 	add	ym_ad1(a6),d2
 	lsr	#1,d2
@@ -1108,10 +1142,10 @@ compute_timer_table:
 	movem.l	(a7)+,d0-d3/a0-a1
 	rts
 
-;;; IN:
-;;;	d0 = chords.q octave.q
-;;; OUT:
-;;;	d1 = YM period
+;;; In:
+;;;	d0: chords.q octave.q
+;;; Out:
+;;;	d1: YM period
 get_chord_period:
 	moveq	#15,d1
 	and	d0,d1
@@ -1180,91 +1214,8 @@ sinus:	dc.b 128, 129, 131, 132, 133, 135, 136, 138, 139, 140, 142
 	dc.b 110, 112, 113, 114, 116, 117, 118, 120, 121, 123, 124, 125
 	dc.b 127
 
-;;; Sinus table [512 entries from [16..240]]
-;; sinus:
-;; 	dc.b 128, 129, 129, 130, 131, 131, 132, 133, 133, 134, 135
-;; 	dc.b 136, 136, 137, 138, 138, 139, 140, 140, 141, 142, 142, 143
-;; 	dc.b 144, 144, 145, 146, 146, 147, 148, 149, 149, 150, 151, 151
-;; 	dc.b 152, 153, 153, 154, 155, 155, 156, 157, 157, 158, 159, 159
-;; 	dc.b 160, 161, 161, 162, 162, 163, 164, 164, 165, 166, 166, 167
-;; 	dc.b 168, 168, 169, 170, 170, 171, 171, 172, 173, 173, 174, 175
-;; 	dc.b 175, 176, 177, 177, 178, 178, 179, 180, 180, 181, 181, 182
-;; 	dc.b 183, 183, 184, 184, 185, 186, 186, 187, 187, 188, 188, 189
-;; 	dc.b 190, 190, 191, 191, 192, 192, 193, 194, 194, 195, 195, 196
-;; 	dc.b 196, 197, 197, 198, 199, 199, 200, 200, 201, 201, 202, 202
-;; 	dc.b 203, 203, 204, 204, 205, 205, 206, 206, 207, 207, 208, 208
-;; 	dc.b 209, 209, 210, 210, 211, 211, 211, 212, 212, 213, 213, 214
-;; 	dc.b 214, 215, 215, 215, 216, 216, 217, 217, 218, 218, 218, 219
-;; 	dc.b 219, 220, 220, 220, 221, 221, 222, 222, 222, 223, 223, 223
-;; 	dc.b 224, 224, 224, 225, 225, 225, 226, 226, 226, 227, 227, 227
-;; 	dc.b 228, 228, 228, 229, 229, 229, 230, 230, 230, 230, 231, 231
-;; 	dc.b 231, 231, 232, 232, 232, 232, 233, 233, 233, 233, 234, 234
-;; 	dc.b 234, 234, 235, 235, 235, 235, 235, 236, 236, 236, 236, 236
-;; 	dc.b 236, 237, 237, 237, 237, 237, 237, 238, 238, 238, 238, 238
-;; 	dc.b 238, 238, 238, 239, 239, 239, 239, 239, 239, 239, 239, 239
-;; 	dc.b 239, 239, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240
-;; 	dc.b 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240, 240
-;; 	dc.b 240, 240, 240, 240, 240, 240, 240, 240, 240, 239, 239, 239
-;; 	dc.b 239, 239, 239, 239, 239, 239, 239, 239, 238, 238, 238, 238
-;; 	dc.b 238, 238, 238, 238, 237, 237, 237, 237, 237, 237, 236, 236
-;; 	dc.b 236, 236, 236, 236, 235, 235, 235, 235, 235, 234, 234, 234
-;; 	dc.b 234, 233, 233, 233, 233, 232, 232, 232, 232, 231, 231, 231
-;; 	dc.b 231, 230, 230, 230, 230, 229, 229, 229, 228, 228, 228, 227
-;; 	dc.b 227, 227, 226, 226, 226, 225, 225, 225, 224, 224, 224, 223
-;; 	dc.b 223, 223, 222, 222, 222, 221, 221, 220, 220, 220, 219, 219
-;; 	dc.b 218, 218, 218, 217, 217, 216, 216, 215, 215, 215, 214, 214
-;; 	dc.b 213, 213, 212, 212, 211, 211, 211, 210, 210, 209, 209, 208
-;; 	dc.b 208, 207, 207, 206, 206, 205, 205, 204, 204, 203, 203, 202
-;; 	dc.b 202, 201, 201, 200, 200, 199, 199, 198, 197, 197, 196, 196
-;; 	dc.b 195, 195, 194, 194, 193, 192, 192, 191, 191, 190, 190, 189
-;; 	dc.b 188, 188, 187, 187, 186, 186, 185, 184, 184, 183, 183, 182
-;; 	dc.b 181, 181, 180, 180, 179, 178, 178, 177, 177, 176, 175, 175
-;; 	dc.b 174, 173, 173, 172, 171, 171, 170, 170, 169, 168, 168, 167
-;; 	dc.b 166, 166, 165, 164, 164, 163, 162, 162, 161, 161, 160, 159
-;; 	dc.b 159, 158, 157, 157, 156, 155, 155, 154, 153, 153, 152, 151
-;; 	dc.b 151, 150, 149, 149, 148, 147, 146, 146, 145, 144, 144, 143
-;; 	dc.b 142, 142, 141, 140, 140, 139, 138, 138, 137, 136, 136, 135
-;; 	dc.b 134, 133, 133, 132, 131, 131, 130, 129, 129, 128, 127, 127
-;; 	dc.b 126, 125, 125, 124, 123, 123, 122, 121, 120, 120, 119, 118
-;; 	dc.b 118, 117, 116, 116, 115, 114, 114, 113, 112, 112, 111, 110
-;; 	dc.b 110, 109, 108, 107, 107, 106, 105, 105, 104, 103, 103, 102
-;; 	dc.b 101, 101, 100, 99, 99, 98, 97, 97, 96, 95, 95, 94, 94, 93, 92
-;; 	dc.b 92, 91, 90, 90, 89, 88, 88, 87, 86, 86, 85, 85, 84, 83, 83
-;; 	dc.b 82, 81, 81, 80, 79, 79, 78, 78, 77, 76, 76, 75, 75, 74, 73
-;; 	dc.b 73, 72, 72, 71, 70, 70, 69, 69, 68, 68, 67, 66, 66, 65, 65
-;; 	dc.b 64, 64, 63, 62, 62, 61, 61, 60, 60, 59, 59, 58, 57, 57, 56
-;; 	dc.b 56, 55, 55, 54, 54, 53, 53, 52, 52, 51, 51, 50, 50, 49, 49
-;; 	dc.b 48, 48, 47, 47, 46, 46, 45, 45, 45, 44, 44, 43, 43, 42, 42
-;; 	dc.b 41, 41, 41, 40, 40, 39, 39, 38, 38, 38, 37, 37, 36, 36, 36
-;; 	dc.b 35, 35, 34, 34, 34, 33, 33, 33, 32, 32, 32, 31, 31, 31, 30
-;; 	dc.b 30, 30, 29, 29, 29, 28, 28, 28, 27, 27, 27, 26, 26, 26, 26
-;; 	dc.b 25, 25, 25, 25, 24, 24, 24, 24, 23, 23, 23, 23, 22, 22, 22
-;; 	dc.b 22, 21, 21, 21, 21, 21, 20, 20, 20, 20, 20, 20, 19, 19, 19
-;; 	dc.b 19, 19, 19, 18, 18, 18, 18, 18, 18, 18, 18, 17, 17, 17, 17
-;; 	dc.b 17, 17, 17, 17, 17, 17, 17, 16, 16, 16, 16, 16, 16, 16, 16
-;; 	dc.b 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16
-;; 	dc.b 16, 16, 16, 16, 16, 16, 16, 16, 17, 17, 17, 17, 17, 17, 17
-;; 	dc.b 17, 17, 17, 17, 18, 18, 18, 18, 18, 18, 18, 18, 19, 19, 19
-;; 	dc.b 19, 19, 19, 20, 20, 20, 20, 20, 20, 21, 21, 21, 21, 21, 22
-;; 	dc.b 22, 22, 22, 23, 23, 23, 23, 24, 24, 24, 24, 25, 25, 25, 25
-;; 	dc.b 26, 26, 26, 26, 27, 27, 27, 28, 28, 28, 29, 29, 29, 30, 30
-;; 	dc.b 30, 31, 31, 31, 32, 32, 32, 33, 33, 33, 34, 34, 34, 35, 35
-;; 	dc.b 36, 36, 36, 37, 37, 38, 38, 38, 39, 39, 40, 40, 41, 41, 41
-;; 	dc.b 42, 42, 43, 43, 44, 44, 45, 45, 45, 46, 46, 47, 47, 48, 48
-;; 	dc.b 49, 49, 50, 50, 51, 51, 52, 52, 53, 53, 54, 54, 55, 55, 56
-;; 	dc.b 56, 57, 57, 58, 59, 59, 60, 60, 61, 61, 62, 62, 63, 64, 64
-;; 	dc.b 65, 65, 66, 66, 67, 68, 68, 69, 69, 70, 70, 71, 72, 72, 73
-;; 	dc.b 73, 74, 75, 75, 76, 76, 77, 78, 78, 79, 79, 80, 81, 81, 82
-;; 	dc.b 83, 83, 84, 85, 85, 86, 86, 87, 88, 88, 89, 90, 90, 91, 92
-;; 	dc.b 92, 93, 94, 94, 95, 95, 96, 97, 97, 98, 99, 99, 100, 101, 101
-;; 	dc.b 102, 103, 103, 104, 105, 105, 106, 107, 107, 108, 109, 110
-;; 	dc.b 110, 111, 112, 112, 113, 114, 114, 115, 116, 116, 117, 118
-;; 	dc.b 118, 119, 120, 120, 121, 122, 123, 123, 124, 125, 125, 126
-;; 	dc.b 127, 127
-	
 
-;;; Compute per2chd table.
-;;; see per2chd for more info.
+;;; Compute per2chd table (see per2chd for more info).
 ;;; 
 compute_per2chd_table:
 	movem.l	d0-a1,-(a7)
@@ -1315,5 +1266,6 @@ compute_per2chd_table:
 ;;;
 ;;; note:
 ;;; 	YM periods = chords[Y]>>X
+
 per2chd:
 	ds.b	$1000
