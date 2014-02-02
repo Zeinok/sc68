@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-15 13:10:36 ben>
+ * Time-stamp: <2013-10-04 20:03:38 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -41,6 +41,7 @@
 #include <sc68/file68_uri.h>
 #include <sc68/file68_str.h>
 #include <sc68/file68_msg.h>
+#include <sc68/file68_features.h>
 
 
 /* Standard Includes */
@@ -240,7 +241,7 @@ static int print_usage(void)
       "  -c --stdout         Output raw to stdout (--output=stdout://)\n"
       "  -n --null           No output (--output=null://)\n"
       "  -w --wav            Riff Wav output. Use in combination with -o.\n"
-      "  -m --memory=<val>   68k memory to allocated (2^<val> bytes)\n"
+      "  -m --memory=<val>   68k memory to allocate (2^<val> bytes)\n"
       );
 
   option68_help(stdout,print_option);
@@ -460,7 +461,13 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
   return -(code == SC68_ERROR);
 }
 
-/* Build output URI for wav output */
+/* Build output URI for wav output.
+ *
+ * !!! Notice !!!
+ *
+ *   This is not a well formed URI but that's how it is right
+ *   now. sc68 needs a proper URI formatter/parser.
+ */
 static char * build_output_uri(char * inname, char * outname)
 {
   static char prefix[] = "audio://ao/driver=wav/output=";
@@ -471,16 +478,19 @@ static char * build_output_uri(char * inname, char * outname)
   Debug("sc68: create output URI in:'%s' out:'%s'\n",inname,outname);
 
   if (outname) {
-    if (!uri68_get_scheme(scheme, 32, outname)) {
-      fprintf(stderr,"sc68: can't create wav here '%s://'\n", scheme);
+    len = uri68_get_scheme(scheme, 32, outname);
+    if (len < 0) {
+      fprintf(stderr,"sc68: error parsing '%s'\n", outname);
+      return 0;
+    } else if (len > 0) {
+      fprintf(stderr,"sc68: can't create wav here -- '%s'\n", scheme);
       return 0;
     }
-    Debug("sc68: don't have a scheme\n");
   } else {
     /* no output given, make it from inname */
     outname = mybasename(inname);
     ext = ".wav";
-    Debug("sc68: basename '%s'\n",outname);
+    Debug("sc68: basename '%s'\n", outname);
   }
 
   len  = sizeof(prefix) + strlen(outname) + 8;
@@ -583,7 +593,7 @@ int main(int argc, char *argv[])
       }
       switch (val) {
       case 'n':
-        outname = "null://"; break; /* --null        */
+        outname = "null:"; break;   /* --null        */
       case 'c':
         outname = "-"; break;       /* --stdout      */
       case 'o':
@@ -643,11 +653,11 @@ int main(int argc, char *argv[])
     inname = argv[i];
   }
   if (!inname) {
-    fprintf (stderr, "%s: missing input file. Try --help.\n",argv[0]);
+    fprintf(stderr, "%s: missing input file. Try --help.\n",argv[0]);
     goto error;
   }
   if (!strcmp(inname,"-")) {
-    inname = "stdin://sc68";
+    inname = "stdin:sc68";
   }
 
   /* Select output
@@ -657,27 +667,39 @@ int main(int argc, char *argv[])
    *    backend.
    */
   if (outname && !strcmp(outname,"-")) {
-    outname = "stdout://sc68";
+    outname = "stdout:sc68";
   }
 
+
   if (opt_owav) {
+#ifndef FILE68_AO
+    fprintf(stderr, "%s: need libao support to create riff/wav files.\n",
+            argv[0]);
+    goto error;
+#else
     outname = namebuf = build_output_uri(inname, outname);
     if (!outname) goto error;
+#endif
   } else if (!outname) {
-    outname = "audio://default";
+#ifndef FILE68_AO
+    outname = "null:sc68";
+    Warning("libao is not supported, fallback to null: output\n");
+#else
+    outname = "audio://sc68";
+#endif
   }
 
   /* Output message to stdout except it is the output. */
-  if (!strncmp68(outname,"stdout://",8)) {
+  if (!strncmp68(outname,"stdout:",7)) {
     /* output to stdout; divert stdout message to stderr */
     sc68_debug_data.out = stderr;
-  } else if (!strncmp68(outname,"stderr://",8)) {
+  } else if (!strncmp68(outname,"stderr:",7)) {
     /* output to stderr; divert stderr message to stdout */
     sc68_debug_data.err = stdout;
   }
 
-  Debug("sc68: input  '%s'\n",inname);
-  Debug("sc68: output '%s'\n",outname);
+  Debug("sc68: input  '%s'\n", inname);
+  Debug("sc68: output '%s'\n", outname);
 
   /* Parse --track= */
   if (!strcmp(tracks,"def")) {
