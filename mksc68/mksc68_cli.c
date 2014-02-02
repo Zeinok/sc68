@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-24 22:25:01 ben>
+ * Time-stamp: <2014-01-13 09:12:05 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -229,10 +229,23 @@ char * cli_prompt(const char * fmt, ...)
   if (fmt) {
     va_list list;
     va_start(list,fmt);
-    if (vasprintf(&newprompt,fmt,list) < 0) {
-      msgerr("set prompt: %s\n", strerror(errno));
+#ifdef HAVE_VASPRINTF
+    if (vasprintf(&newprompt,fmt,list) < 0)
+      newprompt = 0;
+#else
+    {
+      char tmp[256];
+# ifdef HAVE_VSNPRINTF
+      vsnprintf(tmp,sizeof(tmp),fmt,list);
+# else
+      vsprintf(tmp,fmt,list);
+# endif
+      newprompt = strdup(tmp);
     }
+#endif
     va_end(list);
+    if (!newprompt)
+      msgerr("set prompt: %s\n", strerror(errno));
   }
   return prompt = newprompt;
 }

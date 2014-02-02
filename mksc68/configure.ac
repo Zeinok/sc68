@@ -57,7 +57,7 @@ if test x"[$]ac_cv_header_sys_socket_h" != x"yes"; then
 fi
 AC_CHECK_FUNCS([malloc free])
 AC_CHECK_FUNCS([strdup strncasecmp stpcpy])
-AC_CHECK_FUNCS([vsprintf vsnprintf])
+AC_CHECK_FUNCS([vsprintf vsnprintf vasprintf])
 AC_CHECK_FUNCS([hstrerror])
 AC_CHECK_FUNCS([isatty fileno])
 
