@@ -72,11 +72,12 @@ enum {
   EMU68_I = EMU68_X << 1
 };
 
+/* HAXXX: Must be the same order than sc68 internal struct. */
 enum {
   YM = 0,
   MW,
-  PAULA,
   SHIFTER,
+  PAULA,
   MFP
 };
 
