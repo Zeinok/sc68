@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-26 10:27:07 ben>
+ * Time-stamp: <2013-09-25 20:14:17 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -114,7 +114,7 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 
   static const struct ym2149_reg_s init_regs = {
     0xff, 0x0f, 0xff, 0x0f, 0xff, 0x0f, /* tone period A,B,C */
-    0x3f, 077,                          /* noise period & mixer */
+    0x3f, 0xff,                         /* noise period & mixer */
     0x00, 0x00, 0x00,                   /* Volume A,B,C */
     0xFF, 0xFF,                         /* envelop period */
     0x0A,                               /* envelop shape */
