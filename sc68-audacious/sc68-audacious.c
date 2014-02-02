@@ -25,13 +25,24 @@
  */
 
 #include <audacious/plugin.h>
+#include <libaudcore/audstrings.h>
 #include <sc68/sc68.h>
 #include <sc68/tag68.h>
+#include <sc68/audio68.h>
+
+#include <glib.h>
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 static GMutex * ctrl_mutex = NULL;
 static GCond  * ctrl_cond  = NULL;
 static gboolean pause_flag;
 static gint64   seek_value = -1;
+static gboolean sc68a_error;
+static gboolean sc68a_playing;
+static gboolean sc68a_eof;
 
 #ifdef DEBUG
 static void dmsg(const int bit, sc68_t * sc68, const char *fmt, va_list list) {
@@ -42,7 +53,7 @@ static void dmsg(const int bit, sc68_t * sc68, const char *fmt, va_list list) {
 }
 #endif
 
-static void plg_init(void) {
+static bool_t plg_init(void) {
   sc68_init_t init68;
   memset(&init68, 0, sizeof(init68));
 #ifdef DEBUG
@@ -51,6 +62,7 @@ static void plg_init(void) {
   sc68_init(&init68);
   ctrl_mutex = g_mutex_new();
   ctrl_cond  = g_cond_new();
+  return TRUE;
 }
 
 static void plg_cleanup(void) {
@@ -82,14 +94,6 @@ done:
   return buf;
 }
 
-static int get_track_number(int * track, char * s) {
-  int c, v = 0;
-  while (c = *++s, c >= '0' && c <= '9')
-    v = v * 10 + ( c - '0' );
-  *track = v;
-  return !c;
-}
-
 /* Not quiet exact but shoud be ok for all sc68 files :) */
 static int year_of_str(const char * val)
 {
@@ -114,46 +118,31 @@ static Tuple * tuple_from_track(const gchar * filename,
   if (tu) {
     sc68_music_info_t  info;
     sc68_cinfo_t     * cinfo;
-    char track_fmt[]   = "track #%02u";
     char track_str[32];
 
-    tuple_associate_string(tu, FIELD_CODEC,    NULL, "sc68");
-    tuple_associate_string(tu, FIELD_QUALITY,  NULL, "sequenced");
-    tuple_associate_string(tu, FIELD_MIMETYPE, NULL, sc68_mimetype());
+    tuple_set_str(tu, FIELD_CODEC,    NULL, "sc68");
+    tuple_set_str(tu, FIELD_QUALITY,  NULL, "sequenced");
+    tuple_set_str(tu, FIELD_MIMETYPE, NULL, sc68_mimetype());
+
+    if (track <= 0)
+      track = 1;
 
     if ( !sc68_music_info(sc68, &info, track, disk)) {
-      if (track == -1)
-        track = info.trk.track;
 
       if (strcmp(info.album,info.title)) {
-        tuple_associate_string(tu, FIELD_ALBUM,       NULL, info.album);
-        tuple_associate_string(tu, FIELD_TITLE,       NULL, info.title);
-      } else if (info.tracks > 1) {
-        tuple_associate_string(tu, FIELD_ALBUM,       NULL, info.album);
-        if (track > 0) {
-          sprintf(track_str, track_fmt, track % 100u);
-          tuple_associate_string(tu, FIELD_TITLE,     NULL, track_str);
-        }
+        tuple_set_str(tu, FIELD_ALBUM,       NULL, info.album);
+        tuple_set_str(tu, FIELD_TITLE,       NULL, info.title);
       } else {
-        tuple_associate_string(tu, FIELD_TITLE,       NULL, info.title);
+        tuple_set_str(tu, FIELD_TITLE,       NULL, info.title);
       }
-      tuple_associate_string(tu, FIELD_ARTIST,      NULL, info.dsk.tag[TAG68_ID_ARTIST].val);
-      tuple_associate_string(tu, FIELD_SONG_ARTIST, NULL, info.trk.tag[TAG68_ID_ARTIST].val);
-      tuple_associate_string(tu, FIELD_GENRE,       NULL, info.trk.tag[TAG68_ID_GENRE].val);
-      tuple_associate_int   (tu, FIELD_LENGTH,      NULL, info.trk.time_ms);
-      tuple_associate_string(tu, -1,            "format", info.dsk.tag[TAG68_ID_FORMAT].val);
+      tuple_set_str(tu, FIELD_ARTIST,      NULL, info.dsk.tag[TAG68_ID_ARTIST].val);
+      tuple_set_str(tu, FIELD_SONG_ARTIST, NULL, info.trk.tag[TAG68_ID_ARTIST].val);
+      tuple_set_str(tu, FIELD_GENRE,       NULL, info.trk.tag[TAG68_ID_GENRE].val);
+      tuple_set_int(tu, FIELD_LENGTH, NULL,  info.trk.time_ms);
 
-      if (info.tracks > 1) {
-        if (track == 0) {
-          tuple_associate_int(tu, FIELD_SUBSONG_NUM,  NULL, info.tracks);
-          tu->nsubtunes = info.tracks; /* ??? should I */
-        } else {
-          tuple_associate_int(tu, FIELD_SUBSONG_ID,   NULL, track);
-        }
-      }
-      if (track > 0) {
-        tuple_associate_int(tu, FIELD_TRACK_NUMBER, NULL, track);
-      }
+      tuple_set_int(tu, FIELD_SUBSONG_NUM,  NULL, info.tracks);
+      tuple_set_int(tu, FIELD_SUBSONG_ID,   NULL, track);
+      tuple_set_int(tu, FIELD_TRACK_NUMBER, NULL, track);
 
       for (cinfo = &info.dsk;
            cinfo;
@@ -169,16 +158,18 @@ static Tuple * tuple_from_track(const gchar * filename,
             id = FIELD_COPYRIGHT;
           else if (!strcmp(tag->key, TAG68_COMPOSER))
             id = FIELD_COMPOSER;
+          else if (!strcmp(tag->key, TAG68_FORMAT))
+            id = FIELD_CODEC;
           else if (!strcmp(tag->key, TAG68_YEAR)) {
             int year = year_of_str(val);
             if (year)
-              tuple_associate_int(tu, FIELD_YEAR, NULL, year);
+              tuple_set_int(tu, FIELD_YEAR, NULL, year);
           }
 
           if (id != -1)
-            tuple_associate_string(tu, id, NULL, val);
+            tuple_set_str(tu, id, NULL, val);
           else
-            tuple_associate_string(tu, -1, tag->key, val);
+            tuple_set_str(tu, -1, tag->key, val);
         }
       }
     } else {
@@ -211,37 +202,20 @@ gboolean plg_play(InputPlayback * playback,
   sc68_t * sc68 = 0;
   void   * mem = 0;
   int len, rate;
-  int track = 1;
+  int track;
   int myfile = 0;
-  gchar * newfile = 0;
   Tuple *tu = 0;
   gshort paused = 0;
 
   /* Error on exit. */
   g_mutex_lock(ctrl_mutex); {
-    playback->data    = NULL;
-    playback->error   = TRUE;
-    playback->playing = FALSE;
-    playback->eof     = FALSE;
+    playback->set_data(playback, NULL);
+    sc68a_error = TRUE;
+    sc68a_playing = FALSE;
+    sc68a_eof = FALSE;
   } g_mutex_unlock(ctrl_mutex);
 
-  /* Copy URI to be patched. */
-  newfile = strdup(filename);
-  if (!newfile)
-    goto out;
-
-  /* Deal with multiple track files */
-  if (!file) {
-    gchar * q = strrchr(newfile, '?');
-    if (q && get_track_number(&track, q)) {
-      *q = 0;
-      file = vfs_fopen (newfile, "rb");
-      myfile = !!file;
-    } else
-      track = 1;
-  }
-  if (!file)
-    goto out;
+  uri_parse (filename, NULL, NULL, NULL, & track);
 
   /* Currently load the file in memory. Would be better to support
    * audacious VFS with stream68.
@@ -265,13 +239,13 @@ gboolean plg_play(InputPlayback * playback,
     goto out;
 
   /* Set first track unless specified otherwise */
-  sc68_play(sc68, track > 0 ? track : 1, -1);
-  rate = sc68_sampling_rate(sc68, SC68_SPR_QUERY);
+  sc68_play(sc68, track > 0 ? track : 1, SC68_DEF_LOOP);
+  rate = sc68_cntl(sc68, SC68_GET_SPR);
   /* Safety net */
   if (rate <= 8000)
-    rate = sc68_sampling_rate(sc68, 8000);
+    rate = sc68_cntl(sc68, SC68_SET_SPR, 8000);
   else if (rate > 48000)
-    rate = sc68_sampling_rate(sc68, 48000);
+    rate = sc68_cntl(sc68, SC68_SET_SPR, 48000);
 
   /* Open and setup audio playback. */
   if (! playback->output->open_audio(FMT_S16_NE, rate, 2))
@@ -279,11 +253,11 @@ gboolean plg_play(InputPlayback * playback,
 
   g_mutex_lock(ctrl_mutex); {
     /* Set rate and channels (other info are deprecated */
-    playback->set_params(playback, NULL, 0, 0, rate, 2);
+    playback->set_params(playback, -1, rate, 2);
 
-    playback->data = sc68;
+    playback->set_data(playback, sc68);
     code = sc68_process(sc68, 0, 0);
-    tu = tuple_from_track(newfile, sc68, 0, -1);
+    tu = tuple_from_track(filename, sc68, 0, track);
     if (tu) {
       playback->set_tuple(playback, tu);
       /* playback->set_gain_from_playlist(playback); */
@@ -292,28 +266,31 @@ gboolean plg_play(InputPlayback * playback,
 
     pause_flag = pause;
     seek_value = (start_time > 0) ? start_time : -1;
-    playback->playing = TRUE;
-    playback->eof     = FALSE;
-    playback->error   = FALSE;
+
+    sc68a_playing = TRUE;
+    sc68a_eof = FALSE;
+    sc68a_error = FALSE;
     playback->set_pb_ready(playback);
   } g_mutex_unlock(ctrl_mutex);
 
   /* Update return code (load the track) */
-  while (!playback->error && playback->playing && !playback->eof) {
-    int pos, seeking, n;
+  while (!sc68a_error && sc68a_playing && !sc68a_eof) {
+	int n;
 
     if (stop_time >= 0 && playback->output->written_time() >= stop_time) {
-      playback->eof = TRUE;
+      sc68a_eof = TRUE;
       continue;
     }
 
     g_mutex_lock(ctrl_mutex); {
       /* Handle seek request */
+      /* not supported
       if (seek_value >= 0) {
         sc68_seek(sc68, seek_value, 0);
         seek_value = -1;
         g_cond_signal(ctrl_cond);
       }
+      */
 
       /* Handle pause/unpause request */
       if (pause_flag != paused) {
@@ -334,50 +311,45 @@ gboolean plg_play(InputPlayback * playback,
     n = sizeof(buffer) >> 2;
     code = sc68_process(sc68, buffer, &n);
     if (code == SC68_ERROR) {
-      playback->error = TRUE;
+      sc68a_error = TRUE;
       continue;
     }
     if (code & SC68_END) {
-      playback->eof = TRUE;
+      sc68a_eof = TRUE;
       continue;
     }
     if (code & SC68_CHANGE) {
-      tu = tuple_from_track(newfile, sc68, 0, -1);
-      if (tu) {
-        playback->set_tuple(playback, tu);
-        playback->set_params(playback, NULL, 0, 0, 44100, 2);
-        tu = NULL;
-      }
+      sc68a_eof = TRUE;
+      continue;
     }
 
     /* Is sc68 currently seeking ? */
+    /*
     pos = sc68_seek(sc68, -1, &seeking);
     if (pos >= 0 && seeking) {
       while (playback->output->buffer_playing())
         g_usleep(5000);
       playback->output->flush(pos);
     }
+    */
     playback->output->write_audio(buffer, n << 2);
   }
   sc68_stop(sc68);
 
   /* Flush buffer */
   g_mutex_lock(ctrl_mutex); {
-    playback->data = NULL;
-    while (!playback->error && playback->playing && playback->output->buffer_playing())
-      g_usleep(5000);
-    playback->playing = FALSE;
+    playback->set_data(playback, NULL);
+    sc68a_playing = FALSE;
     g_cond_signal(ctrl_cond);
   } g_mutex_unlock(ctrl_mutex);
 
 /* close: */
-  playback->output->close_audio();
+  playback->output->abort_write();
 
 out:
   free(mem);
-  free(newfile);
   sc68_destroy(sc68);
-  return ! playback->error;
+  return ! sc68_error;
 }
 
 static
@@ -389,7 +361,7 @@ static
 void plg_stop(InputPlayback * playback)
 {
   g_mutex_lock(ctrl_mutex); {
-    playback->playing = FALSE;
+    sc68a_playing = FALSE;
   } g_mutex_unlock(ctrl_mutex);
 }
 
@@ -399,10 +371,10 @@ static
  * before the plugin calls set_pb_ready or after stop is called. */
 /* Bug: paused should be a gboolean, not a gshort. */
 /* Bug: There is no way to indicate success or failure. */
-void plg_pause(InputPlayback * playback, gshort paused)
+void plg_pause(InputPlayback * playback, gboolean paused)
 {
   g_mutex_lock(ctrl_mutex); {
-    if (playback->playing) {
+    if (sc68a_playing) {
       pause_flag = paused;
       g_cond_signal(ctrl_cond);
       g_cond_wait(ctrl_cond, ctrl_mutex);
@@ -416,15 +388,25 @@ void plg_pause(InputPlayback * playback, gshort paused)
  * set_pb_ready or after stop is called. */
 /* Bug: time should be a gint, not a gulong. */
 /* Bug: There is no way to indicate success or failure. */
-void plg_seek(InputPlayback * playback, gulong time)
+void plg_seek(InputPlayback * playback, gint time)
 {
   g_mutex_lock(ctrl_mutex); {
-    if (playback->playing) {
+    if (sc68a_playing) {
       seek_value = time;
       g_cond_signal(ctrl_cond);
       g_cond_wait(ctrl_cond, ctrl_mutex);
     }
   } g_mutex_unlock(ctrl_mutex);
+}
+
+static void fill_subtunes(Tuple *tuple) {
+  int tunes = tuple_get_int (tuple, FIELD_SUBSONG_NUM, NULL), i;
+  int subtunes[tunes];
+
+  for (i = 0; i < tunes; ++i)
+	subtunes[i] = i + 1;
+
+  tuple_set_subtunes (tuple, tunes, subtunes);
 }
 
 /* Must return a tuple containing metadata for this file, or NULL if no
@@ -436,12 +418,11 @@ Tuple * plg_probe(const gchar * filename, VFSFile * file)
   sc68_disk_t disk = 0;
   int size/* , track = 0 */;
   void * buf = 0;
+  int track;
 
   fprintf(stderr,
-          "PROBE FN: %s\n"
-          "      URI %s\n",
-          filename ? filename  : "(nil)",
-          file     ? file->uri : "(nil)");
+          "PROBE FN: %s\n",
+          filename ? filename  : "(nil)");
 
   if (!file)
     goto done;
@@ -449,15 +430,17 @@ Tuple * plg_probe(const gchar * filename, VFSFile * file)
     goto done;
   if(disk = sc68_disk_load_mem(buf, size), !disk)
     goto done;
-  tu = tuple_from_track(filename, 0, disk, 0);
+
+  uri_parse (filename, NULL, NULL, NULL, & track);
+  tu = tuple_from_track(filename, 0, disk, track);
+  fill_subtunes(tu);
 
   if (0 && tu) {
     int i;
-    for (i=0; i<FIELD_LAST; ++i) {
-      fprintf (stderr, "- %02d '%20s' ", i, "");
+    for (i=0; i<TUPLE_FIELDS; ++i) {
       switch (tuple_get_value_type (tu, i, 0)) {
         case TUPLE_STRING:
-          fprintf(stderr,"\"%s\"\n", tuple_get_string(tu, i, 0));
+          fprintf(stderr,"\"%s\"\n", tuple_get_str(tu, i, 0));
           break;
         case TUPLE_INT:
           fprintf(stderr,"%d\n", tuple_get_int(tu, i, 0));
@@ -497,19 +480,20 @@ done:
 }
 
 static const gchar * fmts[] = { "sc68", "sndh", "snd", NULL };
-/* static gchar name[] = "sc68"; */
+static gchar name[] = "sc68";
 static gchar desc[] = "Atari and Amiga music player";
 
-static InputPlugin sc68_plugin = {
+AUD_INPUT_PLUGIN (
 
   /* plugin header */
-  .description = desc,
+  .name = name,
+  .about_text = desc,
   .init        = plg_init,
   .cleanup     = plg_cleanup,
 
   /* input plugin */
   .have_subtune         = 1,
-  .vfs_extensions       = fmts,
+  .extensions       = fmts,
   .priority             = 1,
 
   .is_our_file_from_vfs = plg_is_our,
@@ -517,10 +501,6 @@ static InputPlugin sc68_plugin = {
 
   .play                 = plg_play,
   .stop                 = plg_stop,
-  .pause                = plg_pause,
-  .mseek                = plg_seek,
-};
-
-InputPlugin * ip_list [] = { &sc68_plugin, NULL };
-
-SIMPLE_INPUT_PLUGIN("sc68", ip_list)
+  .pause                = plg_pause
+  //.mseek                = plg_seek,
+)
