@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-24 23:25:05 ben>
+ * Time-stamp: <2013-10-01 15:18:56 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -911,9 +911,10 @@ disk68_t * file68_load_mem(const void * buffer, int len)
   return d;
 }
 
-static int st_isgraph( int c )
+
+static int st_isupper( int c )
 {
-  return c >= 32 && c < 128;
+  return (c >= 'A' && c <= 'Z');
 }
 
 static int st_isdigit( int c )
@@ -921,12 +922,22 @@ static int st_isdigit( int c )
   return c >= '0' && c <= '9';
 }
 
+static int st_istag( int c )
+{
+  return c == '!' || c == '#' || c == '*';
+}
+
+static int st_isgraph( int c )
+{
+  return st_isupper(c) || st_isdigit(c) || st_istag(c);
+}
+
 /* @see http://sndh.atari.org/fileformat.php
  */
 static int sndh_info(disk68_t * mb, int len)
 {
   const int unknowns_max = 8;
-  int i, vbl = 0, frq = 0, steonly = 0,
+  int i, vbl = 0, frq = 0/* , steonly = 0 */,
     unknowns = 0, fail = 0;
   int dtag = 0, ttag = 0;
 
@@ -1032,16 +1043,8 @@ static int sndh_info(disk68_t * mb, int len)
       /* musicmon = 1; */
       t = i; i += 4;
     } else if (!memcmp(b+i,"TIME",4)) {
-      int j, tracks;
       /* Time in second */
-      if ( (tracks = mb->nb_mus) <= 0 ) {
-        /* $$$ We could try to count the number de 16-word before the
-         * next tag, it could give us the number of song. Still it's
-         * would be pretty messed up. So let's assume 1 track for
-         * now. */
-        msg68_warning("file68: sndh -- %s\n","got 'TIME' before track count");
-        tracks = 1;
-      }
+      int j, tracks = mb->nb_mus <= 0 ? 1 : mb->nb_mus;
       t = i; i += 4;
       for ( j = 0; j < tracks; ++j ) {
         if (i < len-2 && j < SC68_MAX_TRACK)
@@ -1055,6 +1058,31 @@ static int sndh_info(disk68_t * mb, int len)
                 mb->mus[j].first_ms);
         i += 2;
       }
+    } else if (!memcmp(b+i, "FLAG", 4)) {
+      /* Track features (hardware,fx...) */
+      int j, max=0, tracks = mb->nb_mus <= 0 ? 1 : mb->nb_mus;
+      t = i;
+      for ( j = 0; j < tracks; ++j ) {
+        music68_t * m = mb->mus+j;
+        int k, off = WPeekBE(b + i + 4 + j*2);
+        m->hwflags.bit.timers = 1;
+        TRACE68(file68_cat,
+                "file68: sndh -- FLAG #%02d -- %s\n", j+1, b+i+off);
+        /* parse the flad */
+        for (k=i+off; k<len && b[k]; ++k)
+          switch (b[k]) {
+          case 'y': m->hwflags.bit.ym     = 1; break;
+          case 'e': m->hwflags.bit.ste    = 1; break;
+          case 'a': m->hwflags.bit.timera = 1; break;
+          case 'b': m->hwflags.bit.timerb = 1; break;
+          case 'c': m->hwflags.bit.timerc = 1; break;
+          case 'd': m->hwflags.bit.timerd = 1; break;
+          case 'p': m->hwflags.bit.amiga  = 1; break;
+          }
+        if (k > max)
+          max = k;
+      }
+      i = max+1;
 
     } else if ( !memcmp(b+i,"##",2) && ( (ctypes & 0xC00) == 0xC00 ) ) {
       mb->nb_mus = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' );
@@ -1062,15 +1090,10 @@ static int sndh_info(disk68_t * mb, int len)
       t = i; i += 4;
     } else if (!memcmp(b+i,"!#SN",4)) {
       /* track names */
-      int j, tracks, max = 0;
+      int j, max=0, tracks = mb->nb_mus <= 0 ? 1 : mb->nb_mus;
       t = i;
       /* assert(0); */
-      if ( (tracks = mb->nb_mus) <= 0 ) {
-        /* $$$ Same remark as 'TIME' tag. */
-        msg68_warning("file68: sndh -- %s\n","got '!#SN' before track count");
-        tracks = 1;
-      }
-      for (j = 0; j < tracks; ++ j) {
+      for (j = 0; j < tracks; ++j) {
         int off = WPeekBE(b + i + 4 + j*2);
         if (off > max) max = off;
         mb->mus[j].tags.tag.title.val = b + i + off;
@@ -1146,12 +1169,12 @@ static int sndh_info(disk68_t * mb, int len)
                     b+s);
 
           /* HAXXX: using name can help determine STE needs */
-          if (p == &mb->tags.tag.title.val)
-            steonly = 0
-              || !!strstr(mb->tags.tag.title.val,"STE only")
-              || !!strstr(mb->tags.tag.title.val,"(STe)")
-              || !!strstr(mb->tags.tag.title.val,"(STE)")
-              ;
+          /* if (p == &mb->tags.tag.title.val) */
+          /*   steonly = 0 */
+          /*     || !!strstr(mb->tags.tag.title.val,"STE only") */
+          /*     || !!strstr(mb->tags.tag.title.val,"(STe)") */
+          /*     || !!strstr(mb->tags.tag.title.val,"(STE)") */
+          /*     ; */
 
           TRACE68(file68_cat,
                   "file68: sndh -- got ARG -- '%s'\n",
@@ -1181,8 +1204,11 @@ static int sndh_info(disk68_t * mb, int len)
     mb->mus[i].d0    = i+1;
     mb->mus[i].loops = 0;
     mb->mus[i].frq   = frq ? frq : vbl;
-    mb->mus[i].hwflags.bit.ym  = 1;
-    mb->mus[i].hwflags.bit.ste = steonly;
+    if (!mb->mus[i].hwflags.bit.timers) {
+      /* Did not have the 'FLAG' tag, fallback to YM+STE */
+      mb->mus[i].hwflags.bit.ym  = 1;
+      mb->mus[i].hwflags.bit.ste = 1;
+    }
   }
   return 0;
 }
