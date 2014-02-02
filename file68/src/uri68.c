@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-26 11:14:35 ben>
+ * Time-stamp: <2013-10-04 20:01:41 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -81,7 +81,6 @@ int uri68_get_scheme(char * scheme, int max, const char *uri)
       else if (len > 0) {
         if (len >= max)
           return -1;
-        len = max-1;
         memcpy(scheme, uri, len);
         scheme[len] = 0;
       }
