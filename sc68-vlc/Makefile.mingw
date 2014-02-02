@@ -28,7 +28,7 @@ libexec  := $(PREFIX)/libexec
 VLCSDK     := $(shell realpath ./sdk)
 VLCDIR     := $(shell realpath "$(VLCSDK)/..")
 VLCPLUGDIR := $(VLCDIR)/plugins/demux
-VLCFIXSDK  := | sed "s|/home/jb/vlc_2.0/win32/_win32|'$(VLCSDK)'|g"
+VLCFIXSDK  := | sed "s|/home/.*/win32/_win32|'$(VLCSDK)'|g"
 
 PKGCONFIG  = PKG_CONFIG_LIBDIR='$(SYSROOT)/mingw/lib/pkgconfig'
 PKGCONFIG += PKG_CONFIG_PATH='$(PREFIX)/lib/pkgconfig:$(VLCSDK)/lib/pkgconfig'

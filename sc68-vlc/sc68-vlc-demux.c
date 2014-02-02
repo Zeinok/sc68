@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-17 08:32:22 ben>
+ * Time-stamp: <2014-02-01 18:49:44 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -210,7 +210,7 @@ vlc_module_begin()
     N_("Choose BLEP (Band-Limited stEP) synthesis for the best quality. "
        "PULSE is sc68 legacy engine" ),
     true);
-  change_string_list(ppsz_ymengine, ppsz_ymengine_text, 0)
+  change_string_list(ppsz_ymengine, ppsz_ymengine_text/* , 0 */)
 
   add_string(
     CFG_PREFIX "ym-filter",
@@ -220,7 +220,7 @@ vlc_module_begin()
        "2-poles is the best. "                                         \
        "Avoid none it will discard some SFX."),
     true);
-  change_string_list(ppsz_ymfilter, ppsz_ymfilter_text, 0);
+  change_string_list(ppsz_ymfilter, ppsz_ymfilter_text/* , 0 */);
 
   add_string(
     CFG_PREFIX "ym-volmodel",
@@ -229,7 +229,7 @@ vlc_module_begin()
     N_("Atari-ST is a specially cooked YM channels mixer to "
        "sound more like an actual Atari-ST machine."),
     true);
-  change_string_list(ppsz_ymvol, ppsz_ymvol_text, 0);
+  change_string_list(ppsz_ymvol, ppsz_ymvol_text/* , 0 */);
 
   /* ---------------------------------------------------------------------- */
 
