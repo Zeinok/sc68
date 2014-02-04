@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2014 Benjamin Gerard
  *
- * Time-stamp: <2014-02-02 19:57:58 ben>
+ * Time-stamp: <2014-02-04 17:48:59 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -35,6 +35,7 @@
 /* libc */
 #include <stdio.h>
 #include <ctype.h>
+#include <assert.h>
 
 /* sc68 */
 #include <sc68/sc68.h>
@@ -49,6 +50,10 @@
 
 /* winamp 2 */
 #include "winamp/in2.h"
+#undef   _MSC_VER                       /* fix intptr_t redefinition */
+#define  _MSC_VER 2000
+#include "winamp/wa_ipc.h"
+#include "winamp/ipc_pe.h"
 
 #ifdef __cplusplus
 /* winamp 3 */
@@ -63,12 +68,7 @@
 static api_service * g_service;
 #endif
 
-#undef   _MSC_VER                       /* fix intptr_t redefinition */
-#define  _MSC_VER 2000
-#include "winamp/wa_ipc.h"
-
-/* Post this to the main window at end of file. */
-#define WM_WA_MPEG_EOF WM_USER+2
+/* Fake command line for sc68_init() */
 static char appname[] = "winamp";
 static char *argv[] = { appname };
 
@@ -76,32 +76,30 @@ static char *argv[] = { appname };
  * Plugin private data.
  ******************************************************************************/
 
-typedef struct wasc68_s wasc68_t;
+static char          g_magic[8] = "wasc68!";
+static WNDPROC       g_hookproc;   /* hooked proc            */
 
-static struct wasc68_s {
-  HANDLE      lock;   /* mutex handle           */
-  int         zero_A; /* zeroed from this point */
+#ifdef USE_LOCK
+static HANDLE        g_lock;       /* mutex handle           */
+#endif
 
-  HANDLE      thdl;   /* thread handle          */
-  DWORD       tid;    /* thread id              */
+static HANDLE        g_thdl;       /* thread handle          */
+static DWORD         g_tid;        /* thread id              */
+static char        * g_uri;        /* allocated URI          */
+static sc68_t      * g_sc68;       /* sc68 emulator instance */
+static int           g_code;       /* sc68 process code      */
+static int           g_spr;        /* sampling rate in hz    */
+static int           g_maxlatency; /* max latency in ms      */
+static int           g_trackpos;   /* track position in ms   */
+static int           g_allin1;     /* play all tracks as one */
+static int           g_track;      /* current playing track  */
+static int           g_tracks;     /* number of tracks       */
 
-  char      * uri;        /* allocated URI          */
-  sc68_t    * sc68;       /* sc68 emulator instance */
-  /* sc68_music_info_t mi; */   /* music info             */
-  int         code;       /* sc68 process code      */
-  int         samplerate; /* sampling rate in hz    */
-  int         maxlatency; /* max latency in ms      */
-  int         position;   /* current position in ms */
-  int         allin1;     /* play all tracks as one */
+static volatile LONG g_stopreq;    /* stop requested         */
+static volatile LONG g_paused;     /* pause status           */
+static volatile LONG g_settrack;   /* request change track   */
 
-  volatile int paused;    /* pause status           */
-  volatile int stop_req;  /* request playback stop  */
-
-  int         zero_B; /* zeroed to this point */
-
-  /* Sample buffer (16bit x 2 channels x 2 for DSP) */
-  BYTE        spl[576*2*2*2];
-} g_wasc68;
+static BYTE         g_spl[576*8]; /* Sample buffer          */
 
 /*******************************************************************************
  * Declaration
@@ -139,28 +137,32 @@ int wasc68_cat = msg68_NEVER;
 /*******************************************************************************
  * LOCKS
  ******************************************************************************/
-static wasc68_t * lock(void) {
-  return WaitForSingleObject(g_wasc68.lock, INFINITE) == WAIT_OBJECT_0
-    ? &g_wasc68
-    : 0
-    ;
+#ifdef USE_LOCK
+
+static inline int lock(void)
+{ return WaitForSingleObject(g_lock, INFINITE) == WAIT_OBJECT_0; }
+
+static inline int lock_noblock(void)
+{ return WaitForSingleObject(g_lock, 0) == WAIT_OBJECT_0; }
+
+static inline void unlock(void)
+{ ReleaseMutex(g_lock); }
+
+#else
+
+static inline int lock(void) { return 1; }
+static inline int lock_noblock(void) { return 1; }
+static inline void unlock(void) { }
+
+#endif
+
+static inline LONG atomic_set(LONG volatile * ptr, LONG v)
+{
+  return InterlockedExchange(ptr,v);
 }
 
-static void unlock(wasc68_t * wasc68) {
-  if (wasc68)
-    ReleaseMutex(wasc68->lock);
-}
-
-void set_asid(int asid) {
-  wasc68_t * wasc68 = lock();
-  if (wasc68) {
-    DBG("set asid mode %d\n", asid);
-    sc68_cntl(wasc68->sc68,SC68_SET_ASID,asid);
-    if (wasc68->sc68)
-      sc68_cntl(0,SC68_SET_ASID,asid);
-    unlock(wasc68);
-  }
-}
+static inline LONG atomic_get(LONG volatile * ptr)
+{ return *ptr; }
 
 /* static */
 /*******************************************************************************
@@ -204,8 +206,78 @@ In_Module g_mod =
   seteq,                 /* set equalizer */
   NULL,                  /* setinfo call filled in by winamp */
   0                      /* out_mod filled in by winamp */
-
 };
+
+/*******************************************************************************
+ * Message Hook
+ ******************************************************************************/
+static
+LRESULT CALLBACK myproc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+  int step = 0;
+
+  assert (hWnd == g_mod.hMainWindow);
+
+  switch (Msg) {
+  case WM_WA_IPC:
+    break;
+
+  case WM_COMMAND:
+    switch (LOWORD(wParam)) {
+    case 40061:                       /* shift + prev track */
+      /* case 40044: */                       /* prev track */
+      step = -1;
+      break;
+    case 40060:                       /* shift + next track */
+      /* case 40048: */                       /* next track */
+      step = 1;
+      break;
+    default:
+      dbg("WM_COMMAND #%d w=%d l=%d\n",
+          (int)LOWORD(wParam), (int)wParam, (int)lParam);
+    }
+    break;
+
+  case WM_SYSCOMMAND:
+    DBG("WM_SYSCOMMAND #%d w=%d l=%d\n",
+        (int)LOWORD(wParam), (int)wParam, (int)lParam);
+    break;
+  }
+
+  if (step) {
+    int newtrack = g_track + step;
+    if (g_allin1 && newtrack > 0 && newtrack <= g_tracks) {
+      DBG("request new track -- %02d\n", newtrack);
+      atomic_set(&g_settrack, newtrack);
+      return TRUE;
+    }
+  }
+
+  return g_hookproc
+    ? CallWindowProc(g_hookproc, hWnd, Msg, wParam, lParam)
+    : DefWindowProc(hWnd, Msg, wParam, lParam)
+    ;
+}
+
+static void hook(void)
+{
+  if (!g_hookproc) {
+    g_hookproc = (WNDPROC)
+      SetWindowLong(g_mod.hMainWindow, GWL_WNDPROC, (LONG)myproc);
+    DBG("Hook %s\n", !g_hookproc?"failed":"success");
+  }
+}
+
+static void unhook(void)
+{
+  if (!g_hookproc)
+    DBG("Nothing to unhook\n");
+  else {
+    DBG("unhook winamp message proc\n");
+    SetWindowLong(g_mod.hMainWindow, GWL_WNDPROC, (LONG)g_hookproc);
+    g_hookproc = 0;
+  }
+}
 
 static
 /*******************************************************************************
@@ -284,33 +356,21 @@ int isourfile(const char * uri)
   return 0;
 }
 
-static
 /*******************************************************************************
  * PAUSE
  ******************************************************************************/
-int setpause(int val)
-{
-  wasc68_t * wasc68;
-  if (wasc68 = lock(), wasc68) {
-    if (val >= 0)
-      g_mod.outMod -> Pause(wasc68->paused = val);
-    else
-      val = wasc68->paused;
-    unlock(wasc68);
-  }
-  return val;
-}
-
 static void pause() {
-  setpause(1);
+  atomic_set(&g_paused,1);
+  g_mod.outMod->Pause(1);
 }
 
 static void unpause() {
-  setpause(0);
+  atomic_set(&g_paused,0);
+  g_mod.outMod->Pause(0);
 }
 
 static int ispaused() {
-  return setpause(-1);
+  return atomic_get(&g_paused);
 }
 
 static
@@ -320,13 +380,12 @@ static
 int getlength()
 {
   int ms = 0;
-  wasc68_t * wasc68;
-  if (wasc68 = lock(), wasc68) {
-    const int fct = wasc68->allin1 ? SC68_GET_DSKLEN : SC68_GET_LEN;
-    int res = sc68_cntl(wasc68->sc68, fct);
+  if (lock()) {
+    const int fct = g_allin1 ? SC68_GET_DSKLEN : SC68_GET_LEN;
+    int res = sc68_cntl(g_sc68, fct);
     if (ms != -1)
       ms = res;
-    unlock(wasc68);
+    unlock();
   }
   return ms;
 }
@@ -338,33 +397,11 @@ static
 int getoutputtime()
 {
   int ms = 0;
-  wasc68_t * wasc68;
-
-  if (wasc68 = lock(), wasc68) {
-    ms = g_mod.outMod->GetOutputTime();
-
-    /* DBG("Otime:%d Wtime:%d Dpos:%d Ppos:%d Tpos:%d\n", */
-    /*     g_mod.outMod->GetOutputTime(), */
-    /*     g_mod.outMod->GetWrittenTime(), */
-    /*     sc68_cntl(wasc68->sc68, SC68_GET_PLAYPOS), */
-    /*     sc68_cntl(wasc68->sc68, SC68_GET_DSKPOS), */
-    /*     sc68_cntl(wasc68->sc68, SC68_GET_POS) */
-    /*   ); */
-
-    /* wasc68->position */
-    /*   + g_mod.outMod->GetOutputTime() */
-    /*   - g_mod.outMod->GetWrittenTime(); */
-    /* if (wasc68->allin1) */
-    /*   ms = sc68_cntl(wasc68->sc68, SC68_GET_DSKPOS); */
-    /* ms += sc68_cntl(wasc68->sc68, SC68_GET_PLAYPOS); */
-    /* ms -= g_mod.outMod->GetWrittenTime(); */
-    /* ms = wasc68->position + */
-    /*   + g_mod.outMod->GetOutputTime() */
-    /*   - g_mod.outMod->GetWrittenTime() */
-    /*   ; */
-    unlock(wasc68);
+  if (lock()) {
+    ms = g_trackpos + g_mod.outMod->GetOutputTime();
+    unlock();
   }
-  return ms;
+  /*   - g_mod.outMod->GetWrittenTime() */
 }
 
 static
@@ -403,34 +440,28 @@ static
 void seteq(int on, char data[10], int preamp) {}
 
 
-static void clean_close(wasc68_t * wasc68)
+static void clean_close(void)
 {
-  if (!wasc68)
-    return;
+  if (g_thdl) {
+    TerminateThread(g_thdl,1);
+    CloseHandle(g_thdl);
+    g_thdl = 0;
+    DBG("%s\n","thread cleaned");
+  }
+  if (g_sc68) {
+    sc68_destroy(g_sc68);
+    g_sc68 = 0;
+  }
+  if (g_uri) {
+    free(g_uri);
+    g_uri = 0;
+  }
 
-  if (wasc68->thdl) {
-    TerminateThread(wasc68->thdl,1);
-    CloseHandle(wasc68->thdl);
-    wasc68->thdl = 0;
-    dbg("wasc68::clean - %s\n","thread cleaned");
-  }
-  /* wasc68->mi.trk.track = 0; */
-  if (wasc68->sc68) {
-    sc68_destroy(wasc68->sc68);
-    wasc68->sc68 = 0;
-    /* dbg("wasc68::clean - %s\n","sc68 cleaned"); */
-  }
-  if (wasc68->uri) {
-    free(wasc68->uri);
-    wasc68->uri = 0;
-    /* dbg("wasc68::clean - %s\n","uri cleaned"); */
-  }
-  if ( 1 /* wasc68->mod */) {
-    /* Close output system. */
-    g_mod.outMod->Close();
-    /* Deinitialize visualization. */
-    g_mod.SAVSADeInit();
-  }
+  /* Close output system. */
+  g_mod.outMod->Close();
+  /* Deinitialize visualization. */
+  g_mod.SAVSADeInit();
+
 }
 
 static
@@ -439,25 +470,35 @@ static
  ******************************************************************************/
 void stop()
 {
-  wasc68_t * wasc68;
-  wasc68 = lock();
-  if (wasc68) {
-    wasc68->stop_req = 1;
-    if (wasc68->thdl) {
-      switch ( WaitForSingleObject(wasc68->thdl,10000) ) {
+  if (lock()) {
+    atomic_set(&g_stopreq,1);
+    if (g_thdl) {
+      switch (WaitForSingleObject(g_thdl,10000)) {
       case WAIT_OBJECT_0:
-        CloseHandle(wasc68->thdl);
-        wasc68->thdl = 0;
+        CloseHandle(g_thdl);
+        g_thdl = 0;
         break;
       default:
-        dbg("wasc68::stop - thread did not exit normally\n");
+        dbg("thread did not exit normally\n");
       }
     }
-    clean_close(wasc68);
-    unlock(wasc68);
+    clean_close();
+    unlock();
   }
 }
 
+static
+int track_from_uri(const char ** ptruri)
+{
+  int track = 0;
+  /* const char * uri = *ptruri; */
+  /* if (uri[0] == '/' && isdigit(uri[1]) && isdigit(uri[2]) && uri[3] == ':') { */
+  /*   track = (uri[1]-'0')*10 + uri[2]-'0'; */
+  /*   DBG("found track -- %02d\n", track); */
+  /*   *ptruri = uri+4; */
+  /* } */
+  return track;
+}
 
 static
 /*******************************************************************************
@@ -467,91 +508,107 @@ static
  * @reval  -1 on file not found
  * @retval !0 stopping winamp error
  ******************************************************************************/
-int play(const char *fn)
+int play(const char * uri)
 {
   int err = 1;
-  wasc68_t * wasc68;
+  int settrack = 0;
 
-  if (!fn || !*fn)
+  if (!uri || !*uri)
     return -1;
 
-  if (wasc68 = lock(), !wasc68)
-    goto inused;
+  if (!lock_noblock())
+    goto cantlock;
 
   /* Safety net */
-  if (wasc68->sc68 || wasc68->thdl || wasc68->uri)
+  if (g_sc68 || g_thdl || g_uri)
     goto inused;
 
-  memset(&wasc68->zero_A, 0, (char *)&wasc68->zero_B-(char *)&wasc68->zero_A);
-
-  /* Only mode supported ATM */
-  wasc68->allin1 = 1;
+  /* cleanup */
+  g_hookproc   = 0;
+  g_maxlatency = 0;
+  g_trackpos   = 0;
+  g_track      = 0;
+  g_stopreq    = 0;
+  g_paused     = 0;
+  g_settrack   = 0;
 
   /* Create sc68 emulator instance */
-  if (!wasc68->sc68)
-    wasc68->sc68 = sc68_create(0);
-  if (!wasc68->sc68)
+  if (g_sc68 = sc68_create(0), !g_sc68)
     goto exit;
 
-  /* Duplicate filename */
-  wasc68->uri = strdup(fn);
-  if (!wasc68->uri || sc68_load_uri(wasc68->sc68, wasc68->uri)) {
-    err = -1;
+  settrack = track_from_uri(&uri);
+  if (settrack)
+    DBG("got specific track -- %d\n", settrack);
+
+  /* Duplicate URI an */
+  if (g_uri = strdup(uri), !g_uri)
+    goto exit;
+
+  /* Load */
+  if (sc68_load_uri(g_sc68, g_uri)) {
+    err = -1;                           /* File not found or such */
     goto exit;
   }
 
   /* Get sampling rate */
-  wasc68->samplerate = sc68_cntl(wasc68->sc68, SC68_GET_SPR);
-  if (wasc68->samplerate <= 0) {
+  g_spr = sc68_cntl(g_sc68, SC68_GET_SPR);
+  if (g_spr <= 0)
     goto exit;
-  }
+
+  /* Get track count */
+  g_tracks =  sc68_cntl(g_sc68, SC68_GET_TRACKS);
+  if (g_tracks <= 0)
+    goto exit;
+  DBG("tracks=%d\n",g_tracks);
+
+  /* Only mode supported ATM */
+  g_allin1 = !settrack;
+  DBG("all-in-1: %d\n", g_allin1);
 
   /* Get disk and track info */
-  if (sc68_play(wasc68->sc68, 1, SC68_DEF_LOOP) < 0) {
+  if (sc68_play(g_sc68, settrack ? settrack : 1, SC68_DEF_LOOP) < 0)
     goto exit;
-  }
 
-  wasc68->code = sc68_process(wasc68->sc68, 0, 0);
-  if (wasc68->code == SC68_ERROR) {
+  /* Run music init code. Ensure everything is okay to really play */
+  g_code = sc68_process(g_sc68, 0, 0);
+  if (g_code == SC68_ERROR)
     goto exit;
-  }
 
-  /* if (sc68_music_info(wasc68->sc68, &wasc68->mi, SC68_CUR_TRACK, 0)) { */
-  /*   goto exit; */
-  /* } */
-  /* dump_music_info(&wasc68->mi, wasc68->uri); */
+  /* Get current track */
+  g_track = sc68_cntl(g_sc68, SC68_GET_TRACK);
 
   /* Init output module */
-  wasc68->maxlatency = g_mod.outMod->Open(wasc68->samplerate, 2, 16, 0, 0);
-  if (wasc68->maxlatency < 0) {
+  g_maxlatency = g_mod.outMod->Open(g_spr, 2, 16, 0, 0);
+  if (g_maxlatency < 0)
     goto exit;
-  }
-  /* wasc68->mod = &mod; */
-  g_mod.outMod->SetVolume(-666); /* set default volume */
+
+  /* set default volume */
+  g_mod.outMod->SetVolume(-666);
 
   /* Init info and visualization stuff */
-  g_mod.SetInfo(0, wasc68->samplerate/1000, 2, 1);
-  g_mod.SAVSAInit(wasc68->maxlatency, wasc68->samplerate);
-  g_mod.VSASetInfo(wasc68->samplerate, 2);
+  g_mod.SetInfo(0, g_spr/1000, 2, 1);
+  g_mod.SAVSAInit(g_maxlatency, g_spr);
+  g_mod.VSASetInfo(g_spr, 2);
 
   /* Init play thread */
-  wasc68->thdl = (HANDLE)
+  g_thdl = (HANDLE)
     CreateThread(NULL,                  /* Default Security Attributs */
-                 0,                     /* Default stack size  */
+                 0,                     /* Default stack size         */
                  (LPTHREAD_START_ROUTINE)playloop, /* Thread function */
-                 (LPVOID) wasc68,                  /* Thread Cookie   */
-                 0,                                /* Thread status   */
-                 &wasc68->tid                      /* Thread Id       */
+                 (LPVOID) g_magic,      /* Thread Cookie              */
+                 0,                     /* Thread status              */
+                 &g_tid                 /* Thread Id                  */
       );
 
-  err = !wasc68->thdl;
+  err = !g_thdl;
 exit:
   if (err)
-    clean_close(wasc68);
+    clean_close();
 
 inused:
-  unlock(wasc68);
+  unlock();
 
+cantlock:
   return err;
 }
 
@@ -564,47 +621,6 @@ const char * get_tag(const sc68_cinfo_t * const cinfo, const char * const key)
       return cinfo->tag[i].val;
   return 0;
 }
-
-#if 0
-
-static
-void updatetrack(wasc68_t * wasc68)
-{
-  /* if (wasc68) */
-  /*   sc68_music_info(wasc68->sc68, &wasc68->mi, SC68_CUR_TRACK, 0); */
-}
-
-static
-void dump_music_info(const sc68_music_info_t * const mi, const char * uri)
-{
-  int j, len = 11;
-
-  dbg("%s\n", "***********************");
-  dbg("DUMP MUSIC-INFO for %s\n", uri ? uri : "N/A");
-  dbg("%s\n", "========================");
-  dbg("%-*s : %s %s\n", len, "Disk"   , mi->dsk.time, mi->album);
-  dbg("%-*s : %s %s\n", len, "Track"  , mi->trk.time, mi->title);
-  dbg("%-*s : %s\n",    len, "Artist" , mi->artist);
-  dbg("%s\n", "------------------------");
-  dbg("Disk tags:\n");
-  for (j=0; j<mi->dsk.tags; ++j)
-    dbg("* %c%-*s : %s\n",
-        toupper(*mi->dsk.tag[j].key),
-        len-3,
-        mi->dsk.tag[j].key+1,
-        mi->dsk.tag[j].val);
-
-  dbg("%s\n", "------------------------");
-  dbg("Tracks tags:\n");
-  for (j=0; j<mi->trk.tags; ++j)
-    dbg("* %c%-*s : %s\n",
-        toupper(*mi->trk.tag[j].key),
-        len-3,
-        mi->trk.tag[j].key+1,
-        mi->trk.tag[j].val);
-  dbg("%s\n", "========================");
-}
-#endif
 
 static void xfinfo(char *title, int *msptr, sc68_t *sc68, sc68_disk_t disk)
 {
@@ -645,8 +661,6 @@ static
  ******************************************************************************/
 void getfileinfo(const in_char * uri, in_char * title, int * msptr)
 {
-  /* const int max = GETFILEINFO_TITLE_LENGTH; */
-
   if (title)
     *title = 0;
   if (msptr)
@@ -654,11 +668,10 @@ void getfileinfo(const in_char * uri, in_char * title, int * msptr)
 
   if (!uri || !*uri) {
     /* current disk */
-    wasc68_t * wasc68 = 0;
-    if (wasc68 = lock(), wasc68) {
-      if (wasc68->sc68)
-        xfinfo(title, msptr, wasc68->sc68, 0);
-      unlock(wasc68);
+    if (lock()) {
+      if (g_sc68)
+        xfinfo(title, msptr, g_sc68, 0);
+      unlock();
     }
   } else {
     /* some other disk */
@@ -674,68 +687,91 @@ static
 /*******************************************************************************
  * LOOP
  ******************************************************************************/
-DWORD WINAPI playloop(LPVOID _wasc68)
+DWORD WINAPI playloop(LPVOID cookie)
 {
-  wasc68_t * wasc68 = (wasc68_t *)_wasc68;
   const int get_pos =
-    wasc68->allin1 ? SC68_GET_PLAYPOS : SC68_GET_POS;
+    g_allin1 ? SC68_GET_PLAYPOS : SC68_GET_POS;
 
-  while (!wasc68->stop_req) {
-    int l;
+  hook();
+  for (;;) {
+    int settrack, n = 0, canwrite;
 
-    wasc68->position = sc68_cntl(wasc68->sc68, get_pos);
+    if (atomic_get(&g_stopreq)) {
+      DBG("stop request detected\n");
+      break;
+    }
+    settrack = atomic_set(&g_settrack,0);
+    canwrite = g_mod.outMod->CanWrite();
 
-    /* if (seeking) */
-    /*   g_mod.outMod->Flush(wasc68->position); */
+    if (settrack) {
+      DBG("change track has been requested -- %02d\n", settrack);
+      n = 0;
+      sc68_play(g_sc68, settrack, SC68_DEF_LOOP);
+      g_code = sc68_process(g_sc68, 0, 0);
+      DBG("code=%x\n",g_code);
+    } else if (canwrite >= (576 << (2+!!g_mod.dsp_isactive()))) {
+      n = 576;
+      g_code = sc68_process(g_sc68, g_spl, &n);
+    } else {
+      Sleep(20);                        /* wait a while */
+      continue;
+    }
 
-    if (g_mod.outMod->CanWrite() >= (576 << (2+!!g_mod.dsp_isactive()))) {
-      /* CanWrite() returns the number of bytes you can write, so we
-         check that to the block size. the reason we multiply the
-         block size by two if g_mod.dsp_isactive() is that DSP
-         plug-ins can change it by up to a factor of two (for tempo
-         adjustment).
-      */
-      int n = 576;
-      wasc68->code = sc68_process(wasc68->sc68, wasc68->spl, &n);
-      if (wasc68->code & SC68_END) {
+    /* Exit on error or legit end */
+    if (g_code & SC68_END) {
+      DBG("SC68_END detected -- %x\n", g_code);
+      break;
+    }
+    /* Change track detected */
+    if (g_code & SC68_CHANGE) {
+      DBG("SC68_CHANGE detected -- %x\n", g_code);
+      if (!g_allin1) {
+        DBG("Not all in 1, exit\n");
+        g_code |= SC68_END;
         break;
       }
-      if (wasc68->code & SC68_CHANGE) {
-        if (!wasc68->allin1)
-          break;
+      g_track = sc68_cntl(g_sc68,SC68_GET_TRACK);
+      DBG("change track -- %02d\n", g_track);
+    }
+    if (settrack) {
+      g_trackpos = sc68_cntl(g_sc68, SC68_GET_TRKORG);
+      DBG("Flushing audio -- %d\n", g_trackpos);
+      g_mod.outMod->Flush(0);
+    }
 
-        /* sc68_music_info(wasc68->sc68, &wasc68->mi, SC68_CUR_TRACK, 0); */
-        SendMessage(g_mod.hMainWindow,WM_WA_IPC,0,IPC_UPDTITLE);
+    /* Send audio data to output mod with optionnal DSP processing if
+     * it is requested. */
+    if (n > 0) {
+      int l;
+      int vispos = g_trackpos + g_mod.outMod->GetOutputTime();
+
+      /* Give the samples to the vis subsystems */
+      g_mod.SAAddPCMData (g_spl, 2, 16, vispos);
+      g_mod.VSAAddPCMData(g_spl, 2, 16, vispos);
+
+      /* If we have a DSP plug-in, then call it on our samples */
+      l = (
+        g_mod.dsp_isactive()
+        ? g_mod.dsp_dosamples((short *)g_spl, n, 16, 2, g_spr)
+        : n ) << 2;
+
+      /* Write the pcm data to the output system */
+      g_mod.outMod->Write((char*)g_spl, l);
+    }
+
+        /* sc68_music_info(g_sc68, &g_mi, SC68_CUR_TRACK, 0); */
+        /* SendMessage(g_mod.hMainWindow,WM_WA_IPC,0,IPC_UPDTITLE); */
 
         /* SendMessage(g_mod.hMainWindow, */
         /*             WM_WA_IPC, */
         /*             (WPARAM)(char*)"title", */
         /*             IPC_METADATA_CHANGED); */
-      }
-
-      /* Give the samples to the vis subsystems */
-      g_mod.SAAddPCMData (wasc68->spl, 2, 16, wasc68->position);
-      g_mod.VSAAddPCMData(wasc68->spl, 2, 16, wasc68->position);
-
-      /* If we have a DSP plug-in, then call it on our samples */
-      l = (
-        g_mod.dsp_isactive()
-        ? g_mod.dsp_dosamples((short *)wasc68->spl, n, 16, 2, wasc68->samplerate)
-        : n ) << 2;
-
-      /* Write the pcm data to the output system */
-      g_mod.outMod->Write((char*)wasc68->spl, l);
-    }
-    else {
-      Sleep(20);                        /* wait a while */
-    }
   }
 
-  /* Some output drivers need CanWrite to be called on a regular
-   * basis.
-   */
-  while (!wasc68->stop_req) {
-    g_mod.outMod->CanWrite();
+
+  /* Wait buffered output to be processed */
+  while (!atomic_get(&g_stopreq)) {
+    g_mod.outMod->CanWrite();           /* needed by some out mod */
     if (!g_mod.outMod->IsPlaying()) {
       /* Done playing: tell Winamp and quit the thread */
       PostMessage(g_mod.hMainWindow, WM_WA_MPEG_EOF, 0, 0);
@@ -745,6 +781,9 @@ DWORD WINAPI playloop(LPVOID _wasc68)
     }
   }
 
+exit:
+  unhook();
+  DBG("exit with code -- %x\n", g_code);
   return 0;
 }
 
@@ -788,8 +827,9 @@ void init()
   sc68_cntl(0,SC68_CONFIG_LOAD);
 
   /* clear and init private */
-  memset(&g_wasc68,0,sizeof(g_wasc68));
-  g_wasc68.lock = CreateMutex(NULL, FALSE, NULL);
+#ifdef USE_LOCK
+  g_lock = CreateMutex(NULL, FALSE, NULL);
+#endif
 
   /* clear and init cacke */
   wasc68_cache_init();
@@ -903,24 +943,22 @@ static
  ******************************************************************************/
 void quit()
 {
-  wasc68_t * wasc68;
-
   DBG("\n");
-  wasc68 = lock();
+  lock();
   sc68_cntl(0,SC68_CONFIG_SAVE);
-  unlock(wasc68);
-  CloseHandle(g_wasc68.lock);
-  g_wasc68.lock = 0;
-  memset(&g_wasc68,0,sizeof(g_wasc68));
+  unlock();
+#ifdef USE_LOCK
+  CloseHandle(g_lock);
+  g_lock = 0;
+#endif
   wasc68_cache_kill();
   msg68_cat_free(wasc68_cat);
   wasc68_cat = msg68_NEVER;
   sc68_shutdown();
-
 }
 
 static int xinfo(const char *data, char *dest, size_t destlen,
-                 sc68_t * sc68, sc68_disk_t disk)
+                 sc68_t * sc68, sc68_disk_t disk, int track)
 {
   sc68_music_info_t tmpmi, * const mi = &tmpmi;
   const char * value = 0;
@@ -935,13 +973,27 @@ static int xinfo(const char *data, char *dest, size_t destlen,
   /* Get the info for the default track only. */
   }
   else if (sc68_music_info(sc68, mi,
-                           sc68 ? SC68_CUR_TRACK : SC68_DEF_TRACK, disk)) {
+                           track>0 ? track : SC68_DEF_TRACK, disk)) {
   }
   else if (!strcasecmp(data,"album")) { /* Album name */
     value = mi->album;
   }
   else if (!strcasecmp(data,"title")) { /* Song title */
-    value = mi->title;
+    value = !track ? mi->album : mi->title;
+
+    /* if (!track) { */
+    /*   if (mi->tracks > 1) { */
+    /*     snprintf(dest, destlen, "%s [%02d]",mi->album, mi->tracks); */
+    /*     value = dest; */
+    /*   } else { */
+    /*     value = mi->album; */
+    /*   } */
+    /* } else if (!strcmp68(mi->album,mi->title)) { */
+    /*   snprintf(dest, destlen, "%s #%02", mi->album, mi->trk.track); */
+    /*   value = dest; */
+    /* } else { */
+    /*   value = mi->title; */
+    /* } */
   }
   else if (!strcasecmp(data,"artist")) { /* Song artist */
     value = get_tag(&mi->trk,"aka");
@@ -949,9 +1001,15 @@ static int xinfo(const char *data, char *dest, size_t destlen,
       value = mi->artist;
   }
   else if (!strcasecmp(data,"track")) {
-    value = "01";
-    /* snprintf(dest, destlen, "%02d", track); */
+    if (track == mi->trk.track) {
+      snprintf(dest, destlen, "%02d", track);
+      value = dest;
+    }
   }
+  /* else if (!strcasecmp(data,"disc")) { */
+  /*   snprintf(dest, destlen, "%02d", mi->tracks); */
+  /*   value = dest; */
+  /* } */
   else if (!strcasecmp(data,"albumartist")) {
     value = get_tag(&mi->dsk,"aka");
     if (!value) value = get_tag(&mi->dsk,"artist");
@@ -962,9 +1020,6 @@ static int xinfo(const char *data, char *dest, size_t destlen,
     if (!value) value = get_tag(&mi->trk,"composer");
     if (!value) value = get_tag(&mi->dsk,"original");
     if (!value) value = get_tag(&mi->dsk,"composer");
-  }
-  else if (!strcasecmp(data,"track")) {
-  /*   snprintf(dest, destlen, "%02d", ti->track); */
   } else if (!strcasecmp(data,"genre")) {
     value = mi->genre;
   }
@@ -989,10 +1044,12 @@ static int xinfo(const char *data, char *dest, size_t destlen,
   else if (!strcasecmp(data, "lossless")) {
     value = "1";
   }
+  else if (!strcasecmp(data, "comment")) {
+    value = get_tag(&mi->trk,"comment");
+    if(!value)
+    value = get_tag(&mi->dsk,"comment");
+  }
   else if (!strcasecmp(data,"")) {
-    /* Other interresting tag we might handle someday: */
-    /* "rating" "albumartist" "year" "publisher" "comment" "lossless"
-     * "bpm" */
     DBG("unhandled TAG '%s'\n", data);
   }
 
@@ -1002,7 +1059,6 @@ static int xinfo(const char *data, char *dest, size_t destlen,
   if (value != dest)
     strncpy(dest, value, destlen);
   dest[destlen-1] = 0;
-  /* dbg("wasc68::%s TAG '%s' -> '%s'\n", __FUNCTION__, data, dest); */
   return 1;
 }
 
@@ -1028,15 +1084,28 @@ int winampGetExtendedFileInfo(const char *uri,
 
   if (data && *data && dest && max > 2) {
     if (!uri || !*uri) {
-      wasc68_t * wasc68;
-      if (wasc68 = lock(), wasc68) {
-        res = xinfo(data, dest, max, wasc68->sc68, 0);
-        unlock(wasc68);
+      if (lock()) {
+        res = xinfo(data, dest, max, g_sc68, 0, g_track);
+        unlock();
       }
-    } else if (disk = wasc68_cache_get(uri), disk) {
-      res = xinfo(data, dest, max, 0, disk);
-      wasc68_cache_release(disk, 0);
+    } else {
+      int settrack = track_from_uri(&uri);
+      if (disk = wasc68_cache_get(uri), disk) {
+        res = xinfo(data, dest, max, 0, disk, settrack);
+        wasc68_cache_release(disk, 0);
+      }
     }
   }
   return res;
+}
+
+void set_asid(int asid)
+{
+  DBG("set asid mode -- %d\n", asid);
+  if (lock()) {
+    sc68_cntl(g_sc68,SC68_SET_ASID,asid);
+    if (g_sc68)
+      sc68_cntl(0,SC68_SET_ASID,asid);
+    unlock();
+  }
 }
