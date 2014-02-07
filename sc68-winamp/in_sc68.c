@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2014 Benjamin Gerard
  *
- * Time-stamp: <2014-02-07 20:16:04 ben>
+ * Time-stamp: <2014-02-07 23:40:59 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -299,7 +299,7 @@ static LRESULT mwproc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
         step = 1;
         break;
       default:
-        dbg("WM_COMMAND #%d w=%d l=%d\n",
+        DBG("WM_COMMAND #%d w=%d l=%d\n",
             (int)LOWORD(wParam), (int)wParam, (int)lParam);
       }
     break;
@@ -554,7 +554,7 @@ void stop()
         g_thdl = 0;
         break;
       default:
-        dbg("thread did not exit normally\n");
+        DBG("thread did not exit normally\n");
       }
     }
     clean_close();
@@ -812,8 +812,8 @@ DWORD WINAPI playloop(LPVOID cookie)
       DBG("change track -- %02d\n", g_track);
     }
     if (settrack) {
-      g_trackpos = sc68_cntl(g_sc68, SC68_GET_TRKORG);
-      DBG("Flushing audio -- %d\n", g_trackpos);
+      g_trackpos = sc68_cntl(g_sc68, SC68_GET_ORG);
+      dbg("flushing audio track pos: -- %d \n", g_trackpos);
       g_mod.outMod->Flush(0);
     }
 
