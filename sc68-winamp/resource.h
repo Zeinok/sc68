@@ -6,6 +6,7 @@
 #define IDD_DLG_CONFIG                          104
 #define IDD_DLG_TRACKSELECT                     107
 #define IDC_UFI                                 1001
+#define IDC_HOOK                                1002
 #define IDC_INF_URI                             1003
 #define IDC_INF_FORMAT                          1005
 #define IDC_INF_GENRE                           1009

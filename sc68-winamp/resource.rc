@@ -42,6 +42,7 @@ FONT 8, "Ms Shell Dlg"
     GROUPBOX        "Amiga", IDC_STATIC, 5, 145, 175, 30
     CONTROL         "L/R Blend", IDC_STATIC, WC_STATIC, NOT WS_GROUP | SS_SIMPLE, 12, 162, 34, 8
     GROUPBOX        "Winamp", IDC_STATIC, 5, 185, 175, 30
+    AUTOCHECKBOX    "Hook prev/next track", IDC_HOOK, 90, 200, 84, 8
 }
 
 

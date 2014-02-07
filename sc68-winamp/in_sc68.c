@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2014 Benjamin Gerard
  *
- * Time-stamp: <2014-02-04 17:48:59 ben>
+ * Time-stamp: <2014-02-07 20:16:04 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -76,13 +76,14 @@ static char *argv[] = { appname };
  * Plugin private data.
  ******************************************************************************/
 
-static char          g_magic[8] = "wasc68!";
-static WNDPROC       g_hookproc;   /* hooked proc            */
+int g_usehook = -1, g_useufi = -1;
 
 #ifdef USE_LOCK
 static HANDLE        g_lock;       /* mutex handle           */
 #endif
+static char          g_magic[8] = "wasc68!";
 
+static WNDPROC       g_mwhkproc;   /* main window chain proc */
 static HANDLE        g_thdl;       /* thread handle          */
 static DWORD         g_tid;        /* thread id              */
 static char        * g_uri;        /* allocated URI          */
@@ -95,11 +96,12 @@ static int           g_allin1;     /* play all tracks as one */
 static int           g_track;      /* current playing track  */
 static int           g_tracks;     /* number of tracks       */
 
+static volatile LONG g_playing;    /* true while playing     */
 static volatile LONG g_stopreq;    /* stop requested         */
 static volatile LONG g_paused;     /* pause status           */
 static volatile LONG g_settrack;   /* request change track   */
 
-static BYTE         g_spl[576*8]; /* Sample buffer          */
+static BYTE          g_spl[576*8]; /* Sample buffer          */
 
 /*******************************************************************************
  * Declaration
@@ -157,9 +159,7 @@ static inline void unlock(void) { }
 #endif
 
 static inline LONG atomic_set(LONG volatile * ptr, LONG v)
-{
-  return InterlockedExchange(ptr,v);
-}
+{ return InterlockedExchange(ptr,v); }
 
 static inline LONG atomic_get(LONG volatile * ptr)
 { return *ptr; }
@@ -205,42 +205,103 @@ In_Module g_mod =
   0,0,                   /* dsp calls filled in by winamp */
   seteq,                 /* set equalizer */
   NULL,                  /* setinfo call filled in by winamp */
-  0                      /* out_mod filled in by winamp */
+   0                      /* out_mod filled in by winamp */
 };
 
 /*******************************************************************************
  * Message Hook
  ******************************************************************************/
-static
-LRESULT CALLBACK myproc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
-{
-  int step = 0;
 
-  assert (hWnd == g_mod.hMainWindow);
+/* Process winamp main window messages */
+static LRESULT mwproc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+  const int isplaying = atomic_get(&g_playing);
+  int step = 0;                         /* sub song step */
 
   switch (Msg) {
   case WM_WA_IPC:
-    break;
+    switch (lParam) {
+    case IPC_GET_RANDFUNC: case IPC_GET_API_SERVICE:
+    case IPC_GETINIFILE: case IPC_GETINIDIRECTORY:
+    case IPC_PLAYLIST_MODIFIED:
+    case IPC_CB_ONTOGGLEAOT:
+    case IPC_EMBED_ISVALID:
+    case IPC_GET_DISPATCH_OBJECT:
+    case IPC_GETSADATAFUNC:
+    case IPC_GETVUDATAFUNC:
+    case IPC_GETWND:
+    case IPC_CB_ONSHOWWND: case IPC_CB_ONHIDEWND:
+    case IPC_CB_GETTOOLTIP:
+    case 1602:
+    case IPC_GETTIMEDISPLAYMODE:
+    case IPC_PLAYING_FILE: case IPC_PLAYING_FILEW:
+    case IPC_GETOUTPUTPLUGIN:
+    case IPC_IS_AOT:
+    case IPC_ISPLAYING:
+    case IPC_GETINFO: case IPC_GETOUTPUTTIME: case IPC_IS_PLAYING_VIDEO:
+    case IPC_GETLISTLENGTH: case IPC_GETLISTPOS:
+    case  IPC_GETPLAYLISTFILE: case  IPC_GETPLAYLISTFILEW:
+    case IPC_GET_EXTENDED_FILE_INFOW:
+    case IPC_GET_EXTENDED_FILE_INFOW_HOOKABLE:
+    case IPC_GET_PLAYING_FILENAME:
+    case IPC_GET_PLAYING_TITLE:
+      break;
+    case IPC_IS_EXIT_ENABLED:
+      break;
 
-  case WM_COMMAND:
-    switch (LOWORD(wParam)) {
-    case 40061:                       /* shift + prev track */
-      /* case 40044: */                       /* prev track */
-      step = -1;
+    case IPC_HOOK_TITLES:
+    /* { */
+    /*   waHookTitleStruct *ht = (waHookTitleStruct *) wParam; */
+    /*   if (ht) { */
+    /*     DBG("A: fn:[%s] ti:[%s] len:%d fmt:%d\n", */
+    /*         strnevernull68(ht->filename), */
+    /*         strnevernull68(ht->title), */
+    /*         (int)ht->length, (int)ht->force_useformatting); */
+    /*   } */
+    /*   break; */
+    /* } */
+    case IPC_HOOK_TITLESW:
+    /* { */
+    /*   waHookTitleStructW *ht = (waHookTitleStruct *) wParam; */
+    /*   return TRUE; */
+    /* } */
       break;
-    case 40060:                       /* shift + next track */
-      /* case 40048: */                       /* next track */
-      step = 1;
-      break;
+
     default:
-      dbg("WM_COMMAND #%d w=%d l=%d\n",
-          (int)LOWORD(wParam), (int)wParam, (int)lParam);
+      /* DBG("WA_IPC -- w:%08x l:%08x/%d\n", wParam, lParam, lParam); */
+      break;
     }
     break;
 
   case WM_SYSCOMMAND:
     DBG("WM_SYSCOMMAND #%d w=%d l=%d\n",
         (int)LOWORD(wParam), (int)wParam, (int)lParam);
+  case WM_COMMAND:
+    if (isplaying)
+      switch (LOWORD(wParam)) {
+        /* Hook prev/next track messages
+         *
+         *   When a playing multi-song sc68 file prev/next track button
+         *   will change the subsong instead of adjusting the playlist
+         *   entry. However pressing shift key brings back original
+         *   winamp befavior.
+         */
+      case 40061:                       /* shift + prev track */
+        wParam = MAKEWPARAM(40044,HIWORD(wParam));
+        break;
+      case 40044:                       /* prev track */
+        step = -1;
+        break;
+      case 40060:                       /* shift + next track */
+        wParam = MAKEWPARAM(40048, HIWORD(wParam));
+        break;
+      case 40048:                       /* next track */
+        step = 1;
+        break;
+      default:
+        dbg("WM_COMMAND #%d w=%d l=%d\n",
+            (int)LOWORD(wParam), (int)wParam, (int)lParam);
+      }
     break;
   }
 
@@ -253,29 +314,49 @@ LRESULT CALLBACK myproc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
     }
   }
 
-  return g_hookproc
-    ? CallWindowProc(g_hookproc, hWnd, Msg, wParam, lParam)
+  return g_mwhkproc
+    ? CallWindowProc(g_mwhkproc, hWnd, Msg, wParam, lParam)
     : DefWindowProc(hWnd, Msg, wParam, lParam)
     ;
 }
 
-static void hook(void)
+static
+LRESULT CALLBACK myproc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-  if (!g_hookproc) {
-    g_hookproc = (WNDPROC)
-      SetWindowLong(g_mod.hMainWindow, GWL_WNDPROC, (LONG)myproc);
-    DBG("Hook %s\n", !g_hookproc?"failed":"success");
+  if (hWnd == g_mod.hMainWindow)
+    return mwproc(hWnd, Msg, wParam, lParam);
+  else {
+    assert(!"unexpected window handler in my hook");
+    return DefWindowProc(hWnd, Msg, wParam, lParam);
   }
 }
 
-static void unhook(void)
+static void mw_hook(void)
 {
-  if (!g_hookproc)
-    DBG("Nothing to unhook\n");
+  if (g_usehook) {
+    if (!g_mwhkproc) {
+      const HWND hwnd = g_mod.hMainWindow;
+      char name[512];
+      if (GetClassName(hwnd, name, sizeof(name)) <= 0)
+        strcpy(name,"<no-name>");
+      g_mwhkproc = (WNDPROC)
+        SetWindowLong(hwnd, GWL_WNDPROC, (LONG)myproc);
+      DBG("hook winamp main window #%08x \"%s\" -- %s (%08x)\n",
+          (unsigned) hwnd, name,
+          !g_mwhkproc?"failed":"success", (unsigned)g_mwhkproc);
+    }
+  } else
+    DBG("hook disabled\n");
+}
+
+static void mw_unhook(void)
+{
+  if (!g_mwhkproc)
+    DBG("winamp main window not hooked\n");
   else {
-    DBG("unhook winamp message proc\n");
-    SetWindowLong(g_mod.hMainWindow, GWL_WNDPROC, (LONG)g_hookproc);
-    g_hookproc = 0;
+    DBG("unhook winamp main window\n");
+    SetWindowLong(g_mod.hMainWindow, GWL_WNDPROC, (LONG)g_mwhkproc);
+    g_mwhkproc = 0;
   }
 }
 
@@ -285,13 +366,7 @@ static
  ******************************************************************************/
 void config(HWND hwnd)
 {
-  if (config_dialog(g_mod.hDllInstance, hwnd) < 0)
-    MessageBox(hwnd,
-               "No configuration yet",
-               "sc68 for winamp",
-               MB_OK);
-  else
-    sc68_cntl(0, SC68_CONFIG_SAVE);
+  config_dialog(g_mod.hDllInstance, hwnd);
 }
 
 static
@@ -401,7 +476,7 @@ int getoutputtime()
     ms = g_trackpos + g_mod.outMod->GetOutputTime();
     unlock();
   }
-  /*   - g_mod.outMod->GetWrittenTime() */
+  return ms;
 }
 
 static
@@ -448,6 +523,8 @@ static void clean_close(void)
     g_thdl = 0;
     DBG("%s\n","thread cleaned");
   }
+  atomic_set(&g_playing,0);
+  mw_unhook();
   if (g_sc68) {
     sc68_destroy(g_sc68);
     g_sc68 = 0;
@@ -456,12 +533,10 @@ static void clean_close(void)
     free(g_uri);
     g_uri = 0;
   }
-
   /* Close output system. */
   g_mod.outMod->Close();
   /* Deinitialize visualization. */
   g_mod.SAVSADeInit();
-
 }
 
 static
@@ -524,7 +599,7 @@ int play(const char * uri)
     goto inused;
 
   /* cleanup */
-  g_hookproc   = 0;
+  g_mwhkproc   = 0;
   g_maxlatency = 0;
   g_trackpos   = 0;
   g_track      = 0;
@@ -590,6 +665,7 @@ int play(const char * uri)
   g_mod.SAVSAInit(g_maxlatency, g_spr);
   g_mod.VSASetInfo(g_spr, 2);
 
+
   /* Init play thread */
   g_thdl = (HANDLE)
     CreateThread(NULL,                  /* Default Security Attributs */
@@ -600,7 +676,10 @@ int play(const char * uri)
                  &g_tid                 /* Thread Id                  */
       );
 
-  err = !g_thdl;
+  if (err = !g_thdl, !err) {
+    atomic_set(&g_playing,1);
+    mw_hook();
+  }
 exit:
   if (err)
     clean_close();
@@ -689,10 +768,9 @@ static
  ******************************************************************************/
 DWORD WINAPI playloop(LPVOID cookie)
 {
-  const int get_pos =
-    g_allin1 ? SC68_GET_PLAYPOS : SC68_GET_POS;
+  /* const int get_pos = */
+  /*   g_allin1 ? SC68_GET_PLAYPOS : SC68_GET_POS; */
 
-  hook();
   for (;;) {
     int settrack, n = 0, canwrite;
 
@@ -739,6 +817,10 @@ DWORD WINAPI playloop(LPVOID cookie)
       g_mod.outMod->Flush(0);
     }
 
+    /* if (g_code & SC68_CHANGE) { */
+    /*   PostMessage(g_mod.hMainWindow,WM_WA_IPC,0,IPC_UPDTITLE); */
+    /* } */
+
     /* Send audio data to output mod with optionnal DSP processing if
      * it is requested. */
     if (n > 0) {
@@ -758,16 +840,8 @@ DWORD WINAPI playloop(LPVOID cookie)
       /* Write the pcm data to the output system */
       g_mod.outMod->Write((char*)g_spl, l);
     }
-
-        /* sc68_music_info(g_sc68, &g_mi, SC68_CUR_TRACK, 0); */
-        /* SendMessage(g_mod.hMainWindow,WM_WA_IPC,0,IPC_UPDTITLE); */
-
-        /* SendMessage(g_mod.hMainWindow, */
-        /*             WM_WA_IPC, */
-        /*             (WPARAM)(char*)"title", */
-        /*             IPC_METADATA_CHANGED); */
   }
-
+  atomic_set(&g_playing,0);
 
   /* Wait buffered output to be processed */
   while (!atomic_get(&g_stopreq)) {
@@ -781,16 +855,21 @@ DWORD WINAPI playloop(LPVOID cookie)
     }
   }
 
-exit:
-  unhook();
   DBG("exit with code -- %x\n", g_code);
   return 0;
 }
 
 static int onchange_ufi(const option68_t * opt, value68_t * val)
 {
-  use_ufi = !!val->num;
-  DBG("UFI changed to %s\n",use_ufi?"On":"Off");
+  g_useufi = !!val->num;
+  DBG("%d\n",g_useufi);
+  return 0;
+}
+
+static int onchange_hook(const option68_t * opt, value68_t * val)
+{
+  g_usehook = !!val->num;
+  DBG("%d\n",g_usehook);
   return 0;
 }
 
@@ -800,8 +879,12 @@ static
  ******************************************************************************/
 void init()
 {
-  static option68_t opt_ufi =
-    OPT68_BOOL(0,"ufi","winamp","Unified file info dialog",1,onchange_ufi);
+  /* sc68 init */
+
+  static option68_t opts[] = {
+    OPT68_BOOL(0,"ufi", "winamp","Unified file info dialog",1,onchange_ufi),
+    OPT68_BOOL(0,"hook","winamp","Hook prev/next track",    1,onchange_hook)
+  };
 
   sc68_init_t init68;
   const int debug =
@@ -823,7 +906,11 @@ void init()
 #endif
   init68.flags.no_load_config = 1;      /* disable config load */
   sc68_init(&init68);
-  option68_append(&opt_ufi, 1);         /* add our own options */
+
+  /* sc68 winamp init */
+  option68_append(opts, sizeof(opts)/sizeof(*opts));
+  option68_iset(option68_get("ufi",opt68_ALWAYS),0,opt68_ALWAYS,opt68_CFG);
+  option68_iset(option68_get("hook",opt68_ALWAYS),1,opt68_ALWAYS,opt68_CFG);
   sc68_cntl(0,SC68_CONFIG_LOAD);
 
   /* clear and init private */
@@ -833,6 +920,9 @@ void init()
 
   /* clear and init cacke */
   wasc68_cache_init();
+
+  /* Hook messages */
+  /* mw_hook(); */
 
 #ifdef WITH_API_SERVICE
   /* Get WASABI service */
@@ -944,6 +1034,8 @@ static
 void quit()
 {
   DBG("\n");
+  mw_unhook();
+
   lock();
   sc68_cntl(0,SC68_CONFIG_SAVE);
   unlock();
@@ -1075,8 +1167,7 @@ static int xinfo(const char *data, char *dest, size_t destlen,
  * @retval 0 unsupported tag
  */
 EXPORT
-int winampGetExtendedFileInfo(const char *uri,
-                              const char *data,
+int winampGetExtendedFileInfo(const char *uri, const char *data,
                               char *dest, size_t max)
 {
   sc68_disk_t disk;

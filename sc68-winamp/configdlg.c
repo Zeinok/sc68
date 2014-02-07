@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2014 Benjamin Gerard
  *
- * Time-stamp: <2014-02-02 19:55:54 ben>
+ * Time-stamp: <2014-02-07 20:05:28 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -222,10 +222,17 @@ static BOOL CALLBACK DialogProc(
                          (WPARAM)GetDlgItem(hdlg, IDC_INF_DEFTIME), 0);
 
     }
+
     opt = option68_get("ufi",opt68_ALWAYS);
     if (opt)
-      use_ufi = !!opt->val.num;
-    SetCheck(hdlg, IDC_UFI, use_ufi > 0);
+      g_useufi = !!opt->val.num;
+    SetCheck(hdlg, IDC_UFI, g_useufi > 0);
+
+    opt = option68_get("hook",opt68_ALWAYS);
+    if (opt)
+      g_usehook = !!opt->val.num;
+
+    SetCheck(hdlg, IDC_HOOK, g_usehook > 0);
     ShowWindow(hdlg, SW_SHOW);
     UpdateWindow(hdlg);
   } return 1;
@@ -256,10 +263,19 @@ static BOOL CALLBACK DialogProc(
           option68_iset(opt,v,opt68_ALWAYS,opt68_CFG);
       }
       GetOptFromSlider(hdlg, IDC_INF_AGABLEND, "amiga-blend");
+
       v = GetCheck(hdlg, IDC_UFI);
       if (v >= 0) {
-        use_ufi = v;
+        g_useufi = v;
         opt = option68_get("ufi",opt68_ALWAYS);
+        if (opt)
+          option68_iset(opt,v,opt68_ALWAYS,opt68_CFG);
+      }
+
+      v = GetCheck(hdlg, IDC_HOOK);
+      if (v >= 0) {
+        g_usehook = v;
+        opt = option68_get("hook",opt68_ALWAYS);
         if (opt)
           option68_iset(opt,v,opt68_ALWAYS,opt68_CFG);
       }

@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2014 Benjamin Gerard
  *
- * Time-stamp: <2014-02-02 19:54:29 ben>
+ * Time-stamp: <2014-02-07 19:59:57 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -61,7 +61,7 @@
 EXTERN void set_asid(int asid);
 
 /* dll.c */
-EXTERN int use_ufi;
+EXTERN int g_useufi, g_usehook;
 
 /* dbg.c */
 #include <stdarg.h>
