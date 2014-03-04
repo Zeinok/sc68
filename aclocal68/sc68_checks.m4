@@ -1,6 +1,6 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2014-01-17 13:28:19 ben>
+dnl# Time-stamp: <2014-03-03 00:56:45 ben>
 dnl#
 dnl# autoconf macros
 dnl#
@@ -55,12 +55,32 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
       fi
     fi
 
+    case "[$]enable_sc68_debug/[$]enable_sc68_release" in
+      no/no)
+        compile_mode="standard" ;;
+      yes/no)
+        compile_mode="debug" ;;
+      no/yes)
+        compile_mode="release" ;;
+      yes/yes)
+        compile_mode="debug/release" ;;
+      *)
+        compile_mode="[$]enable_sc68_debug/[$]enable_sc68_release" ;;
+    esac
+
     # --enable-all-static
     if test X[$]enable_sc68_static = Xyes; then
       AC_ENABLE_STATIC
       AC_DISABLE_SHARED
       SC68_ADD_FLAG(ALL_LFLAGS,[-all-static])
       SC68_ADD_FLAGS(ALL_CFLAG,[-static])
+      compile_mode="[$]compile_mode (all-static)"
+    else
+      case "[$]enable_static/[$]enable_shared" in
+        yes/no)  compile_mode="[$]compile_mode (static)";;
+        no/yes)  compile_mode="[$]compile_mode (shared)";;
+        yes/yes) compile_mode="[$]compile_mode (static and shared)";;
+      esac
     fi
 
     # libtool shared library needs -no-undefined

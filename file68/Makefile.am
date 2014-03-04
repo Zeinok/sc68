@@ -1,4 +1,4 @@
-# Time-stamp: <2013-08-03 14:33:10 ben>
+# Time-stamp: <2014-03-03 00:39:11 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  file68 -- Makefile.am -- Use with automake to produce configure.in  |
@@ -10,8 +10,9 @@
 # `----------------------------------------------------------------------'
 # @configure_input@
 
-SUBDIRS         = data68 $(subdirs)
-ACLOCAL_AMFLAGS = -I m4 --install
+SUBDIRS          = data68 $(subdirs)
+ACLOCAL_AMFLAGS  = -I m4 --install
+AUTOMAKE_OPTIONS = subdir-objects
 
 AM_CFLAGS       = $(ALL_CFLAGS) $(LIB_CFLAGS)
 AM_LDFLAGS      = $(ALL_LFLAGS) $(LIB_LFLAGS) -version-info 3:0:0
@@ -22,33 +23,29 @@ hdir=sc68
 null=
 
 if REPLAY68
-replay68_c=$(sdir)/replay68.c
+replay68_c=src/replay68.c
 else
 replay68_c=
 endif
 
-mysources = $(sdir)/error68.c $(sdir)/file68.c $(sdir)/gzip68.c		\
- $(sdir)/ice68.c $(sdir)/init68.c $(sdir)/vfs68.c $(sdir)/vfs68_ao.c	\
- $(sdir)/vfs68_curl.c $(sdir)/vfs68_fd.c $(sdir)/vfs68_file.c		\
- $(sdir)/vfs68_mem.c $(sdir)/vfs68_null.c $(sdir)/vfs68_z.c		\
- $(sdir)/msg68.c $(sdir)/option68.c $(sdir)/registry68.c		\
- $(sdir)/rsc68.c $(sdir)/string68.c $(sdir)/timedb68.c			\
- $(sdir)/uri68.c $(replay68_c) $(null)
-
-apiheaders = $(hdir)/file68_chk.h $(hdir)/file68_ord.h			\
- $(hdir)/file68_err.h $(hdir)/file68.h $(hdir)/file68_api.h		\
- $(hdir)/file68_features.h $(hdir)/file68_vfs.h				\
- $(hdir)/file68_vfs_def.h $(hdir)/file68_msg.h $(hdir)/file68_opt.h	\
- $(hdir)/file68_reg.h $(hdir)/file68_rsc.h $(hdir)/file68_str.h		\
- $(hdir)/file68_tag.h $(hdir)/file68_uri.h $(hdir)/file68_tdb.h		\
+mysources = src/error68.c src/file68.c src/gzip68.c src/ice68.c		\
+ src/init68.c src/vfs68.c src/vfs68_ao.c src/vfs68_curl.c		\
+ src/vfs68_fd.c src/vfs68_file.c src/vfs68_mem.c src/vfs68_null.c	\
+ src/vfs68_z.c src/msg68.c src/option68.c src/registry68.c		\
+ src/rsc68.c src/string68.c src/timedb68.c src/uri68.c $(replay68_c)	\
  $(null)
 
-otherheaders = $(hdir)/file68_zip.h $(hdir)/file68_ice.h		\
- $(hdir)/file68_vfs_ao.h $(hdir)/file68_vfs_curl.h			\
- $(hdir)/file68_vfs_fd.h $(hdir)/file68_vfs_file.h			\
- $(hdir)/file68_vfs_mem.h $(hdir)/file68_vfs_null.h			\
- $(hdir)/file68_vfs_z.h $(sdir)/timedb.inc.h $(sdir)/replay.inc.h	\
- $(null)
+apiheaders = sc68/file68_chk.h sc68/file68_ord.h sc68/file68_err.h	\
+ sc68/file68.h sc68/file68_api.h sc68/file68_features.h			\
+ sc68/file68_vfs.h sc68/file68_vfs_def.h sc68/file68_msg.h		\
+ sc68/file68_opt.h sc68/file68_reg.h sc68/file68_rsc.h			\
+ sc68/file68_str.h sc68/file68_tag.h sc68/file68_uri.h			\
+ sc68/file68_tdb.h $(null)
+
+otherheaders = sc68/file68_zip.h sc68/file68_ice.h			\
+ sc68/file68_vfs_ao.h sc68/file68_vfs_curl.h sc68/file68_vfs_fd.h	\
+ sc68/file68_vfs_file.h sc68/file68_vfs_mem.h sc68/file68_vfs_null.h	\
+ sc68/file68_vfs_z.h src/timedb.inc.h src/replay.inc.h $(null)
 
 myheaders = $(apiheaders) $(otherheaders)
 

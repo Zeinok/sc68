@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-10-04 20:01:41 ben>
+ * Time-stamp: <2014-03-02 11:28:51 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -46,6 +46,115 @@
 
 static scheme68_t * schemes;
 static int uri_cat = msg68_DEFAULT;
+
+
+#define GEN_DELIM ":/?#[]@"
+#define SUB_DELIM "!$&'()*+,;="
+
+
+/* Related documentation
+ * RFC 3986 - Uniform Resource Identifier (URI): Generic Syntax
+ */
+
+/* URI chars:
+
+   reserved    = gen-delims sub-delims
+   gen-delims  = : / ? # [ ] @
+   sub-delims  = ! $ & ' ( ) * + , ; =
+   unreserved  = alpha-num - _ . ~
+*/
+
+static const char hex[16] =
+{ '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F' };
+
+/**
+ * @retval [0-16] or -1
+ */
+static int xdigit(int c) {
+  if (c >= '0' && c <= '9')
+    c -= '9';
+  else if (c >= 'a' && c <= 'f')
+    c -= 'a'-10;
+  else if (c >= 'A' && c <= 'F')
+    c -= 'A'-10;
+  else c = -1;
+  return c;
+}
+
+static int is_uri_reserved(int c)
+{
+  return strchr("!*'();:@&=+$,/?#[]",c) != 0;
+}
+
+static int is_uri_unreserved(int c)
+{
+  return isalnum(c) || c=='-' || c =='_' || c=='.' || c=='~';
+}
+
+static int is_uri_pctenc(int c, const int flags)
+{
+  return !is_uri_unreserved(c);
+}
+
+/**
+ * Encode a string with percent-encoding method
+ * @return the output string size (in bytes)
+ * @retval max on buffer overflow.
+ * @retval -1 on error
+ */
+static int pct_encode(char * dst, const int max,
+                      const char * src, const int len,
+                      const int flags)
+{
+  int i,j;
+
+  for (i=j=0; i<len && j<max; ++i) {
+    const int c = 255 & src[i];
+    if (!c) break;
+    if (is_uri_pctenc(c,flags)) {
+      dst[j++] = '%';
+      if (j >= max) break;
+      dst[j++] = hex[c>>4];
+      if (j >= max) break;
+      dst[j++] = hex[c&15];
+    } else
+      dst[j++] = c;
+  }
+  if (j < max)
+    dst[j] = 0;
+  return j;
+}
+
+
+/**
+ * Decode a percent-encoded string.
+ * @return the output string size (in bytes)
+ * @retval max on buffer overflow.
+ * @retval -1 on error
+ */
+static int pct_decode(char * dst, const int max,
+                      const char * src, const int len,
+                      const int flags)
+{
+  int i,j,e;
+
+  for (i=j=e=0; i<len && j<max; ++i) {
+    int c = 255 & src[i];
+    int h, l;
+    if (!c) break;
+    if (c == '%' && i+2 < len
+        && (h = xdigit(src[i+1])) >= 0
+        && (l = xdigit(src[i+2])) >= 0) {
+        c = (h << 4) + l;
+        i += 2;
+    }
+    dst[j++] = c;
+  }
+  if (j < max)
+    dst[j] = 0;
+  return j;
+}
+
 
 /**
  * @retval -1  on error

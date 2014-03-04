@@ -83,7 +83,3 @@ AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])
-
-dnl#
-dnl# End of sc68-doc/configure.ac
-dnl#

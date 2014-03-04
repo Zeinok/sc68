@@ -33,7 +33,8 @@ AC_ARG_WITH(
 
 AC_ARG_WITH(
   [data-path],
-  [AS_HELP_STRING([--with-data-path],[locate sc68 architecture independent data])])
+  [AS_HELP_STRING([--with-data-path],
+      [locate sc68 architecture independent data])])
 
 AC_ARG_WITH(
   [winamp-dll],
@@ -47,11 +48,8 @@ AC_ARG_WITH(
   [fb2k-dll],
   [AS_HELP_STRING([--with-fb2k-dll],[locate sc68 foobar2000 plugin])])
 
-AC_MSG_CHECKING([makensis])
-if test s${makensis+et} != set; then
-  makensis=`which makensis  2>/dev/null || echo false`
-fi
-AC_MSG_RESULT([$]makensis)
+AC_PATH_PROG([makensis],[makensis])
+AC_PATH_PROG([zip],[zip])
 
 for winnn in win32 win64; do
   AC_MSG_CHECKING([sc68 [$]winnn binary path])
@@ -103,6 +101,7 @@ AC_MSG_CHECKING([sc68 version])
 sc68_version=`[$]PKG_CONFIG [sc68] --modversion`
 AC_MSG_RESULT([[$]sc68_version])
 
+
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
@@ -123,7 +122,6 @@ AC_SUBST([vlc_dll])
 AC_SUBST([winamp_dll])
 AC_SUBST([fb2k_dll])
 
-AC_SUBST([makensis])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 

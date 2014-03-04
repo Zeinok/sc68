@@ -108,7 +108,3 @@ AC_MSG_NOTICE([|   gstreamer           : $gst_rel ($gst_ver)])
 AC_MSG_NOTICE([|   plugin-dir          : $with_gst_plugin_dir])
 AC_MSG_NOTICE([|   gst type finder     : $enable_gst_typefinder])
 AC_MSG_NOTICE([+-----------------------])
-
-dnl#
-dnl# End of ac68-gst/configure.ac
-dnl#

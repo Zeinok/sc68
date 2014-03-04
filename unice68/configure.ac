@@ -78,13 +78,7 @@ AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   debug-mode          : $enable_sc68_debug])
-AC_MSG_NOTICE([|   release-mode        : $enable_sc68_release])
-AC_MSG_NOTICE([|   all-static-mode     : $enable_sc68_static])
+AC_MSG_NOTICE([|   compile mode        : $compile_mode])
 AC_MSG_NOTICE([|   build cli           : $enable_unice68_cli])
 AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])
-
-dnl#
-dnl# End of unice68/configure.ac
-dnl#

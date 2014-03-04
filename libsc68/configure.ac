@@ -143,13 +143,7 @@ AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   debug-mode          : $enable_sc68_debug])
-AC_MSG_NOTICE([|   release-mode        : $enable_sc68_release])
-AC_MSG_NOTICE([|   all-static          : $enable_sc68_static])
+AC_MSG_NOTICE([|   compile mode        : $compile_mode])
 AC_MSG_NOTICE([|   file68              : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   default YM engine   : $with_ym_engine])
 AC_MSG_NOTICE([+-----------------------])
-
-dnl#
-dnl# End of libsc68/configure.ac
-dnl#

@@ -104,14 +104,8 @@ AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   debug-mode          : $enable_sc68_debug])
-AC_MSG_NOTICE([|   release-mode        : $enable_sc68_release])
-AC_MSG_NOTICE([|   static-mode         : $enable_sc68_static])
+AC_MSG_NOTICE([|   compile mode        : $compile_mode])
 AC_MSG_NOTICE([|   file68 headers      : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
 AC_MSG_NOTICE([|   plugin-dir          : $with_audacious_dir])
 AC_MSG_NOTICE([+-----------------------])
-
-dnl#
-dnl# End of "$Id: configure.ac 134 2010-03-09 19:00:25Z benjihan $".
-dnl#

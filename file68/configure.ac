@@ -19,7 +19,7 @@ AC_INIT(
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([src/file68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.10 silent-rules dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.10 subdir-objects silent-rules dist-bzip2])
 AC_CONFIG_HEADERS([config.h sc68/file68_features.h])
 
 AC_USE_SYSTEM_EXTENSIONS
@@ -230,15 +230,26 @@ AC_OUTPUT
 
 SC68_DUMPVARS
 
+vfs=""
+if test x"[$]enable_file" = xyes; then
+  vfs="file"
+fi
+
+if test x"[$]enable_fd" = xyes; then
+  vfs="$vfs fd"
+fi
+
+if test x"[$]enable_mem" = xyes; then
+  vfs="$vfs memory"
+fi
+vfs="[$](echo $vfs)"
+
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|----------------------])
-AC_MSG_NOTICE([|   debug-mode          : $enable_sc68_debug])
-AC_MSG_NOTICE([|   release-mode        : $enable_sc68_release])
-AC_MSG_NOTICE([|   file-stream         : $enable_file])
-AC_MSG_NOTICE([|   fd-stream           : $enable_fd])
-AC_MSG_NOTICE([|   memory-stream       : $enable_mem])
+AC_MSG_NOTICE([|   compile mode        : $compile_mode])
+AC_MSG_NOTICE([|   supported VFS       : $vfs])
 AC_MSG_NOTICE([|   windows registry    : $enable_reg])
 AC_MSG_NOTICE([|   built-in replays    : $enable_replay_rom])
 AC_MSG_NOTICE([|   zlib support        : $has_z ($z_ver)])
@@ -247,7 +258,3 @@ AC_MSG_NOTICE([|   ICE! support        : $has_unice68 ($unice68_ver)])
 AC_MSG_NOTICE([|   ao support          : $has_ao ($ao_ver)])
 AC_MSG_NOTICE([|   sc68 data dir       : $sc68datadir])
 AC_MSG_NOTICE([+----------------------])
-
-dnl#
-dnl# End of file68/configure.ac
-dnl#

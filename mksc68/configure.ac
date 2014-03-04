@@ -53,7 +53,12 @@ AC_CHECK_HEADERS([stdio.h stdlib.h stdarg.h stdint.h string.h])
 AC_CHECK_HEADERS([unistd.h io.h fcntl.h time.h])
 AC_CHECK_HEADERS([sys/socket.h netdb.h])
 if test x"[$]ac_cv_header_sys_socket_h" != x"yes"; then
-  AC_CHECK_HEADERS([winsock.h winsock2.h])
+  AC_CHECK_HEADERS([winsock2.h winsock.h],[break])
+  if test x"[$]ac_cv_header_winsock2_h" = x"yes"; then
+    SC68_ADD_FLAGS([BIN_LFLAGS],[-lws2_32])
+  elif test x"[$]ac_cv_header_winsock_h" = x"yes"; then
+    SC68_ADD_FLAGS(BIN_LFLAGS],[-lwsock32])
+  fi
 fi
 AC_CHECK_FUNCS([malloc free])
 AC_CHECK_FUNCS([strdup strncasecmp stpcpy])
@@ -79,17 +84,12 @@ AC_OUTPUT
 
 SC68_DUMPVARS
 
+
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   debug-mode          : $enable_sc68_debug])
-AC_MSG_NOTICE([|   release-mode        : $enable_sc68_release])
-AC_MSG_NOTICE([|   static-mode         : $enable_sc68_static])
+AC_MSG_NOTICE([|   compile mode        : $compile_mode])
 AC_MSG_NOTICE([|   file68 headers      : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
 AC_MSG_NOTICE([+-----------------------])
-
-dnl#
-dnl# End of mksc68/configure.ac
-dnl#

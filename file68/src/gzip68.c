@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-07-22 07:39:25 ben>
+ * Time-stamp: <2014-03-02 13:58:50 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -296,7 +296,7 @@ int gzip68_buffer(void * dst, int dsize, const void * src, int csize)
 
 #else
 
-#include "error68.h"
+#include "file68_err.h"
 
 void *gzip68_load(const char *fname, int *ptr_ulen)
 {

@@ -2,20 +2,25 @@
 # |                                                                      |
 # | sc68-nsi -- Makefile.am -- Use with automake to produce configure.in | 
 # |                                                                      |
-# |		    (C) 2007-2013 Benjamin Gerard                        |
+# |		    (C) 2007-2014 Benjamin Gerard                        |
 # | 	     <benjihan -4t- users.sourceforge -d0t- net>                 |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
 # Time-stamp: <2013-06-08 13:00:29 ben>
 
+ZIP		= @zip@
 MAKENSIS	= @makensis@
 installer_exe   = $(PACKAGE_TARNAME)-@sc68_version@.exe
+installer_zip   = $(PACKAGE_TARNAME)-@sc68_version@.zip
 uninstall_exe   = $(PACKAGE_TARNAME)-uninstall.exe
 
 # noinst_DATA = $(installer_exe)
 
-all: $(installer_exe)
+all: $(installer_zip)
+
+$(installer_zip): $(installer_exe)
+	$(ZIP) -0 "$@" "$<"
 
 $(installer_exe): $(srcdir)/sc68.nsi Makefile
 	"$(MAKENSIS)" \
@@ -34,4 +39,4 @@ $(installer_exe): $(srcdir)/sc68.nsi Makefile
 	-- `$(CYGPATH_W) "$<"`
 
 clean-local:
-	-rm -f "$(installer_exe)" "$(uninstall_exe)"
+	-rm -f -- "$(installer_exe)" "$(uninstall_exe)" "$(installer_zip)"

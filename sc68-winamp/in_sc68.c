@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2014 Benjamin Gerard
  *
- * Time-stamp: <2014-02-07 23:40:59 ben>
+ * Time-stamp: <2014-02-07 23:48:32 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -219,63 +219,11 @@ static LRESULT mwproc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
   int step = 0;                         /* sub song step */
 
   switch (Msg) {
-  case WM_WA_IPC:
-    switch (lParam) {
-    case IPC_GET_RANDFUNC: case IPC_GET_API_SERVICE:
-    case IPC_GETINIFILE: case IPC_GETINIDIRECTORY:
-    case IPC_PLAYLIST_MODIFIED:
-    case IPC_CB_ONTOGGLEAOT:
-    case IPC_EMBED_ISVALID:
-    case IPC_GET_DISPATCH_OBJECT:
-    case IPC_GETSADATAFUNC:
-    case IPC_GETVUDATAFUNC:
-    case IPC_GETWND:
-    case IPC_CB_ONSHOWWND: case IPC_CB_ONHIDEWND:
-    case IPC_CB_GETTOOLTIP:
-    case 1602:
-    case IPC_GETTIMEDISPLAYMODE:
-    case IPC_PLAYING_FILE: case IPC_PLAYING_FILEW:
-    case IPC_GETOUTPUTPLUGIN:
-    case IPC_IS_AOT:
-    case IPC_ISPLAYING:
-    case IPC_GETINFO: case IPC_GETOUTPUTTIME: case IPC_IS_PLAYING_VIDEO:
-    case IPC_GETLISTLENGTH: case IPC_GETLISTPOS:
-    case  IPC_GETPLAYLISTFILE: case  IPC_GETPLAYLISTFILEW:
-    case IPC_GET_EXTENDED_FILE_INFOW:
-    case IPC_GET_EXTENDED_FILE_INFOW_HOOKABLE:
-    case IPC_GET_PLAYING_FILENAME:
-    case IPC_GET_PLAYING_TITLE:
-      break;
-    case IPC_IS_EXIT_ENABLED:
-      break;
-
-    case IPC_HOOK_TITLES:
-    /* { */
-    /*   waHookTitleStruct *ht = (waHookTitleStruct *) wParam; */
-    /*   if (ht) { */
-    /*     DBG("A: fn:[%s] ti:[%s] len:%d fmt:%d\n", */
-    /*         strnevernull68(ht->filename), */
-    /*         strnevernull68(ht->title), */
-    /*         (int)ht->length, (int)ht->force_useformatting); */
-    /*   } */
-    /*   break; */
-    /* } */
-    case IPC_HOOK_TITLESW:
-    /* { */
-    /*   waHookTitleStructW *ht = (waHookTitleStruct *) wParam; */
-    /*   return TRUE; */
-    /* } */
-      break;
-
-    default:
-      /* DBG("WA_IPC -- w:%08x l:%08x/%d\n", wParam, lParam, lParam); */
-      break;
-    }
-    break;
 
   case WM_SYSCOMMAND:
     DBG("WM_SYSCOMMAND #%d w=%d l=%d\n",
         (int)LOWORD(wParam), (int)wParam, (int)lParam);
+
   case WM_COMMAND:
     if (isplaying)
       switch (LOWORD(wParam)) {
@@ -566,12 +514,6 @@ static
 int track_from_uri(const char ** ptruri)
 {
   int track = 0;
-  /* const char * uri = *ptruri; */
-  /* if (uri[0] == '/' && isdigit(uri[1]) && isdigit(uri[2]) && uri[3] == ':') { */
-  /*   track = (uri[1]-'0')*10 + uri[2]-'0'; */
-  /*   DBG("found track -- %02d\n", track); */
-  /*   *ptruri = uri+4; */
-  /* } */
   return track;
 }
 
@@ -612,8 +554,9 @@ int play(const char * uri)
     goto exit;
 
   settrack = track_from_uri(&uri);
-  if (settrack)
+  if (settrack) {
     DBG("got specific track -- %d\n", settrack);
+  }
 
   /* Duplicate URI an */
   if (g_uri = strdup(uri), !g_uri)
@@ -768,9 +711,6 @@ static
  ******************************************************************************/
 DWORD WINAPI playloop(LPVOID cookie)
 {
-  /* const int get_pos = */
-  /*   g_allin1 ? SC68_GET_PLAYPOS : SC68_GET_POS; */
-
   for (;;) {
     int settrack, n = 0, canwrite;
 
@@ -813,7 +753,7 @@ DWORD WINAPI playloop(LPVOID cookie)
     }
     if (settrack) {
       g_trackpos = sc68_cntl(g_sc68, SC68_GET_ORG);
-      dbg("flushing audio track pos: -- %d \n", g_trackpos);
+      DBG("flushing audio track pos: -- %d \n", g_trackpos);
       g_mod.outMod->Flush(0);
     }
 
@@ -862,14 +802,12 @@ DWORD WINAPI playloop(LPVOID cookie)
 static int onchange_ufi(const option68_t * opt, value68_t * val)
 {
   g_useufi = !!val->num;
-  DBG("%d\n",g_useufi);
   return 0;
 }
 
 static int onchange_hook(const option68_t * opt, value68_t * val)
 {
   g_usehook = !!val->num;
-  DBG("%d\n",g_usehook);
   return 0;
 }
 
@@ -887,6 +825,7 @@ void init()
   };
 
   sc68_init_t init68;
+#ifndef NDEBUG
   const int debug =
 #ifdef DEBUG
     1
@@ -894,6 +833,7 @@ void init()
     0
 #endif
     ;
+#endif
 
   memset(&init68,0,sizeof(init68));
   init68.argv = argv;
@@ -903,6 +843,9 @@ void init()
   init68.debug_set_mask = debug << wasc68_cat;
   init68.debug_clr_mask = 0;
   init68.msg_handler = (sc68_msg_t) msgfct;
+#else
+  wasc68_cat = msg68_NEVER;
+  init68.debug_clr_mask = -1;
 #endif
   init68.flags.no_load_config = 1;      /* disable config load */
   sc68_init(&init68);
