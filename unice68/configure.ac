@@ -52,8 +52,9 @@ AM_CONDITIONAL([UNICE68_CLI],[test "x$enable_unice68_cli" = "xyes"])
 # ,----------------------------------------------------------------------.
 # | Functions and headers                                                |
 # `----------------------------------------------------------------------'
-AC_CHECK_HEADERS([stdio.h stdlib.h string.h stdarg.h errno.h libgen.h])
-AC_CHECK_FUNCS([basename freopen])
+AC_CHECK_HEADERS([stdio.h stdlib.h string.h stdarg.h])
+AC_CHECK_HEADERS([unistd.h fcntl.h errno.h libgen.h io.h])
+AC_CHECK_FUNCS([basename _fileno fileno _setmode])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |

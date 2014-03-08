@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-24 10:10:46 ben>
+ * Time-stamp: <2014-03-05 20:53:26 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -47,18 +47,21 @@
 #ifdef HAVE_LIBGEN_H
 #include <libgen.h>
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
+#if defined(O_BINARY) && ! defined(_O_BINARY)
+# define _O_BINARY O_BINARY
+#endif
 
 static char     * prg;
 static int        verbose;
 static FILE     * msgout;
 static unsigned   memmax = 1<<24;
-
-#ifndef HAVE_FREOPEN
-static FILE *freopen(const char *path, const char *mode, FILE *stream)
-{
-  return stream;
-}
-#endif
 
 #ifndef HAVE_BASENAME
 # ifndef PATHSEP
@@ -368,7 +371,7 @@ int main(int argc, char *argv[])
       ? 0 : argv[1];
   }
   if (argc > 2) {
-    fout = (argv[2][0] == '-' && !argv[2][2])
+    fout = (argv[2][0] == '-' && !argv[2][1])
       ? 0 : argv[2];
   }
 
@@ -384,8 +387,23 @@ int main(int argc, char *argv[])
   err = ERR_INPUT;
   ilen = -1;
   if (!finp) {
+#if defined(_O_BINARY) && defined(HAVE__SETMODE)
+    int fd;
+# if defined(HAVE__FILENO)
+    fd = _fileno(stdin);
+# elif defined(HAVE_FILENO)
+    fd = fileno(stdin);
+# elif defined(STDIN_FILENO)
+    fd = STDIN_FILENO;
+#else
+    fd = -1;
+# endif
+    if (fd != -1)
+      if (_setmode(fd, _O_BINARY) != -1)
+        message(D,"stdin (%d) setmode binary\n", fd);
+#endif
     finp = "<stdin>";
-    inp = freopen(0,"rb",stdin);
+    inp  = stdin;
   } else {
     inp = fopen(finp,"rb");
     if (inp) {
@@ -488,10 +506,12 @@ int main(int argc, char *argv[])
         m = max - ilen;
       }
       n = myread(ibuffer+ilen, m, inp, finp);
+      message(D,"got %d out of %d\n", n, m);
+
       if (n == -1)
         goto error;
       ilen += n;
-    } while (n > 0 && n == m);
+    } while (n > 0 /* && n == m */);
   }
   message(D,"Have read all %d input bytes from `%s' ...\n", ilen, finp);
 
@@ -559,57 +579,73 @@ int main(int argc, char *argv[])
     }
     break;
 
-    default:
-      assert(!"!!!! internal error !!!! invalid sens");
-    }
+  default:
+    assert(!"!!!! internal error !!!! invalid sens");
+  }
 
 
 /***********************************************************************
  * Output
  **********************************************************************/
-    if (!oneop && !err) {
-      err = ERR_OUTPUT;
-      if (!fout) {
-        fout = "<stdout>";
-        out = freopen(0,"wb", stdout);
-      } else {
-        out = fopen(fout,"wb");
-      }
-      message(D,"output: %s (%d)\n", fout, olen);
-      if (!fout) {
-        syserror(fout);
-        goto error;
-      }
-      n = fwrite(obuffer,1,olen,out);
-      message(D,"Have written %d bytes to %s\n", n, fout);
-      if (n != olen) {
-        syserror(fout);
-        goto error;
-      }
-      err = 0;
+  if (!oneop && !err) {
+    err = ERR_OUTPUT;
+    if (!fout) {
+#if defined(_O_BINARY) && defined(HAVE__SETMODE)
+      int fd;
+# if defined(HAVE__FILENO)
+      fd = _fileno(stdout);
+# elif defined(HAVE_FILENO)
+      fd = fileno(stdout);
+# elif defined(STDOUT_FILENO)
+      fd = STDOUT_FILENO;
+#else
+      fd = -1;
+# endif
+      if (fd != -1)
+        if (_setmode(fd, _O_BINARY) != -1)
+          message(D,"stdout (%d) setmode binary\n", fd);
+#endif
+      fout = "<stdout>";
+      out  = stdout;
+    } else {
+      out = fopen(fout,"wb");
     }
 
-  error:
-    if (inp && inp != stdin) {
-      fclose(inp);
+    message(D,"output: %s (%d)\n", fout, olen);
+    if (!fout) {
+      syserror(fout);
+      goto error;
     }
-    if (out) {
-      fflush(out);
-      if (out != stdout) {
-        fclose(out);
-      }
+    n = fwrite(obuffer,1,olen,out);
+    message(D,"Have written %d bytes to %s\n", n, fout);
+    if (n != olen) {
+      syserror(fout);
+      goto error;
     }
-    free(ibuffer);
-    free(obuffer);
-
-    if (!err) {
-      message(N,"ICE! compressed:%d uncompressed:%d ratio:%d%%%s\n",
-              csize, dsize, dsize?(csize+50)*100/dsize:-1,
-              verified ? " (verified)" : "");
-    }
-
-    err &= 127;
-    message(D,"exit with code %d\n", err);
-
-    return err;
+    err = 0;
   }
+
+error:
+  if (inp && inp != stdin) {
+    fclose(inp);
+  }
+  if (out) {
+    fflush(out);
+    if (out != stdout) {
+      fclose(out);
+    }
+  }
+  free(ibuffer);
+  free(obuffer);
+
+  if (!err) {
+    message(N,"ICE! compressed:%d uncompressed:%d ratio:%d%%%s\n",
+            csize, dsize, dsize?(csize+50)*100/dsize:-1,
+            verified ? " (verified)" : "");
+  }
+
+  err &= 127;
+  message(D,"exit with code %d\n", err);
+
+  return err;
+}

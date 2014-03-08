@@ -1,9 +1,8 @@
-# Time-stamp: <2013-07-23 05:59:45 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  unice68 -- Makefile.am -- Use with automake to produce Makefile.in  | 
 # |                                                                      |
-# |                 (C) 2007-2013 Benjamin Gerard                        |
+# |                 (C) 2007-2014 Benjamin Gerard                        |
 # |                                                                      |
 # |             <http://sourceforge.net/users/benjihan>                  |
 # |                                                                      |
