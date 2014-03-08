@@ -1,6 +1,6 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2014-03-03 00:56:45 ben>
+dnl# Time-stamp: <2014-03-07 19:05:41 ben>
 dnl#
 dnl# autoconf macros
 dnl#
@@ -84,6 +84,11 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
     fi
 
     # libtool shared library needs -no-undefined
+    #
+    # libtool will refuse to build dll for mingw platforms without
+    # this flag. May be there are other platforms I don't know of that
+    # need this or another specific flags.
+    #
     AC_MSG_CHECKING([whether shared library need -no-undefined])
     if test X[$]ac_sys_platform_win32 = Xyes; then
       AC_MSG_RESULT([yes])

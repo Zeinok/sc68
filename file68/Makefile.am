@@ -1,9 +1,8 @@
-# Time-stamp: <2014-03-03 00:39:11 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  file68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |                 (C) 2007-2011 Benjamin Gerard                        |
+# |                 (C) 2007-2014 Benjamin Gerard                        |
 # |                                                                      |
 # |            <http://sourceforge.net/users/benjihan>                   |
 # |                                                                      |
@@ -18,8 +17,6 @@ AM_CFLAGS       = $(ALL_CFLAGS) $(LIB_CFLAGS)
 AM_LDFLAGS      = $(ALL_LFLAGS) $(LIB_LFLAGS) -version-info 3:0:0
 AM_CPPFLAGS     = -DFILE68_EXPORT=1 -I$(top_srcdir)/sc68 $(unice68_inc)
 
-sdir=src
-hdir=sc68
 null=
 
 if REPLAY68

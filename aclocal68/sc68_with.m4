@@ -183,6 +183,7 @@ m4_define([DO_SC68_PACKAGE],[
       COPY_SC68_PACKAGE_VARS([_$1],[$1])
       has_$1=no 
       _$1_org="[$]1"
+      _$1_wth="[$]1"
 
       case "x-[$]1" in
         
@@ -227,10 +228,11 @@ m4_define([DO_SC68_PACKAGE],[
  	  ;;
         
         # system: installed package
-        x-system)
+        x-system | x-static)
           AC_PATH_PROG([pkgconfig],["pkg-config"],["false"])
           unset _$1_pkg
-          if test x"[$]enable_sc68_static" = xyes; then
+          if test x"[$]enable_sc68_static" = xyes ||
+            test x"[$]_$1_wth" = xstatic; then
             pkgconfig="[$]pkgconfig --static"
           fi
 	  AC_MSG_CHECKING([for pkg-config $2 module])
@@ -310,19 +312,25 @@ m4_define([DO_SC68_PACKAGE],[
             eval ac_wp_[$]ac_wp_var=\"[\$][$]ac_wp_var\"
           done; unset ac_wp_var
 
+          if test x"[$]_$1_wth" = xstatic; then
+            if test x"[$]GCC" != xyes; then
+              AC_MSG_ERROR(
+                [Can only link partial static library with gcc])
+            else
+              _$1_org="[$]_$1_org (static)"
+              LDFLAGS="-static [$]LDFLAGS"
+            fi
+          fi
+
           _$1_lib=''
           for ac_wp_var in : [$]_$1_ldf; do
             case [$]ac_wp_var in
               -L*)
-                LDFLAGS="[$]LDFLAGS [$]ac_wp_var";;
-              -l$2)
-                ;;
-              -l*)
-                _$1_lib="[$]_$1_lib [$]ac_wp_var"
-                ;;
+                LDFLAGS="[$]LDFLAGS [$]ac_wp_var" ;;
+              -l$2) ;;
+              -l*) _$1_lib="[$]_$1_lib [$]ac_wp_var" ;;
             esac
           done; unset ac_wp_var
-          _$1_lib=[$](echo [$]_$1_lib)
 
           CPPFLAGS="[$]_$1_def [$]_$1_inc [$]CPPFLAGS"
 
@@ -399,6 +407,11 @@ m4_define([DO_SC68_PACKAGE],[
           SC68_ADD_FLAGS([ALL_CFLAGS],[$]$1_ccf)
           SC68_ADD_FLAGS([ALL_LFLAGS],[$]$1_ldf)
           SC68_ADD_FLAG([PAC_REQUIRES],[$]$1_pkg)
+          ;;
+        *'(static)')
+          SC68_ADD_FLAGS([ALL_CFLAGS],[$]$1_ccf)
+          $1_ldf="[$](echo -Wl -dn [$]$1_ldf -dy|sed 's/ /,/g')"
+          SC68_ADD_FLAGS([ALL_LFLAGS],[$]$1_ldf)
           ;;
         *)
           AC_MSG_ERROR([Internal error: invalid value for $1_org '[$]$1_org'])

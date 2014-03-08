@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-09-17 03:42:37 ben>
+ * Time-stamp: <2014-03-06 14:52:32 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -49,6 +49,12 @@
 #include <errno.h>
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_IO_H
+#include <io.h>
 #endif
 
 int is_interactive   = 0;               /* running in a terminal? */
@@ -907,13 +913,29 @@ int main(int argc, char *argv[])
   argc = init68.argc;
   argv = init68.argv;
 
-#ifdef HAVE_ISATTY
-# ifdef HAVE_FILENO
-  ifd = fileno(stdin);                  /* Get fd of stdin */
-# else
-  ifd = 0;                            /* Let's assume stdin is fd 0 */
+  /* Set default interactive mode based on tty detection */
+#if defined(HAVE__FILENO)
+  ifd = _fileno(stdin);
+#elif defined(HAVE_FILENO)
+  ifd = fileno(stdin);
+#elid defined(STDIN_FILENO)
+  ifd = STDIN_FILENO;
+#else
+  ifd = -1;
+#endif
+
+#ifndef MYISATTY
+# if defined(HAVE__ISATTY)
+#  define MYISATTY(FD) _isatty(FD)
+# elif defined(HAVE_ISATTY)
+#  define MYISATTY(FD) isatty(FD)
 # endif
-  if (isatty(ifd) == 1)
+#endif
+
+  /* printf("isatty(%d)=%d\n", ifd, MYISATTY(ifd)); */
+
+#ifdef MYISATTY
+  if (ifd != -1 && MYISATTY(ifd) > 0)
     is_interactive = 1;
   else
     no_readline = 1;

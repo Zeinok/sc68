@@ -64,7 +64,7 @@ AC_CHECK_FUNCS([malloc free])
 AC_CHECK_FUNCS([strdup strncasecmp stpcpy])
 AC_CHECK_FUNCS([vsprintf vsnprintf vasprintf])
 AC_CHECK_FUNCS([hstrerror])
-AC_CHECK_FUNCS([isatty fileno])
+AC_CHECK_FUNCS([_isatty isatty _fileno fileno])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |

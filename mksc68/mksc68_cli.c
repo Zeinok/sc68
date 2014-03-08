@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2014-01-13 09:12:05 ben>
+ * Time-stamp: <2014-03-06 14:06:37 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -46,8 +46,6 @@
 # include <readline/readline.h>
 # include <readline/history.h>
 #endif
-
-/* extern char * strdup(const char *); */
 
 static char * wo_readline (const char * prompt)
 {
