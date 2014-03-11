@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2014-03-06 14:52:32 ben>
+ * Time-stamp: <2014-03-11 15:06:57 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -918,7 +918,7 @@ int main(int argc, char *argv[])
   ifd = _fileno(stdin);
 #elif defined(HAVE_FILENO)
   ifd = fileno(stdin);
-#elid defined(STDIN_FILENO)
+#elif defined(STDIN_FILENO)
   ifd = STDIN_FILENO;
 #else
   ifd = -1;
