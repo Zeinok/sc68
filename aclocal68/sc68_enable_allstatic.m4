@@ -1,14 +1,12 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2011-09-08 13:20:01 ben>
-dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2011 Benjamin Gerard
+dnl# (C) 2009-2014 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20110908 sc68_enable_allstatic.m4
+# serial 20140311 sc68_enable_allstatic.m4
 
 # SC68_ENABLE_ALLSTATIC([MORE-ENABLE-ACTION],[MORE-DISABLE-ACTION])
 # -----------------------------------------------------------------
@@ -17,10 +15,38 @@ AC_DEFUN_ONCE([SC68_ENABLE_ALLSTATIC],[
     AC_ARG_ENABLE(
       [sc68-static],
       [AS_HELP_STRING([--enable-sc68-static],
-	  [all static linkage @<:@default=no@:>@])],
+	  [all static linkage (yes,no,lib) @<:@default=no@:>@])],
       [],[enable_sc68_static=no])
-    SC68_ENABLE_THIS([enable_sc68_static])
-  ])
+    ])
+
+# SC68_DO_ALLSTATIC
+# -----------------
+# Apply the standalone dll trickery
+AC_DEFUN_ONCE([SC68_DO_ALLSTATIC],[
+    if test X"[$]enable_sc68_static" = Xlib; then
+      sc68_wl="-Wl,-dn"
+      set -- [$]ALL_LFLAGS [$]LIBS
+      ALL_LFLAGS=''
+      while test [$]# -gt 0; do
+        case X[$]1 in
+          X-l*)
+            sc68_wl="[$]sc68_wl,[$]1"
+            ;;
+          *)
+            ALL_LFLAGS="[$]ALL_LFLAGS [$]1"
+            ;;
+        esac
+        shift
+      done
+      if test x"[$]sc68_wl" = x'-Wl,-dn'; then
+        sc68_wl=''
+      else
+        sc68_wl="[$]sc68_wl,-dy"
+      fi
+      ALL_LFLAGS="[$](echo [$]ALL_LFLAGS)"
+      LIBS="[$]sc68_wl"
+    fi
+    ])
 
 dnl# ----------------------------------------------------------------------
 dnl#

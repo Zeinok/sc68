@@ -215,6 +215,8 @@ AC_SUBST([file68_features])
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
+SC68_DO_ALLSTATIC
+
 AC_CONFIG_FILES([
     Makefile
     data68/Makefile
@@ -222,6 +224,7 @@ AC_CONFIG_FILES([
     libfile68.spec
     file68.pc
     package.texi])
+
 AC_OUTPUT
 
 # ,----------------------------------------------------------------------.

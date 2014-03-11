@@ -1,10 +1,8 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2014-03-07 19:05:41 ben>
-dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2013 Benjamin Gerard
+dnl# (C) 2009-2014 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 dnl# Distribued under the term of the GPL3+
 
@@ -37,20 +35,14 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
     
     # Check some more (mostly GCC) switch
     # -----------------------------------
-    AC_FOREACH([FLAG],
-      [-std=${CSTD-gnu99} -pedantic -Wall],
-      [AX_CHECK_COMPILER_FLAGS(FLAG,SC68_ADD_FLAG(ALL_CFLAGS,FLAG))])
-
-    # --enable-debug
-    if test X[$]enable_sc68_debug = Xyes; then
-      if test X[$]GCC = Xyes; then
+    if test X[$]GCC = Xyes; then
+      SC68_ADD_FLAGS(ALL_CFLAGS,[-std=[$]{CSTD-gnu99} -pedantic -Wall])
+      # --enable-debug
+      if test X[$]enable_sc68_debug = Xyes; then
         :
       fi
-    fi
-
-    # --enable-release
-    if test X[$]enable_sc68_release = Xyes; then
-      if test X[$]GCC = Xyes; then
+      # --enable-release
+      if test X[$]enable_sc68_release = Xyes; then
         :
       fi
     fi
@@ -68,20 +60,41 @@ AC_DEFUN_ONCE([SC68_CHECKS],[
         compile_mode="[$]enable_sc68_debug/[$]enable_sc68_release" ;;
     esac
 
-    # --enable-all-static
-    if test X[$]enable_sc68_static = Xyes; then
-      AC_ENABLE_STATIC
-      AC_DISABLE_SHARED
-      SC68_ADD_FLAG(ALL_LFLAGS,[-all-static])
-      SC68_ADD_FLAGS(ALL_CFLAG,[-static])
-      compile_mode="[$]compile_mode (all-static)"
-    else
-      case "[$]enable_static/[$]enable_shared" in
-        yes/no)  compile_mode="[$]compile_mode (static)";;
-        no/yes)  compile_mode="[$]compile_mode (shared)";;
-        yes/yes) compile_mode="[$]compile_mode (static and shared)";;
-      esac
-    fi
+    # --enable-sc68-static
+    AC_MSG_CHECKING([for compile/link mode])
+    case x-"[$]enable_sc68_static" in
+      x-yes)
+        # Wants all static
+        AC_ENABLE_STATIC
+        AC_DISABLE_SHARED
+        SC68_ADD_FLAG(ALL_LFLAGS,-all-static)
+        SC68_ADD_FLAG(ALL_CFLAG,-static)
+        compile_mode="[$]compile_mode (all-static)"
+        ;;
+      x-lib | x-sad)
+        # Wants stand-alone DLL
+        enable_sc68_static=lib
+        AC_DISABLE_STATIC
+        AC_ENABLE_SHARED
+        SC68_ADD_FLAG(ALL_LFLAGS,-shared)
+        SC68_ADD_FLAG(LIB_LFLAGS,-no-undefined)
+        SC68_ADD_FLAG(ALL_CFLAGS,-shared)
+        SC68_ADD_FLAG(LIB_CFLAGS,-prefer-pic)
+        if test X[$]GCC = Xyes; then
+          SC68_ADD_FLAG(ALL_CFLAGS,-static-libgcc)
+        fi
+        compile_mode="[$]compile_mode (standalone dll)"
+        ;;
+      *)
+        # Anything else
+        case "[$]enable_static/[$]enable_shared" in
+          yes/no)  compile_mode="[$]compile_mode (static)";;
+          no/yes)  compile_mode="[$]compile_mode (shared)";;
+          yes/yes) compile_mode="[$]compile_mode (static and shared)";;
+        esac
+        ;;
+    esac
+    AC_MSG_RESULT([$]compile_mode)
 
     # libtool shared library needs -no-undefined
     #

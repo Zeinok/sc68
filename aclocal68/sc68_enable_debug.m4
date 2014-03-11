@@ -1,14 +1,12 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2011-09-08 13:20:17 ben>
-dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2011 Benjamin Gerard
+dnl# (C) 2009-2014 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20110908 sc68_enable_debug.m4
+# serial 20140310 sc68_enable_debug.m4
 
 # SC68_ENABLE_DEBUG([DEBUG-ACTION],[NO-DEBUG-ACTION],
 #                   [RELEASE-ACTION],[NO-RELEASE-ACTION])
@@ -22,15 +20,17 @@ AC_DEFUN_ONCE([SC68_ENABLE_DEBUG],[
           [debug facilities @<:@default=no@:>@])],
       [],[enable_sc68_debug=no])
     SC68_ENABLE_THIS([enable_sc68_debug])
-    if test X"$enable_sc68_debug" = X"yes"; then
-      AC_DEFINE([DEBUG],[1],[debug facilities])
-      AC_DEFINE([DEBUG_]AS_TR_CPP(AC_PACKAGE_NAME),[1],
- 	[debug facilities for ]AC_PACKAGE_NAME)
-      [$1]
-    else
-      enable_sc68_debug=no
-      [$2]
-    fi
+    case x-"[$]enable_sc68_debug" in
+      x-no) ;;
+      x-yes)
+        AC_DEFINE([DEBUG],[1],[debug facilities])
+        AC_DEFINE([DEBUG_]AS_TR_CPP(AC_PACKAGE_NAME),[1],
+          [debug facilities for ]AC_PACKAGE_NAME)
+        ;;
+      *)
+        AC_MSG_ERROR([invalid value --enable-sc68-debug=[$]enable_sc68_debug])
+        ;;
+    esac
 
     # --enable-sc68-release (depend on debug)
     AC_ARG_ENABLE(
@@ -45,8 +45,8 @@ AC_DEFUN_ONCE([SC68_ENABLE_DEBUG],[
     fi
     SC68_ENABLE_THIS([enable_sc68_release])
     if test X"[$]enable_sc68_release" = X"yes"; then
-      # $$$ NDEBUG is handled by --enable-assert
-      #AC_DEFINE([NDEBUG],[1],[suppress all debug facilities])
+      dnl #NDEBUG is handled by --enable-assert
+      dnl #AC_DEFINE([NDEBUG],[1],[suppress all debug facilities])
       AC_DEFINE([NDEBUG_]AS_TR_CPP(AC_PACKAGE_NAME),[1],
  	[suppress all debug facilities for ]AC_PACKAGE_NAME)
       [$3]
@@ -63,7 +63,6 @@ AC_DEFUN_ONCE([SC68_ENABLE_DEBUG],[
         enable_assert=yes
       fi
     fi
-
   ])
 
 dnl# ----------------------------------------------------------------------

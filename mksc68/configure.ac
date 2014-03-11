@@ -33,17 +33,9 @@ SC68_SYSTEM
 SC68_OPTIONS
 SC68_TOOLS
 SC68_CHECKS
-SC68_THREADS
 SC68_WITH([sc68],[yes],[sc68_version],[sc68/sc68.h],[libsc68])
 #SC68_WITH([file68],[yes],[],[sc68/file68.h])
 SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
-
-# ,----------------------------------------------------------------------.
-# | extra libraries                                                      |
-# `----------------------------------------------------------------------'
-# SC68_WITH([readline],[no],[readline],[readline/readline.h],[])
-AC_SEARCH_LIBS([readline],[readline],
-  [AC_CHECK_HEADERS([readline/readline.h readline/history.h])])
 
 # ,----------------------------------------------------------------------.
 # | Standard headers and functions                                       |
@@ -52,14 +44,23 @@ AC_SEARCH_LIBS([readline],[readline],
 AC_CHECK_HEADERS([stdio.h stdlib.h stdarg.h stdint.h string.h])
 AC_CHECK_HEADERS([unistd.h io.h fcntl.h time.h])
 AC_CHECK_HEADERS([sys/socket.h netdb.h])
+
+# ,----------------------------------------------------------------------.
+# | Extra libraries                                                      |
+# `----------------------------------------------------------------------'
+AC_SEARCH_LIBS([readline],[readline],
+  [AC_CHECK_HEADERS([readline/readline.h readline/history.h])])
+
+SC68_THREADS
 if test x"[$]ac_cv_header_sys_socket_h" != x"yes"; then
   AC_CHECK_HEADERS([winsock2.h winsock.h],[break])
   if test x"[$]ac_cv_header_winsock2_h" = x"yes"; then
-    SC68_ADD_FLAGS([BIN_LFLAGS],[-lws2_32])
+    SC68_ADD_FLAG([LIBS],[-lws2_32])
   elif test x"[$]ac_cv_header_winsock_h" = x"yes"; then
-    SC68_ADD_FLAGS(BIN_LFLAGS],[-lwsock32])
+    SC68_ADD_FLAG(LIBS],[-lwsock32])
   fi
 fi
+
 AC_CHECK_FUNCS([malloc free])
 AC_CHECK_FUNCS([strdup strncasecmp stpcpy])
 AC_CHECK_FUNCS([vsprintf vsnprintf vasprintf])
@@ -69,6 +70,8 @@ AC_CHECK_FUNCS([_isatty isatty _fileno fileno])
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
+
+SC68_DO_ALLSTATIC
 
 AC_CONFIG_FILES([
     Makefile

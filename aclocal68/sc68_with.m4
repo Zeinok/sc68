@@ -2,12 +2,12 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2011 Benjamin Gerard <http://sourceforge.net/users/benjihan>
+dnl# (C) 2009-2014 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 dnl# Distributed under the term of the GPL
 dnl#
 
-# serial 20130507 sc68_with.m4
+# serial 20140310 sc68_with.m4
 
 # DUMP_SC68_PACKAGE_VARS
 # ----------------------
@@ -227,11 +227,15 @@ m4_define([DO_SC68_PACKAGE],[
           
  	  ;;
         
+        x-static)
+          AC_MSG_ERROR([Deprecated use --with-$1=static; use --enable-sc68-static=lib])
+          ;;
+
         # system: installed package
-        x-system | x-static)
+        x-system)
           AC_PATH_PROG([pkgconfig],["pkg-config"],["false"])
           unset _$1_pkg
-          if test x"[$]enable_sc68_static" = xyes ||
+          if test x"[$]enable_sc68_static" != xno ||
             test x"[$]_$1_wth" = xstatic; then
             pkgconfig="[$]pkgconfig --static"
           fi

@@ -1,10 +1,8 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2011-09-10 04:32:50 ben>
-dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2011 Benjamin Gerard
+dnl# (C) 2009-2014 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
 

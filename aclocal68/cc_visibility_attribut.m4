@@ -1,14 +1,12 @@
 dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
-dnl# Time-stamp: <2013-07-22 06:12:44 ben>
-dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2013 Benjamin Gerard
+dnl# (C) 2009-2014 Benjamin Gerard
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20130722 cc_visibility_attribut.m4
+# serial 20130310 cc_visibility_attribut.m4
 
 # AC_C_VISIBILITY_ATTRIBUT([RESULT-VAR = ac_c_visibility_attribut])
 # -----------------------------------------------------------------
