@@ -132,6 +132,17 @@ class cmenu_asid_item : public cmenu_array_item  {
 public:
   cmenu_asid_item()
     : cmenu_array_item(&guid_asid, sizeof(asid_defs)/sizeof(*asid_defs),asid_defs, (int*)&g_ym_asid) { }
+
+  void context_command(unsigned p_index,metadb_handle_list_cref p_data,const GUID& p_caller) {
+    if (p_index < n) {
+      dbg(m_sc68,"ASID change to <%d>", n);
+      *ptr = p_index;
+      //sc68_t * sc68 = (sc68_t *)InterlockedCompareExchangePointer(&input_sc68::g_playing_sc68,0,0);
+      //if (sc68)
+      //  sc68_cntl(sc68,SC68_SET_ASID,n);
+    }
+  }
+
 };
 
 class cmenu_engine_item : public cmenu_array_item  {

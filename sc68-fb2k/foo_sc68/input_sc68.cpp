@@ -53,10 +53,12 @@ input_sc68::input_sc68() {
     throw exception_aborted();
   }
   sc68_cntl(m_sc68, SC68_SET_OPT_STR, "ym-engine", !g_ym_engine ? "blep" : "pulse");
+  sc68_cntl(m_sc68, SC68_SET_ASID, g_ym_asid);
 }
 
 input_sc68::~input_sc68() {
   sc68_destroy(m_sc68);
+  //InterlockedCompareExchangePointer(&g_playing_sc68,0,m_sc68);
   m_sc68 = 0;
   InterlockedDecrement(&g_instance);
   msg68_debug("input_sc68: %d instance remaining\n", (int)g_instance);
@@ -184,8 +186,9 @@ bool input_sc68::decode_run(audio_chunk & p_chunk,abort_callback & p_abort)
   //if (n > max) n = max;
   int n = max;
 
-  sc68_cntl(m_sc68, SC68_SET_ASID, g_ym_asid);
+  // InterlockedExchangePointer(&g_playing_sc68, m_sc68);
 
+  sc68_cntl(m_sc68, SC68_SET_ASID, g_ym_asid);
   int code = sc68_process(m_sc68, buf, &n);
   if (code == SC68_ERROR)
     throw exception_aborted();
@@ -254,7 +257,9 @@ bool input_sc68::g_is_our_path(const char * p_path,const char * p_extension)
   return ret;
 }
 
-int input_sc68::g_counter = 0;
-volatile LONG input_sc68::g_instance = 0;
-
+int input_sc68::g_counter = 0; // Counter used for naming newly created sc68 instance
+volatile LONG input_sc68::g_instance = 0; // Count exiting input_sc68 instances
 static input_factory_t<input_sc68> g_input_sc68_factory;
+
+//volatile PVOID input_sc68::g_playing_sc68 = 0;
+

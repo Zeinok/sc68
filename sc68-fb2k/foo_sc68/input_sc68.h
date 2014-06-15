@@ -39,6 +39,9 @@ public:
 
   input_sc68();
   ~input_sc68();
+
+  // static volatile PVOID g_playing_sc68;
+
   void open(service_ptr_t<file>, const char *, t_input_open_reason, abort_callback &);
   unsigned get_subsong_count();
   t_uint32 input_sc68::get_subsong(unsigned);

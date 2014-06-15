@@ -68,10 +68,15 @@ public:
 #endif
     if (!sc68_init(&init)) {
       const char * engine = 0;
+
+      // aSID
       g_ym_asid = sc68_cntl(0, SC68_GET_ASID);
-      msg68_debug("got default aSID: %d\n", g_ym_asid);
       if (g_ym_asid < 0 || g_ym_asid > 2)
-        g_ym_asid = 0;
+        g_ym_asid = SC68_ASID_ON;
+      msg68_debug("got default aSID: %d\n", g_ym_asid);
+      sc68_cntl(0, SC68_SET_ASID, SC68_ASID_ON); // Activate global aSID
+        
+      // YM-engine
       sc68_cntl(0, SC68_GET_OPT, "ym-engine", &engine);
       if (engine) {
         msg68_debug("got default engine: '%s'\n", engine);
@@ -90,7 +95,8 @@ public:
 
   // On quit: shutdown sc68 library
   void on_quit() {
-    sc68_cntl(0,SC68_SET_ASID, g_ym_asid);
+    sc68_cntl(0,SC68_SET_OPT_INT, "ym-engine",!!g_ym_engine);
+    sc68_cntl(0,SC68_SET_ASID, SC68_ASID_ON);
     sc68_cntl(0,SC68_CONFIG_SAVE);
     sc68_shutdown();
   }
