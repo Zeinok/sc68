@@ -17,7 +17,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.
- *
+  *
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
@@ -80,13 +80,13 @@ public:
   //cmenu_array_item() : n(0), cur(0), def(0) { }
   cmenu_array_item(const GUID * p_parent, int p_n, const struct cmenu_def * p_def, int * p_ptr = 0)
     : parent(p_parent), n(p_n), def(p_def) {
-    if (p_ptr) {
-      cur = -1;
-      ptr = (unsigned int *) p_ptr;
-    } else {
-      cur = 0;
-      ptr = &cur;
-    }
+      if (p_ptr) {
+        cur = -1;
+        ptr = (unsigned int *) p_ptr;
+      } else {
+        cur = 0;
+        ptr = &cur;
+      }
   }
   GUID get_parent() { return *parent; }
   unsigned get_num_items() { return n; }
@@ -116,15 +116,15 @@ public:
     unsigned p_index, metadb_handle_list_cref p_data,
     pfc::string_base & p_out, unsigned & p_displayflags,
     const GUID & p_caller)
-    {
-      const int flags = FLAG_CHECKED/*|FLAG_RADIOCHECKED*/;
-      if (!__super::context_get_display(p_index, p_data, p_out, p_displayflags, p_caller)) return false;
-      if (p_index == *ptr)
-        p_displayflags |= flags;
-      else
-        p_displayflags &= ~flags;
-      return true;
-    }
+  {
+    const int flags = FLAG_CHECKED/*|FLAG_RADIOCHECKED*/;
+    if (!__super::context_get_display(p_index, p_data, p_out, p_displayflags, p_caller)) return false;
+    if (p_index == *ptr)
+      p_displayflags |= flags;
+    else
+      p_displayflags &= ~flags;
+    return true;
+  }
 };
 
 // Simple context menu item class.

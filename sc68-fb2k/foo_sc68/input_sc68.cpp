@@ -3,9 +3,7 @@
  * @brief   sc68 foobar200 - implement foobar input component
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2013 Benjamin Gerard
- *
- * Time-stamp: <2013-06-03 16:04:24 ben>
+ * Copyright (C) 2013-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,7 +26,7 @@
 
 // declare function from vfs_sc68.cpp
 vfs68_t * vfs68_fb2k_create(service_ptr_t<file> p_file, const char * p_path,
-	t_input_open_reason p_reason, abort_callback & p_abort);
+  t_input_open_reason p_reason, abort_callback & p_abort);
 
 // replay config set by menus
 volatile int g_ym_engine   = 0; // YM engines (blep or pulse)
@@ -37,31 +35,31 @@ volatile int g_ym_asid     = 0; // aSID (ont/off/force)
 
 // C-Tor: create sc68 instance
 input_sc68::input_sc68() {
-	sc68_create_t create;
-	InterlockedIncrement(&g_instance);
-	ZeroMemory(&create, sizeof(create));
-	create.cookie = this;
+  sc68_create_t create;
+  InterlockedIncrement(&g_instance);
+  ZeroMemory(&create, sizeof(create));
+  create.cookie = this;
 #ifdef _DEBUG
-	create.emu68_debug = 1;
+  create.emu68_debug = 1;
 #else
-	create.emu68_debug = 0;
+  create.emu68_debug = 0;
 #endif
-	create.log2mem = 19;
-	create.name = m_name;
-	_snprintf(m_name,sizeof(m_name),"fb2k#%05d", ++g_counter);
-	create.sampling_rate = 44100;
-	m_sc68 = sc68_create(&create);
-	if (!m_sc68) {
-		throw exception_aborted();
-	}
-	sc68_cntl(m_sc68, SC68_SET_OPT_STR, "ym-engine", !g_ym_engine ? "blep" : "pulse");
+  create.log2mem = 19;
+  create.name = m_name;
+  _snprintf(m_name,sizeof(m_name),"fb2k#%05d", ++g_counter);
+  create.sampling_rate = 44100;
+  m_sc68 = sc68_create(&create);
+  if (!m_sc68) {
+    throw exception_aborted();
+  }
+  sc68_cntl(m_sc68, SC68_SET_OPT_STR, "ym-engine", !g_ym_engine ? "blep" : "pulse");
 }
 
 input_sc68::~input_sc68() {
-	sc68_destroy(m_sc68);
-	m_sc68 = 0;
-	InterlockedDecrement(&g_instance);
-	msg68_debug("input_sc68: %d instance remaining\n", (int)g_instance);
+  sc68_destroy(m_sc68);
+  m_sc68 = 0;
+  InterlockedDecrement(&g_instance);
+  msg68_debug("input_sc68: %d instance remaining\n", (int)g_instance);
 }
 
 //! Opens specified file for info read / decoding / info write. This is called only once, immediately after object creation, before any other methods, and no other methods are called if open() fails.
@@ -75,34 +73,34 @@ input_sc68::~input_sc68() {
 //! @param p_abort abort_callback object signaling user aborting the operation.
 void input_sc68::open(service_ptr_t<file> p_filehint, const char * p_path, t_input_open_reason p_reason, abort_callback & p_abort)
 {
-	dbg(m_sc68,"SC68 component: open <%s>\n", p_path);
-	// our input does not support retagging.
-	if (p_reason == input_open_info_write)
-		throw exception_io_unsupported_format(); 
+  dbg(m_sc68,"SC68 component: open <%s>\n", p_path);
+  // our input does not support retagging.
+  if (p_reason == input_open_info_write)
+    throw exception_io_unsupported_format(); 
 
-	vfs68_t  * is = vfs68_fb2k_create(/*m_file = */p_filehint, p_path, p_reason, p_abort);
-	vfs68_open(is);
-	int ret = sc68_load(m_sc68, is);
-	vfs68_close(is);
-	vfs68_destroy(is); is = 0;
+  vfs68_t  * is = vfs68_fb2k_create(/*m_file = */p_filehint, p_path, p_reason, p_abort);
+  vfs68_open(is);
+  int ret = sc68_load(m_sc68, is);
+  vfs68_close(is);
+  vfs68_destroy(is); is = 0;
 
-	if (ret)  {
-		throw exception_aborted();
-	}
+  if (ret)  {
+    throw exception_aborted();
+  }
 
-	sc68_music_info(m_sc68, &m_fileinfo, 1, 0);
-	dbg(m_sc68,"SC68 component: as loaded <%s> <%s>\n", m_fileinfo.album, m_fileinfo.title);
+  sc68_music_info(m_sc68, &m_fileinfo, 1, 0);
+  dbg(m_sc68,"SC68 component: as loaded <%s> <%s>\n", m_fileinfo.album, m_fileinfo.title);
 }
 //! See: input_info_reader::get_subsong_count(). Valid after open() with any reason.
 unsigned input_sc68::get_subsong_count() {
-	//dbg(m_sc68,"SC68 component: get subsong count <%d>", m_fileinfo.tracks);
-	return m_fileinfo.tracks;
+  //dbg(m_sc68,"SC68 component: get subsong count <%d>", m_fileinfo.tracks);
+  return m_fileinfo.tracks;
 }
 
 //! See: input_info_reader::get_subsong(). Valid after open() with any reason.
 t_uint32 input_sc68::get_subsong(unsigned p_index) {
-	//dbg(m_sc68,"SC68 component: get subsong idx <%d>", p_index);
-	return p_index+1;
+  //dbg(m_sc68,"SC68 component: get subsong idx <%d>", p_index);
+  return p_index+1;
 }
 
 
@@ -110,95 +108,95 @@ t_uint32 input_sc68::get_subsong(unsigned p_index) {
 //! See: input_info_reader::get_info(). Valid after open() with any reason.
 void input_sc68::get_info(t_uint32 p_subsong, file_info & p_info, abort_callback & p_abort)
 {
-	sc68_music_info_t * use, tmp;
-	sc68_tag_t tag;
+  sc68_music_info_t * use, tmp;
+  sc68_tag_t tag;
 
-	dbg(m_sc68,"SC68 component: get info for track #%d\n", p_subsong);
+  dbg(m_sc68,"SC68 component: get info for track #%d\n", p_subsong);
 
-	for (int i=0; !sc68_tag_enum(m_sc68, &tag, p_subsong, i, 0); ++i)
-		dbg(m_sc68,"SC68 component: [%02d:%s] = '%s'\n",p_subsong,tag.key,tag.val);
+  for (int i=0; !sc68_tag_enum(m_sc68, &tag, p_subsong, i, 0); ++i)
+    dbg(m_sc68,"SC68 component: [%02d:%s] = '%s'\n",p_subsong,tag.key,tag.val);
 
-	if (p_subsong == m_fileinfo.trk.track)
-		use = &m_fileinfo;
-	else {
-		use = &tmp;
-		sc68_music_info(m_sc68, use, p_subsong, 0);
-	}
+  if (p_subsong == m_fileinfo.trk.track)
+    use = &m_fileinfo;
+  else {
+    use = &tmp;
+    sc68_music_info(m_sc68, use, p_subsong, 0);
+  }
 
-	p_info.set_length(use->trk.time_ms/1000u);
-	p_info.info_set("codec","sc68");
+  p_info.set_length(use->trk.time_ms/1000u);
+  p_info.info_set("codec","sc68");
 
-	p_info.info_set("encoding",use->dsk.tag[TAG68_ID_FORMAT].val);
-	p_info.info_set_int("samplerate", sc68_cntl(m_sc68, SC68_GET_SPR));
-	p_info.info_set_int("channels",2);
-	p_info.info_set_int("bitspersample", 16);
+  p_info.info_set("encoding",use->dsk.tag[TAG68_ID_FORMAT].val);
+  p_info.info_set_int("samplerate", sc68_cntl(m_sc68, SC68_GET_SPR));
+  p_info.info_set_int("channels",2);
+  p_info.info_set_int("bitspersample", 16);
 
-	tag.key = TAG68_AKA;
-	p_info.meta_add("artist",!sc68_tag_get(m_sc68,&tag,p_subsong,0) ? tag.val : use->artist);
-	p_info.meta_add("album artist", !sc68_tag_get(m_sc68,&tag,0,0) ? tag.val : use->dsk.tag[TAG68_ID_ARTIST].val);
+  tag.key = TAG68_AKA;
+  p_info.meta_add("artist",!sc68_tag_get(m_sc68,&tag,p_subsong,0) ? tag.val : use->artist);
+  p_info.meta_add("album artist", !sc68_tag_get(m_sc68,&tag,0,0) ? tag.val : use->dsk.tag[TAG68_ID_ARTIST].val);
 
-	p_info.meta_add("album", use->album);
-	p_info.meta_add("title", use->title);
-	p_info.meta_add("genre", use->trk.tag[TAG68_ID_GENRE].val);
+  p_info.meta_add("album", use->album);
+  p_info.meta_add("title", use->title);
+  p_info.meta_add("genre", use->trk.tag[TAG68_ID_GENRE].val);
 
-	char traknum[3] = "00";
-	traknum[0] += use->trk.track / 10;
-	traknum[1] += use->trk.track % 10;
-	p_info.meta_add("tracknumber", traknum);
-	traknum[0] = '0' + m_fileinfo.tracks / 10;
-	traknum[1] = '0' + m_fileinfo.tracks % 10;
-	p_info.meta_add("totaltracks", traknum);
+  char traknum[3] = "00";
+  traknum[0] += use->trk.track / 10;
+  traknum[1] += use->trk.track % 10;
+  p_info.meta_add("tracknumber", traknum);
+  traknum[0] = '0' + m_fileinfo.tracks / 10;
+  traknum[1] = '0' + m_fileinfo.tracks % 10;
+  p_info.meta_add("totaltracks", traknum);
 
 }
 
 //! See: input_info_reader::get_file_stats(). Valid after open() with any reason.
 t_filestats input_sc68::get_file_stats(abort_callback & p_abort)
 {
-	return filestats_invalid; // m_file->get_stats(p_abort);
+  return filestats_invalid; // m_file->get_stats(p_abort);
 }
 
 void input_sc68::decode_initialize(t_uint32 p_subsong,unsigned p_flags,abort_callback & p_abort)
 {
-	sc68_cntl(m_sc68, SC68_SET_ASID, g_ym_asid);
+  sc68_cntl(m_sc68, SC68_SET_ASID, g_ym_asid);
 
-	if (sc68_play(m_sc68, p_subsong, SC68_DEF_LOOP) < 0) {
-		throw exception_aborted();
-	}
+  if (sc68_play(m_sc68, p_subsong, SC68_DEF_LOOP) < 0) {
+    throw exception_aborted();
+  }
 
-	if (sc68_process(m_sc68, 0, 0) == SC68_ERROR) {
-		throw exception_aborted();
-	}
+  if (sc68_process(m_sc68, 0, 0) == SC68_ERROR) {
+    throw exception_aborted();
+  }
 
-	m_sampling_rate = sc68_cntl(m_sc68, SC68_GET_SPR);
+  m_sampling_rate = sc68_cntl(m_sc68, SC68_GET_SPR);
 
-	if (sc68_music_info(m_sc68, &m_fileinfo , p_subsong, 0)) {
-		throw exception_aborted();
-	}
+  if (sc68_music_info(m_sc68, &m_fileinfo , p_subsong, 0)) {
+    throw exception_aborted();
+  }
 }
 
 //! See: input_decoder::run(). Valid after decode_initialize().
 bool input_sc68::decode_run(audio_chunk & p_chunk,abort_callback & p_abort)
 {
-	t_int32 buf[1024];
-	const int max = sizeof(buf) / sizeof(*buf);
-	//const int hz  = m_fileinfo.rate ? m_fileinfo.rate : 50; 
-	//int         n = m_sampling_rate / m_fileinfo.rate;
-	//if (n > max) n = max;
-	int n = max;
+  t_int32 buf[1024];
+  const int max = sizeof(buf) / sizeof(*buf);
+  //const int hz  = m_fileinfo.rate ? m_fileinfo.rate : 50; 
+  //int         n = m_sampling_rate / m_fileinfo.rate;
+  //if (n > max) n = max;
+  int n = max;
 
-	sc68_cntl(m_sc68, SC68_SET_ASID, g_ym_asid);
+  sc68_cntl(m_sc68, SC68_SET_ASID, g_ym_asid);
 
-	int code = sc68_process(m_sc68, buf, &n);
-	if (code == SC68_ERROR)
-		throw exception_aborted();
-	else {
-		p_chunk.set_data_fixedpoint_ex(
-			buf, n << 2,
-			m_sampling_rate, 2, 16,
-			audio_chunk::FLAG_SIGNED | audio_chunk::FLAG_LITTLE_ENDIAN,
-			audio_chunk::channel_config_stereo);
-	}
-	return !(code & (SC68_END|SC68_CHANGE)); // false is EOF
+  int code = sc68_process(m_sc68, buf, &n);
+  if (code == SC68_ERROR)
+    throw exception_aborted();
+  else {
+    p_chunk.set_data_fixedpoint_ex(
+      buf, n << 2,
+      m_sampling_rate, 2, 16,
+      audio_chunk::FLAG_SIGNED | audio_chunk::FLAG_LITTLE_ENDIAN,
+      audio_chunk::channel_config_stereo);
+  }
+  return !(code & (SC68_END|SC68_CHANGE)); // false is EOF
 }
 
 void input_sc68::decode_seek(double p_seconds,abort_callback & p_abort)
@@ -207,18 +205,18 @@ void input_sc68::decode_seek(double p_seconds,abort_callback & p_abort)
 
 bool input_sc68::decode_can_seek()
 {
-	return false;
+  return false;
 }
 
 bool input_sc68::decode_get_dynamic_info(file_info & p_out, double & p_timestamp_delta)
 {
-	return false;
+  return false;
 }
 
 //! See: input_decoder::get_dynamic_info_track(). Valid after decode_initialize().
 bool input_sc68::decode_get_dynamic_info_track(file_info & p_out, double & p_timestamp_delta)
 {
-	return false;
+  return false;
 }
 
 //! See: input_decoder::on_idle(). Valid after decode_initialize().
@@ -228,36 +226,35 @@ void input_sc68::decode_on_idle(abort_callback & p_abort)
 
 void input_sc68::retag_set_info(t_uint32 p_subsong,const file_info & p_info,abort_callback & p_abort)
 {
-	dbg(m_sc68,"SC68 component: retag set info #%d\n", p_subsong);
-	throw exception_io_unsupported_format();
+  dbg(m_sc68,"SC68 component: retag set info #%d\n", p_subsong);
+  throw exception_io_unsupported_format();
 }
 
 void input_sc68::retag_commit(abort_callback & p_abort)
 {
-	dbg(m_sc68,"SC68 component: retag commit\n");
-	throw exception_io_unsupported_format();
+  dbg(m_sc68,"SC68 component: retag commit\n");
+  throw exception_io_unsupported_format();
 }
 
 bool input_sc68::g_is_our_content_type(const char * p_content_type)
 {
-	bool ret = !stricmp_utf8(sc68_mimetype(), p_content_type);
-	dbg(0,"SC68 component: is our content-type: '%s' ? %s\n", p_content_type, ret ? "yes" : "no");
-	return ret;
+  bool ret = !stricmp_utf8(sc68_mimetype(), p_content_type);
+  dbg(0,"SC68 component: is our content-type: '%s' ? %s\n", p_content_type, ret ? "yes" : "no");
+  return ret;
 }
 
 // TODO: add sc68:// scheme
 bool input_sc68::g_is_our_path(const char * p_path,const char * p_extension)
 {
-	bool ret =
-		!stricmp_utf8(p_extension,"sc68") ||
-		!stricmp_utf8(p_extension,"sndh") ||
-		!stricmp_utf8(p_extension, "snd");
-	dbg(0,"SC68 component: is our file: '%s' ? %s\n", p_path, ret ? "yes" : "no");
-	return ret;
+  bool ret =
+    !stricmp_utf8(p_extension,"sc68") ||
+    !stricmp_utf8(p_extension,"sndh") ||
+    !stricmp_utf8(p_extension, "snd");
+  dbg(0,"SC68 component: is our file: '%s' ? %s\n", p_path, ret ? "yes" : "no");
+  return ret;
 }
 
 int input_sc68::g_counter = 0;
 volatile LONG input_sc68::g_instance = 0;
 
 static input_factory_t<input_sc68> g_input_sc68_factory;
-

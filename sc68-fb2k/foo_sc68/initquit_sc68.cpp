@@ -3,9 +3,7 @@
  * @brief   sc68 foobar200 - implement startup/shutdown callback
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2013 Benjamin Gerard
- *
- * Time-stamp: <2013-06-03 16:04:24 ben>
+ * Copyright (C) 2013-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -30,72 +28,72 @@
 // anything else is printed in foobar2000 console accordingly.
 static void message_cb(const int bit, sc68_t * sc68, const char *fmt, va_list list)
 {
-	pfc::string8_fastalloc temp;
-	uPrintfV(temp,fmt,list);
+  pfc::string8_fastalloc temp;
+  uPrintfV(temp,fmt,list);
 
-	switch (bit) {
-	case msg68_CRITICAL: case msg68_ERROR:
-		console::error(temp); break;
-	case msg68_WARNING:
-		console::warning(temp); break;
-	case msg68_INFO: case msg68_NOTICE:
-		console::info(temp); break;
-	default:
-		if (bit < msg68_DEBUG)
-			console::print(temp);
-		else
-			OutputDebugStringA(temp.toString());
-		break;
-	}
+  switch (bit) {
+  case msg68_CRITICAL: case msg68_ERROR:
+    console::error(temp); break;
+  case msg68_WARNING:
+    console::warning(temp); break;
+  case msg68_INFO: case msg68_NOTICE:
+    console::info(temp); break;
+  default:
+    if (bit < msg68_DEBUG)
+      console::print(temp);
+    else
+      OutputDebugStringA(temp.toString());
+    break;
+  }
 }
- 
+
 // Implements initquit callback.
 class initquit_sc68 : public initquit {
 public:
 
-	// On init: initialize sc68 library.
-	void on_init() {
-		static char * argv[] = { "fb2k" };
-		sc68_init_t init;
-		memset(&init,0,sizeof(init));
-		init.argc = sizeof(argv)/sizeof(*argv);
-		init.argv = argv;
-		init.debug_clr_mask = 0;
-		init.debug_set_mask = 0;
-		init.msg_handler    = (sc68_msg_t) message_cb;
+  // On init: initialize sc68 library.
+  void on_init() {
+    static char * argv[] = { "fb2k" };
+    sc68_init_t init;
+    memset(&init,0,sizeof(init));
+    init.argc = sizeof(argv)/sizeof(*argv);
+    init.argv = argv;
+    init.debug_clr_mask = 0;
+    init.debug_set_mask = 0;
+    init.msg_handler    = (sc68_msg_t) message_cb;
 #ifdef NDEBUG
-		init.debug_clr_mask = -1;
+    init.debug_clr_mask = -1;
 #elif defined(_DEBUG)
-		init.debug_set_mask = (1 << msg68_TRACE) - 1;
+    init.debug_set_mask = (1 << msg68_TRACE) - 1;
 #endif
-		if (!sc68_init(&init)) {
-			const char * engine = 0;
-			g_ym_asid = sc68_cntl(0, SC68_GET_ASID);
-			msg68_debug("got default aSID: %d\n", g_ym_asid);
-			if (g_ym_asid < 0 || g_ym_asid > 2)
-				g_ym_asid = 0;
-			sc68_cntl(0, SC68_GET_OPT, "ym-engine", &engine);
-			if (engine) {
-				msg68_debug("got default engine: '%s'\n", engine);
-				g_ym_engine = !strcmp68(engine,"pulse");
-			}
-		}
-		msg68_notice("SC68 component: %s - %s [%s]",
-			__DATE__, __TIME__,
+    if (!sc68_init(&init)) {
+      const char * engine = 0;
+      g_ym_asid = sc68_cntl(0, SC68_GET_ASID);
+      msg68_debug("got default aSID: %d\n", g_ym_asid);
+      if (g_ym_asid < 0 || g_ym_asid > 2)
+        g_ym_asid = 0;
+      sc68_cntl(0, SC68_GET_OPT, "ym-engine", &engine);
+      if (engine) {
+        msg68_debug("got default engine: '%s'\n", engine);
+        g_ym_engine = !strcmp68(engine,"pulse");
+      }
+    }
+    msg68_notice("SC68 component: %s - %s [%s]",
+      __DATE__, __TIME__,
 #ifdef _DEBUG
-			"Debug"
+      "Debug"
 #else
-			"Release"
+      "Release"
 #endif
-			); 
-	}
+      ); 
+  }
 
-	// On quit: shutdown sc68 library
-	void on_quit() {
-		sc68_cntl(0,SC68_SET_ASID, g_ym_asid);
-		sc68_cntl(0,SC68_CONFIG_SAVE);
-		sc68_shutdown();
-	}
+  // On quit: shutdown sc68 library
+  void on_quit() {
+    sc68_cntl(0,SC68_SET_ASID, g_ym_asid);
+    sc68_cntl(0,SC68_CONFIG_SAVE);
+    sc68_shutdown();
+  }
 };
 
 static initquit_factory_t<initquit_sc68> g_initquit_sc68_factory;

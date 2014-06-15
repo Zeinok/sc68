@@ -3,9 +3,7 @@
  * @brief   sc68 foobar200 - component declaration
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2013 Benjamin Gerard
- *
- * Time-stamp: <2013-06-03 16:04:24 ben>
+ * Copyright (C) 2013-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -28,29 +26,29 @@
 
 static pfc::string_formatter g_get_component_about()
 {
-	pfc::string_formatter about;
-	about <<
-		"Atari-ST and Amiga music player"
-		"\n"
+  pfc::string_formatter about;
+  about <<
+    "Atari-ST and Amiga music player"
+    "\n"
 #ifdef DEBUG
-		"\n" " !!! DEBUG VERSION !!!"
-		"\n"
+    "\n" " !!! DEBUG VERSION !!!"
+    "\n"
 #endif
-		"\n" "http://sc68.atari.org"
-		"\n"
-		"\n" << sc68_versionstr() <<
-		"\n" << file68_versionstr() <<
-		"\n"
-		"\n" "Copyright (C) 2001-2013 Benjamin Gerard.";
-	return about;
+    "\n" "http://sc68.atari.org"
+    "\n"
+    "\n" << sc68_versionstr() <<
+    "\n" << file68_versionstr() <<
+    "\n"
+    "\n" "Copyright (C) 2001-2014 Benjamin Gerard.";
+  return about;
 }
 
 // Declare our component
 DECLARE_COMPONENT_VERSION(
-  "sc68 for foobar2000",
+"sc68 for foobar2000",
   "0.7.0",
   g_get_component_about()
-);
+  );
 
 DECLARE_FILE_TYPE("SC68 files","*.SC68;*.SNDH;*.SND");
 
