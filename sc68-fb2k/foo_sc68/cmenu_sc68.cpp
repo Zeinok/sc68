@@ -3,9 +3,7 @@
  * @brief   sc68 foobar200 - implement context menu
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2013 Benjamin Gerard
- *
- * Time-stamp: <2013-06-03 16:04:24 ben>
+ * Copyright (C) 2013-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -42,9 +40,9 @@ static const GUID guid_blep   = { 0x3e3cd262, 0x6b21, 0x4287, { 0x88, 0x3d, 0x92
 static const GUID guid_pulse  = { 0x7b26813b, 0x06bd, 0x41b7, { 0xa8, 0xfa, 0x0e, 0x8b, 0x95, 0xb2, 0x69, 0x0b } };
 
 // static const GUID guid_filter = { 0x876288c0, 0x7923, 0x4328, { 0x8f, 0x2c, 0x29, 0xf5, 0x16, 0xeb, 0xdf, 0x3c } };
-																												   
+
 enum {
-	SC68_MENU_PRIO = -200
+  SC68_MENU_PRIO = -200
 };
 
 // Create a group containing our menu items.
@@ -57,92 +55,90 @@ static contextmenu_group_popup_factory g_engine(guid_engine, guid_cmenu, "YM Sim
 #endif
 
 
-const 
+const
 struct cmenu_def asid_defs[] = {
-	{ &guid_aoff,   "Off",   "Don't aSIDify sc68 tracks"  },
-	{ &guid_aon,    "On",    "aSIDify sc68 tracks only if it is safe"},
-	{ &guid_aforce, "Force", "Force aSIDfy sc68 tracks" }
+  { &guid_aoff,   "Off",   "Don't aSIDify sc68 tracks"  },
+  { &guid_aon,    "On",    "aSIDify sc68 tracks only if it is safe"},
+  { &guid_aforce, "Force", "Force aSIDfy sc68 tracks" }
 };
 
-const 
+const
 struct cmenu_def engine_defs[] = {
-	{ &guid_blep,   "Blep",  "YM simulator using Band-Limitied-stEP synthesys (best)" },
-	{ &guid_pulse,  "Pulse", "YM simulator using Pulse (sc68 legacy)" },
+  { &guid_blep,   "Blep",  "YM simulator using Band-Limitied-stEP synthesys (best)" },
+  { &guid_pulse,  "Pulse", "YM simulator using Pulse (sc68 legacy)" },
 };
 
 // Simple context menu item class.
 class cmenu_array_item : public contextmenu_item_simple {
 
 protected:
-	unsigned int * ptr, cur, n;
-	const struct cmenu_def * def;
-	const GUID * parent;
+  unsigned int * ptr, cur, n;
+  const struct cmenu_def * def;
+  const GUID * parent;
 
 public:
-	//cmenu_array_item() : n(0), cur(0), def(0) { }
-	cmenu_array_item(const GUID * p_parent, int p_n, const struct cmenu_def * p_def, int * p_ptr = 0)
-		: parent(p_parent), n(p_n), def(p_def) {
-			if (p_ptr) {
-				cur = -1;
-				ptr = (unsigned int *) p_ptr;
-			} else {
-				cur = 0;
-				ptr = &cur; 
-			}
-	}
-	GUID get_parent() { return *parent; }
-	unsigned get_num_items() { return n; }
+  //cmenu_array_item() : n(0), cur(0), def(0) { }
+  cmenu_array_item(const GUID * p_parent, int p_n, const struct cmenu_def * p_def, int * p_ptr = 0)
+    : parent(p_parent), n(p_n), def(p_def) {
+    if (p_ptr) {
+      cur = -1;
+      ptr = (unsigned int *) p_ptr;
+    } else {
+      cur = 0;
+      ptr = &cur;
+    }
+  }
+  GUID get_parent() { return *parent; }
+  unsigned get_num_items() { return n; }
 
-	void get_item_name(unsigned p_index, pfc::string_base & p_out) {
-		if (p_index < n) p_out = def[p_index].name;
-	}
+  void get_item_name(unsigned p_index, pfc::string_base & p_out) {
+    if (p_index < n) p_out = def[p_index].name;
+  }
 
-	GUID get_item_guid(unsigned p_index) {
-		return (p_index < n) ? *def[p_index].guid : pfc::guid_null;
-	}
+  GUID get_item_guid(unsigned p_index) {
+    return (p_index < n) ? *def[p_index].guid : pfc::guid_null;
+  }
 
-	bool get_item_description(unsigned p_index, pfc::string_base & p_out) {
-		if (p_index < n && def[p_index].desc) {
-			p_out = def[p_index].desc;
-			return true;
-		}
-		return false;
-	}
+  bool get_item_description(unsigned p_index, pfc::string_base & p_out) {
+    if (p_index < n && def[p_index].desc) {
+      p_out = def[p_index].desc;
+      return true;
+    }
+    return false;
+  }
 
-	void context_command(unsigned p_index,metadb_handle_list_cref p_data,const GUID& p_caller) {
-		if (p_index < n) *ptr = p_index;
-	}
+  void context_command(unsigned p_index,metadb_handle_list_cref p_data,const GUID& p_caller) {
+    if (p_index < n) *ptr = p_index;
+  }
 
-	// Overriding this is not mandatory. We're overriding it just to demonstrate stuff that you can do such as context-sensitive menu item labels.
-	bool context_get_display(
-		unsigned p_index, metadb_handle_list_cref p_data,
-		pfc::string_base & p_out, unsigned & p_displayflags,
-		const GUID & p_caller)
-	{
-		const int flags = FLAG_CHECKED/*|FLAG_RADIOCHECKED*/;
-		if (!__super::context_get_display(p_index, p_data, p_out, p_displayflags, p_caller)) return false;
-		if (p_index == *ptr)
-			p_displayflags |= flags;
-		else
-			p_displayflags &= ~flags;
-		return true;
-	}
+  // Overriding this is not mandatory. We're overriding it just to demonstrate stuff that you can do such as context-sensitive menu item labels.
+  bool context_get_display(
+    unsigned p_index, metadb_handle_list_cref p_data,
+    pfc::string_base & p_out, unsigned & p_displayflags,
+    const GUID & p_caller)
+    {
+      const int flags = FLAG_CHECKED/*|FLAG_RADIOCHECKED*/;
+      if (!__super::context_get_display(p_index, p_data, p_out, p_displayflags, p_caller)) return false;
+      if (p_index == *ptr)
+        p_displayflags |= flags;
+      else
+        p_displayflags &= ~flags;
+      return true;
+    }
 };
 
 // Simple context menu item class.
 class cmenu_asid_item : public cmenu_array_item  {
 public:
-	cmenu_asid_item()
-		: cmenu_array_item(&guid_asid, sizeof(asid_defs)/sizeof(*asid_defs),asid_defs, (int*)&g_ym_asid) { }
+  cmenu_asid_item()
+    : cmenu_array_item(&guid_asid, sizeof(asid_defs)/sizeof(*asid_defs),asid_defs, (int*)&g_ym_asid) { }
 };
 
 class cmenu_engine_item : public cmenu_array_item  {
 public:
-	cmenu_engine_item()
-		: cmenu_array_item(&guid_engine, sizeof(engine_defs)/sizeof(*engine_defs), engine_defs, (int*)&g_ym_engine) { }
+  cmenu_engine_item()
+    : cmenu_array_item(&guid_engine, sizeof(engine_defs)/sizeof(*engine_defs), engine_defs, (int*)&g_ym_engine) { }
 };
 
 static contextmenu_item_factory_t<cmenu_asid_item> g_asid_factory;
 static contextmenu_item_factory_t<cmenu_engine_item> g_engine_factory;
-
-

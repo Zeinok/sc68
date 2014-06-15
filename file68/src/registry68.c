@@ -3,9 +3,7 @@
  * @brief   ms-Windows registry
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2001-2013 Benjamin Gerard
- *
- * Time-stamp: <2014-05-28 07:41:47 ben>
+ * Copyright (C) 2001-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -23,6 +21,8 @@
  * If not, see <http://www.gnu.org/licenses/>.
  *
  */
+
+/* TODO: remove the recursive stuff as it is totally useless. */
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -110,7 +110,7 @@ static char * SetSystemError(char * str, int max, int err)
   /*   max = sizeof(registry68_errorstr); */
   /* } */
 
-  FormatMessage(
+  FormatMessageA(
     /* source and processing options */
     FORMAT_MESSAGE_FROM_SYSTEM,
     /* pointer to message source */
@@ -436,7 +436,6 @@ int registry68_puts(registry68_key_t rootkey,
   return put_data(rootkey, kname_cst, kdata, l, REG_SZ);
 }
 
-
 #else
 
 int registry68_support(void) { return 0; }
@@ -474,7 +473,5 @@ int registry68_puti(registry68_key_t rootkey, const char * kname_cst,
 {
   return -1;
 }
-
-
 
 #endif /* #ifdef USE_REGISTRY68 */

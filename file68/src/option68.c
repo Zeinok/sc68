@@ -3,9 +3,7 @@
  * @brief   command line options
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2001-2011 Benjamin Gerard
- *
- * Time-stamp: <2013-08-25 16:42:22 ben>
+ * Copyright (C) 2001-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -66,7 +64,7 @@ static inline int opt_org(const option68_t * const opt)
 static int opt_policy(const option68_t * const opt, int set, int org)
 {
   switch (set) {
-  case opt68_PRIO:   set = org >= opt->org; break;
+  case opt68_PRIO:   set = org >= (int)opt->org; break;
   case opt68_NOTSET: set = !opt_isset(opt); break;
   case opt68_ISSET:  set =  opt_isset(opt); break;
   }
@@ -369,7 +367,7 @@ int option68_append(option68_t * options, int n)
   int i;
 
   if (! (options && n > 0) )
-      *(int*)0 = 0;
+    *(int*)0 = 0;
   assert(options && n > 0);
 
   for (i=0; i<n; ++i) {
@@ -511,7 +509,7 @@ void option68_help(void * cookie, option68_help_t fct)
           strncpy(values,"<int>",vmax);
       } else {
         values[0] = '['; values[1] = 0; l = 1;
-        for (j=0; j<opt->sets; ++j) {
+        for (j=0; j<(int)opt->sets; ++j) {
           const int * set = (const int*)opt->set;
           const char * me
             = opt_isset(opt) && opt->val.num == set[j] ? "*" : "";
@@ -527,7 +525,7 @@ void option68_help(void * cookie, option68_help_t fct)
       }
     case opt68_ENU:
       values[0] = '['; values[1] = 0; l = 1;
-      for (j=0; j<opt->sets; ++j) {
+      for (j=0; j<(int)opt->sets; ++j) {
         const char ** set = (const char **)opt->set;
         const char * me = opt_isset(opt) &&
           !strcmp68(set[j],(opt->type==opt68_STR)

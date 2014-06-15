@@ -3,9 +3,7 @@
  * @brief   sc68 config file
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2013 Benjamin Gerard
- *
- * Time-stamp: <2013-09-10 19:13:16 ben>
+ * Copyright (C) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -65,7 +63,7 @@ struct _config68_s {
 };
 
 enum {
- MAX_TIME = (24 * 60 * 60) - 1
+  MAX_TIME = (24 * 60 * 60) - 1
 };
 
 /* exported */
@@ -142,7 +140,7 @@ static int save_config_entry(vfs68_t * os, const option68_t * opt)
     } else {
       const int * set = (const int *) opt->set;
       i += snprintf(tmp+i, max-i, " %c", '[');
-      for (j=0; j<opt->sets; ++j)
+      for (j=0; j<(int)opt->sets; ++j)
         i += snprintf(tmp+i, max-i, "%d%c", set[j], j+1==opt->sets?']':',');
     }
     break;
@@ -152,7 +150,7 @@ static int save_config_entry(vfs68_t * os, const option68_t * opt)
     if (opt->sets) {
       const char ** set = (const char  **) opt->set;
       i += snprintf(tmp+i, max-i, " %c", '[');
-      for (j=0; j<opt->sets; ++j)
+      for (j=0; j<(int)opt->sets; ++j)
         i += snprintf(tmp+i, max-i, "%s%c", set[j], j+1==opt->sets?']':',');
     }
     break;
@@ -273,8 +271,8 @@ static int load_from_registry(const char * confname)
         err = registry68_gets(0, path, str, sizeof(str));
         if (!err)
           err = option68_set(opt, str, opt68_PRIO, opt68_CFG);
-          TRACE68(config68_cat,
-                  "conf68: load '%s' <- '%s'\n", path, str);
+        TRACE68(config68_cat,
+                "conf68: load '%s' <- '%s'\n", path, str);
         break;
       default:
         assert(!"invalid option type");
@@ -367,7 +365,7 @@ static int load_from_file(const char * confname)
     option68_set(opt, word, opt68_PRIO, opt68_CFG);
   }
 
- error:
+error:
   vfs68_destroy(is);
   TRACE68(config68_cat, "conf68: loaded => [%s]\n",strok68(err));
   return err;
