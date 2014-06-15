@@ -5,7 +5,6 @@
  * @date     2003-08-11
  * @brief    Windows registry header.
  */
-/* Time-stamp: <2013-08-02 12:39:28 ben> */
 
 /* Copyright (C) 1998-2013 Benjamin Gerard */
 
@@ -73,7 +72,7 @@ FILE68_API
  * Open a named hierarchic key.
  *
  * @param hkey     Opened key handle or one of reserved registry key handles.
- * @param kname    Hierarchic key name. Slash '/' caractere is interpreted
+ * @param kname    Hierarchic key name. Slash '/' character is interpreted
  *                 as sub-key separator.
  * @param mode     bit#0:read bit#1:write
  *
@@ -88,7 +87,7 @@ FILE68_API
  * Get a string value of a named hierarchic string key.
  *
  * @param hkey     Opened key handle or one of reserved registry key handles.
- * @param kname    Hierarchic key name. Slash '/' caractere is interpreted
+ * @param kname    Hierarchic key name. Slash '/' character is interpreted
  *                 as sub-key separator.
  * @param kdata    Returned string storage location
  * @param kdatasz  Maximum size of kdata buffer.
@@ -105,7 +104,7 @@ FILE68_API
  * Get integer value of a named hierarchic string key.
  *
  * @param hkey    Opened key handle or one of reserved registry key handles.
- * @param kname   Hierarchic key name. Slash '/' caractere is interpreted
+ * @param kname   Hierarchic key name. Slash '/' character is interpreted
  *                as sub-key separator.
  * @param kdata   Pointer to returned int.
  *
@@ -121,7 +120,7 @@ FILE68_API
  * Put a string value of a named hierarchic string key.
  *
  * @param hkey     Opened key handle or one of reserved registry key handles.
- * @param kname    Hierarchic key name. Slash '/' caractere is interpreted
+ * @param kname    Hierarchic key name. Slash '/' character is interpreted
  *                 as sub-key separator.
  * @param kdata    Nul-terminated string.
  *
@@ -137,7 +136,7 @@ FILE68_API
  * Put integer value of a named hierarchic string key.
  *
  * @param hkey    Opened key handle or one of reserved registry key handles.
- * @param kname   Hierarchic key name. Slash '/' caractere is interpreted
+ * @param kname   Hierarchic key name. Slash '/' character is interpreted
  *                as sub-key separator.
  * @param kdata   Integer value.
  *

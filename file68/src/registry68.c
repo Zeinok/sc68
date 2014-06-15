@@ -5,7 +5,7 @@
  *
  * Copyright (C) 2001-2013 Benjamin Gerard
  *
- * Time-stamp: <2013-08-12 19:33:58 ben>
+ * Time-stamp: <2014-05-28 07:41:47 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -146,24 +146,24 @@ static int GetOneLevelKey(HKEY hkey, char **kname, HKEY *hkeyres, int secu)
 
   if (secu & KEY_CREATE_SUB_KEY) {
     hres =
-      RegCreateKeyEx(hkey,     /* handle to open key                */
-                     *kname,   /* address of name of subkey to open */
-                     0,        /* reserved                          */
-                     0,        /* user-defined class type           */
-                     REG_OPTION_NON_VOLATILE, /* Options            */
-                     secu,     /* Access right                      */
-                     0,        /* security attributs                */
-                     hkeyres,  /* address of handle to open key     */
-                     0         /* Disposition                       */
+      RegCreateKeyExA(hkey,     /* handle to open key                */
+                      *kname,   /* address of name of subkey to open */
+                      0,        /* reserved                          */
+                      0,        /* user-defined class type           */
+                      REG_OPTION_NON_VOLATILE, /* Options            */
+                      secu,     /* Access right                      */
+                      0,        /* security attributs                */
+                      hkeyres,  /* address of handle to open key     */
+                      0         /* Disposition                       */
         );
   } else {
     /* Open this sub-key */
     hres =
-      RegOpenKeyEx(hkey,     /* handle to open key                */
-                   *kname,   /* address of name of subkey to open */
-                   0,        /* reserved                          */
-                   secu,     /* security access mask              */
-                   hkeyres   /* address of handle to open key     */
+      RegOpenKeyExA(hkey,     /* handle to open key                */
+                    *kname,   /* address of name of subkey to open */
+                    0,        /* reserved                          */
+                    secu,     /* security access mask              */
+                    hkeyres   /* address of handle to open key     */
         );
   }
 
@@ -312,12 +312,12 @@ static int put_data(registry68_key_t rootkey,
       /*             kdata, */
       /*             kdatasz); */
 
-      RegSetValueEx(hkey,
-                    name,
-                    0,
-                    type,
-                    (const BYTE *)kdata,
-                    kdatasz);
+      RegSetValueExA(hkey,
+                     name,
+                     0,
+                     type,
+                     (const BYTE *)kdata,
+                     kdatasz);
 
     if (hres != ERROR_SUCCESS) {
       /* SetSystemError(error, sizeof(error)-1, hres); */
@@ -374,12 +374,12 @@ static int get_data(registry68_key_t rootkey,
     hres = ERROR_FILE_NOT_FOUND;
   } else {
     hres =
-      RegQueryValueEx(hkey,             /* handle to key to query            */
-                      name,             /* address of name of value to query */
-                      NULL,             /* reserved                          */
-                      &vtype,           /* address of buffer for value type  */
-                      (LPBYTE)kdata,    /* address of data buffer            */
-                      (LPDWORD)&kdatasz /* address of data buffer size       */
+      RegQueryValueExA(hkey,             /* handle to key to query            */
+                       name,             /* address of name of value to query */
+                       NULL,             /* reserved                          */
+                       &vtype,           /* address of buffer for value type  */
+                       (LPBYTE)kdata,    /* address of data buffer            */
+                       (LPDWORD)&kdatasz /* address of data buffer size       */
         );
     if (hres != ERROR_SUCCESS) {
       /* SetSystemError(error, sizeof(error)-1, hres); */
