@@ -4,7 +4,7 @@
 #
 # (C) 2013-2014 https://sourceforge.net/users/benjihan
 #
-# Time-stamp: <2014-01-24 16:18:39 ben>
+# Time-stamp: <2014-06-20 12:35:02 ben>
 
 # Autoconf stuff
 prefix       := @prefix@
@@ -44,8 +44,8 @@ CPPFLAGS     := $(DEFS) @CPPFLAGS@ $(sc68_CFLAGS) -I. $(WAINC)
 CFLAGS       := @CFLAGS@
 LIBS         := @LIBS@ $(sc68_LIBS)
 LDFLAGS      := @LDFLAGS@ $(LIBS) 
-STRIP        := $(CC:%gcc=%strip)
-WINDRES      := $(CC:%gcc=%windres)
+STRIP        := @STRIP@		#$(CC:%gcc=%strip)
+WINDRES      := @WINDRES@	#$(CC:%gcc=%windres)
 
 VPATH = @srcdir@
 

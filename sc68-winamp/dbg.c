@@ -5,8 +5,6 @@
  *
  * Copyright (C) 1998-2014 Benjamin Gerard
  *
- * Time-stamp: <2014-01-23 00:23:14 ben>
- *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation, either version 3 of the
@@ -50,7 +48,7 @@ static void dbgmsg(int prefix, const char * fmt, va_list list)
     i = sizeof(pref)-1;
   }
   vsnprintf(s+i, sizeof(s)-i, fmt, list);
-  OutputDebugString(s);
+  OutputDebugStringA(s);
 }
 
 

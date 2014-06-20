@@ -19,6 +19,20 @@ AC_INIT(
 AC_CONFIG_SRCDIR([in_sc68.c])
 AC_CONFIG_HEADERS([config.h])
 
+
+# ,----------------------------------------------------------------------.
+# | build tools                                                          |
+# `----------------------------------------------------------------------'
+AC_CHECK_TOOL([WINDRES],[windres],[false])
+if test x/"$WINDRES" = x/false; then
+  AC_MSG_ERROR([Missing required build tool -- windres])
+fi
+AC_CHECK_TOOL([STRIP],[strip],[false])
+if test x/"$STRIP" = x/false; then
+  AC_MSG_ERROR([Missing required build tool -- strip])
+fi
+
+
 # ,----------------------------------------------------------------------.
 # | Locate sdks                                                          |
 # `----------------------------------------------------------------------'
