@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2011 Benjamin Gerard
  *
- * Time-stamp: <2011-11-03 01:53:10 ben>
+ * Time-stamp: <2014-06-20 14:35:13 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -27,8 +27,7 @@
 #include <audacious/plugin.h>
 #include <libaudcore/audstrings.h>
 #include <sc68/sc68.h>
-#include <sc68/tag68.h>
-#include <sc68/audio68.h>
+#include <sc68/file68_tag.h>
 
 #include <glib.h>
 #include <pthread.h>
