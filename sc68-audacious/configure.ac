@@ -33,6 +33,7 @@ SC68_SYSTEM
 SC68_OPTIONS
 SC68_TOOLS
 SC68_CHECKS
+SC68_THREADS
 SC68_WITH([sc68],[yes],[sc68_version],[sc68/sc68.h],[libsc68])
 SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
 
@@ -75,8 +76,8 @@ elif test x"$with_audacious_dir" = xuser; then
 fi
 AC_SUBST([plugindir],[$]with_audacious_dir)
 
-aud_cflags=[$]([$]pkgconfig audacious --cflags)
-aud_lflags=[$]([$]pkgconfig audacious --libs)
+aud_cflags="[$]([$]pkgconfig audacious --cflags)"
+aud_lflags="[$]([$]pkgconfig audacious --libs)"
 
 if test -n "$aud_cflags"; then
   SC68_ADD_FLAGS([LIB_CFLAGS],$aud_cflags)
@@ -85,6 +86,15 @@ if test -n "$aud_lflags"; then
   SC68_ADD_FLAGS([LIB_LFLAGS],$aud_lflags)
 fi
 
+# Sometime glib include path is missing.
+AC_CHECK_HEADER([glib.h],,
+  [
+    glib_pkg=glib-2.0
+    if glib_version=[$]([$]pkgconfig [$]glib_pkg --modversion); then
+      glib_cflags=[$]([$]pkgconfig [$]glib_pkg --cflags)
+      SC68_ADD_FLAGS([LIB_CFLAGS],[$]glib_cflags)
+    fi
+  ])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |

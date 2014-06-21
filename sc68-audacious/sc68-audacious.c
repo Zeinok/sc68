@@ -3,9 +3,7 @@
  * @brief   audacious plugin
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
- *
- * Time-stamp: <2014-06-20 14:35:13 ben>
+ * Copyright (C) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

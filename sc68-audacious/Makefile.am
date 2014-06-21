@@ -1,9 +1,8 @@
-# Time-stamp: <2011-09-10 13:44:03 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  sc68aud -- Makefile.am -- Use with automake to produce Makefile.in  | 
 # |                                                                      |
-# |                 (C) 2010-2011 Benjamin Gerard                        |
+# |                 (C) 2010-2014 Benjamin Gerard                        |
 # |                                                                      |
 # |             <http://sourceforge.net/users/benjihan>                  |
 # |                                                                      |
@@ -13,7 +12,7 @@
 SUBDIRS              = $(subdirs)
 ACLOCAL_AMFLAGS      = -I m4 --install
 AM_CFLAGS            = $(ALL_CFLAGS) $(LIB_CFLAGS) $(BIN_CFLAGS)
-AM_CPPFLAGS          = $(sc68_inc) $(file68_inc)
+AM_CPPFLAGS          = $(sc68_inc) $(file68_inc) 
 AM_LDFLAGS           = $(ALL_LFLAGS) $(LIB_LFLAGS) $(BIN_LFLAGS) $(LFLAGS)
 
 # ,----------------------------------------------------------------------.
