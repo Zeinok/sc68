@@ -40,8 +40,8 @@ SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
 AC_ARG_WITH(
   [audacious-dir],
   [AS_HELP_STRING([--with-audacious-dir],
-      [install in audacious user plugin @<:@default=no@:>@])],
-  [],[with_audacious_dir=no])
+      [audacious imput plugin location @<:@auto*|user|path@:>@])],
+  [],[with_audacious_dir=auto])
 
 AC_MSG_CHECKING([for pkg-config audacious module])
 if ! [$]pkgconfig --exists audacious; then
@@ -61,19 +61,39 @@ else
   AC_MSG_ERROR([installed audacious version is too old ($audacious_ver<$audacious_min)])
 fi
 
-AC_MSG_CHECKING([for audacious 3])
-if [$]pkgconfig audacious --atleast-version='3.0.0'; then
-  AC_MSG_RESULT([yes])
-  AC_DEFINE([AUDACIOUS3],[1],[audacious >= 3.0.0])
-else
-  AC_MSG_RESULT([no])
-fi
+# Convert version string to version number 
+set -- `echo [$]audacious_ver | sed 's%\.% %g'`
+audvnum=0; audmul=10000
+while test [$]# -gt 0; do
+  let audvnum=audvnum+[$]1*audmul
+  let audmul=audmul/100
+  shift
+done
+AC_DEFINE_UNQUOTED([AUDACIOUS_VERNUM],[$audvnum],[audacious version number])
 
-if test x"$with_audacious_dir" = xno; then
-  with_audacious_dir=`[$]pkgconfig audacious --variable=input_plugin_dir`
-elif test x"$with_audacious_dir" = xuser; then
-  with_audacious_dir=$HOME/.local/share/audacious/Plugins
-fi
+case x"$with_audacious_dir" in
+
+  xuser)
+    with_audacious_dir=$HOME/.local/share/audacious/Plugins
+    ;;
+
+  xauto)
+    with_audacious_dir=`[$]pkgconfig audacious --variable=input_plugin_dir`
+    if test x"$with_audacious_dir" = x; then
+      with_audacious_dir=`[$]pkgconfig audacious --variable=plugin_dir`/Input
+    fi
+    if ! test -d "$with_audacious_dir"; then
+      AC_MSG_ERROR([Unable to locate audacious input plugins directory. Try --with-audacious-dir.])
+    fi
+    ;;
+
+  x/*)
+    ;;
+
+  *)
+    AC_MSG_ERROR([Invalid value for --with-audacious-dir (auto|user|<path>)])
+    ;;
+esac
 AC_SUBST([plugindir],[$]with_audacious_dir)
 
 aud_cflags="[$]([$]pkgconfig audacious --cflags)"
@@ -117,5 +137,6 @@ AC_MSG_NOTICE([|-----------------------])
 AC_MSG_NOTICE([|   compile mode        : $compile_mode])
 AC_MSG_NOTICE([|   file68 headers      : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
+AC_MSG_NOTICE([|   audacious           : $audacious_ver ($audvnum)])
 AC_MSG_NOTICE([|   plugin-dir          : $with_audacious_dir])
 AC_MSG_NOTICE([+-----------------------])
