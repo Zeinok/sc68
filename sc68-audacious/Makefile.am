@@ -28,8 +28,7 @@ else
 SC68_LA = $(sc68_lib) $(file68_lib)
 endif
 
-plugin_LTLIBRARIES         = libsc68aud.la
-libsc68aud_la_SOURCES      = sc68-audacious.c
-libsc68aud_la_LIBADD       = $(SC68_LA)
-libsc68aud_la_LIBTOOLFLAGS = --tag=disable-static
-LFLAGS                     = -module -avoid-version $(NOINSTALL)
+plugin_LTLIBRARIES = sc68.la
+sc68_la_SOURCES    = sc68-audacious.c
+sc68_la_LIBADD     = $(SC68_LA)
+LFLAGS             = -module -avoid-version $(NOINSTALL)
