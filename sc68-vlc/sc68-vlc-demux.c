@@ -5,7 +5,7 @@
  *
  * Copyright (C) 1998-2013 Benjamin Gerard
  *
- * Time-stamp: <2014-02-01 18:49:44 ben>
+ * Time-stamp: <2014-06-28 01:25:31 ben>
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -287,7 +287,7 @@ static int vlc_init_sc68(void)
   sc68_init_t init68;
   static char appname[] = "vlc";
   /* static char message[] = "--sc68-debug=+loader"; */
-  char * argv[] = { appname/* , message */ };
+  static char * argv[] = { appname/* , message */ };
 
   meta_lut_sort();
   memset(&init68,0,sizeof(init68));
