@@ -1,6 +1,6 @@
 /*
- * @file    sc68.c
- * @brief   audacious plugin
+ * @file    sc68-audacious.c
+ * @brief   sc68 plugin for audacious version 2.4 to 3.4
  * @author  http://sourceforge.net/users/benjihan
  *
  * Copyright (C) 1998-2014 Benjamin Gerard
@@ -22,11 +22,15 @@
  *
  */
 
+/* audacious headers */
 #include <audacious/plugin.h>
 #include <libaudcore/audstrings.h>
-#include <sc68/sc68.h>
-#include <sc68/file68_tag.h>
-#include <sc68/file68_msg.h>
+
+/* Select to deal with mutex (3 possibilities) :
+ * -1- glib with new/free interface
+ * -2- glib with init/clear interface
+ * -3- pthreads
+ */
 
 #if AUDACIOUS_VERNUM < 30200 /* audacious>=3.2 does not depend on glib */
 
@@ -96,9 +100,16 @@ static inline void my_cond_signal()  { pthread_cond_signal(&ctrl_cond); }
 
 #endif
 
+/* standard headers */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/* sc68 headers */
+#include <sc68/sc68.h>
+#include <sc68/file68_tag.h>
+#include <sc68/file68_msg.h>
+
 
 static gboolean pause_flag;
 static gint64   seek_value = -1;
@@ -117,6 +128,7 @@ static void dmsg(const int bit, sc68_t * sc68, const char *fmt, va_list list)
 }
 #endif
 
+/* Audacious tuple functions changed a couple of time ... */
 #if AUDACIOUS_VERNUM >= 30500
 # define TUPLE_STR(A,B,C,D) tuple_set_str(A,!C?B:tuple_field_by_name(C),D)
 # define TUPLE_INT(A,B,C,D) tuple_set_int(A,!C?B:tuple_field_by_name(C),D)
@@ -276,13 +288,14 @@ static Tuple * tuple_from_track(const gchar * filename,
 
           if (id != -1)
             TUPLE_STR(tu, id, NULL, val);
-          else
-            TUPLE_STR(tu, -1, tag->key, val);
+          /* Seems uncessary, audacious ignores tag it does not know ? */
+          /* else */
+          /*   TUPLE_STR(tu, -1, tag->key, val); */
         }
       }
     } else {
       msg68_error("sc68-audacious: "
-                  "could notretrieve sc68 music info for track #%d\n", track);
+                  "could not retrieve sc68 music info for track #%d\n", track);
     }
   }
 
@@ -290,6 +303,9 @@ static Tuple * tuple_from_track(const gchar * filename,
 }
 
 #if AUDACIOUS_VERNUM < 30200
+/* Quick dirty replacement for this missing function just used to
+ * retrieve sub-song number in the uri.
+ */
 static
 void uri_parse(const gchar * fn, void *x, void *y, void *z, gint * ptrk)
 {
@@ -553,9 +569,6 @@ Tuple * plg_probe(const gchar * filename, VFSFile * file)
   int size/* , track = 0 */;
   void * buf = 0;
   int track;
-
-  msg68_debug("PROBE FN: %s\n",
-              filename ? filename  : "(nil)");
 
   if (!file)
     goto done;
