@@ -29,6 +29,11 @@ SC68_LA = $(sc68_lib) $(file68_lib)
 endif
 
 plugin_LTLIBRARIES = sc68.la
-sc68_la_SOURCES    = sc68-audacious.c
+if AUDACIOUS_AT_LEAST_35
+cfiles = sc68-aud35.c
+else
+cfiles = sc68-audacious.c
+endif
+sc68_la_SOURCES    = $(cfiles)
 sc68_la_LIBADD     = $(SC68_LA)
 LFLAGS             = -module -avoid-version $(NOINSTALL)

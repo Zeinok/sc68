@@ -1,6 +1,6 @@
 /*
  * @file    sc68-audacious.c
- * @brief   sc68 plugin for audacious version 2.4 to 3.4
+ * @brief   sc68 plugin for audacious (version 2.4 to 3.4)
  * @author  http://sourceforge.net/users/benjihan
  *
  * Copyright (C) 1998-2014 Benjamin Gerard

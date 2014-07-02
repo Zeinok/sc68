@@ -60,16 +60,9 @@ else
   AC_MSG_RESULT([no])
   AC_MSG_ERROR([installed audacious version is too old ($audacious_ver<$audacious_min)])
 fi
-audacious_max='3.5'
-if test x"$audacious_max" != x; then
-  AC_MSG_CHECKING([if audacious version < $audacious_max]) # need more test on version
-  if ! [$]pkgconfig audacious --atleast-version=$audacious_max; then
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no])
-    AC_MSG_ERROR([installed audacious version is too recent ($audacious_ver>=$audacious_max)])
-  fi
-fi
+
+AM_CONDITIONAL([AUDACIOUS_AT_LEAST_35],
+  [[$]pkgconfig audacious --atleast-version=3.5])
 
 # Convert version string to version number 
 set -- `echo [$]audacious_ver | sed 's%\.% %g'`
