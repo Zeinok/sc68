@@ -1,0 +1,27 @@
+                       sc68 - audacious plugin
+
+                   It is part of the sc68 project.
+
+               (C) COPYRIGHT 1998-2014 Benjamin Gerard
+
+
+*Synopsis*                                   
+
+  This is sc68 plugin for audacious media player, a descendant of
+  XMMS, a clone of the famous windows player winamp.
+
+*Files*
+
+  sc68-audacious.c ... C source file for audacious 2.4 to 3.4
+  sc68-aud35.c     ... C source file for audacious 3.5 and later
+
+*Links*
+
+  sc68 website
+       <http://sc68.atari.org>
+
+  sc68 development project
+       <http://sourceforge.net/projects/sc68>
+
+  audacious audio player
+       <http://audacious-media-player.org>
