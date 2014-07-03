@@ -5,9 +5,8 @@
  * @date     2011-10-03
  * @brief    Metatags definition header file.
  */
-/* Time-stamp: <2013-09-14 05:50:46 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef FILE68_TAG_H
 #define FILE68_TAG_H

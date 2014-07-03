@@ -5,9 +5,8 @@
  * @date      1999/03/20
  * @brief     STE sound emulator header.
  */
-/* Time-stamp: <2013-09-21 12:35:33 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef MWEMUL_H
 #define MWEMUL_H
@@ -368,4 +367,3 @@ int mw_command(mw_t * const mw);
  */
 
 #endif
-

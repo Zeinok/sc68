@@ -5,9 +5,8 @@
  * @author    Benjamin Gerard
  * @date      1999/03/20
  */
-/* Time-stamp: <2013-09-01 10:04:28 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef IO68_MFP_IO_H
 #define IO68_MFP_IO_H

@@ -5,12 +5,11 @@
  * @date     2003-08-08
  * @brief    Memory stream header.
  */
-/* Time-stamp: <2013-08-09 19:39:44 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_VFS_MEM_H_
-#define _FILE68_VFS_MEM_H_
+#ifndef FILE68_VFS_MEM_H
+#define FILE68_VFS_MEM_H
 
 #include "file68_vfs.h"
 
@@ -62,4 +61,3 @@ vfs68_t * vfs68_mem_create(const void * addr, int len, int mode);
  */
 
 #endif
-

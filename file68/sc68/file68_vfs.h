@@ -5,12 +5,11 @@
  * @date     2003-08-08
  * @brief    Stream interface header.
  */
-/* Time-stamp: <2013-07-24 03:59:43 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_VFS_H_
-#define _FILE68_VFS_H_
+#ifndef FILE68_VFS_H
+#define FILE68_VFS_H
 
 
 #ifndef FILE68_API

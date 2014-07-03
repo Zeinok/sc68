@@ -3,9 +3,7 @@
  * @brief   MicroWire I/O plugin (STE soundchip)
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2013 Benjamin Gerard
- *
- * Time-stamp: <2013-10-01 19:16:39 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

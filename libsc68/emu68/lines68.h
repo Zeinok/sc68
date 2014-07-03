@@ -5,7 +5,8 @@
  * @author    Benjamin Gerard
  * @date      2009/05/08
  */
-/* Time-stamp: <2013-08-04 23:08:48 ben> */
+
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 /* The lines68.h header file should include all files required for
  * compiling instruction emulator files.

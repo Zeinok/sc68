@@ -1,11 +1,10 @@
-# Time-stamp: <2013-08-26 09:18:43 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |   io68 -- Makefile.am -- Use with automake to produce configure.in   |
 # |                                                                      |
-# |                 (C) 1998-2013 Benjamin Gerard                        |
+# |               Copyright (C) 1998-2014 Benjamin Gerard                |
 # |                                                                      |
-# |            <http://sourceforge.net/users/benjihan>                   |
+# |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@

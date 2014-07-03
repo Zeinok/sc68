@@ -5,12 +5,11 @@
  * @date     1998-10-07
  * @brief    Resources access header.
  */
-/* Time-stamp: <2013-08-09 21:42:03 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_RSC_H_
-#define _FILE68_RSC_H_
+#ifndef FILE68_RSC_H
+#define FILE68_RSC_H
 
 #include "file68_vfs.h"
 

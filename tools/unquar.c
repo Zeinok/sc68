@@ -1,8 +1,10 @@
-/**
+/*
  * Demux sc68 'QUAR'tet files
  *
- * Time-stamp: <2013-09-15 08:20:52 ben>
+ * Time-stamp: <2014-07-03 07:11:32 ben>
  * Init-stamp: <2013-09-13 21:01:17 ben>
+ *
+ * Copyright (c) 2013-2014 Ben(jamin) Gerard
  */
 
 #include <stdio.h>

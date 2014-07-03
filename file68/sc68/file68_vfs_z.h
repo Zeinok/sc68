@@ -5,12 +5,11 @@
  * @date     2003-10-06
  * @brief    Zlib stream header.
  */
-/* Time-stamp: <2013-08-09 21:45:29 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_VFS_Z_
-#define _FILE68_VFS_Z_
+#ifndef FILE68_VFS_Z
+#define FILE68_VFS_Z
 
 #include "file68_vfs.h"
 

@@ -6,7 +6,7 @@
  * @brief    Windows registry header.
  */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef FILE68_REG_H
 #define FILE68_REG_H

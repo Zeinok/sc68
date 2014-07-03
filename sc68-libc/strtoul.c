@@ -3,9 +3,7 @@
  * @brief   replacement for missing or faulty strtoul()
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2001-2013 Benjamin Gerard
- *
- * Time-stamp: <2013-08-03 08:59:06 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

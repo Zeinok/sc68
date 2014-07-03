@@ -5,9 +5,8 @@
  * @author    Benjamin Gerard
  * @date      1998/07/18
  */
-/* Time-stamp: <2013-09-23 18:51:15 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef IO68_PAULAEMUL_H
 #define IO68_PAULAEMUL_H

@@ -1,35 +1,33 @@
-
 /*
- *                        cdbg68 - sc68 debugger
+ * @file    win,c
+ * @brief   sc68 curses debugger - windows
+ * @author  http://sourceforge.net/users/benjihan
  *
- *            Copyright (C) 2001-2011 Ben(jamin) Gerard
- *           <benjihan -4t- users.sourceforge -d0t- net>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
- * This  program is  free  software: you  can  redistribute it  and/or
- * modify  it under the  terms of  the GNU  General Public  License as
- * published by the Free Software  Foundation, either version 3 of the
+ * This program is free software: you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License as
+ * published by the Free Software Foundation, either version 3 of the
  * License, or (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but
- * WITHOUT  ANY  WARRANTY;  without   even  the  implied  warranty  of
- * MERCHANTABILITY or  FITNESS FOR A PARTICULAR PURPOSE.   See the GNU
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
  *
- * You should have  received a copy of the  GNU General Public License
+ * You should have received a copy of the GNU General Public License
  * along with this program.
+ *
  * If not, see <http://www.gnu.org/licenses/>.
  *
- * $Id: sc68.c 57 2009-01-31 18:24:54Z benjihan $
  */
+
 #include "win.h"
 
 int win_is_root(win_t * win) 
 {
   return win->root == 0;
 }
-
-void win_
-
 
 /* Default callbaks */
 

@@ -5,12 +5,11 @@
  * @date     2009-01-01
  * @brief    commands definition header
  */
-/* Time-stamp: <2013-07-10 17:41:00 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _MKSC68_CMD_H_
-#define _MKSC68_CMD_H_
+#ifndef MKSC68_CMD_H
+#define MKSC68_CMD_H
 
 #include "mksc68_def.h"
 
@@ -35,4 +34,4 @@ EXTERN68 char  * cmd_cur(void);
 /* Defined in mksc68.c -- added here for convenience. */
 EXTERN68 void help(char *com);
 
-#endif /* ifndef _MKSC68_CMD_H_ */
+#endif

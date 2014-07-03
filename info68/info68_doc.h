@@ -12,7 +12,7 @@ Get and format information on sc68 files.
 
 @section info68_licence LICENCE
 
-  Copyright (C) 2001-2009 Benjamin Gerard
+  Copyright (c) 1998-2014 Benjamin Gerard
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by

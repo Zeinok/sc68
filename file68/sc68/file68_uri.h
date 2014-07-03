@@ -5,9 +5,8 @@
  * @date     2003-10-28
  * @brief    URI manipulation header.
  */
-/* Time-stamp: <2013-08-09 19:25:57 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef FILE68_URI_H
 #define FILE68_URI_H

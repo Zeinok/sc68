@@ -7,7 +7,7 @@
 
   @section author AUTHOR
 
-    Copyright (C) 1998-2009 Benjamin Gerard
+    Copyright (c) 1998-2014 Benjamin Gerard
 
     This program is free software.
 

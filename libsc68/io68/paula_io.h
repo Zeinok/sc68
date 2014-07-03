@@ -5,9 +5,8 @@
  * @author    Benjamin Gerard
  * @date      1998/06/18
  */
-/* Time-stamp: <2013-09-23 16:38:06 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef IO68_PAULA_IO_H
 #define IO68_PAULA_IO_H
@@ -74,4 +73,3 @@ paula_t * paulaio_emulator(io68_t * const io);
  */
 
 #endif
-

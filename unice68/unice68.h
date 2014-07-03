@@ -5,12 +5,11 @@
  * @date     2003/08/06
  * @brief    ICE! depacker header
  */
-/* Time-stamp: <2013-07-23 06:05:33 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _UNICE68_H_
-#define _UNICE68_H_
+#ifndef UNICE68_H
+#define UNICE68_H
 
 #ifndef UNICE68_EXTERN
 # ifdef __cplusplus
@@ -169,4 +168,4 @@ int unice68_packer(void * dst, int max, const void * src, int len);
  * @}
  */
 
-#endif /* #ifndef _UNICE68_H_ */
+#endif

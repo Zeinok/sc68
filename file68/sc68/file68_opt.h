@@ -5,9 +5,8 @@
  * @author   Benjamin Gerard
  * @date     2009-02-04
  */
-/* Time-stamp: <2013-08-25 09:16:18 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef FILE68_OPT_H
 #define FILE68_OPT_H

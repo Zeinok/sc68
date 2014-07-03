@@ -5,9 +5,8 @@
  * @date      1999/03/20
  * @brief     all io68 headers.
  */
-/* Time-stamp: <2013-09-06 22:25:23 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef IO68_H
 #define IO68_H

@@ -7,10 +7,10 @@
  *
  */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _MKSC68_OPT_H_
-#define _MKSC68_OPT_H_
+#ifndef MKSC68_OPT_H
+#define MKSC68_OPT_H
 
 #include "mksc68_def.h"
 
@@ -21,4 +21,4 @@ EXTERN68 void opt_create_short(char * shortopts, const opt_t * longopts);
 EXTERN68 int  opt_get(int argc, char * const argv[], const char * optstring,
                       const opt_t * longopts, int * longindex);
 
-#endif /* #ifndef _MKSC68_OPT_H_ */
+#endif

@@ -5,12 +5,11 @@
  * @date     2003-09-06
  * @brief    ICE loader header.
  */
-/* Time-stamp: <2013-07-22 01:19:11 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_ICE_H_
-#define _FILE68_ICE_H_
+#ifndef FILE68_ICE_H
+#define FILE68_ICE_H
 
 #include "file68_vfs.h"
 
@@ -81,4 +80,3 @@ void * file68_ice_load_file(const char * fname, int * ulen);
  */
 
 #endif
-

@@ -3,9 +3,7 @@
  * @brief   audio mixer
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
- *
- * Time-stamp: <2011-10-15 19:43:57 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

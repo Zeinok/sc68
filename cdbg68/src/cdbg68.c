@@ -3,9 +3,7 @@
  * @brief   a 68K curses debugger program
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
- *
- * Time-stamp: <2011-10-18 00:45:54 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -223,7 +221,7 @@ static int version(void)
   puts(
     PACKAGE_NAME " " PACKAGE_VERSION "\n"
     "\n"
-    "Copyright (C) 2001-2011 Benjamin Gerard.\n"
+    "Copyright (c) 2001-2011 Benjamin Gerard.\n"
     "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
     "This is free software: you are free to change and redistribute it.\n"
     "There is NO WARRANTY, to the extent permitted by law.\n"

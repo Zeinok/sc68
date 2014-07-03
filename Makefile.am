@@ -2,13 +2,12 @@
 # |                                                                      |
 # | sc68-ng -- Makefile.am -- Use with automake to produce configure.in  | 
 # |                                                                      |
-# |	       Copyright (C) 2007-2013 Benjamin Gerard                   |
+# |               Copyright (C) 2007-2014 Benjamin Gerard                |
 # |                                                                      |
-# |            <https://sourceforge.net/users/benjihan>                  |
+# |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@
-# $Id: Makefile.am,v 1.2 2007/01/12 09:28:14 benjihan Exp $
 
 ACLOCAL_AMFLAGS = -I m4 --install
 

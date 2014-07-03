@@ -3,9 +3,7 @@
  * @brief   error messages
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2001-2011 Benjamin Gerard
- *
- * Time-stamp: <2013-07-22 00:43:13 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

@@ -5,7 +5,6 @@
  * @author   Benjamin Gerard
  * @date     2009-09-14
  */
-/* Time-stamp: <2013-08-07 13:49:19 ben> */
 
 /* @ref  YAMAHA Corporation documentation (CATALOG No LSI-2121492)
  *

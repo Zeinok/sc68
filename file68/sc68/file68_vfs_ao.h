@@ -5,12 +5,11 @@
  * @date     2007-03-08
  * @brief    AO stream header.
  */
-/* Time-stamp: <2013-08-03 13:52:51 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_VFS_AO_H_
-#define _FILE68_VFS_AO_H_
+#ifndef FILE68_VFS_AO_H
+#define FILE68_VFS_AO_H
 
 #include "file68_vfs.h"
 

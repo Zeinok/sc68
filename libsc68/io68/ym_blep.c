@@ -3,9 +3,7 @@
  * @brief   YM-2149 emulator - YM-2149 Band-Limited stEP synthesis engine
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 200?-2013 Antti Lankila
- *
- * Time-stamp: <2013-08-26 09:08:36 ben>
+ * Copyright (c) 200?-2014 Antti Lankila
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

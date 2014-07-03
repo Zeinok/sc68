@@ -3,9 +3,7 @@
  * @brief   YM-2149 emulator - YM-2149 dump engine
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2013 Benjamin Gerard
- *
- * Time-stamp: <2013-08-26 09:03:23 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

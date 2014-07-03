@@ -5,12 +5,11 @@
  * @author   Benjamin Gerard
  * @date     2003-08-11
  */
-/* Time-stamp: <2013-08-08 17:37:26 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_STR_H_
-#define _FILE68_STR_H_
+#ifndef FILE68_STR_H
+#define FILE68_STR_H
 
 #ifndef FILE68_API
 # include "file68_api.h"

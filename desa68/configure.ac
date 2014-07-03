@@ -19,7 +19,8 @@ AC_INIT(
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([desa68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.10 silent-rules dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.14 silent-rules dist-xz])
+
 AC_CONFIG_HEADERS([config.h])
 
 AC_USE_SYSTEM_EXTENSIONS

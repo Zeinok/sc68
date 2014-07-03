@@ -5,12 +5,11 @@
  * @date     2003-08-08
  * @brief    @ref cURL stream header.
  */
-/* Time-stamp: <2013-08-08 17:21:46 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_VFS_CURL_H_
-#define _FILE68_VFS_CURL_H_
+#ifndef FILE68_VFS_CURL_H
+#define FILE68_VFS_CURL_H
 
 #include "file68_vfs.h"
 
@@ -54,4 +53,3 @@ void vfs68_curl_shutdown(void);
  */
 
 #endif
-

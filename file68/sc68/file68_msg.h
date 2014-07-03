@@ -5,9 +5,8 @@
  * @author   Benjamin Gerard
  * @date     2003-08-22
  */
-/* Time-stamp: <2013-08-30 10:23:09 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef FILE68_MSG_H
 #define FILE68_MSG_H

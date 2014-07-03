@@ -5,9 +5,8 @@
  * @date     2011-11-01
  * @brief    message output header.
  */
-/* Time-stamp: <2013-08-28 11:34:13 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef MKSC68_MSG_H
 #define MKSC68_MSG_H

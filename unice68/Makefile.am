@@ -2,9 +2,9 @@
 # |                                                                      |
 # |  unice68 -- Makefile.am -- Use with automake to produce Makefile.in  | 
 # |                                                                      |
-# |                 (C) 2007-2014 Benjamin Gerard                        |
+# |               Copyright (C) 2007-2014 Benjamin Gerard                |
 # |                                                                      |
-# |             <http://sourceforge.net/users/benjihan>                  |
+# |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@

@@ -3,9 +3,7 @@
  * @brief   MFP-68901 I/O plugin
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2011 Benjamin Gerard
- *
- * Time-stamp: <2013-09-01 11:05:04 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

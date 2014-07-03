@@ -5,9 +5,8 @@
  * @date     2007/08/08
  * @brief    FILE stream header.
  */
-/* Time-stamp: <2013-08-09 19:56:25 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef FILE68_VFS_FILE_H
 #define FILE68_VFS_FILE_H

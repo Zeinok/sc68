@@ -1,11 +1,10 @@
-# Time-stamp: <2013-05-14 11:44:22 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # | gstsc68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |                 (C) 2010-2011 Benjamin Gerard                        |
+# |               Copyright (C) 2010-2014 Benjamin Gerard                |
 # |                                                                      |
-# |            <http://sourceforge.net/users/benjihan>                   |
+# |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@

@@ -1,11 +1,10 @@
-# Time-stamp: <2013-06-06 04:50:16 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  cdbg68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |                 (C) 2009-2013 Benjamin Gerard                        |
+# |               Copyright (C) 2009-2014 Benjamin Gerard                |
 # |                                                                      |
-# |            <http://sourceforge.net/users/benjihan>                   |
+# |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@

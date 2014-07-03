@@ -5,12 +5,11 @@
  * @date     2013-07-09
  * @brief    gdb server function
  */
-/* Time-stamp: <2013-07-12 00:38:37 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _MKSC68_GDB_H_
-#define _MKSC68_GDB_H_
+#ifndef MKSC68_GDB_H
+#define MKSC68_GDB_H
 
 #include "mksc68_def.h"
 
@@ -94,4 +93,4 @@ EXTERN68 int     gdb_error(gdb_t * gdb, const char ** errp);
 EXTERN68 int     gdb_conf(char * uri);
 EXTERN68 void    gdb_get_conf(unsigned char * addr, int * port);
 
-#endif /* ifndef _MKSC68_GDB_H_ */
+#endif

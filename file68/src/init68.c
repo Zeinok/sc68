@@ -3,9 +3,7 @@
  * @brief   library initialization
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2001-2013 Benjamin Gerard
- *
- * Time-stamp: <2013-08-30 10:35:00 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

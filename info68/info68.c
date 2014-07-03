@@ -3,9 +3,7 @@
  * @brief   program to retrieve information from sc68 files
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2013 Benjamin Gerard
- *
- * Time-stamp: <2013-08-30 19:40:45 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -193,7 +191,7 @@ static int display_help(int more)
      "  > 6/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #6\n");
 
   puts
-    ("Copyright (C) 1998-2013 Benjamin Gerard.\n"
+    ("Copyright (c) 1998-2014 Benjamin Gerard.\n"
      "\n"
      "Visit <" PACKAGE_URL ">\n"
      "Report bugs to <" PACKAGE_BUGREPORT ">");
@@ -207,7 +205,7 @@ static int display_version(void)
   puts
     (PACKAGE_STRING "\n"
      "\n"
-     "Copyright (C) 1998-2013 Benjamin Gerard.\n"
+     "Copyright (c) 1998-2014 Benjamin Gerard.\n"
      "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
      "This is free software: you are free to change and redistribute it.\n"
      "There is NO WARRANTY, to the extent permitted by law.\n"

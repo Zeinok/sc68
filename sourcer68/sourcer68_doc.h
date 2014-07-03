@@ -7,7 +7,7 @@
 
 @section author AUTHOR
 
-  Copyright (C) 1998-2009 Benjamin Gerard
+  Copyright (c) 1998-2014 Benjamin Gerard
 
   This program is free software.
 
@@ -81,7 +81,7 @@
 @section bugs BUGS
 
   None has been reported. Report to @e bug@sashipa.com.
-  
+
 @section seealso SEE ALSO
 
   @e as68, @e debug68, @e info68, @e sc68, @e sourcer68, @e unice68

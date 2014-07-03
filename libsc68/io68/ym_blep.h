@@ -5,9 +5,8 @@
  * @author    Antti Lankila
  * @date      2009-01-30
  */
-/* Time-stamp: <2013-08-07 13:52:47 ben> */
 
-/* Copyright (C) 1998-2009 Antti Lankila */
+/* Copyright (c) 1998-2014 Antti Lankila */
 
 /**
  * Setup function for ym blep synthesis engine.

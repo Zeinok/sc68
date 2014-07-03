@@ -4,15 +4,12 @@
  * @author    Benjamin Gerard
  * @date      1999/03/20
  * @brief     YM-2149 emulator plugin header.
- *
  */
 
-/* $Id$ */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-/* Copyright (C) 1998-2009 Benjamin Gerard */
-
-#ifndef _IO68_YM_IO_H_
-#define _IO68_YM_IO_H_
+#ifndef IO68_YM_IO_H
+#define IO68_YM_IO_H
 
 #include "io68_api.h"
 #include "emu68/struct68.h"
@@ -91,4 +88,4 @@ int ymio_active_channels(const io68_t * const io, const int clr, const int set);
  *  @}
  */
 
-#endif /* #ifndef _IO68_YM_IO_H_ */
+#endif

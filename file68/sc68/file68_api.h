@@ -5,12 +5,11 @@
  * @date     2007-02-25
  * @brief    Symbol exportation header.
  */
-/* Time-stamp: <2013-07-22 00:21:52 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_API_H_
-#define _FILE68_API_H_
+#ifndef FILE68_API_H
+#define FILE68_API_H
 
 /**
  * @defgroup file68_lib file68 library

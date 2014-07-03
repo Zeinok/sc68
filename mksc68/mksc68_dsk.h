@@ -5,12 +5,11 @@
  * @date     2009-01-01
  * @brief    disk function
  */
-/* Time-stamp: <2013-07-17 21:36:37 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _MKSC68_DSK_H_
-#define _MKSC68_DSK_H_
+#ifndef MKSC68_DSK_H
+#define MKSC68_DSK_H
 
 #include "mksc68_def.h"
 
@@ -44,4 +43,5 @@ EXTERN68 int dsk_play(dsk_play_t * params);
 EXTERN68 int dsk_stop(void);
 EXTERN68 int dsk_playing(void);
 
-#endif /* ifndef _MKSC68_DSK_H_ */
+#endif
+

@@ -6,10 +6,10 @@
  * @brief    mksc68 command line header.
  */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _MKSC68_CLI_H_
-#define _MKSC68_CLI_H_
+#ifndef MKSC68_CLI_H
+#define MKSC68_CLI_H
 
 #include "mksc68_def.h"
 
@@ -41,4 +41,4 @@ EXTERN68
  */
 void cli_release(void);
 
-#endif /* #ifndef _MKSC68_CLI_H_ */
+#endif

@@ -5,12 +5,11 @@
  * @date     2013-05-30
  * @brief    music duration database header.
  */
-/* Time-stamp: <2013-08-07 13:43:11 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_TDB_H_
-#define _FILE68_TDB_H_
+#ifndef FILE68_TDB_H
+#define FILE68_TDB_H
 
 #include "file68_api.h"
 

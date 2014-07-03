@@ -5,9 +5,8 @@
  * @date      1998/06/24
  * @brief     YM-2149 emulator header.
  */
-/* Time-stamp: <2013-08-16 04:46:12 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef IO68_YM_EMUL_H
 #define IO68_YM_EMUL_H

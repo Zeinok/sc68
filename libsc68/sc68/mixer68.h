@@ -5,9 +5,8 @@
  * @author    Benjamin Gerard
  * @date      1999/05/17
  */
-/* Time-stamp: <2013-08-25 07:06:35 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef MIXER68_H
 #define MIXER68_H

@@ -5,7 +5,8 @@
  * @author    Benjamin Gerard
  * @date      2009/02/10
  */
-/* Time-stamp: <2013-08-07 13:44:31 ben> */
+
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 IO68_EXTERN
 /** Setup function for sc68 pulse ym engine.

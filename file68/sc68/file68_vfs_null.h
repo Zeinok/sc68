@@ -5,12 +5,11 @@
  * @date     2003-10-10
  * @brief    Null stream header.
  */
-/* Time-stamp: <2013-08-09 19:39:53 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_VFS_NULL_H_
-#define _FILE68_VFS_NULL_H_
+#ifndef FILE68_VFS_NULL_H
+#define FILE68_VFS_NULL_H
 
 #include "file68_vfs.h"
 
@@ -52,4 +51,3 @@ void vfs68_null_shutdown(void);
  */
 
 #endif
-

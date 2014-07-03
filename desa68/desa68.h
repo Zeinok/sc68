@@ -5,12 +5,11 @@
  * @author    Benjamin Gerard
  * @date      1999-03-17
  */
-/* Time-stamp: <2013-08-07 16:14:53 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _DESA68_H_
-#define _DESA68_H_
+#ifndef DESA68_H
+#define DESA68_H
 
 #ifndef DESA68_EXTERN
 # ifdef __cplusplus
@@ -302,4 +301,4 @@ const char * desa68_versionstr(void);
  * @}
  */
 
-#endif /* #ifndef _DESA68_H_ */
+#endif

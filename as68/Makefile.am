@@ -1,11 +1,10 @@
-# Time-stamp: <2011-09-10 04:43:27 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |   as68 -- Makefile.am -- Use with automake to produce Makefile.in    | 
 # |                                                                      |
-# |                 (C) 1998-2011 Benjamin Gerard                        |
+# |               Copyright (C) 1998-2014 Benjamin Gerard                |
 # |                                                                      |
-# |             <http://sourceforge.net/users/benjihan>                  |
+# |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@

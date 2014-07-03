@@ -1,11 +1,10 @@
-# Time-stamp: <2013-07-29 00:12:11 ben>
 # ,----------------------------------------------------------------------.
 # |                                                                      |
 # |  emu68 -- Makefile.am -- Use with automake to produce configure.in   |
 # |                                                                      |
-# |                 (C) 1998-2013 Benjamin Gerard                        |
+# |               Copyright (C) 1998-2014 Benjamin Gerard                |
 # |                                                                      |
-# |            <http://sourceforge.net/users/benjihan>                   |
+# |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
 # `----------------------------------------------------------------------'
 # @configure_input@

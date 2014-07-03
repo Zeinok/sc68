@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef _MKSC68_TAG_H_
 #define _MKSC68_TAG_H_
@@ -26,4 +26,5 @@ EXTERN68 void    tag_del_all(void);
 EXTERN68 const char * tag_get(int trk, const char * var);
 EXTERN68 const char * tag_set(int trk, const char * var, const char * val);
 
-#endif /* ifndef _MKSC68_TAG_H_ */
+#endif
+

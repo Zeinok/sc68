@@ -5,9 +5,8 @@
  * @date     2013-08-02
  * @brief    Libc missing or faulty functions replacements.
  */
-/* Time-stamp: <2013-08-14 03:44:29 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef LIBC68_H
 #define LIBC68_H

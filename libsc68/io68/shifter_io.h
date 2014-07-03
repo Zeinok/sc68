@@ -7,12 +7,10 @@
  *
  */
 
-/* $Id$ */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-/* Copyright (C) 1998-2009 Benjamin Gerard */
-
-#ifndef _IO68_SHIFTER_IO_H_
-#define _IO68_SHIFTER_IO_H_
+#ifndef IO68_SHIFTER_IO_H
+#define IO68_SHIFTER_IO_H
 
 #include "io68_api.h"
 

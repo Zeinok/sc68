@@ -8,7 +8,7 @@
 
 @section licence LICENCE
 
-  Copyright (C) 1993-2009 Vincent Penne and Benjamin Gerard
+  Copyright (c) 1993-2009 Vincent Penne and Benjamin Gerard
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -42,12 +42,12 @@
   @arg @b -V              Enable Verbose (default)
   @arg @b -b[Kbytes]      Change code buffer (Kbytes is a number of Kbyte)
   @arg @b -s \<filename\> Set relocation table filename (def:<in>.rel)
-  @arg @b -o \<filename\> Set output filename (def:<in>.bin) 
+  @arg @b -o \<filename\> Set output filename (def:<in>.bin)
 
 
 @section syntax ASSEMBLER SYNTAX
 
-  as68 syntax is very close to hisoft genst(tm). 
+  as68 syntax is very close to hisoft genst(tm).
   Except for some assembly directives are which are followed by a
   { ... } block. In other words it should be close enough to Motorola
   specifications.
@@ -55,7 +55,7 @@
   @subsection macrosyntax MACRO SYNTAX
 
     Following sample should demonstrate macro basic syntax.
-  
+
     @code
     name MACRO
     {
@@ -107,7 +107,7 @@
      add.l   a1,0(a1,d0.l)
      bra.s   reloc
    .finish:
-     rts        
+     rts
    @endcode
 
 
@@ -129,7 +129,7 @@
     @bug  label can not have an instruction name
     @bug  label can start at any column
 
-   
+
   @section seealso SEE ALSO
 
     @see debug68_prg, sourcer68_prg

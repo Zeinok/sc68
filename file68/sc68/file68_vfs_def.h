@@ -5,12 +5,11 @@
  * @date     2003-08-08
  * @brief    Generic stream definition header.
  */
-/* Time-stamp: <2013-07-24 04:20:19 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _FILE68_VFS_DEF_H_
-#define _FILE68_VFS_DEF_H_
+#ifndef FILE68_VFS_DEF_H
+#define FILE68_VFS_DEF_H
 
 #include "file68_vfs.h"
 

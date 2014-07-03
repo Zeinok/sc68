@@ -5,9 +5,8 @@
  * @author    Benjamin Gerard
  * @date      1999/13/03
  */
-/* Time-stamp: <2013-09-13 18:01:56 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef EMU68_EXCEP68_H
 #define EMU68_EXCEP68_H

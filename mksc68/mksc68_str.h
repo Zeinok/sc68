@@ -7,10 +7,10 @@
  *
  */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _MKSC68_STR_H_
-#define _MKSC68_STR_H_
+#ifndef MKSC68_STR_H
+#define MKSC68_STR_H
 
 #include "mksc68_def.h"
 
@@ -20,4 +20,4 @@ EXTERN68 int    str_time_range(const char ** ptr_tl, int * from, int * to);
 EXTERN68 char * str_timefmt(char * buf, int len, unsigned int ms);
 EXTERN68 char * str_hardware(char * const buf, int max, int hw);
 
-#endif /* #ifndef _MKSC68_STR_H_ */
+#endif

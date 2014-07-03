@@ -3,9 +3,7 @@
  * @brief   a 68K sourcer program
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2013 Benjamin Gerard
- *
- * Time-stamp: <2013-09-21 06:04:19 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -1016,7 +1014,7 @@ static int print_version(void)
   puts
     (PACKAGE_STRING "\n"
      "\n"
-     "Copyright (C) 1998-2013 Benjamin Gerard.\n"
+     "Copyright (c) 1998-2014 Benjamin Gerard.\n"
      "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
      "This is free software: you are free to change and redistribute it.\n"
      "There is NO WARRANTY, to the extent permitted by law.\n"
@@ -1098,7 +1096,7 @@ static int print_usage(void)
       "  shifting. Warning: NO PRECEDENCE !!!.\n"
       );
   puts
-    ("Copyright (C) 1998-2013 Benjamin Gerard.\n"
+    ("Copyright (c) 1998-2014 Benjamin Gerard.\n"
      "\n"
      "Visit <" PACKAGE_URL ">\n"
      "Report bugs to <" PACKAGE_BUGREPORT ">");

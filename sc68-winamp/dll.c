@@ -3,9 +3,7 @@
  * @brief   sc68-ng plugin for winamp 5.5 - other exported functions
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2014 Benjamin Gerard
- *
- * Time-stamp: <2014-01-25 13:29:30 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

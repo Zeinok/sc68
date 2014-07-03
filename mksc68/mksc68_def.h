@@ -7,10 +7,10 @@
  *
  */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _MKSC68_DEF_H_
-# define _MKSC68_DEF_H_
+#ifndef MKSC68_DEF_H
+# define MKSC68_DEF_H
 
 # ifndef EXTERN68
 #  ifdef __cplusplus
@@ -26,4 +26,4 @@
 # define assert(V)
 #endif
 
-#endif /* ifndef _MKSC68_DEF_H_ */
+#endif

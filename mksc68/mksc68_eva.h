@@ -7,10 +7,10 @@
  *
  */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef _MKSC68_EVA_H_
-#define _MKSC68_EVA_H_
+#ifndef MKSC68_EVA_H
+#define MKSC68_EVA_H
 
 #include "mksc68_def.h"
 
@@ -23,4 +23,4 @@ EXTERN68
  */
 int eval(char * expr, int * status);
 
-#endif /* _MKSC68_EVA_H_ */
+#endif

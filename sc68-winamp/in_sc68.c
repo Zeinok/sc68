@@ -3,9 +3,7 @@
  * @brief   sc68-ng plugin for winamp 5.5 - main
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 1998-2014 Benjamin Gerard
- *
- * Time-stamp: <2014-02-07 23:48:32 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -334,7 +332,7 @@ void about(HWND hwnd)
 #ifndef NDEBUG
            "\n" "buid on " __DATE__
 #endif
-           "\n(C) 1998-2014 Benjamin Gerard",
+           "\n(c) 1998-2014 Benjamin Gerard",
            sc68_versionstr(),file68_versionstr());
 
   MessageBox(hwnd,

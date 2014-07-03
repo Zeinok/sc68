@@ -18,7 +18,8 @@ AC_INIT(
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68_doc.h])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.10 silent-rules dist-bzip2])
+AM_INIT_AUTOMAKE([foreign 1.14 silent-rules dist-xz])
+
 AM_MAINTAINER_MODE
 
 # ,----------------------------------------------------------------------.

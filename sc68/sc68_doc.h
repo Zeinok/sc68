@@ -7,7 +7,7 @@ sc68 command line player.
 
 @section author AUTHOR
 
-  Copyright (C) 1998-2003 Benjamin Gerard <ben@sashipa.com>
+  Copyright (c) 1998-2003 Benjamin Gerard <ben@sashipa.com>
 
   This program is free software.
 

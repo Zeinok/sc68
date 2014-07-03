@@ -3,9 +3,7 @@
  * @brief   The whole 68k emulator in a single file.
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (C) 2001-2013 Benjamin Gerard
- *
- * Time-stamp: <2013-07-03 05:03:58 ben>
+ * Copyright (c) 1998-2014 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

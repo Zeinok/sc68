@@ -5,9 +5,8 @@
  * @author    Benjamin Gerard
  * @date      2009/02/10
  */
-/* Time-stamp: <2013-08-04 23:12:28 ben> */
 
-/* Copyright (C) 1998-2013 Benjamin Gerard */
+/* Copyright (c) 1998-2014 Benjamin Gerard */
 
 #ifndef EMU68_EMU68_API_H
 #define EMU68_EMU68_API_H
@@ -29,4 +28,4 @@
 # endif
 #endif
 
-#endif /* #ifndef _EMU68_EMU68_API_H_ */
+#endif
