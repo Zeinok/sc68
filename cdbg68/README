@@ -1,0 +1,29 @@
+                  cdbg68 - curses debugger for sc68
+
+                   It is part of the sc68 project.
+
+               (C) COPYRIGHT 1998-2014 Benjamin Gerard
+
+
+*Synopsis*                                   
+
+  cgdb68 is a 68000 debugger with a curses UI specially design for
+  debugging sc68 files. It was meant to replace the debug function of
+  the older debug68 program.
+
+  However it's unfinished and discontinued since sc68 support GDB
+  remote protocol debugging.
+
+
+                         !!! DISCONTINUED !!!
+
+*Links*
+
+  sc68 website
+       <http://sc68.atari.org>
+
+  sc68 development project
+       <http://sourceforge.net/projects/sc68>
+
+  ncurses website
+       <http://www.gnu.org/software/ncurses/>
