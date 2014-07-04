@@ -32,6 +32,7 @@
  TIMEDB_ENTRY( 0x018dd5a8 ,  0,   8985,      YM+TA), /* 3313 */
  TIMEDB_ENTRY( 0x0192b02e ,  0,  10240,      YM+TA), /* 4116 */
  TIMEDB_ENTRY( 0x01972878 ,  0,   8192,         YM), /* 1221 */
+ TIMEDB_ENTRY( 0x01a7f599 ,  0,   1933,   YM+TA+TD), /* Nostalgic_Demo_Ikari.sndh */
  TIMEDB_ENTRY( 0x01b879d6 ,  0,    315,      YM+TA), /* 2642 */
  TIMEDB_ENTRY( 0x01d08df0 ,  0,   4176,         YM), /* 174 */
  TIMEDB_ENTRY( 0x01d08df0 ,  1,   8160,         YM), /* 174 */
@@ -122,11 +123,13 @@
  TIMEDB_ENTRY( 0x04cf71da ,  0,    445,         YM), /* 2461 */
  TIMEDB_ENTRY( 0x04f8965b ,  0,   3072,         YM), /* 2053 */
  TIMEDB_ENTRY( 0x04f9af8d ,  0,   5840,      YM+TD), /* 2393 */
+ TIMEDB_ENTRY( 0x0523c691 ,  0,   1152,      YM+TC), /* Sisco_Sun.sndh */
  TIMEDB_ENTRY( 0x05259830 ,  0,   9830,         YM), /* 579 */
  TIMEDB_ENTRY( 0x05259830 ,  1,   2048,         YM), /* 579 */
  TIMEDB_ENTRY( 0x05259830 ,  2,     81,         YM), /* 579 */
  TIMEDB_ENTRY( 0x053b080a ,  0,  17921,   YM+TA+TD), /* 2195 */
  TIMEDB_ENTRY( 0x05532f21 ,  0,   6655,         YM), /* 3875 */
+ TIMEDB_ENTRY( 0x055f5d72 ,  0,  36096,YM+TA+TB+TD), /* 2541 */
  TIMEDB_ENTRY( 0x056a61e5 ,  0,  17664,         YM), /* 2903 */
  TIMEDB_ENTRY( 0x056f21c8 ,  0,   5378,         YM), /* 368 */
  TIMEDB_ENTRY( 0x056f21c8 ,  1,   3366,         YM), /* 368 */
@@ -136,12 +139,20 @@
  TIMEDB_ENTRY( 0x0574488b ,  1,   2114,         YM), /* 3489 */
  TIMEDB_ENTRY( 0x057595ad ,  0,   6142,         YM), /* 1307 */
  TIMEDB_ENTRY( 0x0589d640 ,  0,   5760,      YM+TA), /* 918 */
+ TIMEDB_ENTRY( 0x05a9b513 ,  0,    445,         YM), /* 4537 */
+ TIMEDB_ENTRY( 0x05a9b513 ,  1,     81,         YM), /* 4537 */
+ TIMEDB_ENTRY( 0x05a9b513 ,  2,    165,         YM), /* 4537 */
+ TIMEDB_ENTRY( 0x05a9b513 ,  3,    103,         YM), /* 4537 */
+ TIMEDB_ENTRY( 0x05a9b513 ,  4,    389,         YM), /* 4537 */
+ TIMEDB_ENTRY( 0x05a9b513 ,  5,   1030,         YM), /* 4537 */
+ TIMEDB_ENTRY( 0x05a9b513 ,  6,    430,         YM), /* 4537 */
  TIMEDB_ENTRY( 0x05cc2736 ,  0,   6145,         YM), /* 3307 */
  TIMEDB_ENTRY( 0x05cc2736 ,  1,   2305,         YM), /* 3307 */
  TIMEDB_ENTRY( 0x05cc2736 ,  2,    769,         YM), /* 3307 */
  TIMEDB_ENTRY( 0x05cc2736 ,  3,    897,         YM), /* 3307 */
  TIMEDB_ENTRY( 0x05d290a5 ,  0,  16696,YM+TA+TB+TD), /* 2095 */
  TIMEDB_ENTRY( 0x05d9ec36 ,  0,   8928,      YM+TA), /* 1752 */
+ TIMEDB_ENTRY( 0x05e13969 ,  0,    631,         YM), /* 4528 */
  TIMEDB_ENTRY( 0x05e18cd3 ,  0,  13740,         YM), /* 737 */
  TIMEDB_ENTRY( 0x05efff3f ,  0,  92450,      YM+TA), /* 4024 */
  TIMEDB_ENTRY( 0x05f8cadb ,  0,  44513,   YM+TA+TD), /* 2227 */
@@ -210,6 +221,13 @@
  TIMEDB_ENTRY( 0x06fcc8e1 ,  2,    445,         YM), /* 3539 */
  TIMEDB_ENTRY( 0x06fcc8e1 ,  3,    224,         YM), /* 3539 */
  TIMEDB_ENTRY( 0x070471b8 ,  0,   5266,         YM), /* 108 */
+ TIMEDB_ENTRY( 0x070e4547 ,  0,    190,         YM), /* 4501 */
+ TIMEDB_ENTRY( 0x070e4547 ,  1,    292,         YM), /* 4501 */
+ TIMEDB_ENTRY( 0x070e4547 ,  2,    261,         YM), /* 4501 */
+ TIMEDB_ENTRY( 0x070e4547 ,  3,    201,         YM), /* 4501 */
+ TIMEDB_ENTRY( 0x070e4547 ,  4,     12,         YM), /* 4501 */
+ TIMEDB_ENTRY( 0x070e4547 ,  5,     10,         YM), /* 4501 */
+ TIMEDB_ENTRY( 0x070e4547 ,  6,    608,         YM), /* 4501 */
  TIMEDB_ENTRY( 0x07150380 ,  0,   3328,         YM), /* 1191 */
  TIMEDB_ENTRY( 0x07330b09 ,  0,  11600,   YM+TA+TB), /* 74 */
  TIMEDB_ENTRY( 0x075c8520 ,  0, 136720,      YM+TA), /* 4058 */
@@ -253,6 +271,7 @@
  TIMEDB_ENTRY( 0x0812636d ,  0,  25638,      YM+TA), /* 3880 */
  TIMEDB_ENTRY( 0x081efa6f ,  0,   3072,      YM+TD), /* 2635 */
  TIMEDB_ENTRY( 0x0827bf66 ,  0,  23802,         YM), /* 1674 */
+ TIMEDB_ENTRY( 0x0857525f ,  0,  24346,         YM), /* Super_Marios_Bros_Family.sndh */
  TIMEDB_ENTRY( 0x0857c9e8 ,  0,   5710,        STE), /* 3450 */
  TIMEDB_ENTRY( 0x0858e24f ,  0,   5772,      YM+TA), /* 821 */
  TIMEDB_ENTRY( 0x0865e3bb ,  0,  20736,         YM), /* 1447 */
@@ -260,16 +279,16 @@
  TIMEDB_ENTRY( 0x087c4b4d ,  0, 115699,      YM+TA), /* 3821 */
  TIMEDB_ENTRY( 0x0886969b ,  0,   2685,         YM), /* 1530 */
  TIMEDB_ENTRY( 0x0889f290 ,  0,  39936,         YM), /* 1437 */
- TIMEDB_ENTRY( 0x08b843f3 ,  0,  11648,         YM), /* 2192 */
- TIMEDB_ENTRY( 0x08b843f3 ,  1,  14592,         YM), /* 2192 */
- TIMEDB_ENTRY( 0x08b843f3 ,  2,  18912,         YM), /* 2192 */
- TIMEDB_ENTRY( 0x08b843f3 ,  3,  12809,         YM), /* 2192 */
- TIMEDB_ENTRY( 0x08b843f3 ,  4,  13824,         YM), /* 2192 */
- TIMEDB_ENTRY( 0x08b843f3 ,  5,  15904,         YM), /* 2192 */
- TIMEDB_ENTRY( 0x08b843f3 ,  6,   2560,         YM), /* 2192 */
- TIMEDB_ENTRY( 0x08b843f3 ,  7,   3072,         YM), /* 2192 */
- TIMEDB_ENTRY( 0x08b843f3 ,  8,   2837,         YM), /* 2192 */
- TIMEDB_ENTRY( 0x08b843f3 ,  9,   5376,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0x08b843f3 ,  0,  11648,         YM), /* Enchanted_Land.sndh */
+ TIMEDB_ENTRY( 0x08b843f3 ,  1,  14592,         YM), /* Enchanted_Land.sndh */
+ TIMEDB_ENTRY( 0x08b843f3 ,  2,  18912,         YM), /* Enchanted_Land.sndh */
+ TIMEDB_ENTRY( 0x08b843f3 ,  3,  12809,         YM), /* Enchanted_Land.sndh */
+ TIMEDB_ENTRY( 0x08b843f3 ,  4,  13824,         YM), /* Enchanted_Land.sndh */
+ TIMEDB_ENTRY( 0x08b843f3 ,  5,  15904,         YM), /* Enchanted_Land.sndh */
+ TIMEDB_ENTRY( 0x08b843f3 ,  6,   2560,         YM), /* Enchanted_Land.sndh */
+ TIMEDB_ENTRY( 0x08b843f3 ,  7,   3072,         YM), /* Enchanted_Land.sndh */
+ TIMEDB_ENTRY( 0x08b843f3 ,  8,   2837,         YM), /* Enchanted_Land.sndh */
+ TIMEDB_ENTRY( 0x08b843f3 ,  9,   5376,         YM), /* Enchanted_Land.sndh */
  TIMEDB_ENTRY( 0x08ec970f ,  0,  25080,      YM+TA), /* 1216 */
  TIMEDB_ENTRY( 0x09052c4b ,  0,   4229,         YM), /* 81 */
  TIMEDB_ENTRY( 0x09052c4b ,  1,   9654,         YM), /* 81 */
@@ -317,6 +336,7 @@
  TIMEDB_ENTRY( 0x0a8acf9e ,  0,   5120,         YM), /* 805 */
  TIMEDB_ENTRY( 0x0a8de2f4 ,  0,   3648,         YM), /* 1100 */
  TIMEDB_ENTRY( 0x0a9036d3 ,  0,  17280,YM+TA+TB+TD), /* 2101 */
+ TIMEDB_ENTRY( 0x0a968b69 ,  0,  47631,   YM+TC+TD), /* Heftig.sndh */
  TIMEDB_ENTRY( 0x0aa9116a ,  0,   6272,YM+TA+TB+TD), /* 188 */
  TIMEDB_ENTRY( 0x0ac01e58 ,  0,  13055,         YM), /* 347 */
  TIMEDB_ENTRY( 0x0ac01e58 ,  1,   2559,         YM), /* 347 */
@@ -325,8 +345,11 @@
  TIMEDB_ENTRY( 0x0ac1c32b ,  1,   1365,         YM), /* 155 */
  TIMEDB_ENTRY( 0x0ac1c32b ,  2,     69,         YM), /* 155 */
  TIMEDB_ENTRY( 0x0acba10e ,  0,  11516,YM+TA+TB+TD), /* 3005 */
+ TIMEDB_ENTRY( 0x0ad1a60e ,  0,     64,         YM), /* 4515 */
  TIMEDB_ENTRY( 0x0ad73d30 ,  0,   8000,         YM), /* 3244 */
+ TIMEDB_ENTRY( 0x0ad9b6c2 ,  0,   1825,         YM), /* 4431 */
  TIMEDB_ENTRY( 0x0af49608 ,  0,   1926,         YM), /* 3920 */
+ TIMEDB_ENTRY( 0x0af7936f ,  0,  12537,      YM+TB), /* Let_the_Djoard_Bells_Ring.sndh */
  TIMEDB_ENTRY( 0x0af93806 ,  0,  17408,         YM), /* 2139 */
  TIMEDB_ENTRY( 0x0b06d0dd ,  0,  43816,YM+TA+TB+TD), /* 2442 */
  TIMEDB_ENTRY( 0x0b19f70f ,  0,   2240,         YM), /* 3189 */
@@ -334,6 +357,7 @@
  TIMEDB_ENTRY( 0x0b1e485c ,  0,   6914,         YM), /* 2117 */
  TIMEDB_ENTRY( 0x0b1e485c ,  1,    770,         YM), /* 2117 */
  TIMEDB_ENTRY( 0x0b2b30f2 ,  0,   8953,         YM), /* 3565 */
+ TIMEDB_ENTRY( 0x0b33f385 ,  0,  10301,YM+TA+TB+TD), /* 2521 */
  TIMEDB_ENTRY( 0x0b4b79f3 ,  0,  15231,YM+TA+TB+TD), /* 2707 */
  TIMEDB_ENTRY( 0x0b587f22 ,  0,   3232,         YM), /* 3185 */
  TIMEDB_ENTRY( 0x0b5cd2b1 ,  0,   2309,         YM), /* 2291 */
@@ -440,16 +464,24 @@
  TIMEDB_ENTRY( 0x0cf0f911 ,  8,  78763,      YM+TA), /* 3774 */
  TIMEDB_ENTRY( 0x0cf0f911 ,  9,  68258,      YM+TA), /* 3774 */
  TIMEDB_ENTRY( 0x0cf0f911 , 10,  30721,      YM+TA), /* 3774 */
+ TIMEDB_ENTRY( 0x0cf4ed4b ,  0,   9984,      YM+TA), /* 4435 */
  TIMEDB_ENTRY( 0x0cfbd1c3 ,  0,   8587,YM+TA+TB+TD), /* 3391 */
  TIMEDB_ENTRY( 0x0d07145f ,  0,   7193,         YM), /* 1579 */
  TIMEDB_ENTRY( 0x0d13205e ,  0,   7295,YM+TA+TB+TD), /* 2807 */
  TIMEDB_ENTRY( 0x0d1f0879 ,  0,   8192,         YM), /* 1168 */
+ TIMEDB_ENTRY( 0x0d2c38b9 ,  0,     57,         YM), /* 4490 */
+ TIMEDB_ENTRY( 0x0d2c38b9 ,  1,   1861,         YM), /* 4490 */
+ TIMEDB_ENTRY( 0x0d2c38b9 ,  2,    121,         YM), /* 4490 */
+ TIMEDB_ENTRY( 0x0d2c38b9 ,  3,     34,         YM), /* 4490 */
+ TIMEDB_ENTRY( 0x0d2c38b9 ,  4,     49,         YM), /* 4490 */
+ TIMEDB_ENTRY( 0x0d2c38b9 ,  5,    365,         YM), /* 4490 */
  TIMEDB_ENTRY( 0x0d2f26a5 ,  0,   4160,         YM), /* 573 */
  TIMEDB_ENTRY( 0x0d2f26a5 ,  1,    317,         YM), /* 573 */
  TIMEDB_ENTRY( 0x0d2f26a5 ,  2,      7,         YM), /* 573 */
  TIMEDB_ENTRY( 0x0d2f26a5 ,  3,     51,         YM), /* 573 */
  TIMEDB_ENTRY( 0x0d3f87e8 ,  0, 185090,      YM+TA), /* 3731 */
  TIMEDB_ENTRY( 0x0d4dbf05 ,  0,  11271,   YM+TA+TD), /* 2272 */
+ TIMEDB_ENTRY( 0x0d58eb4b ,  0,   5003,      YM+TA), /* 4416 */
  TIMEDB_ENTRY( 0x0d5cce44 ,  0,   2498,         YM), /* 3044 */
  TIMEDB_ENTRY( 0x0d61dd75 ,  0,   5039,YM+TA+TB+TD), /* 2980 */
  TIMEDB_ENTRY( 0x0d63d768 ,  0,   6720,         YM), /* 1257 */
@@ -481,6 +513,9 @@
  TIMEDB_ENTRY( 0x0ded0765 ,  0,   4218,YM+TA+TB+TD), /* 4255 */
  TIMEDB_ENTRY( 0x0df05e40 ,  0,   8448,YM+TA+TB+TD), /* 2067 */
  TIMEDB_ENTRY( 0x0df05e40 ,  1,   9504,YM+TA+TB+TD), /* 2067 */
+ TIMEDB_ENTRY( 0x0df45c86 ,  0,    525,         YM), /* 4525 */
+ TIMEDB_ENTRY( 0x0df45c86 ,  1,   2944,         YM), /* 4525 */
+ TIMEDB_ENTRY( 0x0df45c86 ,  2,    215,         YM), /* 4525 */
  TIMEDB_ENTRY( 0x0e01f55f ,  0,  17792,         YM), /* 2187 */
  TIMEDB_ENTRY( 0x0e106f8d ,  0,   4473,      YM+TA), /* 4234 */
  TIMEDB_ENTRY( 0x0e128fd6 ,  0,  23264,YM+TA+TB+TD), /* 4241 */
@@ -540,11 +575,13 @@
  TIMEDB_ENTRY( 0x10250c70 ,  0,   8727,         YM), /* 4075 */
  TIMEDB_ENTRY( 0x10443af2 ,  0,   8384,         YM), /* 2052 */
  TIMEDB_ENTRY( 0x10477923 ,  0,  10861,         YM), /* 170 */
+ TIMEDB_ENTRY( 0x104ec1fb ,  0,  20601,         YM), /* Akira_Versus_San_Go_Ku.sndh */
  TIMEDB_ENTRY( 0x1075f97c ,  0,  15354,         YM), /* 1693 */
  TIMEDB_ENTRY( 0x107f3197 ,  0,   1680,      YM+TA), /* 2886 */
  TIMEDB_ENTRY( 0x1099deae ,  0,  10160,         YM), /* 3145 */
  TIMEDB_ENTRY( 0x10a1171f ,  0,   4600,      YM+TA), /* 4227 */
  TIMEDB_ENTRY( 0x10a18d1f ,  0,   9412,         YM), /* 2234 */
+ TIMEDB_ENTRY( 0x10a51096 ,  0,  33792,YM+TA+TB+TD), /* 2540 */
  TIMEDB_ENTRY( 0x10ab8c09 ,  0,   3328,         YM), /* 1222 */
  TIMEDB_ENTRY( 0x10c356e4 ,  0,  13483,      YM+TA), /* 1328 */
  TIMEDB_ENTRY( 0x10cbaa59 ,  0,   3200,         YM), /* 1428 */
@@ -565,13 +602,27 @@
  TIMEDB_ENTRY( 0x11906bd8 ,  0,  11641,      YM+TA), /* 1936 */
  TIMEDB_ENTRY( 0x11ae621c ,  0,   1339,         YM), /* 3488 */
  TIMEDB_ENTRY( 0x11dc782e ,  0,   5188,      YM+TA), /* 1610 */
+ TIMEDB_ENTRY( 0x11e76d9f ,  0,   3840,      YM+TA), /* 4427 */
  TIMEDB_ENTRY( 0x1202b75e ,  0,   4480,         YM), /* 1209 */
  TIMEDB_ENTRY( 0x1206cc06 ,  0,    511,         YM), /* 3869 */
+ TIMEDB_ENTRY( 0x12121edb ,  0,   2400,         YM), /* 4481 */
  TIMEDB_ENTRY( 0x1215648d ,  0,   3840,         YM), /* 786 */
+ TIMEDB_ENTRY( 0x1219e345 ,  0,   5712,      YM+TA), /* 4439 */
  TIMEDB_ENTRY( 0x122fe23f ,  0,  10241,      YM+TA), /* 3749 */
  TIMEDB_ENTRY( 0x123b4b2f ,  0,  27648,         YM), /* 3477 */
  TIMEDB_ENTRY( 0x1281c6f4 ,  0,   6138,YM+TA+TB+TD), /* 831 */
  TIMEDB_ENTRY( 0x12c1b460 ,  0,   3645,YM+TA+TB+TD), /* 73 */
+ TIMEDB_ENTRY( 0x12ce83a0 ,  0,   2240,         YM), /* Ninja_Spirits.sndh */
+ TIMEDB_ENTRY( 0x12ce83a0 ,  1,   6496,         YM), /* Ninja_Spirits.sndh */
+ TIMEDB_ENTRY( 0x12ce83a0 ,  2,    640,         YM), /* Ninja_Spirits.sndh */
+ TIMEDB_ENTRY( 0x12ce83a0 ,  3,    320,         YM), /* Ninja_Spirits.sndh */
+ TIMEDB_ENTRY( 0x12ce83a0 ,  4,   4960,         YM), /* Ninja_Spirits.sndh */
+ TIMEDB_ENTRY( 0x12ce83a0 ,  5,    448,         YM), /* Ninja_Spirits.sndh */
+ TIMEDB_ENTRY( 0x12ce83a0 ,  6,   2670,         YM), /* Ninja_Spirits.sndh */
+ TIMEDB_ENTRY( 0x12ce83a0 ,  7,   4000,         YM), /* Ninja_Spirits.sndh */
+ TIMEDB_ENTRY( 0x12ce83a0 ,  8,   1280,         YM), /* Ninja_Spirits.sndh */
+ TIMEDB_ENTRY( 0x12ce83a0 ,  9,   2688,         YM), /* Ninja_Spirits.sndh */
+ TIMEDB_ENTRY( 0x12ce83a0 , 10,   2400,         YM), /* Ninja_Spirits.sndh */
  TIMEDB_ENTRY( 0x13030213 ,  0,   2681,   YM+TB+TD), /* 2427 */
  TIMEDB_ENTRY( 0x132348e5 ,  0,   6144,         YM), /* 474 */
  TIMEDB_ENTRY( 0x132df1bd ,  0,   3072,         YM), /* 1812 */
@@ -598,6 +649,20 @@
  TIMEDB_ENTRY( 0x132df1bd , 21,   9688,         YM), /* 1812 */
  TIMEDB_ENTRY( 0x132df1bd , 22,   1152,         YM), /* 1812 */
  TIMEDB_ENTRY( 0x134d9229 ,  0,   5376,         YM), /* 3629 */
+ TIMEDB_ENTRY( 0x13521ee8 ,  0,    441,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 ,  1,    516,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 ,  2,    576,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 ,  3,    467,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 ,  4,    602,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 ,  5,    442,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 ,  6,    552,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 ,  7,    599,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 ,  8,    648,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 ,  9,    483,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 , 10,    804,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 , 11,    496,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 , 12,    786,         YM), /* 4538 */
+ TIMEDB_ENTRY( 0x13521ee8 , 13,    392,         YM), /* 4538 */
  TIMEDB_ENTRY( 0x135f9504 ,  0,  43681,      YM+TA), /* 3727 */
  TIMEDB_ENTRY( 0x1369cc10 ,  0,   5737,         YM), /* 4152 */
  TIMEDB_ENTRY( 0x1369cc10 ,  1,   6481,         YM), /* 4152 */
@@ -636,10 +701,17 @@
  TIMEDB_ENTRY( 0x14019d82 ,  8,  11552,         YM), /* 2218 */
  TIMEDB_ENTRY( 0x14019d82 ,  9,   9989,         YM), /* 2218 */
  TIMEDB_ENTRY( 0x14019d82 , 10,   6735,         YM), /* 2218 */
+ TIMEDB_ENTRY( 0x1407b768 ,  0,   5427,         YM), /* Dan_Dare.sndh */
+ TIMEDB_ENTRY( 0x1407b768 ,  1,   1152,         YM), /* Dan_Dare.sndh */
+ TIMEDB_ENTRY( 0x1407b768 ,  2,   1536,         YM), /* Dan_Dare.sndh */
  TIMEDB_ENTRY( 0x141fa33b ,  0,  10032,         YM), /* 1268 */
  TIMEDB_ENTRY( 0x1440ad99 ,  0,    315,         YM), /* 2491 */
  TIMEDB_ENTRY( 0x1445980b ,  0,   4992,         YM), /* 942 */
+ TIMEDB_ENTRY( 0x14540b43 ,  0,  26490,         YM), /* Throw_The_Confettis.sndh */
  TIMEDB_ENTRY( 0x145cbd3b ,  0,  10365,YM+TA+TB+TD), /* 1017 */
+ TIMEDB_ENTRY( 0x14651f2d ,  0,    765,         YM), /* 4508 */
+ TIMEDB_ENTRY( 0x14651f2d ,  1,    823,         YM), /* 4508 */
+ TIMEDB_ENTRY( 0x14651f2d ,  2,   1218,         YM), /* 4508 */
  TIMEDB_ENTRY( 0x14752934 ,  0,   7296,         YM), /* 238 */
  TIMEDB_ENTRY( 0x1495071d ,  0,   9616,         YM), /* 1023 */
  TIMEDB_ENTRY( 0x149a5ad1 ,  0,   5760,   YM+TA+TD), /* 2255 */
@@ -673,6 +745,9 @@
  TIMEDB_ENTRY( 0x15d4bdc9 ,  0,  14592,   YM+TA+TD), /* 2503 */
  TIMEDB_ENTRY( 0x15e0eb75 ,  0,   4804,         YM), /* 3131 */
  TIMEDB_ENTRY( 0x15ee6b5c ,  0,   6888,YM+TA+TB+TD), /* 178 */
+ TIMEDB_ENTRY( 0x15f5c058 ,  0,  14720,         YM), /* Jug.sndh */
+ TIMEDB_ENTRY( 0x15f5c058 ,  1,   8208,         YM), /* Jug.sndh */
+ TIMEDB_ENTRY( 0x15f5c058 ,  2,  18176,         YM), /* Jug.sndh */
  TIMEDB_ENTRY( 0x160fbf10 ,  0,   7704,         YM), /* 617 */
  TIMEDB_ENTRY( 0x161a542a ,  0,   6079,YM+TA+TB+TD), /* 1152 */
  TIMEDB_ENTRY( 0x16228d20 ,  0,   3079,         YM), /* 2735 */
@@ -682,6 +757,7 @@
  TIMEDB_ENTRY( 0x1650dd24 ,  3,    607,         YM), /* 89 */
  TIMEDB_ENTRY( 0x167e07f3 ,  0,   6527,YM+TA+TB+TD), /* 2981 */
  TIMEDB_ENTRY( 0x1692a08e ,  0,   5565,YM+TA+TB+TD), /* 203 */
+ TIMEDB_ENTRY( 0x16933115 ,  0,   1914,     YM+STE), /* For_Your_Loader_3.sndh */
  TIMEDB_ENTRY( 0x16bfa1c0 ,  0,   3840,         YM), /* 1074 */
  TIMEDB_ENTRY( 0x16d4bf68 ,  0,   2687,YM+TA+TB+TD), /* 2872 */
  TIMEDB_ENTRY( 0x16daeec1 ,  0,   4984,         YM), /* 571 */
@@ -694,12 +770,15 @@
  TIMEDB_ENTRY( 0x16e4d0e2 ,  0,   8568,         YM), /* 147 */
  TIMEDB_ENTRY( 0x16e4d0e2 ,  1,   1120,         YM), /* 147 */
  TIMEDB_ENTRY( 0x16e4d0e2 ,  2,     61,         YM), /* 147 */
+ TIMEDB_ENTRY( 0x16e61312 ,  0,   4611,      YM+TA), /* 4409 */
  TIMEDB_ENTRY( 0x16fedf6d ,  0,   8233,         YM), /* 117 */
  TIMEDB_ENTRY( 0x170813e0 ,  0,  28032,         YM), /* 2180 */
  TIMEDB_ENTRY( 0x171600c0 ,  0,  29536,YM+TA+TB+TD), /* 3358 */
+ TIMEDB_ENTRY( 0x172f9e72 ,  0, 136720,      YM+TA), /* Power_Bass.sndh */
  TIMEDB_ENTRY( 0x173021f6 ,  0,   3455,YM+TA+TB+TD), /* 2988 */
  TIMEDB_ENTRY( 0x177d17ab ,  0,  16231,         YM), /* 3548 */
  TIMEDB_ENTRY( 0x177e6d27 ,  0,   9791,YM+TA+TB+TD), /* 3583 */
+ TIMEDB_ENTRY( 0x17a8e5a3 ,  0,  97201,      YM+TA), /* 4404 */
  TIMEDB_ENTRY( 0x17c24cd9 ,  0,   1536,      YM+TA), /* 920 */
  TIMEDB_ENTRY( 0x17c7fb3e ,  0,   5375,YM+TA+TB+TD), /* 3274 */
  TIMEDB_ENTRY( 0x17cfdfc7 ,  0,   7968,      YM+TA), /* 807 */
@@ -709,6 +788,7 @@
  TIMEDB_ENTRY( 0x17e34c6a ,  0,  12545,   YM+TA+TB), /* 1833 */
  TIMEDB_ENTRY( 0x17f47817 ,  0,   4608,         YM), /* 496 */
  TIMEDB_ENTRY( 0x17f8abde ,  0,   8058,YM+TA+TB+TD), /* 1371 */
+ TIMEDB_ENTRY( 0x183e8fe0 ,  0,   8585,      YM+TA), /* 4432 */
  TIMEDB_ENTRY( 0x1842c149 ,  0,  13440,         YM), /* 1178 */
  TIMEDB_ENTRY( 0x184a5220 ,  0,   5754,   YM+TA+TD), /* 63 */
  TIMEDB_ENTRY( 0x186c4ab7 ,  0,  29736,      YM+TD), /* 1463 */
@@ -742,6 +822,7 @@
  TIMEDB_ENTRY( 0x19a473a7 ,  0,   6912,   YM+TA+TD), /* 2326 */
  TIMEDB_ENTRY( 0x19ae899a ,  0,   3261,YM+TA+TB+TD), /* 275 */
  TIMEDB_ENTRY( 0x19cb007c ,  0,    768,      YM+TA), /* 1751 */
+ TIMEDB_ENTRY( 0x19ce95d7 ,  0,   1320,      YM+TA), /* 4424 */
  TIMEDB_ENTRY( 0x19e62de8 ,  0,   5631,YM+TA+TB+TD), /* 2979 */
  TIMEDB_ENTRY( 0x19f2d59e ,  0,  10746,         YM), /* 1235 */
  TIMEDB_ENTRY( 0x19f4d71f ,  0,   4864,     YM+STE), /* 2177 */
@@ -820,6 +901,8 @@
  TIMEDB_ENTRY( 0x1b893559 ,  2,   3080,         YM), /* 1382 */
  TIMEDB_ENTRY( 0x1b893559 ,  3,   3430,         YM), /* 1382 */
  TIMEDB_ENTRY( 0x1b92ca5a ,  0,   3664,         YM), /* 3194 */
+ TIMEDB_ENTRY( 0x1b92d24d ,  0,    209,         YM), /* 4509 */
+ TIMEDB_ENTRY( 0x1b92d24d ,  1,    465,         YM), /* 4509 */
  TIMEDB_ENTRY( 0x1b9f23b0 ,  0,   8188,   YM+TA+TB), /* 209 */
  TIMEDB_ENTRY( 0x1ba3b22f ,  0,   7968,      YM+TA), /* 2869 */
  TIMEDB_ENTRY( 0x1bb19ba2 ,  0,   8952,YM+TA+TB+TD), /* 2860 */
@@ -847,6 +930,7 @@
  TIMEDB_ENTRY( 0x1c432308 , 10,    127,         YM), /* 1055 */
  TIMEDB_ENTRY( 0x1c976fba ,  0,  16352,   YM+TA+TD), /* 2626 */
  TIMEDB_ENTRY( 0x1ca333b3 ,  0,   3580,      YM+TA), /* 4304 */
+ TIMEDB_ENTRY( 0x1cb3f173 ,  0,   8057,      YM+TB), /* My_ST_Suntans_in_Brazil.sndh */
  TIMEDB_ENTRY( 0x1ccbc756 ,  0,   1736,         YM), /* 3089 */
  TIMEDB_ENTRY( 0x1cf75009 ,  0,   3095,YM+TA+TB+TD), /* 3421 */
  TIMEDB_ENTRY( 0x1d005ee4 ,  0,   4771,         YM), /* 2033 */
@@ -906,6 +990,7 @@
  TIMEDB_ENTRY( 0x1e8d2599 ,  0,  62977,      YM+TA), /* 4356 */
  TIMEDB_ENTRY( 0x1ea83810 ,  0,  21504,      YM+TA), /* 772 */
  TIMEDB_ENTRY( 0x1ee3509a ,  0,  12537,      YM+TA), /* 1684 */
+ TIMEDB_ENTRY( 0x1ef45b07 ,  0, 107526,      YM+TA), /* Magnetic_Fields_2.sndh */
  TIMEDB_ENTRY( 0x1efb7a03 ,  0,   5530,         YM), /* 1237 */
  TIMEDB_ENTRY( 0x1efba80a ,  0,   2304,         YM), /* 750 */
  TIMEDB_ENTRY( 0x1efba80a ,  1,    512,         YM), /* 750 */
@@ -1003,6 +1088,8 @@
  TIMEDB_ENTRY( 0x215d8d3d ,  0,  14208,         YM), /* 2120 */
  TIMEDB_ENTRY( 0x216b8a9a ,  0,   4992,         YM), /* 1175 */
  TIMEDB_ENTRY( 0x216ba57f ,  0,  20352,         YM), /* 2876 */
+ TIMEDB_ENTRY( 0x2198291d ,  0,   9600,         YM), /* Outrun.sndh */
+ TIMEDB_ENTRY( 0x2198291d ,  1,   5832,         YM), /* Outrun.sndh */
  TIMEDB_ENTRY( 0x21c43e70 ,  0,   3072,         YM), /* 1496 */
  TIMEDB_ENTRY( 0x21d994de ,  0,   6850,         YM), /* 107 */
  TIMEDB_ENTRY( 0x21d994de ,  1,    480,         YM), /* 107 */
@@ -1040,6 +1127,7 @@
  TIMEDB_ENTRY( 0x2255c0e5 ,  4,   2320,         YM), /* 1891 */
  TIMEDB_ENTRY( 0x22564cc6 ,  0,   5374,         YM), /* 3199 */
  TIMEDB_ENTRY( 0x227a9880 ,  0,  14202,      YM+TA), /* 1707 */
+ TIMEDB_ENTRY( 0x228b3077 ,  0,  21945,      YM+TA), /* Hardrock_Ballad.sndh */
  TIMEDB_ENTRY( 0x22a66a81 ,  0,   5231,         YM), /* 3174 */
  TIMEDB_ENTRY( 0x22bd0555 ,  0,   2194,         YM), /* 1922 */
  TIMEDB_ENTRY( 0x22bd0555 ,  1,   3680,         YM), /* 1922 */
@@ -1062,6 +1150,11 @@
  TIMEDB_ENTRY( 0x22bd0555 , 18,     27,         YM), /* 1922 */
  TIMEDB_ENTRY( 0x22bd0555 , 19,     67,         YM), /* 1922 */
  TIMEDB_ENTRY( 0x22bd0555 , 20,  12045,         YM), /* 1922 */
+ TIMEDB_ENTRY( 0x22c2a509 ,  0,  12662,         YM), /* The_Sword_and_The_Rose.sndh */
+ TIMEDB_ENTRY( 0x22d51000 ,  0,     34,         YM), /* 4539 */
+ TIMEDB_ENTRY( 0x22d51000 ,  1,     29,         YM), /* 4539 */
+ TIMEDB_ENTRY( 0x22d51000 ,  2,     30,         YM), /* 4539 */
+ TIMEDB_ENTRY( 0x22d51000 ,  3,    129,         YM), /* 4539 */
  TIMEDB_ENTRY( 0x22e34b5d ,  0,   2879,   YM+TA+TB), /* 2701 */
  TIMEDB_ENTRY( 0x22f07182 ,  0,  20112,         YM), /* 1923 */
  TIMEDB_ENTRY( 0x22ff41b3 ,  0,   5681,         YM), /* 133 */
@@ -1107,6 +1200,7 @@
  TIMEDB_ENTRY( 0x23642d41 ,  1,    737,         YM), /* 4139 */
  TIMEDB_ENTRY( 0x23642d41 ,  2,   1288,         YM), /* 4139 */
  TIMEDB_ENTRY( 0x236de9cc ,  0,  11904,         YM), /* 3662 */
+ TIMEDB_ENTRY( 0x239ad5f5 ,  0,  27644,     YM+STE), /* I_Want_U_To_Shoot_Zem_Up.sndh */
  TIMEDB_ENTRY( 0x23ab1ad4 ,  0,   2559,YM+TA+TB+TD), /* 2798 */
  TIMEDB_ENTRY( 0x23ce900b ,  0,   1040,         YM), /* 2416 */
  TIMEDB_ENTRY( 0x23dca986 ,  0, 105727,      YM+TA), /* 3742 */
@@ -1146,6 +1240,7 @@
  TIMEDB_ENTRY( 0x25191609 ,  0,  23456,         YM), /* 1510 */
  TIMEDB_ENTRY( 0x2521bedd ,  0,   3580,      YM+TA), /* 4296 */
  TIMEDB_ENTRY( 0x25304018 ,  0,  37120,         YM), /* 2689 */
+ TIMEDB_ENTRY( 0x2531e907 ,  0,   6652,YM+TA+TB+TD), /* 280 */
  TIMEDB_ENTRY( 0x2544e432 ,  0,   9407,YM+TA+TB+TD), /* 2973 */
  TIMEDB_ENTRY( 0x255ae2f1 ,  0,   1792,         YM), /* 1402 */
  TIMEDB_ENTRY( 0x257ad548 ,  0,  10992,         YM), /* 3148 */
@@ -1164,6 +1259,8 @@
  TIMEDB_ENTRY( 0x25b4b8f3 ,  2,    147,         YM), /* 3971 */
  TIMEDB_ENTRY( 0x25b4b8f3 ,  3,   2708,         YM), /* 3971 */
  TIMEDB_ENTRY( 0x25b4b8f3 ,  4,   1560,         YM), /* 3971 */
+ TIMEDB_ENTRY( 0x25be5bd0 ,  0,   5825,         YM), /* The_Punisher.sndh */
+ TIMEDB_ENTRY( 0x25be5bd0 ,  1,   1728,         YM), /* The_Punisher.sndh */
  TIMEDB_ENTRY( 0x25d9e06e ,  0,    144,         YM), /* 164 */
  TIMEDB_ENTRY( 0x25d9e06e ,  1,    385,         YM), /* 164 */
  TIMEDB_ENTRY( 0x25d9e06e ,  2,   1153,         YM), /* 164 */
@@ -1187,6 +1284,12 @@
  TIMEDB_ENTRY( 0x272758d6 ,  2,   1536,         YM), /* 1880 */
  TIMEDB_ENTRY( 0x2730c06f ,  0,   5958,         YM), /* 4340 */
  TIMEDB_ENTRY( 0x2732cc8e ,  0,  11527,YM+TA+TB+TD), /* 2487 */
+ TIMEDB_ENTRY( 0x273e1934 ,  0,  16352,         YM), /* 4452 */
+ TIMEDB_ENTRY( 0x273e1934 ,  1,  10240,         YM), /* 4452 */
+ TIMEDB_ENTRY( 0x273e1934 ,  2,  16384,         YM), /* 4452 */
+ TIMEDB_ENTRY( 0x273e1934 ,  3,  10752,         YM), /* 4452 */
+ TIMEDB_ENTRY( 0x273e1934 ,  4,  13824,         YM), /* 4452 */
+ TIMEDB_ENTRY( 0x273e1934 ,  5,  16384,         YM), /* 4452 */
  TIMEDB_ENTRY( 0x2740541d ,  0,   7680,      YM+TA), /* 3902 */
  TIMEDB_ENTRY( 0x275088e0 ,  0,  12672,YM+TA+TB+TD), /* 2104 */
  TIMEDB_ENTRY( 0x275088e0 ,  1,    320,YM+TA+TB+TD), /* 2104 */
@@ -1197,8 +1300,10 @@
  TIMEDB_ENTRY( 0x277aa649 ,  0,  13887,         YM), /* 2385 */
  TIMEDB_ENTRY( 0x277aa649 ,  1,   9295,         YM), /* 2385 */
  TIMEDB_ENTRY( 0x277bad2e ,  0,   3264,         YM), /* 2132 */
+ TIMEDB_ENTRY( 0x277c92b9 ,  0,   9262,      YM+TB), /* This_Music-Starwars.sndh */
  TIMEDB_ENTRY( 0x27893784 ,  0,  28160,      YM+TA), /* 3491 */
  TIMEDB_ENTRY( 0x279a4e42 ,  0,  15360,      YM+TA), /* 4126 */
+ TIMEDB_ENTRY( 0x27a2881c ,  0,   8450,      YM+TA), /* 4420 */
  TIMEDB_ENTRY( 0x27a576b2 ,  0,  12284,YM+TA+TB+TD), /* 1006 */
  TIMEDB_ENTRY( 0x27b65471 ,  0,   9982,         YM), /* 1269 */
  TIMEDB_ENTRY( 0x27e00753 ,  0,  23289,      YM+TA), /* 1711 */
@@ -1208,16 +1313,20 @@
  TIMEDB_ENTRY( 0x27fb194e ,  0,  11712,         YM), /* 1433 */
  TIMEDB_ENTRY( 0x2805c4a0 ,  0,  48386,   YM+TB+TD), /* 3333 */
  TIMEDB_ENTRY( 0x28125c34 ,  0,   7390,         YM), /* 3102 */
+ TIMEDB_ENTRY( 0x281bd3c9 ,  0,  37129,      YM+TA), /* 4557 */
  TIMEDB_ENTRY( 0x283bce5d ,  0,  11648,      YM+TA), /* 4122 */
  TIMEDB_ENTRY( 0x28484b7f ,  0,   9629,YM+TA+TB+TD), /* 2864 */
  TIMEDB_ENTRY( 0x284af8bb ,  0,   4207,         YM), /* 4083 */
  TIMEDB_ENTRY( 0x285f472d ,  0,   7869,YM+TA+TB+TD), /* 4248 */
+ TIMEDB_ENTRY( 0x2869cc2e ,  0,   3335,         YM), /* 4547 */
+ TIMEDB_ENTRY( 0x2869cc2e ,  1,   3593,         YM), /* 4547 */
  TIMEDB_ENTRY( 0x28736104 ,  0,   2708,YM+TA+TB+TD), /* 233 */
  TIMEDB_ENTRY( 0x287a3e7b ,  0,   4928,         YM), /* 2289 */
  TIMEDB_ENTRY( 0x288347ca ,  0,   7168,         YM), /* 122 */
  TIMEDB_ENTRY( 0x288347ca ,  1,   3072,         YM), /* 122 */
  TIMEDB_ENTRY( 0x288347ca ,  2,   1792,         YM), /* 122 */
  TIMEDB_ENTRY( 0x288d8df0 ,  0,   6912,      YM+TA), /* 472 */
+ TIMEDB_ENTRY( 0x2895c4cb ,  0,   3834,      YM+TB), /* Unfinished_Sorry_AN_Cool.sndh */
  TIMEDB_ENTRY( 0x289c2b6d ,  0,   9215,      YM+TA), /* 3576 */
  TIMEDB_ENTRY( 0x28aa3438 ,  0,  47642,      YM+TA), /* 4022 */
  TIMEDB_ENTRY( 0x28b5acbc ,  0,  10003,YM+TA+TB+TD), /* 1836 */
@@ -1225,10 +1334,12 @@
  TIMEDB_ENTRY( 0x28e0642f ,  0,   6906,         YM), /* 2881 */
  TIMEDB_ENTRY( 0x28f5a73b ,  0,  12415,   YM+TA+TD), /* 3455 */
  TIMEDB_ENTRY( 0x2931e3e3 ,  0,   9208,   YM+TA+TD), /* 1595 */
+ TIMEDB_ENTRY( 0x29544553 ,  0,  20928,         YM), /* 4473 */
  TIMEDB_ENTRY( 0x296cb067 ,  0,   2301,      YM+TA), /* 199 */
  TIMEDB_ENTRY( 0x2971aaca ,  0,  13871,   YM+TA+TD), /* 2273 */
  TIMEDB_ENTRY( 0x29740494 ,  0,   5116,   YM+TB+TD), /* 1014 */
  TIMEDB_ENTRY( 0x29773ed0 ,  0,  15620,         YM), /* 504 */
+ TIMEDB_ENTRY( 0x29880d1b ,  0,   3450,      YM+TA), /* 4449 */
  TIMEDB_ENTRY( 0x29a3c8c7 ,  0,   1528,         YM), /* 445 */
  TIMEDB_ENTRY( 0x29aa3524 ,  0,   5432,      YM+TA), /* 1039 */
  TIMEDB_ENTRY( 0x29aae4da ,  0,   5333,         YM), /* 3531 */
@@ -1239,6 +1350,8 @@
  TIMEDB_ENTRY( 0x29d60b02 ,  0,   8639,         YM), /* 4390 */
  TIMEDB_ENTRY( 0x29e93284 ,  0,    555,         YM), /* 2150 */
  TIMEDB_ENTRY( 0x2a00b4a1 ,  0,  13056,      YM+TA), /* 3898 */
+ TIMEDB_ENTRY( 0x2a04bc63 ,  0,   1505,         YM), /* 4512 */
+ TIMEDB_ENTRY( 0x2a0eb52b ,  0,   4032,         YM), /* Nostalgic_Demo_Reset.sndh */
  TIMEDB_ENTRY( 0x2a13275d ,  0,   9215,         YM), /* 310 */
  TIMEDB_ENTRY( 0x2a21698c ,  0,  31872,YM+TA+TB+TD), /* 3593 */
  TIMEDB_ENTRY( 0x2a2ec60d ,  0,  12089,      YM+TA), /* 4369 */
@@ -1253,9 +1366,11 @@
  TIMEDB_ENTRY( 0x2ad61ed6 ,  1,   8192,         YM), /* 2045 */
  TIMEDB_ENTRY( 0x2ad61ed6 ,  2,    901,         YM), /* 2045 */
  TIMEDB_ENTRY( 0x2aeb113f ,  0,  16130,         YM), /* 1896 */
+ TIMEDB_ENTRY( 0x2af6c119 ,  0, 107009,      YM+TA), /* 4553 */
  TIMEDB_ENTRY( 0x2b046516 ,  0,  12545,   YM+TA+TD), /* 2297 */
  TIMEDB_ENTRY( 0x2b059920 ,  0,  15403,         YM), /* 1541 */
  TIMEDB_ENTRY( 0x2b05da62 ,  0,   4352,         YM), /* 1535 */
+ TIMEDB_ENTRY( 0x2b0ecaa8 ,  0,  26800,         YM), /* If_It_Works_Good.sndh */
  TIMEDB_ENTRY( 0x2b216eb9 ,  0,  12368,         YM), /* 1417 */
  TIMEDB_ENTRY( 0x2b257e44 ,  0,  35136,YM+TA+TB+TD), /* 4331 */
  TIMEDB_ENTRY( 0x2b29df62 ,  0,  11520,      YM+TA), /* 2206 */
@@ -1302,6 +1417,7 @@
  TIMEDB_ENTRY( 0x2c5f33d7 ,  0,   4608,         YM), /* 1091 */
  TIMEDB_ENTRY( 0x2c61bcb6 ,  0,   1337,YM+TA+TB+TD), /* 1949 */
  TIMEDB_ENTRY( 0x2c681bcc ,  0,   1536,         YM), /* 2636 */
+ TIMEDB_ENTRY( 0x2c753baf ,  0,  19969,      YM+TA), /* 4558 */
  TIMEDB_ENTRY( 0x2c7e574a ,  0,   1530,YM+TA+TB+TD), /* 1946 */
  TIMEDB_ENTRY( 0x2c92323e ,  0,   8448,         YM), /* 1572 */
  TIMEDB_ENTRY( 0x2c92323e ,  1,   9984,         YM), /* 1572 */
@@ -1346,6 +1462,11 @@
  TIMEDB_ENTRY( 0x2cd8b73d , 11,    485,YM+TA+TB+TD), /* 2074 */
  TIMEDB_ENTRY( 0x2cdc85da ,  0,   6717,YM+TA+TB+TD), /* 78 */
  TIMEDB_ENTRY( 0x2cdcd0b2 ,  0,  17988,YM+TA+TB+TD), /* 3995 */
+ TIMEDB_ENTRY( 0x2cdf9e25 ,  0,   1284,         YM), /* 4504 */
+ TIMEDB_ENTRY( 0x2cdf9e25 ,  1,     24,         YM), /* 4504 */
+ TIMEDB_ENTRY( 0x2cdf9e25 ,  2,   3144,         YM), /* 4504 */
+ TIMEDB_ENTRY( 0x2cdf9e25 ,  3,    104,         YM), /* 4504 */
+ TIMEDB_ENTRY( 0x2cdf9e25 ,  4,    238,         YM), /* 4504 */
  TIMEDB_ENTRY( 0x2ce651f2 ,  0,  18432,      YM+TD), /* 2574 */
  TIMEDB_ENTRY( 0x2cedde16 ,  0,   6656,         YM), /* 2015 */
  TIMEDB_ENTRY( 0x2cfd99f3 ,  0,   7510,         YM), /* 3070 */
@@ -1378,11 +1499,16 @@
  TIMEDB_ENTRY( 0x2d7f8cc2 ,  0,  43453,      YM+TA), /* 3956 */
  TIMEDB_ENTRY( 0x2d80a54d ,  0,   4605,   YM+TB+TD), /* 183 */
  TIMEDB_ENTRY( 0x2d97a73f ,  0,  12800,         YM), /* 3234 */
+ TIMEDB_ENTRY( 0x2daa0f5f ,  0,  52481,      YM+TA), /* Pompey_Pirates_Menu_77.sndh */
+ TIMEDB_ENTRY( 0x2db33623 ,  0,  13818,YM+TA+TB+TD), /* Treat_Final_Version.sndh */
  TIMEDB_ENTRY( 0x2dc08e48 ,  0,  17424,         YM), /* 318 */
  TIMEDB_ENTRY( 0x2dcc758f ,  0,   8347,         YM), /* 1293 */
  TIMEDB_ENTRY( 0x2de65596 ,  0,   2298,YM+TA+TB+TD), /* 4263 */
  TIMEDB_ENTRY( 0x2e0fa0f3 ,  0,   8064,         YM), /* 1098 */
  TIMEDB_ENTRY( 0x2e1efe28 ,  0,   6522,         YM), /* 2882 */
+ TIMEDB_ENTRY( 0x2e28fd1e ,  0,  10176,         YM), /* 2018 */
+ TIMEDB_ENTRY( 0x2e28fd1e ,  1,   3073,         YM), /* 2018 */
+ TIMEDB_ENTRY( 0x2e28fd1e ,  2,    541,         YM), /* 2018 */
  TIMEDB_ENTRY( 0x2e453b54 ,  0,   4599,   YM+TA+TD), /* 4295 */
  TIMEDB_ENTRY( 0x2e4b8df5 ,  0,   6713,      YM+TD), /* 4108 */
  TIMEDB_ENTRY( 0x2e4eb8b7 ,  0, 369326,      YM+TA), /* 3824 */
@@ -1392,6 +1518,7 @@
  TIMEDB_ENTRY( 0x2e4eb8b7 ,  4, 470212,      YM+TA), /* 3824 */
  TIMEDB_ENTRY( 0x2e4eb8b7 ,  5,  10404,      YM+TA), /* 3824 */
  TIMEDB_ENTRY( 0x2e5ac845 ,  0,   3037,      YM+TA), /* 3842 */
+ TIMEDB_ENTRY( 0x2e837e42 ,  0,  11519,         YM), /* 4462 */
  TIMEDB_ENTRY( 0x2e9179de ,  0,   5120,      YM+TA), /* 793 */
  TIMEDB_ENTRY( 0x2e9421ad ,  0,   8448,         YM), /* 216 */
  TIMEDB_ENTRY( 0x2e9421ad ,  1,   6400,         YM), /* 216 */
@@ -1422,6 +1549,7 @@
  TIMEDB_ENTRY( 0x2fa66e99 ,  3,    193,         YM), /* 2049 */
  TIMEDB_ENTRY( 0x2fa66e99 ,  4,   1749,         YM), /* 2049 */
  TIMEDB_ENTRY( 0x2fa66e99 ,  5,     97,         YM), /* 2049 */
+ TIMEDB_ENTRY( 0x2fabce4a ,  0,   8640,         YM), /* Frostys_Music_2.sndh */
  TIMEDB_ENTRY( 0x30076276 ,  0,   3195,         YM), /* 2602 */
  TIMEDB_ENTRY( 0x30151375 ,  0,   6503,   YM+TA+TD), /* 204 */
  TIMEDB_ENTRY( 0x3017e289 ,  0,   2466,         YM), /* 3085 */
@@ -1444,6 +1572,7 @@
  TIMEDB_ENTRY( 0x30c9d495 ,  0,   1536,         YM), /* 2482 */
  TIMEDB_ENTRY( 0x30cf6273 ,  0,  13824,         YM), /* 1072 */
  TIMEDB_ENTRY( 0x30d39028 ,  0,  88564,      YM+TA), /* 3779 */
+ TIMEDB_ENTRY( 0x30f050db ,  0,  12282,         YM), /* Generation_2_0.sndh */
  TIMEDB_ENTRY( 0x30fdfa0e ,  0,   8253,YM+TA+TB+TD), /* 1009 */
  TIMEDB_ENTRY( 0x3117fc7b ,  0,   9598,YM+TA+TB+TD), /* 3271 */
  TIMEDB_ENTRY( 0x3121658e ,  0,   1151,   YM+TA+TD), /* 2825 */
@@ -1454,8 +1583,14 @@
  TIMEDB_ENTRY( 0x3141548d ,  2,   1436,         YM), /* 1806 */
  TIMEDB_ENTRY( 0x3141548d ,  3,   9984,         YM), /* 1806 */
  TIMEDB_ENTRY( 0x3168eef8 ,  0,   8835,         YM), /* 1813 */
+ TIMEDB_ENTRY( 0x316adca5 ,  0,  23930,     YM+STE), /* The_Legacy_Nightmare.sndh */
  TIMEDB_ENTRY( 0x316c52b9 ,  0,   8639,   YM+TA+TD), /* 3213 */
  TIMEDB_ENTRY( 0x316e1a68 ,  0,   3834,      YM+TA), /* 1673 */
+ TIMEDB_ENTRY( 0x3176b0f3 ,  0,   6816,         YM), /* 217 */
+ TIMEDB_ENTRY( 0x3176b0f3 ,  1,   5120,         YM), /* 217 */
+ TIMEDB_ENTRY( 0x3176b0f3 ,  2,   3840,         YM), /* 217 */
+ TIMEDB_ENTRY( 0x3176b0f3 ,  3,   6529,         YM), /* 217 */
+ TIMEDB_ENTRY( 0x3176b0f3 ,  4,   3264,         YM), /* 217 */
  TIMEDB_ENTRY( 0x318448b0 ,  0,  13316,   YM+TA+TD), /* 2295 */
  TIMEDB_ENTRY( 0x319185e0 ,  0,   7680,         YM), /* 613 */
  TIMEDB_ENTRY( 0x31a35d34 ,  0,  17088,         YM), /* 2439 */
@@ -1498,6 +1633,7 @@
  TIMEDB_ENTRY( 0x33526cb7 ,  0,  10370,   YM+TA+TD), /* 2311 */
  TIMEDB_ENTRY( 0x3355a037 ,  0,   8192,YM+TA+TB+TD), /* 3336 */
  TIMEDB_ENTRY( 0x3356789d ,  0,   6541,      YM+TA), /* 2155 */
+ TIMEDB_ENTRY( 0x335b93b1 ,  0,   9021,YM+TA+TB+TD), /* 4456 */
  TIMEDB_ENTRY( 0x335f6906 ,  0,   8826,YM+TA+TB+TD), /* 1481 */
  TIMEDB_ENTRY( 0x33625fef ,  0,  26106,         YM), /* 3874 */
  TIMEDB_ENTRY( 0x3364a361 ,  0,   8064,         YM), /* 1131 */
@@ -1525,6 +1661,7 @@
  TIMEDB_ENTRY( 0x344b88ed ,  0,  15936,         YM), /* 2137 */
  TIMEDB_ENTRY( 0x34613b0c ,  0,   8540,   YM+TA+TB), /* 3200 */
  TIMEDB_ENTRY( 0x347b809f ,  0,   2304,         YM), /* 1762 */
+ TIMEDB_ENTRY( 0x348a8522 ,  0,   3328,      YM+TA), /* 4433 */
  TIMEDB_ENTRY( 0x34affc14 ,  0,   1024,         YM), /* 3405 */
  TIMEDB_ENTRY( 0x34affc14 ,  1,   4160,         YM), /* 3405 */
  TIMEDB_ENTRY( 0x34affc14 ,  2,   1280,         YM), /* 3405 */
@@ -1539,21 +1676,21 @@
  TIMEDB_ENTRY( 0x34c46ff5 ,  2,    185,         YM), /* 2944 */
  TIMEDB_ENTRY( 0x34ca54fa ,  0,  16128,         YM), /* 898 */
  TIMEDB_ENTRY( 0x34cafd52 ,  0,   4639,   YM+TA+TD), /* 2688 */
- TIMEDB_ENTRY( 0x34d7c319 ,  0,    536,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 ,  1,    570,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 ,  2,    376,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 ,  3,    210,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 ,  4,    321,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 ,  5,    208,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 ,  6,     88,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 ,  7,    321,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 ,  8,     80,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 ,  9,     27,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 , 10,     28,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 , 11,     28,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 , 12,    381,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 , 13,     72,         YM), /* 1816 */
- TIMEDB_ENTRY( 0x34d7c319 , 14,   5809,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x34d7c319 ,  0,    536,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 ,  1,    570,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 ,  2,    376,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 ,  3,    210,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 ,  4,    321,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 ,  5,    208,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 ,  6,     88,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 ,  7,    321,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 ,  8,     80,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 ,  9,     27,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 , 10,     28,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 , 11,     28,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 , 12,    381,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 , 13,     72,         YM), /* Arcade_Trivia_Quiz.sndh */
+ TIMEDB_ENTRY( 0x34d7c319 , 14,   5809,         YM), /* Arcade_Trivia_Quiz.sndh */
  TIMEDB_ENTRY( 0x34ecd6e9 ,  0,   3760,         YM), /* 3573 */
  TIMEDB_ENTRY( 0x34ecd6e9 ,  1,   1600,         YM), /* 3573 */
  TIMEDB_ENTRY( 0x34ecd6e9 ,  2,   1280,         YM), /* 3573 */
@@ -1594,11 +1731,21 @@
  TIMEDB_ENTRY( 0x355cca36 ,  0,   3577,YM+TA+TB+TD), /* 2592 */
  TIMEDB_ENTRY( 0x3574919f ,  0,   4559,   YM+TA+TD), /* 827 */
  TIMEDB_ENTRY( 0x35c38980 ,  0,  71428,      YM+TA), /* 3761 */
+ TIMEDB_ENTRY( 0x35cbb59f ,  0,   7153,         YM), /* Everton_FC_Intelligensia.sndh */
+ TIMEDB_ENTRY( 0x35cbb59f ,  1,    186,         YM), /* Everton_FC_Intelligensia.sndh */
+ TIMEDB_ENTRY( 0x35cbb59f ,  2,    160,         YM), /* Everton_FC_Intelligensia.sndh */
+ TIMEDB_ENTRY( 0x35cbb59f ,  3,    323,         YM), /* Everton_FC_Intelligensia.sndh */
+ TIMEDB_ENTRY( 0x35cbb59f ,  4,    180,         YM), /* Everton_FC_Intelligensia.sndh */
+ TIMEDB_ENTRY( 0x35cbb59f ,  5,    352,         YM), /* Everton_FC_Intelligensia.sndh */
+ TIMEDB_ENTRY( 0x35cbb59f ,  6,   2800,         YM), /* Everton_FC_Intelligensia.sndh */
+ TIMEDB_ENTRY( 0x35cbb59f ,  7,   2167,         YM), /* Everton_FC_Intelligensia.sndh */
  TIMEDB_ENTRY( 0x35dbbb7f ,  0,  10499,      YM+TA), /* 3433 */
  TIMEDB_ENTRY( 0x35f2c927 ,  0,  28032,YM+TA+TB+TD), /* 3201 */
  TIMEDB_ENTRY( 0x360831c5 ,  0,   3199,         YM), /* 2446 */
  TIMEDB_ENTRY( 0x360831c5 ,  1,   1599,         YM), /* 2446 */
  TIMEDB_ENTRY( 0x361939ff ,  0,   8192,   YM+TB+TD), /* 3981 */
+ TIMEDB_ENTRY( 0x361be82a ,  0, 338641,      YM+TA), /* 4555 */
+ TIMEDB_ENTRY( 0x361be82a ,  1, 321486,      YM+TA), /* 4555 */
  TIMEDB_ENTRY( 0x362aaf32 ,  0,   8687,      YM+TB), /* 2875 */
  TIMEDB_ENTRY( 0x363afdb3 ,  0,  75264,         YM), /* 2430 */
  TIMEDB_ENTRY( 0x363edd1a ,  0,   4492,         YM), /* 3172 */
@@ -1629,7 +1776,15 @@
  TIMEDB_ENTRY( 0x37100241 ,  3,   1473,         YM), /* 136 */
  TIMEDB_ENTRY( 0x3738c1fa ,  0,   4473,      YM+TA), /* 1144 */
  TIMEDB_ENTRY( 0x375738fb ,  0,   3589,         YM), /* 293 */
+ TIMEDB_ENTRY( 0x37586ef3 ,  0,  14202,      YM+TA), /* Run_For_Your_Life.sndh */
  TIMEDB_ENTRY( 0x376031f2 ,  0, 103476,      YM+TA), /* 3745 */
+ TIMEDB_ENTRY( 0x376335a6 ,  0,     40,         YM), /* 4496 */
+ TIMEDB_ENTRY( 0x376335a6 ,  1,    195,         YM), /* 4496 */
+ TIMEDB_ENTRY( 0x376335a6 ,  2,    303,         YM), /* 4496 */
+ TIMEDB_ENTRY( 0x376335a6 ,  3,    246,         YM), /* 4496 */
+ TIMEDB_ENTRY( 0x376335a6 ,  4,    361,         YM), /* 4496 */
+ TIMEDB_ENTRY( 0x376335a6 ,  5,    225,         YM), /* 4496 */
+ TIMEDB_ENTRY( 0x376335a6 ,  6,    223,         YM), /* 4496 */
  TIMEDB_ENTRY( 0x3765fccc ,  0,   6553,         YM), /* 75 */
  TIMEDB_ENTRY( 0x3786df73 ,  0,   9722,         YM), /* 498 */
  TIMEDB_ENTRY( 0x37901b71 ,  0,  31098,      YM+TA), /* 4235 */
@@ -1658,12 +1813,15 @@
  TIMEDB_ENTRY( 0x38b24d90 ,  0,    224,YM+TA+TB+TD), /* 3624 */
  TIMEDB_ENTRY( 0x38b9bdb1 ,  0,  28672,         YM), /* 2458 */
  TIMEDB_ENTRY( 0x38d851a2 ,  0,   6160,         YM), /* 2368 */
- TIMEDB_ENTRY( 0x38e8d033 ,  0,  23320,      YM+TA), /* 1690 */
+ TIMEDB_ENTRY( 0x38e8d033 ,  0,  23320,      YM+TA), /* Hardrock_Ballad.sndh */
  TIMEDB_ENTRY( 0x38eeac82 ,  0,  24327,YM+TA+TB+TD), /* 3300 */
  TIMEDB_ENTRY( 0x3903ca97 ,  0,  13440,   YM+TA+TB), /* 1331 */
  TIMEDB_ENTRY( 0x390fff1b ,  0,  15648,         YM), /* 267 */
  TIMEDB_ENTRY( 0x393e5990 ,  0,   1914,         YM), /* 444 */
  TIMEDB_ENTRY( 0x397d0167 ,  0,   7709,         YM), /* 1036 */
+ TIMEDB_ENTRY( 0x39a1a9c4 ,  0,   8442,         YM), /* Ventura-Hystanders.sndh */
+ TIMEDB_ENTRY( 0x39a1a9c4 ,  1,   8442,         YM), /* Ventura-Hystanders.sndh */
+ TIMEDB_ENTRY( 0x39b60021 ,  0,  22266,      YM+TA), /* The_Twins_Parodie.sndh */
  TIMEDB_ENTRY( 0x39cfda35 ,  0,   5832,         YM), /* 1972 */
  TIMEDB_ENTRY( 0x39ddf67a ,  0,  15092,      YM+TD), /* 1989 */
  TIMEDB_ENTRY( 0x39de27ad ,  0,  10745,YM+TA+TB+TD), /* 829 */
@@ -1721,6 +1879,7 @@
  TIMEDB_ENTRY( 0x3bf50ca8 ,  0,  15344,   YM+TA+TD), /* 2275 */
  TIMEDB_ENTRY( 0x3c0e9f47 ,  0,   8448,         YM), /* 2022 */
  TIMEDB_ENTRY( 0x3c0e9f47 ,  1,   9504,         YM), /* 2022 */
+ TIMEDB_ENTRY( 0x3c17e638 ,  0,   2260,   YM+TA+TD), /* Nostalgic_Demo_IkariUnused.sndh */
  TIMEDB_ENTRY( 0x3c35d9fd ,  0,   4356,         YM), /* 319 */
  TIMEDB_ENTRY( 0x3c381868 ,  0,   6406,         YM), /* 4148 */
  TIMEDB_ENTRY( 0x3c4609cc ,  0,  58904,         YM), /* 1441 */
@@ -1744,6 +1903,7 @@
  TIMEDB_ENTRY( 0x3c9e7164 ,  2,     96,         YM), /* 359 */
  TIMEDB_ENTRY( 0x3c9e7164 ,  3,    113,         YM), /* 359 */
  TIMEDB_ENTRY( 0x3c9e7164 ,  4,   1535,         YM), /* 359 */
+ TIMEDB_ENTRY( 0x3cad8c4c ,  0,   2112,         YM), /* 4477 */
  TIMEDB_ENTRY( 0x3cb4ea89 ,  0,  20730,         YM), /* 1708 */
  TIMEDB_ENTRY( 0x3cba31e7 ,  0,   8640,         YM), /* 1179 */
  TIMEDB_ENTRY( 0x3cd8c70a ,  0,   5570,         YM), /* 1052 */
@@ -1751,7 +1911,7 @@
  TIMEDB_ENTRY( 0x3d0d2149 ,  0,  12960,         YM), /* 1994 */
  TIMEDB_ENTRY( 0x3d0f7efd ,  0,  12703,         YM), /* 1760 */
  TIMEDB_ENTRY( 0x3d12a99a ,  0,  17206,        STE), /* 3366 */
- TIMEDB_ENTRY( 0x3d151266 ,  0,   8960,     YM+STE), /* 3602 */
+ TIMEDB_ENTRY( 0x3d151266 ,  0,   8960,     YM+STE), /* Its_Cool_To_Be_Evil.sndh */
  TIMEDB_ENTRY( 0x3d17e34a ,  0,   6144,         YM), /* 1431 */
  TIMEDB_ENTRY( 0x3d1d30fc ,  0,   3241,         YM), /* 3081 */
  TIMEDB_ENTRY( 0x3d1fc0d1 ,  0,  36096,      YM+TD), /* 1477 */
@@ -1777,6 +1937,7 @@
  TIMEDB_ENTRY( 0x3d7de33c ,  6,    197,         YM), /* 145 */
  TIMEDB_ENTRY( 0x3d7de33c ,  7,    204,         YM), /* 145 */
  TIMEDB_ENTRY( 0x3d7de33c ,  8,     48,         YM), /* 145 */
+ TIMEDB_ENTRY( 0x3da7acb5 ,  0,   9942,      YM+TA), /* 4429 */
  TIMEDB_ENTRY( 0x3db4ae01 ,  0,   3515,YM+TA+TB+TD), /* 1121 */
  TIMEDB_ENTRY( 0x3dcae6b6 ,  0,  12864,         YM), /* 2450 */
  TIMEDB_ENTRY( 0x3dcc854a ,  0,   5115,YM+TA+TB+TD), /* 1252 */
@@ -1787,6 +1948,7 @@
  TIMEDB_ENTRY( 0x3de043eb ,  0,   6678,YM+TA+TB+TD), /* 1606 */
  TIMEDB_ENTRY( 0x3df7689f ,  0,  23680,   YM+TB+TD), /* 3992 */
  TIMEDB_ENTRY( 0x3e165308 ,  0,   4927,         YM), /* 4096 */
+ TIMEDB_ENTRY( 0x3e231b4c ,  0,   4608,         YM), /* Stax_Menu _53_Tune_3.sndh */
  TIMEDB_ENTRY( 0x3e27512d ,  0,   5435,YM+TA+TB+TD), /* 2752 */
  TIMEDB_ENTRY( 0x3e2a318d ,  0,   4282,         YM), /* 96 */
  TIMEDB_ENTRY( 0x3e2a47e1 ,  0,   2559,         YM), /* 2845 */
@@ -1848,11 +2010,14 @@
  TIMEDB_ENTRY( 0x41641b13 ,  0,   5247,      YM+TB), /* 3620 */
  TIMEDB_ENTRY( 0x416b9770 ,  0,   4096,         YM), /* 3660 */
  TIMEDB_ENTRY( 0x416f7801 ,  0,   8442,      YM+TA), /* 1837 */
+ TIMEDB_ENTRY( 0x417a758b ,  0,   9409,   YM+TA+TD), /* Nostalgic_Demo_Mainmenu.sndh */
  TIMEDB_ENTRY( 0x4197ebcf ,  0,   3520,         YM), /* 2364 */
  TIMEDB_ENTRY( 0x419cdbc4 ,  0,  14784,         YM), /* 2037 */
  TIMEDB_ENTRY( 0x41a0f845 ,  0,  14329,YM+TA+TB+TD), /* 1960 */
  TIMEDB_ENTRY( 0x41abaeae ,  0,  11457,         YM), /* 2740 */
  TIMEDB_ENTRY( 0x41c77720 ,  0,   4200,         YM), /* 3245 */
+ TIMEDB_ENTRY( 0x41ce3523 ,  0,  18090,     YM+STE), /* Throw_It_In_A_Trash_Can.sndh */
+ TIMEDB_ENTRY( 0x41d2e0e9 ,  0,   1664,         YM), /* 4500 */
  TIMEDB_ENTRY( 0x41f03310 ,  0,   4602,      YM+TA), /* 3556 */
  TIMEDB_ENTRY( 0x41fbfde9 ,  0,  18816,         YM), /* 945 */
  TIMEDB_ENTRY( 0x42030931 ,  0,  39105,      YM+TA), /* 3717 */
@@ -1863,6 +2028,7 @@
  TIMEDB_ENTRY( 0x422fc19d ,  2,   2704,         YM), /* 1069 */
  TIMEDB_ENTRY( 0x4237532f ,  0,   4992,         YM), /* 800 */
  TIMEDB_ENTRY( 0x425d6b8b ,  0,   6399,YM+TA+TB+TD), /* 2997 */
+ TIMEDB_ENTRY( 0x427697e0 ,  0,   6914,   YM+TA+TD), /* Nostalgic_Demo_Dots.sndh */
  TIMEDB_ENTRY( 0x428d7eda ,  0,   5754,YM+TA+TB+TD), /* 4250 */
  TIMEDB_ENTRY( 0x42a1a7d3 ,  0,   2106,   YM+TA+TD), /* 1938 */
  TIMEDB_ENTRY( 0x42a6e7d7 ,  0,   4992,         YM), /* 97 */
@@ -1898,6 +2064,7 @@
  TIMEDB_ENTRY( 0x43527b57 ,  8,   1726,         YM), /* 2549 */
  TIMEDB_ENTRY( 0x4365fca2 ,  0,   1858,         YM), /* 501 */
  TIMEDB_ENTRY( 0x436ce977 ,  0,   2044,      YM+TB), /* 4303 */
+ TIMEDB_ENTRY( 0x4379cbc2 ,  0,  15354,     YM+STE), /* Jochen_Spirit.sndh */
  TIMEDB_ENTRY( 0x4389dc3b ,  0,  37888,   YM+TB+TD), /* 2843 */
  TIMEDB_ENTRY( 0x43981f38 ,  0,   8704,         YM), /* 1740 */
  TIMEDB_ENTRY( 0x439d0a4d ,  0,  12291,   YM+TA+TD), /* 2341 */
@@ -1930,6 +2097,9 @@
  TIMEDB_ENTRY( 0x441d9f8b ,  0,     96,         YM), /* 3926 */
  TIMEDB_ENTRY( 0x442a4206 ,  0,   4992,         YM), /* 1184 */
  TIMEDB_ENTRY( 0x4438f589 ,  0,  38400,YM+TA+TB+TD), /* 2627 */
+ TIMEDB_ENTRY( 0x4472aef8 ,  0,   4372,         YM), /* 4510 */
+ TIMEDB_ENTRY( 0x4472aef8 ,  1,    447,         YM), /* 4510 */
+ TIMEDB_ENTRY( 0x4472aef8 ,  2,    441,         YM), /* 4510 */
  TIMEDB_ENTRY( 0x4477eb41 ,  0,  14070,         YM), /* 1746 */
  TIMEDB_ENTRY( 0x44808679 ,  0,   6912,         YM), /* 479 */
  TIMEDB_ENTRY( 0x448093ee ,  0,   4986,   YM+TB+TD), /* 4268 */
@@ -1949,6 +2119,7 @@
  TIMEDB_ENTRY( 0x448ef395 ,  3,     81,         YM), /* 101 */
  TIMEDB_ENTRY( 0x448ef395 ,  4,    122,         YM), /* 101 */
  TIMEDB_ENTRY( 0x449a8f2a ,  0,   7780,         YM), /* 3064 */
+ TIMEDB_ENTRY( 0x449ce984 ,  0,   5006,         YM), /* 4444 */
  TIMEDB_ENTRY( 0x44bf284b ,  0,   7199,YM+TA+TB+TD), /* 2974 */
  TIMEDB_ENTRY( 0x44dd5228 ,  0,   4037,         YM), /* 45 */
  TIMEDB_ENTRY( 0x44f3f5ec ,  0,  39936,         YM), /* 2606 */
@@ -1964,6 +2135,7 @@
  TIMEDB_ENTRY( 0x456297c7 ,  0,  10464,         YM), /* 2217 */
  TIMEDB_ENTRY( 0x456297c7 ,  1,  19776,         YM), /* 2217 */
  TIMEDB_ENTRY( 0x45657a96 ,  0,  16890,   YM+TA+TD), /* 1834 */
+ TIMEDB_ENTRY( 0x456697f4 ,  0,  24570,      YM+TA), /* Pentatonik_Illusion.sndh */
  TIMEDB_ENTRY( 0x4568c87a ,  0,    768,   YM+TA+TD), /* 405 */
  TIMEDB_ENTRY( 0x45698dbb ,  0,   3840,         YM), /* 1045 */
  TIMEDB_ENTRY( 0x457c457a ,  0,   3528,         YM), /* 4220 */
@@ -1974,6 +2146,7 @@
  TIMEDB_ENTRY( 0x457c457a ,  5,   2184,         YM), /* 4220 */
  TIMEDB_ENTRY( 0x457c457a ,  6,    813,         YM), /* 4220 */
  TIMEDB_ENTRY( 0x457c457a ,  7,    840,         YM), /* 4220 */
+ TIMEDB_ENTRY( 0x45a4f0f1 ,  0,  14777,YM+TA+TB+TD), /* 4518 */
  TIMEDB_ENTRY( 0x45a5b063 ,  0,   8448,         YM), /* 2743 */
  TIMEDB_ENTRY( 0x45a5b063 ,  1,   9600,         YM), /* 2743 */
  TIMEDB_ENTRY( 0x45a5b063 ,  2,   6272,         YM), /* 2743 */
@@ -1986,10 +2159,41 @@
  TIMEDB_ENTRY( 0x45a5b063 ,  9,   8320,         YM), /* 2743 */
  TIMEDB_ENTRY( 0x45a5b063 , 10,   6120,         YM), /* 2743 */
  TIMEDB_ENTRY( 0x45a5b063 , 11,   6960,         YM), /* 2743 */
+ TIMEDB_ENTRY( 0x45b4b0d5 ,  0,   5120,      YM+TA), /* 4434 */
+ TIMEDB_ENTRY( 0x45b5ef21 ,  0, 170373,      YM+TA), /* 4562 */
+ TIMEDB_ENTRY( 0x45b5ef21 ,  1, 229546,      YM+TA), /* 4562 */
+ TIMEDB_ENTRY( 0x45b5ef21 ,  2,  44359,      YM+TA), /* 4562 */
+ TIMEDB_ENTRY( 0x45b5ef21 ,  3, 105778,      YM+TA), /* 4562 */
+ TIMEDB_ENTRY( 0x45b5ef21 ,  4,  85803,      YM+TA), /* 4562 */
+ TIMEDB_ENTRY( 0x45b5ef21 ,  5,  10001,      YM+TA), /* 4562 */
+ TIMEDB_ENTRY( 0x45b5ef21 ,  6,  49924,      YM+TA), /* 4562 */
+ TIMEDB_ENTRY( 0x45b5ef21 ,  7, 189162,      YM+TA), /* 4562 */
+ TIMEDB_ENTRY( 0x45b5ef21 ,  8,   7850,      YM+TA), /* 4562 */
+ TIMEDB_ENTRY( 0x45b5ef21 ,  9,  46062,      YM+TA), /* 4562 */
+ TIMEDB_ENTRY( 0x45b5ef21 , 10,  50795,      YM+TA), /* 4562 */
+ TIMEDB_ENTRY( 0x45b5ef21 , 11,   3364,      YM+TA), /* 4562 */
  TIMEDB_ENTRY( 0x45c08937 ,  0,   8640,      YM+TA), /* 787 */
  TIMEDB_ENTRY( 0x45e4090f ,  0,   3064,         YM), /* 1284 */
  TIMEDB_ENTRY( 0x45e95c53 ,  0,  54944,   YM+TB+TD), /* 3440 */
  TIMEDB_ENTRY( 0x46447c65 ,  0,  20180,         YM), /* 2964 */
+ TIMEDB_ENTRY( 0x464ab741 ,  0,    896,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 ,  1,     11,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 ,  2,    223,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 ,  3,     11,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 ,  4,     36,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 ,  5,    128,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 ,  6,     26,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 ,  7,     39,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 ,  8,     33,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 ,  9,     39,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 , 10,     33,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 , 11,    103,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 , 12,     83,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 , 13,    127,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 , 14,    127,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 , 15,     39,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 , 16,     24,         YM), /* 4534 */
+ TIMEDB_ENTRY( 0x464ab741 , 17,     50,         YM), /* 4534 */
  TIMEDB_ENTRY( 0x46528a63 ,  0,  13433,     YM+STE), /* 4365 */
  TIMEDB_ENTRY( 0x4652cd27 ,  0,   3860,      YM+TA), /* 3839 */
  TIMEDB_ENTRY( 0x465a6bdc ,  0,  37633,         YM), /* 3529 */
@@ -2005,8 +2209,13 @@
  TIMEDB_ENTRY( 0x46ba2db5 ,  0,   1152,         YM), /* 1410 */
  TIMEDB_ENTRY( 0x46df70e6 ,  0,   3353,         YM), /* 2716 */
  TIMEDB_ENTRY( 0x4711a6b6 ,  0,   8448,         YM), /* 247 */
+ TIMEDB_ENTRY( 0x4722c6d4 ,  0,    935,         YM), /* 4549 */
+ TIMEDB_ENTRY( 0x4722c6d4 ,  1,   1870,         YM), /* 4549 */
+ TIMEDB_ENTRY( 0x4722c6d4 ,  2,   1008,         YM), /* 4549 */
+ TIMEDB_ENTRY( 0x4726dc9b ,  0,   3834,      YM+TA), /* 4451 */
  TIMEDB_ENTRY( 0x472e2b73 ,  0,  10747,YM+TA+TB+TD), /* 1000 */
  TIMEDB_ENTRY( 0x472fd6cf ,  0,   9216,         YM), /* 1095 */
+ TIMEDB_ENTRY( 0x4740948c ,  0,   6888,YM+TA+TB+TD), /* UCM_15.sndh */
  TIMEDB_ENTRY( 0x47430808 ,  0,  10880,      YM+TD), /* 2006 */
  TIMEDB_ENTRY( 0x4746395c ,  0,  29184,      YM+TD), /* 2573 */
  TIMEDB_ENTRY( 0x47547c37 ,  0,  12540,YM+TA+TB+TD), /* 2452 */
@@ -2034,10 +2243,13 @@
  TIMEDB_ENTRY( 0x47f3f9ea ,  7,   1524,         YM), /* 156 */
  TIMEDB_ENTRY( 0x47f3f9ea ,  8,   1686,         YM), /* 156 */
  TIMEDB_ENTRY( 0x480b7552 ,  0,  14336,         YM), /* 2810 */
+ TIMEDB_ENTRY( 0x48318dc0 ,  0,   2331,         YM), /* 4531 */
  TIMEDB_ENTRY( 0x4842a105 ,  0,   9600,         YM), /* 763 */
  TIMEDB_ENTRY( 0x484aad3f ,  0,   9023,YM+TA+TB+TD), /* 3525 */
  TIMEDB_ENTRY( 0x4864e718 ,  0,  47200,YM+TA+TB+TD), /* 2597 */
  TIMEDB_ENTRY( 0x48651fff ,  0,  10752,         YM), /* 589 */
+ TIMEDB_ENTRY( 0x486b399f ,  0,   7040,         YM), /* Driving_Force.sndh */
+ TIMEDB_ENTRY( 0x486b399f ,  1,    180,         YM), /* Driving_Force.sndh */
  TIMEDB_ENTRY( 0x48887d4f ,  0,  37120,YM+TA+TB+TD), /* 3343 */
  TIMEDB_ENTRY( 0x48ab9818 ,  0,   3836,         YM), /* 1286 */
  TIMEDB_ENTRY( 0x48ad0e6f ,  0,   1556,     YM+STE), /* 1211 */
@@ -2098,6 +2310,7 @@
  TIMEDB_ENTRY( 0x4a79bd65 ,  8,   1245,         YM), /* 134 */
  TIMEDB_ENTRY( 0x4a82eb53 ,  0,   7296,      YM+TD), /* 1983 */
  TIMEDB_ENTRY( 0x4a844c81 ,  0,   4224,         YM), /* 1164 */
+ TIMEDB_ENTRY( 0x4a89a203 ,  0,  21882,         YM), /* The_Popples_Revenge.sndh */
  TIMEDB_ENTRY( 0x4a941b05 ,  0,   6479,         YM), /* 3677 */
  TIMEDB_ENTRY( 0x4ab7ff41 ,  0,   1152,      YM+TA), /* 913 */
  TIMEDB_ENTRY( 0x4ad3ea2a ,  0,  10751,YM+TA+TB+TD), /* 4222 */
@@ -2158,6 +2371,10 @@
  TIMEDB_ENTRY( 0x4be36326 ,  1,   1921,         YM), /* 1735 */
  TIMEDB_ENTRY( 0x4bea4113 ,  0,   2746,YM+TA+TB+TD), /* 285 */
  TIMEDB_ENTRY( 0x4bf2f8a5 ,  0,   8467,   YM+TA+TD), /* 3829 */
+ TIMEDB_ENTRY( 0x4bf639b9 ,  0,     88,         YM), /* 4505 */
+ TIMEDB_ENTRY( 0x4bf639b9 ,  1,    215,         YM), /* 4505 */
+ TIMEDB_ENTRY( 0x4bf639b9 ,  2,    175,         YM), /* 4505 */
+ TIMEDB_ENTRY( 0x4bf639b9 ,  3,    950,         YM), /* 4505 */
  TIMEDB_ENTRY( 0x4c014df9 ,  0,  85503,      YM+TA), /* 3764 */
  TIMEDB_ENTRY( 0x4c195cc7 ,  0,  23041,      YM+TA), /* 3837 */
  TIMEDB_ENTRY( 0x4c3072b5 ,  0,   5375,YM+TA+TB+TD), /* 201 */
@@ -2168,6 +2385,14 @@
  TIMEDB_ENTRY( 0x4c99e00a ,  0,   2047,         YM), /* 4090 */
  TIMEDB_ENTRY( 0x4ca2f120 ,  0,  14941,   YM+TA+TB), /* 418 */
  TIMEDB_ENTRY( 0x4cb39ae7 ,  0,   9408,         YM), /* 1505 */
+ TIMEDB_ENTRY( 0x4cb89c38 ,  0,  18228,         YM), /* 4468 */
+ TIMEDB_ENTRY( 0x4cb89c38 ,  1,  16512,         YM), /* 4468 */
+ TIMEDB_ENTRY( 0x4cb89c38 ,  2,   9216,         YM), /* 4468 */
+ TIMEDB_ENTRY( 0x4cb89c38 ,  3,   6416,         YM), /* 4468 */
+ TIMEDB_ENTRY( 0x4cb89c38 ,  4,  12032,         YM), /* 4468 */
+ TIMEDB_ENTRY( 0x4cb89c38 ,  5,  25392,         YM), /* 4468 */
+ TIMEDB_ENTRY( 0x4cb89c38 ,  6,  19776,         YM), /* 4468 */
+ TIMEDB_ENTRY( 0x4cb89c38 ,  7,  15872,         YM), /* 4468 */
  TIMEDB_ENTRY( 0x4cbebadc ,  0,    183,         YM), /* 3316 */
  TIMEDB_ENTRY( 0x4cc72c6e ,  0,   2346,         YM), /* 110 */
  TIMEDB_ENTRY( 0x4cc72c6e ,  1,     50,         YM), /* 110 */
@@ -2180,6 +2405,7 @@
  TIMEDB_ENTRY( 0x4ce5b155 ,  0,   1920,         YM), /* 3285 */
  TIMEDB_ENTRY( 0x4ce8caa8 ,  0,  11835,YM+TA+TB+TD), /* 1608 */
  TIMEDB_ENTRY( 0x4cf10c3a ,  0,  42711,      YM+TA), /* 4036 */
+ TIMEDB_ENTRY( 0x4d0139e8 ,  0,   3840,         YM), /* 4443 */
  TIMEDB_ENTRY( 0x4d017b7d ,  0,   3584,         YM), /* 604 */
  TIMEDB_ENTRY( 0x4d1f2f40 ,  0,   4607,         YM), /* 353 */
  TIMEDB_ENTRY( 0x4d1f2f40 ,  1,   3309,         YM), /* 353 */
@@ -2191,6 +2417,7 @@
  TIMEDB_ENTRY( 0x4d23fd12 ,  0,   3072,         YM), /* 612 */
  TIMEDB_ENTRY( 0x4d32f6ab ,  0,  23104,YM+TA+TB+TD), /* 3372 */
  TIMEDB_ENTRY( 0x4d41504d ,  0,   2213,         YM), /* 3937 */
+ TIMEDB_ENTRY( 0x4d4208c3 ,  0,   9840,         YM), /* 4480 */
  TIMEDB_ENTRY( 0x4d63d8b4 ,  0,  35630,      YM+TA), /* 3482 */
  TIMEDB_ENTRY( 0x4d68ce12 ,  0,  31488,         YM), /* 1458 */
  TIMEDB_ENTRY( 0x4d6b8e91 ,  0,   5369,YM+TA+TB+TD), /* 4103 */
@@ -2211,6 +2438,7 @@
  TIMEDB_ENTRY( 0x4e397598 ,  0,   6912,         YM), /* 3250 */
  TIMEDB_ENTRY( 0x4e5a4612 ,  0,   1152,      YM+TD), /* 2643 */
  TIMEDB_ENTRY( 0x4e946cbe ,  0,  41855,YM+TA+TB+TD), /* 3651 */
+ TIMEDB_ENTRY( 0x4e9480a3 ,  0,  15403,         YM), /* BSW_121.sndh */
  TIMEDB_ENTRY( 0x4eaae9f6 ,  0,   2817,         YM), /* 3896 */
  TIMEDB_ENTRY( 0x4ecaf12f ,  0,   4147,         YM), /* 4137 */
  TIMEDB_ENTRY( 0x4ecaf12f ,  1,   1015,         YM), /* 4137 */
@@ -2223,6 +2451,7 @@
  TIMEDB_ENTRY( 0x4ecaf12f ,  8,   4147,         YM), /* 4137 */
  TIMEDB_ENTRY( 0x4ecaf12f ,  9,    775,         YM), /* 4137 */
  TIMEDB_ENTRY( 0x4ecaf12f , 10,   1686,         YM), /* 4137 */
+ TIMEDB_ENTRY( 0x4ecd1790 ,  0,   7167,   YM+TA+TB), /* 3435 */
  TIMEDB_ENTRY( 0x4ed01492 ,  0,  17408,YM+TA+TB+TD), /* 2091 */
  TIMEDB_ENTRY( 0x4eefb3ae ,  0,   8448,         YM), /* 2179 */
  TIMEDB_ENTRY( 0x4eefb3ae ,  1,  11904,         YM), /* 2179 */
@@ -2293,7 +2522,12 @@
  TIMEDB_ENTRY( 0x503d6010 ,  1,   6144,         YM), /* 2023 */
  TIMEDB_ENTRY( 0x504c6e55 ,  0,  54981,         YM), /* 2111 */
  TIMEDB_ENTRY( 0x5052dac8 ,  0,  22652,YM+TA+TB+TD), /* 2596 */
+ TIMEDB_ENTRY( 0x50601a0e ,  0,  15360,         YM), /* 1818 */
+ TIMEDB_ENTRY( 0x50601a0e ,  1,    883,         YM), /* 1818 */
+ TIMEDB_ENTRY( 0x50601a0e ,  2,   4475,         YM), /* 1818 */
+ TIMEDB_ENTRY( 0x50601a0e ,  3,   2047,         YM), /* 1818 */
  TIMEDB_ENTRY( 0x50654693 ,  0,  26240,YM+TA+TB+TD), /* 2909 */
+ TIMEDB_ENTRY( 0x50675679 ,  0,  10753,   YM+TA+TD), /* Nostalgic_Demo_Fractals.sndh */
  TIMEDB_ENTRY( 0x506e5380 ,  0,   4475,YM+TA+TB+TD), /* 1244 */
  TIMEDB_ENTRY( 0x50725811 ,  0,   6911,YM+TA+TB+TD), /* 2866 */
  TIMEDB_ENTRY( 0x507729d8 ,  0,   4032,         YM), /* 4004 */
@@ -2312,6 +2546,7 @@
  TIMEDB_ENTRY( 0x515e600b ,  0,  28800,         YM), /* 2038 */
  TIMEDB_ENTRY( 0x51704069 ,  0,  17088,         YM), /* 2901 */
  TIMEDB_ENTRY( 0x5180476a ,  0,  36024,      YM+TA), /* 3878 */
+ TIMEDB_ENTRY( 0x51841b4d ,  0,   3855,         YM), /* 4453 */
  TIMEDB_ENTRY( 0x519ca005 ,  0,   6169,         YM), /* 843 */
  TIMEDB_ENTRY( 0x519ca005 ,  1,   1749,         YM), /* 843 */
  TIMEDB_ENTRY( 0x519ca005 ,  2,    208,         YM), /* 843 */
@@ -2346,6 +2581,7 @@
  TIMEDB_ENTRY( 0x52b0c50f ,  0,   8639,         YM), /* 507 */
  TIMEDB_ENTRY( 0x52ca7216 ,  0,   7420,YM+TA+TB+TD), /* 3650 */
  TIMEDB_ENTRY( 0x52dc9635 ,  0,  32320,YM+TA+TB+TD), /* 2527 */
+ TIMEDB_ENTRY( 0x52dd204c ,  0,   5861,      YM+TA), /* 4415 */
  TIMEDB_ENTRY( 0x52defff8 ,  0,    535,         YM), /* 4156 */
  TIMEDB_ENTRY( 0x52e68367 ,  0,   1944,      YM+TA), /* 2633 */
  TIMEDB_ENTRY( 0x52ee21bc ,  0,   4838,         YM), /* 3977 */
@@ -2389,16 +2625,18 @@
  TIMEDB_ENTRY( 0x53e01684 ,  0,   4025,   YM+TB+TD), /* 4286 */
  TIMEDB_ENTRY( 0x53e105e5 ,  0,   3286,         YM), /* 3925 */
  TIMEDB_ENTRY( 0x53ee72fb ,  0,   5772,         YM), /* 4339 */
+ TIMEDB_ENTRY( 0x53f1f6e8 ,  0,   6144,         YM), /* 4406 */
  TIMEDB_ENTRY( 0x540cb5f2 ,  0,  11520,   YM+TA+TD), /* 2256 */
  TIMEDB_ENTRY( 0x540da2c3 ,  0,   9216,         YM), /* 1079 */
- TIMEDB_ENTRY( 0x541c3e95 ,  0,  15360,         YM), /* 1818 */
- TIMEDB_ENTRY( 0x541c3e95 ,  1,    883,         YM), /* 1818 */
- TIMEDB_ENTRY( 0x541c3e95 ,  2,   4475,         YM), /* 1818 */
- TIMEDB_ENTRY( 0x541c3e95 ,  3,   2047,         YM), /* 1818 */
+ TIMEDB_ENTRY( 0x541c3e95 ,  0,  15360,         YM), /* Scooby_And_Scrappy_Doo.sndh */
+ TIMEDB_ENTRY( 0x541c3e95 ,  1,    883,         YM), /* Scooby_And_Scrappy_Doo.sndh */
+ TIMEDB_ENTRY( 0x541c3e95 ,  2,   4475,         YM), /* Scooby_And_Scrappy_Doo.sndh */
+ TIMEDB_ENTRY( 0x541c3e95 ,  3,   2047,         YM), /* Scooby_And_Scrappy_Doo.sndh */
  TIMEDB_ENTRY( 0x544250d8 ,  0,   1275,         YM), /* 467 */
  TIMEDB_ENTRY( 0x54425228 ,  0,   1565,         YM), /* 2465 */
  TIMEDB_ENTRY( 0x544381a1 ,  0,   9783,         YM), /* 2140 */
  TIMEDB_ENTRY( 0x5444fa7d ,  0,   4025,   YM+TA+TD), /* 1157 */
+ TIMEDB_ENTRY( 0x544ba2ae ,  0,   3764,         YM), /* 4507 */
  TIMEDB_ENTRY( 0x5453fbd2 ,  0,   4929,         YM), /* 888 */
  TIMEDB_ENTRY( 0x545e3d52 ,  0,   6715,         YM), /* 547 */
  TIMEDB_ENTRY( 0x545e3d52 ,  1,    379,         YM), /* 547 */
@@ -2443,6 +2681,8 @@
  TIMEDB_ENTRY( 0x553acdb6 ,  0,  23884,         YM), /* 3870 */
  TIMEDB_ENTRY( 0x555306f5 ,  0,   1530,   YM+TA+TB), /* 4298 */
  TIMEDB_ENTRY( 0x55593e48 ,  0,   9216,   YM+TA+TD), /* 2325 */
+ TIMEDB_ENTRY( 0x555bb0ee ,  0,  21492,      YM+TA), /* Middle_Earth_Theme.sndh */
+ TIMEDB_ENTRY( 0x557a9fc7 ,  0,  21945,      YM+TA), /* 1690 */
  TIMEDB_ENTRY( 0x558740e6 ,  0,   4864,      YM+TA), /* 779 */
  TIMEDB_ENTRY( 0x558a84e1 ,  0,   2753,         YM), /* 3061 */
  TIMEDB_ENTRY( 0x559c530e ,  0,   5509,YM+TA+TB+TD), /* 4318 */
@@ -2479,12 +2719,13 @@
  TIMEDB_ENTRY( 0x569634ec ,  5,   2304,         YM), /* 173 */
  TIMEDB_ENTRY( 0x569b83dd ,  0,   1914,         YM), /* 1697 */
  TIMEDB_ENTRY( 0x56a669f1 ,  0,   6834,         YM), /* 3097 */
- TIMEDB_ENTRY( 0x56b7f845 ,  0,   4677,         YM), /* 881 */
- TIMEDB_ENTRY( 0x56b7f845 ,  1,   1756,         YM), /* 881 */
- TIMEDB_ENTRY( 0x56b7f845 ,  2,   3616,         YM), /* 881 */
- TIMEDB_ENTRY( 0x56b7f845 ,  3,    804,         YM), /* 881 */
- TIMEDB_ENTRY( 0x56b7f845 ,  4,   4629,         YM), /* 881 */
- TIMEDB_ENTRY( 0x56b7f845 ,  5,   5205,         YM), /* 881 */
+ TIMEDB_ENTRY( 0x56b7f845 ,  0,   4677,         YM), /* Winter_Olympiad.sndh */
+ TIMEDB_ENTRY( 0x56b7f845 ,  1,   1756,         YM), /* Winter_Olympiad.sndh */
+ TIMEDB_ENTRY( 0x56b7f845 ,  2,   3616,         YM), /* Winter_Olympiad.sndh */
+ TIMEDB_ENTRY( 0x56b7f845 ,  3,    804,         YM), /* Winter_Olympiad.sndh */
+ TIMEDB_ENTRY( 0x56b7f845 ,  4,   4629,         YM), /* Winter_Olympiad.sndh */
+ TIMEDB_ENTRY( 0x56b7f845 ,  5,   5205,         YM), /* Winter_Olympiad.sndh */
+ TIMEDB_ENTRY( 0x56df27ae ,  0,   7296,      YM+TD), /* Outline.sndh */
  TIMEDB_ENTRY( 0x56e307f1 ,  0,   9786,         YM), /* 1033 */
  TIMEDB_ENTRY( 0x56eb9f9b ,  0,   5052,         YM), /* 3093 */
  TIMEDB_ENTRY( 0x56ec7baa ,  0,  21492,      YM+TA), /* 4364 */
@@ -2519,6 +2760,9 @@
  TIMEDB_ENTRY( 0x5775383b , 19,    261,         YM), /* 2884 */
  TIMEDB_ENTRY( 0x5775383b , 20,    337,         YM), /* 2884 */
  TIMEDB_ENTRY( 0x5778b48b ,  0,   4845,         YM), /* 3508 */
+ TIMEDB_ENTRY( 0x5778d698 ,  0,  42411,         YM), /* See_Ya_Again_on_Falcon.sndh */
+ TIMEDB_ENTRY( 0x57835ad4 ,  0,     97,         YM), /* Kid_Gloves_2.sndh */
+ TIMEDB_ENTRY( 0x57835ad4 ,  1,    592,         YM), /* Kid_Gloves_2.sndh */
  TIMEDB_ENTRY( 0x579315cd ,  0,   8448,         YM), /* 3212 */
  TIMEDB_ENTRY( 0x57bde7bc ,  0,  13440,         YM), /* 484 */
  TIMEDB_ENTRY( 0x57c18f04 ,  0,    889,         YM), /* 1319 */
@@ -2553,6 +2797,7 @@
  TIMEDB_ENTRY( 0x584046c7 , 16,   3040,         YM), /* 1887 */
  TIMEDB_ENTRY( 0x5844547d ,  0,  13900,         YM), /* 373 */
  TIMEDB_ENTRY( 0x584c6418 ,  0,   3315,      YM+TD), /* 1108 */
+ TIMEDB_ENTRY( 0x584ccccf ,  0,   7290,         YM), /* The_Undead_Horrow_Show.sndh */
  TIMEDB_ENTRY( 0x5863bafb ,  0,   5629,         YM), /* 557 */
  TIMEDB_ENTRY( 0x5863bafb ,  1,    253,         YM), /* 557 */
  TIMEDB_ENTRY( 0x58641f7d ,  0,  10176,      YM+TA), /* 788 */
@@ -2595,6 +2840,14 @@
  TIMEDB_ENTRY( 0x595c4446 ,  0,  14208,         YM), /* 3253 */
  TIMEDB_ENTRY( 0x595cc1b1 ,  0,    524,         YM), /* 2148 */
  TIMEDB_ENTRY( 0x597fad6b ,  0,   4224,         YM), /* 1218 */
+ TIMEDB_ENTRY( 0x598024f0 ,  0,  20057,YM+TA+TB+TD), /* 3853 */
+ TIMEDB_ENTRY( 0x598b5167 ,  0,    953,         YM), /* 4513 */
+ TIMEDB_ENTRY( 0x598b5167 ,  1,    143,         YM), /* 4513 */
+ TIMEDB_ENTRY( 0x598b5167 ,  2,    171,         YM), /* 4513 */
+ TIMEDB_ENTRY( 0x598b5167 ,  4,    935,         YM), /* 4513 */
+ TIMEDB_ENTRY( 0x598b5167 ,  5,     26,         YM), /* 4513 */
+ TIMEDB_ENTRY( 0x598b5167 ,  6,    803,         YM), /* 4513 */
+ TIMEDB_ENTRY( 0x598b5167 ,  7,    201,         YM), /* 4513 */
  TIMEDB_ENTRY( 0x59c38d29 ,  0,   9213,YM+TA+TB+TD), /* 1054 */
  TIMEDB_ENTRY( 0x59c7d1e4 ,  0,   9539,         YM), /* 869 */
  TIMEDB_ENTRY( 0x59cb6454 ,  0,   9166,         YM), /* 3173 */
@@ -2612,6 +2865,9 @@
  TIMEDB_ENTRY( 0x5a4908be ,  0,   6657,      YM+TA), /* 3820 */
  TIMEDB_ENTRY( 0x5a4c8b67 ,  0,   2334,   YM+TA+TD), /* 2308 */
  TIMEDB_ENTRY( 0x5a4f1da6 ,  0,   2560,         YM), /* 2003 */
+ TIMEDB_ENTRY( 0x5a561c67 ,  0,    766,         YM), /* 4524 */
+ TIMEDB_ENTRY( 0x5a561c67 ,  1,   2944,         YM), /* 4524 */
+ TIMEDB_ENTRY( 0x5a561c67 ,  2,    439,         YM), /* 4524 */
  TIMEDB_ENTRY( 0x5a614e63 ,  0,   4775,      YM+TA), /* 3843 */
  TIMEDB_ENTRY( 0x5a9b3487 ,  0,  13434,YM+TA+TB+TD), /* 2480 */
  TIMEDB_ENTRY( 0x5acc5761 ,  0,   3776,         YM), /* 495 */
@@ -2660,6 +2916,11 @@
  TIMEDB_ENTRY( 0x5c0bf856 ,  4,   5796,         YM), /* 751 */
  TIMEDB_ENTRY( 0x5c0bf856 ,  5,    251,         YM), /* 751 */
  TIMEDB_ENTRY( 0x5c0bf856 ,  6,   3168,         YM), /* 751 */
+ TIMEDB_ENTRY( 0x5c0f753b ,  0,   1850,         YM), /* P47_The_Freedom_Fighter.sndh */
+ TIMEDB_ENTRY( 0x5c0f753b ,  1,   3976,         YM), /* P47_The_Freedom_Fighter.sndh */
+ TIMEDB_ENTRY( 0x5c0f753b ,  2,   2765,         YM), /* P47_The_Freedom_Fighter.sndh */
+ TIMEDB_ENTRY( 0x5c0f753b ,  3,   2305,         YM), /* P47_The_Freedom_Fighter.sndh */
+ TIMEDB_ENTRY( 0x5c0f753b ,  4,   3328,         YM), /* P47_The_Freedom_Fighter.sndh */
  TIMEDB_ENTRY( 0x5c2d5f54 ,  0,   4583,         YM), /* 1311 */
  TIMEDB_ENTRY( 0x5c2d5f54 ,  1,    184,         YM), /* 1311 */
  TIMEDB_ENTRY( 0x5c2d5f54 ,  2,    171,         YM), /* 1311 */
@@ -2669,6 +2930,7 @@
  TIMEDB_ENTRY( 0x5c5abf0b ,  0,  12096,   YM+TA+TD), /* 3050 */
  TIMEDB_ENTRY( 0x5c5ae98d ,  0,   5127,   YM+TA+TD), /* 2324 */
  TIMEDB_ENTRY( 0x5c69cf28 ,  0,   6525,         YM), /* 374 */
+ TIMEDB_ENTRY( 0x5c6d53d2 ,  0,    291,         YM), /* 4522 */
  TIMEDB_ENTRY( 0x5c6ec096 ,  0,  11516,   YM+TA+TD), /* 2511 */
  TIMEDB_ENTRY( 0x5c8150d3 ,  0,   8098,         YM), /* 1277 */
  TIMEDB_ENTRY( 0x5c9f6920 ,  0,    504,   YM+TA+TB), /* 834 */
@@ -2686,12 +2948,14 @@
  TIMEDB_ENTRY( 0x5cc8ca9b ,  3,   4681,         YM), /* 90 */
  TIMEDB_ENTRY( 0x5cc8ca9b ,  4,     84,         YM), /* 90 */
  TIMEDB_ENTRY( 0x5cc8ca9b ,  5,    131,         YM), /* 90 */
+ TIMEDB_ENTRY( 0x5cd611c2 ,  0,    864,      YM+TA), /* 4430 */
  TIMEDB_ENTRY( 0x5ce03029 ,  0,   8320,         YM), /* 1497 */
  TIMEDB_ENTRY( 0x5ce03029 ,  1,   9344,         YM), /* 1497 */
  TIMEDB_ENTRY( 0x5ce03029 ,  2,  16896,         YM), /* 1497 */
  TIMEDB_ENTRY( 0x5ce03029 ,  3,   1536,         YM), /* 1497 */
  TIMEDB_ENTRY( 0x5ce45268 ,  0,   8644,         YM), /* 272 */
  TIMEDB_ENTRY( 0x5ce57cce ,  0,   4486,      YM+TA), /* 2242 */
+ TIMEDB_ENTRY( 0x5ce7c5f2 ,  0,   2289,         YM), /* 3891 */
  TIMEDB_ENTRY( 0x5ce8e2e7 ,  0,   1785,YM+TA+TB+TD), /* 1957 */
  TIMEDB_ENTRY( 0x5ced344b ,  0,   6528,         YM), /* 2902 */
  TIMEDB_ENTRY( 0x5ced4178 ,  0,   5892,         YM), /* 447 */
@@ -2723,9 +2987,25 @@
  TIMEDB_ENTRY( 0x5d30e01b , 13,    643,         YM), /* 1313 */
  TIMEDB_ENTRY( 0x5d3bbc34 ,  0,   4552,         YM), /* 4088 */
  TIMEDB_ENTRY( 0x5d4599d2 ,  0,    767,         YM), /* 4097 */
+ TIMEDB_ENTRY( 0x5d562a89 ,  0,    536,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 ,  1,    570,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 ,  2,    376,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 ,  3,    210,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 ,  4,    321,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 ,  5,    208,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 ,  6,     88,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 ,  7,    321,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 ,  8,     80,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 ,  9,     27,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 , 10,     28,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 , 11,     28,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 , 12,    381,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 , 13,     72,         YM), /* 1816 */
+ TIMEDB_ENTRY( 0x5d562a89 , 14,   5809,         YM), /* 1816 */
  TIMEDB_ENTRY( 0x5d6d8726 ,  0,   4795,   YM+TA+TD), /* 4252 */
  TIMEDB_ENTRY( 0x5d784c68 ,  0,   8320,         YM), /* 2817 */
  TIMEDB_ENTRY( 0x5d8e0999 ,  0,   7422,         YM), /* 3031 */
+ TIMEDB_ENTRY( 0x5db72ada ,  0,   3072,      YM+TC), /* Hyper_dog_poo.sndh */
  TIMEDB_ENTRY( 0x5dbf134d ,  0,   5471,         YM), /* 15 */
  TIMEDB_ENTRY( 0x5dbf134d ,  1,    110,         YM), /* 15 */
  TIMEDB_ENTRY( 0x5dbf134d ,  2,    131,         YM), /* 15 */
@@ -2733,6 +3013,10 @@
  TIMEDB_ENTRY( 0x5dbf134d ,  4,   3074,         YM), /* 15 */
  TIMEDB_ENTRY( 0x5dc28293 ,  0,  10001,      YM+TA), /* 3743 */
  TIMEDB_ENTRY( 0x5dcb165f ,  0,  54966,      YM+TA), /* 4020 */
+ TIMEDB_ENTRY( 0x5de01097 ,  0,    328,         YM), /* 4487 */
+ TIMEDB_ENTRY( 0x5de01097 ,  1,    288,         YM), /* 4487 */
+ TIMEDB_ENTRY( 0x5de5027f ,  0,   2816,         YM), /* 4530 */
+ TIMEDB_ENTRY( 0x5de5027f ,  1,   2816,         YM), /* 4530 */
  TIMEDB_ENTRY( 0x5dfb9bff ,  0,   4104,         YM), /* 1117 */
  TIMEDB_ENTRY( 0x5e1ab844 ,  0,  37888,      YM+TD), /* 2616 */
  TIMEDB_ENTRY( 0x5e292a9d ,  0,  17450,YM+TA+TC+TD), /* 4368 */
@@ -2758,6 +3042,7 @@
  TIMEDB_ENTRY( 0x5f93d42c ,  0,  12672,         YM), /* 3276 */
  TIMEDB_ENTRY( 0x5f95cad7 ,  0,  13377,   YM+TA+TD), /* 2357 */
  TIMEDB_ENTRY( 0x5fb25bb2 ,  0,   7680,         YM), /* 1654 */
+ TIMEDB_ENTRY( 0x5fcdea08 ,  0,   7679,YM+TA+TB+TD), /* 2708 */
  TIMEDB_ENTRY( 0x5fd4be5a ,  0,   8955,      YM+TB), /* 57 */
  TIMEDB_ENTRY( 0x5fd8dde9 ,  0,  21492,         YM), /* 1701 */
  TIMEDB_ENTRY( 0x5fe3d3ca ,  0,   2848,         YM), /* 591 */
@@ -2765,6 +3050,7 @@
  TIMEDB_ENTRY( 0x5fe5097b ,  0,  43519,YM+TA+TB+TD), /* 3367 */
  TIMEDB_ENTRY( 0x5ff1f0b5 ,  0,  19584,YM+TA+TB+TD), /* 2531 */
  TIMEDB_ENTRY( 0x5ff35036 ,  0,  16085,      YM+TA), /* 3955 */
+ TIMEDB_ENTRY( 0x6002d68c ,  0,   3834,      YM+TA), /* 4448 */
  TIMEDB_ENTRY( 0x6011f87f ,  0,  13824,         YM), /* 1002 */
  TIMEDB_ENTRY( 0x601bcaa3 ,  0,   8413,         YM), /* 2050 */
  TIMEDB_ENTRY( 0x607b46c5 ,  0,   5663,         YM), /* 2656 */
@@ -2802,16 +3088,17 @@
  TIMEDB_ENTRY( 0x6242f4be ,  1,   3922,         YM), /* 2720 */
  TIMEDB_ENTRY( 0x6242f4be ,  2,   5872,         YM), /* 2720 */
  TIMEDB_ENTRY( 0x62760220 ,  0,   1914,      YM+TA), /* 2639 */
+ TIMEDB_ENTRY( 0x62773ed5 ,  0,   2309,   YM+TA+TD), /* Nostalgic_Demo_GriffScreen.sndh */
  TIMEDB_ENTRY( 0x629aae6c ,  0,  17408,         YM), /* 2047 */
- TIMEDB_ENTRY( 0x62a6cab9 ,  0,   2905,         YM), /* 3205 */
- TIMEDB_ENTRY( 0x62a6cab9 ,  1,   5120,         YM), /* 3205 */
- TIMEDB_ENTRY( 0x62a6cab9 ,  2,   4000,         YM), /* 3205 */
- TIMEDB_ENTRY( 0x62a6cab9 ,  3,   2327,         YM), /* 3205 */
- TIMEDB_ENTRY( 0x62a6cab9 ,  4,   2176,         YM), /* 3205 */
- TIMEDB_ENTRY( 0x62a6cab9 ,  5,   2953,         YM), /* 3205 */
- TIMEDB_ENTRY( 0x62a6cab9 ,  6,   3741,         YM), /* 3205 */
- TIMEDB_ENTRY( 0x62a6cab9 ,  7,   1478,         YM), /* 3205 */
- TIMEDB_ENTRY( 0x62a6cab9 ,  8,    321,         YM), /* 3205 */
+ TIMEDB_ENTRY( 0x62a6cab9 ,  0,   2905,         YM), /* Flipit_and_Magnose.sndh */
+ TIMEDB_ENTRY( 0x62a6cab9 ,  1,   5120,         YM), /* Flipit_and_Magnose.sndh */
+ TIMEDB_ENTRY( 0x62a6cab9 ,  2,   4000,         YM), /* Flipit_and_Magnose.sndh */
+ TIMEDB_ENTRY( 0x62a6cab9 ,  3,   2327,         YM), /* Flipit_and_Magnose.sndh */
+ TIMEDB_ENTRY( 0x62a6cab9 ,  4,   2176,         YM), /* Flipit_and_Magnose.sndh */
+ TIMEDB_ENTRY( 0x62a6cab9 ,  5,   2953,         YM), /* Flipit_and_Magnose.sndh */
+ TIMEDB_ENTRY( 0x62a6cab9 ,  6,   3741,         YM), /* Flipit_and_Magnose.sndh */
+ TIMEDB_ENTRY( 0x62a6cab9 ,  7,   1478,         YM), /* Flipit_and_Magnose.sndh */
+ TIMEDB_ENTRY( 0x62a6cab9 ,  8,    321,         YM), /* Flipit_and_Magnose.sndh */
  TIMEDB_ENTRY( 0x62acc74a ,  0,   8831,   YM+TB+TD), /* 2657 */
  TIMEDB_ENTRY( 0x62afbe50 ,  0,   4026,         YM), /* 1243 */
  TIMEDB_ENTRY( 0x62f59ad0 ,  0,  46080,YM+TA+TB+TD), /* 2535 */
@@ -2823,6 +3110,11 @@
  TIMEDB_ENTRY( 0x6335a459 ,  0,   2463,         YM), /* 1245 */
  TIMEDB_ENTRY( 0x634d837a ,  0,   3200,         YM), /* 4206 */
  TIMEDB_ENTRY( 0x6357527a ,  0,  10257,         YM), /* 2136 */
+ TIMEDB_ENTRY( 0x6361d67f ,  0,     64,         YM), /* 4546 */
+ TIMEDB_ENTRY( 0x6361d67f ,  1,    232,         YM), /* 4546 */
+ TIMEDB_ENTRY( 0x6361d67f ,  2,    307,         YM), /* 4546 */
+ TIMEDB_ENTRY( 0x6361d67f ,  3,   3643,         YM), /* 4546 */
+ TIMEDB_ENTRY( 0x6361d67f ,  4,     49,         YM), /* 4546 */
  TIMEDB_ENTRY( 0x63875879 ,  0,  37242,         YM), /* 889 */
  TIMEDB_ENTRY( 0x63875879 ,  1, 106746,         YM), /* 889 */
  TIMEDB_ENTRY( 0x638e66d5 ,  0,  26368,YM+TA+TB+TD), /* 3299 */
@@ -2853,6 +3145,7 @@
  TIMEDB_ENTRY( 0x63f7b876 ,  0,  11522,         YM), /* 4189 */
  TIMEDB_ENTRY( 0x6420fd5d ,  0,   6912,      YM+TD), /* 433 */
  TIMEDB_ENTRY( 0x6420ff6f ,  0,   8959,   YM+TA+TD), /* 3434 */
+ TIMEDB_ENTRY( 0x642b715d ,  0,   5376,   YM+TA+TB), /* Synergy_Demo_Reset.sndh */
  TIMEDB_ENTRY( 0x642e0540 ,  0,   2674,         YM), /* 2744 */
  TIMEDB_ENTRY( 0x64409956 ,  0,   5568,         YM), /* 128 */
  TIMEDB_ENTRY( 0x64549b22 ,  0,   1536,         YM), /* 979 */
@@ -2866,6 +3159,9 @@
  TIMEDB_ENTRY( 0x649e2a02 ,  1,    490,         YM), /* 2216 */
  TIMEDB_ENTRY( 0x649e2a02 ,  2,    201,         YM), /* 2216 */
  TIMEDB_ENTRY( 0x649e2a02 ,  3,  24576,         YM), /* 2216 */
+ TIMEDB_ENTRY( 0x649f7c4b ,  0,  57029,      YM+TA), /* 4560 */
+ TIMEDB_ENTRY( 0x649f7c4b ,  1,  14785,      YM+TA), /* 4560 */
+ TIMEDB_ENTRY( 0x649f7c4b ,  2,  11521,      YM+TA), /* 4560 */
  TIMEDB_ENTRY( 0x64a27951 ,  0,   3456,         YM), /* 490 */
  TIMEDB_ENTRY( 0x64becfa4 ,  0,   4608,         YM), /* 1514 */
  TIMEDB_ENTRY( 0x64becfa4 ,  1,   4352,         YM), /* 1514 */
@@ -2873,6 +3169,10 @@
  TIMEDB_ENTRY( 0x64c634bc ,  0,  10368,         YM), /* 1646 */
  TIMEDB_ENTRY( 0x64ee1ded ,  0,  12089,         YM), /* 2494 */
  TIMEDB_ENTRY( 0x650104a6 ,  0,  13665,   YM+TA+TD), /* 2209 */
+ TIMEDB_ENTRY( 0x650176bc ,  0,    960,         YM), /* 4479 */
+ TIMEDB_ENTRY( 0x650176bc ,  1,    193,         YM), /* 4479 */
+ TIMEDB_ENTRY( 0x650176bc ,  2,    192,         YM), /* 4479 */
+ TIMEDB_ENTRY( 0x650176bc ,  3,    768,         YM), /* 4479 */
  TIMEDB_ENTRY( 0x6502f195 ,  0,   3150,         YM), /* 62 */
  TIMEDB_ENTRY( 0x6502f195 ,  1,    114,         YM), /* 62 */
  TIMEDB_ENTRY( 0x6502f195 ,  2,    375,         YM), /* 62 */
@@ -2916,6 +3216,7 @@
  TIMEDB_ENTRY( 0x6697b220 ,  0,   3835,   YM+TB+TD), /* 222 */
  TIMEDB_ENTRY( 0x669c22a9 ,  0,   6527,         YM), /* 3673 */
  TIMEDB_ENTRY( 0x66bd7052 ,  0,   7365,         YM), /* 3238 */
+ TIMEDB_ENTRY( 0x66d1653f ,  0,   1706,         YM), /* 4541 */
  TIMEDB_ENTRY( 0x66f95843 ,  0,    288,         YM), /* 1080 */
  TIMEDB_ENTRY( 0x66fd72bf ,  0,  11362,         YM), /* 3282 */
  TIMEDB_ENTRY( 0x6704938d ,  0,  14208,         YM), /* 761 */
@@ -2928,12 +3229,15 @@
  TIMEDB_ENTRY( 0x67aec997 ,  0,   9360,      YM+TD), /* 2381 */
  TIMEDB_ENTRY( 0x67aec997 ,  1,    800,      YM+TD), /* 2381 */
  TIMEDB_ENTRY( 0x67aec997 ,  2,   1761,      YM+TD), /* 2381 */
+ TIMEDB_ENTRY( 0x67b2ba59 ,  0,  13433,     YM+STE), /* The_Singing_Green_Frog.sndh */
  TIMEDB_ENTRY( 0x67b3ebf9 ,  0,  12032,      YM+TA), /* 258 */
  TIMEDB_ENTRY( 0x67c3acd0 ,  0,   8315,YM+TA+TB+TD), /* 999 */
  TIMEDB_ENTRY( 0x67cb3b1e ,  0,    635,   YM+TA+TD), /* 4281 */
  TIMEDB_ENTRY( 0x67d46062 ,  0,   7680,         YM), /* 1423 */
  TIMEDB_ENTRY( 0x67d7a40b ,  0,   5025,         YM), /* 230 */
  TIMEDB_ENTRY( 0x67dc492e ,  0,   2233,      YM+TA), /* 4277 */
+ TIMEDB_ENTRY( 0x67dc7b59 ,  0,    514,   YM+TA+TD), /* Nostalgic_Demo_Loader.sndh */
+ TIMEDB_ENTRY( 0x67e7f2a8 ,  0,   5632,         YM), /* 4482 */
  TIMEDB_ENTRY( 0x6814db57 ,  0,  16132,      YM+TA), /* 3818 */
  TIMEDB_ENTRY( 0x6827389a ,  0,   4992,         YM), /* 1443 */
  TIMEDB_ENTRY( 0x6827389a ,  1,   4992,         YM), /* 1443 */
@@ -2956,6 +3260,9 @@
  TIMEDB_ENTRY( 0x68abea93 ,  0,   1553,         YM), /* 862 */
  TIMEDB_ENTRY( 0x68ad370f ,  0,   3835,   YM+TA+TD), /* 996 */
  TIMEDB_ENTRY( 0x68b06314 ,  0,   3517,      YM+TA), /* 2776 */
+ TIMEDB_ENTRY( 0x68b73120 ,  0,   8243,YM+TA+TC+TD), /* Traxxer_2.sndh */
+ TIMEDB_ENTRY( 0x68b92abf ,  0,  10758,         YM), /* 4426 */
+ TIMEDB_ENTRY( 0x68e43d5d ,  0,   3129,YM+TA+TB+TD), /* 3644 */
  TIMEDB_ENTRY( 0x69079f07 ,  0,  18495,      YM+TA), /* 1747 */
  TIMEDB_ENTRY( 0x69244f58 ,  0,   4992,         YM), /* 901 */
  TIMEDB_ENTRY( 0x69296b00 ,  0,  38912,         YM), /* 9 */
@@ -2999,6 +3306,8 @@
  TIMEDB_ENTRY( 0x6a6bd1ab , 13,   2870,         YM), /* 4393 */
  TIMEDB_ENTRY( 0x6a73db9c ,  0,   8703,YM+TA+TB+TD), /* 3831 */
  TIMEDB_ENTRY( 0x6a77e267 ,  0, 133746,      YM+TA), /* 4029 */
+ TIMEDB_ENTRY( 0x6a79cf52 ,  0,   1360,         YM), /* 4548 */
+ TIMEDB_ENTRY( 0x6abe41d0 ,  0,   6534,      YM+TA), /* 4563 */
  TIMEDB_ENTRY( 0x6ac1f37c ,  0,   8960,   YM+TB+TD), /* 2905 */
  TIMEDB_ENTRY( 0x6ad0abf2 ,  0,  70376,      YM+TA), /* 4021 */
  TIMEDB_ENTRY( 0x6aeffc55 ,  0, 131124,      YM+TA), /* 3825 */
@@ -3011,6 +3320,7 @@
  TIMEDB_ENTRY( 0x6af6a6ae ,  6,   8589,         YM), /* 1377 */
  TIMEDB_ENTRY( 0x6afddd06 ,  0,   5975,         YM), /* 330 */
  TIMEDB_ENTRY( 0x6b0ab29b ,  0,   3072,         YM), /* 1183 */
+ TIMEDB_ENTRY( 0x6b0e6a79 ,  0,    102,         YM), /* 4520 */
  TIMEDB_ENTRY( 0x6b12fd37 ,  0,  12288,   YM+TA+TD), /* 2268 */
  TIMEDB_ENTRY( 0x6b26103c ,  0,   2240,         YM), /* 1502 */
  TIMEDB_ENTRY( 0x6b26103c ,  1,   6496,         YM), /* 1502 */
@@ -3025,6 +3335,9 @@
  TIMEDB_ENTRY( 0x6b26103c , 10,   2400,         YM), /* 1502 */
  TIMEDB_ENTRY( 0x6b3041dd ,  0,  13818,         YM), /* 1027 */
  TIMEDB_ENTRY( 0x6b46576e ,  0,   2300,YM+TA+TB+TD), /* 1165 */
+ TIMEDB_ENTRY( 0x6b60c6cd ,  0,    140,         YM), /* 4523 */
+ TIMEDB_ENTRY( 0x6b60c6cd ,  1,   1745,         YM), /* 4523 */
+ TIMEDB_ENTRY( 0x6b60c6cd ,  2,    903,         YM), /* 4523 */
  TIMEDB_ENTRY( 0x6b62e9cc ,  0,  41104,      YM+TA), /* 4027 */
  TIMEDB_ENTRY( 0x6b780fd1 ,  0,  11649,      YM+TA), /* 3783 */
  TIMEDB_ENTRY( 0x6b81bbea ,  0,    319,         YM), /* 2471 */
@@ -3041,6 +3354,7 @@
  TIMEDB_ENTRY( 0x6bce9bb7 ,  1,    289,         YM), /* 1504 */
  TIMEDB_ENTRY( 0x6c287539 ,  0,   7296,         YM), /* 1205 */
  TIMEDB_ENTRY( 0x6c287f4e ,  0,   6526,         YM), /* 1321 */
+ TIMEDB_ENTRY( 0x6c2c0a56 ,  0,   3847,         YM), /* 2721 */
  TIMEDB_ENTRY( 0x6c3a5336 ,  0,   8336,         YM), /* 1800 */
  TIMEDB_ENTRY( 0x6c3a5336 ,  1,   6110,         YM), /* 1800 */
  TIMEDB_ENTRY( 0x6c4168b0 ,  0,    360,         YM), /* 1715 */
@@ -3128,6 +3442,7 @@
  TIMEDB_ENTRY( 0x6ee1a637 ,  0,  12096,         YM), /* 596 */
  TIMEDB_ENTRY( 0x6ee9c6f1 ,  0,   3072,         YM), /* 4005 */
  TIMEDB_ENTRY( 0x6ef4d709 ,  0,   2044,   YM+TA+TB), /* 4280 */
+ TIMEDB_ENTRY( 0x6f0d5919 ,  0,  18809,         YM), /* Tears_On_My_Keyboard.sndh */
  TIMEDB_ENTRY( 0x6f1bf9fb ,  0,   1535,YM+TA+TB+TD), /* 2710 */
  TIMEDB_ENTRY( 0x6f2274c6 ,  0,   5766,         YM), /* 2000 */
  TIMEDB_ENTRY( 0x6f2ceb7a ,  0,  38912,         YM), /* 2805 */
@@ -3197,6 +3512,14 @@
  TIMEDB_ENTRY( 0x7211ab87 ,  0,  17027,YM+TA+TB+TD), /* 2076 */
  TIMEDB_ENTRY( 0x721728d7 ,  0,    896,         YM), /* 958 */
  TIMEDB_ENTRY( 0x721e7262 ,  0,   2000,         YM), /* 1802 */
+ TIMEDB_ENTRY( 0x72267264 ,  0,   6976,         YM), /* Kid_Gloves_2.sndh */
+ TIMEDB_ENTRY( 0x72267264 ,  1,   7680,         YM), /* Kid_Gloves_2.sndh */
+ TIMEDB_ENTRY( 0x72267264 ,  2,   7680,         YM), /* Kid_Gloves_2.sndh */
+ TIMEDB_ENTRY( 0x72267264 ,  3,    506,         YM), /* Kid_Gloves_2.sndh */
+ TIMEDB_ENTRY( 0x72267264 ,  4,   9216,         YM), /* Kid_Gloves_2.sndh */
+ TIMEDB_ENTRY( 0x72267264 ,  5,   8704,         YM), /* Kid_Gloves_2.sndh */
+ TIMEDB_ENTRY( 0x72267264 ,  6,   7936,         YM), /* Kid_Gloves_2.sndh */
+ TIMEDB_ENTRY( 0x72267264 ,  7,   7680,         YM), /* Kid_Gloves_2.sndh */
  TIMEDB_ENTRY( 0x723e22d3 ,  0,   8057,      YM+TD), /* 1622 */
  TIMEDB_ENTRY( 0x723ee025 ,  0,   3453,YM+TA+TB+TD), /* 2871 */
  TIMEDB_ENTRY( 0x725e3a5a ,  0,  20544,YM+TA+TB+TD), /* 2526 */
@@ -3275,7 +3598,9 @@
  TIMEDB_ENTRY( 0x7577cc92 ,  0,  75297,YM+TA+TB+TD), /* 3427 */
  TIMEDB_ENTRY( 0x757c4fb6 ,  0,   6527,   YM+TA+TD), /* 2821 */
  TIMEDB_ENTRY( 0x757e009b ,  0,   2239,         YM), /* 1783 */
+ TIMEDB_ENTRY( 0x7592f83a ,  0,    360,         YM), /* The_Music_Bootsector.sndh */
  TIMEDB_ENTRY( 0x759f714f ,  0,  43344,YM+TA+TB+TD), /* 3369 */
+ TIMEDB_ENTRY( 0x75c72475 ,  0,   9408,         YM), /* 4475 */
  TIMEDB_ENTRY( 0x75d17603 ,  0,   8642,         YM), /* 1772 */
  TIMEDB_ENTRY( 0x75e3431c ,  0,    383,   YM+TA+TB), /* 3380 */
  TIMEDB_ENTRY( 0x75eaa993 ,  0, 108252,      YM+TA), /* 4030 */
@@ -3336,11 +3661,36 @@
  TIMEDB_ENTRY( 0x78a8fed2 ,  1,    575,         YM), /* 219 */
  TIMEDB_ENTRY( 0x78ae279e ,  0,   4210,        STE), /* 3454 */
  TIMEDB_ENTRY( 0x78b86c80 ,  0,  11840,YM+TA+TB+TD), /* 3395 */
+ TIMEDB_ENTRY( 0x78beb4a6 ,  0,     49,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 ,  1,     51,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 ,  2,     51,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 ,  3,     22,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 ,  4,     30,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 ,  5,     37,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 ,  6,      7,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 ,  7,     26,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 ,  8,     26,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 ,  9,     26,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 10,    565,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 11,     21,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 12,     34,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 13,     36,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 14,     32,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 15,     47,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 16,     14,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 17,     23,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 18,     22,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 19,     22,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 20,      7,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 21,   4224,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 22,  12160,         YM), /* Killing_Game_Show.sndh */
+ TIMEDB_ENTRY( 0x78beb4a6 , 23,   6144,         YM), /* Killing_Game_Show.sndh */
  TIMEDB_ENTRY( 0x78c38480 ,  0,   1785,      YM+TA), /* 1934 */
  TIMEDB_ENTRY( 0x78d65c71 ,  0,   9210,   YM+TB+TD), /* 1585 */
  TIMEDB_ENTRY( 0x78f74af9 ,  0,  10753,   YM+TA+TD), /* 4204 */
  TIMEDB_ENTRY( 0x790768e3 ,  0,  17228,      YM+TD), /* 1986 */
  TIMEDB_ENTRY( 0x790e4d93 ,  0,  16128,         YM), /* 739 */
+ TIMEDB_ENTRY( 0x790eea63 ,  0,  21690,         YM), /* I_Found_The_Dead_Zone.sndh */
  TIMEDB_ENTRY( 0x790f5fb6 ,  0, 310273,      YM+TA), /* 3752 */
  TIMEDB_ENTRY( 0x7913a832 ,  0,   2682,         YM), /* 4213 */
  TIMEDB_ENTRY( 0x7913db4d ,  0,   2731,         YM), /* 3137 */
@@ -3448,12 +3798,14 @@
  TIMEDB_ENTRY( 0x7b3dc813 ,  0,  45820,YM+TA+TB+TD), /* 2575 */
  TIMEDB_ENTRY( 0x7b568abe ,  0,   3072,      YM+TA), /* 922 */
  TIMEDB_ENTRY( 0x7b5f880f ,  0,  11519,         YM), /* 1521 */
+ TIMEDB_ENTRY( 0x7b62d825 ,  0,  23552,YM+TA+TB+TD), /* 2542 */
  TIMEDB_ENTRY( 0x7b7834ab ,  0,   3450,         YM), /* 4374 */
  TIMEDB_ENTRY( 0x7b8256b0 ,  0,  39168,YM+TA+TB+TD), /* 3672 */
  TIMEDB_ENTRY( 0x7b8853a3 ,  0,   2304,         YM), /* 1427 */
  TIMEDB_ENTRY( 0x7b9c5d58 ,  0,   4471,         YM), /* 1788 */
  TIMEDB_ENTRY( 0x7b9c5d58 ,  1,    439,         YM), /* 1788 */
  TIMEDB_ENTRY( 0x7ba6257e ,  0,    319,   YM+TB+TD), /* 4185 */
+ TIMEDB_ENTRY( 0x7bb1d48b ,  0,  39936,YM+TA+TB+TD), /* 4552 */
  TIMEDB_ENTRY( 0x7bd0c66a ,  0,   2560,         YM), /* 1882 */
  TIMEDB_ENTRY( 0x7bd0c66a ,  1,    640,         YM), /* 1882 */
  TIMEDB_ENTRY( 0x7bd0c66a ,  2,     73,         YM), /* 1882 */
@@ -3505,6 +3857,8 @@
  TIMEDB_ENTRY( 0x7ced1e01 ,  1,    160,         YM), /* 3974 */
  TIMEDB_ENTRY( 0x7ced1e01 ,  2,    258,         YM), /* 3974 */
  TIMEDB_ENTRY( 0x7d0ad5a2 ,  0,  22859,         YM), /* 2239 */
+ TIMEDB_ENTRY( 0x7d0c5fa4 ,  0,   3613,         YM), /* 4455 */
+ TIMEDB_ENTRY( 0x7d0c5fa4 ,  1,   7169,         YM), /* 4455 */
  TIMEDB_ENTRY( 0x7d17868c ,  0,  38400,         YM), /* 4105 */
  TIMEDB_ENTRY( 0x7d25d2f0 ,  0,   8287,         YM), /* 1777 */
  TIMEDB_ENTRY( 0x7d2e02af ,  0,  11647,   YM+TA+TD), /* 2563 */
@@ -3549,6 +3903,11 @@
  TIMEDB_ENTRY( 0x7e4c2abc ,  3,      7,         YM), /* 2055 */
  TIMEDB_ENTRY( 0x7e705d5d ,  0,  20480,         YM), /* 2046 */
  TIMEDB_ENTRY( 0x7e87073c ,  0,   6912,         YM), /* 2108 */
+ TIMEDB_ENTRY( 0x7ec89c40 ,  0,   6656,      YM+TA), /* 4408 */
+ TIMEDB_ENTRY( 0x7ec89c40 ,  1,   6656,      YM+TA), /* 4408 */
+ TIMEDB_ENTRY( 0x7ec89c40 ,  2,   3224,      YM+TA), /* 4408 */
+ TIMEDB_ENTRY( 0x7ec89c40 ,  3,   6528,      YM+TA), /* 4408 */
+ TIMEDB_ENTRY( 0x7ec89c40 ,  4,   4096,      YM+TA), /* 4408 */
  TIMEDB_ENTRY( 0x7ecc8753 ,  0,   8718,         YM), /* 224 */
  TIMEDB_ENTRY( 0x7ed223e3 ,  0,  11520,         YM), /* 1981 */
  TIMEDB_ENTRY( 0x7ed6be79 ,  0,   4992,         YM), /* 3255 */
@@ -3565,6 +3924,7 @@
  TIMEDB_ENTRY( 0x7f1d73ee ,  0,   8519,         YM), /* 4086 */
  TIMEDB_ENTRY( 0x7f215061 ,  0,   1152,         YM), /* 1086 */
  TIMEDB_ENTRY( 0x7f2e1bf1 ,  0,  10948,   YM+TA+TD), /* 892 */
+ TIMEDB_ENTRY( 0x7f2e346b ,  0,   3072,         YM), /* 4411 */
  TIMEDB_ENTRY( 0x7f3281eb ,  0,   2880,         YM), /* 745 */
  TIMEDB_ENTRY( 0x7f3281eb ,  1,    361,         YM), /* 745 */
  TIMEDB_ENTRY( 0x7f3a98de ,  0,   6144,         YM), /* 1163 */
@@ -3627,12 +3987,15 @@
  TIMEDB_ENTRY( 0x8086197d ,  0, 250925,      YM+TA), /* 3756 */
  TIMEDB_ENTRY( 0x809533e6 ,  0,  14596,   YM+TA+TD), /* 2791 */
  TIMEDB_ENTRY( 0x80977f6f ,  0,  34561,      YM+TA), /* 3805 */
+ TIMEDB_ENTRY( 0x80a8b3eb ,  0,   6149,      YM+TD), /* 4407 */
  TIMEDB_ENTRY( 0x80aaad6b ,  0,   2239,         YM), /* 2846 */
  TIMEDB_ENTRY( 0x80adb17b ,  0,  44544,         YM), /* 2691 */
  TIMEDB_ENTRY( 0x80b2cf54 ,  0,  44160,YM+TA+TB+TD), /* 4007 */
  TIMEDB_ENTRY( 0x80bb78a3 ,  0,   4475,      YM+TA), /* 52 */
+ TIMEDB_ENTRY( 0x80bf9c60 ,  0,  11228,         YM), /* 4551 */
  TIMEDB_ENTRY( 0x80cd4c07 ,  0,  10908,   YM+TA+TD), /* 4299 */
  TIMEDB_ENTRY( 0x80d049d0 ,  0,   6239,         YM), /* 1534 */
+ TIMEDB_ENTRY( 0x80dc0ddd ,  0,   1693,         YM), /* 4502 */
  TIMEDB_ENTRY( 0x80de0b59 ,  0,   4181,         YM), /* 867 */
  TIMEDB_ENTRY( 0x80de0b59 ,  1,    192,         YM), /* 867 */
  TIMEDB_ENTRY( 0x80de0b59 ,  2,   3336,         YM), /* 867 */
@@ -3651,6 +4014,7 @@
  TIMEDB_ENTRY( 0x81317f3f ,  0,   8063,   YM+TA+TD), /* 2557 */
  TIMEDB_ENTRY( 0x814f3f2e ,  0,   5112,      YM+TA), /* 1150 */
  TIMEDB_ENTRY( 0x817b29ae ,  0,  21504,         YM), /* 1467 */
+ TIMEDB_ENTRY( 0x8194b266 ,  0,    488,         YM), /* 4542 */
  TIMEDB_ENTRY( 0x81eb526a ,  0,   4512,      YM+TD), /* 2380 */
  TIMEDB_ENTRY( 0x81eb526a ,  1,    768,      YM+TD), /* 2380 */
  TIMEDB_ENTRY( 0x81eb526a ,  2,    560,      YM+TD), /* 2380 */
@@ -3659,7 +4023,15 @@
  TIMEDB_ENTRY( 0x82884d6e ,  0,   4080,   YM+TA+TD), /* 2745 */
  TIMEDB_ENTRY( 0x828877c1 ,  0,   6527,         YM), /* 2396 */
  TIMEDB_ENTRY( 0x8289f87a ,  0,   6132,      YM+TA), /* 914 */
+ TIMEDB_ENTRY( 0x828de111 ,  0,  19578,      YM+TA), /* Sharpness_Buzztone.sndh */
  TIMEDB_ENTRY( 0x828f12cb ,  0,  51827,   YM+TA+TB), /* 1353 */
+ TIMEDB_ENTRY( 0x82925534 ,  0,   2497,         YM), /* 4543 */
+ TIMEDB_ENTRY( 0x82925534 ,  1,    315,         YM), /* 4543 */
+ TIMEDB_ENTRY( 0x82925534 ,  2,   2285,         YM), /* 4543 */
+ TIMEDB_ENTRY( 0x82925534 ,  3,    752,         YM), /* 4543 */
+ TIMEDB_ENTRY( 0x82925534 ,  4,    184,         YM), /* 4543 */
+ TIMEDB_ENTRY( 0x82925534 ,  5,    139,         YM), /* 4543 */
+ TIMEDB_ENTRY( 0x82925534 ,  6,    914,         YM), /* 4543 */
  TIMEDB_ENTRY( 0x82a10bd4 ,  0,  12576,      YM+TD), /* 410 */
  TIMEDB_ENTRY( 0x82a1a072 ,  0,  15648,YM+TA+TB+TD), /* 2071 */
  TIMEDB_ENTRY( 0x82ab9458 ,  0,  12288,         YM), /* 2116 */
@@ -3690,6 +4062,7 @@
  TIMEDB_ENTRY( 0x83b8a41f ,  0,   4795,YM+TA+TB+TD), /* 49 */
  TIMEDB_ENTRY( 0x83b9ee01 ,  0,  36745,      YM+TA), /* 3762 */
  TIMEDB_ENTRY( 0x83c6f446 ,  0,   2602,         YM), /* 3039 */
+ TIMEDB_ENTRY( 0x83e8d142 ,  0,   1280,         YM), /* 4478 */
  TIMEDB_ENTRY( 0x83f4c7f6 ,  0,   4608,      YM+TA), /* 253 */
  TIMEDB_ENTRY( 0x840a28cc ,  0,   1152,         YM), /* 777 */
  TIMEDB_ENTRY( 0x840b9a90 ,  0,  26656,      YM+TA), /* 4015 */
@@ -3791,12 +4164,16 @@
  TIMEDB_ENTRY( 0x86a9b159 , 10,   4608,         YM), /* 357 */
  TIMEDB_ENTRY( 0x86be6826 ,  0,   6528,         YM), /* 113 */
  TIMEDB_ENTRY( 0x86c60eb4 ,  0,    514,   YM+TA+TD), /* 2233 */
+ TIMEDB_ENTRY( 0x86d6391b ,  0,  10751,         YM), /* 1990.sndh */
  TIMEDB_ENTRY( 0x86e3fc9b ,  0,  14596,YM+TA+TB+TD), /* 2106 */
+ TIMEDB_ENTRY( 0x86ed0e65 ,  0,    256,         YM), /* 4544 */
+ TIMEDB_ENTRY( 0x86ed0e65 ,  1,    640,         YM), /* 4544 */
+ TIMEDB_ENTRY( 0x86f8c6b0 ,  0,   6465,      YM+TA), /* 4417 */
  TIMEDB_ENTRY( 0x86fbb490 ,  0,   3924,         YM), /* 3924 */
- TIMEDB_ENTRY( 0x87086cc8 ,  0,   7348,         YM), /* 1817 */
- TIMEDB_ENTRY( 0x87086cc8 ,  1,   6671,         YM), /* 1817 */
- TIMEDB_ENTRY( 0x87086cc8 ,  2,   8523,         YM), /* 1817 */
- TIMEDB_ENTRY( 0x87086cc8 ,  3,   4600,         YM), /* 1817 */
+ TIMEDB_ENTRY( 0x87086cc8 ,  0,   7348,         YM), /* Huckleberry_Hound.sndh */
+ TIMEDB_ENTRY( 0x87086cc8 ,  1,   6671,         YM), /* Huckleberry_Hound.sndh */
+ TIMEDB_ENTRY( 0x87086cc8 ,  2,   8523,         YM), /* Huckleberry_Hound.sndh */
+ TIMEDB_ENTRY( 0x87086cc8 ,  3,   4600,         YM), /* Huckleberry_Hound.sndh */
  TIMEDB_ENTRY( 0x8716d8eb ,  0,   6725,         YM), /* 20 */
  TIMEDB_ENTRY( 0x872fca5b ,  0,  40321,      YM+TA), /* 4060 */
  TIMEDB_ENTRY( 0x876c3fe0 ,  0,  70022,      YM+TA), /* 4040 */
@@ -3808,6 +4185,8 @@
  TIMEDB_ENTRY( 0x87a70bcb ,  0,  10435,         YM), /* 3091 */
  TIMEDB_ENTRY( 0x87a8a5b0 ,  0,  68170,      YM+TA), /* 3702 */
  TIMEDB_ENTRY( 0x87aa164b ,  0,   3241,         YM), /* 3281 */
+ TIMEDB_ENTRY( 0x87b13082 ,  0,   1799,         YM), /* 2723 */
+ TIMEDB_ENTRY( 0x87b13082 ,  1,    126,         YM), /* 2723 */
  TIMEDB_ENTRY( 0x87ba7407 ,  0,   7267,   YM+TA+TD), /* 3432 */
  TIMEDB_ENTRY( 0x87d9730c ,  0,  10766,         YM), /* 510 */
  TIMEDB_ENTRY( 0x87ee8140 ,  0,   8075,         YM), /* 2431 */
@@ -3829,6 +4208,20 @@
  TIMEDB_ENTRY( 0x883c5219 ,  0,   2533,         YM), /* 2889 */
  TIMEDB_ENTRY( 0x8842bf29 ,  0,   5120,         YM), /* 2631 */
  TIMEDB_ENTRY( 0x885918eb ,  0,   7169,         YM), /* 391 */
+ TIMEDB_ENTRY( 0x885a67aa ,  0,   1536,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa ,  1,    873,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa ,  2,    496,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa ,  3,    393,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa ,  4,    350,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa ,  5,    429,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa ,  6,    213,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa ,  7,     25,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa ,  8,     19,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa ,  9,     52,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa , 10,    882,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa , 11,      4,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa , 12,     10,         YM), /* 4536 */
+ TIMEDB_ENTRY( 0x885a67aa , 13,    286,         YM), /* 4536 */
  TIMEDB_ENTRY( 0x8862706d ,  0,  11380,YM+TA+TB+TD), /* 1283 */
  TIMEDB_ENTRY( 0x88706463 ,  0,   7872,         YM), /* 2942 */
  TIMEDB_ENTRY( 0x88706463 ,  1,   1901,         YM), /* 2942 */
@@ -3852,6 +4245,7 @@
  TIMEDB_ENTRY( 0x890722c7 ,  0,   4032,   YM+TA+TD), /* 442 */
  TIMEDB_ENTRY( 0x8907a108 ,  0,   7678,         YM), /* 1265 */
  TIMEDB_ENTRY( 0x8927bb05 ,  0, 202301,      YM+TA), /* 3785 */
+ TIMEDB_ENTRY( 0x8930c09b ,  0,  13249,   YM+TA+TD), /* Nostalgic_Demo_3D_Intro.sndh */
  TIMEDB_ENTRY( 0x89340a3e ,  0,  13056,         YM), /* 473 */
  TIMEDB_ENTRY( 0x89370a2b ,  0,  21504,         YM), /* 753 */
  TIMEDB_ENTRY( 0x89370a2b ,  1,   1664,         YM), /* 753 */
@@ -3919,7 +4313,9 @@
  TIMEDB_ENTRY( 0x8b0fed98 ,  4,   5791,         YM), /* 858 */
  TIMEDB_ENTRY( 0x8b1281b1 ,  0,   4992,         YM), /* 1173 */
  TIMEDB_ENTRY( 0x8b25b76f ,  0,   9603,      YM+TA), /* 4216 */
+ TIMEDB_ENTRY( 0x8b2795f7 ,  0,   7680,      YM+TA), /* 4413 */
  TIMEDB_ENTRY( 0x8b284c27 ,  0,  12287,YM+TA+TB+TD), /* 3856 */
+ TIMEDB_ENTRY( 0x8b3c5623 ,  0,  20730,         YM), /* Do_You_Speak_Russian.sndh */
  TIMEDB_ENTRY( 0x8b53314e ,  0,   8862,         YM), /* 3116 */
  TIMEDB_ENTRY( 0x8b555cf3 ,  0,   7103,YM+TA+TB+TD), /* 180 */
  TIMEDB_ENTRY( 0x8b7693b4 ,  0,  15583,         YM), /* 4149 */
@@ -3941,7 +4337,23 @@
  TIMEDB_ENTRY( 0x8bcea812 ,  3,    352,         YM), /* 733 */
  TIMEDB_ENTRY( 0x8be0ecd1 ,  0,    768,      YM+TA), /* 941 */
  TIMEDB_ENTRY( 0x8be8f290 ,  0,   9026,      YM+TA), /* 434 */
+ TIMEDB_ENTRY( 0x8beb31ce ,  0,   1150,         YM), /* Spicetro.sndh */
  TIMEDB_ENTRY( 0x8c0c63c0 ,  0,  10381,YM+TA+TB+TD), /* 193 */
+ TIMEDB_ENTRY( 0x8c29a260 ,  0,   7138,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 ,  1,  13249,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 ,  2, 116353,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 ,  3, 209350,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 ,  4,  48067,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 ,  5,  84636,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 ,  6,  79902,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 ,  7,  81924,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 ,  8,  49453,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 ,  9,  79904,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 , 10,  80414,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 , 11,  26324,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 , 12,  29649,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 , 13,  53146,      YM+TA), /* 4554 */
+ TIMEDB_ENTRY( 0x8c29a260 , 14,  29377,      YM+TA), /* 4554 */
  TIMEDB_ENTRY( 0x8c2fb4ec ,  0,  11808,      YM+TD), /* 2370 */
  TIMEDB_ENTRY( 0x8c37b1ae ,  0,   3326,         YM), /* 3181 */
  TIMEDB_ENTRY( 0x8c4525aa ,  0,   5632,         YM), /* 124 */
@@ -3952,6 +4364,7 @@
  TIMEDB_ENTRY( 0x8c4525aa ,  5,   3072,         YM), /* 124 */
  TIMEDB_ENTRY( 0x8c4525aa ,  6,   5568,         YM), /* 124 */
  TIMEDB_ENTRY( 0x8c48beb4 ,  0,   7290,YM+TA+TB+TD), /* 1954 */
+ TIMEDB_ENTRY( 0x8c53a63b ,  0,   5370,     YM+STE), /* For_Your_Loader_1.sndh */
  TIMEDB_ENTRY( 0x8c75565c ,  0,   5676,      YM+TA), /* 1918 */
  TIMEDB_ENTRY( 0x8c77c4d5 ,  0,   3515,YM+TA+TB+TD), /* 1120 */
  TIMEDB_ENTRY( 0x8c7baee8 ,  0,   4479,YM+TA+TB+TD), /* 278 */
@@ -3972,6 +4385,7 @@
  TIMEDB_ENTRY( 0x8cf7cc14 ,  0,    287,         YM), /* 3687 */
  TIMEDB_ENTRY( 0x8d1af88d ,  0,   1150,         YM), /* 2472 */
  TIMEDB_ENTRY( 0x8d1c0533 ,  0,  23040,      YM+TD), /* 1461 */
+ TIMEDB_ENTRY( 0x8d210821 ,  0,   3807,YM+TA+TB+TD), /* 3328 */
  TIMEDB_ENTRY( 0x8d2c0721 ,  0,   9212,   YM+TB+TD), /* 1594 */
  TIMEDB_ENTRY( 0x8d2eb1f2 ,  0,  17920,         YM), /* 1631 */
  TIMEDB_ENTRY( 0x8d3d8d54 ,  0,   2687,YM+TA+TB+TD), /* 3591 */
@@ -3990,18 +4404,28 @@
  TIMEDB_ENTRY( 0x8dbd7740 ,  0,   2568,         YM), /* 924 */
  TIMEDB_ENTRY( 0x8dd544db ,  0,   8917,         YM), /* 3101 */
  TIMEDB_ENTRY( 0x8ddc7e6d ,  0,   7680,         YM), /* 2917 */
- TIMEDB_ENTRY( 0x8ddd6f2d ,  0,  12640,         YM), /* 148 */
+ TIMEDB_ENTRY( 0x8ddd6f2d ,  0,  12640,         YM), /* Thundercats.sndh */
  TIMEDB_ENTRY( 0x8decf627 ,  0,   6048,         YM), /* 2395 */
  TIMEDB_ENTRY( 0x8decf627 ,  1,    822,         YM), /* 2395 */
  TIMEDB_ENTRY( 0x8dedec82 ,  0,  11136,         YM), /* 2164 */
  TIMEDB_ENTRY( 0x8df3ff4b ,  0,   5370,   YM+TA+TB), /* 1589 */
  TIMEDB_ENTRY( 0x8e063c55 ,  0,  10080,         YM), /* 2122 */
+ TIMEDB_ENTRY( 0x8e0efde2 ,  0,    227,         YM), /* 4492 */
+ TIMEDB_ENTRY( 0x8e0efde2 ,  1,     42,         YM), /* 4492 */
+ TIMEDB_ENTRY( 0x8e0efde2 ,  2,     22,         YM), /* 4492 */
+ TIMEDB_ENTRY( 0x8e0efde2 ,  3,    109,         YM), /* 4492 */
+ TIMEDB_ENTRY( 0x8e0efde2 ,  4,    120,         YM), /* 4492 */
  TIMEDB_ENTRY( 0x8e2e2598 ,  0, 151121,      YM+TA), /* 4042 */
  TIMEDB_ENTRY( 0x8e349d20 ,  0,   7424,         YM), /* 2170 */
  TIMEDB_ENTRY( 0x8e36011b ,  0,  12672,   YM+TA+TD), /* 2294 */
  TIMEDB_ENTRY( 0x8e378611 ,  0,   1933,   YM+TA+TD), /* 4205 */
  TIMEDB_ENTRY( 0x8e4f2328 ,  0,   8543,   YM+TA+TD), /* 2647 */
  TIMEDB_ENTRY( 0x8e5379b3 ,  0,  19968,YM+TA+TB+TD), /* 2591 */
+ TIMEDB_ENTRY( 0x8e602a02 ,  0,   2785,         YM), /* Sonic_Boom.sndh */
+ TIMEDB_ENTRY( 0x8e602a02 ,  1,   1921,         YM), /* Sonic_Boom.sndh */
+ TIMEDB_ENTRY( 0x8e602a02 ,  2,   2941,         YM), /* Sonic_Boom.sndh */
+ TIMEDB_ENTRY( 0x8e602a02 ,  3,   2689,         YM), /* Sonic_Boom.sndh */
+ TIMEDB_ENTRY( 0x8e602a02 ,  4,   2304,         YM), /* Sonic_Boom.sndh */
  TIMEDB_ENTRY( 0x8e7fd9cc ,  0,  13439,YM+TA+TB+TD), /* 2490 */
  TIMEDB_ENTRY( 0x8e95a515 ,  0,   5175,      YM+TA), /* 1123 */
  TIMEDB_ENTRY( 0x8eac0fea ,  0,   9214,         YM), /* 1024 */
@@ -4043,6 +4467,7 @@
  TIMEDB_ENTRY( 0x901b8ed0 ,  0,  14338,   YM+TA+TD), /* 2344 */
  TIMEDB_ENTRY( 0x903338c6 ,  0,   9258,      YM+TA), /* 4226 */
  TIMEDB_ENTRY( 0x904819f7 ,  0,   6144,         YM), /* 1186 */
+ TIMEDB_ENTRY( 0x904db026 ,  0,   5112,      YM+TA), /* Eschelle.sndh */
  TIMEDB_ENTRY( 0x9052a143 ,  0,  17282,         YM), /* 2188 */
  TIMEDB_ENTRY( 0x9052a143 ,  1,    292,         YM), /* 2188 */
  TIMEDB_ENTRY( 0x905b4e7c ,  0,   3520,   YM+TA+TD), /* 42 */
@@ -4061,6 +4486,7 @@
  TIMEDB_ENTRY( 0x90e8ecd2 ,  2,     74,         YM), /* 1070 */
  TIMEDB_ENTRY( 0x90e8ecd2 ,  3,    122,         YM), /* 1070 */
  TIMEDB_ENTRY( 0x90e8ecd2 ,  4,    157,         YM), /* 1070 */
+ TIMEDB_ENTRY( 0x90eca942 ,  0,  11044,      YM+TA), /* 4423 */
  TIMEDB_ENTRY( 0x90f2e8d8 ,  0,   3584,   YM+TB+TD), /* 48 */
  TIMEDB_ENTRY( 0x9124ef78 ,  0,   6480,   YM+TA+TD), /* 2775 */
  TIMEDB_ENTRY( 0x91283c69 ,  0,   1075,         YM), /* 2922 */
@@ -4070,6 +4496,7 @@
  TIMEDB_ENTRY( 0x91363e06 ,  0,   4475,   YM+TA+TB), /* 1605 */
  TIMEDB_ENTRY( 0x91399987 ,  0,   4922,         YM), /* 2926 */
  TIMEDB_ENTRY( 0x91399987 ,  1,   8506,         YM), /* 2926 */
+ TIMEDB_ENTRY( 0x91521990 ,  0,   9221,   YM+TA+TD), /* 2197 */
  TIMEDB_ENTRY( 0x91718563 ,  0,   8442,YM+TA+TB+TD), /* 3415 */
  TIMEDB_ENTRY( 0x91792432 ,  0,  19776,         YM), /* 2178 */
  TIMEDB_ENTRY( 0x91792432 ,  1,   6912,         YM), /* 2178 */
@@ -4082,12 +4509,14 @@
  TIMEDB_ENTRY( 0x91857058 ,  4,     81,         YM), /* 3517 */
  TIMEDB_ENTRY( 0x91857058 ,  5,     31,         YM), /* 3517 */
  TIMEDB_ENTRY( 0x91935cc7 ,  0,   9986,   YM+TA+TD), /* 2303 */
+ TIMEDB_ENTRY( 0x91a0b1c5 ,  0,   1152,      YM+TA), /* 4447 */
  TIMEDB_ENTRY( 0x91c5ee9a ,  0,   4686,         YM), /* 1299 */
  TIMEDB_ENTRY( 0x91c5ee9a ,  1,   4702,         YM), /* 1299 */
  TIMEDB_ENTRY( 0x91c5ee9a ,  2,   4638,         YM), /* 1299 */
  TIMEDB_ENTRY( 0x91c5ee9a ,  3,    637,         YM), /* 1299 */
  TIMEDB_ENTRY( 0x91c5ee9a ,  4,   1009,         YM), /* 1299 */
  TIMEDB_ENTRY( 0x91d09de8 ,  0,  12672,         YM), /* 3263 */
+ TIMEDB_ENTRY( 0x91db48fb ,  0,   6787,      YM+TA), /* 4437 */
  TIMEDB_ENTRY( 0x91dccdd3 ,  0,   2688,         YM), /* 2760 */
  TIMEDB_ENTRY( 0x91f7e381 ,  0,   1048,         YM), /* 1909 */
  TIMEDB_ENTRY( 0x91fe5aa6 ,  0,   8826,YM+TA+TB+TD), /* 2830 */
@@ -4129,6 +4558,10 @@
  TIMEDB_ENTRY( 0x925da54f ,  2,   1120,      YM+TD), /* 2379 */
  TIMEDB_ENTRY( 0x925da54f ,  3,    800,      YM+TD), /* 2379 */
  TIMEDB_ENTRY( 0x926e5f9c ,  0,  44544,         YM), /* 1445 */
+ TIMEDB_ENTRY( 0x92918c4f ,  0,  10280,         YM), /* 4472 */
+ TIMEDB_ENTRY( 0x92918c4f ,  1,  11776,         YM), /* 4472 */
+ TIMEDB_ENTRY( 0x92918c4f ,  2,  14376,         YM), /* 4472 */
+ TIMEDB_ENTRY( 0x92918c4f ,  3,  14016,         YM), /* 4472 */
  TIMEDB_ENTRY( 0x92af0dc4 ,  0,   4794,YM+TA+TB+TD), /* 1611 */
  TIMEDB_ENTRY( 0x92b271a9 ,  0,  13056,         YM), /* 1101 */
  TIMEDB_ENTRY( 0x92b4df1f ,  0,  33260,         YM), /* 1444 */
@@ -4207,6 +4640,18 @@
  TIMEDB_ENTRY( 0x949bc29d ,  0,   8832,      YM+TA), /* 789 */
  TIMEDB_ENTRY( 0x949e8058 ,  0,   1069,      YM+TA), /* 3846 */
  TIMEDB_ENTRY( 0x94ae535a ,  0,  12031,         YM), /* 3456 */
+ TIMEDB_ENTRY( 0x94c6dcd9 ,  0,  15743,         YM), /* 4461 */
+ TIMEDB_ENTRY( 0x94c6dcd9 ,  1,  10045,         YM), /* 4461 */
+ TIMEDB_ENTRY( 0x94c6dcd9 ,  2,    959,         YM), /* 4461 */
+ TIMEDB_ENTRY( 0x94c6dcd9 ,  3,   4639,         YM), /* 4461 */
+ TIMEDB_ENTRY( 0x94c6dcd9 ,  4,   4799,         YM), /* 4461 */
+ TIMEDB_ENTRY( 0x94c6dcd9 ,  5,    215,         YM), /* 4461 */
+ TIMEDB_ENTRY( 0x94c6dcd9 ,  6,   1919,         YM), /* 4461 */
+ TIMEDB_ENTRY( 0x94c6dcd9 ,  7,   9215,         YM), /* 4461 */
+ TIMEDB_ENTRY( 0x94c6dcd9 ,  8,  19151,         YM), /* 4461 */
+ TIMEDB_ENTRY( 0x94c6dcd9 ,  9,   9215,         YM), /* 4461 */
+ TIMEDB_ENTRY( 0x94c6dcd9 , 10,  11679,         YM), /* 4461 */
+ TIMEDB_ENTRY( 0x94c6dcd9 , 11,    215,         YM), /* 4461 */
  TIMEDB_ENTRY( 0x94d7ca31 ,  0, 245238,   YM+TA+TD), /* 2350 */
  TIMEDB_ENTRY( 0x94eca603 ,  0,   2720,         YM), /* 1732 */
  TIMEDB_ENTRY( 0x94eca603 ,  1,   1280,         YM), /* 1732 */
@@ -4222,8 +4667,12 @@
  TIMEDB_ENTRY( 0x95388ec7 ,  5,     75,         YM), /* 3882 */
  TIMEDB_ENTRY( 0x95388ec7 ,  6,  11666,         YM), /* 3882 */
  TIMEDB_ENTRY( 0x95415f16 ,  0, 164471,      YM+TA), /* 4023 */
+ TIMEDB_ENTRY( 0x9552015e ,  0,   4224,         YM), /* 4465 */
+ TIMEDB_ENTRY( 0x9552015e ,  1,   4608,         YM), /* 4465 */
+ TIMEDB_ENTRY( 0x9552015e ,  2,   6720,         YM), /* 4465 */
  TIMEDB_ENTRY( 0x955241c3 ,  0,     55,         YM), /* 2407 */
  TIMEDB_ENTRY( 0x9563057b ,  0,  30457,         YM), /* 1717 */
+ TIMEDB_ENTRY( 0x95ab22e0 ,  0,  10944,         YM), /* 4471 */
  TIMEDB_ENTRY( 0x95c8b74d ,  0,  38719,      YM+TA), /* 3596 */
  TIMEDB_ENTRY( 0x95db7840 ,  0,   1595,      YM+TA), /* 2644 */
  TIMEDB_ENTRY( 0x961366b6 ,  0,   3577,YM+TA+TB+TD), /* 1940 */
@@ -4253,6 +4702,7 @@
  TIMEDB_ENTRY( 0x96e7cd5d ,  0,  12672,         YM), /* 2020 */
  TIMEDB_ENTRY( 0x96e7cd5d ,  1,    321,         YM), /* 2020 */
  TIMEDB_ENTRY( 0x96e80ca2 ,  0,   6144,         YM), /* 491 */
+ TIMEDB_ENTRY( 0x97182e59 ,  0,   3840,      YM+TA), /* 4428 */
  TIMEDB_ENTRY( 0x971a913a ,  0,   6079,         YM), /* 4130 */
  TIMEDB_ENTRY( 0x971a913a ,  1,    214,         YM), /* 4130 */
  TIMEDB_ENTRY( 0x971a913a ,  2,   4222,         YM), /* 4130 */
@@ -4280,6 +4730,7 @@
  TIMEDB_ENTRY( 0x97cc1c60 ,  2,    384,YM+TA+TB+TD), /* 2098 */
  TIMEDB_ENTRY( 0x97eb9731 ,  0,   2928,         YM), /* 453 */
  TIMEDB_ENTRY( 0x97f3ab2e ,  0,   3840,      YM+TA), /* 952 */
+ TIMEDB_ENTRY( 0x9805afa1 ,  0,   5376,      YM+TA), /* 4440 */
  TIMEDB_ENTRY( 0x981baf1f ,  0,   1117,         YM), /* 1536 */
  TIMEDB_ENTRY( 0x9828011a ,  0,   4986,         YM), /* 899 */
  TIMEDB_ENTRY( 0x98376a21 ,  0,   5376,      YM+TD), /* 2011 */
@@ -4321,7 +4772,15 @@
  TIMEDB_ENTRY( 0x99327bfa ,  0,   1152,         YM), /* 1087 */
  TIMEDB_ENTRY( 0x99671248 ,  0,   3450,         YM), /* 1342 */
  TIMEDB_ENTRY( 0x997d6e29 ,  0,  27648,YM+TA+TB+TD), /* 3376 */
+ TIMEDB_ENTRY( 0x999d9ffe ,  0,   7296,      YM+TA), /* 4422 */
  TIMEDB_ENTRY( 0x99b3dad9 ,  0,   8853,         YM), /* 1971 */
+ TIMEDB_ENTRY( 0x99b563c1 ,  0,    481,         YM), /* 4493 */
+ TIMEDB_ENTRY( 0x99b563c1 ,  1,    130,         YM), /* 4493 */
+ TIMEDB_ENTRY( 0x99b563c1 ,  2,    159,         YM), /* 4493 */
+ TIMEDB_ENTRY( 0x99b563c1 ,  3,    189,         YM), /* 4493 */
+ TIMEDB_ENTRY( 0x99b563c1 ,  4,    305,         YM), /* 4493 */
+ TIMEDB_ENTRY( 0x99b563c1 ,  5,    149,         YM), /* 4493 */
+ TIMEDB_ENTRY( 0x99b563c1 ,  6,    167,         YM), /* 4493 */
  TIMEDB_ENTRY( 0x99cea52d ,  0,    871,         YM), /* 98 */
  TIMEDB_ENTRY( 0x99cea52d ,  1,   8533,         YM), /* 98 */
  TIMEDB_ENTRY( 0x99cea52d ,  2,    853,         YM), /* 98 */
@@ -4352,6 +4811,7 @@
  TIMEDB_ENTRY( 0x9ae5f425 ,  1,  16448,         YM), /* 1811 */
  TIMEDB_ENTRY( 0x9ae5f425 ,  2,  19008,         YM), /* 1811 */
  TIMEDB_ENTRY( 0x9ae5f425 ,  3,  12672,         YM), /* 1811 */
+ TIMEDB_ENTRY( 0x9b2b2f8a ,  0,   4224,      YM+TA), /* 4419 */
  TIMEDB_ENTRY( 0x9b391918 ,  0,   4092,YM+TA+TB+TD), /* 4328 */
  TIMEDB_ENTRY( 0x9b3cda13 ,  0, 171748,      YM+TA), /* 3757 */
  TIMEDB_ENTRY( 0x9b4f3100 ,  0, 101867,      YM+TA), /* 4059 */
@@ -4364,6 +4824,13 @@
  TIMEDB_ENTRY( 0x9b8e4792 ,  0,   4620,         YM), /* 838 */
  TIMEDB_ENTRY( 0x9b8e4792 ,  1,    708,         YM), /* 838 */
  TIMEDB_ENTRY( 0x9ba23b31 ,  0,  98009,      YM+TA), /* 4056 */
+ TIMEDB_ENTRY( 0x9ba720f0 ,  0,   1600,         YM), /* 4497 */
+ TIMEDB_ENTRY( 0x9ba720f0 ,  1,     41,         YM), /* 4497 */
+ TIMEDB_ENTRY( 0x9ba720f0 ,  2,     45,         YM), /* 4497 */
+ TIMEDB_ENTRY( 0x9ba720f0 ,  3,     36,         YM), /* 4497 */
+ TIMEDB_ENTRY( 0x9ba720f0 ,  4,     41,         YM), /* 4497 */
+ TIMEDB_ENTRY( 0x9ba720f0 ,  5,     37,         YM), /* 4497 */
+ TIMEDB_ENTRY( 0x9ba720f0 ,  6,   1021,         YM), /* 4497 */
  TIMEDB_ENTRY( 0x9bc97355 ,  0,  36787,      YM+TA), /* 3834 */
  TIMEDB_ENTRY( 0x9bc97355 ,  1,  40326,      YM+TA), /* 3834 */
  TIMEDB_ENTRY( 0x9bd0d1e4 ,  0,   4048,YM+TA+TB+TD), /* 2813 */
@@ -4393,6 +4860,7 @@
  TIMEDB_ENTRY( 0x9c92d01b , 14,   7105,         YM), /* 146 */
  TIMEDB_ENTRY( 0x9c92d01b , 15,     87,         YM), /* 146 */
  TIMEDB_ENTRY( 0x9c92d01b , 16,    335,         YM), /* 146 */
+ TIMEDB_ENTRY( 0x9cb240a4 ,  0,   2688,      YM+TB), /* My_Name_Is_Jess_Bond.sndh */
  TIMEDB_ENTRY( 0x9cb76943 ,  0,   5120,         YM), /* 344 */
  TIMEDB_ENTRY( 0x9cb76943 ,  1,   1199,         YM), /* 344 */
  TIMEDB_ENTRY( 0x9cb76943 ,  2,    253,         YM), /* 344 */
@@ -4411,6 +4879,17 @@
  TIMEDB_ENTRY( 0x9cc8b789 ,  8,   3264,         YM), /* 1111 */
  TIMEDB_ENTRY( 0x9ccc87fe ,  0,    496,         YM), /* 4133 */
  TIMEDB_ENTRY( 0x9ccc87fe ,  1,    483,         YM), /* 4133 */
+ TIMEDB_ENTRY( 0x9cf60b4b ,  0,    538,         YM), /* 4540 */
+ TIMEDB_ENTRY( 0x9cf60b4b ,  1,    609,         YM), /* 4540 */
+ TIMEDB_ENTRY( 0x9cf60b4b ,  2,    550,         YM), /* 4540 */
+ TIMEDB_ENTRY( 0x9cf60b4b ,  3,    521,         YM), /* 4540 */
+ TIMEDB_ENTRY( 0x9cf60b4b ,  4,    580,         YM), /* 4540 */
+ TIMEDB_ENTRY( 0x9cf60b4b ,  5,   1461,         YM), /* 4540 */
+ TIMEDB_ENTRY( 0x9cf60b4b ,  6,   1825,         YM), /* 4540 */
+ TIMEDB_ENTRY( 0x9cf60b4b ,  7,   1296,         YM), /* 4540 */
+ TIMEDB_ENTRY( 0x9cf60b4b ,  8,    306,         YM), /* 4540 */
+ TIMEDB_ENTRY( 0x9cf60b4b ,  9,    261,         YM), /* 4540 */
+ TIMEDB_ENTRY( 0x9cf60b4b , 10,    245,         YM), /* 4540 */
  TIMEDB_ENTRY( 0x9cfdf4ac ,  0,   9983,      YM+TA), /* 3619 */
  TIMEDB_ENTRY( 0x9d2eaeb3 ,  0,   7680,         YM), /* 2034 */
  TIMEDB_ENTRY( 0x9d2eaeb3 ,  1,   4416,         YM), /* 2034 */
@@ -4431,6 +4910,14 @@
  TIMEDB_ENTRY( 0x9d8449ea ,  0,  12202,YM+TA+TB+TD), /* 3642 */
  TIMEDB_ENTRY( 0x9da43427 ,  0,   1756,         YM), /* 3115 */
  TIMEDB_ENTRY( 0x9df47e85 ,  0,   4226,         YM), /* 1228 */
+ TIMEDB_ENTRY( 0x9e23b2be ,  0,   6976,         YM), /* 1375 */
+ TIMEDB_ENTRY( 0x9e23b2be ,  1,   7680,         YM), /* 1375 */
+ TIMEDB_ENTRY( 0x9e23b2be ,  2,   7680,         YM), /* 1375 */
+ TIMEDB_ENTRY( 0x9e23b2be ,  3,    506,         YM), /* 1375 */
+ TIMEDB_ENTRY( 0x9e23b2be ,  4,   9216,         YM), /* 1375 */
+ TIMEDB_ENTRY( 0x9e23b2be ,  5,   8704,         YM), /* 1375 */
+ TIMEDB_ENTRY( 0x9e23b2be ,  6,   7936,         YM), /* 1375 */
+ TIMEDB_ENTRY( 0x9e23b2be ,  7,   7680,         YM), /* 1375 */
  TIMEDB_ENTRY( 0x9e2769bd ,  0,   3456,         YM), /* 3659 */
  TIMEDB_ENTRY( 0x9e32e31d ,  0,   6136,      YM+TA), /* 1335 */
  TIMEDB_ENTRY( 0x9e42a039 ,  0,   4511,         YM), /* 332 */
@@ -4439,6 +4926,16 @@
  TIMEDB_ENTRY( 0x9e5fedcd ,  0,  38400,         YM), /* 1448 */
  TIMEDB_ENTRY( 0x9e69482f ,  0,  13433,         YM), /* 1687 */
  TIMEDB_ENTRY( 0x9e776126 ,  0,  26800,         YM), /* 1723 */
+ TIMEDB_ENTRY( 0x9e8a8d67 ,  0,   2569,         YM), /* 4187 */
+ TIMEDB_ENTRY( 0x9e8a8d67 ,  1,   3853,         YM), /* 4187 */
+ TIMEDB_ENTRY( 0x9e8a8d67 ,  2,   3849,         YM), /* 4187 */
+ TIMEDB_ENTRY( 0x9e8a8d67 ,  3,   4621,         YM), /* 4187 */
+ TIMEDB_ENTRY( 0x9e8a8d67 ,  4,   4047,         YM), /* 4187 */
+ TIMEDB_ENTRY( 0x9e8a8d67 ,  5,   3085,         YM), /* 4187 */
+ TIMEDB_ENTRY( 0x9e8a8d67 ,  6,   2569,         YM), /* 4187 */
+ TIMEDB_ENTRY( 0x9e8a8d67 ,  7,   3175,         YM), /* 4187 */
+ TIMEDB_ENTRY( 0x9e8a8d67 ,  8,   5393,         YM), /* 4187 */
+ TIMEDB_ENTRY( 0x9e8a8d67 ,  9,   4915,         YM), /* 4187 */
  TIMEDB_ENTRY( 0x9ea21686 ,  0,   6048,      YM+TA), /* 915 */
  TIMEDB_ENTRY( 0x9ebbca94 ,  0,   4322,         YM), /* 243 */
  TIMEDB_ENTRY( 0x9ec32bc8 ,  0,   7680,      YM+TB), /* 40 */
@@ -4446,6 +4943,7 @@
  TIMEDB_ENTRY( 0x9edc4972 ,  0, 104526,      YM+TA), /* 3753 */
  TIMEDB_ENTRY( 0x9eeab97a ,  0,  18144,         YM), /* 916 */
  TIMEDB_ENTRY( 0x9ef29429 ,  0,   3328,         YM), /* 3 */
+ TIMEDB_ENTRY( 0x9efd158b ,  0,   8058,      YM+TA), /* 4450 */
  TIMEDB_ENTRY( 0x9f08ba34 ,  0,   2875,   YM+TA+TB), /* 202 */
  TIMEDB_ENTRY( 0x9f094e8e ,  0,   1275,         YM), /* 26 */
  TIMEDB_ENTRY( 0x9f144684 ,  0,   5787,         YM), /* 1232 */
@@ -4454,6 +4952,7 @@
  TIMEDB_ENTRY( 0x9f265e3d ,  0,   7674,         YM), /* 2455 */
  TIMEDB_ENTRY( 0x9f2aeb7c ,  0,  11424,YM+TA+TB+TD), /* 2100 */
  TIMEDB_ENTRY( 0x9f373ded ,  0,  20601,         YM), /* 1672 */
+ TIMEDB_ENTRY( 0x9f633da5 ,  0,  16512,         YM), /* 4457 */
  TIMEDB_ENTRY( 0x9f783efb ,  0,   3836,      YM+TA), /* 200 */
  TIMEDB_ENTRY( 0x9f92ee0c ,  0,   8448,         YM), /* 1556 */
  TIMEDB_ENTRY( 0x9f94483d ,  0,  12288,      YM+TD), /* 3997 */
@@ -4468,7 +4967,7 @@
  TIMEDB_ENTRY( 0x9fb5b4eb ,  0,   2688,YM+TA+TB+TD), /* 1721 */
  TIMEDB_ENTRY( 0x9fbc887d ,  0,  10367,         YM), /* 1758 */
  TIMEDB_ENTRY( 0x9fc7da3a ,  0,   4607,YM+TA+TB+TD), /* 2840 */
- TIMEDB_ENTRY( 0x9fcf84c2 ,  0,  10752,         YM), /* 2109 */
+ TIMEDB_ENTRY( 0x9fcf84c2 ,  0,  10752,         YM), /* Forgotten_Worlds.sndh */
  TIMEDB_ENTRY( 0x9fd943e9 ,  0,   2454,         YM), /* 3123 */
  TIMEDB_ENTRY( 0x9fe1c921 ,  0,   6401,         YM), /* 361 */
  TIMEDB_ENTRY( 0x9fe1c921 ,  1,    105,         YM), /* 361 */
@@ -4495,6 +4994,8 @@
  TIMEDB_ENTRY( 0xa014ee7d ,  2,    111,         YM), /* 127 */
  TIMEDB_ENTRY( 0xa014ee7d ,  3,    303,         YM), /* 127 */
  TIMEDB_ENTRY( 0xa01e8669 ,  0,   5845,   YM+TA+TB), /* 215 */
+ TIMEDB_ENTRY( 0xa02678df ,  0,  30699,      YM+TA), /* 4556 */
+ TIMEDB_ENTRY( 0xa02a21ba ,  0,   2690,         YM), /* What_Time_Is_It_(Scrolly).sndh */
  TIMEDB_ENTRY( 0xa0308e31 ,  0,   8930,         YM), /* 109 */
  TIMEDB_ENTRY( 0xa0308e31 ,  1,   5071,         YM), /* 109 */
  TIMEDB_ENTRY( 0xa0308e31 ,  2,   7606,         YM), /* 109 */
@@ -4504,11 +5005,14 @@
  TIMEDB_ENTRY( 0xa0689dfd ,  0,    889,      YM+TD), /* 1958 */
  TIMEDB_ENTRY( 0xa07ef087 ,  0,  69284,      YM+TA), /* 3703 */
  TIMEDB_ENTRY( 0xa09bee55 ,  0,  30101,      YM+TA), /* 3744 */
+ TIMEDB_ENTRY( 0xa0a62086 ,  0,  26624,         YM), /* 4458 */
+ TIMEDB_ENTRY( 0xa0a62086 ,  1,  14136,         YM), /* 4458 */
  TIMEDB_ENTRY( 0xa0ab174b ,  0,  37013,      YM+TA), /* 3833 */
  TIMEDB_ENTRY( 0xa0ab174b ,  1, 191166,      YM+TA), /* 3833 */
  TIMEDB_ENTRY( 0xa0ab174b ,  2,  13057,      YM+TA), /* 3833 */
  TIMEDB_ENTRY( 0xa0ae25f0 ,  0,   9409,   YM+TA+TD), /* 4202 */
  TIMEDB_ENTRY( 0xa0afd16f ,  0,  11279,         YM), /* 2284 */
+ TIMEDB_ENTRY( 0xa0c219dd ,  0, 176704,      YM+TA), /* 3794 */
  TIMEDB_ENTRY( 0xa0c8ef8f ,  0,  10464,         YM), /* 2152 */
  TIMEDB_ENTRY( 0xa0df0320 ,  0,   6307,         YM), /* 3027 */
  TIMEDB_ENTRY( 0xa0e5eff7 ,  0,   4254,         YM), /* 4343 */
@@ -4524,12 +5028,23 @@
  TIMEDB_ENTRY( 0xa1a6ba29 ,  2,   3456,         YM), /* 968 */
  TIMEDB_ENTRY( 0xa1c3c7cd ,  0,    639,         YM), /* 4087 */
  TIMEDB_ENTRY( 0xa1cd2fe3 ,  0,   3072,         YM), /* 3252 */
+ TIMEDB_ENTRY( 0xa1d04ddb ,  0,   3590,         YM), /* 4503 */
+ TIMEDB_ENTRY( 0xa1d04ddb ,  1,   3400,         YM), /* 4503 */
+ TIMEDB_ENTRY( 0xa1d04ddb ,  2,   3316,         YM), /* 4503 */
+ TIMEDB_ENTRY( 0xa1d04ddb ,  3,   4228,         YM), /* 4503 */
+ TIMEDB_ENTRY( 0xa1d04ddb ,  4,   2800,         YM), /* 4503 */
+ TIMEDB_ENTRY( 0xa1d04ddb ,  5,   3345,         YM), /* 4503 */
+ TIMEDB_ENTRY( 0xa1d04ddb ,  6,   3480,         YM), /* 4503 */
+ TIMEDB_ENTRY( 0xa1d04ddb ,  7,   3893,         YM), /* 4503 */
+ TIMEDB_ENTRY( 0xa1d04ddb ,  8,    566,         YM), /* 4503 */
+ TIMEDB_ENTRY( 0xa1d04ddb ,  9,   1080,         YM), /* 4503 */
  TIMEDB_ENTRY( 0xa1e592e4 ,  0,  17684,YM+TA+TB+TD), /* 2625 */
  TIMEDB_ENTRY( 0xa1e8f58b ,  0,   6144,         YM), /* 268 */
  TIMEDB_ENTRY( 0xa205e610 ,  0,     92,         YM), /* 3929 */
  TIMEDB_ENTRY( 0xa20ed582 ,  0,   8658,         YM), /* 4144 */
  TIMEDB_ENTRY( 0xa21825a8 ,  0,  52546,      YM+TA), /* 4048 */
  TIMEDB_ENTRY( 0xa21c1160 ,  0,   6647,         YM), /* 1924 */
+ TIMEDB_ENTRY( 0xa22d1413 ,  0,  23034,     YM+STE), /* My_First_Resonant_Burp-STe.sndh */
  TIMEDB_ENTRY( 0xa2408d27 ,  0,   1600,         YM), /* 610 */
  TIMEDB_ENTRY( 0xa24ee054 ,  0,  14480,YM+TA+TB+TD), /* 3883 */
  TIMEDB_ENTRY( 0xa259b297 ,  0,   2560,         YM), /* 1921 */
@@ -4548,6 +5063,7 @@
  TIMEDB_ENTRY( 0xa2f5aaef ,  5,   4670,         YM), /* 3867 */
  TIMEDB_ENTRY( 0xa2f5aaef ,  6,   5313,         YM), /* 3867 */
  TIMEDB_ENTRY( 0xa2f5aaef ,  7,   2565,         YM), /* 3867 */
+ TIMEDB_ENTRY( 0xa30442ab ,  0,    360,      YM+TD), /* The_Music_Bootsector_Remix.sndh */
  TIMEDB_ENTRY( 0xa31ddc78 ,  0,  15475,   YM+TA+TD), /* 3859 */
  TIMEDB_ENTRY( 0xa32f7822 ,  0,   5632,      YM+TA), /* 262 */
  TIMEDB_ENTRY( 0xa34a0911 ,  0,  14464,         YM), /* 3030 */
@@ -4558,6 +5074,7 @@
  TIMEDB_ENTRY( 0xa3c69210 ,  0,   7035,YM+TA+TB+TD), /* 281 */
  TIMEDB_ENTRY( 0xa3d60c47 ,  0,   9021,YM+TA+TB+TD), /* 192 */
  TIMEDB_ENTRY( 0xa3dac9cf ,  0,  13442,         YM), /* 1044 */
+ TIMEDB_ENTRY( 0xa3dd6060 ,  0,  10752,         YM), /* 2109 */
  TIMEDB_ENTRY( 0xa3f7a518 ,  0,   2304,      YM+TA), /* 261 */
  TIMEDB_ENTRY( 0xa4027d15 ,  0,   4100,YM+TA+TB+TD), /* 3156 */
  TIMEDB_ENTRY( 0xa404d61f ,  0,   5142,         YM), /* 1217 */
@@ -4584,6 +5101,8 @@
  TIMEDB_ENTRY( 0xa4c88cba ,  0,   6144,         YM), /* 1543 */
  TIMEDB_ENTRY( 0xa4cfbfa7 ,  0,   1984,         YM), /* 3691 */
  TIMEDB_ENTRY( 0xa4f1a7f7 ,  0,   4986,YM+TA+TB+TD), /* 4254 */
+ TIMEDB_ENTRY( 0xa509c3dc ,  0,    512,         YM), /* 4545 */
+ TIMEDB_ENTRY( 0xa509c3dc ,  1,    320,         YM), /* 4545 */
  TIMEDB_ENTRY( 0xa50f1db7 ,  0,   3836,YM+TA+TB+TD), /* 4300 */
  TIMEDB_ENTRY( 0xa512f2d6 ,  0,   3450,         YM), /* 3077 */
  TIMEDB_ENTRY( 0xa51df7b2 ,  0,  11520,         YM), /* 337 */
@@ -4601,6 +5120,7 @@
  TIMEDB_ENTRY( 0xa59030f9 ,  0,    640,         YM), /* 2147 */
  TIMEDB_ENTRY( 0xa5914f29 ,  0,  25600,YM+TA+TB+TD), /* 3985 */
  TIMEDB_ENTRY( 0xa5a557ae ,  0,   1247,   YM+TA+TD), /* 2761 */
+ TIMEDB_ENTRY( 0xa5aef182 ,  0,  21492,         YM), /* Middle_Earth_Theme_(chip).sndh */
  TIMEDB_ENTRY( 0xa5c011df ,  0,    612,         YM), /* 3973 */
  TIMEDB_ENTRY( 0xa5c011df ,  1,    543,         YM), /* 3973 */
  TIMEDB_ENTRY( 0xa5c011df ,  2,    147,         YM), /* 3973 */
@@ -4609,11 +5129,21 @@
  TIMEDB_ENTRY( 0xa5cb8483 ,  0,   6048,YM+TA+TB+TD), /* 2087 */
  TIMEDB_ENTRY( 0xa5e54bdd ,  0,    959,         YM), /* 1525 */
  TIMEDB_ENTRY( 0xa5ea5ae4 ,  0,  21492,      YM+TA), /* 1700 */
+ TIMEDB_ENTRY( 0xa612e913 ,  0,   9246,         YM), /* 3062 */
  TIMEDB_ENTRY( 0xa63e3855 ,  0,   1920,         YM), /* 2898 */
  TIMEDB_ENTRY( 0xa64425df ,  0,   1275,     YM+STE), /* 1908 */
  TIMEDB_ENTRY( 0xa657eca3 ,  0,    635,   YM+TA+TB), /* 4269 */
  TIMEDB_ENTRY( 0xa65934b0 ,  0,   9216,      YM+TA), /* 1634 */
  TIMEDB_ENTRY( 0xa65d7cfa ,  0,   3284,         YM), /* 4069 */
+ TIMEDB_ENTRY( 0xa66242ca ,  0,   2905,         YM), /* 3205 */
+ TIMEDB_ENTRY( 0xa66242ca ,  1,   5120,         YM), /* 3205 */
+ TIMEDB_ENTRY( 0xa66242ca ,  2,   4000,         YM), /* 3205 */
+ TIMEDB_ENTRY( 0xa66242ca ,  3,   2327,         YM), /* 3205 */
+ TIMEDB_ENTRY( 0xa66242ca ,  4,   2176,         YM), /* 3205 */
+ TIMEDB_ENTRY( 0xa66242ca ,  5,   2953,         YM), /* 3205 */
+ TIMEDB_ENTRY( 0xa66242ca ,  6,   3741,         YM), /* 3205 */
+ TIMEDB_ENTRY( 0xa66242ca ,  7,   1478,         YM), /* 3205 */
+ TIMEDB_ENTRY( 0xa66242ca ,  8,    321,         YM), /* 3205 */
  TIMEDB_ENTRY( 0xa671058b ,  0,   2685,YM+TA+TB+TD), /* 4314 */
  TIMEDB_ENTRY( 0xa6aa9d05 ,  0,  12769,         YM), /* 860 */
  TIMEDB_ENTRY( 0xa6aa9d05 ,  1,   2237,         YM), /* 860 */
@@ -4636,6 +5166,7 @@
  TIMEDB_ENTRY( 0xa7986dac ,  0,   6144,   YM+TA+TD), /* 3595 */
  TIMEDB_ENTRY( 0xa7c6aad7 ,  0,  37888,         YM), /* 2842 */
  TIMEDB_ENTRY( 0xa7e7b254 ,  0,   2560,         YM), /* 334 */
+ TIMEDB_ENTRY( 0xa8029a43 ,  0,   7812,      YM+TA), /* 4438 */
  TIMEDB_ENTRY( 0xa807f6bd ,  0,  12800,         YM), /* 144 */
  TIMEDB_ENTRY( 0xa807f6bd ,  1,   5376,         YM), /* 144 */
  TIMEDB_ENTRY( 0xa807f6bd ,  2,     66,         YM), /* 144 */
@@ -4658,6 +5189,8 @@
  TIMEDB_ENTRY( 0xa8ed8659 ,  0,   9862,         YM), /* 726 */
  TIMEDB_ENTRY( 0xa9059a8e ,  0,  39936,YM+TA+TB+TD), /* 3337 */
  TIMEDB_ENTRY( 0xa90b38fe ,  0,  39937,      YM+TA), /* 3759 */
+ TIMEDB_ENTRY( 0xa91709d5 ,  0,  19968,         YM), /* Great_Stuff_Compil_30.sndh */
+ TIMEDB_ENTRY( 0xa93fb805 ,  0,   1600,         YM), /* 4532 */
  TIMEDB_ENTRY( 0xa9558038 ,  0,  41320,YM+TA+TB+TD), /* 2580 */
  TIMEDB_ENTRY( 0xa96cf208 ,  0,   7290,         YM), /* 970 */
  TIMEDB_ENTRY( 0xa981ef77 ,  0, 107187,      YM+TA), /* 3733 */
@@ -4728,6 +5261,7 @@
  TIMEDB_ENTRY( 0xab4fde3b ,  0,   3068,      YM+TA), /* 1531 */
  TIMEDB_ENTRY( 0xab59c75b ,  0,   7680,   YM+TB+TD), /* 3460 */
  TIMEDB_ENTRY( 0xab9f613f ,  0,   9216,   YM+TA+TD), /* 2348 */
+ TIMEDB_ENTRY( 0xabaca928 ,  0,   7744,YM+TA+TB+TD), /* 2873 */
  TIMEDB_ENTRY( 0xabb5b4e0 ,  0,  89681,      YM+TA), /* 3747 */
  TIMEDB_ENTRY( 0xabb78bc7 ,  0,    411,         YM), /* 1116 */
  TIMEDB_ENTRY( 0xabb78bc7 ,  1,    640,         YM), /* 1116 */
@@ -4808,6 +5342,7 @@
  TIMEDB_ENTRY( 0xafd23fc7 ,  0,   5754,YM+TA+TB+TD), /* 2622 */
  TIMEDB_ENTRY( 0xafd55952 ,  0,   4202,         YM), /* 3069 */
  TIMEDB_ENTRY( 0xafe7bd6f ,  0, 346905,      YM+TA), /* 3714 */
+ TIMEDB_ENTRY( 0xaff68460 ,  0,  16384,      YM+TA), /* 4412 */
  TIMEDB_ENTRY( 0xaffb8647 ,  0,  11648,   YM+TA+TD), /* 2263 */
  TIMEDB_ENTRY( 0xb002fd49 ,  0, 236193,      YM+TA), /* 3788 */
  TIMEDB_ENTRY( 0xb002fd49 ,  1,  73698,      YM+TA), /* 3788 */
@@ -4820,6 +5355,7 @@
  TIMEDB_ENTRY( 0xb002fd49 ,  8,  73314,      YM+TA), /* 3788 */
  TIMEDB_ENTRY( 0xb002fd49 ,  9,  11525,      YM+TA), /* 3788 */
  TIMEDB_ENTRY( 0xb002fd49 , 10, 250924,      YM+TA), /* 3788 */
+ TIMEDB_ENTRY( 0xb014305f ,  0,  21121,      YM+TA), /* 4559 */
  TIMEDB_ENTRY( 0xb01a35e5 ,  0,   6405,         YM), /* 227 */
  TIMEDB_ENTRY( 0xb052d02c ,  0,   6144,      YM+TD), /* 583 */
  TIMEDB_ENTRY( 0xb054596f ,  0,  15103,         YM), /* 3969 */
@@ -4832,6 +5368,7 @@
  TIMEDB_ENTRY( 0xb1190160 ,  0,  14592,YM+TA+TB+TD), /* 1105 */
  TIMEDB_ENTRY( 0xb14cd84f ,  0,   3840,   YM+TA+TD), /* 2323 */
  TIMEDB_ENTRY( 0xb14f0777 ,  0,   9216,         YM), /* 2163 */
+ TIMEDB_ENTRY( 0xb1531395 ,  0,   9145,         YM), /* Laser_Squad.sndh */
  TIMEDB_ENTRY( 0xb158b1e4 ,  0,  11454,      YM+TA), /* 1524 */
  TIMEDB_ENTRY( 0xb159c8f7 ,  0,  13439,        STE), /* 3381 */
  TIMEDB_ENTRY( 0xb15ea782 ,  0,  64178,      YM+TA), /* 3758 */
@@ -4859,6 +5396,7 @@
  TIMEDB_ENTRY( 0xb22e35a0 ,  0,  70725,      YM+TA), /* 4053 */
  TIMEDB_ENTRY( 0xb24bc173 ,  0,  20352,         YM), /* 2107 */
  TIMEDB_ENTRY( 0xb24bc173 ,  1,   2304,         YM), /* 2107 */
+ TIMEDB_ENTRY( 0xb25dd0d5 ,  0,  23418,         YM), /* Camerto_For_Acid_Band.sndh */
  TIMEDB_ENTRY( 0xb2810651 ,  0,    504,         YM), /* 3680 */
  TIMEDB_ENTRY( 0xb282048d ,  0,   9856,         YM), /* 1161 */
  TIMEDB_ENTRY( 0xb28d3b2f ,  0,   3465,         YM), /* 321 */
@@ -4868,7 +5406,12 @@
  TIMEDB_ENTRY( 0xb2b75a57 ,  0,  12096,         YM), /* 119 */
  TIMEDB_ENTRY( 0xb2c0ab4c ,  0,  14777,   YM+TA+TD), /* 232 */
  TIMEDB_ENTRY( 0xb2c91b33 ,  0,   9216,         YM), /* 1488 */
+ TIMEDB_ENTRY( 0xb2d356bc ,  0, 105073,         YM), /* 4527 */
  TIMEDB_ENTRY( 0xb2fd791e ,  0,  39914,   YM+TA+TD), /* 2356 */
+ TIMEDB_ENTRY( 0xb3355200 ,  0,  14976,         YM), /* 4476 */
+ TIMEDB_ENTRY( 0xb3355200 ,  1,  11247,         YM), /* 4476 */
+ TIMEDB_ENTRY( 0xb3355200 ,  2,  10464,         YM), /* 4476 */
+ TIMEDB_ENTRY( 0xb3355200 ,  3,   6480,         YM), /* 4476 */
  TIMEDB_ENTRY( 0xb33cf165 ,  0,   6096,         YM), /* 577 */
  TIMEDB_ENTRY( 0xb33cf165 ,  1,    175,         YM), /* 577 */
  TIMEDB_ENTRY( 0xb33cf165 ,  2,     86,         YM), /* 577 */
@@ -4890,7 +5433,7 @@
  TIMEDB_ENTRY( 0xb38062b5 ,  0,   5503,         YM), /* 4079 */
  TIMEDB_ENTRY( 0xb381de0c ,  0,   6720,      YM+TA), /* 254 */
  TIMEDB_ENTRY( 0xb389ea27 ,  0,   4608,         YM), /* 489 */
- TIMEDB_ENTRY( 0xb38b91f7 ,  0,  10176,         YM), /* 273 */
+ TIMEDB_ENTRY( 0xb38b91f7 ,  0,  10176,         YM), /* ZPC_Demo.sndh */
  TIMEDB_ENTRY( 0xb39fb491 ,  0,   2304,      YM+TA), /* 419 */
  TIMEDB_ENTRY( 0xb3a13281 ,  0,   3456,      YM+TA), /* 2288 */
  TIMEDB_ENTRY( 0xb3a80925 ,  0,  48351,      YM+TA), /* 3826 */
@@ -4938,8 +5481,10 @@
  TIMEDB_ENTRY( 0xb4d2b8ca ,  3,   4607,         YM), /* 346 */
  TIMEDB_ENTRY( 0xb4d2b8ca ,  4,   6559,         YM), /* 346 */
  TIMEDB_ENTRY( 0xb4d2b8ca ,  5,   3839,         YM), /* 346 */
+ TIMEDB_ENTRY( 0xb4e7c586 ,  0,  20730,      YM+TA), /* Another_Western_Legend.sndh */
  TIMEDB_ENTRY( 0xb4ebda37 ,  0,   6239,         YM), /* 2363 */
  TIMEDB_ENTRY( 0xb4ee1085 ,  0,   2878,      YM+TA), /* 1522 */
+ TIMEDB_ENTRY( 0xb506f527 ,  0,   8194,      YM+TA), /* 4441 */
  TIMEDB_ENTRY( 0xb52e4463 ,  0, 104433,      YM+TA), /* 3961 */
  TIMEDB_ENTRY( 0xb52f08db ,  0,  53760,YM+TA+TB+TD), /* 2593 */
  TIMEDB_ENTRY( 0xb537451e ,  0,   9216,         YM), /* 2459 */
@@ -4968,6 +5513,10 @@
  TIMEDB_ENTRY( 0xb611e966 ,  2,    109,         YM), /* 1484 */
  TIMEDB_ENTRY( 0xb611e966 ,  3,     72,         YM), /* 1484 */
  TIMEDB_ENTRY( 0xb611e966 ,  4,     92,         YM), /* 1484 */
+ TIMEDB_ENTRY( 0xb635f6fb ,  0,   7872,         YM), /* WWF_European_Rampage.sndh */
+ TIMEDB_ENTRY( 0xb635f6fb ,  1,   1901,         YM), /* WWF_European_Rampage.sndh */
+ TIMEDB_ENTRY( 0xb635f6fb ,  2,    607,         YM), /* WWF_European_Rampage.sndh */
+ TIMEDB_ENTRY( 0xb635f6fb ,  3,    403,         YM), /* WWF_European_Rampage.sndh */
  TIMEDB_ENTRY( 0xb648c266 ,  0,   4927,         YM), /* 3621 */
  TIMEDB_ENTRY( 0xb64a9732 ,  0,  15356,         YM), /* 1748 */
  TIMEDB_ENTRY( 0xb665d7fe ,  0,  16524,         YM), /* 2061 */
@@ -4982,6 +5531,7 @@
  TIMEDB_ENTRY( 0xb69262a3 ,  0,   1786,   YM+TA+TB), /* 4279 */
  TIMEDB_ENTRY( 0xb6b816bd ,  0,  73808,      YM+TA), /* 3754 */
  TIMEDB_ENTRY( 0xb6c1f2ed ,  0,  17280,         YM), /* 602 */
+ TIMEDB_ENTRY( 0xb6de3b9f ,  0,  30457,         YM), /* Tra_La_Li_and_Tra_La_La.sndh */
  TIMEDB_ENTRY( 0xb6e84eda ,  0,   2067,         YM), /* 3042 */
  TIMEDB_ENTRY( 0xb6f3f526 ,  0,  13760,         YM), /* 1790 */
  TIMEDB_ENTRY( 0xb6f4299a ,  0,  84279,      YM+TA), /* 3807 */
@@ -5003,6 +5553,7 @@
  TIMEDB_ENTRY( 0xb76f5fb4 ,  0,   9849,      YM+TA), /* 1694 */
  TIMEDB_ENTRY( 0xb77fed59 ,  0,   4096,         YM), /* 3217 */
  TIMEDB_ENTRY( 0xb7b182ac ,  0,   5161,YM+TA+TB+TD), /* 3876 */
+ TIMEDB_ENTRY( 0xb7b64257 ,  0,   8914,      YM+TA), /* 4425 */
  TIMEDB_ENTRY( 0xb7bb39fc ,  0,   2688,   YM+TA+TD), /* 2315 */
  TIMEDB_ENTRY( 0xb7d0f956 ,  0,   6335,YM+TA+TB+TD), /* 4100 */
  TIMEDB_ENTRY( 0xb7d663ab ,  0,   1536,         YM), /* 3272 */
@@ -5023,6 +5574,7 @@
  TIMEDB_ENTRY( 0xb7dddacd , 12,    250,         YM), /* 1916 */
  TIMEDB_ENTRY( 0xb7edf654 ,  0,   9984,   YM+TA+TD), /* 2512 */
  TIMEDB_ENTRY( 0xb7ef0a5a ,  0,  15360,YM+TA+TB+TD), /* 2841 */
+ TIMEDB_ENTRY( 0xb7f63639 ,  0,  25977,     YM+STE), /* Cubase_versus_Notator.sndh */
  TIMEDB_ENTRY( 0xb7fb8030 ,  0,   5628,   YM+TA+TD), /* 220 */
  TIMEDB_ENTRY( 0xb7fd89a5 ,  0,   5891,   YM+TA+TD), /* 2313 */
  TIMEDB_ENTRY( 0xb80b6df6 ,  0,   1637,   YM+TA+TB), /* 3606 */
@@ -5064,6 +5616,7 @@
  TIMEDB_ENTRY( 0xba2c50f8 ,  2,   2682,         YM), /* 3287 */
  TIMEDB_ENTRY( 0xba2f914f ,  0,   7279,YM+TA+TB+TD), /* 3392 */
  TIMEDB_ENTRY( 0xba4c288d ,  0,   5754,         YM), /* 4260 */
+ TIMEDB_ENTRY( 0xba574393 ,  0,   3200,         YM), /* 4466 */
  TIMEDB_ENTRY( 0xba5bf3fb ,  0,   4860,      YM+TA), /* 1629 */
  TIMEDB_ENTRY( 0xba6a8ef8 ,  0,    379,         YM), /* 2945 */
  TIMEDB_ENTRY( 0xba6a8ef8 ,  1,    435,         YM), /* 2945 */
@@ -5075,11 +5628,14 @@
  TIMEDB_ENTRY( 0xba708458 ,  3,   5376,         YM), /* 1057 */
  TIMEDB_ENTRY( 0xba71e92e ,  0,   5805,         YM), /* 3163 */
  TIMEDB_ENTRY( 0xba886f7d ,  0,  42240,         YM), /* 7 */
+ TIMEDB_ENTRY( 0xbab4b43b ,  0,  20992,         YM), /* 4459 */
+ TIMEDB_ENTRY( 0xbab4b43b ,  1,   3392,         YM), /* 4459 */
  TIMEDB_ENTRY( 0xbac8350c ,  0,   7919,         YM), /* 1316 */
  TIMEDB_ENTRY( 0xbad7e342 ,  0,   1676,         YM), /* 3487 */
  TIMEDB_ENTRY( 0xbb183018 ,  0,   6409,         YM), /* 3028 */
  TIMEDB_ENTRY( 0xbb188322 ,  0,  15175,YM+TA+TB+TD), /* 2105 */
  TIMEDB_ENTRY( 0xbb317266 ,  0,  10752,      YM+TA), /* 2156 */
+ TIMEDB_ENTRY( 0xbb425ad7 ,  0,   3455,YM+TA+TB+TD), /* 3052 */
  TIMEDB_ENTRY( 0xbb470a6d ,  0,  14501,         YM), /* 2040 */
  TIMEDB_ENTRY( 0xbb65fe65 ,  0,  10933,   YM+TA+TD), /* 1852 */
  TIMEDB_ENTRY( 0xbb765c7e ,  0,   8442,      YM+TA), /* 2634 */
@@ -5088,6 +5644,7 @@
  TIMEDB_ENTRY( 0xbb8625e1 ,  0,  19578,      YM+TA), /* 1678 */
  TIMEDB_ENTRY( 0xbb875700 ,  0,   9600,         YM), /* 3260 */
  TIMEDB_ENTRY( 0xbb96bca5 ,  0,   3480,      YM+TA), /* 3601 */
+ TIMEDB_ENTRY( 0xbba8240e ,  0,   1215,     YM+STE), /* Please_No.sndh */
  TIMEDB_ENTRY( 0xbbac27d1 ,  0,   8058,   YM+TA+TB), /* 2774 */
  TIMEDB_ENTRY( 0xbbb25894 ,  0,   1280,      YM+TA), /* 925 */
  TIMEDB_ENTRY( 0xbbb47b36 ,  0,   5363,         YM), /* 874 */
@@ -5098,6 +5655,8 @@
  TIMEDB_ENTRY( 0xbbb47b36 ,  5,   6636,         YM), /* 874 */
  TIMEDB_ENTRY( 0xbbb47b36 ,  6,    169,         YM), /* 874 */
  TIMEDB_ENTRY( 0xbbcb5276 ,  0,   1248,         YM), /* 2955 */
+ TIMEDB_ENTRY( 0xbbe35e3b ,  0,   1171,         YM), /* 4499 */
+ TIMEDB_ENTRY( 0xbbe35e3b ,  1,   1280,         YM), /* 4499 */
  TIMEDB_ENTRY( 0xbbed6592 ,  0,   6537,         YM), /* 3165 */
  TIMEDB_ENTRY( 0xbbf23b4e ,  0,   4112,         YM), /* 1668 */
  TIMEDB_ENTRY( 0xbbf23b4e ,  1,   5376,         YM), /* 1668 */
@@ -5138,13 +5697,26 @@
  TIMEDB_ENTRY( 0xbd3181a0 ,  3,  66090,      YM+TA), /* 3772 */
  TIMEDB_ENTRY( 0xbd3181a0 ,  4,  40353,      YM+TA), /* 3772 */
  TIMEDB_ENTRY( 0xbd3ba2ea ,  0,  17982,YM+TA+TB+TD), /* 2567 */
+ TIMEDB_ENTRY( 0xbd485b20 ,  0,     35,         YM), /* 4529 */
+ TIMEDB_ENTRY( 0xbd485b20 ,  1,    282,         YM), /* 4529 */
+ TIMEDB_ENTRY( 0xbd485b20 ,  2,    133,         YM), /* 4529 */
+ TIMEDB_ENTRY( 0xbd485b20 ,  3,   1280,         YM), /* 4529 */
  TIMEDB_ENTRY( 0xbd530e2b ,  0,   1913,         YM), /* 1262 */
  TIMEDB_ENTRY( 0xbd530e2b ,  1,    939,         YM), /* 1262 */
  TIMEDB_ENTRY( 0xbd530e2b ,  2,   4456,         YM), /* 1262 */
  TIMEDB_ENTRY( 0xbd5738da ,  0,   3022,         YM), /* 3887 */
  TIMEDB_ENTRY( 0xbd5b476a ,  0,   3072,YM+TA+TB+TD), /* 2099 */
+ TIMEDB_ENTRY( 0xbd619255 ,  0,   1280,         YM), /* 4516 */
+ TIMEDB_ENTRY( 0xbd619255 ,  1,     33,         YM), /* 4516 */
+ TIMEDB_ENTRY( 0xbd619255 ,  2,     37,         YM), /* 4516 */
+ TIMEDB_ENTRY( 0xbd619255 ,  3,      5,         YM), /* 4516 */
+ TIMEDB_ENTRY( 0xbd619255 ,  4,     23,         YM), /* 4516 */
+ TIMEDB_ENTRY( 0xbd619255 ,  5,     33,         YM), /* 4516 */
+ TIMEDB_ENTRY( 0xbd619255 ,  6,     20,         YM), /* 4516 */
+ TIMEDB_ENTRY( 0xbd619255 ,  7,     42,         YM), /* 4516 */
  TIMEDB_ENTRY( 0xbd640e59 ,  0,  22272,YM+TA+TB+TD), /* 2441 */
  TIMEDB_ENTRY( 0xbd75fdd2 ,  0,   8384,YM+TA+TB+TD), /* 2079 */
+ TIMEDB_ENTRY( 0xbd7e5b6b ,  0,  13818,         YM), /* Psychosonorous_Disorder.sndh */
  TIMEDB_ENTRY( 0xbdac181f ,  0,  10379,         YM), /* 3122 */
  TIMEDB_ENTRY( 0xbdad5be6 ,  0,  11904,         YM), /* 1633 */
  TIMEDB_ENTRY( 0xbdb1ca4d ,  0,   3775,         YM), /* 1246 */
@@ -5154,6 +5726,7 @@
  TIMEDB_ENTRY( 0xbdeb5cd0 ,  0, 105889,      YM+TA), /* 4354 */
  TIMEDB_ENTRY( 0xbdec1d95 ,  0,   6141,YM+TA+TB+TD), /* 58 */
  TIMEDB_ENTRY( 0xbe03a1d8 ,  0,  11193,YM+TA+TB+TD), /* 1013 */
+ TIMEDB_ENTRY( 0xbe048f1e ,  0,   1536,         YM), /* Huno_Demo.sndh */
  TIMEDB_ENTRY( 0xbe12afd4 ,  0,  10240,   YM+TA+TD), /* 2269 */
  TIMEDB_ENTRY( 0xbe23c6ad ,  0, 104591,      YM+TA), /* 3766 */
  TIMEDB_ENTRY( 0xbe24fa83 ,  0, 123845,      YM+TA), /* 3849 */
@@ -5164,6 +5737,7 @@
  TIMEDB_ENTRY( 0xbe534838 ,  2, 129861,      YM+TA), /* 3773 */
  TIMEDB_ENTRY( 0xbe534838 ,  3,  40321,      YM+TA), /* 3773 */
  TIMEDB_ENTRY( 0xbe534838 ,  4,  30790,      YM+TA), /* 3773 */
+ TIMEDB_ENTRY( 0xbe53b399 ,  0,   1337,         YM), /* Thats_Illogical_Captain.sndh */
  TIMEDB_ENTRY( 0xbe71d4b7 ,  0,   6568,         YM), /* 375 */
  TIMEDB_ENTRY( 0xbe75a4a1 ,  0,   8718,         YM), /* 1271 */
  TIMEDB_ENTRY( 0xbe7893e1 ,  0,  10022,         YM), /* 3516 */
@@ -5182,6 +5756,18 @@
  TIMEDB_ENTRY( 0xbeb89041 ,  0,   2303,      YM+TA), /* 3423 */
  TIMEDB_ENTRY( 0xbec0d438 ,  0,  24372,         YM), /* 1092 */
  TIMEDB_ENTRY( 0xbec625b1 ,  0,  11283,         YM), /* 879 */
+ TIMEDB_ENTRY( 0xbed01983 ,  0,   2240,         YM), /* McDonald_Land.sndh */
+ TIMEDB_ENTRY( 0xbed01983 ,  1,   2240,         YM), /* McDonald_Land.sndh */
+ TIMEDB_ENTRY( 0xbed01983 ,  2,   2048,         YM), /* McDonald_Land.sndh */
+ TIMEDB_ENTRY( 0xbed01983 ,  3,   3584,         YM), /* McDonald_Land.sndh */
+ TIMEDB_ENTRY( 0xbed01983 ,  4,   1728,         YM), /* McDonald_Land.sndh */
+ TIMEDB_ENTRY( 0xbed01983 ,  5,   2560,         YM), /* McDonald_Land.sndh */
+ TIMEDB_ENTRY( 0xbed01983 ,  6,    255,         YM), /* McDonald_Land.sndh */
+ TIMEDB_ENTRY( 0xbed01983 ,  7,   3072,         YM), /* McDonald_Land.sndh */
+ TIMEDB_ENTRY( 0xbed01983 ,  8,   2048,         YM), /* McDonald_Land.sndh */
+ TIMEDB_ENTRY( 0xbed01983 ,  9,   1536,         YM), /* McDonald_Land.sndh */
+ TIMEDB_ENTRY( 0xbed01983 , 10,    136,         YM), /* McDonald_Land.sndh */
+ TIMEDB_ENTRY( 0xbed01983 , 11,   3520,         YM), /* McDonald_Land.sndh */
  TIMEDB_ENTRY( 0xbedc45d2 ,  0,   7488,         YM), /* 3209 */
  TIMEDB_ENTRY( 0xbefa3934 ,  0,  11424,         YM), /* 2058 */
  TIMEDB_ENTRY( 0xbf0e1fae ,  0, 154337,      YM+TA), /* 3808 */
@@ -5241,6 +5827,7 @@
  TIMEDB_ENTRY( 0xc0c689b3 ,  7,    598,         YM), /* 574 */
  TIMEDB_ENTRY( 0xc0c689b3 ,  8,  14254,         YM), /* 574 */
  TIMEDB_ENTRY( 0xc0d0d761 ,  0,   2303,YM+TA+TB+TD), /* 2989 */
+ TIMEDB_ENTRY( 0xc10e2b29 ,  0,   6144,      YM+TA), /* 4410 */
  TIMEDB_ENTRY( 0xc11d69b3 ,  0,   7680,         YM), /* 1554 */
  TIMEDB_ENTRY( 0xc125f0b1 ,  0,  26490,         YM), /* 1680 */
  TIMEDB_ENTRY( 0xc12837c7 ,  0,   1536,         YM), /* 1388 */
@@ -5289,10 +5876,11 @@
  TIMEDB_ENTRY( 0xc2d7c987 ,  0,   3072,         YM), /* 1198 */
  TIMEDB_ENTRY( 0xc2df6c6b ,  0,  14225,      YM+TD), /* 1384 */
  TIMEDB_ENTRY( 0xc2ecaab7 ,  0,   3842,         YM), /* 427 */
+ TIMEDB_ENTRY( 0xc2f242c9 ,  0,   4473,      YM+TA), /* Guille.sndh */
  TIMEDB_ENTRY( 0xc2fa1a91 ,  0,   1544,         YM), /* 4010 */
- TIMEDB_ENTRY( 0xc30d3174 ,  0,  19532,         YM), /* 2175 */
- TIMEDB_ENTRY( 0xc30d3174 ,  1,   3840,         YM), /* 2175 */
- TIMEDB_ENTRY( 0xc30d3174 ,  2,    711,         YM), /* 2175 */
+ TIMEDB_ENTRY( 0xc30d3174 ,  0,  19532,         YM), /* 5th_Gear.sndh */
+ TIMEDB_ENTRY( 0xc30d3174 ,  1,   3840,         YM), /* 5th_Gear.sndh */
+ TIMEDB_ENTRY( 0xc30d3174 ,  2,    711,         YM), /* 5th_Gear.sndh */
  TIMEDB_ENTRY( 0xc312cf0f ,  0,   2040,      YM+TD), /* 470 */
  TIMEDB_ENTRY( 0xc3310a79 ,  0,   9600,         YM), /* 1661 */
  TIMEDB_ENTRY( 0xc33f9df3 ,  0,   2912,      YM+TA), /* 438 */
@@ -5401,8 +5989,9 @@
  TIMEDB_ENTRY( 0xc5c9741d ,  8,  24129,      YM+TA), /* 3851 */
  TIMEDB_ENTRY( 0xc5d8d8b6 ,  0,   4098,         YM), /* 295 */
  TIMEDB_ENTRY( 0xc5daac93 ,  0,   5903,         YM), /* 345 */
- TIMEDB_ENTRY( 0xc613678d ,  0,   4218,      YM+TA), /* 1356 */
+ TIMEDB_ENTRY( 0xc613678d ,  0,   4218,      YM+TA), /* Pandora.sndh */
  TIMEDB_ENTRY( 0xc630704d ,  0,   5370,      YM+TA), /* 3555 */
+ TIMEDB_ENTRY( 0xc636e615 ,  0,  51827,   YM+TA+TB), /* Synergy_Demo_Odyssey.sndh */
  TIMEDB_ENTRY( 0xc66ec609 ,  0,   6168,         YM), /* 3015 */
  TIMEDB_ENTRY( 0xc66ec609 ,  1,   1584,         YM), /* 3015 */
  TIMEDB_ENTRY( 0xc66ec609 ,  2,  10752,         YM), /* 3015 */
@@ -5410,11 +5999,27 @@
  TIMEDB_ENTRY( 0xc6a2be86 ,  0,  12384,   YM+TA+TD), /* 1987 */
  TIMEDB_ENTRY( 0xc6aa274c ,  0,   3450,         YM), /* 884 */
  TIMEDB_ENTRY( 0xc6aa274c ,  1,   6522,         YM), /* 884 */
+ TIMEDB_ENTRY( 0xc6b598fc ,  0,   5371,YM+TA+TC+TD), /* Chillout.sndh */
  TIMEDB_ENTRY( 0xc6b7c2bb ,  0,   9218,         YM), /* 2165 */
  TIMEDB_ENTRY( 0xc6d142da ,  0,  13433,   YM+TA+TD), /* 1329 */
  TIMEDB_ENTRY( 0xc6dbb53f ,  0,   8321,         YM), /* 4158 */
  TIMEDB_ENTRY( 0xc6fc56df ,  0,    860,     YM+STE), /* 1907 */
  TIMEDB_ENTRY( 0xc6fd617f ,  0,   9218,         YM), /* 2419 */
+ TIMEDB_ENTRY( 0xc711e291 ,  0,  13275,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 ,  1,     16,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 ,  2,     30,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 ,  3,     49,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 ,  4,     13,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 ,  5,     23,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 ,  6,     71,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 ,  7,     54,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 ,  8,     36,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 ,  9,     11,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 , 10,    129,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 , 11,    383,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 , 12,    161,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 , 13,     91,         YM), /* 2738 */
+ TIMEDB_ENTRY( 0xc711e291 , 14,    667,         YM), /* 2738 */
  TIMEDB_ENTRY( 0xc7147a34 ,  0,   1674,         YM), /* 3169 */
  TIMEDB_ENTRY( 0xc71ef6ab ,  0,   8703,         YM), /* 309 */
  TIMEDB_ENTRY( 0xc722956b ,  0,   4782,         YM), /* 13 */
@@ -5443,6 +6048,11 @@
  TIMEDB_ENTRY( 0xc7a3fc91 , 10,    172,         YM), /* 111 */
  TIMEDB_ENTRY( 0xc7a3fc91 , 11,    512,         YM), /* 111 */
  TIMEDB_ENTRY( 0xc7aa5a55 ,  0,  13816,YM+TA+TB+TD), /* 1602 */
+ TIMEDB_ENTRY( 0xc7c162f8 ,  0,   3515,         YM), /* 4533 */
+ TIMEDB_ENTRY( 0xc7c162f8 ,  1,    129,         YM), /* 4533 */
+ TIMEDB_ENTRY( 0xc7c162f8 ,  2,    175,         YM), /* 4533 */
+ TIMEDB_ENTRY( 0xc7c162f8 ,  3,    960,         YM), /* 4533 */
+ TIMEDB_ENTRY( 0xc7c162f8 ,  4,   1660,         YM), /* 4533 */
  TIMEDB_ENTRY( 0xc7ca5444 ,  0,   6265,         YM), /* 4370 */
  TIMEDB_ENTRY( 0xc7eb6d07 ,  0,   4320,         YM), /* 3302 */
  TIMEDB_ENTRY( 0xc7ec04eb ,  0,   7679,   YM+TA+TB), /* 2698 */
@@ -5492,6 +6102,35 @@
  TIMEDB_ENTRY( 0xc8ba0fce ,  1,  11815,         YM), /* 3533 */
  TIMEDB_ENTRY( 0xc8ba0fce ,  2,   2953,         YM), /* 3533 */
  TIMEDB_ENTRY( 0xc8ba0fce ,  3,    738,         YM), /* 3533 */
+ TIMEDB_ENTRY( 0xc8ba3168 ,  0,   4230,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 ,  1,   3616,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 ,  2,   4677,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 ,  3,   1756,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 ,  4,    804,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 ,  5,   4629,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 ,  6,   2037,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 ,  7,   5205,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 ,  8,   3213,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 ,  9,   4230,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 10,   2077,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 11,   4417,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 12,    396,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 13,    561,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 14,    441,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 15,    373,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 16,   1114,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 17,    992,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 18,    354,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 19,    752,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 20,    753,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 21,    769,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 22,   1043,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 23,    369,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 24,    644,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 25,    709,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 26,    517,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 27,    753,         YM), /* 881 */
+ TIMEDB_ENTRY( 0xc8ba3168 , 28,    400,         YM), /* 881 */
  TIMEDB_ENTRY( 0xc8c2490b ,  0,   6911,         YM), /* 2754 */
  TIMEDB_ENTRY( 0xc8caeb3d ,  0,   6522,         YM), /* 4246 */
  TIMEDB_ENTRY( 0xc901f2fb ,  0,   5375,         YM), /* 21 */
@@ -5544,6 +6183,7 @@
  TIMEDB_ENTRY( 0xca87983a ,  1,  63050,      YM+TA), /* 3810 */
  TIMEDB_ENTRY( 0xca87983a ,  2,  32865,      YM+TA), /* 3810 */
  TIMEDB_ENTRY( 0xca87983a ,  3,  37447,      YM+TA), /* 3810 */
+ TIMEDB_ENTRY( 0xcaa63e4b ,  0,  37632,YM+TA+TB+TD), /* 2543 */
  TIMEDB_ENTRY( 0xcabca9c7 ,  0,   3840,         YM), /* 1132 */
  TIMEDB_ENTRY( 0xcac3b1bb ,  0,   2381,         YM), /* 3149 */
  TIMEDB_ENTRY( 0xcac60fdd ,  0,   2233,      YM+TA), /* 1547 */
@@ -5585,6 +6225,7 @@
  TIMEDB_ENTRY( 0xcb7fd9fa ,  0,   7355,   YM+TB+TD), /* 1593 */
  TIMEDB_ENTRY( 0xcb92ad8e ,  0,   2685,         YM), /* 2468 */
  TIMEDB_ENTRY( 0xcb99d602 ,  0,   8239,         YM), /* 376 */
+ TIMEDB_ENTRY( 0xcb9d3083 ,  0,  17520,         YM), /* 4460 */
  TIMEDB_ENTRY( 0xcb9f77f5 ,  0,  12160,         YM), /* 3417 */
  TIMEDB_ENTRY( 0xcb9f77f5 ,  1,   5120,         YM), /* 3417 */
  TIMEDB_ENTRY( 0xcba8b8b4 ,  0,  16507,YM+TA+TB+TD), /* 3275 */
@@ -5667,10 +6308,13 @@
  TIMEDB_ENTRY( 0xce10e412 ,  0,   1536,         YM), /* 1416 */
  TIMEDB_ENTRY( 0xce1d88e7 ,  0,  10362,      YM+TA), /* 1341 */
  TIMEDB_ENTRY( 0xce2943e0 ,  0,   7676,         YM), /* 1281 */
+ TIMEDB_ENTRY( 0xce513a50 ,  0,  12864,         YM), /* 4463 */
+ TIMEDB_ENTRY( 0xce513a50 ,  1,   3392,         YM), /* 4463 */
  TIMEDB_ENTRY( 0xce7065c1 ,  0,   8184,YM+TA+TB+TD), /* 1860 */
  TIMEDB_ENTRY( 0xce761369 ,  0,  37120,         YM), /* 1466 */
  TIMEDB_ENTRY( 0xce7b0f53 ,  0,  96613,      YM+TA), /* 3723 */
  TIMEDB_ENTRY( 0xce7cf8c8 ,  0,  71750,      YM+TA), /* 3730 */
+ TIMEDB_ENTRY( 0xcea96759 ,  0,  12112,         YM), /* 4442 */
  TIMEDB_ENTRY( 0xcec3ab5d ,  0,  14601,         YM), /* 4138 */
  TIMEDB_ENTRY( 0xcec3ab5d ,  1,   3724,         YM), /* 4138 */
  TIMEDB_ENTRY( 0xcec3ab5d ,  2,   5026,         YM), /* 4138 */
@@ -5690,6 +6334,8 @@
  TIMEDB_ENTRY( 0xcefd9efc ,  0,   9720,   YM+TA+TB), /* 1366 */
  TIMEDB_ENTRY( 0xcf04b309 ,  0,  22877,      YM+TA), /* 1214 */
  TIMEDB_ENTRY( 0xcf05d18a ,  0,   5581,         YM), /* 847 */
+ TIMEDB_ENTRY( 0xcf1f811e ,  0,   6155,         YM), /* 2005 */
+ TIMEDB_ENTRY( 0xcf1f811e ,  1,    768,         YM), /* 2005 */
  TIMEDB_ENTRY( 0xcf55417a ,  0,   9722,         YM), /* 1275 */
  TIMEDB_ENTRY( 0xcf56db36 ,  0,  11641,YM+TA+TB+TD), /* 3283 */
  TIMEDB_ENTRY( 0xcf823424 ,  0,   1176,         YM), /* 3690 */
@@ -5761,6 +6407,28 @@
  TIMEDB_ENTRY( 0xd1a7dd4b ,  1,   3199,         YM), /* 1292 */
  TIMEDB_ENTRY( 0xd1a7dd4b ,  2,   3199,         YM), /* 1292 */
  TIMEDB_ENTRY( 0xd1a7dd4b ,  3,   3359,         YM), /* 1292 */
+ TIMEDB_ENTRY( 0xd1b00941 ,  0,    639,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 ,  1,    814,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 ,  2,    573,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 ,  3,    638,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 ,  4,    837,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 ,  5,    573,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 ,  6,    381,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 ,  7,    445,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 ,  8,    554,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 ,  9,    678,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 10,    949,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 11,    564,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 12,    814,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 13,    573,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 14,    638,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 15,    837,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 16,    573,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 17,    381,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 18,    445,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 19,    564,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 20,    571,         YM), /* 4521 */
+ TIMEDB_ENTRY( 0xd1b00941 , 21,    166,         YM), /* 4521 */
  TIMEDB_ENTRY( 0xd1c7fc9f ,  0,   3847,         YM), /* 1322 */
  TIMEDB_ENTRY( 0xd1c7fc9f ,  1,   1924,         YM), /* 1322 */
  TIMEDB_ENTRY( 0xd1c7fc9f ,  2,   2420,         YM), /* 1322 */
@@ -5772,11 +6440,14 @@
  TIMEDB_ENTRY( 0xd1e68c94 ,  0,  14340,   YM+TA+TD), /* 1591 */
  TIMEDB_ENTRY( 0xd1e87fdb ,  0,   8064,         YM), /* 1129 */
  TIMEDB_ENTRY( 0xd1ed13d1 ,  0,   5370,         YM), /* 1695 */
+ TIMEDB_ENTRY( 0xd1f9f03d ,  0,   4608,         YM), /* Choux_H.sndh */
  TIMEDB_ENTRY( 0xd200eaae ,  0,  31047,YM+TA+TB+TD), /* 3558 */
  TIMEDB_ENTRY( 0xd212a72f ,  0,   7387,         YM), /* 560 */
  TIMEDB_ENTRY( 0xd212a72f ,  1,    379,         YM), /* 560 */
  TIMEDB_ENTRY( 0xd212a72f ,  2,     91,         YM), /* 560 */
  TIMEDB_ENTRY( 0xd2473448 ,  0,   8057,      YM+TA), /* 1713 */
+ TIMEDB_ENTRY( 0xd24de703 ,  0,   5957,YM+TA+TB+TD), /* 4483 */
+ TIMEDB_ENTRY( 0xd25aaebf ,  0,   9952,         YM), /* 4470 */
  TIMEDB_ENTRY( 0xd268a213 ,  0,   3725,         YM), /* 4132 */
  TIMEDB_ENTRY( 0xd268a213 ,  1,   1887,         YM), /* 4132 */
  TIMEDB_ENTRY( 0xd268a213 ,  2,   2264,         YM), /* 4132 */
@@ -5921,6 +6592,7 @@
  TIMEDB_ENTRY( 0xd5975740 ,  6,    288,         YM), /* 2223 */
  TIMEDB_ENTRY( 0xd5975740 ,  7,   4608,         YM), /* 2223 */
  TIMEDB_ENTRY( 0xd5a9e389 ,  0,   1920,         YM), /* 2149 */
+ TIMEDB_ENTRY( 0xd5e031fc ,  0,  23034,      YM+TA), /* Protect_Your_Enviornment.sndh */
  TIMEDB_ENTRY( 0xd5e45f05 ,  0,  38418,YM+TA+TB+TD), /* 2748 */
  TIMEDB_ENTRY( 0xd603c7a0 ,  0,    447,      YM+TA), /* 828 */
  TIMEDB_ENTRY( 0xd60fdf9d ,  0,   5760,         YM), /* 1162 */
@@ -5951,6 +6623,7 @@
  TIMEDB_ENTRY( 0xd6d5d0d5 ,  5,     96,YM+TA+TB+TD), /* 2094 */
  TIMEDB_ENTRY( 0xd6e2e254 ,  0,  94335,      YM+TA), /* 3836 */
  TIMEDB_ENTRY( 0xd6e2e254 ,  1,  46714,      YM+TA), /* 3836 */
+ TIMEDB_ENTRY( 0xd6e994aa ,  0,   2503,      YM+TA), /* 4421 */
  TIMEDB_ENTRY( 0xd6fc04a8 ,  0,  12993,   YM+TA+TD), /* 2296 */
  TIMEDB_ENTRY( 0xd71de918 ,  0,  20616,YM+TA+TB+TD), /* 3345 */
  TIMEDB_ENTRY( 0xd72ee71f ,  0,   3410,         YM), /* 2143 */
@@ -6138,6 +6811,7 @@
  TIMEDB_ENTRY( 0xdb1fd431 ,  0,   2254,         YM), /* 3067 */
  TIMEDB_ENTRY( 0xdb20f6e5 ,  0,  15680,   YM+TA+TB), /* 1866 */
  TIMEDB_ENTRY( 0xdb35c13a ,  0,  10362,YM+TA+TB+TD), /* 1008 */
+ TIMEDB_ENTRY( 0xdb534206 ,  0,  23034,         YM), /* My_First_Resonant_Burp-STf.sndh */
  TIMEDB_ENTRY( 0xdb561d60 ,  0,   8322,         YM), /* 3118 */
  TIMEDB_ENTRY( 0xdb572f78 ,  0,   8826,YM+TA+TB+TD), /* 3195 */
  TIMEDB_ENTRY( 0xdb595e25 ,  0,  23552,YM+TA+TB+TD), /* 3523 */
@@ -6185,6 +6859,7 @@
  TIMEDB_ENTRY( 0xdca92951 ,  0,  47631,   YM+TA+TD), /* 3564 */
  TIMEDB_ENTRY( 0xdcb3ba9b ,  0,   4289,         YM), /* 3164 */
  TIMEDB_ENTRY( 0xdcc68a4d ,  0,  12160,         YM), /* 3649 */
+ TIMEDB_ENTRY( 0xdcd09be2 ,  0,   7493,      YM+TA), /* 4414 */
  TIMEDB_ENTRY( 0xdcd274f9 ,  0,  23034,         YM), /* 1677 */
  TIMEDB_ENTRY( 0xdcd4953e ,  0, 128713,      YM+TA), /* 3770 */
  TIMEDB_ENTRY( 0xdcd4953e ,  1,  99446,      YM+TA), /* 3770 */
@@ -6239,6 +6914,7 @@
  TIMEDB_ENTRY( 0xdd9df0b2 ,  6,     11,         YM), /* 1787 */
  TIMEDB_ENTRY( 0xddc18eeb ,  0,  10746,YM+TA+TB+TD), /* 998 */
  TIMEDB_ENTRY( 0xddc3e416 ,  0,   3840,         YM), /* 1096 */
+ TIMEDB_ENTRY( 0xddc4b469 ,  0,   7200,         YM), /* 4469 */
  TIMEDB_ENTRY( 0xddc62fc9 ,  0,   3834,         YM), /* 1229 */
  TIMEDB_ENTRY( 0xdddca2cb ,  0,   3750,         YM), /* 3492 */
  TIMEDB_ENTRY( 0xde0f51a4 ,  0,   4218,      YM+TA), /* 1340 */
@@ -6247,6 +6923,13 @@
  TIMEDB_ENTRY( 0xde2e1e47 ,  0,   5760,         YM), /* 1489 */
  TIMEDB_ENTRY( 0xde2e1e47 ,  1,   2880,         YM), /* 1489 */
  TIMEDB_ENTRY( 0xde2e1e47 ,  2,    405,         YM), /* 1489 */
+ TIMEDB_ENTRY( 0xde341604 ,  0,  14352,      YM+TA), /* 4403 */
+ TIMEDB_ENTRY( 0xde361082 ,  0,   3360,         YM), /* 4485 */
+ TIMEDB_ENTRY( 0xde361082 ,  1,    326,         YM), /* 4485 */
+ TIMEDB_ENTRY( 0xde361082 ,  2,   1828,         YM), /* 4485 */
+ TIMEDB_ENTRY( 0xde361082 ,  3,   1828,         YM), /* 4485 */
+ TIMEDB_ENTRY( 0xde361082 ,  4,   1280,         YM), /* 4485 */
+ TIMEDB_ENTRY( 0xde361082 ,  5,    469,         YM), /* 4485 */
  TIMEDB_ENTRY( 0xde50676e ,  0,  13824,YM+TA+TB+TD), /* 3457 */
  TIMEDB_ENTRY( 0xde57adb7 ,  0,   9603,         YM), /* 421 */
  TIMEDB_ENTRY( 0xde5f08a6 ,  0,  50703,   YM+TA+TD), /* 3617 */
@@ -6443,6 +7126,15 @@
  TIMEDB_ENTRY( 0xe4b88228 ,  0,   5116,         YM), /* 549 */
  TIMEDB_ENTRY( 0xe4b88228 ,  1,   6043,         YM), /* 549 */
  TIMEDB_ENTRY( 0xe4b88228 ,  2,   2875,         YM), /* 549 */
+ TIMEDB_ENTRY( 0xe4c183bd ,  0,   9711,         YM), /* SDI_(Activision).sndh */
+ TIMEDB_ENTRY( 0xe4c183bd ,  1,   3868,         YM), /* SDI_(Activision).sndh */
+ TIMEDB_ENTRY( 0xe4c183bd ,  2,  23052,         YM), /* SDI_(Activision).sndh */
+ TIMEDB_ENTRY( 0xe4c183bd ,  3,  15582,         YM), /* SDI_(Activision).sndh */
+ TIMEDB_ENTRY( 0xe4c183bd ,  4,  12683,         YM), /* SDI_(Activision).sndh */
+ TIMEDB_ENTRY( 0xe4c183bd ,  5,  13210,         YM), /* SDI_(Activision).sndh */
+ TIMEDB_ENTRY( 0xe4c183bd ,  6,   8317,         YM), /* SDI_(Activision).sndh */
+ TIMEDB_ENTRY( 0xe4c183bd ,  7,   1199,         YM), /* SDI_(Activision).sndh */
+ TIMEDB_ENTRY( 0xe4c183bd ,  8,  10447,         YM), /* SDI_(Activision).sndh */
  TIMEDB_ENTRY( 0xe4e000d3 ,  0,  11751,         YM), /* 755 */
  TIMEDB_ENTRY( 0xe4e000d3 ,  1,   1248,         YM), /* 755 */
  TIMEDB_ENTRY( 0xe4e2ed49 ,  0,   2239,      YM+TA), /* 1520 */
@@ -6471,8 +7163,13 @@
  TIMEDB_ENTRY( 0xe579c04d ,  0,   8460,         YM), /* 2929 */
  TIMEDB_ENTRY( 0xe579c04d ,  1,    552,         YM), /* 2929 */
  TIMEDB_ENTRY( 0xe57bd95d ,  0,   6304,   YM+TA+TD), /* 2554 */
+ TIMEDB_ENTRY( 0xe5864cf5 ,  0,   7348,         YM), /* 1817 */
+ TIMEDB_ENTRY( 0xe5864cf5 ,  1,   6671,         YM), /* 1817 */
+ TIMEDB_ENTRY( 0xe5864cf5 ,  2,   8523,         YM), /* 1817 */
+ TIMEDB_ENTRY( 0xe5864cf5 ,  3,   4600,         YM), /* 1817 */
  TIMEDB_ENTRY( 0xe598f127 ,  0,   4608,   YM+TA+TD), /* 833 */
  TIMEDB_ENTRY( 0xe5a3c2c6 ,  0,  39892,YM+TA+TB+TD), /* 3561 */
+ TIMEDB_ENTRY( 0xe5b35f04 ,  0,   9849,      YM+TB), /* Lemon_Squeezers_Dream.sndh */
  TIMEDB_ENTRY( 0xe5f1f8a5 ,  0,  17656,         YM), /* 1797 */
  TIMEDB_ENTRY( 0xe5f1f8a5 ,  1,  18816,         YM), /* 1797 */
  TIMEDB_ENTRY( 0xe5f1f8a5 ,  2,   6144,         YM), /* 1797 */
@@ -6494,6 +7191,16 @@
  TIMEDB_ENTRY( 0xe6c20336 ,  4,  10408,         YM), /* 835 */
  TIMEDB_ENTRY( 0xe6c20336 ,  5,   6906,         YM), /* 835 */
  TIMEDB_ENTRY( 0xe6d22082 ,  0,  93914,      YM+TA), /* 4061 */
+ TIMEDB_ENTRY( 0xe6e43013 ,  0,   6912,         YM), /* 1065 */
+ TIMEDB_ENTRY( 0xe6e43013 ,  1,   8449,         YM), /* 1065 */
+ TIMEDB_ENTRY( 0xe6e43013 ,  2,  10304,         YM), /* 1065 */
+ TIMEDB_ENTRY( 0xe6e43013 ,  3,   7296,         YM), /* 1065 */
+ TIMEDB_ENTRY( 0xe6e43013 ,  4,   7168,         YM), /* 1065 */
+ TIMEDB_ENTRY( 0xe6e43013 ,  5,   8064,         YM), /* 1065 */
+ TIMEDB_ENTRY( 0xe6e43013 ,  6,   1920,         YM), /* 1065 */
+ TIMEDB_ENTRY( 0xe6e43013 ,  7,   1280,         YM), /* 1065 */
+ TIMEDB_ENTRY( 0xe6e43013 ,  8,    768,         YM), /* 1065 */
+ TIMEDB_ENTRY( 0xe6e43013 ,  9,   4928,         YM), /* 1065 */
  TIMEDB_ENTRY( 0xe70e705e ,  0,  10048,         YM), /* 1030 */
  TIMEDB_ENTRY( 0xe74a3255 ,  0,  76272,   YM+TB+TD), /* 3461 */
  TIMEDB_ENTRY( 0xe76ad285 ,  0,   4853,   YM+TA+TD), /* 2822 */
@@ -6518,6 +7225,19 @@
  TIMEDB_ENTRY( 0xe7ef8c50 ,  0,  12799,   YM+TA+TD), /* 3486 */
  TIMEDB_ENTRY( 0xe8061997 ,  0,   4986,   YM+TA+TB), /* 1596 */
  TIMEDB_ENTRY( 0xe81015af ,  0,   8884,         YM), /* 3034 */
+ TIMEDB_ENTRY( 0xe8140729 ,  0,  11648,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0xe8140729 ,  1,  14592,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0xe8140729 ,  2,  18912,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0xe8140729 ,  3,  12809,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0xe8140729 ,  4,  13824,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0xe8140729 ,  5,  15904,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0xe8140729 ,  6,   2560,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0xe8140729 ,  7,   3072,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0xe8140729 ,  8,   2837,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0xe8140729 ,  9,    289,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0xe8140729 , 10,   5376,         YM), /* 2192 */
+ TIMEDB_ENTRY( 0xe825e877 ,  0,  15743,         YM), /* 4564 */
+ TIMEDB_ENTRY( 0xe830a8b1 ,  0,  23289,      YM+TB), /* SOS-Means_Save_Our_ST.sndh */
  TIMEDB_ENTRY( 0xe8337ccb ,  0,  10880,         YM), /* 2801 */
  TIMEDB_ENTRY( 0xe836372d ,  0,   6914,   YM+TA+TD), /* 4203 */
  TIMEDB_ENTRY( 0xe864f155 ,  0,   5385,         YM), /* 2160 */
@@ -6548,6 +7268,7 @@
  TIMEDB_ENTRY( 0xe8e9b785 ,  0,   1481,         YM), /* 3138 */
  TIMEDB_ENTRY( 0xe8f066f3 ,  0,   1584,         YM), /* 841 */
  TIMEDB_ENTRY( 0xe8f066f3 ,  1,   3408,         YM), /* 841 */
+ TIMEDB_ENTRY( 0xe8f3e611 ,  0,    768,      YM+TA), /* 4436 */
  TIMEDB_ENTRY( 0xe8f49a27 ,  0,   5952,         YM), /* 816 */
  TIMEDB_ENTRY( 0xe8fc8215 ,  0,  88070,      YM+TA), /* 4016 */
  TIMEDB_ENTRY( 0xe911b901 ,  0,    374,         YM), /* 455 */
@@ -6585,6 +7306,7 @@
  TIMEDB_ENTRY( 0xea7cf4b0 ,  5,   2880,         YM), /* 1993 */
  TIMEDB_ENTRY( 0xea7cf4b0 ,  6,   2720,         YM), /* 1993 */
  TIMEDB_ENTRY( 0xea807e2f ,  0,   7296,         YM), /* 2877 */
+ TIMEDB_ENTRY( 0xea83d2c5 ,  0,  13103,YM+TA+TB+TD), /* 4517 */
  TIMEDB_ENTRY( 0xea88b50c ,  0,   2304,         YM), /* 3206 */
  TIMEDB_ENTRY( 0xea90e2d0 ,  0,   9905,         YM), /* 4200 */
  TIMEDB_ENTRY( 0xea9a97c5 ,  0,   5112,      YM+TA), /* 1685 */
@@ -6661,9 +7383,11 @@
  TIMEDB_ENTRY( 0xed033f60 ,  0,   5884,YM+TA+TB+TD), /* 179 */
  TIMEDB_ENTRY( 0xed2f2895 ,  0,   2096,         YM), /* 1499 */
  TIMEDB_ENTRY( 0xed33fd77 ,  0,   3839,YM+TA+TB+TD), /* 3020 */
+ TIMEDB_ENTRY( 0xed352795 ,  0,   6272,      YM+TB), /* A_Sixties_Slow.sndh */
  TIMEDB_ENTRY( 0xed35355e ,  0,   8446,         YM), /* 372 */
  TIMEDB_ENTRY( 0xed4ac7a6 ,  0,  16696,         YM), /* 2051 */
  TIMEDB_ENTRY( 0xed5b98db ,  0,   3662,      YM+TA), /* 3838 */
+ TIMEDB_ENTRY( 0xed65b8d6 ,  0,  44513,   YM+TA+TD), /* Nostalgic_Demo_Credits.sndh */
  TIMEDB_ENTRY( 0xed704505 ,  0,  20352,         YM), /* 3237 */
  TIMEDB_ENTRY( 0xed76828a ,  0,  14502,YM+TA+TB+TD), /* 2093 */
  TIMEDB_ENTRY( 0xed823f8d ,  0,   6032,         YM), /* 289 */
@@ -6722,8 +7446,11 @@
  TIMEDB_ENTRY( 0xef139890 ,  2,   4096,         YM), /* 1512 */
  TIMEDB_ENTRY( 0xef139890 ,  3,    236,         YM), /* 1512 */
  TIMEDB_ENTRY( 0xef255e42 ,  0,   8257,         YM), /* 3884 */
+ TIMEDB_ENTRY( 0xef2c00f7 ,  0,  25338,         YM), /* Not_a_Soporific_Lullaby.sndh */
  TIMEDB_ENTRY( 0xef4650fc ,  0,  21329,      YM+TA), /* 1743 */
+ TIMEDB_ENTRY( 0xef4de347 ,  0,  21568,YM+TA+TB+TD), /* 4400 */
  TIMEDB_ENTRY( 0xef63b160 ,  0,   5645,         YM), /* 3035 */
+ TIMEDB_ENTRY( 0xef770201 ,  0,   5375,YM+TA+TB+TD), /* 2699 */
  TIMEDB_ENTRY( 0xef92d231 ,  0,   5760,         YM), /* 1820 */
  TIMEDB_ENTRY( 0xefcc5dd3 ,  0,   3840,         YM), /* 601 */
  TIMEDB_ENTRY( 0xeffb0c76 ,  0,  13377,YM+TA+TB+TD), /* 4184 */
@@ -6734,6 +7461,7 @@
  TIMEDB_ENTRY( 0xf04c02ac ,  0,    768,         YM), /* 1910 */
  TIMEDB_ENTRY( 0xf0529ea6 ,  0,   6912,         YM), /* 2041 */
  TIMEDB_ENTRY( 0xf05369a4 ,  0,  34272,YM+TA+TB+TD), /* 3379 */
+ TIMEDB_ENTRY( 0xf0665a0f ,  0,   6527,         YM), /* 4329 */
  TIMEDB_ENTRY( 0xf085566c ,  0,   3835,         YM), /* 27 */
  TIMEDB_ENTRY( 0xf093b98b ,  0,  14586,YM+TA+TB+TD), /* 1011 */
  TIMEDB_ENTRY( 0xf0a7c121 ,  0,   9986,         YM), /* 423 */
@@ -6742,8 +7470,13 @@
  TIMEDB_ENTRY( 0xf0be2ab0 ,  0,  82251,      YM+TA), /* 3966 */
  TIMEDB_ENTRY( 0xf0e33ae4 ,  0,   7424,         YM), /* 3190 */
  TIMEDB_ENTRY( 0xf10cf937 ,  0,   1604,         YM), /* 3168 */
+ TIMEDB_ENTRY( 0xf1211a3c ,  0,    225,         YM), /* 4454 */
+ TIMEDB_ENTRY( 0xf1211a3c ,  1,    289,         YM), /* 4454 */
+ TIMEDB_ENTRY( 0xf1211a3c ,  2,  10080,         YM), /* 4454 */
+ TIMEDB_ENTRY( 0xf1211a3c ,  3,   6912,         YM), /* 4454 */
  TIMEDB_ENTRY( 0xf124c30b ,  0,   5760,         YM), /* 2397 */
  TIMEDB_ENTRY( 0xf13a9be3 ,  0,   7298,         YM), /* 1053 */
+ TIMEDB_ENTRY( 0xf141ce45 ,  0,  30720,YM+TA+TB+TD), /* teramis */
  TIMEDB_ENTRY( 0xf1441012 ,  0,   7999,         YM), /* 3678 */
  TIMEDB_ENTRY( 0xf14a3936 ,  0,   4468,         YM), /* 160 */
  TIMEDB_ENTRY( 0xf14a3936 ,  1,  11614,         YM), /* 160 */
@@ -6753,6 +7486,8 @@
  TIMEDB_ENTRY( 0xf1a269e0 ,  0, 104996,      YM+TA), /* 3959 */
  TIMEDB_ENTRY( 0xf1a27de5 ,  0,  35220,      YM+TA), /* 2809 */
  TIMEDB_ENTRY( 0xf1a2c561 ,  0,   6396,   YM+TA+TD), /* 37 */
+ TIMEDB_ENTRY( 0xf1a5e780 ,  0,    386,         YM), /* 4498 */
+ TIMEDB_ENTRY( 0xf1a5e780 ,  1,   1631,         YM), /* 4498 */
  TIMEDB_ENTRY( 0xf1ac7701 ,  0,   6191,         YM), /* 3689 */
  TIMEDB_ENTRY( 0xf1c60210 ,  0,  10367,YM+TA+TB+TD), /* 3278 */
  TIMEDB_ENTRY( 0xf21858c3 ,  0,  41568,         YM), /* 1436 */
@@ -6795,6 +7530,14 @@
  TIMEDB_ENTRY( 0xf2c7cdc6 ,  0,  13006,      YM+TA), /* 2770 */
  TIMEDB_ENTRY( 0xf2e06124 ,  0,   9792,   YM+TA+TD), /* 2787 */
  TIMEDB_ENTRY( 0xf2ed13f3 ,  0,   5817,YM+TA+TB+TD), /* 3668 */
+ TIMEDB_ENTRY( 0xf30f12fb ,  0,  16384,         YM), /* 4464 */
+ TIMEDB_ENTRY( 0xf30f12fb ,  1,  16596,         YM), /* 4464 */
+ TIMEDB_ENTRY( 0xf30f12fb ,  2,   8192,         YM), /* 4464 */
+ TIMEDB_ENTRY( 0xf30f12fb ,  3,  17712,         YM), /* 4464 */
+ TIMEDB_ENTRY( 0xf30f12fb ,  4,  16128,         YM), /* 4464 */
+ TIMEDB_ENTRY( 0xf30f12fb ,  5,  17520,         YM), /* 4464 */
+ TIMEDB_ENTRY( 0xf30f12fb ,  6,  10368,         YM), /* 4464 */
+ TIMEDB_ENTRY( 0xf30f12fb ,  7,  10880,         YM), /* 4464 */
  TIMEDB_ENTRY( 0xf3193839 ,  0,    508,   YM+TA+TD), /* 2425 */
  TIMEDB_ENTRY( 0xf31b12f8 ,  0,   5534,         YM), /* 4076 */
  TIMEDB_ENTRY( 0xf3240c01 ,  0,   3552,         YM), /* 1203 */
@@ -6811,6 +7554,16 @@
  TIMEDB_ENTRY( 0xf36b02f9 ,  6,    687,         YM), /* 578 */
  TIMEDB_ENTRY( 0xf36b02f9 ,  7,   1820,         YM), /* 578 */
  TIMEDB_ENTRY( 0xf371e8a6 ,  0,   2068,         YM), /* 3068 */
+ TIMEDB_ENTRY( 0xf37947f2 ,  0,   3288,         YM), /* Warlock_the_Avenger.sndh */
+ TIMEDB_ENTRY( 0xf37947f2 ,  1,     62,         YM), /* Warlock_the_Avenger.sndh */
+ TIMEDB_ENTRY( 0xf37947f2 ,  2,    455,         YM), /* Warlock_the_Avenger.sndh */
+ TIMEDB_ENTRY( 0xf37947f2 ,  3,     66,         YM), /* Warlock_the_Avenger.sndh */
+ TIMEDB_ENTRY( 0xf37947f2 ,  4,    455,         YM), /* Warlock_the_Avenger.sndh */
+ TIMEDB_ENTRY( 0xf37947f2 ,  5,    307,         YM), /* Warlock_the_Avenger.sndh */
+ TIMEDB_ENTRY( 0xf37947f2 ,  6,   3120,         YM), /* Warlock_the_Avenger.sndh */
+ TIMEDB_ENTRY( 0xf37947f2 ,  7,     46,         YM), /* Warlock_the_Avenger.sndh */
+ TIMEDB_ENTRY( 0xf37947f2 ,  8,   1365,         YM), /* Warlock_the_Avenger.sndh */
+ TIMEDB_ENTRY( 0xf37947f2 ,  9,    512,         YM), /* Warlock_the_Avenger.sndh */
  TIMEDB_ENTRY( 0xf37a6157 ,  0,   6912,         YM), /* 2002 */
  TIMEDB_ENTRY( 0xf3992b60 ,  0,   9210,      YM+TA), /* 2502 */
  TIMEDB_ENTRY( 0xf3acc758 ,  0,   2400,   YM+TA+TD), /* 411 */
@@ -6833,6 +7586,7 @@
  TIMEDB_ENTRY( 0xf490c357 ,  1,    192,         YM), /* 349 */
  TIMEDB_ENTRY( 0xf490c357 ,  2,    793,         YM), /* 349 */
  TIMEDB_ENTRY( 0xf493813b ,  0,    518,         YM), /* 1494 */
+ TIMEDB_ENTRY( 0xf49b7214 ,  0,   8448,      YM+TA), /* 4418 */
  TIMEDB_ENTRY( 0xf4a2cb20 ,  0,   2048,         YM), /* 135 */
  TIMEDB_ENTRY( 0xf4a2cb20 ,  1,   1877,         YM), /* 135 */
  TIMEDB_ENTRY( 0xf4a2cb20 ,  2,    135,         YM), /* 135 */
@@ -6880,7 +7634,19 @@
  TIMEDB_ENTRY( 0xf65c50e0 ,  0,   6911,YM+TA+TB+TD), /* 2992 */
  TIMEDB_ENTRY( 0xf668e3f0 ,  0,  10426,   YM+TA+TD), /* 3647 */
  TIMEDB_ENTRY( 0xf699428a ,  0,   5760,   YM+TA+TD), /* 4316 */
+ TIMEDB_ENTRY( 0xf6b1345a ,  0,   3072,         YM), /* 4519 */
  TIMEDB_ENTRY( 0xf6b1d5ee ,  0,   6064,         YM), /* 3098 */
+ TIMEDB_ENTRY( 0xf6d68e4c ,  0,   4608,         YM), /* Song_9.sndh */
+ TIMEDB_ENTRY( 0xf6d73f8f ,  0,   2542,         YM), /* 4535 */
+ TIMEDB_ENTRY( 0xf6d73f8f ,  1,    147,         YM), /* 4535 */
+ TIMEDB_ENTRY( 0xf6d73f8f ,  2,    106,         YM), /* 4535 */
+ TIMEDB_ENTRY( 0xf6d73f8f ,  3,   2189,         YM), /* 4535 */
+ TIMEDB_ENTRY( 0xf6d73f8f ,  4,   1120,         YM), /* 4535 */
+ TIMEDB_ENTRY( 0xf6d73f8f ,  5,   2351,         YM), /* 4535 */
+ TIMEDB_ENTRY( 0xf6d73f8f ,  6,    545,         YM), /* 4535 */
+ TIMEDB_ENTRY( 0xf6d73f8f ,  7,   1920,         YM), /* 4535 */
+ TIMEDB_ENTRY( 0xf6d73f8f ,  8,   2571,         YM), /* 4535 */
+ TIMEDB_ENTRY( 0xf6d73f8f ,  9,    218,         YM), /* 4535 */
  TIMEDB_ENTRY( 0xf6dbcd1a ,  0,   3072,         YM), /* 734 */
  TIMEDB_ENTRY( 0xf6e2634e ,  0,   9978,YM+TA+TB+TD), /* 2423 */
  TIMEDB_ENTRY( 0xf6e83698 ,  0,  36992,YM+TA+TB+TD), /* 3863 */
@@ -6888,6 +7654,27 @@
  TIMEDB_ENTRY( 0xf72491f6 ,  0,   2700,         YM), /* 3146 */
  TIMEDB_ENTRY( 0xf72e19e6 ,  0,   2298,         YM), /* 4273 */
  TIMEDB_ENTRY( 0xf7376718 ,  0,  17424,      YM+TA), /* 725 */
+ TIMEDB_ENTRY( 0xf7441a76 ,  0,    743,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 ,  1,   1210,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 ,  2,    640,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 ,  3,    152,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 ,  4,    448,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 ,  5,    576,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 ,  6,    768,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 ,  7,    512,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 ,  8,   1024,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 ,  9,    704,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 , 10,   1645,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 , 11,    643,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 , 12,    576,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 , 13,    832,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 , 14,    256,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 , 15,   1554,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 , 16,    672,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 , 17,    329,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 , 18,    480,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf7441a76 , 19,    896,         YM), /* 4491 */
+ TIMEDB_ENTRY( 0xf74f2e17 ,  0,   6144,         YM), /* 4445 */
  TIMEDB_ENTRY( 0xf791df96 ,  0,  31040,         YM), /* 2690 */
  TIMEDB_ENTRY( 0xf7c096ee ,  0,   5127,YM+TA+TB+TD), /* 214 */
  TIMEDB_ENTRY( 0xf7d382af ,  0,  12288,         YM), /* 1082 */
@@ -6901,6 +7688,7 @@
  TIMEDB_ENTRY( 0xf7fe995e ,  0,   5373,YM+TA+TB+TD), /* 4258 */
  TIMEDB_ENTRY( 0xf8105359 ,  0,  43008,YM+TA+TB+TD), /* 4349 */
  TIMEDB_ENTRY( 0xf81187b5 ,  0,   3889,         YM), /* 3092 */
+ TIMEDB_ENTRY( 0xf8255e0a ,  0,  19199,         YM), /* 4474 */
  TIMEDB_ENTRY( 0xf839d7b9 ,  0,   5631,YM+TA+TB+TD), /* 2987 */
  TIMEDB_ENTRY( 0xf83d8b09 ,  0,   2300,   YM+TB+TD), /* 4261 */
  TIMEDB_ENTRY( 0xf888195c ,  0,  24832,YM+TA+TB+TD), /* 2086 */
@@ -6940,6 +7728,10 @@
  TIMEDB_ENTRY( 0xf9cc8d5d ,  0,  38400,         YM), /* 3476 */
  TIMEDB_ENTRY( 0xf9d34064 ,  0,  72515,      YM+TA), /* 4041 */
  TIMEDB_ENTRY( 0xf9d954dc ,  0,  10745,YM+TA+TB+TD), /* 1968 */
+ TIMEDB_ENTRY( 0xf9dce660 ,  0,   1443,         YM), /* 4484 */
+ TIMEDB_ENTRY( 0xf9dce660 ,  1,    576,         YM), /* 4484 */
+ TIMEDB_ENTRY( 0xf9dce660 ,  2,   3584,         YM), /* 4484 */
+ TIMEDB_ENTRY( 0xf9dce660 ,  3,   1861,         YM), /* 4484 */
  TIMEDB_ENTRY( 0xf9e43f4a ,  0,   9888,         YM), /* 2383 */
  TIMEDB_ENTRY( 0xf9e4b826 ,  0,   1513,         YM), /* 139 */
  TIMEDB_ENTRY( 0xf9e4b826 ,  1,     78,         YM), /* 139 */
@@ -6954,7 +7746,7 @@
  TIMEDB_ENTRY( 0xfa8edb08 ,  0,   2496,YM+TA+TB+TD), /* 3865 */
  TIMEDB_ENTRY( 0xfa9a5fac ,  0,   8064,         YM), /* 257 */
  TIMEDB_ENTRY( 0xfaad5275 ,  0,  52481,      YM+TA), /* 3706 */
- TIMEDB_ENTRY( 0xfab82e4a ,  0,   6155,         YM), /* 2005 */
+ TIMEDB_ENTRY( 0xfab82e4a ,  0,   6155,         YM), /* DSOTS-The_Lost_Boys.sndh */
  TIMEDB_ENTRY( 0xfabf8b04 ,  0,    195,         YM), /* 564 */
  TIMEDB_ENTRY( 0xfabf8b04 ,  1,    597,         YM), /* 564 */
  TIMEDB_ENTRY( 0xfabf8b04 ,  2,    322,         YM), /* 564 */
@@ -6989,6 +7781,7 @@
  TIMEDB_ENTRY( 0xfb5d6332 ,  0,  10756,         YM), /* 2229 */
  TIMEDB_ENTRY( 0xfb67d77b ,  0,   5384,         YM), /* 1034 */
  TIMEDB_ENTRY( 0xfb7d564d ,  0,   2080,         YM), /* 3060 */
+ TIMEDB_ENTRY( 0xfb7df809 ,  0,  23802,         YM), /* The_Battle_Of_Arpegios.sndh */
  TIMEDB_ENTRY( 0xfb7ee1cc ,  0,  59073,      YM+TA), /* 3804 */
  TIMEDB_ENTRY( 0xfb8e2f01 ,  0,   8642,         YM), /* 402 */
  TIMEDB_ENTRY( 0xfb96b36a ,  0,   6833,      YM+TA), /* 3648 */
@@ -6998,12 +7791,14 @@
  TIMEDB_ENTRY( 0xfbfd09ab ,  0,  19199,YM+TA+TB+TD), /* 3609 */
  TIMEDB_ENTRY( 0xfbfd4508 ,  0,   2727,      YM+TB), /* 2650 */
  TIMEDB_ENTRY( 0xfc0e9214 ,  0,   7681,      YM+TA), /* 4337 */
+ TIMEDB_ENTRY( 0xfc33afb1 ,  0,   6585,      YM+TA), /* 4550 */
  TIMEDB_ENTRY( 0xfc39e0b9 ,  0,   9599,YM+TA+TB+TD), /* 1842 */
  TIMEDB_ENTRY( 0xfc4a54b6 ,  0,   8640,      YM+TA), /* 1635 */
  TIMEDB_ENTRY( 0xfc693ef5 ,  0,   3842,         YM), /* 367 */
  TIMEDB_ENTRY( 0xfc693ef5 ,  1,   1538,         YM), /* 367 */
  TIMEDB_ENTRY( 0xfc693ef5 ,  2,    194,         YM), /* 367 */
  TIMEDB_ENTRY( 0xfc693ef5 ,  3,    194,         YM), /* 367 */
+ TIMEDB_ENTRY( 0xfc72b34f ,  0,   4218,      YM+TA), /* 1356 */
  TIMEDB_ENTRY( 0xfc7861f8 ,  0,  10560,         YM), /* 3572 */
  TIMEDB_ENTRY( 0xfc83d25a ,  0,  36180,YM+TA+TB+TD), /* 2529 */
  TIMEDB_ENTRY( 0xfc8405c1 ,  0,  10496,         YM), /* 2060 */
@@ -7018,11 +7813,17 @@
  TIMEDB_ENTRY( 0xfcd906c1 ,  2,    162,         YM), /* 2953 */
  TIMEDB_ENTRY( 0xfcd906c1 ,  3,    178,         YM), /* 2953 */
  TIMEDB_ENTRY( 0xfcd941cf ,  0,   1789,         YM), /* 1901 */
+ TIMEDB_ENTRY( 0xfcf79bbd ,  0,   3066,     YM+STE), /* For_Your_Loader_2.sndh */
  TIMEDB_ENTRY( 0xfcfcd5e5 ,  0,   9235,         YM), /* 1881 */
  TIMEDB_ENTRY( 0xfcfcd5e5 ,  1,   3834,         YM), /* 1881 */
  TIMEDB_ENTRY( 0xfcfcd5e5 ,  2,   4836,         YM), /* 1881 */
  TIMEDB_ENTRY( 0xfcfcd5e5 ,  3,   2587,         YM), /* 1881 */
  TIMEDB_ENTRY( 0xfcffaeb8 ,  0,  99125,      YM+TA), /* 3952 */
+ TIMEDB_ENTRY( 0xfd153c8e ,  0,  19532,         YM), /* 2175 */
+ TIMEDB_ENTRY( 0xfd153c8e ,  1,   3840,         YM), /* 2175 */
+ TIMEDB_ENTRY( 0xfd153c8e ,  2,    711,         YM), /* 2175 */
+ TIMEDB_ENTRY( 0xfd153c8e ,  3,   1152,         YM), /* 2175 */
+ TIMEDB_ENTRY( 0xfd153c8e ,  4,    385,         YM), /* 2175 */
  TIMEDB_ENTRY( 0xfd1e4db4 ,  0, 408186,      YM+TA), /* 4034 */
  TIMEDB_ENTRY( 0xfd40717c ,  0,   1530,         YM), /* 17 */
  TIMEDB_ENTRY( 0xfd40717c ,  1,   1336,         YM), /* 17 */
@@ -7030,6 +7831,7 @@
  TIMEDB_ENTRY( 0xfd40717c ,  3,   4979,         YM), /* 17 */
  TIMEDB_ENTRY( 0xfd40717c ,  4,   2517,         YM), /* 17 */
  TIMEDB_ENTRY( 0xfd40717c ,  5,    570,         YM), /* 17 */
+ TIMEDB_ENTRY( 0xfd4e7906 ,  0,   8960,     YM+STE), /* 4514 */
  TIMEDB_ENTRY( 0xfd603263 ,  0,   3072,         YM), /* 2056 */
  TIMEDB_ENTRY( 0xfd8aad47 ,  0, 204304,      YM+TA), /* 3707 */
  TIMEDB_ENTRY( 0xfd8b4b10 ,  0,   7120,         YM), /* 2412 */
@@ -7083,6 +7885,12 @@
  TIMEDB_ENTRY( 0xffbaf782 ,  0,   4669,         YM), /* 298 */
  TIMEDB_ENTRY( 0xffbfbad9 ,  0,   3072,         YM), /* 1148 */
  TIMEDB_ENTRY( 0xffc3f74c ,  0,   3832,         YM), /* 592 */
+ TIMEDB_ENTRY( 0xffc8af8b ,  0,  17916,         YM), /* 4467 */
+ TIMEDB_ENTRY( 0xffc8af8b ,  1,   5760,         YM), /* 4467 */
+ TIMEDB_ENTRY( 0xffc8af8b ,  2,   9648,         YM), /* 4467 */
+ TIMEDB_ENTRY( 0xffc8af8b ,  3,   7984,         YM), /* 4467 */
+ TIMEDB_ENTRY( 0xffc8af8b ,  4,  17408,         YM), /* 4467 */
+ TIMEDB_ENTRY( 0xffc8af8b ,  5,  18408,         YM), /* 4467 */
  TIMEDB_ENTRY( 0xffe1c341 ,  0,   4064,         YM), /* 3187 */
  TIMEDB_ENTRY( 0xfff98e01 ,  0,   9983,   YM+TA+TB), /* 1361 */
  TIMEDB_ENTRY( 0xfffaeaae ,  0,  10362,   YM+TB+TD), /* 2477 */
