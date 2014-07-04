@@ -14,7 +14,7 @@ dnl#
 AC_INIT(
   [sc68-audacious],
   [0.2.0],
-  [benjihan -4t- users.sourceforge -d0t- net],
+  [http://sourceforge.net/projects/sc68/],,
   [sc68-audacious],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68-audacious.c])

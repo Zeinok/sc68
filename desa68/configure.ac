@@ -14,7 +14,7 @@ dnl#
 AC_INIT(
   [desa68],
   [20130703],
-  [benjihan -4t- sourceforge],
+  [http://sourceforge.net/projects/sc68/],,
   [libdesa68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([desa68.c])

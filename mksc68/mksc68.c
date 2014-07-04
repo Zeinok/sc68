@@ -86,7 +86,7 @@ static int print_usage(int more)
      "\n"
      "Options:\n"
      "  -h --help           Display this message and exit (-hh for more)\n"
-     "  -V --version        Display sc68 version x.y.z and licence and exit\n"
+     "  -V --version        Display mksc68 version x.y.z and licence\n"
      "  -v --verbose        Increase verbosity level\n"
      "  -q --quiet          Decrease verbosity level\n"
      "  -x --fail-exit      Exit if a command fails\n"

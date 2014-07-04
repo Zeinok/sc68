@@ -14,7 +14,7 @@ dnl#
 AC_INIT(
   [sourcer68],
   [20090117],
-  [benjihan -4t- sourceforge],,
+  [http://sourceforge.net/projects/sc68/],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sourcer68.c])
 AC_CONFIG_MACRO_DIR([m4])

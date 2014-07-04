@@ -14,7 +14,7 @@ dnl#
 AC_INIT(
   [sc68-nsis],
   [1.0],
-  [https://sourceforge.net/users/benjihan],,
+  [http://sourceforge.net/projects/sc68/],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68.nsi])
 AM_INIT_AUTOMAKE([foreign 1.14 silent-rules dist-xz])
