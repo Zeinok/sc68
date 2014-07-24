@@ -33,6 +33,7 @@
 #include "sc68.h"
 #include "mixer68.h"
 #include "conf68.h"
+#include "dial68/dial68.h"
 
 #ifndef HAVE_BASENAME
 #include "libc68.h"
@@ -238,13 +239,14 @@ struct _sc68_s {
 # endif
 #endif
 
-static int           sc68_cat = msg68_NEVER;
+int sc68_cat = msg68_NEVER;
+int dial_cat = msg68_NEVER;
 static int           sc68_id;        /* counter for auto generated name */
 static volatile int  sc68_init_flag; /* Library init flag     */
 static int           sc68_spr_def = SPR_DEF;
 static int           dbg68k;
 static const char    not_available[] = SC68_NOFILENAME;
-static char          appname[16];
+static char          appname[16] = "sc68";
 static char          sc68_errstr[ERRMAX];
 
 /***********************************************************************
@@ -814,13 +816,13 @@ static const char * optcfg_get_str(const char * name, const char * def)
 }
 #endif
 
+#if 0
 static void optcfg_set_int(const char * name, int v)
 {
   option68_t * opt = option68_get(name, opt68_ALWAYS);
   option68_iset(opt, v, opt68_ALWAYS, opt68_APP);
 }
 
-#if 0
 static void optcfg_set_str(const char * name, const char * v)
 {
   option68_t * opt = option68_get(name, opt68_ALWAYS);
@@ -1013,7 +1015,8 @@ int sc68_init(sc68_init_t * init)
     memset(&dummy_init, 0, sizeof(dummy_init));
     init = &dummy_init;
   }
-  sc68_cat = msg68_cat("sc68","sc68 library",DEBUG_SC68_O);
+  sc68_cat = msg68_cat("sc68",  "sc68 library",DEBUG_SC68_O);
+  dial_cat = msg68_cat("dialog","sc68 dialogs",DEBUG_SC68_O);
 
   /* Set debug handler and filters. */
   msg68_set_handler((msg68_t)init->msg_handler);
@@ -1087,6 +1090,9 @@ void sc68_shutdown(void)
     config68_shutdown();          /* always after file68_shutdown() */
   }
   sc68_debug(0,"libsc68: shutdowned -- %s\n",ok_int(0));
+
+  msg68_cat_free(sc68_cat); sc68_cat = msg68_NEVER;
+  msg68_cat_free(dial_cat); dial_cat = msg68_NEVER;
 }
 
 sc68_t * sc68_create(sc68_create_t * create)
@@ -2557,6 +2563,12 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
   case SC68_SET_ASID:
     res = set_asid(sc68, va_arg(list, int));
     break;
+
+  case SC68_DIAL: {
+    void      * data = va_arg(list, void *);
+    sc68_dial_f cntl = va_arg(list, sc68_dial_f);
+    res = dial68(data, cntl);
+  } break;
 
   default:
     if (!sc68)

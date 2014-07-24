@@ -9,7 +9,7 @@
 # `----------------------------------------------------------------------'
 # @configure_input@
 
-SUBDIRS         = io68 emu68 $(subdirs)
+SUBDIRS         = io68 emu68 dial68 $(subdirs)
 ACLOCAL_AMFLAGS = -I m4 --install
 
 AM_CFLAGS       = $(ALL_CFLAGS) $(LIB_CFLAGS)
@@ -27,18 +27,21 @@ pkgconfig_DATA = sc68.pc
 # | Libtool library                                                      |
 # `----------------------------------------------------------------------'
 
-if SOURCE_FILE68
-FILE68_LA = $(file68_dir)/libfile68.la
-@SET_MAKE@
-$(file68_dir)/libfile68.la:
-	cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libfile68.la
-else
-FILE68_LA =
-endif
+# if SOURCE_FILE68
+# FILE68_LA = $(file68_dir)/libfile68.la
+# @SET_MAKE@
+# $(file68_dir)/libfile68.la:
+# 	cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libfile68.la
+# else
+# FILE68_LA =
+# endif
 
 lib_LTLIBRARIES    = libsc68.la
 libsc68_la_SOURCES = api68.c conf68.c mixer68.c libsc68.c
-libsc68_la_LIBADD  = io68/libio68.la emu68/libemu68.la $(FILE68_LA)
+libsc68_la_LIBADD  = io68/libio68.la emu68/libemu68.la dial68/libdial68.la
+if SOURCE_FILE68
+libsc68_la_LIBADD += $(file68_dir)/libfile68.la
+endif
 
 # ,----------------------------------------------------------------------.
 # | Installed headers                                                    |

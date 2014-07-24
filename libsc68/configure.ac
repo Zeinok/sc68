@@ -23,6 +23,7 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
+LT_PROG_RC
 
 # ,----------------------------------------------------------------------.
 # | sc68                                                                 |
@@ -47,6 +48,26 @@ AC_SUBST([SC68_EMAIL])
 # ,----------------------------------------------------------------------.
 # | Optional features                                                    |
 # `----------------------------------------------------------------------'
+
+AC_ARG_ENABLE([dialog],
+  [AS_HELP_STRING([--enable-dialog],
+      [compile dialog helpers for this sub-system @<:@yes*|win32@:>@])],
+  [],[enable_dialog='yes'])
+
+if test x"${enable_dialog}" = xyes; then
+  enable_dialog=no
+  if test x"${ac_sys_native_win32}" = xyes; then
+      enable_dialog=winui; 
+  fi
+fi
+
+if test x"[$]enable_dialog" != xno; then
+  AC_DEFINE_UNQUOTED([USE_DIALOG],["[$]enable_dialog"],
+    [Using sc68 dialog helpers])
+fi
+
+AM_CONDITIONAL([use_winui],[test "X${enable_dialog}" = 'Xwinui'])
+AM_CONDITIONAL([dll_winui],[test A = A])
 
 AC_ARG_ENABLE(
   [emu68-monolitic],
@@ -128,6 +149,8 @@ AC_CONFIG_FILES([
     Makefile
     emu68/Makefile
     io68/Makefile
+    dial68/Makefile
+    dial68/winui/Makefile
     libsc68-${VERSION}.ebuild:libsc68.ebuild.in
     libsc68.spec
     sc68.pc])
@@ -146,4 +169,5 @@ AC_MSG_NOTICE([|-----------------------])
 AC_MSG_NOTICE([|   compile mode        : $compile_mode])
 AC_MSG_NOTICE([|   file68              : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   default YM engine   : $with_ym_engine])
+AC_MSG_NOTICE([|   dialog helpers      : $enable_dialog])
 AC_MSG_NOTICE([+-----------------------])

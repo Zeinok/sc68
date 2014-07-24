@@ -297,46 +297,47 @@ enum sc68_asid_e {
 };
 
 /**
- * sc68_cntl() fct parameter.
+ * sc68_cntl() op parameter.
  */
 enum sc68_cntl_e {
-  SC68_NOP = 0,
-  SC68_GET_LAST,                     /**< Get the last command #.   */
-  SC68_GET_NAME,                     /**< Get sc68 instance name.   */
-  SC68_GET_TRACKS,                   /**< Get number of tracks.     */
-  SC68_GET_TRACK,                    /**< Get current track.        */
-  SC68_GET_DEFTRK,                   /**< Get disk default track.   */
-  SC68_GET_LOOPS,                    /**< Number of loops to play.  */
-  SC68_GET_LOOP,                     /**< Get current loop.         */
-  SC68_GET_DISK,                     /**< Get a pointer to disk.    */
-  SC68_GET_SPR,                      /**< Get sampling rate.        */
-  SC68_SET_SPR,                      /**< Set sampling rate.        */
-  SC68_GET_LEN,                      /**< Get current track length. */
-  SC68_GET_TRKLEN,                   /**< Get some track length.    */
-  SC68_GET_DSKLEN,                   /**< Get disk length.          */
-  SC68_GET_ORG,                      /**< Get current track origin. */
-  SC68_GET_TRKORG,                   /**< Get some track origin.    */
-  SC68_GET_POS,                      /**< Get track position (ms).  */
-  SC68_GET_DSKPOS,                   /**< Get disk position (ms).   */
-  SC68_GET_PLAYPOS,                  /**< Get play position (ms).   */
-  SC68_SET_POS,                      /**< Set position.             */
-  SC68_GET_PCM,                      /**< Get PCM format            */
-  SC68_SET_PCM,                      /**< Set PCM format            */
-  SC68_CAN_ASID,                     /**< Get aSID caps             */
-  SC68_GET_ASID,                     /**< Get aSID mode             */
-  SC68_SET_ASID,                     /**< Set aSID mode             */
-  SC68_GET_COOKIE,                   /**< Get cookie (user data).   */
-  SC68_SET_COOKIE,                   /**< Set cookie (user data).   */
-  SC68_EMULATORS,                    /**< Get emulators array.      */
-  SC68_CONFIG_LOAD,                  /**< Load and apply config.    */
-  SC68_CONFIG_SAVE,                  /**< Save config               */
-  SC68_ENUM_OPT,                     /**< Enumerate options.        */
-  SC68_GET_OPT,                      /**< Get options.              */
-  SC68_SET_OPT_STR,                  /**< Set options (string).     */
-  SC68_SET_OPT_INT,                  /**< Set options (integer).    */
+  SC68_NOP = 0,      /**< No OPeration.             */
+  SC68_GET_LAST,     /**< Get the last command #.   */
+  SC68_GET_NAME,     /**< Get sc68 instance name.   */
+  SC68_GET_TRACKS,   /**< Get number of tracks.     */
+  SC68_GET_TRACK,    /**< Get current track.        */
+  SC68_GET_DEFTRK,   /**< Get disk default track.   */
+  SC68_GET_LOOPS,    /**< Number of loops to play.  */
+  SC68_GET_LOOP,     /**< Get current loop.         */
+  SC68_GET_DISK,     /**< Get a pointer to disk.    */
+  SC68_GET_SPR,      /**< Get sampling rate.        */
+  SC68_SET_SPR,      /**< Set sampling rate.        */
+  SC68_GET_LEN,      /**< Get current track length. */
+  SC68_GET_TRKLEN,   /**< Get some track length.    */
+  SC68_GET_DSKLEN,   /**< Get disk length.          */
+  SC68_GET_ORG,      /**< Get current track origin. */
+  SC68_GET_TRKORG,   /**< Get some track origin.    */
+  SC68_GET_POS,      /**< Get track position (ms).  */
+  SC68_GET_DSKPOS,   /**< Get disk position (ms).   */
+  SC68_GET_PLAYPOS,  /**< Get play position (ms).   */
+  SC68_SET_POS,      /**< Set position.             */
+  SC68_GET_PCM,      /**< Get PCM format            */
+  SC68_SET_PCM,      /**< Set PCM format            */
+  SC68_CAN_ASID,     /**< Get aSID caps             */
+  SC68_GET_ASID,     /**< Get aSID mode             */
+  SC68_SET_ASID,     /**< Set aSID mode             */
+  SC68_GET_COOKIE,   /**< Get cookie (user data).   */
+  SC68_SET_COOKIE,   /**< Set cookie (user data).   */
+  SC68_EMULATORS,    /**< Get emulators array.      */
+  SC68_CONFIG_LOAD,  /**< Load and apply config.    */
+  SC68_CONFIG_SAVE,  /**< Save config               */
+  SC68_ENUM_OPT,     /**< Enumerate options.        */
+  SC68_GET_OPT,      /**< Get options.              */
+  SC68_SET_OPT_STR,  /**< Set options (string).     */
+  SC68_SET_OPT_INT,  /**< Set options (integer).    */
+  SC68_DIAL,         /**< Run a dialog.             */
 
   /* Always last */
-  SC68_CNTL_LAST                     /**< Last command #.           */
+  SC68_CNTL_LAST     /**< Last command #.           */
 };
 
 /**
@@ -407,12 +408,12 @@ SC68_API
  * Generic control function.
  *
  * @param  sc68  sc68 instance or 0 for general control.
- * @param  fct   what to control (@ref sc68_cntl_fct).
+ * @param  op    operation, what to control (@ref sc68_cntl_fct).
  *
  * @retval  0  success
  * @retval -1  failure
  */
-int sc68_cntl(sc68_t * sc68, int fct, ...);
+int sc68_cntl(sc68_t * sc68, int op, ...);
 
 SC68_API
 /**
@@ -676,6 +677,74 @@ void sc68_close(sc68_t * sc68);
 /**
  * @}
  */
+
+/**
+ * @name Dialog helper.
+ *
+ *   The dialog helper is meant to help handling common dialogs used
+ *   by various sc68 players. It provides a system free communication
+ *   method that allow to create dialogs that does not need to link
+ *   with sc68 shared library.
+ *
+ * @{
+ */
+
+/**
+ * Operation (3rd parameter) for the sc68_dial_f handler function.
+ */
+enum sc68_dial_e {
+  SC68_DIAL_CALL,                       /**< Call special function. */
+
+  SC68_DIAL_GETI,                       /**< Get integer value.     */
+  SC68_DIAL_SETI,                       /**< Set integer value.     */
+  SC68_DIAL_GETS,                       /**< Get string value.      */
+  SC68_DIAL_SETS,                       /**< Set string value.      */
+
+  SC68_DIAL_MIN,                        /**< Get minimal value.     */
+  SC68_DIAL_MAX,                        /**< Get maximal value.     */
+  SC68_DIAL_CNT,                        /**< Get enum count.        */
+
+  SC68_DIAL_ENUM,                       /**< Get enum values.       */
+  SC68_DIAL_DESC,                       /**< Get a description.     */
+  SC68_DIAL_CAT,                        /**< Get a category.        */
+};
+
+#define SC68_DIAL_NEW    "new"      /**< key to create the dialog.  */
+#define SC68_DIAL_KILL   "kill"     /**< key to destroy the dialog. */
+#define SC68_DIAL_HELLO  "hello"    /**< key to start a connection. */
+#define SC68_DIAL_WAIT   "wait"     /**< key to wait for dialog.    */
+
+/**
+ * Union used by the sc68_dial_f handler (4th parameter).
+ */
+union sc68_dialval_u {
+  int i;                                /**< Integer. */
+  const char * s;                       /**< String.  */
+};
+
+/**
+ * Typedef for the sc68_dialval_u union.
+ */
+typedef union sc68_dialval_u sc68_dialval_t;
+
+/**
+ *  Dialog helper control function.
+ *
+ *  @param  cookie
+ *  @param  key
+ *  @param  op
+ *  @param  val
+ *
+ *  @return error code
+ *  @retval 0 on success
+ *  @retval -1 on error
+ */
+typedef int (*sc68_dial_f)(void *, const char *, int, sc68_dialval_t *);
+
+/**
+ * @}
+ */
+
 
 /**
  * @}
