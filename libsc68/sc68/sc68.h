@@ -301,6 +301,7 @@ enum sc68_asid_e {
  */
 enum sc68_cntl_e {
   SC68_NOP = 0,
+  SC68_GET_LAST,                     /**< Get the last command #.   */
   SC68_GET_NAME,                     /**< Get sc68 instance name.   */
   SC68_GET_TRACKS,                   /**< Get number of tracks.     */
   SC68_GET_TRACK,                    /**< Get current track.        */
@@ -333,6 +334,9 @@ enum sc68_cntl_e {
   SC68_GET_OPT,                      /**< Get options.              */
   SC68_SET_OPT_STR,                  /**< Set options (string).     */
   SC68_SET_OPT_INT,                  /**< Set options (integer).    */
+
+  /* Always last */
+  SC68_CNTL_LAST                     /**< Last command #.           */
 };
 
 /**

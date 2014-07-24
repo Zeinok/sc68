@@ -2482,6 +2482,10 @@ int sc68_cntl(sc68_t * sc68, int fct, ...)
   case SC68_NOP:
     break;
 
+  case SC68_GET_LAST:
+    res = SC68_CNTL_LAST;
+    break;
+
   case SC68_GET_NAME:
     *va_arg(list, char **) = sc68 ? sc68->name : appname;
     res = 0;
