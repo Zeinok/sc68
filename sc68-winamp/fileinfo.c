@@ -95,9 +95,7 @@ static int getval(void * _cookie, const char * key, intptr_t * result)
         sc68_music_info(0, &cookie->info, track, cookie->disk);
       *result = cookie->info.trk.track - 1;
     } else {
-      DBG("unknown command \"%s\"", key);
-      *result = (intptr_t)0;
-      return -1;
+      goto unknown;
     }
     return 0;
   }
@@ -122,9 +120,7 @@ static int getval(void * _cookie, const char * key, intptr_t * result)
     else if (keyis("s_year"))
       *result = (intptr_t) cookie->info.year;
     else {
-      DBG("unknown command \"%s\"", key);
-      *result = (intptr_t)0;
-      return -1;
+      goto unknown;
     }
     return 0;
   }
@@ -139,9 +135,7 @@ static int getval(void * _cookie, const char * key, intptr_t * result)
     else if (keyis("i_hw_asid"))
       *result = (intptr_t) cookie->info.trk.asid;
     else {
-      DBG("unknown command \"%s\"", key);
-      *result = (intptr_t)0;
-      return -1;
+      goto unknown;
     }
     return 0;
   }
@@ -159,13 +153,15 @@ static int getval(void * _cookie, const char * key, intptr_t * result)
       cookie->tstr[2] = 0;
       *result = (intptr_t) cookie->tstr;
     } else {
-      *result = (intptr_t)0;
-      return -1;
+      DBG("invalid index \"%s[%d]\"", key,i);
+      goto error;
     }
     return 0;
   }
 
+unknown:
   DBG("unknown command \"%s\"", key);
+error:
   *result = (intptr_t)0;
   return -1;
 }

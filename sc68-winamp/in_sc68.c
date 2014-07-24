@@ -320,7 +320,7 @@ static
  ******************************************************************************/
 void config(HWND hwnd)
 {
-  config_dialog(g_mod.hDllInstance, hwnd);
+  config_dialog(g_cfgdll, hwnd);
 }
 
 static

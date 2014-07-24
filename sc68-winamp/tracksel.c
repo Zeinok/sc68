@@ -93,20 +93,15 @@ static int getval(void * _cookie, const char * key, intptr_t * result)
       }
       *result = cookie->track = track;
     } else {
-      DBG("unknown command \"%s\"", key);
-      *result = (intptr_t)0;
-      return -1;
+      goto unknown;
     }
-    return 0;
   }
 
   if (key[0] == 's' && key[1] == '_') {
     if (keyis("s_album"))
       *result = (intptr_t) cookie->info.album;
     else {
-      DBG("unknown command \"%s\"", key);
-      *result = (intptr_t)0;
-      return -1;
+      goto unknown;
     }
     return 0;
   }
@@ -115,9 +110,7 @@ static int getval(void * _cookie, const char * key, intptr_t * result)
     if (keyis("i_hw_asid"))
       *result = (intptr_t) cookie->info.trk.asid;
     else {
-      DBG("unknown command \"%s\"", key);
-      *result = (intptr_t)0;
-      return -1;
+      goto unknown;
     }
     return 0;
   }
@@ -141,10 +134,10 @@ static int getval(void * _cookie, const char * key, intptr_t * result)
       cookie->tstr[sizeof(cookie->tstr)-1] = 0;
       *result = (intptr_t) cookie->tstr;
     } else {
-      *result = (intptr_t)0;
-      return -1;
+      goto unknown;
     }
     return 0;
+
   } else if (keyis("a_asid")) {
     int i = *result;
     if (i == -2)                        /* get current */
@@ -155,13 +148,15 @@ static int getval(void * _cookie, const char * key, intptr_t * result)
       static const char * asid[3] = { "Off", "On", "Force" };
       *result = (intptr_t) asid[i];
     } else {
-      *result = (intptr_t)0;
-      return -1;
+      DBG("invalid index \"%s[%d]\"", key,i);
+      goto error;
     }
     return 0;
   }
 
+unknown:
   DBG("unknown command \"%s\"", key);
+error:
   *result = (intptr_t)0;
   return -1;
 }

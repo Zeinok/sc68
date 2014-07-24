@@ -41,7 +41,7 @@ static char empty[] = "";
 
 #define FOREACH_OPT(opt) for (opt=opts; opt; opt = opt->next)
 
-static int in_range(const option68_t * const opt, const int val)
+static inline int in_range(const option68_t * const opt, const int val)
 {
   return opt->min == opt->max || (val >= opt->min && val <= opt->max);
 }

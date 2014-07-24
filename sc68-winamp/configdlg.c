@@ -47,17 +47,257 @@
 #include "sc68/sc68.h"
 #include "sc68/file68_opt.h"
 
+struct cookie_s {
+  cookie_t * me;                        /*  */
+  HINSTANCE hinst;                      /* HMOD of sc68cfg DLL */
+  HWND hwnd;                            /* Parent window */
+};
+
+static void del_cookie(cookie_t * cookie)
+{
+  DBG("configuration\n");
+  if (cookie && cookie->me == cookie) {
+    free(cookie);
+  }
+}
+
+static const char ident[] = "config";
+static const char * l_spr[] = {
+  "< custom >",
+  "11 khz","22 khz", "44.1 khz","48 khz","96 khz"
+};
+static const int i_spr[] = {
+  0,
+  11025, 22050, 44100, 48000, 96000
+};
+
+static int get_int(const char * key, int def)
+{
+  const option68_t * opt
+    = option68_get(key,opt68_ISSET);
+  return opt ? !!opt->val.num : def;
+}
+
+static int getopt(cookie_t * cookie, const char * key, intptr_t * result)
+{
+  const option68_t * opt = option68_get(key+2, opt68_ALWAYS);
+  if (opt) {
+    const int isset = opt->org != opt68_UDF;
+
+    switch (key[0]) {
+
+    case 'i':
+      /*  simple integer option value */
+      if (isset && (opt->type == opt68_BOL || opt->type == opt68_INT)) {
+        *result = (intptr_t) opt->val.num;
+        return 0;
+      }
+      break;
+
+    case 's':
+      /* simple string value */
+      if (isset && (opt->type == opt68_STR && !opt->sets)) {
+        *result = (intptr_t) opt->val.str;
+        return 0;
+      }
+      break;
+
+    case 'a':
+      /* simple string array */
+      if (opt->set
+          && (opt->type == opt68_STR || opt->type == opt68_ENU)) {
+        int i = *result;
+        if (i==-2)
+          *result = opt->val.num;
+        else if (i==-1)
+          *result = opt->sets;
+        else if (i>=0 && i<opt->sets)
+          *result = (intptr_t) i[(const char **)opt->set];
+        else {
+          DBG("invalid range \"%s[%d]\"\n",key,i);
+          return -1;
+        };
+        return 0;
+      }
+      break;
+
+    case 'o':
+      /* get option detail */
+      switch ((int)*result) {
+      case 'd': *result = (intptr_t) opt->desc; return 0;
+      case 'n': *result = (intptr_t) opt->sets; return 0;
+      case '<': *result = (intptr_t) opt->min;  return 0;
+      case '>': *result = (intptr_t) opt->max;  return 0;
+
+      case 't':
+        if (opt->type == opt68_INT || opt->type == opt68_BOL
+            || opt->type == opt68_ENU)
+          *result = (intptr_t) 'i';
+        else if (opt->type == opt68_STR)
+          *result = (intptr_t) 's';
+        else
+          return -1;
+        return 0;
+
+      case 'i':
+        if (opt->set) {
+          *result = (intptr_t) opt->val.num;
+          return 0;
+        }
+        return -1;
+
+      case 'v':
+        if (!opt->set) {
+          if (opt->type == opt68_INT || opt->type == opt68_BOL)
+            *result = (intptr_t) opt->val.num;
+          else if (opt->type == opt68_STR)
+            *result = (intptr_t) opt->val.str;
+          else
+            return -1;
+        } else {
+          if (opt->type == opt68_INT || opt->type == opt68_BOL)
+            *result = (intptr_t) opt->val.num[(int*)opt->set];
+          else if (opt->type == opt68_ENU || opt->type == opt68_STR)
+            *result = (intptr_t) opt->val.num[(const char **)opt->set];
+          else
+            return -1;
+        }
+        return 0;
+      }
+      DBG("invalid option argument \"%s[%c]\"\n", key, (char)*result);
+      return -1;
+
+    }
+  }
+  DBG("invalid key \"%s\"\n", key);
+  return -1;
+}
+
+#define keyis(N) !strcmp(key,N)
+
+static int getval(void * _cookie, const char * key, intptr_t * result)
+{
+  cookie_t * cookie = (cookie_t *) _cookie;
+  if (!key || !cookie || cookie->me != cookie || !result)
+    return -1;
+
+  if (key[0] == '_') {
+    if (keyis("_instance"))
+      *result = (intptr_t)cookie->hinst;
+    else if (keyis("_parent"))
+      *result = (intptr_t)cookie->hwnd;
+    else if (keyis ("_identity"))
+      *result = (intptr_t) ident;
+    else if (keyis("_kill")) {
+      del_cookie(cookie);
+      *result = (intptr_t)0;
+    }
+    /* else if (keyis("_settrack")) { */
+
+    /* }  */
+    else {
+      goto unknown;
+    }
+    return 0;
+  }
+
+  if (keyis("a_sampling-rate")) {
+    int j, i = *result;
+    const int max = sizeof (l_spr) / sizeof (*l_spr);
+    if (i == -2) {
+      const option68_t * opt = option68_get(key+2, opt68_ISSET);
+      if (opt) {
+        for (j = 1; j < max; ++j)
+          if (opt->val.num == i_spr[j]) {
+            *result = j;
+            return 0;
+          }
+      }
+      *result = 0;
+      return 0;
+    } else if (i == -1) {
+      *result = (intptr_t) max;
+    } else if (i>=0 && i<max) {
+      *result = (intptr_t) l_spr[i];
+    } else {
+      DBG("invalid range \"%s[%d]\"\n", key, i);
+      return -1;
+    }
+    return 0;
+  }
+
+  if (!getopt(cookie,key, result)) {
+    DBG("OK getopt \"%s\"\n", key);
+    return 0;
+  }
+  return -1;
+
+/*   if (key[0] == 'a' && key[1] == '_') { */
+/*     if (0) { */
+/*     } */
+/*     else if (keyis("a_sampling-rate")) { */
+/*       int i = *result; */
+/*       if (i == -2)                        /\* get current *\/ */
+/*         *result = (intptr_t) cookie->cfg_spridx; */
+/*       else if (i == -1)                   /\* get count *\/ */
+/*         *result = (intptr_t) 3; */
+
+
+
+
+
+unknown:
+  DBG("unknown command \"%s\"", key);
+error:
+  *result = (intptr_t)0;
+  return -1;
+}
+
 /* Only exported function. */
 int config_dialog(HINSTANCE hinst, HWND hwnd)
 {
-  return -1;
-#if 0
-  HWND hdlg
-    = CreateDialogParam(hinst, (LPCTSTR)IDD_DLG_CONFIG,
-                        hwnd, (DLGPROC)DialogProc, (LPARAM)0);
-  return hdlg ? 0 : -1;
-#endif
+  cookie_t * cookie = 0;
+  int res = -1;
+
+  if (!dialog_modless)
+    goto error;
+
+  cookie = malloc(sizeof(*cookie));
+  if (!cookie)
+    goto error;
+
+  cookie->me    = cookie;
+  cookie->hinst = hinst;
+  cookie->hwnd  = hwnd;
+  res = dialog_modless(cookie,getval);
+  goto exit;
+  DBG("%s() -> %d\n", __FUNCTION__, res);
+  return res;
+
+error:
+  del_cookie(cookie);
+exit:
+  DBG("%s() -> %d\n", __FUNCTION__, res);
+  return res;
 }
+
+
+
+
+
+
+/***********************************************************************
+ **********************************************************************
+ **********************************************************************
+ **********************************************************************
+ **********************************************************************
+ **********************************************************************
+ **********************************************************************
+ **********************************************************************
+ **********************************************************************
+ **********************************************************************
+ ***********************************************************************/
+
 #if 0
 static int GetOptFromCombo(HWND hdlg, int idc, const char * key)
 {
@@ -150,19 +390,6 @@ static int SetSliderByOpt(HWND hdlg, int idc, const char * key, int bud,
   return 0;
 }
 
-static const char * l_spr[] = {
-  "11 khz","22 khz", "44.1 khz","48 khz","96 khz"
-};
-static const int i_spr[] = {
-  11025, 22050, 44100, 48000, 96000
-};
-
-static int get_int(const char * key, int def)
-{
-  const option68_t * opt
-    = option68_get(key,opt68_ISSET);
-  return opt ? !!opt->val.num : def;
-}
 
 /* static int myabs(const int v) { return v < 0 ? -v : v; } */
 static int mydiv(const int a, const int b) {
@@ -306,6 +533,20 @@ static BOOL CALLBACK DialogProc(
       case 2:                           /* force */
         set_asid(SC68_ASID_FORCE); break;
       } break;
+
+    case IDC_INF_SPR:
+      
+      /* switch ( SendMessage(hwndCtl, CB_GETCURSEL, 0, 0) ) { */
+      /* case 0:                           /\* off *\/ */
+      /*   set_asid(SC68_ASID_OFF); break; */
+      /* case 1:                           /\* on *\/ */
+      /*   set_asid(SC68_ASID_ON); break; */
+      /* case 2:                           /\* force *\/ */
+      /*   set_asid(SC68_ASID_FORCE); break; */
+      /* } break; */
+
+
+
 
     default:
       DBG("#%05d W=%04x/%04x L=%08x\n",
