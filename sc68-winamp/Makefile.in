@@ -4,7 +4,7 @@
 #
 # (C) 2013-2014 https://sourceforge.net/users/benjihan
 #
-# Time-stamp: <2014-06-20 12:35:02 ben>
+# Time-stamp: <2014-07-08 09:49:14 ben>
 
 # Autoconf stuff
 prefix       := @prefix@
@@ -49,8 +49,8 @@ WINDRES      := @WINDRES@	#$(CC:%gcc=%windres)
 
 VPATH = @srcdir@
 
-OBJS := in_sc68.o transcoder.o resource.o fileinfo.o configdlg.o	\
- dll.o dbg.o tracksel.o cache.o
+OBJS := in_sc68.o transcoder.o fileinfo.o configdlg.o dll.o dbg.o	\
+ tracksel.o cache.o
 
 
 all: in_sc68.dll
@@ -58,8 +58,8 @@ all: in_sc68.dll
 in_sc68.dll: $(OBJS)
 	$(CC) -shared -o $@ $^ -static-libgcc -static $(LDFLAGS)
 
-%.o: %.rc
-	$(WINDRES) -i $< -o $@
+# %.o: %.rc
+# 	$(WINDRES) -i $< -o $@
 
 # ======================================================================
 # Install and such

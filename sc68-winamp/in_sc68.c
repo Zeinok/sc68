@@ -76,6 +76,14 @@ static char *argv[] = { appname };
 
 int g_usehook = -1, g_useufi = -1;
 
+
+/* sc68 dialogs dll */
+static const char    sc68dlg_dll[] = "sc68dlg.dll";
+HMODULE              g_cfgdll = 0;
+dialog_f             dialog_modless = 0;
+dialog_f             dialog_modal = 0;
+
+
 #ifdef USE_LOCK
 static HANDLE        g_lock;       /* mutex handle           */
 #endif
@@ -347,7 +355,7 @@ static
  ******************************************************************************/
 int infobox(const char * uri, HWND hwnd)
 {
-  fileinfo_dialog(g_mod.hDllInstance, hwnd, uri);
+  fileinfo_dialog(g_cfgdll, hwnd, uri);
   return INFOBOX_UNCHANGED;
 }
 
@@ -965,6 +973,22 @@ void init()
 
   }
 #endif
+
+  g_cfgdll = LoadLibrary(sc68dlg_dll);
+  if (!g_cfgdll) {
+    DBG("unable to load sc68 dialiogs dll -- %s", sc68dlg_dll);
+  } else {
+    DBG("Have loaded DLL -- %s", sc68dlg_dll);
+    dialog_modal = (dialog_f) GetProcAddress(g_cfgdll, "dialog_modal");
+    if (!dialog_modal) {
+      DBG("could not find function \"%s\"\n", "dialog_modal");
+    }
+    dialog_modless = (dialog_f) GetProcAddress(g_cfgdll, "dialog_modless");
+    if (!dialog_modless) {
+      DBG("could not find function \"%s\"\n", "dialog_modless");
+    }
+  }
+
   DBG("init completed\n");
 }
 

@@ -75,12 +75,13 @@ EXTERN void msgfct(const int, void *, const char *, va_list);
 # endif
 #endif
 
-/* tracksel.c */
-enum {
-  REMEMBER_NOT_SET    = -666,
-  REMEMBER_ALL_TRACKS = -1,
-  REMEMBER_DEF_TRACK  =  0,
-};
+/* sc68dlg.dll */
+#include <stdint.h>
+typedef struct cookie_s cookie_t;
+typedef int (*dlgmsg_f)(void *, const char *, intptr_t *);
+typedef intptr_t (*dialog_f)(cookie_t *, dlgmsg_f);
+EXTERN dialog_f dialog_modless;
+EXTERN dialog_f dialog_modal;
 
 /* cache.c */
 EXTERN int   wasc68_cache_init(void);

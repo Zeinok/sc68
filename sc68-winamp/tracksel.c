@@ -30,17 +30,8 @@
 /* winamp sc68 declarations */
 #include "wasc68.h"
 
-/* windows */
-#include <windows.h>
-#include <mmreg.h>
-#include <msacm.h>
-#include <commctrl.h>
-
 /* winamp 2 */
 #include "winamp/in2.h"
-
-#include "resource.h"
-#include "dlg.c"
 
 /* libc */
 #include <math.h>
@@ -52,169 +43,157 @@
 /* sc68 */
 #include "sc68/sc68.h"
 
-static BOOL CALLBACK DialogProc(HWND,UINT,WPARAM,LPARAM);
-
-
-static int remember = REMEMBER_NOT_SET;
-
-struct tracksel {
-  int select;
-  int tracks;
-  sc68_t * sc68;
+struct cookie_s {
+  cookie_t * me;                        /*  */
+  HINSTANCE hinst;                      /* HMOD of sc68cfg DLL */
+  HWND hwnd;                            /* Parent window */
+  sc68_disk_t disk;                     /*  */
+  int track;                            /* 0:all >0 track# */
+  int asid;                             /* 0:off 1:on 2:force */
+  sc68_minfo_t info;                    /*  */
+  char tstr[128];
 };
 
-/* Only exported function. */
-int tracksel_dialog(HINSTANCE hinst, HWND hwnd, sc68_t * sc68)
+static void del_cookie(cookie_t * cookie)
 {
-  struct tracksel ts;
-  ts.sc68   = sc68;
-  ts.tracks = sc68_cntl(sc68, SC68_GET_TRACKS);
-
-  if (remember != REMEMBER_NOT_SET) {
-    ts.select = remember;
-    if (remember == REMEMBER_ALL_TRACKS || remember == REMEMBER_DEF_TRACK ||
-        (remember > 0 && remember <= ts.tracks)) {
-      DBG("trackseldlg has been remembered\n");
-      goto done;
-    }
+  DBG("trackselect\n");
+  if (cookie && cookie->me == cookie) {
+    free(cookie);
   }
-  ts.select = REMEMBER_NOT_SET;
-  DialogBoxParam(hinst, (LPCTSTR)IDD_DLG_TRACKSELECT,
-                 hwnd, (DLGPROC)DialogProc, (LPARAM)&ts);
-done:
-  DBG("trackseldlg -> %d\n", ts.select);
-  return ts.select;
 }
 
-static int SetTrackList(HWND hdlg, sc68_t * sc68, int sel)
+static const char ident[] = "trackselect";
+
+#define keyis(N) !strcmp(key,N)
+
+static int getval(void * _cookie, const char * key, intptr_t * result)
 {
-  HWND hcb = GetDlgItem(hdlg, IDC_SEL_TRACKLIST);
-  int i, tracks = sc68_cntl(sc68,SC68_GET_TRACKS);
-  char tmp[256];
-  sc68_minfo_t inf;
+  cookie_t * cookie = (cookie_t *) _cookie;
+  if (!key || !cookie || cookie->me != cookie || !result)
+    return -1;
 
-  DBG("trackseldlg -- SetTrackList tracks=%d sel=%d\n", tracks, sel);
-
-  SendMessage(hcb, (UINT)CB_RESETCONTENT,(WPARAM) 0,(LPARAM) 0);
-  SendMessage(hcb,(UINT) CB_ADDSTRING,(WPARAM) 0,(LPARAM) "<Default>");
-  for (i=1; i <= tracks; ++i)
-    if (!sc68_music_info(sc68, &inf, i, 0)) {
-      if (!*inf.title || !strcmp(inf.album, inf.title))
-        snprintf(tmp,sizeof(tmp),"%02u - %s\n",
-                 inf.trk.track, inf.album);
-      else
-        snprintf(tmp,sizeof(tmp),"%02u - %s\n",
-                 inf.trk.track, inf.title);
-      SendMessage(hcb,(UINT) CB_ADDSTRING,(WPARAM) 0,(LPARAM) tmp);
+  if (key[0] == '_') {
+    if (keyis("_instance"))
+      *result = (intptr_t)cookie->hinst;
+    else if (keyis("_parent"))
+      *result = (intptr_t)cookie->hwnd;
+    else if (keyis ("_identity"))
+      *result = (intptr_t) ident;
+    else if (keyis("_kill")) {
+      del_cookie(cookie);
+      *result = (intptr_t)0;
     }
-  if (sel > tracks)
-    sel = 0;
-  SendMessage(hcb, CB_SETCURSEL, (WPARAM)sel, (LPARAM)0);
-  return 0;
-}
-
-
-static int SetInfo(HWND hdlg, sc68_t * sc68)
-{
-  sc68_minfo_t inf;
-  if (!sc68_music_info(sc68, &inf, SC68_DEF_TRACK, 0)) {
-    char tmp[512];
-    snprintf(tmp,sizeof(tmp),"%s - %s",inf.artist, inf.album);
-    SetText(hdlg, IDC_SEL_ALBUM,  tmp);
+    else if (keyis("_settrack")) {
+      int track = (int) *result;
+      if (track < 0 || track > cookie->info.tracks)
+        track = 0;
+      if (track >0 && track != cookie->info.trk.track) {
+        sc68_music_info(0, &cookie->info, track, cookie->disk);
+        track = cookie->info.trk.track;
+      }
+      *result = cookie->track = track;
+    } else {
+      DBG("unknown command \"%s\"", key);
+      *result = (intptr_t)0;
+      return -1;
+    }
     return 0;
   }
+
+  if (key[0] == 's' && key[1] == '_') {
+    if (keyis("s_album"))
+      *result = (intptr_t) cookie->info.album;
+    else {
+      DBG("unknown command \"%s\"", key);
+      *result = (intptr_t)0;
+      return -1;
+    }
+    return 0;
+  }
+
+  if (key[0] == 'i' && key[1] == '_') {
+    if (keyis("i_hw_asid"))
+      *result = (intptr_t) cookie->info.trk.asid;
+    else {
+      DBG("unknown command \"%s\"", key);
+      *result = (intptr_t)0;
+      return -1;
+    }
+    return 0;
+  }
+
+  if (keyis("a_tracklist")) {
+    int i = *result;
+    if (i == -2)                        /* get current */
+      *result = (intptr_t) cookie->track;
+    else if (i == -1)                   /* get count */
+      *result = (intptr_t) cookie->info.tracks + 1;
+    else if (i >= 0 && i <= cookie->info.tracks) {
+      if (!i)
+        snprintf(cookie->tstr,sizeof(cookie->tstr),"ALL - %s",
+                 cookie->info.album);
+      else {
+        sc68_music_info_t info;
+        sc68_music_info(0, &info, i, cookie->disk);
+        snprintf(cookie->tstr,sizeof(cookie->tstr),"%02u - %s",
+                 info.trk.track, info.title);
+      }
+      cookie->tstr[sizeof(cookie->tstr)-1] = 0;
+      *result = (intptr_t) cookie->tstr;
+    } else {
+      *result = (intptr_t)0;
+      return -1;
+    }
+    return 0;
+  } else if (keyis("a_asid")) {
+    int i = *result;
+    if (i == -2)                        /* get current */
+      *result = (intptr_t) cookie->asid;
+    else if (i == -1)                   /* get count */
+      *result = (intptr_t) 3;
+    else if (i >= 0 && i < 3) {
+      static const char * asid[3] = { "Off", "On", "Force" };
+      *result = (intptr_t) asid[i];
+    } else {
+      *result = (intptr_t)0;
+      return -1;
+    }
+    return 0;
+  }
+
+  DBG("unknown command \"%s\"", key);
+  *result = (intptr_t)0;
   return -1;
 }
 
-
-static BOOL CALLBACK DialogProc(
-  HWND hdlg,      // handle to dialog box
-  UINT uMsg,      // message
-  WPARAM wParam,  // first message parameter
-  LPARAM lParam)  // second message parameter
+/* Only exported function. */
+int tracksel_dialog(HINSTANCE hinst, HWND hwnd, sc68_disk_t disk)
 {
-  switch(uMsg)
-  {
-  case WM_INITDIALOG: {
-    struct tracksel * ts = (struct tracksel *) lParam;
-    SetWindowLong(hdlg, DWL_USER, lParam);
-    SetInfo(hdlg, ts->sc68);
-    if (remember == REMEMBER_NOT_SET) {
-      DBG("trackseldlg -- init -- don't remember\n");
-      SetCheck(hdlg,  IDC_SEL_REMEMBER, 0);
-      SetCheck(hdlg,  IDC_SEL_ALLTRACKS, 0);
-      SetCheck(hdlg,  IDC_SEL_SINGLETRACK, 1);
-      SetEnable(hdlg, IDC_SEL_TRACKLIST, 1);
-      SetTrackList(hdlg, ts->sc68, 0);
-    } else {
-      DBG("trackseldlg -- init -- remember %d\n", remember);
-      SetCheck(hdlg,  IDC_SEL_REMEMBER, 1);
-      SetCheck(hdlg,  IDC_SEL_ALLTRACKS, remember == -1);
-      SetCheck(hdlg,  IDC_SEL_SINGLETRACK, remember != -1);
-      SetTrackList(hdlg, ts->sc68, remember);
-      SetEnable(hdlg, IDC_SEL_TRACKLIST, remember != -1);
-    }
-    ShowWindow(hdlg, SW_SHOW);
-    UpdateWindow(hdlg);
-  } return 1;
+  cookie_t * cookie = 0;
+  int res = -1;
 
-  case WM_COMMAND: {
-    int wNotifyCode = HIWORD(wParam); // notification code
-    int wID = LOWORD(wParam);         // item, control, or accelerator identifier
-    HWND hwndCtl = (HWND) lParam;     // handle of control
-    struct tracksel * ts = (struct tracksel *) GetWindowLong(hdlg, DWL_USER);
+  if (!dialog_modal || !disk)
+    goto error;
 
-    switch(wID) {
-    case IDCANCEL:
-      DBG("trackseldlg -- CANCEL");
-      ts->select = REMEMBER_NOT_SET;
-      EndDialog(hdlg, 1);
-      return 0;
+  cookie = malloc(sizeof(*cookie));
+  if (!cookie)
+    goto error;
 
-    case IDOK:
-      if (GetCheck(hdlg, IDC_SEL_REMEMBER) == 1)
-        remember = ts->select;
-      else
-        remember = REMEMBER_NOT_SET;
-      DBG("trackseldlg -- OK (sel=%d remember=%d)\n", ts->select, remember);
-      EndDialog(hdlg, 1);
-      return 0;
+  cookie->me    = cookie;
+  cookie->hinst = hinst;
+  cookie->hwnd  = hwnd;
+  cookie->disk  = disk;
+  sc68_music_info(0, &cookie->info, SC68_DEF_TRACK, cookie->disk);
+  cookie->track = 0;
+  cookie->asid  = 0;
+  res = dialog_modal(cookie,getval);
+  goto exit;
+  DBG("%s() -> %d\n", __FUNCTION__, res);
+  return res;
 
-    case IDC_SEL_SINGLETRACK:
-    case IDC_SEL_ALLTRACKS:
-      switch (GetCheck(hdlg, IDC_SEL_SINGLETRACK)) {
-      case 0:
-        SetEnable(hdlg, IDC_SEL_TRACKLIST, 0);
-        ts->select = REMEMBER_ALL_TRACKS;
-        break;
-      case 1:
-        SetEnable(hdlg, IDC_SEL_TRACKLIST, 1);
-        ts->select = SendDlgItemMessage(hdlg, IDC_SEL_TRACKLIST, CB_GETCURSEL,
-                                    (WPARAM)0, (LPARAM)0);
-        if (ts->select < 0 || ts->select > ts->tracks)
-          ts->select = 0;
-        break;
-      }
-      DBG("trackseldlg -- SINGLETRACK/ALLTRACK -> %d\n", ts->select);
-      break;
-
-    case IDC_SEL_TRACKLIST:
-      ts->select = SendMessage(hwndCtl, CB_GETCURSEL, 0, 0);
-      if (ts->select < 0 || ts->select > ts->tracks)
-        ts->select = 0;
-      DBG("trackseldlg -- TRACKLIST -> %d\n", ts->select);
-      break;
-    }
-  } return 0;
-
-  case WM_DESTROY:
-    return 0;
-
-  case WM_CLOSE:
-    EndDialog(hdlg, 0);
-      /* DestroyWindow (hdlg); */
-    return 0;
-  }
-
-  return 0;
+error:
+  del_cookie(cookie);
+exit:
+  DBG("%s() -> %d\n", __FUNCTION__, res);
+  return res;
 }

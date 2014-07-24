@@ -22,7 +22,6 @@
  *
  */
 
-
 /* generated config header */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -44,25 +43,22 @@
 #include <stdlib.h>
 #include <time.h>
 
-/* resource */
-#include "resource.h"
-#include "dlg.c"
-
 /* sc68 */
 #include "sc68/sc68.h"
 #include "sc68/file68_opt.h"
 
-static BOOL CALLBACK DialogProc(HWND,UINT,WPARAM,LPARAM);
-
 /* Only exported function. */
 int config_dialog(HINSTANCE hinst, HWND hwnd)
 {
+  return -1;
+#if 0
   HWND hdlg
     = CreateDialogParam(hinst, (LPCTSTR)IDD_DLG_CONFIG,
                         hwnd, (DLGPROC)DialogProc, (LPARAM)0);
   return hdlg ? 0 : -1;
+#endif
 }
-
+#if 0
 static int GetOptFromCombo(HWND hdlg, int idc, const char * key)
 {
   option68_t * opt = option68_get(key, opt68_ALWAYS);
@@ -328,3 +324,4 @@ static BOOL CALLBACK DialogProc(
 
   return 0;
 }
+#endif

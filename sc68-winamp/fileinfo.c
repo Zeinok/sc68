@@ -32,9 +32,9 @@
 
 /* windows */
 #include <windows.h>
-#include <mmreg.h>
-#include <msacm.h>
-#include <commctrl.h>
+/* #include <mmreg.h> */
+/* #include <msacm.h> */
+/* #include <commctrl.h> */
 
 /* libc */
 #include <math.h>
@@ -43,171 +43,167 @@
 #include <stdlib.h>
 #include <time.h>
 
-/* resource */
-#include "resource.h"
-#include "dlg.c"
-
 /* sc68 */
 #include "sc68/sc68.h"
 
-static BOOL CALLBACK DialogProc(HWND,UINT,WPARAM,LPARAM);
+struct cookie_s {
+  cookie_t * me;                        /*  */
+  HINSTANCE hinst;                      /* HMOD of sc68cfg DLL */
+  HWND hwnd;                            /* Parent window */
+  const char * uri;                     /*  */
+  sc68_disk_t disk;                     /*  */
+  sc68_minfo_t info;                    /*  */
+  char tstr[4];
+};
+
+static void del_cookie(cookie_t * cookie)
+{
+  DBG("fileinfo\n");
+  if (cookie && cookie->me == cookie) {
+    free((void*)cookie->uri);
+    sc68_disk_free(cookie->disk);
+    free(cookie);
+  }
+}
+
+static const char ident[] = "fileinfo";
+
+#define keyis(N) !strcmp(key,N)
+
+static int getval(void * _cookie, const char * key, intptr_t * result)
+{
+  cookie_t * cookie = (cookie_t *) _cookie;
+  if (!key || !cookie || cookie->me != cookie || !result)
+    return -1;
+
+  if (key[0] == '_') {
+    if (keyis("_instance"))
+      *result = (intptr_t)cookie->hinst;
+    else if (keyis("_parent"))
+      *result = (intptr_t)cookie->hwnd;
+    else if (keyis ("_identity"))
+      *result = (intptr_t) ident;
+    else if (keyis("_kill")) {
+      del_cookie(cookie);
+      *result = (intptr_t)0;
+    }
+    else if (keyis("_settrack")) {
+      int track = (int) *result + 1;
+      if (track <= 0 || track > cookie->info.tracks)
+        track = cookie->info.dsk.track;
+      if (track != cookie->info.trk.track)
+        sc68_music_info(0, &cookie->info, track, cookie->disk);
+      *result = cookie->info.trk.track - 1;
+    } else {
+      DBG("unknown command \"%s\"", key);
+      *result = (intptr_t)0;
+      return -1;
+    }
+    return 0;
+  }
+
+  if (key[0] == 's' && key[1] == '_') {
+    if (keyis("s_uri"))
+      *result = (intptr_t) cookie->uri;
+    else if (keyis("s_format"))
+      *result = (intptr_t) cookie->info.format;
+    else if (keyis("s_genre"))
+      *result = (intptr_t) cookie->info.genre;
+    else if (keyis("s_title"))
+      *result = (intptr_t) cookie->info.title;
+    else if (keyis("s_artist"))
+      *result = (intptr_t) cookie->info.artist;
+    else if (keyis("s_album"))
+      *result = (intptr_t) cookie->info.album;
+    else if (keyis("s_ripper"))
+      *result = (intptr_t) cookie->info.ripper;
+    else if (keyis("s_converter"))
+      *result = (intptr_t) cookie->info.converter;
+    else if (keyis("s_year"))
+      *result = (intptr_t) cookie->info.year;
+    else {
+      DBG("unknown command \"%s\"", key);
+      *result = (intptr_t)0;
+      return -1;
+    }
+    return 0;
+  }
+
+  if (key[0] == 'i' && key[1] == '_') {
+    if (keyis("i_time"))
+      *result = (intptr_t) ((cookie->info.trk.time_ms+500u)/1000u);
+    else if (keyis("i_hw_ym"))
+      *result = (intptr_t) cookie->info.trk.ym;
+    else if (keyis("i_hw_ste"))
+      *result = (intptr_t) cookie->info.trk.ste;
+    else if (keyis("i_hw_asid"))
+      *result = (intptr_t) cookie->info.trk.asid;
+    else {
+      DBG("unknown command \"%s\"", key);
+      *result = (intptr_t)0;
+      return -1;
+    }
+    return 0;
+  }
+
+  if (keyis("a_tracklist")) {
+    int i = *result;
+    if (i == -2)                        /* get current */
+      *result = (intptr_t) cookie->info.trk.track - 1;
+    else if (i == -1)                   /* get count */
+      *result = (intptr_t) cookie->info.tracks;
+    else if (i >=0 && i < cookie->info.tracks) {
+      ++i;
+      cookie->tstr[0] = '0' + (i/10u);
+      cookie->tstr[1] = '0' + (i%10u);
+      cookie->tstr[2] = 0;
+      *result = (intptr_t) cookie->tstr;
+    } else {
+      *result = (intptr_t)0;
+      return -1;
+    }
+    return 0;
+  }
+
+  DBG("unknown command \"%s\"", key);
+  *result = (intptr_t)0;
+  return -1;
+}
+
 
 /* Only exported function. */
 int fileinfo_dialog(HINSTANCE hinst, HWND hwnd, const char * uri)
 {
-  HWND hdlg
-    = CreateDialogParam(hinst, (LPCTSTR)IDD_DLG_FILEINFO,
-                        hwnd, (DLGPROC)DialogProc, (LPARAM)uri);
-  return hdlg ? 0 : -1;
+  sc68_disk_t disk = 0;
+  cookie_t * cookie = 0;
+  int res = -1;
+
+  if (!dialog_modless || !uri)
+    goto error;
+
+  disk = sc68_load_disk_uri(uri);
+  if (!disk)
+    goto error;
+
+  cookie = malloc(sizeof(*cookie));
+  if (!cookie)
+    goto error;
+
+  cookie->me    = cookie;
+  cookie->hinst = hinst;
+  cookie->hwnd  = hwnd;
+  cookie->uri   = strdup(uri);
+  cookie->disk  = disk;
+  sc68_music_info(0, &cookie->info, SC68_DEF_TRACK, cookie->disk);
+  disk = 0;
+  res = dialog_modless(cookie,getval);
+  if (!res)
+    goto success;
+
+error:
+  sc68_disk_free(disk);
+  del_cookie(cookie);
+success:
+  return res;
 }
 
-static int SetTrackList(HWND hdlg, const int t, const int n)
-{
-  HWND hcb = GetDlgItem(hdlg, IDC_INF_TRACK);
-  int i;
-
-  SendMessage(hcb, (UINT)CB_RESETCONTENT,(WPARAM) 0,(LPARAM) 0);
-  for (i = 1; i <= n; ++i) {
-    char t[3];
-    t[0] = '0' + i / 10; t[1] = '0' + i % 10; t[2] = 0;
-    SendMessage(hcb,(UINT) CB_ADDSTRING,(WPARAM) 0,(LPARAM) t);
-  }
-  if (t > 0 && t <= n)
-    SendMessage(hcb, CB_SETCURSEL, (WPARAM)t-1, (LPARAM)0);
-  return 0;
-}
-
-static int SetInfo(HWND hdlg, const sc68_music_info_t * inf)
-{
-  SetText(hdlg, IDC_INF_ALBUM,     inf->album);
-  SetText(hdlg, IDC_INF_ARTIST,    inf->artist);
-  SetText(hdlg, IDC_INF_TITLE ,    inf->title);
-  SetText(hdlg, IDC_INF_GENRE,     inf->genre);
-  SetText(hdlg, IDC_INF_FORMAT,    inf->format);
-  SetText(hdlg, IDC_INF_RIPPER,    inf->ripper);
-  SetText(hdlg, IDC_INF_CONVERTER, inf->converter);
-  SetText(hdlg, IDC_INF_YEAR,      inf->year);
-  SetText(hdlg, IDC_INF_TIME,      inf->trk.time+3);
-
-  SetVisible(hdlg, IDC_INF_AMIGA, 0 ^ inf->trk.amiga);
-  SetVisible(hdlg, IDC_INF_YM,    1 ^ inf->trk.amiga);
-  SetVisible(hdlg, IDC_INF_STE,   1 ^ inf->trk.amiga);
-  SetVisible(hdlg, IDC_INF_ASID,  1 ^ inf->trk.amiga);
-
-  SetEnable(hdlg,  IDC_INF_AMIGA,0);
-  SetEnable(hdlg,  IDC_INF_YM,   0);
-  SetEnable(hdlg,  IDC_INF_STE,  0);
-  SetEnable(hdlg,  IDC_INF_ASID, 0);
-
-  SetCheck(hdlg,  IDC_INF_AMIGA,inf->trk.amiga);
-  SetCheck(hdlg,  IDC_INF_YM,   inf->trk.ym);
-  SetCheck(hdlg,  IDC_INF_STE,  inf->trk.ste);
-  SetCheck(hdlg,  IDC_INF_ASID, inf->trk.asid);
-  return 0;
-}
-
-static int NoInfo(HWND hdlg)
-{
-  sc68_music_info_t info;
-  memset(&info,0,sizeof(info));
-  info.album = info.artist = info.title = info.genre =
-    info.format = info.ripper = info.converter = "N/A";
-  strcpy(info.trk.time,"-- --:--");
-  return SetInfo(hdlg, &info);
-}
-
-/* Change cookie, return previous */
-static sc68_disk_t ChangeDisk(HWND hdlg, sc68_disk_t d)
-{
-  return (sc68_disk_t) SetWindowLong(hdlg, DWL_USER, (LONG)d);
-}
-
-/* Get cookie */
-static sc68_disk_t GetDisk(HWND hdlg)
-{
-  return (sc68_disk_t) GetWindowLong(hdlg, DWL_USER);
-}
-
-static int SetDiskInfo(HWND hdlg, const char * uri)
-{
-  sc68_disk_t d = GetDisk(hdlg);
-  sc68_music_info_t info;
-
-  SetText(hdlg,IDC_INF_URI, uri);
-  if (d && !sc68_music_info(0, &info, 1, d)) {
-    SetTrackList(hdlg, info.trk.track, info.tracks);
-    SetInfo(hdlg,&info);
-  } else {
-    SetTrackList(hdlg, 0, 0);
-    NoInfo(hdlg);
-  }
-  SetFocus(GetDlgItem(hdlg, IDOK));
-  return 0;
-}
-
-static int ChangeFile(HWND hdlg, const char * uri)
-{
-  sc68_disk_t d, prev;
-
-  d = sc68_load_disk_uri(uri);
-  if (!d)
-    return -1;
-  prev = ChangeDisk(hdlg, d);
-  if (prev)
-    sc68_disk_free(prev);
-  SetDiskInfo(hdlg, uri);
-  return 0;
-}
-
-static BOOL CALLBACK DialogProc(
-  HWND hdlg,      // handle to dialog box
-  UINT uMsg,      // message
-  WPARAM wParam,  // first message parameter
-  LPARAM lParam)  // second message parameter
-{
-
-  switch(uMsg)
-  {
-
-  case WM_INITDIALOG:
-    ChangeFile(hdlg, (char *)lParam);
-    ShowWindow(hdlg, SW_SHOW);
-    UpdateWindow(hdlg);
-    return 1;
-
-  case WM_COMMAND: {
-    /* int wNotifyCode = HIWORD(wParam); // notification code */
-    int wID = LOWORD(wParam);         // item, control, or accelerator identifier
-    HWND hwndCtl = (HWND) lParam;     // handle of control
-
-    switch(wID) {
-
-    case IDOK:
-      DestroyWindow (hdlg);
-      break;
-
-    case IDC_INF_TRACK:
-      if (HIWORD(wParam) == CBN_SELCHANGE) {
-        sc68_music_info_t info;
-        sc68_disk_t d = GetDisk(hdlg);
-        int track = SendMessage(hwndCtl, (UINT) CB_GETCURSEL,
-                                (WPARAM) 0, (LPARAM) 0);
-        if (track >= 0 && !sc68_music_info(0, &info, track+1, d))
-          SetInfo(hdlg,&info);
-        else
-          NoInfo(hdlg);
-      }
-    }
-  } break;
-
-  case WM_DESTROY:
-    sc68_disk_free(ChangeDisk(hdlg,0));
-    break;
-
-  case WM_CLOSE:
-    DestroyWindow (hdlg);
-    break;
-  }
-
-  return 0;
-}

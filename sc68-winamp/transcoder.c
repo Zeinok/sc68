@@ -43,14 +43,15 @@
 /* windows */
 #include <windows.h>
 
-/* winamp 2 */
+/* winamp */
 #include "winamp/in2.h"
 
 /* in_sc68.c */
 EXTERN In_Module g_mod;
+EXTERN HMODULE g_cfgdll;
 
 /* tracksel.c */
-EXTERN int tracksel_dialog(HINSTANCE hinst, HWND hwnd, sc68_t * sc68);
+EXTERN int tracksel_dialog(HINSTANCE hinst, HWND hwnd, sc68_disk_t disk);
 
 struct transcon {
   sc68_t * sc68;                        /* sc68 instance */
@@ -81,7 +82,7 @@ intptr_t winampGetExtendedRead_open(
   const char *uri,int *siz, int *bps, int *nch, int *spr)
 {
   struct transcon * trc;
-  int res, ms, tracks, track;
+  int res, ms, tracks, track, asid = 0;
 
   DBG("(\"%s\")\n", uri);
 
@@ -94,32 +95,35 @@ intptr_t winampGetExtendedRead_open(
   if (!trc->sc68)
     goto error;
   if (sc68_load_uri(trc->sc68, uri))
-      goto error;
+    goto error;
   tracks = sc68_cntl(trc->sc68,SC68_GET_TRACKS);
   if (tracks < 2) {
     DBG("only the one track\n");
     track = 1;
   } else {
     track = get_track_from_uri(uri);
-    if (track == -1)
-      track = SC68_DEF_TRACK;
-    else if (track < 1 || track > tracks) {
-      track = tracksel_dialog(g_mod.hDllInstance, g_mod.hMainWindow, trc->sc68);
-      if (track == REMEMBER_NOT_SET)
-        goto error;
-      if (!track) {
-        DBG("transcode default track\n");
-        track = SC68_DEF_TRACK;
-      } else if (track < 1 || track > tracks) {
-        DBG("transcode all tracks as one\n");
-        trc->allin1 = 1;
-        track = 1;
-      } else {
-        DBG("transcode track #%d\n", track);
+    if (track < 1 || track > tracks) {
+      sc68_disk_t disk = 0;
+      if (!sc68_cntl(trc->sc68,SC68_GET_DISK,&disk)) {
+        track = tracksel_dialog(g_cfgdll, g_mod.hMainWindow, disk);
+        if (track >= 0) {
+          asid = track >> 8;
+          track &= 255;
+        }
+      }
+      else {
+        DBG("could not retrieve sc68 disk !!\n");
+        track = -1;
       }
     }
+    if (track <= 0 || track > tracks) {
+      DBG("transcode all tracks as one\n");
+      trc->allin1 = 1;
+      track = 1;
+    } else {
+      DBG("transcode track #%d\n", track);
+    }
   }
-
   if (sc68_play(trc->sc68, track, 1))
     goto error;
   res = sc68_process(trc->sc68, 0, 0);
@@ -177,7 +181,7 @@ intptr_t winampGetExtendedRead_getData(
   trc->done = (res & SC68_END) ||
     ((res & (SC68_LOOP|SC68_CHANGE)) && !trc->allin1);
   pcm <<= 2;
- error:
+error:
   if (trc->done)
     DBG("(hdl=%p)"
         " => %s (%u pcms)\n",
