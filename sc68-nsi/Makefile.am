@@ -40,3 +40,5 @@ $(installer_exe): $(srcdir)/sc68.nsi Makefile
 
 clean-local:
 	-rm -f -- "$(installer_exe)" "$(uninstall_exe)" "$(installer_zip)"
+
+EXTRA_DIST = sc68.nsi sc68-icon-32.ico
