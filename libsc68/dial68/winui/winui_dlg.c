@@ -31,7 +31,7 @@
 #include "sc68/sc68.h"                  /* for sc68_dial_f */
 
 /* windows */
-#include <windef.h>
+/* #include <windef.h> */
 
 /* Needed for UDM32 family defines */
 #ifndef WINVER
@@ -169,7 +169,7 @@ void dbg(const char * fmt, ...)
 {
   static const char pref[] = "winui  : ";
   char s[256];
-  const int max = sizeof(s)-1;
+  const DWORD max = sizeof(s)-1;
   DWORD i;
   va_list list;
   HANDLE hdl;
@@ -849,7 +849,7 @@ static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
    * something more system independant. */
 
   if (cntl(cookie, "instance", SC68_DIAL_CALL, &v) || !v.s) {
-    v.s = GetModuleHandleA(0);
+    v.s = (void*)GetModuleHandleA(0);
     DBG("User did not provide a instance handle -> default is %p\n",v.s);
     if (!v.s)
       goto failed;

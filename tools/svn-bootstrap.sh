@@ -3,7 +3,11 @@
 # Run this script after fresh update. It should do all autotools and
 # buddies required before you can configure and compile this package.
 #
-# $Id$
+# this file is part of the sc68 project <http://sc68.atari.org/>
+#
+# Copyright (C) 2007-2014 Benjamin Gerard
+#
+
 
 me="svn-bootstrap.sh"
 ln_s="ln -sf --"
