@@ -43,123 +43,61 @@
 /* sc68 */
 #include "sc68/sc68.h"
 
+static const int magic = ('T'<<24)|('S'<<16)|('E'<<8)|'L';
+
 struct cookie_s {
-  cookie_t * me;                        /*  */
-  HINSTANCE hinst;                      /* HMOD of sc68cfg DLL */
-  HWND hwnd;                            /* Parent window */
-  sc68_disk_t disk;                     /*  */
-  int track;                            /* 0:all >0 track# */
-  int asid;                             /* 0:off 1:on 2:force */
-  sc68_minfo_t info;                    /*  */
-  char tstr[128];
+  int          magic;                   /* magic id      */
+  HINSTANCE    hinst;                   /* hinst ?       */
+  HWND         hwnd;                    /* Parent window */
+  sc68_disk_t  disk;                    /* sc68 disk     */
 };
+
+static inline int ismagic(cookie_t * cookie) {
+  const int res = cookie && cookie->magic == magic;
+  if (!res) {
+    DBG(" !!! NOT MAGIC !!!\n");
+  }
+  return res;
+}
 
 static void del_cookie(cookie_t * cookie)
 {
   DBG("trackselect\n");
-  if (cookie && cookie->me == cookie) {
+  if (ismagic(cookie)) {
     free(cookie);
   }
 }
 
-static const char ident[] = "trackselect";
-
 #define keyis(N) !strcmp(key,N)
 
-static int getval(void * _cookie, const char * key, intptr_t * result)
+static int cntl(void * _cookie, const char * key, int op, sc68_dialval_t *val)
 {
   cookie_t * cookie = (cookie_t *) _cookie;
-  if (!key || !cookie || cookie->me != cookie || !result)
+
+  if (!key || !ismagic(cookie))
     return -1;
 
-  if (key[0] == '_') {
-    if (keyis("_instance"))
-      *result = (intptr_t)cookie->hinst;
-    else if (keyis("_parent"))
-      *result = (intptr_t)cookie->hwnd;
-    else if (keyis ("_identity"))
-      *result = (intptr_t) ident;
-    else if (keyis("_kill")) {
+  switch (op) {
+  case SC68_DIAL_CALL:
+    if (keyis(SC68_DIAL_KILL))
       del_cookie(cookie);
-      *result = (intptr_t)0;
-    }
-    else if (keyis("_settrack")) {
-      int track = (int) *result;
-      if (track < 0 || track > cookie->info.tracks)
-        track = 0;
-      if (track >0 && track != cookie->info.trk.track) {
-        sc68_music_info(0, &cookie->info, track, cookie->disk);
-        track = cookie->info.trk.track;
-      }
-      *result = cookie->track = track;
-    } else {
-      goto unknown;
-    }
-  }
-
-  if (key[0] == 's' && key[1] == '_') {
-    if (keyis("s_album"))
-      *result = (intptr_t) cookie->info.album;
-    else {
-      goto unknown;
-    }
+    else if (keyis(SC68_DIAL_HELLO))
+      val->s = "trackselect";
+    else if (keyis(SC68_DIAL_WAIT))
+      val->i = 1;
+    else if (keyis("instance"))
+      val->s = (const char *) cookie->hinst;
+    else if (keyis("parent"))
+      val->s = (const char *) cookie->hwnd;
+    else if (keyis("disk"))
+      val->s = (const char *) cookie->disk;
+    else break;
     return 0;
   }
-
-  if (key[0] == 'i' && key[1] == '_') {
-    if (keyis("i_hw_asid"))
-      *result = (intptr_t) cookie->info.trk.asid;
-    else {
-      goto unknown;
-    }
-    return 0;
-  }
-
-  if (keyis("a_tracklist")) {
-    int i = *result;
-    if (i == -2)                        /* get current */
-      *result = (intptr_t) cookie->track;
-    else if (i == -1)                   /* get count */
-      *result = (intptr_t) cookie->info.tracks + 1;
-    else if (i >= 0 && i <= cookie->info.tracks) {
-      if (!i)
-        snprintf(cookie->tstr,sizeof(cookie->tstr),"ALL - %s",
-                 cookie->info.album);
-      else {
-        sc68_music_info_t info;
-        sc68_music_info(0, &info, i, cookie->disk);
-        snprintf(cookie->tstr,sizeof(cookie->tstr),"%02u - %s",
-                 info.trk.track, info.title);
-      }
-      cookie->tstr[sizeof(cookie->tstr)-1] = 0;
-      *result = (intptr_t) cookie->tstr;
-    } else {
-      goto unknown;
-    }
-    return 0;
-
-  } else if (keyis("a_asid")) {
-    int i = *result;
-    if (i == -2)                        /* get current */
-      *result = (intptr_t) cookie->asid;
-    else if (i == -1)                   /* get count */
-      *result = (intptr_t) 3;
-    else if (i >= 0 && i < 3) {
-      static const char * asid[3] = { "Off", "On", "Force" };
-      *result = (intptr_t) asid[i];
-    } else {
-      DBG("invalid index \"%s[%d]\"", key,i);
-      goto error;
-    }
-    return 0;
-  }
-
-unknown:
-  DBG("unknown command \"%s\"", key);
-error:
-  *result = (intptr_t)0;
-  return -1;
+  DBG("\"%s\" unknown command #%02d \"%s\"",  "trackselect", op, key);
+  return 1;
 }
+
 
 /* Only exported function. */
 int tracksel_dialog(HINSTANCE hinst, HWND hwnd, sc68_disk_t disk)
@@ -167,28 +105,15 @@ int tracksel_dialog(HINSTANCE hinst, HWND hwnd, sc68_disk_t disk)
   cookie_t * cookie = 0;
   int res = -1;
 
-  if (!dialog_modal || !disk)
-    goto error;
-
-  cookie = malloc(sizeof(*cookie));
+  cookie = malloc(sizeof(cookie_t));
   if (!cookie)
-    goto error;
-
-  cookie->me    = cookie;
+    return -1;
+  cookie->magic = magic;
   cookie->hinst = hinst;
   cookie->hwnd  = hwnd;
   cookie->disk  = disk;
-  sc68_music_info(0, &cookie->info, SC68_DEF_TRACK, cookie->disk);
-  cookie->track = 0;
-  cookie->asid  = 0;
-  res = dialog_modal(cookie,getval);
-  goto exit;
-  DBG("%s() -> %d\n", __FUNCTION__, res);
-  return res;
 
-error:
-  del_cookie(cookie);
-exit:
+  res = sc68_cntl(0, SC68_DIAL, cookie, cntl);
   DBG("%s() -> %d\n", __FUNCTION__, res);
   return res;
 }

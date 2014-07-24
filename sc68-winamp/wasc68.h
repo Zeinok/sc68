@@ -55,8 +55,13 @@
 # define FMT12
 #endif
 
+#include "sc68/sc68.h"
+
 /* in_sc68.c */
-EXTERN void set_asid(int asid);
+EXTERN int set_asid(int asid);
+EXTERN int save_config(void);
+EXTERN sc68_t * sc68_lock(void);
+EXTERN void sc68_unlock(sc68_t *);
 
 /* dll.c */
 EXTERN int g_useufi, g_usehook;
@@ -76,17 +81,21 @@ EXTERN void msgfct(const int, void *, const char *, va_list);
 #endif
 
 /* sc68dlg.dll */
-#include <stdint.h>
+/* #include <stdint.h> */
+/* #include <sc68/sc68.h> */
 typedef struct cookie_s cookie_t;
-typedef int (*dlgmsg_f)(void *, const char *, intptr_t *);
-typedef intptr_t (*dialog_f)(cookie_t *, dlgmsg_f);
-EXTERN dialog_f dialog_modless;
-EXTERN dialog_f dialog_modal;
+/* typedef int (*dlgmsg_f)(sc68_dial_t *, const char *, int, sc68_dialval_t *); */
+/* EXTERN dialog_f dialog_modless; */
+/* EXTERN dialog_f dialog_modal; */
 
 /* cache.c */
 EXTERN int   wasc68_cache_init(void);
 EXTERN void  wasc68_cache_kill(void);
 EXTERN void* wasc68_cache_get(const char * uri);
 EXTERN void  wasc68_cache_release(void * disk, int dont_keep);
+
+
+#define DLGHWND  g_mod.hMainWindow
+#define DLGHINST g_mod.hDllInstance
 
 #endif

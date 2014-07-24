@@ -4,7 +4,6 @@
 #
 # (C) 2013-2014 https://sourceforge.net/users/benjihan
 #
-# Time-stamp: <2014-07-08 09:49:14 ben>
 
 # Autoconf stuff
 prefix       := @prefix@
@@ -41,7 +40,7 @@ CC           := @CC@
 CPP	     := @CPP@
 DEFS         := @DEFS@
 CPPFLAGS     := $(DEFS) @CPPFLAGS@ $(sc68_CFLAGS) -I. $(WAINC)
-CFLAGS       := @CFLAGS@
+CFLAGS       := @CFLAGS@ -m32 -mwin32 -mdll
 LIBS         := @LIBS@ $(sc68_LIBS)
 LDFLAGS      := @LDFLAGS@ $(LIBS) 
 STRIP        := @STRIP@		#$(CC:%gcc=%strip)
@@ -50,22 +49,28 @@ WINDRES      := @WINDRES@	#$(CC:%gcc=%windres)
 VPATH = @srcdir@
 
 OBJS := in_sc68.o transcoder.o fileinfo.o configdlg.o dll.o dbg.o	\
- tracksel.o cache.o
-
+ tracksel.o cache.o resource.o
+# nobug.o
+# resource.o
 
 all: in_sc68.dll
 
 in_sc68.dll: $(OBJS)
-	$(CC) -shared -o $@ $^ -static-libgcc -static $(LDFLAGS)
+#	$(CC) -shared -o $@ $^ -static-libgcc -static $(LDFLAGS)
+	$(CC) -v -mdll -o $@ $^ -static-libgcc -static $(LDFLAGS)
+	$(CC:%gcc=%objdump) -x $@ | grep rsrc
 
-# %.o: %.rc
-# 	$(WINDRES) -i $< -o $@
+%.a: %.o
+	$(CC:%gcc=%ar) -cms $@ $<
+
+%.o: %.rc
+	$(WINDRES) -i $< -o $@
 
 # ======================================================================
 # Install and such
 # ======================================================================
 
-install: in_sc68.dll 
+install: in_sc68.dll
 	install --strip-program=$(STRIP) -D -s $< $(libexecdir)/$<
 
 winamp: in_sc68.dll
@@ -96,3 +101,5 @@ configure: configure.ac ./config.status
 
 %: %.in ./config.status
 	$(SHELL) ./config.status
+
+.PHONY: all clean winamp distclean install uninstall

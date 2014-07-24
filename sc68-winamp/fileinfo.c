@@ -32,174 +32,102 @@
 
 /* windows */
 #include <windows.h>
-/* #include <mmreg.h> */
-/* #include <msacm.h> */
-/* #include <commctrl.h> */
 
 /* libc */
-#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
+//#include <time.h>
 
 /* sc68 */
 #include "sc68/sc68.h"
 
+static const int magic = ('F'<<24)|('I'<<16)|('N'<<8)|'F';
+
 struct cookie_s {
-  cookie_t * me;                        /*  */
-  HINSTANCE hinst;                      /* HMOD of sc68cfg DLL */
-  HWND hwnd;                            /* Parent window */
-  const char * uri;                     /*  */
-  sc68_disk_t disk;                     /*  */
-  sc68_minfo_t info;                    /*  */
-  char tstr[4];
+  int          magic;                   /* Points on me */
+  HINSTANCE    hinst;                   /* HMOD of sc68cfg DLL */
+  HWND         hwnd;                    /* Parent window */
+  const char * uri;                     /* Uri of the file */
+  sc68_disk_t  disk;                    /* sc68 disk */
 };
+
+static inline int ismagic(cookie_t * cookie) {
+  const int res = cookie && cookie->magic == magic;
+  if (!res) {
+    DBG(" !!! NOT MAGIC !!!\n");
+  }
+  return res;
+}
 
 static void del_cookie(cookie_t * cookie)
 {
   DBG("fileinfo\n");
-  if (cookie && cookie->me == cookie) {
+  if (ismagic(cookie)) {
     free((void*)cookie->uri);
     sc68_disk_free(cookie->disk);
     free(cookie);
   }
 }
 
-static const char ident[] = "fileinfo";
-
 #define keyis(N) !strcmp(key,N)
 
-static int getval(void * _cookie, const char * key, intptr_t * result)
+static int cntl(void * _cookie, const char * key, int op, sc68_dialval_t *val)
 {
   cookie_t * cookie = (cookie_t *) _cookie;
-  if (!key || !cookie || cookie->me != cookie || !result)
+
+  if (!key || !ismagic(cookie))
     return -1;
 
-  if (key[0] == '_') {
-    if (keyis("_instance"))
-      *result = (intptr_t)cookie->hinst;
-    else if (keyis("_parent"))
-      *result = (intptr_t)cookie->hwnd;
-    else if (keyis ("_identity"))
-      *result = (intptr_t) ident;
-    else if (keyis("_kill")) {
+  switch (op) {
+  case SC68_DIAL_CALL:
+    if (keyis(SC68_DIAL_KILL))
       del_cookie(cookie);
-      *result = (intptr_t)0;
-    }
-    else if (keyis("_settrack")) {
-      int track = (int) *result + 1;
-      if (track <= 0 || track > cookie->info.tracks)
-        track = cookie->info.dsk.track;
-      if (track != cookie->info.trk.track)
-        sc68_music_info(0, &cookie->info, track, cookie->disk);
-      *result = cookie->info.trk.track - 1;
-    } else {
-      goto unknown;
-    }
+    else if (keyis(SC68_DIAL_HELLO))
+      val->s = "fileinfo";
+    else if (keyis(SC68_DIAL_WAIT))
+      val->i = 0;
+    else if (keyis("instance"))
+      val->s = (const char *) cookie->hinst;
+    else if (keyis("parent"))
+      val->s = (const char *) cookie->hwnd;
+    else if (keyis("disk"))
+      val->s = (const char *) cookie->disk;
+    else break;
+    return 0;
+  case SC68_DIAL_GETS:
+    if (keyis("uri"))
+      val->s = cookie->uri;
+    else break;
     return 0;
   }
-
-  if (key[0] == 's' && key[1] == '_') {
-    if (keyis("s_uri"))
-      *result = (intptr_t) cookie->uri;
-    else if (keyis("s_format"))
-      *result = (intptr_t) cookie->info.format;
-    else if (keyis("s_genre"))
-      *result = (intptr_t) cookie->info.genre;
-    else if (keyis("s_title"))
-      *result = (intptr_t) cookie->info.title;
-    else if (keyis("s_artist"))
-      *result = (intptr_t) cookie->info.artist;
-    else if (keyis("s_album"))
-      *result = (intptr_t) cookie->info.album;
-    else if (keyis("s_ripper"))
-      *result = (intptr_t) cookie->info.ripper;
-    else if (keyis("s_converter"))
-      *result = (intptr_t) cookie->info.converter;
-    else if (keyis("s_year"))
-      *result = (intptr_t) cookie->info.year;
-    else {
-      goto unknown;
-    }
-    return 0;
-  }
-
-  if (key[0] == 'i' && key[1] == '_') {
-    if (keyis("i_time"))
-      *result = (intptr_t) ((cookie->info.trk.time_ms+500u)/1000u);
-    else if (keyis("i_hw_ym"))
-      *result = (intptr_t) cookie->info.trk.ym;
-    else if (keyis("i_hw_ste"))
-      *result = (intptr_t) cookie->info.trk.ste;
-    else if (keyis("i_hw_asid"))
-      *result = (intptr_t) cookie->info.trk.asid;
-    else {
-      goto unknown;
-    }
-    return 0;
-  }
-
-  if (keyis("a_tracklist")) {
-    int i = *result;
-    if (i == -2)                        /* get current */
-      *result = (intptr_t) cookie->info.trk.track - 1;
-    else if (i == -1)                   /* get count */
-      *result = (intptr_t) cookie->info.tracks;
-    else if (i >=0 && i < cookie->info.tracks) {
-      ++i;
-      cookie->tstr[0] = '0' + (i/10u);
-      cookie->tstr[1] = '0' + (i%10u);
-      cookie->tstr[2] = 0;
-      *result = (intptr_t) cookie->tstr;
-    } else {
-      DBG("invalid index \"%s[%d]\"", key,i);
-      goto error;
-    }
-    return 0;
-  }
-
-unknown:
-  DBG("unknown command \"%s\"", key);
-error:
-  *result = (intptr_t)0;
-  return -1;
+  DBG("\"%s\" unknown command #%02d \"%s\"",  "fileinfo", op, key);
+  return 1;
 }
-
 
 /* Only exported function. */
 int fileinfo_dialog(HINSTANCE hinst, HWND hwnd, const char * uri)
 {
-  sc68_disk_t disk = 0;
-  cookie_t * cookie = 0;
   int res = -1;
+  cookie_t * cookie = malloc(sizeof(cookie_t));
+  if (cookie) {
+    cookie->magic = magic;
+    cookie->hinst = hinst;
+    cookie->hwnd  = hwnd;
+    cookie->uri   = strdup(uri);
+    if (!cookie->uri ||
+        !(cookie->disk = sc68_load_disk_uri(uri)))
+      del_cookie(cookie);
+    else
+      res = sc68_cntl(0, SC68_DIAL, cookie, cntl);
 
-  if (!dialog_modless || !uri)
-    goto error;
-
-  disk = sc68_load_disk_uri(uri);
-  if (!disk)
-    goto error;
-
-  cookie = malloc(sizeof(*cookie));
-  if (!cookie)
-    goto error;
-
-  cookie->me    = cookie;
-  cookie->hinst = hinst;
-  cookie->hwnd  = hwnd;
-  cookie->uri   = strdup(uri);
-  cookie->disk  = disk;
-  sc68_music_info(0, &cookie->info, SC68_DEF_TRACK, cookie->disk);
-  disk = 0;
-  res = dialog_modless(cookie,getval);
-  if (!res)
-    goto success;
-
-error:
-  sc68_disk_free(disk);
-  del_cookie(cookie);
-success:
+    if (res == -1) {
+        /* fileinfo dialog has failed, notify so that next time winamp
+         * used the built-in unified fileinfo instead of this one.
+         */
+      g_useufi = 1;
+    }
+  }
+  DBG("%s() -> %d\n", __FUNCTION__, res);
   return res;
 }
-

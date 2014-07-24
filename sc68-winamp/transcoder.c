@@ -54,10 +54,10 @@ EXTERN HMODULE g_cfgdll;
 EXTERN int tracksel_dialog(HINSTANCE hinst, HWND hwnd, sc68_disk_t disk);
 
 struct transcon {
-  sc68_t * sc68;                        /* sc68 instance */
+  sc68_t * sc68;                        /* sc68 instance               */
   int done;                             /* 0:not done, 1:done -1:error */
-  int allin1;                           /* 1:all tracks at once */
-  size_t pcm;                           /* pcm counter */
+  int allin1;                           /* 1:all tracks at once        */
+  size_t pcm;                           /* pcm counter                 */
 };
 
 static int get_track_from_uri(const char * uri)
@@ -96,19 +96,28 @@ intptr_t winampGetExtendedRead_open(
     goto error;
   if (sc68_load_uri(trc->sc68, uri))
     goto error;
-  tracks = sc68_cntl(trc->sc68,SC68_GET_TRACKS);
-  if (tracks < 2) {
-    DBG("only the one track\n");
+  if (tracks = sc68_cntl(trc->sc68,SC68_GET_TRACKS), tracks <= 0)
+    goto error;
+  if (tracks < 2 &&
+      sc68_cntl(trc->sc68, SC68_CAN_ASID, SC68_DSK_TRACK) <= 0) {
+    DBG("only the one track and can't aSID, no need for a dialiog\n");
     track = 1;
   } else {
     track = get_track_from_uri(uri);
     if (track < 1 || track > tracks) {
       sc68_disk_t disk = 0;
       if (!sc68_cntl(trc->sc68,SC68_GET_DISK,&disk)) {
-        track = tracksel_dialog(g_cfgdll, g_mod.hMainWindow, disk);
+        track = tracksel_dialog(DLGHINST, DLGHWND, disk);
         if (track >= 0) {
-          asid = track >> 8;
+          asid = (track >> 8) & 3;
           track &= 255;
+        }
+        else if (track == -1) {
+          DBG("could not open the track-select dialog, fallback !!\n");
+          track = 0;
+        } else {
+          DBG("Abort by user ? code=%d !!\n", track);
+          track = -1;
         }
       }
       else {
@@ -116,14 +125,17 @@ intptr_t winampGetExtendedRead_open(
         track = -1;
       }
     }
-    if (track <= 0 || track > tracks) {
-      DBG("transcode all tracks as one\n");
+    if (track == 0) {
+      DBG("transcode all tracks as one (asid=%d)\n", asid);
       trc->allin1 = 1;
       track = 1;
+    } else if (track > 0 && track <= tracks) {
+      DBG("transcode track #%d (asid=%d)\n", track, asid);
     } else {
-      DBG("transcode track #%d\n", track);
+      goto error;
     }
   }
+  sc68_cntl(trc->sc68, SC68_SET_ASID, asid);
   if (sc68_play(trc->sc68, track, 1))
     goto error;
   res = sc68_process(trc->sc68, 0, 0);
@@ -135,7 +147,6 @@ intptr_t winampGetExtendedRead_open(
   *spr = sc68_cntl(trc->sc68, SC68_GET_SPR);
   *bps = 16;
   *siz = (int) ((uint64_t)ms * (*spr) / 1000) << 2;
-  DBG("=> %p\n", (void*)trc);
   return (intptr_t)trc;
 
 error:
@@ -165,9 +176,6 @@ intptr_t winampGetExtendedRead_getData(
   struct transcon * trc = (struct transcon *) hdl;
   int pcm, res;
 
-  /* DBG("winampGetExtendedRead_getData(hdl=%p, len=%d)\n", */
-  /*     (void *)trc, len); */
-
   if (*end || trc->done)
     return 0;
   pcm = len >> 2;
@@ -182,10 +190,6 @@ intptr_t winampGetExtendedRead_getData(
     ((res & (SC68_LOOP|SC68_CHANGE)) && !trc->allin1);
   pcm <<= 2;
 error:
-  if (trc->done)
-    DBG("(hdl=%p)"
-        " => %s (%u pcms)\n",
-        (void*)trc, trc->done<0?"FAILED":"DONE", (unsigned)trc->pcm);
   return pcm;
 }
 
@@ -198,8 +202,6 @@ EXPORT
 void winampGetExtendedRead_close(intptr_t hdl)
 {
   struct transcon * trc = (struct transcon *) hdl;
-
-  DBG("(hdl=%p)\n", (void *)trc);
   if (trc) {
     sc68_destroy(trc->sc68);
     free(trc);

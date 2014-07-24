@@ -42,8 +42,6 @@ In_Module *winampGetInModule2()
   return &g_mod;
 }
 
-int use_ufi = -1;     /**< @see winampUseUnifiedFileInfoDlg() */
-
 /**
  * Called on file info request.
  *
@@ -53,8 +51,8 @@ int use_ufi = -1;     /**< @see winampUseUnifiedFileInfoDlg() */
 EXPORT
 int winampUseUnifiedFileInfoDlg(const char * fn)
 {
-  DBG("winampUseUnifiedFileInfoDlg -> %d\n", use_ufi);
-  return !g_mod.InfoBox || use_ufi > 0;
+  DBG("winampUseUnifiedFileInfoDlg -> %d\n", g_useufi);
+  return !g_mod.InfoBox || g_useufi > 0;
 }
 
 /**

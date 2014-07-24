@@ -95,6 +95,8 @@ static int opt_vers = 0;
 static int opt_help = 0;
 static int opt_list = 0;
 static int opt_owav = 0;
+static int opt_conf = 0;
+static int opt_info = 0;
 
 struct sc68_debug_data_s {
   FILE * out;
@@ -230,10 +232,12 @@ static int print_usage(void)
       "  -h --help           Print this message and exit\n"
       "  -v --version        Print sc68 version x.y.z and licence and exit\n"
       "  -D --debug-list     Print debug categories and exit\n"
+      "  -C --config         Open configuration dialog and exit\n"
+      "  -I --info           Open file info dialog and exit\n"
       "  -v --verbose        Print more info\n"
       "  -q --quiet          Do not display music info\n"
       "  -r --rate=<val>     Sampling rate (in hz)\n"
-      "  -t --track=<val>    Choose track to play [\"all\"|\"def\"|track-#]\n"
+      "  -t --track=<val>    Choose track to play [\"all\"|\"def\"|\"sel\"|#]\n"
       "  -l --loop=<val>     Track loop [\"def\"|\"inf\"|loop-#]\n"
       "  -o --output=<URI>   Set output\n"
       "  -c --stdout         Output raw to stdout (--output=stdout://)\n"
@@ -298,6 +302,101 @@ static char * mybasename(char * fname)
   return fname;
 }
 
+/* ======================================================================
+   config dialog
+   ====================================================================== */
+
+static int conf_f(void * data, const char * key, int op, sc68_dialval_t * v)
+{
+  Debug("data: %p key:%s op:%d\n",data, key, op);
+  if (op != SC68_DIAL_CALL)
+    return 1;
+  if (!strcmp(key,SC68_DIAL_WAIT))
+    v->i = 1;
+  else if (!strcmp(key,SC68_DIAL_HELLO))
+    v->s = "config";
+  else
+    return 1;                           /* continue */
+  return 0;                             /* taken */
+}
+
+static int conf_dialog(void)
+{
+  return sc68_cntl(0,SC68_DIAL,0,conf_f);
+}
+
+/* ======================================================================
+   fileinfo dialog
+   ====================================================================== */
+
+struct finf {
+  sc68_t     * sc68;
+  const char * uri;
+};
+
+static int finf_f(void * data, const char * key, int op, sc68_dialval_t * v)
+{
+  struct finf * fi = data;
+
+  Debug("data: %p key:%s op:%d\n",data, key, op);
+
+  if (op == SC68_DIAL_GETS && !strcmp(key,"uri"))
+    v->s = (void*) fi->uri;
+  else if (op != SC68_DIAL_CALL)
+    return 1;
+  else if (!strcmp(key,SC68_DIAL_WAIT))
+    v->i = 1;
+  else if (!strcmp(key,SC68_DIAL_KILL))
+    return 1;
+  else if (!strcmp(key,SC68_DIAL_HELLO))
+    v->s = "fileinfo";
+  else if (!strcmp(key,"sc68"))
+    v->s = (void*) fi->sc68;
+  else if (!strcmp(key,"disk")) {
+    if (sc68_cntl(fi->sc68, SC68_GET_DISK, &v->s))
+      return -1;
+  } else
+    return 1;                           /* comtinue */
+  return 0;                             /* taken */
+}
+
+static int finf_dialog(sc68_t * sc68, const char * uri)
+{
+  static struct finf fi;
+  fi.sc68 = sc68;
+  fi.uri  = uri;
+  return sc68_cntl(sc68,SC68_DIAL,&fi,finf_f);
+}
+
+/* ======================================================================
+   track dialog
+   ====================================================================== */
+
+static int tsel_f(void * data, const char * key, int op, sc68_dialval_t * v)
+{
+  Debug("data: %p key:%s op:%d\n",data, key, op);
+  if (op != SC68_DIAL_CALL)
+    return 1;
+  if (!strcmp(key,SC68_DIAL_WAIT))
+    v->i = 1;
+  else if (!strcmp(key,SC68_DIAL_HELLO))
+    v->s = "trackselect";
+  else if (!strcmp(key,"sc68"))
+    v->s = data;
+  else if (!strcmp(key,"disk")) {
+    if (sc68_cntl(data, SC68_GET_DISK, &v->s))
+      return -1;
+  } else
+    return 1;                           /* comtinue */
+  return 0;                             /* taken */
+}
+
+static int tsel_dialog(sc68_t * sc68)
+{
+  return sc68_cntl(sc68,SC68_DIAL,sc68,tsel_f);
+}
+
+
 static void DisplayInfo(int track)
 {
   sc68_music_info_t Info, * info = &Info;
@@ -345,7 +444,7 @@ static char * codestr(int code) {
 }
 
 /* track:  0:all -1:default */
-static int PlayLoop(vfs68_t * out, int track, int loop)
+static int PlayLoop(vfs68_t * out, int track, int loop, int asid)
 {
   static char buffer[256 << 2];
   const int max = sizeof(buffer) >> 2;
@@ -356,8 +455,9 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
   Debug("PlayLoop:\n"
         " track  : %d\n"
         " loop   : %d\n"
+        " asid   : %d\n"
         " output : '%s'\n",
-        track,loop,vfs68_filename(out));
+        track,loop,asid,vfs68_filename(out));
 
   if (loop == 0) {
     Debug("PlayLoop: default loop resquested\n");
@@ -378,6 +478,12 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
     Debug("PlayLoop: track #%d resquested\n",track);
   }
   Debug(" all    : %s\n",all?"yes":"no");
+
+  /* Set aSID. */
+  if (asid > 0) {
+    sc68_cntl(0, SC68_SET_ASID, asid);
+    sc68_cntl(sc68, SC68_SET_ASID, asid);
+  }
 
   /* Set track. */
   code = sc68_play(sc68, track, loop);
@@ -447,8 +553,11 @@ static int PlayLoop(vfs68_t * out, int track, int loop)
       Print("\n");
       if (!all)
         break;
-      else
+      else {
+        if (asid > 0)
+          sc68_cntl(sc68, SC68_SET_ASID, asid);
         DisplayInfo(-1);
+      }
     }
 
     /* if (n > 0) */
@@ -513,7 +622,7 @@ int main(int argc, char *argv[])
   const char * rates   = "def";
   const char * memory  = "def";
   char sc68_name[] = "sc68"; /* !!! MUST BE in writable memory for
-                                    basename() !!! */
+                                basename() !!! */
 
   int i,j;
   int log2m = 0;
@@ -521,6 +630,7 @@ int main(int argc, char *argv[])
   int loop  = 0;
   int rate  = 0;
   int err   = 1;
+  int asid  = -1;
   sc68_init_t init68;
   sc68_create_t create68;
   vfs68_t * out = 0;
@@ -531,6 +641,8 @@ int main(int argc, char *argv[])
   const my_option_t longopts[] = {
     {"help",       0, 0, 'h'},
     {"version",    0, 0, 'V'},
+    {"config",     0, 0, 'C'},          /* $$$ For test */
+    {"info",       0, 0, 'I'},          /* $$$ For test */
     {"debug-list", 0, 0, 'D'},
     {"quiet",      0, 0, 'q'},
     {"verbose",    0, 0, 'v'},
@@ -582,6 +694,8 @@ int main(int argc, char *argv[])
     case 'h': opt_help = 1; break;  /* --help        */
     case 'V': opt_vers = 1; break;  /* --version     */
     case 'D': opt_list = 1; break;  /* --debug-list  */
+    case 'C': opt_conf = 1; break;  /* --config      */
+    case 'I': opt_info = 1; break;  /* --info        */
     case 'v': ++opt_verb; break;    /* --verbose     */
     case 'q': --opt_verb; break;    /* --quiet       */
     case 'n': case 'c': case 'o':
@@ -645,6 +759,12 @@ int main(int argc, char *argv[])
     goto exit;
   }
 
+  if (opt_conf) {
+    err = conf_dialog();
+    goto exit;
+  }
+
+
   /* Select input */
 
   if (!inname && i<argc) {
@@ -699,14 +819,6 @@ int main(int argc, char *argv[])
   Debug("sc68: input  '%s'\n", inname);
   Debug("sc68: output '%s'\n", outname);
 
-  /* Parse --track= */
-  if (!strcmp(tracks,"def")) {
-    track = 0;
-  } else if (!strcmp(tracks,"all")) {
-    track = -1;
-  } else {
-    track = strtoul(tracks,0,10);
-  }
 
   /* Parse --loop= */
   if (!strcmp(loops,"def")) {
@@ -752,9 +864,34 @@ int main(int argc, char *argv[])
     goto error;
   }
 
+  if (opt_info) {
+    err = finf_dialog(sc68,inname);
+    goto exit;
+  }
+
+  /* Parse --track= */
+  if (!strcmp(tracks,"sel")) {
+    int t = tsel_dialog(sc68);
+    if (t < 0) {
+      Error("%s\n", "user abort (track selector)");
+      goto error;
+    } else {
+      asid  = (t >> 8) & 3;
+      t &= 255;
+      track = !t ? -1 : t;
+    }
+  }
+  else if (!strcmp(tracks,"def")) {
+    track = 0;
+  } else if (!strcmp(tracks,"all")) {
+    track = -1;
+  } else {
+    track = strtoul(tracks,0,10);
+  }
+
   /* Loop */
   Debug("sc68: Enter Playloop\n");
-  if (PlayLoop(out, track, loop) < 0) {
+  if (PlayLoop(out, track, loop, asid) < 0) {
     Debug("sc68: Exit Playloop with error\n");
     goto error;
   }
