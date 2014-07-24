@@ -239,7 +239,7 @@ int option68_iset(option68_t * opt, int val, int set, int org)
         break;
 
       case opt68_STR: {
-        char tmp[128];
+        char tmp[64];
         snprintf(tmp,sizeof(tmp),"%d",val);
         tmp[sizeof(tmp)-1] = 0;
         /* err =  */opt_set_str(opt,org,tmp);

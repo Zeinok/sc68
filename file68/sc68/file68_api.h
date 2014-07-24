@@ -13,7 +13,7 @@
 
 /**
  * @defgroup file68_lib file68 library
- * @ingroup  file68
+ * @ingroup  sc68_dev_lib
  *
  *   file68 is a library to manipulate sc68 files and access sc68
  *   resources and much more.

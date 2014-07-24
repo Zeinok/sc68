@@ -386,7 +386,7 @@ void msg68x_trace(void * cookie, const char * fmt, ...);
 #   endif
 #  else
 #   define TRACE68 if (0);else msg68_dummy
-static void msg68_dummy(int cat, const char * fmt, ...) {}
+FMT23 static void msg68_dummy(int cat, const char * fmt, ...) {}
 #  endif
 #  define VTRACE68(cat,fmt,list)
 # else

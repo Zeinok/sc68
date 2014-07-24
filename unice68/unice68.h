@@ -41,13 +41,15 @@
 
 /**
  *  @defgroup  unice68_lib  unice68 library
- *  @ingroup   api68
- *  @brief     ICE! 2.4 depacker.
+ *  @ingroup   sc68_dev_lib
+ *  @brief     ICE! 2.4 packer and depacker.
  *
- *    unice68 library provides functions to depack ICE! packed buffer.
- *    The depacker used is a rought conversion of the original ICE 2.4
- *    routine written in 68000 assembler. ICE packer was (and may be
- *    is) widely used on the Atari ST the Atari ST.
+ *    unice68 library provides functions to pack or depack ICE! packed
+ *    buffer.  The depacker used is a rought conversion of the
+ *    original ICE 2.4 routine written in 68000 assembler. ICE packer
+ *    was (and may be still is) widely used on the Atari ST the Atari
+ *    ST. More importantly it is the packer used by
+ *    [the sndh music archive](http://dbug.kicks-ass.net/sndh/).
  *
  *  @note unice68 library is re-entrant (thread-safe).
  *

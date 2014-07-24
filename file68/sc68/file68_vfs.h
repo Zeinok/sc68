@@ -18,7 +18,7 @@
 
 
 /**
- * @defgroup  file68_vfs  I/O streams.
+ * @defgroup  file68_vfs  Virtual File system.
  * @ingroup   file68_lib
  *
  *   Provides access functions for generic I/O streams..

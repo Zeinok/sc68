@@ -61,9 +61,9 @@ enum {
  * @{
  */
 enum  {
-  SC68_YM        = 1 << 0,   /**< YM-2149 actif.                  */
-  SC68_STE       = 1 << 1,   /**< STE sound actif.                */
-  SC68_AMIGA     = 1 << 2,   /**< AMIGA sound actif.              */
+  SC68_YM        = 1 << 0,   /**< YM-2149 active.                 */
+  SC68_STE       = 1 << 1,   /**< STE sound active.               */
+  SC68_AMIGA     = 1 << 2,   /**< AMIGA sound active.             */
   SC68_STECHOICE = 1 << 3,   /**< Optionnal STF/STE (not tested). */
   SC68_TIMERS    = 1 << 4,   /**< Has timer info.                 */
   SC68_TIMERA    = 1 << 5,   /**< Timer-A used.                   */
@@ -494,7 +494,6 @@ void file68_shutdown(void);
 /**
  * @}
  */
-
 
 /**
  * @}

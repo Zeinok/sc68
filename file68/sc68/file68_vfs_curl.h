@@ -20,7 +20,7 @@
  * @anchor cURL
  *
  *   @b cURL is a client-side URL transfer library. For more informations
- *   see <a href="http://curl.planetmirror.com/libcurl/">cURL website</a>.
+ *   see [cURL official website](http://curl.planetmirror.com/libcurl/).
  *
  * @{
  */

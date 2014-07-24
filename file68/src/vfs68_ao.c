@@ -34,10 +34,11 @@
 #ifndef DEBUG_AO68_O
 # define DEBUG_AO68_O 0
 #endif
-static int ao68_cat = msg68_DEFAULT;
 
 /* Define this if you want xiph libao support. */
 #ifdef USE_AO
+
+static int ao68_cat = msg68_DEFAULT;
 
 #include "file68_vfs_def.h"
 #include "file68_str.h"
