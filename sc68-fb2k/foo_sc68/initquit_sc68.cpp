@@ -28,8 +28,13 @@
 // anything else is printed in foobar2000 console accordingly.
 static void message_cb(const int bit, sc68_t * sc68, const char *fmt, va_list list)
 {
+  static char tmp[256];
   pfc::string8_fastalloc temp;
-  uPrintfV(temp,fmt,list);
+
+  vsnprintf(tmp,sizeof(tmp),fmt,list);
+  tmp[sizeof(tmp)-1] = 0;
+  temp = tmp;
+  //uPrintfV(temp,fmt,list);
 
   switch (bit) {
   case msg68_CRITICAL: case msg68_ERROR:

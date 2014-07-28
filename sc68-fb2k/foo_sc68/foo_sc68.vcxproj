@@ -129,6 +129,9 @@
       <Project>{f3ce61a8-30bc-49f3-a786-90556f4c695a}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\..\libsc68\dial68\winui\resource.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

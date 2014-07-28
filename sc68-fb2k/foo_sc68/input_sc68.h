@@ -24,7 +24,11 @@
 #ifndef SC68FB2K_INPUT_SC68_H
 #define SC68FB2K_INPUT_SC68_H
 
-#define dbg(sc68,fmt,...)
+#ifdef _DEBUG
+#define DBG(fmt,...) msg68_debug(fmt, ## __VA_ARGS__)
+#else
+#define DBG(fmt,...) for(;0;)
+#endif
 
 class input_sc68 {
 

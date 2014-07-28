@@ -314,6 +314,11 @@ static inline int GetComboPos(HWND hdlg, int idc)
   return pos == CB_ERR ? -1 : pos;
 }
 
+static inline int GetSlidePos(HWND hdlg, int idc)
+{
+  return SendDlgItemMessageA(hdlg, idc, TBM_GETPOS, 0, 0);
+}
+
 #if 0
 static int init_int(dialog_t * dial, int idc, const char * key)
 {
@@ -475,7 +480,7 @@ static int init_slide(dialog_t * dial, int idc, const char * key,
 static int return_slide(dialog_t * dial, int idc, const char * key)
 {
   sc68_dialval_t v;
-  v.i = SendDlgItemMessageA(dial->hdlg, idc,TBM_GETPOS,0,0);
+  v.i = GetSlidePos(dial->hdlg,idc);
   if (v.i >= 0) {
     DBG("%s(%d,%s) -> %d\n", __FUNCTION__, idc, key, v.i);
     return dial->cntl(dial->cookie, key, SC68_DIAL_SETI, &v);
@@ -663,6 +668,7 @@ static intptr_t CALLBACK DialogProc(
   LPARAM lparam)  // second message parameter
 {
   dialog_t * dial = GET_USERCOOKIE(hdlg);
+  sc68_dialval_t v;
   int i;
 
   /* To set a result : */
@@ -722,15 +728,14 @@ static intptr_t CALLBACK DialogProc(
       return TRUE;
 
     case IDC_SEL_ASID:
-    case IDC_CFG_ASID: {
-      sc68_dialval_t asid;
-      asid.i = SendMessageA(hwndCtl, CB_GETCURSEL, 0, 0);
-      if (asid.i >=0 && asid.i<3) {
-        dial->cntl(dial->cookie,"asid", SC68_DIAL_SETI, &asid);
+    case IDC_CFG_ASID:
+      v.i = SendMessageA(hwndCtl, CB_GETCURSEL, 0, 0);
+      if (v.i >=0 && v.i<3) {
+        dial->cntl(dial->cookie,"asid", SC68_DIAL_SETI, &v);
         if (wID == IDC_CFG_ASID)
-          dial->cntl(dial->cookie,"asid", SC68_DIAL_CALL, &asid);
+          dial->cntl(dial->cookie,"asid", SC68_DIAL_CALL, &v);
       }
-    } return TRUE;
+      return TRUE;
 
     case IDC_SEL_REMEMBER:
       return TRUE;
@@ -738,7 +743,6 @@ static intptr_t CALLBACK DialogProc(
     case IDC_SEL_TRACK:
     case IDC_INF_TRACK:
       if (HIWORD(wparam) == CBN_SELCHANGE) {
-        sc68_dialval_t v;
         v.i = SendMessage(hwndCtl,CB_GETCURSEL,0,0);
         if (v.i != CB_ERR) {
           dial->cntl(dial->cookie,"track", SC68_DIAL_SETI, &v);
@@ -759,6 +763,20 @@ static intptr_t CALLBACK DialogProc(
 
     case IDC_CFG_SPR:
       update_spr(dial);
+      return TRUE;
+
+    case IDC_CFG_AGAFILTER:
+      /* Real Time apply */
+      v.i = GetCheck(hdlg, IDC_CFG_AGAFILTER) == 1;
+      if (!dial->cntl(dial->cookie,"amiga-filter", SC68_DIAL_CALL, &v))
+        DBG("Real-Time amiga-filter => %d\n", v.i);
+      return TRUE;
+
+    case IDC_CFG_AGABLEND:
+      /* Real Time apply */
+      v.i = GetSlidePos(hdlg, IDC_CFG_AGABLEND);
+      if (v.i>=0 && !dial->cntl(dial->cookie,"amiga-blend", SC68_DIAL_CALL, &v))
+        DBG("Real-Time amiga-blend => %d\n", v.i);
       return TRUE;
 
     default:
@@ -845,9 +863,6 @@ static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
     goto failed;
   }
 
-  /* $$$ the "instance" and "parent" commands need to be changed to
-   * something more system independant. */
-
   if (cntl(cookie, "instance", SC68_DIAL_CALL, &v) || !v.s) {
     v.s = (void*)GetModuleHandleA(0);
     DBG("User did not provide a instance handle -> default is %p\n",v.s);
@@ -858,8 +873,7 @@ static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
   DBG("win32 instance -> %p\n", (void*) tmp.hinst);
 
   if (cntl(cookie, "parent", SC68_DIAL_CALL, &v))
-    v.s = 0;                            /* $$TEMP */
-    /* goto failed; */
+    v.s = 0;                          /* Is there a better choice ? */
   tmp.hparent = (HWND) v.s;
   DBG("win32 parent window -> %p\n", (void*) tmp.hparent);
 

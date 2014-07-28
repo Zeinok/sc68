@@ -134,7 +134,7 @@ static int getopt(const char * key, int op, sc68_dialval_t * val)
 
 static int conf(void * data, const char * key, int op, sc68_dialval_t *val)
 {
-  dial_t * dial = data;
+  dial_t * dial = (dial_t *) data;
   int res = -1;
 
   static const char * l_spr[] = {
@@ -201,15 +201,28 @@ static int conf(void * data, const char * key, int op, sc68_dialval_t *val)
     }
 
   }
-  else if (op == SC68_DIAL_SETI && keyis("sampling-rate")
-           && val->i > 0 && val->i < sprmax) {
-    val->i = i_spr[val->i];
-  }
-  else if (op == SC68_DIAL_CALL && keyis("save")) {
-    val->i = sc68_cntl(0, SC68_CONFIG_SAVE);
+  else if (op == SC68_DIAL_CALL) {
+    /* Other special calls like real-tiem access */
+    if (keyis(SC68_DIAL_NEW))
+      val->i = 0;
+    else if (keyis("save"))
+      val->i = sc68_cntl(0, SC68_CONFIG_SAVE);
+    else if (keyis("amiga-filter"))
+      /* $$$ TODO: realtime amiga-filter */
+      val->i = !!val->i;
+    else if (keyis("amiga-blend"))
+      /* $$$ TODO: realtime amiga-blend */
+      val->i = val->i;
   }
   else {
-    /* Finally may be try with options */
+    /* Finally try it as an option key.
+     *
+     * "sampling-rate" is converted if the value is in the index range
+     *                 instead of the frequency value range.
+     */
+    if (op == SC68_DIAL_SETI && keyis("sampling-rate")
+        && val->i > 0 && val->i < sprmax)
+        val->i = i_spr[val->i];
     res = getopt(key, op, val);
   }
 
@@ -230,7 +243,7 @@ int dial68_new_conf(void ** pdata, sc68_dial_f * pcntl)
     dial->dial.dial = magic;
     dial->dial.size = size;
     dial->dial.data = *pdata;
-    dial->dial.cntl = **pcntl;
+    dial->dial.cntl = *pcntl;
     *pcntl = conf;
     *pdata = dial;
     res = 0;
@@ -238,4 +251,3 @@ int dial68_new_conf(void ** pdata, sc68_dial_f * pcntl)
   TRACE68(dial_cat, P "%s -> %p %d\n", __FUNCTION__, (void*)dial, res);
   return res;
 }
-

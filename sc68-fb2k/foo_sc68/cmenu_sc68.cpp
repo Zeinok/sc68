@@ -39,6 +39,8 @@ static const GUID guid_engine = { 0x76fa907e, 0x0fac, 0x456b, { 0x9e, 0x23, 0xac
 static const GUID guid_blep   = { 0x3e3cd262, 0x6b21, 0x4287, { 0x88, 0x3d, 0x92, 0xe4, 0xe2, 0xbc, 0xbc, 0x16 } };
 static const GUID guid_pulse  = { 0x7b26813b, 0x06bd, 0x41b7, { 0xa8, 0xfa, 0x0e, 0x8b, 0x95, 0xb2, 0x69, 0x0b } };
 
+static const GUID guid_config = { 0x72815b85, 0x0904, 0x4d11, { 0xB3, 0xF0, 0x2C, 0x62, 0x0F, 0xFD, 0x9F, 0xC1 } };
+
 // static const GUID guid_filter = { 0x876288c0, 0x7923, 0x4328, { 0x8f, 0x2c, 0x29, 0xf5, 0x16, 0xeb, 0xdf, 0x3c } };
 
 enum {
@@ -49,13 +51,13 @@ enum {
 #if 0
 static contextmenu_group_factory g_cmenu(guid_cmenu, contextmenu_groups::root, SC68_MENU_PRIO);
 #else
-static contextmenu_group_popup_factory g_cmenu (guid_cmenu,  contextmenu_groups::root, "SC68", SC68_MENU_PRIO);
-static contextmenu_group_popup_factory g_asid  (guid_asid,   guid_cmenu, "aSIDifier", SC68_MENU_PRIO);
-static contextmenu_group_popup_factory g_engine(guid_engine, guid_cmenu, "YM Simulator", SC68_MENU_PRIO);
+static contextmenu_group_popup_factory g_cmenu (guid_cmenu,  contextmenu_groups::root, "SC68",         SC68_MENU_PRIO);
+static contextmenu_group_popup_factory g_asid  (guid_asid,   guid_cmenu,               "aSIDifier",    SC68_MENU_PRIO);
+static contextmenu_group_popup_factory g_engine(guid_engine, guid_cmenu,               "YM Simulator", SC68_MENU_PRIO);
+static contextmenu_group_popup_factory g_config(guid_config, guid_cmenu,               "Configure",    SC68_MENU_PRIO);
 #endif
-
-
 const
+
 struct cmenu_def asid_defs[] = {
   { &guid_aoff,   "Off",   "Don't aSIDify sc68 tracks"  },
   { &guid_aon,    "On",    "aSIDify sc68 tracks only if it is safe"},
@@ -135,13 +137,10 @@ public:
 
   void context_command(unsigned p_index,metadb_handle_list_cref p_data,const GUID& p_caller) {
     if (p_index < n) {
-      dbg(m_sc68,"ASID change to <%d>", n);
+      DBG("ASID change to <%d>", n);
       if (*ptr == p_index)
         p_index = (p_index+1) & 1;
       *ptr = p_index;
-      //sc68_t * sc68 = (sc68_t *)InterlockedCompareExchangePointer(&input_sc68::g_playing_sc68,0,0);
-      //if (sc68)
-      //  sc68_cntl(sc68,SC68_SET_ASID,n);
     }
   }
 
@@ -153,5 +152,61 @@ public:
     : cmenu_array_item(&guid_engine, sizeof(engine_defs)/sizeof(*engine_defs), engine_defs, (int*)&g_ym_engine) { }
 };
 
+//class cmenu_config_item : public cmenu_array_item {
+//  int * n;
+//public:
+//  cmenu_config_item()
+//    : cmenu_array_item(&guid_config, 0, 0, 0) { }
+//};
+
+class cmenu_config_item : public contextmenu_item_simple  {
+public:
+
+  unsigned get_num_items() {
+    return 1;
+  }
+
+  GUID get_item_guid(unsigned p_index) { return guid_config; }
+  void get_item_name(unsigned p_index, pfc::string_base & p_out) {
+      p_out = "Configure";
+  }
+  bool get_item_description(unsigned p_index, pfc::string_base & p_out) {
+      p_out = "sc68 configuration";
+      return true;
+  }
+
+  static int conf_f(void * data, const char * key, int op, sc68_dialval_t * v)
+{
+  //DBG("%s %d %s\n", __FUNCTION__, op, key);
+  //DBG("data: %p key:%s op:%d\n",(const char *) data, key, op);
+  if (op != SC68_DIAL_CALL)
+    return 1;
+  if (!strcmp(key,SC68_DIAL_WAIT))
+    v->i = 1;
+  else if (!strcmp(key,SC68_DIAL_HELLO))
+    v->s = "config";
+  else if (!strcmp(key,"instance")) {
+    HINSTANCE hinst = core_api::get_my_instance();
+    const char * fn = core_api::get_my_file_name();
+    DBG("hinst=%08x \"%s\"\n", (unsigned) hinst, fn);
+    v->s = (const char *)(HINSTANCE) hinst;
+  } else if (!strcmp(key,"parent"))
+    v->s = (const char *) (HWND) core_api::get_main_window();
+  else
+    return 1;                           /* continue */
+  return 0;                             /* taken */
+}
+
+  void context_command(unsigned p_index,metadb_handle_list_cref p_data,const GUID& p_caller) {
+    if (p_index == 0) {
+      DBG("%s\n","OPEN DIALOG CONFIG DIALOG");
+      sc68_cntl(0,SC68_DIAL, 0, conf_f);
+    }
+  }
+
+  GUID get_parent() { return guid_cmenu; }
+};
+
 static contextmenu_item_factory_t<cmenu_asid_item> g_asid_factory;
 static contextmenu_item_factory_t<cmenu_engine_item> g_engine_factory;
+static contextmenu_item_factory_t<cmenu_config_item> g_config_factory;

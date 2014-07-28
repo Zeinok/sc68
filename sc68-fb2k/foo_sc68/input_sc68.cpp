@@ -75,7 +75,7 @@ input_sc68::~input_sc68() {
 //! @param p_abort abort_callback object signaling user aborting the operation.
 void input_sc68::open(service_ptr_t<file> p_filehint, const char * p_path, t_input_open_reason p_reason, abort_callback & p_abort)
 {
-  dbg(m_sc68,"SC68 component: open <%s>\n", p_path);
+  DBG("SC68 component: open <%s>\n", p_path);
   // our input does not support retagging.
   if (p_reason == input_open_info_write)
     throw exception_io_unsupported_format(); 
@@ -91,17 +91,17 @@ void input_sc68::open(service_ptr_t<file> p_filehint, const char * p_path, t_inp
   }
 
   sc68_music_info(m_sc68, &m_fileinfo, 1, 0);
-  dbg(m_sc68,"SC68 component: as loaded <%s> <%s>\n", m_fileinfo.album, m_fileinfo.title);
+  DBG("SC68 component: as loaded <%s> <%s>\n", m_fileinfo.album, m_fileinfo.title);
 }
 //! See: input_info_reader::get_subsong_count(). Valid after open() with any reason.
 unsigned input_sc68::get_subsong_count() {
-  //dbg(m_sc68,"SC68 component: get subsong count <%d>", m_fileinfo.tracks);
+  //DBG("SC68 component: get subsong count <%d>", m_fileinfo.tracks);
   return m_fileinfo.tracks;
 }
 
 //! See: input_info_reader::get_subsong(). Valid after open() with any reason.
 t_uint32 input_sc68::get_subsong(unsigned p_index) {
-  //dbg(m_sc68,"SC68 component: get subsong idx <%d>", p_index);
+  //DBG("SC68 component: get subsong idx <%d>", p_index);
   return p_index+1;
 }
 
@@ -113,10 +113,10 @@ void input_sc68::get_info(t_uint32 p_subsong, file_info & p_info, abort_callback
   sc68_music_info_t * use, tmp;
   sc68_tag_t tag;
 
-  dbg(m_sc68,"SC68 component: get info for track #%d\n", p_subsong);
+  DBG("SC68 component: get info for track #%d\n", p_subsong);
 
   for (int i=0; !sc68_tag_enum(m_sc68, &tag, p_subsong, i, 0); ++i)
-    dbg(m_sc68,"SC68 component: [%02d:%s] = '%s'\n",p_subsong,tag.key,tag.val);
+    DBG("SC68 component: [%02d:%s] = '%s'\n",p_subsong,tag.key,tag.val);
 
   if (p_subsong == m_fileinfo.trk.track)
     use = &m_fileinfo;
@@ -229,20 +229,20 @@ void input_sc68::decode_on_idle(abort_callback & p_abort)
 
 void input_sc68::retag_set_info(t_uint32 p_subsong,const file_info & p_info,abort_callback & p_abort)
 {
-  dbg(m_sc68,"SC68 component: retag set info #%d\n", p_subsong);
+  DBG("SC68 component: retag set info #%d\n", p_subsong);
   throw exception_io_unsupported_format();
 }
 
 void input_sc68::retag_commit(abort_callback & p_abort)
 {
-  dbg(m_sc68,"SC68 component: retag commit\n");
+  DBG("SC68 component: retag commit\n");
   throw exception_io_unsupported_format();
 }
 
 bool input_sc68::g_is_our_content_type(const char * p_content_type)
 {
   bool ret = !stricmp_utf8(sc68_mimetype(), p_content_type);
-  dbg(0,"SC68 component: is our content-type: '%s' ? %s\n", p_content_type, ret ? "yes" : "no");
+  DBG("SC68 component: is our content-type: '%s' ? %s\n", p_content_type, ret ? "yes" : "no");
   return ret;
 }
 
@@ -253,7 +253,7 @@ bool input_sc68::g_is_our_path(const char * p_path,const char * p_extension)
     !stricmp_utf8(p_extension,"sc68") ||
     !stricmp_utf8(p_extension,"sndh") ||
     !stricmp_utf8(p_extension, "snd");
-  dbg(0,"SC68 component: is our file: '%s' ? %s\n", p_path, ret ? "yes" : "no");
+  DBG("SC68 component: is our file: '%s' ? %s\n", p_path, ret ? "yes" : "no");
   return ret;
 }
 

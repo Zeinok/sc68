@@ -296,9 +296,6 @@
     <None Include="..\..\libsc68\dial68\README" />
     <None Include="..\..\libsc68\dial68\winui\README" />
   </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="..\..\libsc68\dial68\winui\resource.rc" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
