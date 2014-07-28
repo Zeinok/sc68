@@ -45,10 +45,10 @@ static pfc::string_formatter g_get_component_about()
 
 // Declare our component
 DECLARE_COMPONENT_VERSION(
-"sc68 for foobar2000",
+  "sc68 for foobar2000",
   "0.7.0",
   g_get_component_about()
-  );
+);
 
 DECLARE_FILE_TYPE("SC68 files","*.SC68;*.SNDH;*.SND");
 

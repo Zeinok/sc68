@@ -136,6 +136,8 @@ public:
   void context_command(unsigned p_index,metadb_handle_list_cref p_data,const GUID& p_caller) {
     if (p_index < n) {
       dbg(m_sc68,"ASID change to <%d>", n);
+      if (*ptr == p_index)
+        p_index = (p_index+1) & 1;
       *ptr = p_index;
       //sc68_t * sc68 = (sc68_t *)InterlockedCompareExchangePointer(&input_sc68::g_playing_sc68,0,0);
       //if (sc68)
