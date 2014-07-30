@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_vfs_file.h
  * @author   Benjamin Gerard
  * @date     2007/08/08
@@ -15,7 +15,7 @@
 
 /**
  * @name     FILE stream
- * @ingroup  file68_vfs
+ * @ingroup  lib_file68_vfs
  *
  *   Implements vfs68_t for stdio.h FILE.
  *

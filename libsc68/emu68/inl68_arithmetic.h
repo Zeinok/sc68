@@ -1,5 +1,5 @@
-/**
- * @ingroup   emu68_lib
+/*
+ * @ingroup   lib_emu68
  * @file      emu68/inl68_arithmetic.h
  * @brief     68k arithmetical instruction inlines.
  * @author    Benjamin Gerard

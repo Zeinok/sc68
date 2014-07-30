@@ -59,7 +59,7 @@ mksc68_tag.h
 bin_PROGRAMS         = mksc68
 mksc68_SOURCES       = $(sources)
 mksc68_LDADD         = $(SC68_LA) $(FILE68_LA) $(DESA68_LA)
-noinst_HEADERS       = mksc68_doc.h $(headers)
+noinst_HEADERS       = $(headers)
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |

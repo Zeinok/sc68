@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_str.h
  * @brief    String manipulation header.
  * @author   Benjamin Gerard
@@ -16,8 +16,8 @@
 #endif
 
 /**
- * @defgroup  file68_str  String manipulation
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_str  String manipulation
+ * @ingroup   lib_file68
  *
  *   Provides string manipulation functions.
  *
@@ -180,7 +180,7 @@ FILE68_API
 const char * strnevernull68(const char *s);
 #endif
 
-#define strok68(V) strok68(V)
+#define strok68(V) strok68(V)           /**< inlined version of strok68()  */
 #ifdef strok68
 static inline
 const char * strok68(const int v)

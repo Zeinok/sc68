@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/struct68.h
  * @brief     Struture definitions header.
  * @author    Benjamin Gerard
@@ -14,7 +14,7 @@
 #include "type68.h"
 
 /**
- * @addtogroup emu68_lib_types
+ * @addtogroup lib_emu68_types
  * @{
  */
 
@@ -52,12 +52,16 @@ typedef void (*iomemfunc68_t)(io68_t * const);
 typedef void (linefunc68_t)(emu68_t * const, int, int);
 
 #ifndef EMU68_MONOLITIC
+/** @nodoc */
 # define DECL_LINE68(N)                                 \
   void N(emu68_t * const emu68, int reg9, int reg0)
+/** @nodoc */
 # define DECL_STATIC_LINE68(N) static DECL_LINE68(N)
 #else
+/** @nodoc */
 # define DECL_LINE68(N)                                         \
   static void N(emu68_t * const emu68, int reg9, int reg0)
+/** @nodoc */
 # define DECL_STATIC_LINE68(N) DECL_LINE68(N)
 #endif
 
@@ -123,29 +127,37 @@ typedef struct
   int sr;                      /**< 68K Status Register.     */
 } reg68_t;
 
-#define REG68_D0_IDX 000
-#define REG68_D1_IDX 001
-#define REG68_D2_IDX 002
-#define REG68_D3_IDX 003
-#define REG68_D4_IDX 004
-#define REG68_D5_IDX 005
-#define REG68_D6_IDX 006
-#define REG68_D7_IDX 007
-#define REG68_DN_IDX(N) (N&7)
+/**
+ * 68k register index.
+ * @{
+ */
+enum emu68_regidx_e {
+  REG68_D0_IDX,               /**< D0 register index.  */
+  REG68_D1_IDX,                /**< D1 register index.  */
+  REG68_D2_IDX,                /**< D2 register index.  */
+  REG68_D3_IDX,                /**< D3 register index.  */
+  REG68_D4_IDX,                /**< D4 register index.  */
+  REG68_D5_IDX,                /**< D5 register index.  */
+  REG68_D6_IDX,                /**< D6 register index.  */
+  REG68_D7_IDX,                /**< D7 register index.  */
+  REG68_A0_IDX,                /**< A0 register index.  */
+  REG68_A1_IDX,                /**< A1 register index.  */
+  REG68_A2_IDX,                /**< A2 register index.  */
+  REG68_A3_IDX,                /**< A3 register index.  */
+  REG68_A4_IDX,                /**< A4 register index.  */
+  REG68_A5_IDX,                /**< A5 register index.  */
+  REG68_A6_IDX,                /**< A6 register index.  */
+  REG68_A7_IDX,                /**< A7 register index.  */
+  REG68_US_IDX,                /**< USP register index. */
+  REG68_PC_IDX,                /**< PC register index.  */
+  REG68_SR_IDX,                /**< SR register index.  */
+};
 
-#define REG68_A0_IDX 010
-#define REG68_A1_IDX 011
-#define REG68_A2_IDX 012
-#define REG68_A3_IDX 013
-#define REG68_A4_IDX 014
-#define REG68_A5_IDX 015
-#define REG68_A6_IDX 016
-#define REG68_A7_IDX 017
-#define REG68_AN_IDX(N) (8+(N&7))
-
-#define REG68_US_IDX 020
-#define REG68_PC_IDX 021
-#define REG68_SR_IDX 022
+#define REG68_DN_IDX(N) (REG68_D0_IDX+(N&7)) /**< Dn register index.  */
+#define REG68_AN_IDX(N) (REG68_A0_IDX+(N&7)) /**< An register index.  */
+/**
+ * @}
+ */
 
 /**
  * Exception trapping handler.
@@ -196,11 +208,11 @@ struct emu68_s {
   int      nio;                       /**< # IO plug in IO-list.    */
   io68_t * iohead;                    /**< Head of IO-list.         */
   io68_t * interrupt_io;              /**< Current interuptible IO. */
-  io68_t * mapped_io[256];
-  io68_t * memio;
-  io68_t   ramio; /**< io used only in debug mode (access control). */
-  io68_t   errio; /**< io used for invalid address in debug mode.   */
-  io68_t   nopio; /**< io used for invalid address in normal mode.  */
+  io68_t * mapped_io[256];            /**< IO areas.                */
+  io68_t * memio;                     /**< IO to access memory.     */
+  io68_t   ramio; /**< IO used only in debug mode (access control). */
+  io68_t   errio; /**< IO used for invalid address in debug mode.   */
+  io68_t   nopio; /**< IO used for invalid address in normal mode.  */
 
   /* Memory access. */
   addr68_t bus_addr;        /**< bus address for memory access.     */
@@ -208,10 +220,10 @@ struct emu68_s {
 
   int      frm_chk_fl;      /**< ORed chk change for current frame. */
   struct {
-    unsigned pc;
-    unsigned ad;
-    int      fl;
-  } fst_chk, lst_chk;
+    unsigned pc;                        /**< Pc register value  */
+    unsigned ad;                        /**< Addr               */
+    int      fl;                        /**< Flags.             */
+  } fst_chk /**< first check. */, lst_chk /**< last check. */;
   u8       * chk;           /**< Access-Control-Memory buffer.      */
 
   emu68_bp_t breakpoints[31];           /**< Hardware breakpoints.  */
@@ -220,7 +232,7 @@ struct emu68_s {
   addr68_t memmsk;     /**< Onboard memory mask (2^log2mem-1).      */
   int      log2mem;    /**< Onboard memory buffer size (2^log2mem). */
   u8       mem[32];    /**< Onboard memory buffer.
-                            @notice Must be last in struct.         */
+                            @note   Must be last in struct.         */
 };
 
 static inline
@@ -241,8 +253,8 @@ void inl_addcycle68(emu68_t * const emu68, const cycle68_t n)
 
 #ifndef emu68_alloc
 # include <stdlib.h>
-# define emu68_alloc(size) malloc(size)
-# define emu68_free(size)  free(size)
+# define emu68_alloc(size) malloc(size) /**< used instead of malloc(). */
+# define emu68_free(size)  free(size)   /**< used instead of free().   */
 #endif
 
 /**

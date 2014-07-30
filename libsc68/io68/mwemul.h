@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_lib
+ * @ingroup   lib_io68
  * @file      io68/mwemul.h
  * @author    Benjamin Gerard
  * @date      1999/03/20
@@ -8,15 +8,15 @@
 
 /* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef MWEMUL_H
-#define MWEMUL_H
+#ifndef IO68_MWEMUL_H
+#define IO68_MWEMUL_H
 
 #include "io68_api.h"
 #include "emu68/type68.h"
 
 /**
- * @defgroup  io68_lib_mw  STE sound emulator
- * @ingroup   io68_lib
+ * @defgroup  lib_io68_mw  STE sound emulator
+ * @ingroup   lib_io68
  * @brief     STE (MicroWire/LMC/DMA) emulator.
  *
  * @{
@@ -249,10 +249,10 @@ IO68_EXTERN
  *   pointer locates the 68K memory buffer where samples are stored to
  *   allow DMA fetch emulation.
  *
- * @param  out    Pointer to YM-2149 source sample directly used for
- *                Microwire output mixing.
- * @param  mem68  Pointer to 68K memory buffer start address
- * @param  n      Number of sample to mix in out buffer
+ * @param  mw     microwire instance
+ * @param  out    pointer to YM-2149 source sample directly used for
+ *                microwire output mixing.
+ * @param  n      number of sample to mix in out buffer
  *
  * @see YM_mix()  @see YM_get_buffer()
  */
@@ -327,8 +327,10 @@ IO68_EXTERN
  * Set/Get high pass filter.
  *
  * @param   mw  microwire instance
- * @param    n  @mw_lmc_e "high pass filter" in range [0..12] for [-12..0] dB
- * @return      @mw_lmc_e "high pass filter"
+
+ * @param    n  @ref mw_lmc_e "high pass filter" in range [0..12] for
+ *              [-12..0] dB
+ * @return      @ref mw_lmc_e "high pass filter"
  *
  * @see      mw_lmc_low()
  * @warning  Filters are not supported by this microwire emulator.
@@ -340,8 +342,9 @@ IO68_EXTERN
  * Set/Get low pass filter.
  *
  * @param   mw  microwire instance
- * @param    n  @mw_lmc_e "low pass filter" in range [0..12] for [-12..0] dB
- * @return      @mw_lmc_e "low pass filter"
+ * @param    n  @ref mw_lmc_e "low pass filter" in range [0..12]
+ *              for [-12..0] dB
+ * @return      @ref mw_lmc_e "low pass filter"
  *
  * @see      mw_lmc_high()
  * @warning  Filters are not supported by this microwire emulator.

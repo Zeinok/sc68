@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_vfs_curl.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
@@ -15,7 +15,7 @@
 
 /**
  * @name     cURL stream
- * @ingroup  file68_vfs
+ * @ingroup  lib_file68_vfs
  *
  * @anchor cURL
  *

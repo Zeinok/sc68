@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_vfs_def.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
@@ -15,7 +15,7 @@
 
 /**
  * @name     Open modes
- * @ingroup  file68_vfs
+ * @ingroup  lib_file68_vfs
  * @{
  */
 enum {
@@ -54,7 +54,7 @@ enum {
 
 /**
  * @name     Stream function prototypes.
- * @ingroup  file68_vfs
+ * @ingroup  lib_file68_vfs
  * @{
  */
 typedef const char * (* vfs68_name_t) (vfs68_t *);
@@ -76,7 +76,7 @@ typedef void (* vfs68_destroy_t) (vfs68_t *);
  *
  *   Set of functions needed to handle a stream.
  *
- * @ingroup  file68_vfs
+ * @ingroup  lib_file68_vfs
  */
 struct _vfs68_t {
   vfs68_name_t    name;    /**< Get stream name.        */

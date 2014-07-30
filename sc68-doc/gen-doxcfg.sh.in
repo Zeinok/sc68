@@ -3,8 +3,6 @@
 # @file    gen-doxcfg.sh
 # @author  Benjamin Gerard
 # @brief   Generate sc68 doxygen configuration file.
-# 
-# Time-stamp: <2013-08-07 15:13:51 ben>
 
 doxygen=@doxygen@
 srcdir="@srcdir@"
@@ -15,8 +13,8 @@ if test -z "$1"; then
     exit 2
 fi
 
-"$doxygen" -s -g "$1.tmp" >/dev/null &&
-sed -f - $1.tmp >$1  <<EOF
+"$doxygen" -s -g "$1" >/dev/null &&
+sed -i -f - "$1"  <<EOF
 s|\(^PROJECT_NAME${spc}=\)${spc}.*$|\1 "sc68"|
 s|\(^PROJECT_NUMBER${spc}=\)${spc}.*$|\1 "@PACKAGE_VERSION@"|
 s|\(^PROJECT_BRIEF${spc}=\)${spc}.*$|\1 "An Atari-ST and Amiga music player"|
@@ -30,7 +28,9 @@ s|\(^GENERATE_LATEX${spc}=\)${spc}.*$|\1 NO|
 s|\(^FILE_PATTERNS${spc}=\)${spc}.*$|\1 \*.h|
 s|\(^JAVADOC_AUTOBRIEF${spc}=\)${spc}.*$|\1 YES|
 s|\(^INPUT_FILTER${spc}=\)${spc}.*$|\1 "${SHELL} ./doc-filter.sh"|
+s|\(^ALIASES${spc}=\)${spc}.*$|\1 "nodoc=@xrefitem undoc \\\"not documented\\\" \\\\"Undocumented List\\\"" |
 EOF
 r=$?
-rm -- "$1.tmp"
+test $r -eq 0 || rm -- "$1"
+
 exit $r

@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68.h
  * @author   Benjamin Gerard
  * @date     1998-09-03
@@ -18,8 +18,8 @@
 #include "file68_tag.h"
 
 /**
- * @defgroup  file68_file  Music file manipulation
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_fil  Music file manipulation
+ * @ingroup   lib_file68
  *
  *  Provides various functions for sc68 file manipulation.
  *
@@ -421,11 +421,7 @@ FILE68_API
 /**
  * Destroy loaded or allocated disk.
  *
- * @param  extra  extra bytes to allocate
- *
- * @return  a pointer to allocated disk
- * @retval  0  failure
- *
+ * @param  disk  disk to free.
  *
  * @see file68_new()
  * @see file68_load()

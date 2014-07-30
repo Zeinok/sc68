@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_tdb.h
  * @author   Benjamin Gerard
  * @date     2013-05-30
@@ -14,8 +14,8 @@
 #include "file68_api.h"
 
 /**
- * @defgroup  file68_tdb  External music info database.
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_tdb  External music info database.
+ * @ingroup   lib_file68
  *
  * Provides function for accessing the music length database.
  *

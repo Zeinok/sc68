@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_zip.h
  * @author   Benjamin Gerard
  * @date     2003-09-03
@@ -16,8 +16,8 @@
 #endif
 
 /**
- * @defgroup  file68_zip  gzip file support.
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_zip  gzip file support.
+ * @ingroup   lib_file68
  *
  *   Provides functions for loading and saving gzip file.
  *

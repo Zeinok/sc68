@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_msg.h
  * @brief    Message header.
  * @author   Benjamin Gerard
@@ -21,14 +21,14 @@
 # define FMT23 __attribute__ ((format (printf, 2, 3)))
 # define FMT34 __attribute__ ((format (printf, 3, 4)))
 #else
-# define FMT12
-# define FMT23
-# define FMT34
+# define FMT12 /**< @nodoc */
+# define FMT23 /**< @nodoc */
+# define FMT34 /**< @nodoc */
 #endif
 
 /**
- * @defgroup  file68_msg  Output messages
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_msg  Output messages
+ * @ingroup   lib_file68
  * @brief     Provides functions to output text messages.
  *
  *   The output message system defines fixed categories of message:
@@ -46,7 +46,7 @@
 /**
  * Message handler type.
  *
- * @param  bit        one of the @ref enum_msg68_bit enum value.
+ * @param  bit        one of the @ref msg68_cat_e enum value.
  * @param  user_data  user private data.
  * @param  format     printf like format string.
  * @param  va_list    variable argument list.
@@ -57,7 +57,7 @@ typedef void (*msg68_t)(int, void*, const char*, va_list);
  * Message category help display function.
  *
  * @param  user_data    user private data.
- * @param  bit          one of the @ref enum_msg68_bit enum value.
+ * @param  bit          one of the @ref msg68_cat_e enum value.
  * @param  name         category name.
  * @param  description  short description.
  */
@@ -200,7 +200,7 @@ FILE68_API
 /**
  * Print generic message (variable argument).
  *
- * @param  cat     message type @ref enum_msg68_bit.
+ * @param  cat     message type @ref msg68_cat_e.
  * @param  fmt     printf() like format string.
  * @param  list    variable argument list (stdarg.h)
  */
@@ -210,7 +210,7 @@ FILE68_API FMT23
 /**
  * Print generic message.
  *
- * @param  cat     message type @ref enum_msg68_bit.
+ * @param  cat     message type @ref msg68_cat_e.
  * @param  fmt     printf() like format string.
  */
 void msg68(int cat, const char * fmt, ...);
@@ -289,7 +289,7 @@ FILE68_API FMT34
 /**
  * Print message (eXtended version).
  *
- * @param  cat     message type @ref enum_msg68_bit.
+ * @param  cat     message type @ref msg68_cat_e.
  * @param  cookie  user data.
  * @param  fmt     printf() like format string.
  */
@@ -299,7 +299,7 @@ FILE68_API
 /**
  * Print message (eXtended version; variable argument).
  *
- * @param  cat     message type @ref enum_msg68_bit.
+ * @param  cat     message type @ref msg68_cat_e.
  * @param  cookie  user data.
  * @param  fmt     printf() like format string.
  * @param  list    variable argument list (stdarg.h)
@@ -390,8 +390,8 @@ FMT23 static void msg68_dummy(int cat, const char * fmt, ...) {}
 #  endif
 #  define VTRACE68(cat,fmt,list)
 # else
-#  define  TRACE68 msg68
-#  define VTRACE68 msg68_va
+#  define  TRACE68 msg68                /**< @nodoc */
+#  define VTRACE68 msg68_va             /**< @nodoc */
 # endif
 #endif
 

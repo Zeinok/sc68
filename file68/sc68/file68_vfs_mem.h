@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_vfs_mem.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
@@ -15,7 +15,7 @@
 
 /**
  * @name     Memory stream
- * @ingroup  file68_vfs
+ * @ingroup  lib_file68_vfs
  *
  *   Implements vfs68_t for memory buffer.
  *

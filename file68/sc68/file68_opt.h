@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_opt.h
  * @brief    Command line option manipulation header.
  * @author   Benjamin Gerard
@@ -16,8 +16,8 @@
 #endif
 
 /**
- * @defgroup  file68_opt  Options manipulation
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_opt  Options manipulation
+ * @ingroup   lib_file68
  *
  *   Provides command line options manipulation functions.
  *
@@ -179,7 +179,7 @@ FILE68_API
  * @param  options  Array of options
  * @param  n        Array size
  *
- * @notice Options are not internally copied.
+ * @note   Options are not internally copied.
  */
 int option68_append(option68_t * options, int n);
 

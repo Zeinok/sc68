@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_devel
+ * @ingroup   lib_io68
  * @file      io68/io68_api.h
  * @author    Benjamin Gerard
  * @date      2009/02/10

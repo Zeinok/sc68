@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_chk.h
  * @author   Benjamin Gerard
  * @date     2011-10-02
@@ -12,7 +12,7 @@
 #define FILE68_CHK_H
 
 /**
- * @addtogroup   file68_lib
+ * @addtogroup   lib_file68
  * @{
  */
 

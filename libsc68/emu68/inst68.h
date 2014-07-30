@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/inst68.h
  * @brief     68k instructions header.
  * @author    Benjamin Gerard
@@ -15,8 +15,8 @@
 #include "type68.h"
 
 /**
- * @defgroup   emu68_lib_inst  68k Instructions
- * @ingroup    emu68_lib_core
+ * @defgroup   lib_emu68_inst  68k Instructions
+ * @ingroup    lib_emu68_core
  * @{
  */
 
@@ -48,7 +48,7 @@ EMU68_EXTERN
  *  @param  s      normalized source operand
  *  @param  d      normalized destination operand
  *  @param  c      normalized carry
- *  @return        nornmalized result
+ *  @return        normalized result
  *  @retval        d + s + c
  */
 int68_t add68(emu68_t * const emu68, const int68_t s, int68_t d, int68_t c);
@@ -64,7 +64,7 @@ EMU68_EXTERN
  *  @param  s      normalized source operand
  *  @param  d      normalized destination operand
  *  @param  c      normalized carry
- *  @return        nornmalized result
+ *  @return        normalized result
  *  @retval        d - s - c
  */
 int68_t sub68(emu68_t * const emu68, const int68_t s, int68_t d, int68_t c);
@@ -402,18 +402,6 @@ int (* const scc68[])(emu68_t * const emu68);
 
 EMU68_EXTERN
 /**
- * SWAP words
- *
- *  The swap68() function swaps MSW and LSW and updates SR flags
- *  accordingly
- *
- *  @param  emu68  68k emulator instance
- *  @param  dn     data register to swap [0..7]
- */
-void swap68(emu68_t * const emu68, const int dn);
-
-EMU68_EXTERN
-/**
  * 68K LEA instruction (load effective address).
  *
  *  The lea68() function returns effective address.
@@ -482,7 +470,7 @@ void unlk68(emu68_t * const emu68, const int reg);
 
 EMU68_EXTERN
 /**
- * 68K SWAP instruction.
+ * SWAP high and low words.
  *
  *  The swap68() function performs a MSW LSW swapping and updates SR
  *  flags accordingly.
@@ -669,6 +657,7 @@ EMU68_EXTERN
  *
  *  @param  emu68  68k emulator instance.
  *  @param  d      destination operand
+ *  @param  s      source operand
  *  @return        result
  *  @retval        d,10 - s,10 - X
  */
@@ -689,12 +678,6 @@ void buserror68(emu68_t * const emu68, const int addr, const int mode);
 
 EMU68_EXTERN
 void exception68(emu68_t * const emu68, const int vector, const int level);
-
-EMU68_EXTERN
-void linea68(emu68_t * const emu68);
-
-EMU68_EXTERN
-void linef68(emu68_t * const emu68);
 
 /**
  * @}

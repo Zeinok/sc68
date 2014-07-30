@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_err.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
@@ -18,8 +18,8 @@
 
 
 /**
- * @defgroup  file68_err  Error message
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_err  Error message
+ * @ingroup   lib_file68
  *
  *   Provides error message facilities.
  *

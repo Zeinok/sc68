@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/type68.h
  * @brief     Type definitions header.
  * @date      1999/03/13
@@ -14,8 +14,8 @@
 #ifdef HAVE_STDINT_H
 # include <stdint.h>
 #else
-typedef  int32_t  int_fast32_t;
-typedef uint32_t uint_fast32_t;
+typedef  int32_t  int_fast32_t;         /**< @nodoc */
+typedef uint32_t uint_fast32_t;         /**< @nodoc */
 #endif
 
 #ifdef HAVE_SYS_TYPES_H
@@ -23,8 +23,8 @@ typedef uint32_t uint_fast32_t;
 #endif
 
 /**
- * @defgroup  emu68_lib_types  Type definitions
- * @ingroup   emu68_lib
+ * @defgroup  lib_emu68_types  Type definitions
+ * @ingroup   lib_emu68
  *
  *   Definition of types used by EMU68 and SC68 related projects.
  *

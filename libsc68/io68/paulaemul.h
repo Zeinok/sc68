@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_lib
+ * @ingroup   lib_io68
  * @file      io68/paulaemul.h
  * @brief     Paula emulator header.
  * @author    Benjamin Gerard
@@ -16,8 +16,8 @@
 #include "emu68/struct68.h"
 
 /**
- *  @defgroup  io68_lib_paula  Amiga Paula emulator.
- *  @ingroup   io68_lib
+ *  @defgroup  lib_io68_aga  Amiga Paula emulator.
+ *  @ingroup   lib_io68
  *  @brief     Paula emulator (Amiga soundchip).
  *
  *  @todo Write something about paula and about this emulator right here !
@@ -74,6 +74,9 @@
  *  @{
  */
 
+/**
+ * Amiga hardware regiosters.
+ */
 enum amiga_regs_e {
 
   /** Amiga Vertical/Horizontal electron bean position */

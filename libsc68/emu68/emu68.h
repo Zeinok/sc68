@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/emu68.h
  * @brief     68K emulator header.
  * @author    Benjamin Gerard
@@ -19,19 +19,19 @@
 #include "mem68.h"
 
 /**
- * @defgroup  emu68_lib  68k emulator library
- * @ingroup   sc68_lib
+ * @defgroup  lib_emu68  68k emulator library
+ * @ingroup   lib_sc68
  * @brief     The 68k emulator library.
  */
 
 /**
- * @defgroup  emu68_lib_core  68k emulator core
- * @ingroup   emu68_lib
+ * @defgroup  lib_emu68_core  68k emulator core
+ * @ingroup   lib_emu68
  * @brief     The core of the 68k emulator.
  */
 
 /**
- * @addtogroup  emu68_lib
+ * @addtogroup  lib_emu68
  * @{
  */
 
@@ -243,6 +243,7 @@ EMU68_API
  * Set internal cycle counter.
  *
  * @param  emu68  emulator instance
+ * @param  cycle  cycle number
  */
 void emu68_set_cycle(emu68_t * const emu68, cycle68_t cycle);
 
@@ -271,33 +272,37 @@ cycle68_t emu68_get_cycle(emu68_t * const emu68);
 
 EMU68_API
 /**
- * Check if a memory block is in 68K on-board memory range.
+ * Check and get a valid 68k onboard memory block.
  *
  * @param  emu68  emulator instance
+ * @param  addr   address of memory block to access
+ * @param  size   size in byte of the memory block
  *
  * @return  Pointer to onboard memory block
  * @retval  0  Failure
  */
-u8 * emu68_memptr(emu68_t * const emu68, addr68_t dest, uint68_t sz);
+u8 * emu68_memptr(emu68_t * const emu68, addr68_t addr, uint68_t size);
 
 EMU68_API
 /**
- * Check for a memory access status block.
+ * Check and get a valid 68k onboard memory access control block.
  *
  * @param  emu68  emulator instance
+ * @param  addr   address of memory block to access
+ * @param  size   size in byte of the memory block
  *
- * @return  Pointer to onboard memory block
+ * @return  pointer to onboard memory block
  * @retval  0  Failure
  */
-u8 * emu68_chkptr(emu68_t * const emu68, addr68_t dst, uint68_t sz);
+u8 * emu68_chkptr(emu68_t * const emu68, addr68_t addr, uint68_t size);
 
 
 EMU68_API
 /**
- * Get byte in 68K onboard memory.
+ * Read a byte from 68K onboard memory.
  *
  * @param  emu68  emulator instance
- * @param  emu68  emulator instance
+ * @param  addr   address of byte to access
  *
  * @see emu68_poke()
  */
@@ -305,79 +310,105 @@ int emu68_peek(emu68_t * const emu68, addr68_t addr);
 
 EMU68_API
 /**
- * Get byte in 68K access control memory.
+ * Read a byte from 68K access control memory.
  *
  * @param  emu68  emulator instance
- * @param  emu68  emulator instance
+ * @param  addr   address of byte to access
  *
- * @see emu68_poke()
+ * @see emu68_chkpoke()
  */
 int emu68_chkpeek(emu68_t * const emu68, addr68_t addr);
 
 
 EMU68_API
 /**
- * Put a byte in 68K onboard memory.
+ * Write a byte in 68K onboard memory.
  *
  * @param  emu68  emulator instance
+ * @param  addr   address of byte to access
+ * @param  byte   byte value
  *
  * @see emu68_peek()
  */
-int emu68_poke(emu68_t * const emu68, addr68_t addr, int68_t v);
+int emu68_poke(emu68_t * const emu68, addr68_t addr, int68_t byte);
 
 EMU68_API
 /**
- * Put a byte in 68K access control memory.
+ * Write a byte in 68K access control memory.
  *
  * @param  emu68  emulator instance
+ * @param  addr   address of byte to access
+ * @param  byte   byte value
  *
  * @see emu68_peek()
  */
-int emu68_chkpoke(emu68_t * const emu68, addr68_t addr, int68_t v);
+int emu68_chkpoke(emu68_t * const emu68, addr68_t addr, int68_t byte);
 
 EMU68_API
 /**
- * Put a memory block to 68K on-board memory.
+ * Write a memory block in 68K on-board memory.
  *
  *   The function copy a memory block in 68K on-board memory after verifying
  *   that the operation access valid 68K memory.
  *
  * @param  emu68  emulator instance
+ * @param  dst    address of memory block to access in the 68k memory
+ * @param  src    pointer to the source buffer
+ * @param  size   size in byte of the memory block
  *
  * @see emu68_memget()
  * @see emu68_memvalid()
  */
 int emu68_memput(emu68_t * const emu68,
-                 addr68_t dst, const u8 * src, uint68_t sz);
+                 addr68_t dst, const u8 * src, uint68_t size);
 
 EMU68_API
 /**
- * Get 68K on-board memory into a memory block.
+ * Read a 68K on-board memory block.
  *
  *   The function copy a 68K on-board memory to a memory location after
  *   verifying that the operation access valid 68K memory.
  *
  * @param  emu68  emulator instance
+ * @param  dst    pointer to the destination buffer
+ * @param  src    address of memory block to access in the 68k memory
+ * @param  size   size in byte of the memory block
  *
  * @see emu68_memput()
  * @see emu68_memvalid()
  */
 int emu68_memget(emu68_t * const emu68,
-                 u8 * dst, addr68_t src, uint68_t sz);
+                 u8 * dst, addr68_t src, uint68_t size);
 
 EMU68_API
 /**
  * Fill a 68k on board memory block with a value.
+ *
  * @param  emu68  emulator instance
+ * @param  addr   address of 68K memory block to access
+ * @param  byte   byte value to write
+ * @param  size   size in byte of the memory block
+ * @return error-code
+ * @retval  0 on success
+ * @retval -1 on error
  */
-int emu68_memset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz);
+int emu68_memset(emu68_t * const emu68,
+                 addr68_t addr, u8 byte, uint68_t size);
 
 EMU68_API
 /**
  * Fill a 68k access control memory block with a value.
+ *
  * @param  emu68  emulator instance
+ * @param  addr   address of 68K memory block to access
+ * @param  byte   byte value to write
+ * @param  size   size in byte of the memory block
+ * @return error-code
+ * @retval  0 on success
+ * @retval -1 on error
  */
-int emu68_chkset(emu68_t * const emu68, addr68_t dst, u8 val, uint68_t sz);
+int emu68_chkset(emu68_t * const emu68,
+                 addr68_t addr, u8 byte, uint68_t size);
 
 EMU68_API
 /**
@@ -485,8 +516,8 @@ EMU68_API
  *   instruction counter.
  *
  * @param  emu68           emulator instance
- * @param  instrunctions   max instruction to execute 0:no limit,
- *                         EMU68_CONT:continue a breaked run
+ * @param  instructions    max instruction to execute 0: no limit,
+ *                         EMU68_CONT: continue a broken run
 
  * @return @ref emu68_status_e "execution status"
  */
@@ -498,7 +529,8 @@ EMU68_API
  *
  * @param  emu68   emulator instance
  * @param  cycles  interval within to excute interruptions
- * @return @ref emu68_rc_e "execution return code"
+ *
+ * @return @ref emu68_status_e "execution status"
  */
 int emu68_interrupt(emu68_t * const emu68, cycle68_t cycles);
 
@@ -552,9 +584,12 @@ EMU68_API
  */
 int emu68_bp_find(emu68_t * const emu68, addr68_t addr);
 
-/** @} */
+/**
+ * @}
+ */
 
-/** @name  Version checking functions
+/**
+ * @name  Version checking functions
  * @{
  */
 

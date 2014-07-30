@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/emu68_api.h
  * @brief     emu68 library export header.
  * @author    Benjamin Gerard

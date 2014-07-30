@@ -1,6 +1,6 @@
 /**
- * @ingroup   sc68_lib
- * @file      conf68.h
+ * @ingroup   lib_sc68
+ * @file      sc68/conf68.h
  * @brief     configuration file.
  * @author    Benjamin Gerard
  * @date      1999/07/27
@@ -20,8 +20,8 @@
 #endif
 
 /**
- *  @defgroup  sc68_conf  configuration file
- *  @ingroup   sc68_lib
+ *  @defgroup  lib_sc68_conf  Access to sc68 configuration
+ *  @ingroup   lib_sc68
  *
  *  This module prodives functions to access sc68 configuration.
  *

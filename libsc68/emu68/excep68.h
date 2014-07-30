@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/excep68.h
  * @brief     68k exception and interruption definition header.
  * @author    Benjamin Gerard
@@ -12,7 +12,7 @@
 #define EMU68_EXCEP68_H
 
 /**
- * @addtogroup  emu68_lib
+ * @addtogroup  lib_emu68
  *
  * @{
  */
@@ -56,7 +56,7 @@ enum emu68_vector_e {
   LINEA_VECTOR    = 0x00A, /**< Linea vector address.                   */
   LINEF_VECTOR    = 0x00B, /**< Linef vector address.                   */
   SPURIOUS_VECTOR = 0x018, /**< Spurious interrupt vector address.      */
-  TRAP_VECTOR_0   = 0x020, /**< Trap #n vector address.                 */
+  TRAP_VECTOR_0   = 0x020, /**< Trap \#n vector address.                */
 };
 
 /** Nth TRAP vector address. */

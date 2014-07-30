@@ -1,9 +1,9 @@
 /**
- * @ingroup   io68_ym_devel
+ * @ingroup   lib_io68
  * @file      io68/ymemul.h
+ * @brief     YM-2149 emulator header.
  * @author    Benjamin Gerard
  * @date      1998/06/24
- * @brief     YM-2149 emulator header.
  */
 
 /* Copyright (c) 1998-2014 Benjamin Gerard */
@@ -23,8 +23,8 @@ enum {
 };
 
 /**
- * @defgroup   io68_ym_devel  YM-2149 emulator
- * @ingroup    io68_devel
+ * @defgroup   lib_io68_ym  YM-2149 emulator
+ * @ingroup    lib_io68
  *
  * The YM-2149 (Atari-ST soundchip) emulator.
  *
@@ -47,9 +47,9 @@ enum {
   YM_ENVTYPE  = 13, /**< Volume envelop wave form.              */
   YM_ENVSHAPE = 13, /**< Alias for YM_ENVTYPE.                  */
 };
-#define YM_PERL(N) (YM_BASEPERL+(N)*2) /**< Canal #N LSB period.    */
-#define YM_PERH(N) (YM_BASEPERH+(N)*2) /**< Canal #N MSB period.    */
-#define YM_VOL(N)  (YM_BASEVOL+(N))    /**< Canal #N volume.        */
+#define YM_PERL(N) (YM_BASEPERL+(N)*2) /**< Canal N LSB period.    */
+#define YM_PERH(N) (YM_BASEPERH+(N)*2) /**< Canal N MSB period.    */
+#define YM_VOL(N)  (YM_BASEVOL+(N))    /**< Canal N volume.        */
 /**
  * @}
  */
@@ -94,30 +94,30 @@ typedef struct
  * YM-2149 internal register mapping.
  */
 struct ym2149_reg_s {
-  /* 0 */  u8 per_a_lo;
-  /* 1 */  u8 per_a_hi;
-  /* 2 */  u8 per_b_lo;
-  /* 3 */  u8 per_b_hi;
-  /* 4 */  u8 per_c_lo;
-  /* 5 */  u8 per_c_hi;
-  /* 6 */  u8 per_noise;
-  /* 7 */  u8 ctl_mixer;
-  /* 8 */  u8 vol_a;
-  /* 9 */  u8 vol_b;
-  /* A */  u8 vol_c;
-  /* B */  u8 per_env_lo;
-  /* C */  u8 per_env_hi;
-  /* D */  u8 env_shape;
-  /* E */  u8 io_a;
-  /* F */  u8 io_b;
+  u8 per_a_lo;      /**< (0) LSB tone period channel A */
+  u8 per_a_hi;      /**< (1) MSB tone period channel A */
+  u8 per_b_lo;      /**< (2) LSB tone period channel B */
+  u8 per_b_hi;      /**< (3) MSB tone period channel B */
+  u8 per_c_lo;      /**< (4) LSB tone period channel C */
+  u8 per_c_hi;      /**< (5) MSB tone period channel C */
+  u8 per_noise;     /**< (6) Noise period              */
+  u8 ctl_mixer;     /**< (7) Mixer control             */
+  u8 vol_a;         /**< (8) Volume/envelop channel A  */
+  u8 vol_b;         /**< (9) Volume/envelop channel B  */
+  u8 vol_c;         /**< (A) Volume/envelop channel C  */
+  u8 per_env_lo;    /**< (B) LSB envelop period        */
+  u8 per_env_hi;    /**< (C) MSB envelop period        */
+  u8 env_shape;     /**< (D) Envelop shape             */
+  u8 io_a;          /**< (E) IO port A                 */
+  u8 io_b;          /**< (F) IO port B                 */
 };
 
 /**
  * Access YM-2149 internal register by name or by index.
  */
 typedef union ym_reg_u {
-  struct ym2149_reg_s name;     /* ym registers by name.  */
-  u8 index[16];                 /* ym registers by index. */
+  struct ym2149_reg_s name;     /**< ym registers by name.  */
+  u8 index[16];                 /**< ym registers by index. */
 } ym_reg_t;
 
 /**
@@ -128,7 +128,7 @@ typedef union ym_reg_u {
 #endif
 
 /**
- * YM-2149 emulation engines.
+ * YM-2149 emulation engine identifiers.
  */
 enum ym_engine_e {
   YM_ENGINE_QUERY   = -1, /**< Query current or default engine.             */
@@ -139,7 +139,7 @@ enum ym_engine_e {
 };
 
 /**
- * YM-2149 volume models.
+ * YM-2149 volume model identifiers.
  */
 enum ym_vol_e {
   YM_VOL_QUERY   = -1, /**< Query current or default volume model. */
@@ -151,7 +151,7 @@ enum ym_vol_e {
 };
 
 /**
- * Sampling rate.
+ * Sampling rate special values.
  */
 enum ym_hz_e {
   YM_HZ_QUERY   = -1,  /**< Query current or default sampling rate. */
@@ -159,7 +159,7 @@ enum ym_hz_e {
 };
 
 /**
- * YM master clock frequency.
+ * YM master clock frequency special values.
  */
 enum ym_clock_e {
   /** Query current or default master clock frequency. */
@@ -170,13 +170,18 @@ enum ym_clock_e {
   YM_CLOCK_ATARIST = EMU68_ATARIST_CLOCK/4u,
 };
 
-/* struct ym_s; */
+/**
+ * Type definition for struct ym_s.
+ */
 typedef struct ym_s ym_t;
 
 #include "ym_puls.h" /* data structure for puls ym emulator. */
 #include "ym_blep.h" /* data structure for blep ym emulator.  */
 #include "ym_dump.h" /* data structure for dump ym emulator.  */
 
+/**
+ * Base struct for all YM emulators.
+ */
 struct ym_s {
 
   /**
@@ -223,7 +228,10 @@ struct ym_s {
    * @}
    */
 
-  /* $$$ TEMP: should be allocated... */
+  /**
+   * Pre-allocated YM memory access.
+   * @note should be allocated
+   */
   ym_waccess_t static_waccess[2048];
 
   /**
@@ -240,13 +248,13 @@ struct ym_s {
   int volmodel;             /**< @ref ym_vol_e "volume model".   */
 
   /**
-   * Engine private data.
+   * union of all YM emulators private data.
    */
   union emu_u {
     ym_puls_t puls; /**< PULS YM emulator data. */
     ym_blep_t blep; /**< BLEP YM emulator data. */
     ym_dump_t dump; /**< DUMP YM emulator data. */
-  } emu;
+  } emu;            /**< Engine private data. */
 };
 
 /**
@@ -277,7 +285,7 @@ IO68_EXTERN
  * Create an Yamaha-2149 emulator instance.
  *
  * @param  ym
- * @param  params
+ * @param  parms
  *
  * @return  error-code
  * @retval   0  Success
@@ -325,7 +333,8 @@ IO68_EXTERN
  *   used as the new default value for this field at ym_setup()
  *   function call.
  *
- * @param  params  Default parameters for ym_setup().
+ * @param  argc pointer to argument count (updated)
+ * @param  argv array of arguments string (updated)
  *
  * @return error-code (always success)
  * @retval 0  Success
@@ -535,8 +544,10 @@ IO68_EXTERN
 /**
  * Set or get Yamaha-2149 emulator engine.
  *
- * @param  engine  @ref ym_engine_e "special values"
- * @return @ref ym_engine_e "engine value".
+ * @param  ym      YM-2149 emulator instance
+ * @param  engine  @ref ym_engine_e "engine identifier" value
+
+ * @return @ref ym_engine_e "engine identifier".
  * @retval -1 on error
  */
 int ym_engine(ym_t * const ym, int engine);

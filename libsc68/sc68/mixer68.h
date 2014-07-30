@@ -1,5 +1,5 @@
 /**
- * @ingroup   sc68_lib
+ * @ingroup   lib_sc68
  * @file      sc68/mixer68.h
  * @brief     audio mixer header.
  * @author    Benjamin Gerard
@@ -22,8 +22,8 @@
 #endif
 
 /**
- * @defgroup  sc68_mixer  audio mixer
- * @ingroup   sc68_lib
+ * @defgroup  lib_sc68_mixer  Simple audio mixer
+ * @ingroup   lib_sc68
  *
  *   sc68 audio mixer provides functions for computing audio data PCM.
  *   Almost all functions work on 16 bit stereo PCM. Some functions

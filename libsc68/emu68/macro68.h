@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/macro68.h
  * @brief     68K instruction emulation macro definitions.
  * @author    Benjamin Gerard
@@ -10,6 +10,10 @@
 
 #ifndef EMU68_MACRO68_H
 #define EMU68_MACRO68_H
+
+/**
+ * @cond emu68macros
+ */
 
 /* Determine what instruction to inline.
  *
@@ -354,5 +358,9 @@
 #define SCC(CC)      scc68[CC](emu68)
 #define BCC(PC,CC)   bcc68[CC](emu68,PC)
 #define DBCC(DN,CC)  dbcc68[CC](emu68,DN)
+
+/**
+ * @endcond
+ */
 
 #endif

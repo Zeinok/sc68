@@ -1,5 +1,5 @@
-/**
- * @ingroup   emu68_lib
+/*
+ * @ingroup   lib_emu68
  * @file      emu68/lines68.h
  * @brief     68k instructions header.
  * @author    Benjamin Gerard

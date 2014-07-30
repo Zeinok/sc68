@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_ym_devel
+ * @ingroup   lib_io68
  * @file      io68/ym_blep.h
  * @brief     YM-2149 BLEP synthesis engine
  * @author    Antti Lankila
@@ -7,6 +7,17 @@
  */
 
 /* Copyright (c) 1998-2014 Antti Lankila */
+
+/**
+ * @defgroup  lib_io68_ym_blep  BLEP YM engine
+ * @ingroup   lib_io68_ym
+ * @brief     Band Limited Step YM engine.
+ *
+ *   The dump engine is a phony engine that will online dump to stdout
+ *   all write access to the YM registers.
+ *
+ * @{
+ */
 
 /**
  * Setup function for ym blep synthesis engine.
@@ -21,46 +32,54 @@
 int ym_blep_setup(ym_t * const ym);
 
 enum {
-  MAX_BLEPS = 256
+  MAX_BLEPS = 256                       /**< @nodoc */
 };
 
+/** @nodoc */
 typedef struct {
-  s32 count;
-  u32 event;
-  u16 flip_flop;
-  u16 tonemix;
-  u16 noisemix;
-  u16 envmask;
-  u16 volmask;
+  s32 count;                            /**< @nodoc */
+  u32 event;                            /**< @nodoc */
+  u16 flip_flop;                        /**< @nodoc */
+  u16 tonemix;                          /**< @nodoc */
+  u16 noisemix;                         /**< @nodoc */
+  u16 envmask;                          /**< @nodoc */
+  u16 volmask;                          /**< @nodoc */
 } ym_blep_tone_t;
 
+/** @nodoc */
 typedef struct {
-  u16 stamp;
-  s16 level;
+  u16 stamp;                            /**< @nodoc */
+  s16 level;                            /**< @nodoc */
 } ym_blep_blep_state_t;
 
+/** @nodoc */
 typedef struct {
   /* sampling parameters */
-  u32 cycles_per_sample; /* 8 bit fixed point ym clocks */
-  u32 cycles_to_next_sample;
+  u32 cycles_per_sample;             /**< 8 bit fixed point ym clocks */
+  u32 cycles_to_next_sample;         /**< @nodoc */
 
   /* subsystem states */
-  ym_blep_tone_t tonegen[3];
-  u32 noise_event;
-  s32 noise_count;
-  u32 noise_state;
-  u16 noise_output;
+  ym_blep_tone_t tonegen[3];            /**< @nodoc */
+  u32 noise_event;                      /**< @nodoc */
+  s32 noise_count;                      /**< @nodoc */
+  u32 noise_state;                      /**< @nodoc */
+  u16 noise_output;                     /**< @nodoc */
 
-  u32 env_event;
-  s32 env_count;
-  u8 env_state;
-  u16 env_output;
+  u32 env_event;                        /**< @nodoc */
+  s32 env_count;                        /**< @nodoc */
+  u8 env_state;                         /**< @nodoc */
+  u16 env_output;                       /**< @nodoc */
 
   /* blep stuff */
-  s16 global_output_level;
-  u32 blep_idx;
-  u16 time;
-  s32 hp;
+  s16 global_output_level;              /**< @nodoc */
+  u32 blep_idx;                         /**< @nodoc */
+  u16 time;                             /**< @nodoc */
+  s32 hp;                               /**< @nodoc */
 
+  /** @nodoc */
   ym_blep_blep_state_t blepstate[MAX_BLEPS];
 } ym_blep_t;
+
+/**
+ * @}
+ */

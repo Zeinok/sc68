@@ -1,5 +1,5 @@
 /**
- * @ingroup  unice68_lib
+ * @ingroup  lib_unice68
  * @file     unice68.h
  * @author   Benjamin Gerard
  * @date     2003/08/06
@@ -40,7 +40,7 @@
 #endif
 
 /**
- *  @defgroup  unice68_lib  unice68 library
+ *  @defgroup  lib_unice68  unice68 library
  *  @ingroup   sc68_dev_lib
  *  @brief     ICE! 2.4 packer and depacker.
  *

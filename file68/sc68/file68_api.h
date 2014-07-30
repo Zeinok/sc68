@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_api.h
  * @author   Benjamin Gerard
  * @date     2007-02-25
@@ -12,7 +12,7 @@
 #define FILE68_API_H
 
 /**
- * @defgroup file68_lib file68 library
+ * @defgroup lib_file68 file68 library
  * @ingroup  sc68_dev_lib
  *
  *   file68 is a library to manipulate sc68 files and access sc68

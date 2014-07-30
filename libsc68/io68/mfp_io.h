@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_mfp_devel
+ * @ingroup   lib_io68
  * @file      io68/mfp_io.h
  * @brief     MFP-68901 IO plugin header.
  * @author    Benjamin Gerard
@@ -15,7 +15,7 @@
 #include "emu68/struct68.h"
 
 /**
- * @addtogroup  io68_mfp_devel
+ * @addtogroup  lib_io68_mfp
  * @{
  */
 

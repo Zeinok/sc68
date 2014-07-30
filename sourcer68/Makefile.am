@@ -41,7 +41,6 @@ endif
 bin_PROGRAMS          = sourcer68
 sourcer68_SOURCES     = sourcer68.c
 sourcer68_LDADD       = $(FILE68_LA) $(DESA68_LA)
-noinst_HEADERS        = sourcer68_doc.h
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |

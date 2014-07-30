@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_rsc.h
  * @author   Benjamin Gerard
  * @date     1998-10-07
@@ -15,8 +15,8 @@
 
 
 /**
- * @defgroup  file68_rsc  Resource access
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_rsc  Resource access
+ * @ingroup   lib_file68
  *
  *   Provides resource access functions.
  *

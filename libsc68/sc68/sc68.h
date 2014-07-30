@@ -1,5 +1,5 @@
 /**
- * @ingroup   sc68_lib
+ * @ingroup   lib_sc68
  * @file      sc68/sc68.h
  * @brief     sc68 API header.
  * @author    Benjamin Gerard
@@ -40,7 +40,7 @@
 #endif
 
 /**
- * @defgroup  sc68_lib  sc68 library
+ * @defgroup  lib_sc68  sc68 library
  * @ingroup   sc68_dev_lib
  *
  * This API provides functions to use sc68 libraries efficiently.
@@ -155,10 +155,13 @@ typedef struct {
   /** command line arguments */
   char ** argv;
 
+  /** structure for init flags. */
   struct init_flags {
+    /** set to avoid skip loading on init. */
     unsigned int no_load_config : 1;
+    /** set to skip config saving on shutdown. */
     unsigned int no_save_config : 1;
-  } flags;
+  } flags;     /**< init flags (0 is always the default behaviour). */
 
 } sc68_init_t;
 
@@ -240,7 +243,10 @@ typedef struct {
   char * converter;      /**< Points to "converter" tag.         */
   char * _lasttag;       /**< Last predefined tag.               */
 
-} sc68_music_info_t, sc68_minfo_t;
+} sc68_music_info_t;
+
+/** Alias type for sc68_music_info_t. */
+typedef sc68_music_info_t sc68_minfo_t;
 
 /**
  * Flags returned eturn codeby the sc68_process() functions.
@@ -383,7 +389,7 @@ SC68_API
 /**
  * Create sc68 instance.
  *
- * @param   creation  Creation parameters.
+ * @param   create  Creation parameters.
  *
  * @return  Pointer to created sc68 instance.
  * @retval  0  Error.
@@ -408,7 +414,7 @@ SC68_API
  * Generic control function.
  *
  * @param  sc68  sc68 instance or 0 for general control.
- * @param  op    operation, what to control (@ref sc68_cntl_fct).
+ * @param  op    @ref sc68_dial_e operation
  *
  * @retval  0  success
  * @retval -1  failure
@@ -551,7 +557,7 @@ SC68_API
  * Get a copy of disk/track meta tag.
  *
  * @param  sc68  sc68 instance
- * @param  tag   tag to look for (tag68_t::key must be set).
+ * @param  key   tag to look for (tag68_t::key must be set).
  * @param  track track number (0:disk tags, -1:current/default).
  * @param  disk  disk to get information from (0 for current disk).
  *
@@ -606,9 +612,9 @@ SC68_API
 /**
  * Create a VFS from uri.
  *
- * @name  uri     URI or path
- * @name  mode    open mode
- * @argc  number  of supplemental arguments
+ * @param  uri     URI or path
+ * @param  mode    open mode
+ * @param  argc    number of supplemental arguments
  *
  * @return VFS
  * @retval 0 on error
@@ -635,7 +641,7 @@ int sc68_load_mem(sc68_t * sc68, const void * buffer, int len);
 /**
  * Load an sc68 disk outside the API.
  *
- * @notice Free it with sc68_disk_free() function.
+ * @note Free it with sc68_disk_free() function.
  */
 SC68_API
 sc68_disk_t sc68_load_disk(vfs68_t * is);

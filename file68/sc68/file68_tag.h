@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_tag.h
  * @author   Benjamin Gerard
  * @date     2011-10-03
@@ -12,7 +12,7 @@
 #define FILE68_TAG_H
 
 /**
- * @addtogroup   file68_lib
+ * @addtogroup   lib_file68
  * @{
  */
 
@@ -50,16 +50,25 @@ typedef union {
     tag68_t genre;                /**< Static tag for genre/format   */
     /** Other custom tags. */
     tag68_t custom[TAG68_ID_MAX-TAG68_ID_CUSTOM];
-  } tag;
+  } tag;                          /**< Common tags fast access.      */
 } tagset68_t;
 
-/* Fixed position tags */
+/**
+ * @name  Fixed position tags
+ * @{
+ */
 #define TAG68_TITLE      "title"
 #define TAG68_ARTIST     "artist"
 #define TAG68_GENRE      "genre"
 #define TAG68_FORMAT     "format"
+/**
+ * @}
+ */
 
-/* Well-known Custom tags */
+/**
+ * @name  Well-known Custom tags
+ * @{
+ */
 #define TAG68_COMMENT    "comment"
 #define TAG68_COPYRIGHT  "copyright"
 #define TAG68_IMAGE      "image"
@@ -75,12 +84,21 @@ typedef union {
 #define TAG68_HASH       "hash"
 #define TAG68_URI        "uri"
 #define TAG68_HARDWARE   "hardware"
+/**
+ * @}
+ */
 
-/* Aliases tags */
+/**
+ * @name  Tag aliases
+ * @{
+ */
 #define TAG68_ALBUM      TAG68_TITLE
 #define TAG68_AUTHOR     TAG68_ARTIST
 #define TAG68_ALIAS      TAG68_TAG
 #define TAG68_DURATION   TAG68_LENGTH
+/**
+ * @}
+ */
 
 /**
  * @}

@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/error68.h
  * @brief     Error message stack header.
  * @author    Benjamin Gerard
@@ -15,8 +15,8 @@
 #include "struct68.h"
 
 /**
- * @defgroup  emu68_lib_error  Error message stack
- * @ingroup   emu68_lib_api
+ * @defgroup  lib_emu68_err  Error message stack
+ * @ingroup   lib_emu68
  *
  *   EMU68 error handling consists on a fixed size stack of
  *   messages. When an EMU68 function fails, it stores a description

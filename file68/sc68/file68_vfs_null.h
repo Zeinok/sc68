@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_vfs_null.h
  * @author   Benjamin Gerard
  * @date     2003-10-10
@@ -15,7 +15,7 @@
 
 /**
  * @name     Null VFS
- * @ingroup  file68_vfs
+ * @ingroup  lib_file68_vfs
  *
  *   Implements a null vfs68_t.
  *

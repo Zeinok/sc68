@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_paula_devel
+ * @ingroup   lib_io68
  * @file      io68/paula_io.h
  * @brief     Paula IO plugin header.
  * @author    Benjamin Gerard
@@ -15,7 +15,7 @@
 #include "paulaemul.h"
 
 /**
- * @addtogroup  io68_paula_devel
+ * @addtogroup  lib_io68_aga
  * @{
  */
 

@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_lib
+ * @ingroup   lib_io68
  * @file      io68/mw_io.h
  * @brief     STE sound IO plugin header.
  * @author    Benjamin Gerard
@@ -15,7 +15,7 @@
 #include "mwemul.h"
 
 /**
- * @addtogroup  io68_lib_mw
+ * @addtogroup  lib_io68_mw
  * @{
  */
 
@@ -72,7 +72,7 @@ IO68_EXTERN
  *
  * @return @ref mw_engine_e "MW engine descriptor"
  */
-uint68_t mwio_engine(io68_t * const io, int);
+uint68_t mwio_engine(io68_t * const io, int engine);
 
 IO68_EXTERN
 /**

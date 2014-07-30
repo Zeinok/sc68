@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_mfp_devel
+ * @ingroup   lib_io68
  * @file      io68/mfpemul.h
  * @brief     MFP-68901 emulator header.
  * @author    Benjamin Gerard
@@ -15,8 +15,8 @@
 #include "emu68/struct68.h"
 
 /**
- * @defgroup  io68_mfp_devel  MFP-68901 emulator
- * @ingroup   io68_devel
+ * @defgroup  lib_io68_mfp  MFP-68901 emulator
+ * @ingroup   lib_io68
  * @brief     MFP-68901 (Atari-ST timers) emulator.
  *
  *  Motorola Multi Function Peripheral is a multi purpose IO chip:
@@ -230,14 +230,14 @@ typedef struct {
  */
 typedef struct
 {
-  mfp_timer_def_t def; /**< Timer definition. */
+  mfp_timer_def_t def; /**< Timer definition.                          */
 
-  bogoc68_t cti;       /**< bogo-cycle to next timer interrupt.          */
-  uint_t    tdr_cur;   /**< Timer Data register current value.           */
-  uint_t    tdr_res;   /**< Timer Data register reset value.             */
-  uint_t    tcr;       /**< Timer control register (prescaler) [0..7].   */
+  bogoc68_t cti;       /**< bogo-cycle to next timer interrupt.        */
+  uint_t    tdr_cur;   /**< Timer Data register current value.         */
+  uint_t    tdr_res;   /**< Timer Data register reset value.           */
+  uint_t    tcr;       /**< Timer control register (prescaler) [0..7]. */
 
-  bogoc68_t psc;
+  bogoc68_t psc;       /**< prescale counter.                          */
 
   /* On Interrupt */
   uint_t   int_lost;   /**< Interrupts missed (should be 0).           */
@@ -347,6 +347,7 @@ IO68_EXTERN
  * Reset mfp instance.
  *
  * @param  mfp    mfp emulator instance.
+ * @param  bogoc  bogo cycles
  *
  * @return Error-code
  * @retval  0  Success

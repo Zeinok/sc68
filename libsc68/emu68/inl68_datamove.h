@@ -1,5 +1,5 @@
-/**
- * @ingroup   emu68_lib_inline
+/*
+ * @ingroup   lib_emu68_inl
  * @file      emu68/inl68_datamove.h
  * @brief     68k program control inlines.
  * @author    Benjamin Gerard

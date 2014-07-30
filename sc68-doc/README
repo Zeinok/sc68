@@ -8,33 +8,76 @@
 *Synopsis*                                   
 
   Generate sc68 documentations from source code using doxygen.
-  The documentation has two main parts
+  The documentation is divided in two main parts:
    - End user's documentation 
    - Developper's documentation
-
-
-  Currently the only available frontend is for Windows system.
 
 
 *Files of interest*
 
   doc-filter.sh.in ... sh script to pre-filter doxygen documented files
   gen-doxcfg.sh.in ... sh script to generate doxygen config file
+  sc68_doc.h ......... Main page of the documentation
 
 
 *Hierarchy*
 
   This is the sc68 documentation groups hierarchy.
 
-  sc68_doc
-   +- sc68_usr
-   |  +- sc68_cfg
-   |  +- sc68_prg
-   |     +- sc68_prg_dev
-   |     +- sc68_prg_usr
-   `- sc68_dev
-      +- sc68_dev_lib
+  sc68_doc                           - root of all documentation
+   |- sc68_usr                       - end user's documentation
+   |  |- sc68_cfg                    - sc68 configuration
+   |  `- sc68_prg                    - sc68 programs usage
+   |     |- sc68_prg_dev             - sc68 developers programs
+   |     |  |- prg_as68              - the as68 program
+   |     |  `- prg_mksc68            - the mksc68 program
+   |     `- sc68_prg_usr             - sc68 end-users programs
+   |        |- prg_info68            - the info68 program
+   |        |- prg_sc68              - the sc68 program
+   |        `- prg_unice68           - the unice68 program
+   `- sc68_dev                       - developer's documentation
+      |- sc68_build                  - building sc68
+      `- sc68_dev_lib                - sc68 libraries
+         |- lib_unice68              - the unice68 library
+         |- lib_file68               - the file68 library
+            |- lib_file68_vfs
+            |- lib_file68_zip
+            |- lib_file68_vfs
+            |- lib_file68_uri
+            |- lib_file68_tdb
+            |- lib_file68_str
+            |- lib_file68_reg
+            |- lib_file68_rsc
+            |- lib_file68_ord
+            |- lib_file68_opt
+            |- lib_file68_msg
+            |- lib_file68_ice
+            |- lib_file68_err
+            |- lib_file68_fil
+         `- lib_sc68                 - the sc68 library
+            |-lib_io68
+            | |- lib_io68_aga        - amiga paula emulator
+            | |- lib_io68_ym
+            | |  |- lib_io68_ym_puls - pulse YM engine
+            | |  |- lib_io68_ym_blep - BLEP  YM engine
+            | |  |- lib_io68_ym_dump - dump YM engine
+            |- lib_emu68             - 68k emulator library
+               |- lib_emu68_core     - 68k emulator core
+                  |- lib_emu68_inst  - 68k Instructions
 
+lib_emu68_inl
+
+               |- lib_emu68_types    - emu68 type definition
+               |- lib_emu68_srdef    - status register definitions
+               |- lib_emu68_mem      - 68k memory and IO manager
+
+lib_emu68_api
+|- lib_emu68_err - Error message stack
+|- lib_emu68_ioplug  - 68k IO plugger
+
+            |- emu68_lib_core
+            |-
+            |-
 
 *Links*
 
@@ -45,4 +88,4 @@
        <http://sourceforge.net/projects/sc68>
 
   doxygen - Generate documentation from source code
-       <www.doxygen.org>
+       <http://www.doxygen.org>

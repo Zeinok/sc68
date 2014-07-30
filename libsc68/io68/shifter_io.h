@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_lib
+ * @ingroup   lib_io68
  * @file      io68/shifter_io.h
  * @author    Benjamin Gerard
  * @date      1999/06/10
@@ -14,8 +14,9 @@
 
 #include "io68_api.h"
 
-/** @defgroup  io68_lib_shifter  Atari-ST shifter (video chip)
- *  @ingroup   io68_lib
+/**
+ *  @defgroup  lib_io68_shifter  Atari-ST shifter (video chip)
+ *  @ingroup   lib_io68
  *
  *    Atari-ST shifter emulator is limited to 50/60Hz detection.
  *    It is used by some player to adapt the replay speed.
@@ -68,7 +69,8 @@ IO68_EXTERN
 void shifterio_shutdown(void);
 
 IO68_EXTERN
-/** Create shifter io instance.
+/**
+ *  Create shifter io instance.
  *
  *   @param   emu68  68000 emulator instance
  *   @param   hz     Initial frequency (50,60 or 70), default 50
@@ -82,7 +84,9 @@ IO68_EXTERN
 /** Reset shifter and set new vertical refresh rate. */
 int shifterio_reset(io68_t * const io, int hz);
 
-/** @} */
+/**
+ *  @}
+ */
 
 /**
  *  @}

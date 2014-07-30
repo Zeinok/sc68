@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_ord.h
  * @author   Benjamin Gerard
  * @date     2003-08-12
@@ -16,8 +16,8 @@
 #endif
 
 /**
- * @defgroup  file68_ord  Byte ordering
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_ord  Byte ordering
+ * @ingroup   lib_file68
  *
  *   Provides functions for dealing with host byte order.
  *

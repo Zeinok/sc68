@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_uri.h
  * @author   Benjamin Gerard
  * @date     2003-10-28
@@ -20,8 +20,8 @@
 #include <stdarg.h>
 
 /**
- * @defgroup  file68_uri  URI manipulation
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_uri  URI manipulation
+ * @ingroup   lib_file68
  *
  *    Provides functions for sc68 URI manipulation and access.
  *
@@ -38,6 +38,9 @@ enum scheme68_e {
   SCHEME68_REMOTE = SCHEME68_ISMINE<<1 /**< access might be remote. */
 };
 
+/**
+ * Type definition for struct scheme68_s.
+ */
 typedef struct scheme68_s scheme68_t;
 
 /**
@@ -61,7 +64,7 @@ FILE68_API
 /**
  * Register a scheme handler.
  *
- * @param  scheme  scheme info,
+ * @param  scheme  scheme info
  *
  * @return error code
  * @retval 0     success
@@ -73,8 +76,8 @@ FILE68_API
 /**
  * Unregister a scheme handler.
  *
- * @param  scheme  scheme info,
- * @TODO   implements uri68_unregister() for real !
+ * @param  scheme  scheme info
+ * @todo   implements uri68_unregister() for real !
  */
 void uri68_unregister(scheme68_t * scheme);
 
@@ -85,7 +88,7 @@ FILE68_API
  * @param  uri  uri to test
  *
  * @retval  1  scheme is local
- * @retcal  0  scheme may be remote
+ * @retval  0  scheme may be remote
  */
 int uri68_is_local(const char * uri);
 

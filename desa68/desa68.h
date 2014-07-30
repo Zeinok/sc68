@@ -1,5 +1,5 @@
 /**
- * @ingroup   desa68_lib
+ * @ingroup   lib_desa68
  * @file      desa68.h
  * @brief     Motorola 68K disassembler header.
  * @author    Benjamin Gerard
@@ -40,7 +40,7 @@
 #endif
 
 /**
- * @defgroup desa68_lib desa68 library
+ * @defgroup lib_desa68 desa68 library
  * @ingroup  sc68_dev_lib
  *
  * desa68 is a standalone library to disassemble 68000 machine code.
@@ -55,10 +55,9 @@
  * as symbol.
  *
  * A complete example of how to use it may be found in the @ref
- * cli_sourcer68 sourcer68 directory. This library is also used by
- * @ref cli_debug68 debug68 programs.
- *
- * @note desa68 library re-entrant (thread-safe).
+ * prg_sourcer68 sourcer68 directory. This library is also used by the
+ * deprecated @ref prg_debug68 debug68 and @ref prg_cdbg68 cdbg68
+ * programs.
  *
  * @{
  */

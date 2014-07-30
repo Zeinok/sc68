@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/assert68.h
  * @brief     assert feature header.
  * @author    Benjamin Gerard
@@ -25,7 +25,7 @@
 #endif
 
 #ifndef EMU68_BREAK
-# define EMU68_BREAK 1                  /* Don't break anymore */
+# define EMU68_BREAK 1                  /**< Don't break anymore */
 #endif
 
 #endif

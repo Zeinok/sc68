@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_reg.h
  * @author   Benjamin Gerard
  * @date     2003-08-11
@@ -16,8 +16,8 @@
 #endif
 
 /**
- * @defgroup  file68_reg  Registry access
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_reg  Registry access
+ * @ingroup   lib_file68
  *
  *   Provides Windows registry access functions.
  *
@@ -128,7 +128,7 @@ FILE68_API
  * @retval 0  Success
  * @retval -1 Error
  */
-int registry68_puts(registry68_key_t rootkey, const char * kname_cst,
+int registry68_puts(registry68_key_t hkey, const char * kname,
                     const char * kdata);
 
 FILE68_API
@@ -144,8 +144,7 @@ FILE68_API
  * @retval 0  Success
  * @retval -1 Error
  */
-int registry68_puti(registry68_key_t rootkey, const char * kname_cst,
-                    int kdata);
+int registry68_puti(registry68_key_t hkey, const char * kname, int kdata);
 
 
 /**

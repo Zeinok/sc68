@@ -1,5 +1,5 @@
-/**
- * @ingroup   emu68_lib_inline
+/*
+ * @ingroup   lib_emu68_inl
  * @file      emu68/inl68_shifting.h
  * @brief     68k bit shifting inlines.
  * @author    Benjamin Gerard

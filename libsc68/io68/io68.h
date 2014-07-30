@@ -1,5 +1,5 @@
 /**
- * @ingroup   io68_lib
+ * @ingroup   lib_io68
  * @file      io68/io68.h
  * @author    Benjamin Gerard
  * @date      1999/03/20
@@ -8,8 +8,8 @@
 
 /* Copyright (c) 1998-2014 Benjamin Gerard */
 
-#ifndef IO68_H
-#define IO68_H
+#ifndef IO68_IO68_H
+#define IO68_IO68_H
 
 #include "io68_api.h"
 
@@ -20,8 +20,8 @@
 #include "paula_io.h"
 
 /**
- * @defgroup  io68_lib  Chipset emulators.
- * @ingroup   sc68_lib
+ * @defgroup  lib_io68  Chipset emulators.
+ * @ingroup   lib_sc68
  *
  * @{
  */

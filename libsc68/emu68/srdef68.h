@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/srdef68.h
  * @brief     Status Register (SR) definition header.
  * @date      1999/13/03
@@ -12,8 +12,8 @@
 #define EMU68_SRDEF68_H
 
 /**
- * @defgroup  emu68_lib_srdef  Status Register (SR) definitions
- * @ingroup   emu68_lib
+ * @defgroup  lib_emu68_srdef  Status Register (SR) definitions
+ * @ingroup   lib_emu68
  *
  *   68K status register definitions.
  *   The SR is composed of condition code register (CCR) located in

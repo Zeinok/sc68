@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [sc68-doc],
-  [20130801],
+  [20140801],
   [http://sourceforge.net/projects/sc68/],,
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68_doc.h])
@@ -52,10 +52,8 @@ AC_SUBST([doxfile])
 
 mydocdir=`cd "${srcdir}/.." && pwd`
 
-for dir in sc68-doc sc68-doc/sc68_doc.h as68/as68_doc.h \
-  info68/info68_doc.h sourcer68/sourcer68_doc.h mksc68/mksc68_doc.h \
-  sc68/sc68_doc.h desa68 unice68 file68/sc68 \
-  libsc68/sc68 libsc68/io68 libsc68/emu68 
+for dir in sc68-doc sc68-doc/sc68_doc.h desa68 unice68 file68/sc68 \
+   libsc68/sc68 libsc68/io68 libsc68/emu68
 do
   AC_MSG_CHECKING([whether [$]dir exists])
   if test -e "[$]{mydocdir}/[$]{dir}"; then

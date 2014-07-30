@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/mem68.h
  * @brief     68k memory and IO manager header.
  * @author    Benjamin Gerard
@@ -15,8 +15,8 @@
 #include "struct68.h"
 
 /**
- * @defgroup  emu68_lib_mem68  68k memory and IO manager
- * @ingroup   emu68_lib
+ * @defgroup  lib_emu68_mem  68k memory and IO manager
+ * @ingroup   lib_emu68
  * @brief     Handling memory and I/O access.
  *
  *   EMU68 memory manager assumes that all addresses in the lowest
@@ -490,8 +490,9 @@ EMU68_EXTERN
 /**
  *  Add a new memory access control area (for new IO).
  *
- *  @param  area      Which area (bit 16 to 23 of address) to change.
- *  @param  read_bwl  Read function table (byte, word and long in this order)
+ *  @param  emu68     emu68 instance
+ *  @param  area      which area (bit 16 to 23 of address) to change
+ *  @param  read_bwl  read function table (byte, word and long in this order)
  *  @param  write_bwl idem read_bwl for write access.
  *
  * @see emu68_mem_reset_area()
@@ -503,6 +504,9 @@ void emu68_mem_new_area(emu68_t * const emu68, u8 area,
 EMU68_EXTERN
 /**
  *  Reset memory access control area to default state.
+ *
+ *  @param  emu68     emu68 instance
+ *  @param  area      which area (bit 16 to 23 of address) to reset
  *
  *  @see emu68_mem_new_area()
  */

@@ -1,4 +1,4 @@
-#error "FOR DOCUMENTATION PURPOSE ONLY"
+#error FOR DOCUMENTATION PURPOSE ONLY
 
 /*
 
@@ -10,6 +10,9 @@ sc68_doc
     sc68_prg
       sc68_prg_dev
       sc68_prg_usr
+        info68_prg
+        unice68_prg
+        sc68_prg
   sc68_dev
     sc68_dev_lib
 */
@@ -33,7 +36,7 @@ sc68_doc
  @section Content
 
    The @ref sc68_usr "sc68 user documentation" contains documentation for
-   - @ref sc68_cli "Using programs and utilities"
+   - @ref sc68_prg "Using programs and utilities"
    - @ref sc68_cfg "Configuration"
 
    The sc68 developer documentation contains documentation for
@@ -60,7 +63,7 @@ sc68_doc
 
 
 /**
- @defgroup  sc68_prg  sc68 programs
+ @defgroup  sc68_prg  sc68 programs usage.
  @ingroup   sc68_usr
 */
 
@@ -75,7 +78,33 @@ sc68_doc
 */
 
 /**
- @defgroup  sc68_dev_lib sc68  libraries
+ @defgroup  prg_sourcer68 sourcer68
+ @ingroup   sc68_prg_dev
+ @brief     sc68 disasembler/sourcer program.
+*/
+
+/**
+ @defgroup  prg_debug68  debug68
+ @ingroup   sc68_prg_dev
+ @brief     sc68 deprecated swiss army knife program.
+ @deprecated in favour the @ref prg_mksc68 mksc68 program
+*/
+
+/**
+ @defgroup  prg_cdbg68  cdbg68
+ @ingroup   sc68_prg_dev
+ @brief     sc68 deprecated curses debugger.
+ @deprecated in favour of the gdb remote debug protocol
+*/
+
+/**
+ @defgroup  prg_mksc68  mksc68
+ @ingroup   sc68_prg_dev
+ @brief     sc68 swiss army knife program.
+*/
+
+/**
+ @defgroup  sc68_dev_lib  sc68 libraries
  @ingroup   sc68_dev
 
    Documents sc68 and buddies libraries.
@@ -83,13 +112,4 @@ sc68_doc
    This documention is for developers that want to use sc68 or its
    component in their own programs.
 
-   The @ref sc68_lib is the higher level component. It depends on @ref
-   file68_lib which main purpose is to handle sc68 resources (player,
-   files, config ...). @ref unice68_lib is optionnaly used for
-   depacking ICE! file a common compressor format in the Atari ST
-   world.  Finally @ref desa68_lib is used by extra programs such as
-   @ref sourcer68_prg or @ref debug68_prg for disassemble M68000
-   machine code.
-
 */
-

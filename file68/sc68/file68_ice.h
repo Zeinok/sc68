@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_ice.h
  * @author   Benjamin Gerard
  * @date     2003-09-06
@@ -14,8 +14,8 @@
 #include "file68_vfs.h"
 
 /**
- * @defgroup  file68_ice  ICE loader support.
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_ice  ICE loader support.
+ * @ingroup   lib_file68
  *
  *   Provides functions for loading ICE stream.
  *

@@ -1,5 +1,5 @@
 /**
- * @ingroup   emu68_lib
+ * @ingroup   lib_emu68
  * @file      emu68/cc68.h
  * @brief     Condition code header.
  * @author    Benjamin Gerard
@@ -15,7 +15,7 @@
 #include "srdef68.h"
 
 /**
- * @addtogroup   emu68_lib_core
+ * @addtogroup   lib_emu68_core
  * @{
  */
 

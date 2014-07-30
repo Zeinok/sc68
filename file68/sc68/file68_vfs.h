@@ -1,5 +1,5 @@
 /**
- * @ingroup  file68_lib
+ * @ingroup  lib_file68
  * @file     sc68/file68_vfs.h
  * @author   Benjamin Gerard
  * @date     2003-08-08
@@ -18,10 +18,10 @@
 
 
 /**
- * @defgroup  file68_vfs  Virtual File system.
- * @ingroup   file68_lib
+ * @defgroup  lib_file68_vfs  Virtual File System.
+ * @ingroup   lib_file68
  *
- *   Provides access functions for generic I/O streams..
+ *   Provides access functions for generic I/O streams.
  *
  * @{
  */

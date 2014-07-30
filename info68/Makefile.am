@@ -31,7 +31,7 @@ endif
 bin_PROGRAMS         = info68
 info68_SOURCES       = info68.c
 info68_LDADD         = $(FILE68_LA) $(DESA68_LA)
-noinst_HEADERS       = info68_doc.h
+noinst_HEADERS       =
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |
