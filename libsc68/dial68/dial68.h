@@ -1,5 +1,5 @@
 /**
- * @ingroup   sc68_lib
+ * @ingroup   lib_sc68
  * @file      dial68.h
  * @brief     sc68 dialog helper file.
  * @author    Benjamin Gerard
@@ -14,12 +14,12 @@
 #include "sc68/sc68.h"
 #include "sc68/file68_msg.h"
 
-#define P "dial68 : "
-SC68_EXTERN int dial_cat;
+#define P "dial68 : "                /**< @nodoc */
+SC68_EXTERN int dial_cat;            /**< dialog message categorie. */
 
 /**
- *  @defgroup  sc68_dial  dialog helper
- *  @ingroup   sc68_lib
+ *  @defgroup  lib_dial68  dialog helper
+ *  @ingroup   lib_sc68
  *
  *  This module prodives functions to handle sc68 dialogs.
  *

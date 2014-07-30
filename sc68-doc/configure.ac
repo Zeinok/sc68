@@ -53,7 +53,7 @@ AC_SUBST([doxfile])
 mydocdir=`cd "${srcdir}/.." && pwd`
 
 for dir in sc68-doc sc68-doc/sc68_doc.h desa68 unice68 file68/sc68 \
-   libsc68/sc68 libsc68/io68 libsc68/emu68
+   libsc68/sc68 libsc68/io68 libsc68/emu68 libsc68/dial68
 do
   AC_MSG_CHECKING([whether [$]dir exists])
   if test -e "[$]{mydocdir}/[$]{dir}"; then
