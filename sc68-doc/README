@@ -1,0 +1,48 @@
+                         sc68 - documentation
+                                   
+                   It is part of the sc68 project.
+
+               (C) COPYRIGHT 1998-2014 Benjamin Gerard
+
+
+*Synopsis*                                   
+
+  Generate sc68 documentations from source code using doxygen.
+  The documentation has two main parts
+   - End user's documentation 
+   - Developper's documentation
+
+
+  Currently the only available frontend is for Windows system.
+
+
+*Files of interest*
+
+  doc-filter.sh.in ... sh script to pre-filter doxygen documented files
+  gen-doxcfg.sh.in ... sh script to generate doxygen config file
+
+
+*Hierarchy*
+
+  This is the sc68 documentation groups hierarchy.
+
+  sc68_doc
+   +- sc68_usr
+   |  +- sc68_cfg
+   |  +- sc68_prg
+   |     +- sc68_prg_dev
+   |     +- sc68_prg_usr
+   `- sc68_dev
+      +- sc68_dev_lib
+
+
+*Links*
+
+  sc68 website
+       <http://sc68.atari.org>
+
+  sc68 development project
+       <http://sourceforge.net/projects/sc68>
+
+  doxygen - Generate documentation from source code
+       <www.doxygen.org>
