@@ -1,4 +1,4 @@
-			  sc68 - DirectShow
+                    sc68 - DirectShow baseclasses
                                    
                    It is part of the sc68 project.
 
@@ -7,22 +7,20 @@
 
 *Synopsis*                                   
 
-  Generate sc68 documentations from source code using doxygen.
-  The documentation is divided in two main parts:
-   - End user's documentation 
-   - Developper's documentation
+  The baseclasses project is part of Microsoft Platform SDK. It's a
+  collection of classes and interfaces for DirectShow and COM.
+
+  This project holds the neccessary headers as well as different
+  pre-compiled flavours of this library (compiled with Microsoft
+  Visual C++ Express 2010).
 
 
-*Files of interest*
+*Hierarchy*
 
-Files from Microsoft Platform SDK.
-Compiled with proper RTL for this project.
-
-
- 7.1/
- |- include/
- `- lib/
-    |- strmbasd-mb.lib
-    |- strmbasd.lib
-    |- strmbase-mb.lib
-    `- strmbase.lib
+ 7.1/                    - Using baseclasses from this version of MS SDK
+ |- include/             - baseclasses headers
+ `- lib/                 - pre-compiled baseclasses libraries
+    |- strmbasd-mb.lib     - multibyte debug
+    |- strmbasd.lib        - normal debug
+    |- strmbase-mb.lib     - multibyte release
+    `- strmbase.lib        - norma; release

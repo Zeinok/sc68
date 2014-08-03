@@ -19,7 +19,6 @@ public:
   Sc68OutPin(Sc68Splitter *pFilter, CCritSec *pLock, HRESULT *phr);
   int GetSamplingRate();
 
-
   virtual HRESULT Inactive();
   virtual HRESULT Active();
 
@@ -51,7 +50,7 @@ public:
 
   // Mine
   Sc68Splitter * GetFilter() const { return (Sc68Splitter *)m_pFilter; }
-
+  const CMediaType & GetMediaType() const { return m_MediaType; }
 protected:
   CMediaType m_MediaType;
   WAVEFORMATEX m_waveformatex;

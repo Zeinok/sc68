@@ -82,8 +82,9 @@ Sc68Splitter::Sc68Splitter(LPUNKNOWN pUnk, HRESULT *phr)
   , m_sc68(0)
   , m_disk(0)
   , m_code(SC68_ERROR)
-  , m_spr(GetSamplingRate())
-  , m_allin1(true)
+  , m_track(0)
+  //, m_spr(GetSamplingRate())
+  //, m_allin1(true)
 {
   HRESULT hr = NOERROR;
   Sc68OutPin * l_OutPin = nullptr;
@@ -97,7 +98,7 @@ Sc68Splitter::Sc68Splitter(LPUNKNOWN pUnk, HRESULT *phr)
     if (l_OutPin) { delete l_OutPin; l_OutPin = 0; }
   }
   if (phr) *phr = hr;
-  DBG("%s() => spr=%dhz %s\n",__FUNCTION__, m_spr, !hr?"OK":"FAIL");
+  DBG("%s() => %s\n",__FUNCTION__, !hr?"OK":"FAIL");
 }
 
 CBasePin* Sc68Splitter::GetPin(int n)
@@ -235,14 +236,14 @@ HRESULT Sc68Splitter::CreateSc68(sc68_disk_t disk)
   m_code = SC68_ERROR;
   SetDisk(disk);
   hr = (m_sc68 && m_disk
-        && (m_spr = GetSamplingRate()) > 0
+        //&& (m_spr = GetSamplingRate()) > 0
         && !sc68_open(m_sc68, m_disk)
-        && !sc68_play(m_sc68,1,SC68_DEF_LOOP)
+        && !sc68_play(m_sc68, m_track<=0 || m_track>m_info.tracks ? 1 : m_track, SC68_DEF_LOOP)
         && (m_code = sc68_process(m_sc68,0,0)) != SC68_ERROR
     ) ? S_OK : E_FAIL;
   DumpSc68Error(__FUNCTION__);
   DBG("%s() code=0x%x spr=%dhz => %s\n", __FUNCTION__,
-      m_code, m_spr, !hr ?"OK" : "FAIL");
+      m_code, GetSamplingRate()/*m_spr*/, !hr ?"OK" : "FAIL");
   return hr;
 }
 

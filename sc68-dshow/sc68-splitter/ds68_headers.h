@@ -1,5 +1,7 @@
 #pragma once
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <control.h>
 #include <streams.h>
 #include <tchar.h>
@@ -30,3 +32,4 @@
 #ifdef  _MSC_VER
 #pragma warning(disable: 4355)
 #endif
+

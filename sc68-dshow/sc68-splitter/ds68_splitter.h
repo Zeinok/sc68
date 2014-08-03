@@ -19,7 +19,12 @@
 #undef  WITH_TRACKINFO
 #define WITH_STREAMSELECT
 
+#ifdef WITH_TRACKINFO
+#include "ds68_trackinfo.h"
+#endif
+
 [uuid(CLID_SC68SPLITTER_STR)]
+/// sc68 DirectShow Splitter filter.
 class Sc68Splitter : public CSource
                    , public IAMMediaContent
                    , public IMediaPosition
@@ -35,14 +40,16 @@ class Sc68Splitter : public CSource
 {
 
 private:
-  Sc68InpPin * m_InpPin;
-  sc68_t * m_sc68;
-  sc68_disk_t m_disk;
-  sc68_minfo_t m_info;
-  bool m_allin1;
+  Sc68InpPin * m_InpPin; ///< Pointer to input pin (byte stream).
+  sc68_t * m_sc68;       ///< sc68 instance.
+  sc68_disk_t m_disk;    ///< loaded disk
+  sc68_minfo_t m_info;   ///< current track info
+  int m_code;            ///< Last sc68_process() return code.
 
-  int m_spr;
-  int m_code;
+  int m_track;           ///< Track select: 0=all
+  // bool m_allin1;
+  // int m_spr;
+  
 
 public:
   // IUnknown
@@ -73,6 +80,9 @@ public:
 
   int GetSamplingRate();
   int SetSamplingRate(int spr);
+
+
+
 
   // Implements CBaseFilter
   virtual int GetPinCount();

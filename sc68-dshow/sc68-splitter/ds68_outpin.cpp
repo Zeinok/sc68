@@ -80,7 +80,7 @@ Sc68OutPin::Sc68OutPin(Sc68Splitter *pFilter, CCritSec *pLock, HRESULT *phr) :
   //////////////////////
   // Setup Media type //
   //////////////////////
-  int spr = pFilter->GetSamplingRate();
+  const int spr = pFilter->GetSamplingRate();
 
   // Setup PCM format
   m_waveformatex.wFormatTag = WAVE_FORMAT_PCM;

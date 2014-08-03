@@ -31,6 +31,9 @@ const char * MediaTypeA(const CMediaType pmt);
 /** Binary String from byte string. */
 HRESULT BSTRset(BSTR * lpstr, const char * str);
 
+/** Create a formatted widechar string from multibyte. */
+WCHAR * FormatStrW(const char * fmt, ...);
+
 /**
  * @}
  */

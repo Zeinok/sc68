@@ -49,12 +49,18 @@ HRESULT Sc68Splitter::Enable(long lIndex,DWORD dwFlags)
 {
   HRESULT hr = E_NOTIMPL;
 
-  switch (dwFlags) {
+  if (!m_info.tracks || lIndex < 0 || lIndex > m_info.tracks)
+    hr = E_INVALIDARG;
+  else switch (dwFlags) {
   case 0:
     // Disable all streams in the group containing this stream.
     break;
   case AMSTREAMSELECTENABLE_ENABLE:
     // Enable only this stream within the given group and disable all others.
+    if (!sc68_play(m_sc68, !lIndex?1:lIndex, SC68_DEF_LOOP)) {
+      m_track = lIndex;
+      hr = S_OK;
+    }
     break;
   case AMSTREAMSELECTENABLE_ENABLEALL:
     // Enable all streams in the group containing this stream.
@@ -79,15 +85,34 @@ HRESULT Sc68Splitter::Info(long lIndex,
   else if (lIndex < 0 || lIndex > m_info.tracks)
     hr = S_FALSE;
   else {
+    hr = S_OK;
     if (ppmt) {
-      *ppmt = NULL; // TODO
+      CMediaType pMediaType;
+      Sc68OutPin * opin = (Sc68OutPin *)GetPin(1);
+      const AM_MEDIA_TYPE & srcMt = opin->GetMediaType();
+      *ppmt = CreateMediaType(&srcMt);
     }
-    if (lIndex == 0) {
+    if (pdwFlags) {
+      *pdwFlags = lIndex == m_track ? AMSTREAMSELECTINFO_ENABLED : 0;
     }
-    else {
+    if (plcid) *plcid = NULL;
+    if (pdwGroup) *pdwGroup = NULL;
+    if (ppszName) {
+      if (!lIndex) {
+        *ppszName = FormatStrW("ALL - %s", m_info.album);
+      } else {
+        sc68_minfo_t info;
+        if (sc68_music_info(m_sc68, &info, lIndex, m_disk))
+          hr = E_FAIL;
+        else
+          *ppszName = FormatStrW("%02d - %s", info.trk.track, info.title);
+      }
+      if (!*ppszName)
+        hr = E_OUTOFMEMORY;
     }
+    if (ppUnk) *ppUnk = NULL;
   }
-  DBG("%s() => %s\n", __FUNCTION__, !hr ? "OK":"FAIL");
+  DBG("%s(%d/%d) => %s\n", __FUNCTION__, lIndex, m_info.tracks, !hr ? "OK":"FAIL");
   return hr;
 }
 #endif

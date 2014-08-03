@@ -229,6 +229,7 @@
     <ClInclude Include="ds68_outpin.h" />
     <ClInclude Include="ds68_prop.h" />
     <ClInclude Include="ds68_splitter.h" />
+    <ClInclude Include="ds68_trackinfo.h" />
     <ClInclude Include="ds68_types.h" />
     <ClInclude Include="ds68_vfs.h" />
     <ClInclude Include="ds68_utils.h" />

@@ -45,7 +45,7 @@ HRESULT Sc68Splitter::CanSeekForward(LONG *pCanSeek)
 HRESULT Sc68Splitter::get_CurrentPosition(REFTIME *pllTime)
 {
   CheckPointer(pllTime,E_POINTER);
-  if (m_allin1)
+  if (!m_track)
     return E_NOTIMPL;
   else
     return E_NOTIMPL;
@@ -56,7 +56,7 @@ HRESULT Sc68Splitter::get_Duration(REFTIME *plength)
   CheckPointer(plength,E_POINTER);
   if (!m_disk)
     return E_NOTIMPL;
-  if (m_allin1)
+  if (!m_track)
     *plength = (m_info.dsk.time_ms+999) / 1000;
   else
     *plength = (m_info.trk.time_ms+999) / 1000;

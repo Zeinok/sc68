@@ -133,3 +133,26 @@ HRESULT BSTRset(BSTR * lpstr, const char * str)
   MultiByteToWideChar(CP_UTF8, 0, str, chars, *lpstr, chars);
   return S_OK;
 }
+
+WCHAR * FormatStrW(const char * fmt, ...)
+{
+  WCHAR * wstr = 0;
+  char str[256];
+  const int max = sizeof(str);
+  int icnt, ocnt;
+  va_list list;
+
+  va_start(list,fmt);
+  icnt = vsnprintf(str,max,fmt,list) + 1;
+  ASSERT(icnt == strlen(str)+1);
+  str[max-1] = 0;
+  va_end(list);
+
+  ocnt = MultiByteToWideChar(CP_UTF8,0,str,icnt+1,NULL,0);
+  if (ocnt > 0) {
+    wstr = (WCHAR *) CoTaskMemAlloc(ocnt*sizeof(WCHAR));
+    if (wstr)
+      MultiByteToWideChar(CP_UTF8, 0, str, icnt, wstr, ocnt);
+  }
+  return wstr;
+}
