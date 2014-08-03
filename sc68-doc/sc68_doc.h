@@ -56,6 +56,12 @@ sc68_doc
 */
 
 /**
+ @defgroup  sc68_cfg  sc68 configuration
+ @ingroup   sc68_usr
+ @brief     Configure sc68.
+*/
+
+/**
  @defgroup  sc68_dev  Developer's documentation
  @ingroup   sc68_doc
  @brief     How to use sc68 libraries in your programs.
@@ -112,4 +118,9 @@ sc68_doc
    This documention is for developers that want to use sc68 or its
    component in their own programs.
 
+*/
+
+/**
+ @defgroup  sc68_players  sc68 players and plugins
+ @ingroup   sc68_dev
 */

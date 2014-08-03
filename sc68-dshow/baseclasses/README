@@ -1,0 +1,28 @@
+			  sc68 - DirectShow
+                                   
+                   It is part of the sc68 project.
+
+               (C) COPYRIGHT 1998-2014 Benjamin Gerard
+
+
+*Synopsis*                                   
+
+  Generate sc68 documentations from source code using doxygen.
+  The documentation is divided in two main parts:
+   - End user's documentation 
+   - Developper's documentation
+
+
+*Files of interest*
+
+Files from Microsoft Platform SDK.
+Compiled with proper RTL for this project.
+
+
+ 7.1/
+ |- include/
+ `- lib/
+    |- strmbasd-mb.lib
+    |- strmbasd.lib
+    |- strmbase-mb.lib
+    `- strmbase.lib
