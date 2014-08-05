@@ -16,7 +16,7 @@
 
 #include "ds68_prop.h"
 
-#undef  WITH_TRACKINFO
+#define WITH_TRACKINFO
 #define WITH_STREAMSELECT
 
 #ifdef WITH_TRACKINFO

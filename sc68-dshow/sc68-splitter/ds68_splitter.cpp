@@ -109,15 +109,12 @@ CBasePin* Sc68Splitter::GetPin(int n)
   case 1: pin = m_paStreams[0]; break;
   default: pin = nullptr; break;
   }
-  //DBG(L"%s(%d) -> %s\n", __FUNCTIONW__, n, pin ? pin->Name() : L"(null)");
   return pin;
 }
 
 int Sc68Splitter::GetPinCount()
 {
-  int cnt = 2;
-  //DBG("%s() -> %d\n", __FUNCTION__, cnt);
-  return cnt;
+  return 2;
 }
 
 void Sc68Splitter::DumpSc68Error(const char * func, sc68_t * m_sc68)
@@ -174,6 +171,7 @@ exit:
 int Sc68Splitter::FillBuffer(IMediaSample *pSample)
 {
   BYTE * spl;
+  BOOL discont;
 
   if (!pSample)
     return SC68_IDLE;
@@ -189,14 +187,35 @@ int Sc68Splitter::FillBuffer(IMediaSample *pSample)
     goto exit;
   }
 
+  discont = (m_code & SC68_CHANGE) ? TRUE : FALSE;
+
   if (SUCCEEDED(pSample->GetPointer(&spl))) {
+    REFERENCE_TIME start, end;
     int n = pSample->GetSize(), nspl;
     nspl = n >> 2;
+
+    int dskpos, trkpos;
+
+    dskpos = sc68_cntl(m_sc68,SC68_GET_DSKPOS);
+    trkpos = sc68_cntl(m_sc68,SC68_GET_POS);
+
     m_code = sc68_process(m_sc68, (void*)spl, &nspl);
     if (m_code == SC68_ERROR)
       goto exit;
     pSample->SetActualDataLength(nspl<<2);
-    if (m_code && SC68_CHANGE)
+    pSample->SetSyncPoint(TRUE);
+    pSample->SetDiscontinuity(discont);
+    //if (discont)
+    //  pSample->SetMediaTime(&start,NULL);
+    pSample->GetMediaTime(&start,&end);
+    DBG("MEDIATIME: %c dsk:%u trk:%u %llu %llu\n", discont?'*':' ', dskpos, trkpos,start,end);
+
+    // pSample->SetTime(
+    //   [in]  REFERENCE_TIME *pTimeStart,
+    //   [in]  REFERENCE_TIME *pTimeEnd
+    //   );
+
+    if (m_code & SC68_CHANGE)
       sc68_music_info(m_sc68,&m_info,SC68_CUR_TRACK,0);
   }
 exit:
@@ -279,7 +298,7 @@ HRESULT Sc68Splitter::Stop()
   return hr;
 }
 #endif
-                                 
+
 static const char * Iname(REFIID riid) {
     return  0 ? 0
     : (riid == IID_IAMMediaContent)

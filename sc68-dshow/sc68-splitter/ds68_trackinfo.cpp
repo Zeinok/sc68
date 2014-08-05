@@ -30,84 +30,109 @@
 
 #ifdef WITH_TRACKINFO
 
+#define DECLARE_MAXTRACKS const UINT maxTracks = (m_info.tracks + (m_info.tracks > 1))
+
 STDMETHODIMP_(UINT)
 Sc68Splitter::GetTrackCount()
 {
-  UINT res = m_allin1 ? m_info.tracks > 0 : m_info.tracks;
-  DBG("%s() => %u\n", res);
-  return res;
+  DECLARE_MAXTRACKS;
+  DBG("%s() => %u\n", __FUNCTION__, maxTracks);
+  return maxTracks;
 }
 
 STDMETHODIMP_(BOOL)
 Sc68Splitter::GetTrackInfo(UINT aTrackIdx, struct TrackElement * pStructureToFill)
 {
-  if (m_allin1 || aTrackIdx >= (UINT)m_info.tracks || !pStructureToFill)
-    return false;
-  pStructureToFill->FlagDefault = aTrackIdx == 0;
-  pStructureToFill->FlagForced  = false;
-  pStructureToFill->FlagLacing  = false;
-  pStructureToFill->MaxCache    = 0;
-  pStructureToFill->MinCache    = 0;
-  pStructureToFill->Size        = sizeof(*pStructureToFill);
-  pStructureToFill->Type        = TypeAudio;
-  return true;
+  DECLARE_MAXTRACKS;
+  BOOL res = FALSE;
+  if (aTrackIdx <= maxTracks  && pStructureToFill) {
+    pStructureToFill->FlagDefault = aTrackIdx == 0;
+    pStructureToFill->FlagForced  = false;
+    pStructureToFill->FlagLacing  = false;
+    pStructureToFill->MaxCache    = 0;
+    pStructureToFill->MinCache    = 0;
+    pStructureToFill->Size        = sizeof(*pStructureToFill);
+    pStructureToFill->Type        = TypeAudio;
+    res = TRUE;
+  }
+  DBG("%s(%d) => %u\n", __FUNCTION__, aTrackIdx, res?"OK":"FAIL");
+  return res;
 }
 
 STDMETHODIMP_(BOOL)
 Sc68Splitter::GetTrackExtendedInfo(UINT aTrackIdx, void* pStructureToFill)
 {
-  struct TrackExtendedInfoAudio * p
-    = (struct TrackExtendedInfoAudio *)pStructureToFill;
-
-  if (m_allin1 || aTrackIdx >= (UINT)m_info.tracks || !pStructureToFill)
-    return false;
-  p->BitDepth = 16;
-  p->Channels = 2;
-  p->OutputSamplingFrequency = (float)m_spr;
-  p->SamplingFreq = (float)m_spr;
-  p->Size = sizeof(*p);
-  return true;
-}
-
-
-STDMETHODIMP_(BSTR)
-Sc68Splitter::GetTrackCodecID(UINT aTrackIdx)
-{
-  BSTR str = nullptr;
-  if (m_info.genre && *m_info.genre)
-    BSTRset(&str, m_info.genre);
-  return nullptr;
+  DECLARE_MAXTRACKS;
+  BOOL res = FALSE;
+  if (aTrackIdx <= maxTracks  && pStructureToFill) {
+    struct TrackExtendedInfoAudio * p
+      = (struct TrackExtendedInfoAudio *)pStructureToFill;
+    p->BitDepth = 16;
+    p->Channels = 2;
+    p->OutputSamplingFrequency = (float)GetSamplingRate();
+    p->SamplingFreq = p->OutputSamplingFrequency;
+    p->Size = sizeof(*p);
+    res = TRUE;
+  }
+  DBG("%s(%d) => %u\n", __FUNCTION__, aTrackIdx, res?"OK":"FAIL");
+  return res;
 }
 
 STDMETHODIMP_(BSTR)
 Sc68Splitter::GetTrackName(UINT aTrackIdx)
 {
+  DECLARE_MAXTRACKS;
   BSTR str = nullptr;
-  if (!m_allin1 && aTrackIdx < (UINT)m_info.tracks) {
-    if (m_info.tracks == 1 && m_info.album)
-      BSTRset(&str, m_info.album);
-    else {
-      sc68_minfo_t info;
-      if (!sc68_music_info(m_sc68,&info,aTrackIdx,0)) {
-        char tmp[256];
-        if (info.title)
-          _snprintf(tmp,sizeof(tmp),"%02d. %s",info.trk.track, info.title);
-        else if (info.album)
-          _snprintf(tmp,sizeof(tmp),"%02d. %s",info.trk.track, info.album);
+  if (aTrackIdx <= maxTracks) {
+    char tmp[256];
+    const char * use = tmp;
+    if (!aTrackIdx) {
+      if (maxTracks > 1)
+        _snprintf(tmp,sizeof(tmp),"ALL. %s", m_info.album);
+      else if (strcmp68(m_info.album,m_info.title))
+        _snprintf(tmp,sizeof(tmp),"%s - %s", m_info.album, m_info.title);
+      else
+        use = m_info.album;
+    } else {
+      sc68_minfo_t info, *pinfo;
+      if (aTrackIdx == m_info.trk.track)
+        pinfo = &m_info;
+      else if (!sc68_music_info(m_sc68,&info,aTrackIdx,m_disk))
+        pinfo = &info;
+      else
+        use = NULL, pinfo = NULL;
+
+      if (pinfo) {
+        if (maxTracks > 1)
+          if (strcmp68(pinfo->album,pinfo->title))
+            _snprintf(tmp,sizeof(tmp),"%02u. %s - %s", pinfo->trk.track, pinfo->album, pinfo->title);
+          else
+            _snprintf(tmp,sizeof(tmp),"%02u. %s", pinfo->trk.track, pinfo->album);
         else
-          _snprintf(tmp,sizeof(tmp),"track #%02d",info.trk.track);
-        tmp[sizeof(tmp)-1] = 0;
-        BSTRset(&str,tmp);
+          if (strcmp68(pinfo->album,pinfo->title))
+            _snprintf(tmp,sizeof(tmp),"%s - %s", pinfo->album, pinfo->title);
+          else
+            use = pinfo->album;
       }
+      tmp[sizeof(tmp)-1] = 0;
     }
+    if (use)
+      BSTRset(&str, use);
   }
+  DBG(L"%s(%d) => \"%s\"\n", __FUNCTION__, aTrackIdx, str?str:L"(nil)");
   return str;
+}
+
+STDMETHODIMP_(BSTR)
+Sc68Splitter::GetTrackCodecID(UINT aTrackIdx)
+{
+  return nullptr;
 }
 
 STDMETHODIMP_(BSTR)
 Sc68Splitter::GetTrackCodecName(UINT aTrackIdx)
 {
-  return GetTrackCodecID(aTrackIdx);
+  return nullptr;
 }
 
 STDMETHODIMP_(BSTR)

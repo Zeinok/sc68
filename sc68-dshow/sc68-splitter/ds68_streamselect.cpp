@@ -88,9 +88,11 @@ HRESULT Sc68Splitter::Info(long lIndex,
     hr = S_OK;
     if (ppmt) {
       CMediaType pMediaType;
-      Sc68OutPin * opin = (Sc68OutPin *)GetPin(1);
-      const AM_MEDIA_TYPE & srcMt = opin->GetMediaType();
-      *ppmt = CreateMediaType(&srcMt);
+      Sc68OutPin * opin = (Sc68OutPin *) m_paStreams[0]; // GetPin(1);
+      if (opin) {
+        const AM_MEDIA_TYPE & srcMt = opin->GetMediaType();
+        *ppmt = CreateMediaType(&srcMt);
+      }
     }
     if (pdwFlags) {
       *pdwFlags = lIndex == m_track ? AMSTREAMSELECTINFO_ENABLED : 0;
