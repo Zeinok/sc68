@@ -355,7 +355,7 @@ void mfp_put_tcr(mfp_t * const mfp,
     /* Timer C and D do not have ECM nor PWM */
     mfp->map[0x1D] = v &= 0x77;
     mfp_put_tcr_bogo(mfp->timers+TIMER_C, v>>4, bogoc);
-    mfp_put_tcr_bogo(mfp->timers+TIMER_D, v   , bogoc);
+    mfp_put_tcr_bogo(mfp->timers+TIMER_D, v&07, bogoc);
   }
 }
 
