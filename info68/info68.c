@@ -53,6 +53,16 @@ static int error(const char *format, ...)
   return -1;
 }
 
+/* static void debug(const char *format, ...) */
+/* { */
+/* #ifdef DEBUG */
+/*   va_list list; */
+/*   va_start(list, format); */
+/*   vfprintf(stderr, format, list); */
+/*   va_end(list); */
+/* #endif */
+/* } */
+
 static int file_error(const char *filename)
 {
   error ("info68: bad or missing sc68 input file \"%s\"\n", filename);
@@ -229,6 +239,12 @@ static const char * HWflags(const hwflags68_t f)
   return flags;
 }
 
+static int fmt_0 = 0;                   /* prefix zero   */
+static int fmt_l = 0;                   /* format length */
+static char fmt_b[2048];                /* format temp buffer */
+#define fmt_max (sizeof(fmt_b)-1)
+
+
 static void PutC(vfs68_t *out, const int c)
 {
   vfs68_putc(out, c);
@@ -236,29 +252,39 @@ static void PutC(vfs68_t *out, const int c)
 
 static void PutS(vfs68_t *out, const char *s)
 {
-  if (s)
+  if (s) {
     vfs68_puts(out, s);
+    if (fmt_l) {
+      int len = strlen(s);
+      while (len++ < fmt_l)
+        vfs68_putc(out, ' ');
+    }
+  }
 }
 
 static void PutI(vfs68_t *out, int v)
 {
-  char buffer[64];
-  sprintf(buffer,"%d",v);
-  PutS(out, buffer);
+  snprintf(fmt_b, fmt_max, fmt_0 ? "%0*d" : "%*d" , fmt_l, v);
+  fmt_b[fmt_max] = 0;
+  PutS(out, fmt_b);
 }
 
 static void PutX(vfs68_t *out, unsigned int v)
 {
-  char buffer[64];
-  sprintf(buffer,"%x",v);
-  PutS(out, buffer);
+  snprintf(fmt_b, fmt_max, fmt_0 ? "%0*x" : "%*x" , fmt_l, v);
+  fmt_b[fmt_max] = 0;
+  PutS(out, fmt_b);
 }
 
 static void PutX32(vfs68_t *out, unsigned int v)
 {
-  char buffer[64];
-  sprintf(buffer,"%08x",v&0xFFFFFFFF);
-  PutS(out, buffer);
+  if (!fmt_0 && !fmt_l) {
+    fmt_0 = 1;
+    fmt_l = 8;
+  }
+  snprintf(fmt_b, fmt_max, fmt_0 ? "%0*x" : "%*x" , fmt_l, v);
+  fmt_b[fmt_max] = 0;
+  PutS(out, fmt_b);
 }
 
 static int ReadTrackNumber(char **ps, int max)
@@ -470,6 +496,18 @@ int main(int argc, char ** argv)
           /* Not escaped */
           if(esc = (c=='%'), !esc) {
             PutC(out,c);
+          } else {
+            int d;
+            fmt_l = 0;
+            fmt_0 = 0;
+            if (d = s[1], (d >= '0' && d <= '9')) {
+              fmt_0 = ( d == '0' );
+              do {
+                ++s;
+                fmt_l = fmt_l*10 + d - '0';
+                d = s[1];
+              } while (d >= '0' && d <= '9');
+            }
           }
         } else {
           /* Escaped */
