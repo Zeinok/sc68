@@ -31,7 +31,8 @@
 #include <sc68/file68_msg.h>
 
 #define cpp(V)      (V*prediv_width[(int)ptimer->tcr])
-#define timerfrq(V) ((8000000u*192u)/cpp(V))
+#define bogotohz(V) ((8000000u*192u)/(V))
+#define timerfrq(V) bogotohz(cpp(V))
 
 #define MYHD "mfp    : "
 
@@ -335,23 +336,26 @@ static void mfp_put_tcr_bogo(mfp_timer_t * const ptimer,
 void mfp_put_tcr(mfp_t * const mfp,
                  int timer, int68_t v, const bogoc68_t bogoc)
 {
-  timer &= 3;
+  assert( (timer & 3) == timer);
   if (timer < TIMER_C) {
     /* Timer A or B */
-    mfp->map[0x19+2*timer] = v;
-    /* $$$ Event mode + Pulse mode is NOT simulate yet ! */
-    if (v&0x10) {
+    mfp->map[0x19+(timer<<1)] = v &= 15;
+
+    if (v > 8) {
+      /* PWM or ECM */
       TRACE68(mfp_cat,
-            MYHD "timer-%c -- mode not supported --  %02x\n",
-            timer_def[timer].letter,(int)(u8)v);
-      assert(0 == "mfp mode not supported");
+              MYHD "timer-%c -- %s-mode not supported --  %02x\n",
+              timer_def[timer].letter,
+              v == 8 ? "event-count" : "pulse-width", v);
+      assert(!"mfp mode not supported");
+      v = 0;                            /* stop timer disable  */
     }
-    mfp_put_tcr_bogo(mfp->timers+timer, v&7, bogoc);
+    mfp_put_tcr_bogo(mfp->timers+timer, v, bogoc);
   } else {
-    /* Timer C and D */
-    mfp->map[0x1D] = v;
-    mfp_put_tcr_bogo(mfp->timers+TIMER_C, (v>>4)&7, bogoc);
-    mfp_put_tcr_bogo(mfp->timers+TIMER_D,  v    &7, bogoc);
+    /* Timer C and D do not have ECM nor PWM */
+    mfp->map[0x1D] = v &= 0x77;
+    mfp_put_tcr_bogo(mfp->timers+TIMER_C, v>>4, bogoc);
+    mfp_put_tcr_bogo(mfp->timers+TIMER_D, v   , bogoc);
   }
 }
 
