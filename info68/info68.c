@@ -141,7 +141,8 @@ static int display_help(int more)
      "    `%Y'         formated disk time. Format \"TT MM:SS\"\n"
      "    `%H'         all tracks ORed hardware flags (see %h)\n"
      "    `%F'         file format (sc68 or sndh)\n"
-     "    `%~'         file hash code (unic-id)\n");
+     "    `%~'         file hash code (unic-id)\n"
+     "    `%U'         input URI\n");
   puts
     ("  track-commands:\n"
      "\n"
@@ -154,10 +155,11 @@ static int display_help(int more)
      "    `%r'         replay name\n"
      "    `%t'         time in sec\n"
      "    `%y'         formated time. Format \"TT MM:SS\"\n"
-     "    `%f'         replay frequency\n"
+     "    `%f'         replay frequency (frame length)\n"
+     "    `%m'         duration in frames\n"
      "    `%@'         load address (in hexdecimal)\n"
-     "    `%h'         hardware flags [YSA] uppercase means activated\n"
-     "                   Y:YM-2149,  S:STE  A:Amiga\n");
+     "    `%h'         hardware flags [YSAT] uppercase means activated\n"
+     "                 Y:YM-2149 S:STE A:Amiga T:Timers\n");
 
   puts
     ("  misc-commands:\n"
@@ -264,14 +266,14 @@ static void PutS(vfs68_t *out, const char *s)
 
 static void PutI(vfs68_t *out, int v)
 {
-  snprintf(fmt_b, fmt_max, fmt_0 ? "%0*d" : "%*d" , fmt_l, v);
+  snprintf(fmt_b, fmt_max, fmt_0 ? "%0*d" : "%-*d" , fmt_l, v);
   fmt_b[fmt_max] = 0;
   PutS(out, fmt_b);
 }
 
 static void PutX(vfs68_t *out, unsigned int v)
 {
-  snprintf(fmt_b, fmt_max, fmt_0 ? "%0*x" : "%*x" , fmt_l, v);
+  snprintf(fmt_b, fmt_max, fmt_0 ? "%0*x" : "%-*x" , fmt_l, v);
   fmt_b[fmt_max] = 0;
   PutS(out, fmt_b);
 }
@@ -282,7 +284,7 @@ static void PutX32(vfs68_t *out, unsigned int v)
     fmt_0 = 1;
     fmt_l = 8;
   }
-  snprintf(fmt_b, fmt_max, fmt_0 ? "%0*x" : "%*x" , fmt_l, v);
+  snprintf(fmt_b, fmt_max, fmt_0 ? "%0*x" : "%-*x" , fmt_l, v);
   fmt_b[fmt_max] = 0;
   PutS(out, fmt_b);
 }
@@ -453,7 +455,6 @@ int main(int argc, char ** argv)
       PutS(out,"loop-ms: ");   PutI(out,m->loops_ms); PutC(out,'\n');
       PutS(out,"loop-fr: ");   PutI(out,m->loops_fr); PutC(out,'\n');
 
-      PutS(out,"rate: ");     PutI(out,m->frq);      PutC(out,'\n');
       PutS(out,"hardware: "); PutS(out,HWflags(m->hwflags)); PutC(out,'\n');
       for (j=0; !file68_tag_enum(d, i, j, &key, &val); ++j) {
         PutS(out,key); PutS(out,": "); PutS(out,val); PutC(out,'\n');
@@ -526,6 +527,9 @@ int main(int argc, char ** argv)
             break;
 
             /* DISK commands */
+          case 'U':
+            PutS(out,inname);
+            break;
           case '~':
             PutX32(out,d->hash);
             break;
@@ -590,6 +594,9 @@ int main(int argc, char ** argv)
             break;
           case 'y':
             PutS(out,strtime68(0, curTrack+1, m->first_ms/1000u));
+            break;
+          case 'm':
+            PutI(out,m->first_fr);
             break;
           case 'h':
             PutS(out, HWflags(m->hwflags));
