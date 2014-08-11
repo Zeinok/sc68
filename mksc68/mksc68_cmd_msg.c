@@ -104,6 +104,8 @@ int run_msg(cmd_t * cmd, int argc, char ** argv)
     for (arg = strtok(arg,","); arg; arg = strtok(0, ",")) {
       if (!strcmp68(arg,"all"))
         bits = -1;
+      else if (!strcmp68(arg,"none"))
+        bits = 0;
       else if (arg[0] == '#' && isdigit((int)arg[1]))
         bits |= 1 << strtol(arg+1,0,0);
       else if (isdigit((int)arg[0]))
@@ -111,7 +113,7 @@ int run_msg(cmd_t * cmd, int argc, char ** argv)
       else if (*arg) {
         int bit = msg68_cat_bit(arg);
         if (bit < 0) {
-          msgwrn("unknown category \"%s\". Try --list.\n",arg);
+          msgwrn("unknown category \"%s\". Try msg (without parameter).\n",arg);
         } else {
           bits |= 1 << bit;
         }
@@ -150,9 +152,10 @@ cmd_t cmd_msg = {
   "CATS := a `,' (comma) separated list of categories (CAT) optionally\n"
   "         prefixed by an operator (OP).\n"
   "CAT  := a category-name OR a number OR a bit-number (prefixed by `#')\n"
-  "OP   := `+' (plus) | `~' (tilde) | `-' (minus) | `,' (coma)\n"
-  " `+' set the specified categories (OR) (default)\n"
-  " `~' clear the specified categories (NAND)\n"
-  " `-' as `~' (beware of option parsing)\n"
+  "OP   := `=' (equal) | `+' (plus) | `~' (tilde) | `-' (minus) | `,' (coma)\n"
+  " `=' set the specified categories (SET)\n"
+  " `+' enable the specified categories (OR) (default)\n"
+  " `~' disable the specified categories (NAND)\n"
+  " `-' as `~' (might confuse the options parser)\n"
   " `,' set ONLY the specified categories and clear others (SET)\n"
 };
