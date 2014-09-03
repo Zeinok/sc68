@@ -425,7 +425,7 @@ cmd_t cmd_play = {
   "   -m --m=N          68k memory size of 2^N.\n"
   "   -d --debug        Debug via gdb.\n"
   "\n"
-  "POS := [+|-]ms | [+|-]mm:ss[:ms]\n"
+  "POS := [+|-]ms | [+|-]mm:ss[,ms]\n"
   "  '+' is relative to start position.\n"
   "  '-' is relative to end position.\n"
   "  no prefix is absolute time posiiton.\n"

@@ -173,6 +173,7 @@ int run_extract(cmd_t * cmd, int argc, char ** argv)
   }
   i = optind;
 
+
   if (i == argc) {
     msgerr("missing <URI> parameter. Try --help.\n");
     goto error;
@@ -223,7 +224,7 @@ cmd_t cmd_extract = {
   /* com */ "extract",
   /* alt */ "xt",
   /* use */ "<URI> [TRACKS]",
-  /* des */ "load a new disk",
+  /* des */ "extract track raw data",
   /* hlp */
   "The `extract' command extracts track data.\n"
   "\n"
