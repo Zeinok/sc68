@@ -65,12 +65,13 @@ noinst_HEADERS       = $(headers)
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-dist_man_MANS        = mksc68.1
-info_TEXINFOS        = mksc68.texi
-MAINTAINERCLEANFILES = $(srcdir)/mksc68.1
+dist_man1_MANS       = mksc68.man
 
-TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
-fail                 = { test -e '$@' && rm '$@'; test a = b; }
+# info_TEXINFOS        = mksc68.texi
+# MAINTAINERCLEANFILES = $(srcdir)/mksc68.1
 
-$(srcdir)/mksc68.1: mksc68.1.tpl.in $(srcdir)/mksc68.texi
-	$(TEXINFO2MAN) mksc68.1.tpl $(srcdir)/mksc68.texi >$@ || $(fail)
+# TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
+# fail                 = { test -e '$@' && rm '$@'; test a = b; }
+
+# $(srcdir)/mksc68.1: mksc68.1.tpl.in $(srcdir)/mksc68.texi
+# 	$(TEXINFO2MAN) mksc68.1.tpl $(srcdir)/mksc68.texi >$@ || $(fail)

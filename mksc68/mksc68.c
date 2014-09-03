@@ -77,10 +77,12 @@ static void print_option(void * data,
          desc+1);
 }
 
+static void cmd_list(const cmd_t * cmd, int tabs);
+
 static int print_usage(int more)
 {
   puts
-    ("Usage: " PACKAGE_NAME " [OPTION] URI...\n"
+    ("Usage: " PACKAGE_NAME " [Options] [--] [URI ...]\n"
      "\n"
      "  sc68 file toolbox - to create or modify sc68 files\n"
      "\n"
@@ -94,9 +96,33 @@ static int print_usage(int more)
      "  -i --interactive    Force interactive mode (default autodetect tty)\n"
       );
 
-  if (more) {
-   option68_help(stdout,print_option);
-   puts("");
+  if (more > 1) {
+    const cmd_t * cmd;
+    puts
+      ("sc68-options:");
+    option68_help(stdout,print_option);
+    puts
+      ("");
+
+    puts
+      ("Commands:");
+    for (cmd = cmd_lst(); cmd; cmd = cmd->nxt) {
+      cmd_list(cmd,2);
+      if (more > 2) {
+        char buf[767], *s;
+        const int max = sizeof(buf) - 1;
+        strncpy(buf, cmd->hlp, max); buf[max] = 0;
+        /* puts */
+        /*   (""); */
+        for (s = strtok(buf,"\n"); s; s=strtok(0,"\n")) {
+          printf("  %c %s\n",more>3?' ':'|',s);
+        }
+        puts
+          ("");
+      }
+    }
+    puts
+      ("");
   }
 
   puts
@@ -122,10 +148,11 @@ static int print_version(void)
   return 0;
 }
 
-static void cmd_list(const cmd_t * cmd)
+static void cmd_list(const cmd_t * cmd, int tabs)
 {
   int coml = 8, coma = 3, comu = 25;
-  printf("%-*s %-*s %-*s : %s.\n",
+  printf("%*s%-*s %-*s %-*s : %s.\n",
+         tabs, "",
          coml, cmd->com,
          coma, cmd->alt?cmd->alt:"",
          comu, cmd->use?cmd->use:"",
@@ -187,7 +214,7 @@ static int run_help(cmd_t * me, int argc, char ** argv)
   if (argc < 2) {
     /* list all commands */
     for (cmd = cmd_lst(); cmd; cmd = cmd->nxt) {
-      cmd_list(cmd);
+      cmd_list(cmd,0);
     }
   } else {
     int i;
@@ -235,9 +262,9 @@ extern cmd_t cmd_new, cmd_load, cmd_play, cmd_stop, cmd_msg, cmd_tag;
 extern cmd_t cmd_time, cmd_save, cmd_info, cmd_gdb, cmd_extract;
 static cmd_t
 cmd_exit = {
-  run_exit, "exit",  "x", "[exit-code]",   "exit command interpreter" },
+  run_exit, "exit",  "x", "[exit-code]", "exit command interpreter" },
 cmd_help = {
-  run_help, "help",  "?", "[cmd ...]", "Print command(s) usage",
+  run_help, "help",  "?", "[cmd ...]", "print command(s) usage",
   "The `help' command prints command list or usage.\n"
   "Without argument it prints the command list with a short description.\n"
   "Else prints a complete usage for all given commands.\n"
@@ -967,7 +994,8 @@ int main(int argc, char *argv[])
   i = i;
 
   if (opt_help) {
-    return print_usage(opt_help > 1);
+    if (add_commands()) opt_help = 1;
+    return print_usage(opt_help);
   }
 
   if (opt_vers) {

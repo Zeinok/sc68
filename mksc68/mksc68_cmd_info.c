@@ -196,11 +196,12 @@ cmd_t cmd_info = {
   "Use -l to select how to display how to display it.\n"
   "\n"
   "OPTIONS\n"
-  "   -l --long        use verbose info format.\n"
-  "   -d --disk        display disk info.\n"
-  "   -a --all         display full info.\n"
-  "   -t\n"
-  "   --tracks=TRACKS  select tracks tag.\n"
+  /* *****************   ********************************************** */
+  "  -l --long           Use verbose info format.\n"
+  "  -d --disk           Display disk info.\n"
+  "  -a --all            Display full info.\n"
+  "  -t\n"
+  "  --tracks=TRACKS  select tracks tag.\n"
   "\n"
   "TRACKS := N[-N][,N[-N]]* N:=[0-9]+ (0 is the last track)"
 };

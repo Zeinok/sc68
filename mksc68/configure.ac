@@ -13,12 +13,14 @@ dnl#
 
 AC_INIT(
   [mksc68],
-  [20130730],
-  [http://sourceforge.net/projects/sc68/],,
+  [20140815],
+  [http://sourceforge.net/projects/sc68/],
+  [mksc68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([mksc68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.14 silent-rules dist-xz])
+AM_INIT_AUTOMAKE(
+  [foreign 1.14 silent-rules dist-xz no-installman no-installinfo])
 AC_CONFIG_HEADERS([config.h])
 
 AC_USE_SYSTEM_EXTENSIONS
@@ -28,7 +30,7 @@ LT_INIT([win32-dll])
 # | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
-SC68_PACKAGE([Command line toolbox for sc68 files.])
+SC68_PACKAGE([sc68 file toolbox.])
 SC68_SYSTEM
 SC68_OPTIONS
 SC68_TOOLS

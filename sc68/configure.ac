@@ -14,12 +14,13 @@ dnl#
 AC_INIT(
   [sc68],
   [3.0.0b],
-  [http://sourceforge.net/projects/sc68/],,
+  [http://sourceforge.net/projects/sc68/],
   [sc68-cli],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.14 silent-rules dist-xz])
+AM_INIT_AUTOMAKE(
+  [foreign 1.14 silent-rules dist-xz no-installman no-installinfo])
 AC_CONFIG_HEADERS([config.h])
 
 AC_USE_SYSTEM_EXTENSIONS

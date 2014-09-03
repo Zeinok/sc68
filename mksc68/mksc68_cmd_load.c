@@ -93,6 +93,7 @@ cmd_t cmd_load = {
   "The `load' command loads or merges a disk.\n"
   "\n"
   "OPTIONS\n"
-  "   -f --force   force a new disk creation.\n"
-  "   -a --add     merge current and loaded disks."
+  /* *****************   ********************************************** */
+  "  -f --force          Force a new disk creation.\n"
+  "  -a --add            Merge current and loaded disks."
 };

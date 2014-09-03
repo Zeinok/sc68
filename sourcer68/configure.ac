@@ -14,11 +14,13 @@ dnl#
 AC_INIT(
   [sourcer68],
   [20090117],
-  [http://sourceforge.net/projects/sc68/],,
+  [http://sourceforge.net/projects/sc68/],
+  [sourcer68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sourcer68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.14 silent-rules dist-xz])
+AM_INIT_AUTOMAKE(
+  [foreign 1.14 silent-rules dist-xz no-installman no-installinfo])
 
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])

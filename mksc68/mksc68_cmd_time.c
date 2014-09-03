@@ -1238,10 +1238,11 @@ cmd_t cmd_time = {
   "to autodetect tracks duration.\n"
   "\n"
   "TRACKS\n"
-  "   List of tracks (eg: 1,2-5,7), or all\n"
+  "  List of tracks (eg: 1,2-5,7), or all.\n"
   "\n"
   "OPTIONS\n"
-  "   -s --silent=MS      Duration for silent detection (0:disable).\n"
-  "   -M --max-time=MS    Maximum time.\n"
-  "   -p --pass-time=MS   Search pass duration."
+  /* *****************   ********************************************** */
+  "  -s --silent=MS      Duration for silent detection (0:disable).\n"
+  "  -M --max-time=MS    Maximum time.\n"
+  "  -p --pass-time=MS   Search pass duration."
 };

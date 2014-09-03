@@ -45,12 +45,12 @@ sc68_LDADD           = $(SC68_LA) $(FILE68_LA)
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-dist_man_MANS        = sc68.1
-info_TEXINFOS        = sc68.texi
-MAINTAINERCLEANFILES = $(srcdir)/sc68.1
+dist_man1_MANS       = sc68.man
+# info_TEXINFOS        = sc68.texi
+# MAINTAINERCLEANFILES = $(srcdir)/sc68.1
 
-TEXINFO2MAN          = $(texinfo2man)
-fail                 = { test -e '$@' && rm '$@'; test a = b; }
+# TEXINFO2MAN          = $(texinfo2man)
+# fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
-$(srcdir)/sc68.1: sc68.1.tpl.in $(srcdir)/sc68.texi
-	$(TEXINFO2MAN) sc68.1.tpl $(srcdir)/sc68.texi >$@ || $(fail)
+# $(srcdir)/sc68.1: sc68.1.tpl.in $(srcdir)/sc68.texi
+# 	$(TEXINFO2MAN) sc68.1.tpl $(srcdir)/sc68.texi >$@ || $(fail)

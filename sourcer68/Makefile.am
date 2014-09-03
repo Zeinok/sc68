@@ -46,12 +46,12 @@ sourcer68_LDADD       = $(FILE68_LA) $(DESA68_LA)
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-dist_man_MANS        = sourcer68.1
-info_TEXINFOS        = sourcer68.texi
-MAINTAINERCLEANFILES = $(srcdir)/sourcer68.1
+dist_man1_MANS       = sourcer68.man
+# info_TEXINFOS        = sourcer68.texi
+# MAINTAINERCLEANFILES = $(srcdir)/sourcer68.1
 
-TEXINFO2MAN          = $(texinfo2man)
-fail                 = { test -e '$@' && rm '$@'; test a = b; }
+# TEXINFO2MAN          = $(texinfo2man)
+# fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
-$(srcdir)/sourcer68.1: sourcer68.1.tpl.in $(srcdir)/sourcer68.texi
-	$(TEXINFO2MAN) sourcer68.1.tpl $(srcdir)/sourcer68.texi >$@ || $(fail)
+# $(srcdir)/sourcer68.1: sourcer68.1.tpl.in $(srcdir)/sourcer68.texi
+# 	$(TEXINFO2MAN) sourcer68.1.tpl $(srcdir)/sourcer68.texi >$@ || $(fail)

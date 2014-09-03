@@ -229,8 +229,9 @@ cmd_t cmd_extract = {
   "The `extract' command extracts track data.\n"
   "\n"
   "OPTIONS\n"
-  "   -s --single  only save identical data once.\n"
-  "   -b --binary  output binary (.mus) files (default).\n"
-  "   -a --asm     output 68k assembler (.s) compatible data.\n"
-  "   -A --ascii   output 68k assembler (.s) with ASCII.\n"
+  /* *****************   ********************************************** */
+  "  -s --single         Save identical data only once.\n"
+  "  -b --binary         Output binary (.mus) files (default).\n"
+  "  -a --asm            Output 68k assembler (.s) compatible data.\n"
+  "  -A --ascii          Output 68k assembler (.s) with ASCII.\n"
 };

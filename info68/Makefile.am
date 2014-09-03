@@ -37,12 +37,13 @@ noinst_HEADERS       =
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-dist_man_MANS        = info68.1
-info_TEXINFOS        = info68.texi
-MAINTAINERCLEANFILES = $(srcdir)/info68.1
+dist_man1_MANS        = info68.man
 
-TEXINFO2MAN          = $(texinfo2man)	
-fail                 = { test -e '$@' && rm '$@'; test a = b; }
+# info_TEXINFOS        = info68.texi
+# MAINTAINERCLEANFILES = $(srcdir)/info68.1
 
-$(srcdir)/info68.1: info68.1.tpl.in $(srcdir)/info68.texi
-	$(TEXINFO2MAN) info68.1.tpl $(srcdir)/info68.texi >$@ || $(fail)
+# TEXINFO2MAN          = $(texinfo2man)	
+# fail                 = { test -e '$@' && rm '$@'; test a = b; }
+
+# $(srcdir)/info68.1: info68.1.tpl.in $(srcdir)/info68.texi
+# 	$(TEXINFO2MAN) info68.1.tpl $(srcdir)/info68.texi >$@ || $(fail)

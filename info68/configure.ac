@@ -13,12 +13,14 @@ dnl#
 
 AC_INIT(
   [info68],
-  [20130730],
-  [http://sourceforge.net/projects/sc68/],,
+  [20140815],
+  [http://sourceforge.net/projects/sc68/],
+  [info68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([info68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.14 silent-rules dist-xz])
+AM_INIT_AUTOMAKE(
+  [foreign 1.14 silent-rules dist-xz no-installman no-installinfo])
 AC_CONFIG_HEADERS([config.h])
 
 AC_USE_SYSTEM_EXTENSIONS
@@ -28,7 +30,7 @@ LT_INIT([win32-dll])
 # | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
-SC68_PACKAGE([Get tag info from sc68 music files.])
+SC68_PACKAGE([Formats info from sc68 music files.])
 SC68_SYSTEM
 SC68_OPTIONS
 SC68_TOOLS

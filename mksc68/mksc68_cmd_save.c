@@ -97,6 +97,7 @@ cmd_t cmd_save = {
   /* hlp */
   "The `save' command saves the disk.\n"
   "\n"
-  "OPTION\n"
-  "   -z --gzip=#  Set compression level [0..9]."
+  "OPTIONS\n"
+  /* *****************   ********************************************** */
+  "  -z --gzip=#         Set compression level [0..9]."
 };

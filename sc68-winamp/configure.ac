@@ -14,7 +14,8 @@ dnl#
 AC_INIT(
   [sc68-winamp],
   [0.5],
-  [http://sourceforge.net/projects/sc68/],,
+  [http://sourceforge.net/projects/sc68/],
+  [sc68-winamp],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([in_sc68.c])
 AC_CONFIG_HEADERS([config.h])

@@ -90,5 +90,6 @@ cmd_t cmd_new = {
   "The `new' creates a brand new disk.\n"
   "\n"
   "OPTIONS\n"
-  "   -f --force   force a new disk creation."
+  /* *****************   ********************************************** */
+  "  -f --force          Force a new disk creation."
 };

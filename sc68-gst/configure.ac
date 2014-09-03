@@ -14,7 +14,8 @@ dnl#
 AC_INIT(
   [sc68-gst],
   [0.1.0],
-  [http://sourceforge.net/projects/sc68/],,
+  [http://sourceforge.net/projects/sc68/],
+  [sc68-gst],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([gstsc68.c])
 AC_CONFIG_MACRO_DIR([m4])

@@ -14,7 +14,8 @@ dnl#
 AC_INIT(
   [file68],
   [3.0.0b],
-  [http://sourceforge.net/projects/sc68/],,
+  [http://sourceforge.net/projects/sc68/],
+  [file68],
   [libfile68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([src/file68.c])

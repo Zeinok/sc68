@@ -14,7 +14,8 @@ dnl#
 AC_INIT(
   [as68],
   [20130730],
-  [http://sourceforge.net/projects/sc68/],,
+  [http://sourceforge.net/projects/sc68/],
+  [as68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([as68.c])
 AC_CONFIG_MACRO_DIR([m4])

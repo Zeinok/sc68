@@ -14,7 +14,8 @@ dnl#
 AC_INIT(
   [cdbg68],
   [20090618],
-  [http://sourceforge.net/projects/sc68/],,
+  [http://sourceforge.net/projects/sc68/],
+  [cdbg68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([src/cdbg68.c])
 AC_CONFIG_MACRO_DIR([m4])

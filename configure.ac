@@ -14,7 +14,8 @@ dnl#
 AC_INIT(
   [sc68-ng],
   [3.0.0b],
-  [http://sourceforge.net/projects/sc68/],,
+  [http://sourceforge.net/projects/sc68/],
+  [sc68-ng],
   [http://sc68.atari.org])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu 1.14 silent-rules check-news dist-xz])

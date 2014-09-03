@@ -53,12 +53,12 @@ include_HEADERS      = unice68.h
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-dist_man_MANS        = unice68.1
-info_TEXINFOS        = unice68.texi
-MAINTAINERCLEANFILES = $(srcdir)/unice68.1
+dist_man1_MANS       = unice68.man
+# info_TEXINFOS        = unice68.texi
+# MAINTAINERCLEANFILES = $(srcdir)/unice68.1
 
-TEXINFO2MAN          = $(texinfo2man)
-fail                 = { test -e '$@' && rm '$@'; test a = b; }
+# TEXINFO2MAN          = $(texinfo2man)
+# fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
-$(srcdir)/unice68.1: unice68.1.tpl.in $(srcdir)/unice68.texi
-	$(TEXINFO2MAN) unice68.1.tpl $(srcdir)/unice68.texi >$@ || $(fail)
+# $(srcdir)/unice68.1: unice68.1.tpl.in $(srcdir)/unice68.texi
+# 	$(TEXINFO2MAN) unice68.1.tpl $(srcdir)/unice68.texi >$@ || $(fail)
