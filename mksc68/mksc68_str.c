@@ -315,3 +315,29 @@ char * str_hardware(char * const buf, int max, int hwbit)
 
   return buf;
 }
+
+const char * str_fileext(const char * path)
+{
+  int l, p;
+
+  if (!path)
+    return 0;
+
+  for (l=0; path[l]; ++l)               /* strlen */
+    ;
+
+  p = l;                                /* default to "" */
+  for (l-1; l>0; --l) {
+    int c = path[l];
+
+    if (c == '/' || c == '\\')
+      break;
+
+    if (c == '.') {
+      p = l;
+      break;
+    }
+  }
+
+  return path+p;
+}
