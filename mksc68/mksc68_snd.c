@@ -262,7 +262,7 @@ int sndh_save_sndh(const char * uri, disk68_t * d, int version, int gzip)
     goto exit;
   }
 
-  /* process in 2 pass:
+  /* Process in 2 pass:
    * - pass #1 compute required space and allocate buffer
    * - pass #2 do the real stuff
    */
@@ -321,6 +321,21 @@ int sndh_save_sndh(const char * uri, disk68_t * d, int version, int gzip)
       }
     }
 
+    /* Sub names */
+    for (i=0; i<d->nb_mus; ++i)
+      if (strcmp(d->tags.tag.title.val, d->mus[i].tags.tag.title.val))
+        break;
+    if (i != d->nb_mus) {
+      int tbl, bas;
+      bas = off = w_E(dbuf,off);        /* Even / base string offset */
+      tbl = w_D(dbuf,off,"!#SN",4);     /* Table after the tag */
+      off = tbl+2*d->nb_mus;            /* Skip the table */
+      for (i=0; i<d->nb_mus; ++i) {
+        w_W(dbuf,tbl+i*2,off-bas);           /* Fill offset to string */
+        off = w_S(dbuf,off,d->mus[i].tags.tag.title.val);
+      }
+    }
+
     /* Footer */
     off  = w_4(dbuf, off, "HDNS");      /* sndh footer   */
     off  = w_E(dbuf, off);              /* ensure even   */
@@ -333,7 +348,7 @@ int sndh_save_sndh(const char * uri, disk68_t * d, int version, int gzip)
       break;
     }
 
-    /* rewrite boot */
+    /* Rewrite boot */
     if (dbuf) {
       int * bt = &boot.init;
       for (i=0; i<3; ++i) {
@@ -349,7 +364,7 @@ int sndh_save_sndh(const char * uri, disk68_t * d, int version, int gzip)
       break;
     }
 
-    /* finally alloc buffer and ready for pass 2 */
+    /* Finally alloc buffer and ready for pass 2 */
     dbuf = malloc(dlen);
     if (!dbuf) {
       msgerr("memory allocation failed\n");
