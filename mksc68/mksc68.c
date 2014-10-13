@@ -876,7 +876,11 @@ static int interactive(void)
 
   msgdbg("mksc68 is going %sinteractive\n",is_interactive?"":"non ");
 
-  while (!exit_flag) {
+  for(;;) {
+    if (!is_interactive && feof(stdin)) {
+      msgdbg("Exit on EOF\n");
+      break;
+    }
     prompt();
     argc = cli_read(argv, 32);
     if (argc <= 0 || argv[0][0] == '#')
@@ -896,7 +900,11 @@ static int interactive(void)
     exit_code = cmd_run(argc, argv);
     if (exit_code && exit_on_fail) {
       msgdbg("Exit on fail (%s => %d)\n",argv[0],exit_code);
-      exit_flag = 1;
+      break;
+    }
+    if (exit_flag) {
+      msgdbg("Exit requested (%s => %d)\n",argv[0],exit_code);
+      break;
     }
   }
   dsk_stop();
