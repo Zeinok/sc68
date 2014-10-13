@@ -32,6 +32,7 @@
 #include "mksc68_cmd.h"
 #include "mksc68_tag.h"
 #include "mksc68_str.h"
+#include "mksc68_snd.h"
 
 #include <sc68/file68.h>
 #include <sc68/file68_str.h>
@@ -146,6 +147,9 @@ int dsk_merge(const char * uri)
   return -1;
 }
 
+/* @param  version  0:auto >0:sc68 <0:sndh
+ * @param  gzip     sc68: gzip level 0..9, sndh: 0=raw else ice!
+ */
 int dsk_save(const char * uri, int version, int gzip)
 {
   int err;
@@ -156,7 +160,17 @@ int dsk_save(const char * uri, int version, int gzip)
     msgerr("missing filename\n");
     return -1;
   }
-  msgdbg("saving disk as '%s' gzip:%d version:%d\n", uri, gzip, version);
+
+  if (!version) {
+    const char * ext = str_fileext(uri);
+    if (!strcmp68(ext,".snd") || !strcmp68(ext,".sndh"))
+      version = -1;
+    else
+      version = 1;
+  }
+
+  msgdbg("saving disk as '%s' gzip:%d format:%s version:%d\n",
+         uri, gzip, version<0?"sndh":"sc68",version^-(version<0));
 
   if (!is_valid_disk())
     return -1;
@@ -164,7 +178,11 @@ int dsk_save(const char * uri, int version, int gzip)
   if (dsk_validate())
     return -1;
 
-  err = file68_save_uri(uri, dsk_get_disk(), version, gzip);
+  if (version > 0)
+    err = file68_save_uri(uri, dsk_get_disk(), version-1, gzip);
+  else
+    err = sndh_save(uri, dsk_get_disk(), -version-1, gzip);
+
   if (!err) {
     dsk.modified = 0;
     msginf("disk saved\n");

@@ -14,9 +14,9 @@
 #include "mksc68_def.h"
 
 EXTERN68 int dsk_new(const char * name, int force);
-EXTERN68 int dsk_load(const char * url, int merge, int force);
-EXTERN68 int dsk_merge(const char * url);
-EXTERN68 int dsk_save(const char * url, int version, int gzip);
+EXTERN68 int dsk_load(const char * uri, int merge, int force);
+EXTERN68 int dsk_merge(const char * uri);
+EXTERN68 int dsk_save(const char * uri, int version, int gzip);
 EXTERN68 int dsk_kill(void);
 
 EXTERN68 int    dsk_has_disk(void);

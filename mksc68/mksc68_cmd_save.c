@@ -32,11 +32,13 @@
 #include "mksc68_msg.h"
 #include "mksc68_opt.h"
 
+#include "sc68/file68_str.h"
 #include <ctype.h>
 
 static const opt_t longopts[] = {
   { "help",    0, 0, 'h' },
   { "gzip",    1, 0, 'z' },
+  { "format",  1, 0, 'F' },
   { 0,0,0,0 }
 };
 
@@ -66,11 +68,22 @@ int run_save(cmd_t * cmd, int argc, char ** argv)
       }
       gzip = *optarg - '0';
       break;
+    case 'F':                           /* --format=sc68|sndh */
+      if (!strcmp68(optarg,"sc68")) {
+        version = 1;
+      } else if (!strcmp68(optarg,"sndh")) {
+        version = -1;
+      } else {
+        msgerr("unknown format -- `%s'\n", optarg);
+        goto error;
+      }
+      break;
 
     case '?':                       /* Unknown or missing parameter */
       goto error;
     default:
-      msgerr("unexpected getopt return value (%d)\n", val);
+      msgerr("unexpected getopt return value `%c'(%d)\n",
+             isgraph(val)?val:'.',val);
       goto error;
     }
     if (val == -1) break;
@@ -99,5 +112,6 @@ cmd_t cmd_save = {
   "\n"
   "OPTIONS\n"
   /* *****************   ********************************************** */
-  "  -z --gzip=#         Set compression level [0..9]."
+  "  -z --gzip=#         Set compression level [0..9].\n"
+  "  -F --format=fmt     Set output format [sc68*,sndh]."
 };
