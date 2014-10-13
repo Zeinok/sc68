@@ -134,11 +134,15 @@ static mfp_timer_t * find_next_int(const mfp_t * const mfp)
 static inline
 int timer_get_tdr(const mfp_timer_t * const ptimer, const bogoc68_t bogoc)
 {
-  const bogoc68_t cti = ptimer->cti - bogoc;       /* cycles to interrupt */
-  const uint68_t  psw = prediv_width[ptimer->tcr]; /* cycles count-down   */
-  const uint68_t  cnt = cti/psw;                   /* count-down          */
-  const uint68_t  tdr = cnt%ptimer->tdr_res+1;
-  return tdr;
+  assert(ptimer->cti >= bogoc);
+  assert(ptimer->tcr > 0 && ptimer->tcr < 8);
+  if (1) {
+    const bogoc68_t cti = ptimer->cti - bogoc;       /* cycles to interrupt */
+    const uint68_t  psw = prediv_width[ptimer->tcr]; /* cycles count-down   */
+    const uint68_t  cnt = cti/psw;                   /* count-down          */
+    const uint68_t  tdr = cnt%ptimer->tdr_res+1;
+    return tdr;
+  }
 }
 
 /* Control register changes, adjust ``cti'' (cycle to next interrupt)
@@ -211,7 +215,8 @@ void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
 static inline
 void stop_timer(mfp_timer_t * const ptimer, const bogoc68_t bogoc)
 {
-  ptimer->tdr_cur = timer_get_tdr(ptimer, bogoc);
+  if (ptimer->tcr)
+    ptimer->tdr_cur = timer_get_tdr(ptimer, bogoc);
   ptimer->tcr = 0;
   ptimer->psc = 0;
 }
@@ -322,6 +327,7 @@ void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
 static void mfp_put_tcr_bogo(mfp_timer_t * const ptimer,
                              int v, const bogoc68_t bogoc)
 {
+  assert(v >= 0 && v < 8);
   if (v != ptimer->tcr) {
     if (!v) {
       stop_timer(ptimer,bogoc);
@@ -341,7 +347,7 @@ void mfp_put_tcr(mfp_t * const mfp,
     /* Timer A or B */
     mfp->map[0x19+(timer<<1)] = v &= 15;
 
-    if (v > 8) {
+    if (v >= 8) {
       /* PWM or ECM */
       TRACE68(mfp_cat,
               MYHD "timer-%c -- %s-mode not supported --  %02x\n",
