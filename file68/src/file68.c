@@ -346,11 +346,39 @@ static int ice_is_magic(const char * buffer)
     && buffer[3] == '!';
 }
 
+/* Decode 68k instruction at the beginning of sndh files.
+ * @return  offset of the jump or org if it's a rts.
+ * @retval -1 on error
+ */
+static int sndh_decode(const char * buf, int org, int off)
+{
+  if (off < 12) {
+    unsigned int w0, w1;
+    w0 = WPeekBE(buf + off + 0);
+
+    /* Skip nop */
+    if (w0 == 0x4e71)
+      return sndh_decode(buf,org,off+2);
+    w1 = WPeekBE(buf + off + 2);
+
+    /* Decode 68k instructions allowed instructions: jmp(pc)/bra/bra.s/rts
+     */
+    if (w0 == 0x6000 || w0 == 0x4efa)
+      return off + 2 + w1;              /* bra and jmp(pc) */
+    else if ( (w0 & 0xff00) == 0x6000 )
+      return off + (int8_t) w0;         /* bra.s */
+    else if ( w0 == 0x4e75 || (w0 == 0x4e00 && off == 4))
+      return org;                       /* rts or illegal-fix */
+  }
+  return -1;
+}
+
 static inline int sndh_inst(int c) {
   return (c &0xFF00) == 0x6000          /* bra and bra.s */
-  || c == 0x4efa                        /* jmp (pc) */
-  || c == 0x4e75                        /* rts */
-  || c == 0x4e71                        /* nop */
+    || c == 0x4efa                        /* jmp (pc) */
+    || c == 0x4e75                        /* rts */
+    || c == 0x4e71                        /* nop */
+    || c == 0x4e00                        /* !! illegal !! */
   ;
 }
 
@@ -360,13 +388,16 @@ static int sndh_is_magic(const char *buffer, int max)
   int i=0, v = 0;
   if (max >= start
       && sndh_inst(WPeekBE(buffer+0))
-      /* && sndh_inst(WPeekBE(buffer+4)) */
+      && sndh_inst(WPeekBE(buffer+4)) /* FIXME: $$$ those commented */
       && sndh_inst(WPeekBE(buffer+8))) {
     for (i=start, v = LPeekBE(buffer+i); i < max && v != sndh_cc;
          v = ((v<<8) | (buffer[i++]&255)) & 0xFFFFFFFF)
       ;
   }
   i = (v == sndh_cc) ? i-4: 0;
+
+  assert(i==0 || i == 12);
+
   return i;
 }
 
@@ -1089,10 +1120,30 @@ static int sndh_info(disk68_t * mb, int len)
     } else if (!memcmp(b+i,"!#SN",4)) {
       /* track names */
       int j, max=0, tracks = mb->nb_mus <= 0 ? 1 : mb->nb_mus;
+
+      int faulty = 0;
+
       t = i;
       /* assert(0); */
+
+
+      /* FIXME: normally (according to the documentation) the subname
+       * table are offset relative the tag itself. However in some
+       * files they are obviously relative to the end of the offset
+       * table. Those are most probably faulty files, but I'll keep
+       * loading them by guessing the offset is wrong since it points
+       * in middle of the offset table instead of an actual string. */
       for (j = 0; j < tracks; ++j) {
-        int off = WPeekBE(b + i + 4 + j*2);
+        int off = WPeekBE(b + i + 4 + j*2); /* string offset */
+        if (off < 4+tracks*2) {
+          /* assert(!"faulty !#SN"); */
+          faulty = 4+tracks*2;
+          break;
+        }
+      }
+
+      for (j = 0; j < tracks; ++j) {
+        int off = faulty + WPeekBE(b + i + 4 + j*2); /* string offset */
         if (off > max) max = off;
         mb->mus[j].tags.tag.title.val = b + i + off;
         TRACE68(file68_cat,
@@ -1158,10 +1209,10 @@ static int sndh_info(disk68_t * mb, int len)
         }
 
         if (k+1 < len) {
-          b[k+1] = 0;                   /* Strip triling space */
+          b[k+1] = 0;                   /* Strip trailing space */
           i = k+2;
           if (p)
-            *p = b+s;                     /* store tag */
+            *p = b+s;                   /* store tag */
           else
             TRACE68(file68_cat,"file68: sndh -- not storing -- '%s'\n",
                     b+s);
