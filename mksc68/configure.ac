@@ -38,6 +38,7 @@ SC68_CHECKS
 SC68_WITH([sc68],[yes],[sc68_version],[sc68/sc68.h],[libsc68])
 #SC68_WITH([file68],[yes],[],[sc68/file68.h])
 SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
+SC68_WITH_HEADER([unice68],[yes],[unice68.h])
 
 # ,----------------------------------------------------------------------.
 # | Standard headers and functions                                       |
