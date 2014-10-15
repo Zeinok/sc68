@@ -280,6 +280,7 @@ static void PutX(vfs68_t *out, unsigned int v)
 
 static void PutX32(vfs68_t *out, unsigned int v)
 {
+  int sav_0 = fmt_0, sav_l = fmt_l;
   if (!fmt_0 && !fmt_l) {
     fmt_0 = 1;
     fmt_l = 8;
@@ -287,6 +288,8 @@ static void PutX32(vfs68_t *out, unsigned int v)
   snprintf(fmt_b, fmt_max, fmt_0 ? "%0*x" : "%-*x" , fmt_l, v);
   fmt_b[fmt_max] = 0;
   PutS(out, fmt_b);
+  fmt_0 = sav_0;
+  fmt_l = sav_l;
 }
 
 static int ReadTrackNumber(char **ps, int max)
