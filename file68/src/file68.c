@@ -346,13 +346,15 @@ static int ice_is_magic(const char * buffer)
     && buffer[3] == '!';
 }
 
+struct sndh_boot { int init, kill, play, data; };
+
 /* Decode 68k instruction at the beginning of sndh files.
  * @return  offset of the jump or org if it's a rts.
  * @retval -1 on error
  */
 static int sndh_decode(const char * buf, int org, int off)
 {
-  if (off < 12) {
+  if (off <= 10) {
     unsigned int w0, w1;
     w0 = WPeekBE(buf + off + 0);
 
@@ -373,23 +375,33 @@ static int sndh_decode(const char * buf, int org, int off)
   return -1;
 }
 
-static inline int sndh_inst(int c) {
-  return (c &0xFF00) == 0x6000          /* bra and bra.s */
-    || c == 0x4efa                        /* jmp (pc) */
-    || c == 0x4e75                        /* rts */
-    || c == 0x4e71                        /* nop */
-    || c == 0x4e00                        /* !! illegal !! */
-  ;
-}
-
-static int sndh_is_magic(const char *buffer, int max)
+/* @retval 0   on error
+ * @retval 12  nornal 'SNDH' tag position.
+ */
+static int sndh_is_magic(const char *buffer, int max, struct sndh_boot * sb)
 {
+  struct sndh_boot tmp, * boot = sb ? sb : &tmp;
   const int start = 10;
   int i=0, v = 0;
-  if (max >= start
-      && sndh_inst(WPeekBE(buffer+0))
-      && sndh_inst(WPeekBE(buffer+4)) /* FIXME: $$$ those commented */
-      && sndh_inst(WPeekBE(buffer+8))) {
+
+  boot->init = boot->kill = boot->play = -1;
+  boot->data = 0x1000;
+
+  if (max >= 12
+      && (boot->init = sndh_decode(buffer,0,0)) >= 0
+      && (boot->kill = sndh_decode(buffer,4,4)) >= 0
+      && (boot->play = sndh_decode(buffer,8,8)) >= 0 ) {
+
+    if (boot->init >= 16 && boot->init < boot->data)
+      boot->data = boot->init;
+    if (boot->kill >= 16 && boot->kill < boot->data)
+      boot->data = boot->kill;
+    if (boot->play >= 16 && boot->play < boot->data)
+      boot->data = boot->play;
+    if (boot->data == 0x1000)
+      return 0;
+    max = boot->data;
+
     for (i=start, v = LPeekBE(buffer+i); i < max && v != sndh_cc;
          v = ((v<<8) | (buffer[i++]&255)) & 0xFFFFFFFF)
       ;
@@ -489,7 +501,7 @@ static int read_header(vfs68_t * const is, unsigned int * hptr)
       /* Must be done after gzip or ice becausez id-string may appear
        * in compressed buffer too.
        */
-      if (sndh_is_magic(id,sndh_req)) {
+      if (sndh_is_magic(id,sndh_req,0)) {
         TRACE68(file68_cat,"file68: found %s signature\n","SNDH");
         return -sndh_cc;
       }
@@ -969,9 +981,9 @@ static int sndh_info(disk68_t * mb, int len)
   int i, vbl = 0, frq = 0/* , steonly = 0 */,
     unknowns = 0, fail = 0;
   int dtag = 0, ttag = 0;
-
   char * b = mb->data;
   char empty_tag[4] = { 0, 0, 0, 0 };
+  struct sndh_boot boot;
 
   /* Default */
   mb->mus[0].data   = b;
@@ -985,17 +997,24 @@ static int sndh_info(disk68_t * mb, int len)
 
   mb->mus[0].replay = 0;
 
-  i = sndh_is_magic(b, len);
+  i = sndh_is_magic(b, len, &boot);
   if (!i) {
     /* should not happen since we already have tested it. */
     msg68_critical("file68: sndh -- info mising magic!\n");
     return -1;
   }
+  if (boot.data >= len) {
+    msg68_error("file68: sndh -- unable to locate music data\n");
+    return -1;
+  }
+  len = boot.data;
 
-/*   i   += 4; /\* Skip sndh_cc *\/ */
-/*   len -= 4; */
 
-  /* $$$ Hacky:
+  TRACE68(file68_cat,
+          "file68: sndh -- init:%04x kill:%04x play:%04x data:%04x\n",
+          boot.init, boot.kill, boot.play, boot.data);
+
+  /* HAXXX:
      Some music have 0 after values. I don't know what are
      sndh rules. May be 0 must be skipped or may be tag must be word
      aligned.
