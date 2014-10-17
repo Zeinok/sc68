@@ -245,14 +245,26 @@ static int run_echo(cmd_t * me, int argc, char ** argv)
 {
   int i;
   errno = 0;
-  for (i=1; i<argc; ++i)
-    msginf("%s%s",argv[i], i==argc-1?"\n":" ");
+  /* FIXME: which print function should I use ?
+   * printf() or msginf()
+   */
+  for (i=1; i<argc; ++i) {
+    const char * sep = " ";
+    if (i==argc-1) {
+      int len = strlen(argv[i]);
+      sep = (len > 0 && argv[i][len-1] == '\n') ? "" : "\n";
+    }
+    printf("%s%s",argv[i], sep);
+  }
   return -!!errno;
 }
 
 static int run_error(cmd_t * me, int argc, char ** argv)
 {
   int i;
+  /* FIXME: which print function should I use ?
+   * printf() or msgerr()
+   */
   for (i=1; i<argc; ++i)
     msgerr("%s%s",argv[i], i==argc-1?"\n":" ");
   return exit_code;
