@@ -47,7 +47,38 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdint.h>
+#include <ctype.h>
 
+
+union sndh_boot {
+  int off[4];
+  struct sym {
+    int init, kill, play, data;
+  } sym;
+};
+typedef union sndh_boot sndh_boot_t;
+
+struct sndh_header {
+  sndh_boot_t boot;
+  int hlen;    /* header length */
+  int dlen;    /* data length */
+  int ntune;   /* number of sub tunes */
+  int dtune;   /* default tune */
+  int rate;    /* sndh only allow same replay rate for all subtunes */
+  int timer;   /* one of 'V', 'A', 'B', 'C', 'D' */
+};
+typedef struct sndh_header sndh_header_t;
+
+/* sndh boot field name */
+static const char what[4][5] = { "init", "kill", "play", "data" };
+
+/* 68k instruction type */
+enum {
+  INST_NOP,
+  INST_RTS,
+  INST_JMP,
+  INST_ERR = -1
+};
 
 /* Even alignment */
 static int w_E(uint8_t * dst, int off) {
@@ -76,12 +107,6 @@ static int w_Z(uint8_t * dst, int off, const char * src) {
   return w_D(dst, off, src, strlen(src));
 }
 
-/* write byte */
-/* static int w_B(uint8_t * dst, int off, const uint8_t val) { */
-/*   if (dst) dst[off] = val; */
-/*   return off+1; */
-/* } */
-
 /* write 68k word */
 static int w_W(uint8_t * dst, int off, const uint16_t val) {
   if (dst) {
@@ -108,8 +133,7 @@ static int w_4(uint8_t * dst, int off, const void * src) {
 }
 
 /* Write tag and string value, only if defined */
-static int w_TS(uint8_t * dst, int off, const char * t, const char *s)
-{
+static int w_TS(uint8_t * dst, int off, const char * t, const char *s) {
   if (t && s && *s) {
     off = w_Z(dst,off,t);
     off = w_S(dst,off,s);
@@ -117,8 +141,7 @@ static int w_TS(uint8_t * dst, int off, const char * t, const char *s)
   return off;
 }
 
-static int w_T99(uint8_t * dst, int off, const char * t, int v)
-{
+static int w_T99(uint8_t * dst, int off, const char * t, int v) {
   if (t && v > 1) {
     char tmp[3];
     off = w_Z(dst,off,t);               /* write the tag */
@@ -134,32 +157,16 @@ static int w_T99(uint8_t * dst, int off, const char * t, int v)
   return off;
 }
 
-static int16_t get_W(const uint8_t * buf){
+static int16_t get_W(const uint8_t * buf) {
   return (((int16_t)(int8_t)buf[0]) << 8) | buf[1];
 }
-
-typedef union {
-  int off[4];
-  struct sndh_boot {
-    int init, kill, play, data;
-  } boot;
-} sndh_boot_t;
-
-static const char what[4][5] = { "init", "kill", "play", "data" };
-
-enum {
-  INST_NOP,
-  INST_RTS,
-  INST_JMP,
-  INST_ERR = -1
-};
 
 static int decode_68k(const uint8_t * buf, int * _off)
 {
   int ret, w, off = *_off;
 
   if (off < 0 || off >= 10)
-    return INST_ERR;                    /* out of range */
+    return INST_ERR;                    /* Out of range */
 
   w = get_W(buf+off);
   off += 2;
@@ -179,7 +186,7 @@ static int decode_68k(const uint8_t * buf, int * _off)
   case 0x6000:                          /* BRA */
   case 0x4efa:                          /* JMP(PC) */
     if (off > 10)
-      return INST_ERR;                  /* out of range */
+      return INST_ERR;                  /* Out of range */
     off += get_W(buf+off);
     ret = INST_JMP;
     break;
@@ -207,7 +214,7 @@ static int decode_inst(const uint8_t * buf, sndh_boot_t * sb, int i, int msk)
     assert( off < 12 );
 
     if (msk & (1<<off)) {
-      msgerr("mksndh: <%s> infinite loop -- +%d\n",
+      msgerr("sndh: <%s> infinite loop -- +$%04x\n",
              what[i], off);
       return -1;
     }
@@ -220,9 +227,9 @@ static int decode_inst(const uint8_t * buf, sndh_boot_t * sb, int i, int msk)
       return 0;
 
     case INST_JMP:
-      if ((off & 1) || off < 0 || off >= sb->boot.data) {
-        msgerr("mksndh: <%s> invalid jump location -- +%d\n",
-               what[i], off);
+      if ((off & 1) || off < 0 || off >= sb->sym.data) {
+        msgerr("sndh: <%s> invalid jump location -- +$%04x >= $%04x\n",
+               what[i], off, sb->sym.data);
         return -1;
       }
       if (off < 12)
@@ -232,7 +239,7 @@ static int decode_inst(const uint8_t * buf, sndh_boot_t * sb, int i, int msk)
 
     case INST_NOP:
       if (off == 12) {
-        msgerr("mksndh: <%s> ran out range -- +%d\n",
+        msgerr("sndh: <%s> ran out range -- +$%04x\n",
                what[i], off);
         return -1;
       }
@@ -242,15 +249,13 @@ static int decode_inst(const uint8_t * buf, sndh_boot_t * sb, int i, int msk)
       assert(!"should not happen");
       /* continue on error */
     case INST_ERR:
-      msgerr("mksndh: unable to decode <%s> instruction at +%d\n",
+      msgerr("sndh: unable to decode <%s> instruction at +$%04x\n",
              what[i], off);
       return -1;
     }
   }
   assert(!"should not reach that point");
   return -1;
-
-
 }
 
 static int decode_boot(const uint8_t * buf, int len, sndh_boot_t * sb)
@@ -267,7 +272,7 @@ static int decode_boot(const uint8_t * buf, int len, sndh_boot_t * sb)
     if (decode_inst(buf,sb,i,0) < 0)
       return -1;
     else
-      msgdbg("mksndh: <%s> offset is +$%06x\n", what[i], sb->off[i]);
+      msgdbg("sndh: <%s> offset is +$%04x\n", what[i], sb->off[i]);
 
   /* locate data */
   for (i=0; i<3; ++i) {
@@ -277,31 +282,202 @@ static int decode_boot(const uint8_t * buf, int len, sndh_boot_t * sb)
       continue;                         /* RTS */
 
     if (off < 16) {
-      msgerr("sndh: <%s> offset +%d is invalid\n", what[i], off);
+      msgerr("sndh: <%s> offset +$%04x is invalid\n", what[i], off);
       return -1;
     }
 
-    if (off < sb->boot.data)
-      sb->boot.data = off;
+    if (off < sb->sym.data)
+      sb->sym.data = off;
   }
 
   /* ensure data is in range */
-  if (sb->boot.data < 16 || sb->boot.data >= len) {
-    msgerr("sndh: unable to locate sndh data location -- %d\n", sb->boot.data);
+  if (sb->sym.data < 16 || sb->sym.data >= len) {
+    msgerr("sndh: unable to locate sndh data +$%04x\n", sb->sym.data);
     return -1;
   }
 
   /* looking for 'HDNS' tag */
-  for (i=sb->boot.data-4; i>=16; --i)
+  for (i=sb->sym.data-4; i>=16; --i)
     if (!memcmp(buf+i,"HDNS",4)) {
-      msgdbg("sndh: 'HDNS' marker found at +%d\n",i+4);
-      sb->boot.data = i+4;
+      msgdbg("sndh: 'HDNS' marker found at +$%04x\n",i+4);
+      sb->sym.data = i+4;
       break;
     }
 
   if (i<16)
     msgwrn("sndh: no 'HDNS' marker; output might be corrupt\n");
 
+  msgdbg("sndh: decode-boot: $%04x $%04x $%04x $%04x\n",
+         sb->sym.init, sb->sym.kill, sb->sym.play, sb->sym.data);
+
+  return 0;
+}
+
+/* decode sndh header */
+static int decode_header(const uint8_t * buf, int len, sndh_header_t * hd)
+{
+  int over, upos, know, i;
+
+  if (decode_boot(buf, len, &hd->boot))
+    return -1;
+  if (!memcmp(buf+hd->boot.sym.data-4,"HDNS",4))
+    /* Need to decode sndh header if the end marker is missing */
+    return 0;
+
+  len = hd->boot.sym.data;
+  for (over=0, know=1, i=16; !over && i+3<len; ) {
+    static const char strs[][4] = {
+      { 'T','I','T','L' },            /* title     */
+      { 'C','O','M','M' },            /* composer  */
+      { 'R','I','P','P' },            /* ripper    */
+      { 'C','O','N','V' },            /* converter */
+      { 'Y','E','A','R' },            /* year      */
+    };
+    int tag = i, j;
+
+    msgdbg("sndh: decode-header: pos:%04x/%04x '%c%c%c%c'\n",
+           i,len,
+           isgraph(buf[i+0])?buf[i+0]:'.',
+           isgraph(buf[i+1])?buf[i+1]:'.',
+           isgraph(buf[i+2])?buf[i+2]:'.',
+           isgraph(buf[i+3])?buf[i+3]:'.');
+
+    if (know) {
+      upos = 0;
+      know = 0;
+    }
+
+    /* End marker 'HDNS' */
+    know = !memcmp(buf+i,"HDNS",4);
+    if (know) {
+      over = i += 4;
+      continue;
+    }
+
+    /* Most string tags (see table above) */
+    for (j=0; !know && j<sizeof(strs)/sizeof(*strs); ++j)
+      know = !memcmp(buf+i,strs[j],4);
+    if (know) {
+      for(i+=4; i<len && buf[i++];);
+      continue;
+    }
+
+    /* '##xx' and '#!xx' */
+    know = buf[i+0] == '#' && (buf[i+1] == '#' || buf[i+1] == '!')
+      && isdigit(buf[i+2]) && isdigit(buf[i+3]);
+    if (know) {
+      int n = 0, * ptr;
+      for (i+=2; i<len && isdigit(buf[i]); ++i)
+        n = n*10+buf[i]-'0';
+      if (i >= len)
+        continue;
+      if (!buf[i])
+        ++i;
+      else
+        msgwrn("sndh: tag '%c%c' not zero terminated\n",
+               buf[tag], buf[tag+1]);
+
+      ptr = (buf[tag+1] == '#') ? &hd->ntune : &hd->dtune;
+      if (!n) n = 1;         /* Fix dodgy file */
+      if (*ptr && n != *ptr) {
+        msgerr("sndh: already have a differnt value for '#%c' -- %d != %d\n",
+               buf[tag+1], *ptr, n);
+        return -1;
+      }
+      *ptr = n;
+      continue;
+    }
+
+    /* Timer */
+    know = ( (buf[i+0] == '!' && buf[i+1] == 'V') ||
+             (buf[i+0] == 'T' && buf[i+1]>='A' && buf[i+1]<='D') )
+      && isdigit(buf[i+2]) && isdigit(buf[i+3]);
+    if (know) {
+      hd->rate = 0;
+      hd->timer = buf[i+1];
+      for (i+=2; i<len && isdigit(buf[i]); ++i)
+        hd->rate = hd->rate*10+buf[i]-'0';
+      if (i >= len)
+        continue;
+      if (!buf[i])
+        ++i;
+      else
+        msgwrn("sndh: tag '%c%c' not zero terminated\n",
+               buf[tag], buf[tag+1]);
+      if (hd->rate < 25 || hd->rate > 1000)
+        msgwrn("sndh: tag '%c%c' unlikely timer rate %dhz\n",
+               buf[tag], buf[tag+1], hd->rate);
+      continue;
+    }
+
+    /* Song names or song flags */
+    know = !memcmp("#!SN", buf+i,4) || !memcmp("FLAG", buf+i,4);
+    if (know) {
+      int base = i, max;
+      if (!hd->ntune) {
+        msgwrn("sndh: '%s' before '##'\n",
+               buf[i] == '#' ? "#!SN" : "FLAG");
+        hd->ntune = 1;
+      }
+      i += 4;
+      max = i + (hd->ntune << 1);
+      if (!get_W(buf+i+4))      /* Fix dodgy file */
+        base = max;
+      for (j=0; j<hd->ntune; ++j) {
+        int str = base + get_W(buf+i+(j<<1));
+        if (str < 16 || str >= len) {
+          msgerr("sndh: song name string offset out of range\n");
+          return -1;
+        }
+        if (str > max) max = str;
+      }
+      for (i=max; i<len && buf[i++];);
+      continue;
+    }
+
+    know = !memcmp(buf+i,"TIME",4);
+    if (know) {
+      if (i&1) {
+        msgwrn("sndh: 'TIME' is not aligned\n");
+        ++i;
+      }
+      if (!hd->ntune) {
+        msgwrn("sndh: 'TIME' before '##'\n");
+        hd->ntune = 1;
+      }
+      i += 4 + (hd->ntune<<1);
+      continue;
+    }
+
+    if (!upos)
+      upos = i;
+    if (i++ - upos > 7) {
+      over = i = upos;
+      msgdbg("sndh: no more tag found at +$%04x\n", over);
+      continue;
+    }
+  }
+  msgdbg("sndh: exit parser: pos:$%04x/$%04x unknown:$%04x over:$%04x\n",
+         i,len,upos,over);
+
+  if (over) {
+    msgdbg("sndh: over at +$%04x\n", over);
+    if (over < hd->boot.sym.data) {
+      msgdbg("sndh: over %d byte(s) before data +$%04x\n",
+             hd->boot.sym.data - over, over);
+      hd->boot.sym.data = over;
+    } else if (over == hd->boot.sym.data)
+      msgdbg("sndh: over at data +$%04x\n", over);
+  } else if (upos) {
+    msgwrn("sndh: set data to last known valid position +$%04x\n",upos);
+    hd->boot.sym.data = upos;
+  } else if (i != hd->boot.sym.data) {
+    hd->boot.sym.data = i;
+    msgdbg("sndh: data now at +$%04x\n", hd->boot.sym.data);
+  }
+  msgdbg("sndh: decode-header: $%04x $%04x $%04x $%04x\n",
+         hd->boot.sym.init, hd->boot.sym.kill,
+         hd->boot.sym.play, hd->boot.sym.data);
   return 0;
 }
 
@@ -320,7 +496,6 @@ static const char * tag(disk68_t *d, int track, const char * key)
 
   return s;
 }
-
 
 int sndh_save_buf(const char * uri, const void * buf, int len , int gz)
 {
@@ -363,22 +538,9 @@ int sndh_save_buf(const char * uri, const void * buf, int len , int gz)
 }
 
 static
-int save_sndh(const char * uri, disk68_t * d, int vers, int gz)
+int create_sndh(uint8_t **_dbuf, sndh_header_t * hd, disk68_t * d)
 {
-  int ret = -1;
-
-  const uint8_t * sbuf = (const uint8_t *)d->mus[0].data;
-  int             slen = d->mus[0].datasz;
-  uint8_t       * dbuf = 0;
-  int             dlen = 0;
-  int             hlen = 0;
-
-  sndh_boot_t sb;
-
-  ret = decode_boot(sbuf, slen, &sb);
-  if (ret)
-    goto exit;
-  ret = -1;
+  uint8_t * dbuf = 0;
 
   /* Process in 2 pass:
    * - pass #1 compute required space and allocate buffer
@@ -455,52 +617,80 @@ int save_sndh(const char * uri, disk68_t * d, int vers, int gz)
 
     /* Footer */
     off  = w_4(dbuf, off, "HDNS");      /* sndh footer   */
-    off  = w_E(dbuf, off);              /* ensure even   */
-    hlen = off;                         /* header length */
-    dlen = off + slen - sb.boot.data;
-    msgdbg("sndh header end at +$%x (%d bytes)\n", off, dlen);
-
-    if (dlen < 22) {
-      msgerr("%d bytes is too small for being valid sndh data\n", dlen);
-      break;
+    /* That's a bit tricky: the header and data must be aligned
+     * together. */
+    if ( (off ^ hd->boot.sym.data) & 1) {
+      if (dbuf) dbuf[off] = 0;
+      off += 1;
     }
+    /* off  = w_E(dbuf, off); */              /* ensure even   */
+    hd->hlen = off;                     /* header length */
+    msgdbg("sndh: create-header: +$%04x/$%06x/$%06x\n",
+           hd->hlen, hd->dlen, hd->hlen + hd->dlen);
 
     /* Rewrite boot */
     if (dbuf) {
-      int * bt = sb.off;
+      int * bt = hd->boot.off, data = hd->boot.sym.data;
       for (i=0; i<3; ++i) {
         if (!bt[i])
           w_L(dbuf, i*4, 0x4e754e75);
         else {
           w_W(dbuf, i*4+0, 0x6000);
-          w_W(dbuf, i*4+2, (bt[i] - bt[3] + hlen) - (i*4+2));
+          w_W(dbuf, i*4+2, (bt[i] - data + hd->hlen) - (i*4+2));
         }
       }
-      memcpy(dbuf+hlen,sbuf+sb.boot.data,slen-sb.boot.data);
-      ret = sndh_save_buf(uri, dbuf, dlen, gz);
-      break;
+      *_dbuf = dbuf;
+      return 0;
     }
 
     /* Finally alloc buffer and ready for pass 2 */
-    dbuf = malloc(dlen);
+    dbuf = malloc(hd->hlen+hd->dlen);
     if (!dbuf) {
       msgerr("sndh: %s\n", strerror(errno));
       break;
     }
   }
+  return -1;
+}
 
-exit:
+static
+int save_sndh(const char * uri, disk68_t * d, int vers, int gz)
+{
+  int ret = -1;
+
+  const uint8_t * sbuf = (const uint8_t *)d->mus[0].data;
+  int             slen = d->mus[0].datasz;
+  uint8_t       * dbuf = 0;
+  sndh_header_t   hd;
+  memset(&hd, 0, sizeof(hd));
+
+  ret = decode_header(sbuf, slen, &hd);
+  if (!ret) {
+    hd.dlen = slen - hd.boot.sym.data;
+    ret = create_sndh(&dbuf, &hd, d);
+  }
+  if (!ret)
+    memcpy(dbuf+hd.hlen, sbuf+hd.boot.sym.data, hd.dlen);
+  if (!ret)
+    ret = sndh_save_buf(uri, dbuf, hd.hlen+hd.dlen, gz);
   free(dbuf);
   return ret;
 }
 
 
-static
-int sndh_save_sc68(const char * uri, disk68_t * d, int vers, int gz)
+static int save_sc68(const char * uri, disk68_t * d, int vers, int gz)
 {
   int ret = -1;
   msgerr("sndh: save '%s' version:%d compress:%d"
          " -- sc68 -> sndh unsupported\n", uri, vers, gz);
+
+  /* sndh_header_t hd; */
+  /* memset(&hd, 0, sizeof(hd)); */
+  /* hd.boot.sym.init = 0; */
+  /* hd.boot.sym.kill = 4; */
+  /* hd.boot.sym.play = 8; */
+  /* hd.boot.sym.data = 0; */
+
   return ret;
 }
 
@@ -510,7 +700,7 @@ int sndh_save(const char * uri, void * _dsk, int vers, int gz)
   disk68_t * d = (disk68_t *)_dsk;
 
   if (!strcmp68(d->tags.array[TAG68_ID_FORMAT].val,"sc68"))
-    ret = sndh_save_sc68(uri, d, vers, gz);
+    ret = save_sc68(uri, d, vers, gz);
   else
     ret = save_sndh(uri, d, vers, gz);
 
