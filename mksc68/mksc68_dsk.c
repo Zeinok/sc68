@@ -153,6 +153,7 @@ int dsk_merge(const char * uri)
 int dsk_save(const char * uri, int version, int gzip)
 {
   int err;
+  const char * fmt;
 
   if (!uri)
     uri = dsk.filename;
@@ -163,10 +164,17 @@ int dsk_save(const char * uri, int version, int gzip)
 
   if (!version) {
     const char * ext = str_fileext(uri);
-    if (!strcmp68(ext,".snd") || !strcmp68(ext,".sndh"))
-      version = -1;
-    else
-      version = 1;
+    ext += (ext[0]=='.');
+    while (!version) {
+      if (!strcmp68(ext,"snd") || !strcmp68(ext,"sndh"))
+        version = -1;
+      else if (!strcmp68(ext,"sc68"))
+        version = 1;
+      else if (ext = dsk_tag_get(0, TAG68_FORMAT), !ext) {
+        msgerr("unable to determine output file format. try -F\n");
+        return -1;
+      }
+    }
   }
 
   msgdbg("saving disk as '%s' gzip:%d format:%s version:%d\n",
@@ -178,16 +186,19 @@ int dsk_save(const char * uri, int version, int gzip)
   if (dsk_validate())
     return -1;
 
-  if (version > 0)
+  if (version > 0) {
+    fmt = "sc68";
     err = file68_save_uri(uri, dsk_get_disk(), version-1, gzip);
-  else
+  } else {
+    fmt = "sndh";
     err = sndh_save(uri, dsk_get_disk(), -version-1, gzip);
+  }
 
   if (!err) {
     dsk.modified = 0;
-    msginf("disk saved\n");
+    msginf("disk saved as %s -- \"%s\"\n", fmt, uri);
   } else
-    msgerr("failed to save \"%s\"\n",uri);
+    msgerr("failed to save %s -- \"%s\"\n", fmt, uri);
 
   return err;
 }

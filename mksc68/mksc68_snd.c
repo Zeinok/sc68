@@ -335,28 +335,29 @@ int sndh_save_buf(const char * uri, const void * buf, int len , int gz)
         if (ret)
           msgerr("sndh: failed to save -- %s\n", uri);
         else
-          msginf("sndh: saved (%d bytes) -- %s\n", len, uri);
+          msgnot("sndh: saved (%d bytes) -- %s\n", len, uri);
       }
       vfs68_destroy(vfs);
     }
   } else {
+#ifndef USE_UNICE68
+    msgerr("sndh: ICE! packer not supported\n");
+#else
     int max = len + (len>>1);
     char * dst = malloc(max);
     if (!dst) {
       msgerr("sndh: %s\n", strerror(errno));
       ret = -1;
     } else {
-#ifdef USE_UNICE68
       ret = unice68_packer(dst, max, buf, len);
       if (ret > 0) {
         dst[1]='C'; dst[2]='E';         /* fix ICE header */
-        ret = sndh_save_buf(uri,dst, ret, 0);
+        ret = sndh_save_buf(uri, dst, ret, 0);
       } else
         ret = -1;
-#else
-      msgerr("sndh: ICE! packer not supported\n");
-#endif
+      free(dst);
     }
+#endif
   }
   return ret;
 }
@@ -468,7 +469,7 @@ int save_sndh(const char * uri, disk68_t * d, int vers, int gz)
     if (dbuf) {
       int * bt = sb.off;
       for (i=0; i<3; ++i) {
-        if (bt[i] < hlen)
+        if (!bt[i])
           w_L(dbuf, i*4, 0x4e754e75);
         else {
           w_W(dbuf, i*4+0, 0x6000);

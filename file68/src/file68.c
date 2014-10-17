@@ -385,7 +385,7 @@ static int sndh_is_magic(const char *buffer, int max, struct sndh_boot * sb)
   int i=0, v = 0;
 
   boot->init = boot->kill = boot->play = -1;
-  boot->data = 0x1000;
+  boot->data = 0x8000;
 
   if (max >= 12
       && (boot->init = sndh_decode(buffer,0,0)) >= 0
