@@ -136,7 +136,7 @@ emu68_handler_t emu68_get_handler(emu68_t * const emu68)
 const char * emu68_exception_name(unsigned int vector, char * buf)
 {
   static const char * xtra_names[] = {
-    "hw-trace", "hw-halt", "hw-stop", "hw-reset", "hw-init"
+    "hw-trace", "hw-halt", "hw-stop", "hw-reset", "hw-init", "hw-iovf"
   };
 
   static const char * xcpt_names[] = {
@@ -414,8 +414,10 @@ static inline int controlled_step68(emu68_t * const emu68)
 
   /* Instruction countdown */
   if ( emu68->instructions && !--emu68->instructions )
-    if (emu68->status == EMU68_NRM)
+    if (emu68->status == EMU68_NRM) {
       emu68->status = EMU68_BRK;
+      inl_exception68(emu68, HWINSTOV_VECTOR, -1);
+    }
 
   return emu68->status;
 }

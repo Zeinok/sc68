@@ -38,6 +38,7 @@ enum emu68_vector_e {
   HWSTOP_VECTOR   = 0x122, /**< Report processor suspended (stop).      */
   HWRESET_VECTOR  = 0x123, /**< Report IO reset (reset).                */
   HWINIT_VECTOR   = 0x124, /**< Report a hardware reset (emu68_reset).  */
+  HWINSTOV_VECTOR = 0x125, /**< Report instruction count overflow.      */
 
   PRIVATE_VECTOR  = 0x200, /**< First private vector for users.         */
 

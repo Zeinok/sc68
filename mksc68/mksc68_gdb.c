@@ -836,7 +836,7 @@ fail:
 
 int gdb_event(gdb_t * gdb, int vector, void * emu)
 {
-  int  pc, sr;
+  int  pc, sr, st;
   char irqname[32], fctname[128];
 
   assert (gdb->run == RUN_CONT);
@@ -852,7 +852,7 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
   gdb->emu = emu;
   emu68_exception_name(vector,irqname);
   fctname[0] = 0;
-
+  st = gdb->emu->status;
   if (vector < 0x100) {
     /***********************************************************************
      * 68k exceptions
@@ -938,11 +938,11 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
     } else if (vector == HWSTOP_VECTOR) {
       if ( (sr & 0x3F00) == 0x2F00 ) {
         const int num = sr & 0xFF;
-        /* Unitialized exception catched !!! */
+        /* non-catch exception !!! */
         strcpy(irqname,"NC-");
         emu68_exception_name(num,irqname+3);
         pc = Lpeek(gdb->emu, gdb->emu->reg.a[7]+2);
-        msgnot("non-init exception #%d (%s) from 0x%X\n",
+        msgnot("non-catch exception #%d (%s) from 0x%X\n",
                num, irqname, pc);
       } else {
         sprintf (irqname,"stop-#%04x",sr);
@@ -953,6 +953,11 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
         gdb->sigval = SIGVAL_STOP;
         SIGNAL(STOP, gdb->sigval, "stopped");
       }
+    } else if (vector == HWINSTOV_VECTOR) {
+      msgnot("catch instruction overflow @$%06x\n", pc);
+      gdb->emu->status = EMU68_NRM;
+      gdb->sigval = SIGVAL_TRAP;
+      SIGNAL(STOP,gdb->sigval,"instruction-overflow");
     } else if (vector != HWTRACE_VECTOR) {
       /* Unhandled special exception */
       gdb->sigval = SIGVAL_0;
@@ -967,7 +972,7 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
     char line[16 * 3];
     int i,j;
 
-    msgnot("68k exception in <%s>\n"
+    msgnot("68k exception in <%s> %s\n"
            "  vector : %02x (%d)\n"
            "  type   : %s%s\n"
            "  from pc:%08x sr:%04x\n"
@@ -976,7 +981,7 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
            "       d4:%08x d5:%08x d6:%08x d7:%08x\n"
            "       a0:%08x a1:%08x a2:%08x a3:%08x\n"
            "       a4:%08x a5:%08x a6:%08x a7:%08x\n",
-           gdb->emu->name,
+           gdb->emu->name,emu68_status_name(st),
            vector, gdb->sigval,
            irqname, fctname,
            pc, sr,

@@ -132,7 +132,7 @@ typedef struct
  * @{
  */
 enum emu68_regidx_e {
-  REG68_D0_IDX,               /**< D0 register index.  */
+  REG68_D0_IDX,                /**< D0 register index.  */
   REG68_D1_IDX,                /**< D1 register index.  */
   REG68_D2_IDX,                /**< D2 register index.  */
   REG68_D3_IDX,                /**< D3 register index.  */

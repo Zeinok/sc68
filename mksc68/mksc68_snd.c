@@ -325,7 +325,7 @@ static int decode_header(const uint8_t * buf, int len, sndh_header_t * hd)
     return 0;
 
   len = hd->boot.sym.data;
-  for (over=0, know=1, i=16; !over && i+3<len; ) {
+  for (upos=over=0, know=1, i=16; !over && i+3<len; ) {
     static const char strs[][4] = {
       { 'T','I','T','L' },            /* title     */
       { 'C','O','M','M' },            /* composer  */

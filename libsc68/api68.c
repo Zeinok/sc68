@@ -539,7 +539,7 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
       vector = TRAP_VECTOR(0);
       if (trap_type[subvec]) {
         sc68->irq.sysfct = Wpeek(emu68, emu68->reg.a[7]+6) & 0xFFFF;
-        emu68->status    = savest;         /* Don't break */
+        emu68->status    = savest;      /* Known trap: no break */
       }
     }
   } else {
@@ -570,17 +570,18 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
         sr = Wpeek(emu68, emu68->reg.a[7]);
         pc = Lpeek(emu68, emu68->reg.a[7]+2);
         error_addx(sc68,
-                   "libsc68: non-init exception #%d (%s) from %06x",
+                   "libsc68: non-catch exception #%d (%s) from %06x",
                    num, irqname, pc);
         emu68->status = EMU68_HLT;
       } else {
         emu68->status = EMU68_STP;
       }
 
-    case HWBREAK_VECTOR:
+    case HWBREAK_VECTOR: case HWINSTOV_VECTOR:
       break;
 
     case HWINIT_VECTOR:
+      dumpex = 0;
     case HWHALT_VECTOR:
     case HWRESET_VECTOR:
       /* Recieve the reset vector when reset instruction has just been
@@ -1338,7 +1339,7 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr, uint68_t maxinst)
   status = emu68_finish(emu68, maxinst);
   while (status == EMU68_STP) {
     sc68_debug(sc68,
-               "libsc68: stop #$%04X ignored @ $%6X\n",
+               "libsc68: stop #$%04X ignored @$%X\n",
                emu68->reg.sr, emu68->reg.pc);
     status = emu68_finish(emu68, EMU68_CONT);
   }
@@ -1440,7 +1441,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
 
   /* Install non initialized exception detection code. */
   for (i=0; i<256; ++i) {
-    int vector = base + i*8;
+    int vector = base + i*8, rte_or_reset;
 
     /* setup vector [$000..$400] */
     memptr[ (i<<2) + 0 ] = vector >> 24;
@@ -1454,13 +1455,18 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
      * this interruption.
      */
 
+    rte_or_reset = i == 5 /* Divide-By-Zero ? */
+      ? 0x73                     /* RTE */
+      : 0x70                     /* RESET */
+      ;
+
     /* install instruction stop #$2FNN */
     memptr[ vector + 0 ] = 0x4e;
     memptr[ vector + 1 ] = 0x72 /* + (i == 69) */;
     memptr[ vector + 2 ] = 0x2F; /* magic SR value (see handler) */
     memptr[ vector + 3 ] = i;    /* vector number                */
-    memptr[ vector + 4 ] = 0x4e; /* RESET                        */
-    memptr[ vector + 5 ] = 0x70;
+    memptr[ vector + 4 ] = 0x4e; /* RESET or RTE                 */
+    memptr[ vector + 5 ] = rte_or_reset;
     memptr[ vector + 6 ] = 0x4e; /* RTE                          */
     memptr[ vector + 7 ] = 0x73;
   }
@@ -1590,7 +1596,7 @@ static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
   TRACE68(sc68_cat," -> %s\n","running music init code ...");
   status = finish(sc68, sc68->playaddr, 0x2300, INIT_MAX_INST);
   if ( status != EMU68_NRM ) {
-    error_addx(sc68, "libsc68: abnormal 68K status %d (%s) in init code",
+    error_addx(sc68, "libsc68: abnormal 68K status %d (%s) in init code\n",
                status, emu68_status_name(status));
     return SC68_ERROR;
   }
