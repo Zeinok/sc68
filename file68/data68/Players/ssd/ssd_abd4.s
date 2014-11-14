@@ -1,109 +1,122 @@
-; Animal Mine SidSoundDesigner Replayer by MC
-;
-; 1.00 reassembled,fixed and new stuff added by .defjam./.checkpoint.
-; 1.01 Falcon-IDE-fix by FroST
-; 1.02 Pattern fix, Optimisation, comments by Ben/OVR
-; 1.03 Portamento fix, additional comments by Grazey/PHF
+;;; -*- mode: asm; tab-width: 16; indent-tabs-mode: t; comment-column: 64
+;;; 
+;;; Animal Mine SidSoundDesigner Replayer by MC
+;;;
+;;; 1.00 reassembled,fixed and new stuff added by .defjam./.checkpoint.
+;;; 1.01 Falcon-IDE-fix by FroST
+;;; 1.02 Pattern fix, Optimisation, comments by Ben/OVR
+;;; 1.03 Portamento fix, additional comments by Grazey/PHF
+;;; 1.04 Position Independant Code (PIC) AKA PC Relative (PCR)
+;;; 
+;;; Uses Timers A,B & D
+;;; 
+;;; Timer C <-> B conversion - Ozk and Grazey
+;;; 
+;;; For a standalone version set 'test' to 0. The assemble as an excutable.
+;;; Then remove the first $1c bytes from the start of the file.
+;;; 
+;;; Tabs to 16
 
-; Uses Timers A,B & D
+	opt	a+,p+		; Auto PCR, Check for PCR
+	near	a4		; Relocate a4 displacement
 
-; Timer C <-> B conversion - Ozk and Grazey
+	opt	o-		; Don't opimize the jump table
+music:	bra.w	init_music	; +0
+	bra.w	my_replay_music	; +4
+	bra.w	exit_player	; +8
+	bra.w	set_music_off	; +12
+	bra.w	set_music_on	; +16
+	bra.w	set_sid_off	; +20
+	bra.w	set_sid_on	; +24
+	bra.w	set_screen_freq	; +28
+	opt	o-		; $$$ CHANGE ME Optimize from now on
 
-; For a standalone version set 'test' to 0. The assemble as an excutable.
-; Then remove the first $1c bytes from the start of the file.
+lall:	dc.b	"Sid Sound Designer by MC of Animal Mine 93-95 "
+	dc.b	"ver. 1.04 ABD "
+	dc.b	"fixed by .defjam./.checkpoint. "
+	dc.b	"Falcon fix by FroST "
+	dc.b	"Pattern Break fix by Ben/OVR "
+	dc.b	"Portamento fix by Grazey/PHF"
+	dc.b	"PCR by Ben/OVR "
+	even
 
-test	equ	0	; 1 Test Version, 0 Full version
-
-;	Tabs to 16
-
-music		bra	init_music	;+0
-		bra	my_replay_music	;+4
-		bra	exit_player	;+8
-		bra	set_music_off	;+12
-		bra	set_music_on	;+16
-		bra	set_sid_off	;+20
-		bra	set_sid_on	;+24
-		bra	set_screen_freq	;+28
-
-lall		dc.b	"Sid Sound Designer by MC of Animal Mine 93-95 "
-		dc.b	"ver. 1.03 ABD "
-		dc.b	"fixed by .defjam./.checkpoint. "
-		dc.b	"Falcon fix by FroST "
-		dc.b	"Pattern Break fix by Ben/OVR "
-		dc.b	"Portamento fix by Grazey/PHF"
-		even
-
-volume		SET $0E	14
-instr_type		SET $2C	44
-hardw_buzz		SET $3A	58
-extend_tone		SET $3D	61
-extend_wave		SET $3E	62
-tfmx_effect		SET $3F	63
-extend_noiz_adr		SET $40	64
-extend_tone_adr		SET $44	68
-extend_wave_adr		SET $48	72
-extend_noiz     	SET $4F	79
-extend_tone_flag 	SET $4E	78
-extend_buzz		SET $50	80
+volume			SET $0E	;; 14
+instr_type		SET $2C	;; 44
+hardw_buzz		SET $3A	;; 58
+extend_tone		SET $3D	;; 61
+extend_wave		SET $3E	;; 62
+tfmx_effect		SET $3F	;; 63
+extend_noiz_adr		SET $40	;; 64
+extend_tone_adr		SET $44	;; 68
+extend_wave_adr		SET $48	;; 72
+extend_noiz     	SET $4F	;; 79
+extend_tone_flag 	SET $4E	;; 78
+extend_buzz		SET $50	;; 80
 
 
 my_replay_music:
-	tst.b	do_replay_flag
+	movem.l	D0-A6,-(a7)
+	lea	music(pc),a4
+	tst.b	do_replay_flag(a4)
 	beq.s	no_replay
 
-	movem.l	D0-A6,-(a7)
 	bsr	replay_music
 
-	tst.b	music_off_flag
+	tst.b	music_off_flag(a4)
 	beq.s	no_music_off
 
 	move	#$2700,SR
 	bsr	clear_YM
 	bsr	restore_MFP
-
-	sf	do_replay_flag
+	sf	do_replay_flag(a4)
 	move	#$2300,SR
-no_music_off:	movem.l	(a7)+,D0-A6
-no_replay:	rts
+no_music_off:
+no_replay:
+	movem.l	(a7)+,D0-A6
+	rts
 
 
-set_music_off:	
+set_music_off:
+	lea	music(pc),a4
 	bsr	clear_YM
-	st	music_off_flag
+	st	music_off_flag(a4)
 	rts
 
 set_music_on:	
+	lea	music(pc),a4
 	bsr	set_sid_on
-	sf	music_off_flag
-	st	do_replay_flag
+	sf	music_off_flag(a4)
+	st	do_replay_flag(a4)
 	rts
 
 music_off_flag:	DC.B	0
 do_replay_flag:	DC.B	0
 
 
-exit_player:	
+exit_player:
+	movem.l	d0-a6,-(a7)
+	lea	music(pc),a4
 	bsr	restore_MFP
 	bsr	restore_h200
 	move	#$2700,SR
 	bsr	clear_YM
 	move	#$2300,SR
+	movem.l	(a7)+,d0-a6
 	rts
 
-save_MFP:	
-	
+save_MFP:
 	move	#$2700,SR
 	lea	mfp_regs(PC),A0
-	move.b	$FFFFFA07.w,(A0)+	;IERA
-	move.b	$FFFFFA09.w,(A0)+	;IERB
-	move.b	$FFFFFA13.w,(A0)+	;IMRA
-	move.b	$FFFFFA15.w,(A0)+	;IMRB
+	move.b	$FFFFFA07.w,(A0)+ ;IERA
+	move.b	$FFFFFA09.w,(A0)+ ;IERB
+	move.b	$FFFFFA13.w,(A0)+ ;IMRA
+	move.b	$FFFFFA15.w,(A0)+ ;IMRB
 
-	move.b	$FFFFFA17.w,(A0)+	;Interrupt Vektor Register
+	move.b	$FFFFFA17.w,(A0)+ ;Interrupt Vektor Register
 
-	move.b	$FFFFFA19.w,(A0)+	;Timer A Control
-	move.b	$FFFFFA1B.w,(A0)+	;Timer B Control
-	move.b	$FFFFFA1D.w,(A0)+	;Timer C/D Control
+	move.b	$FFFFFA19.w,(A0)+ ;Timer A Control
+	move.b	$FFFFFA1B.w,(A0)+ ;Timer B Control
+	move.b	$FFFFFA1D.w,(A0)+ ;Timer C/D Control
 
 	bclr	#5,$FFFFFA07.w	;Timer A
 	bclr	#0,$FFFFFA07.w	;Timer B
@@ -120,15 +133,13 @@ save_MFP:
 	move.l	$00000060.w,(A0)+	;Spurious irq
 
 	bclr	#3,$FFFFFA17.w	; software end of int.
-	lea	rte_(PC),A0
+	lea	VoidIrq(PC),A0
 	move.l	A0,$00000060.w
 	move.l	A0,$00000110.w
 	move.l	A0,$00000120.w
 	move.l	A0,$00000134.w
 	move	#$2300,SR
 	rts
-
-rte_:	rte
 
 mfp_regs:	ds.b	16
 irq_vectors:	dc.l	0,0,0,0,0,0,0,0
@@ -174,8 +185,11 @@ restore_MFP:
 	move	#$2300,SR
 	rts
 
-set_sid_on:	move	#$2700,SR
-	move.l	#rte_,$00000060.w
+set_sid_on:
+	lea	music(pc),a4
+	move	#$2700,SR
+	pea	VoidIrq(pc)
+	move.l	(a7)+,$00000060.w
 	bsr	copy_sid_psg_rout
 
 	move.l	#td0,$00000110.w	;Timer D
@@ -201,11 +215,12 @@ set_sid_on:	move	#$2700,SR
 	move	#$2300,SR
 	rts
 
-set_sid_off:	move	#$2700,SR
+set_sid_off:
+	lea	music(pc),a4
+	move	#$2700,SR
 
-	lea	rte_(PC),A0
+	lea	VoidIrq(PC),A0
 	move.l	A0,$00000060.w
-
 	move.l	A0,$00000110.w		;Timer D
 	and.b	#%11110000,$fffffa1d.w	;Preserve Timer C bits!
 	move.b	#255,$FFFFFA25.w
@@ -227,7 +242,8 @@ set_sid_off:	move	#$2700,SR
 	rts
 
 
-save_h200:	move	#$2700,SR
+save_h200:
+	move	#$2700,SR
 	lea	$00000200.w,A0
 	lea	save200(PC),A1
 do_s2:	move.w	#$0100/4-1,D0
@@ -236,11 +252,14 @@ sc0:	move.l	(A0)+,(A1)+
 	move	#$2300,SR
 	rts
 
-restore_h200:	move	#$2700,SR
+restore_h200:
+	move	#$2700,SR
 	lea	$00000200.w,A1
 	lea	save200(PC),A0
 	bra.s	do_s2
-save200:	DS.B	$0100
+	
+save200:
+	DS.B	$0100
 
 
 copy_sid_psg_rout:
@@ -260,10 +279,10 @@ clear_YM:				; Frost Fix
 	move.b	#8,$ffff8800.w
 	clr.b	$ffff8802.w
 
-; Never modify bit 6 on a Falcon, coz bit 7 in YM's port A means
-; "Falcon internal IDE drive on/off", changing bit 6 in reg 7 will
-; provide a direction change of the flow from port A (do you follow
-; me, coz I don't know how to explain in english).
+;;; Never modify bit 6 on a Falcon, coz bit 7 in YM's port A means
+;;; "Falcon internal IDE drive on/off", changing bit 6 in reg 7 will
+;;; provide a direction change of the flow from port A (do you follow
+;;; me, coz I don't know how to explain in english).
 
 	move.b	#7,$ffff8800.w
 	move.b	$ffff8802.w,d0
@@ -282,7 +301,7 @@ clr_ym_r
 
 ;D0 = Freq.	( D0>=50 )
 set_screen_freq:
-	move.l	D0,screen_freq
+	move.l	D0,screen_freq(a4)
 	rts
 
 screen_freq:	dc.l	50
@@ -303,12 +322,12 @@ replay_music:
 
 ;Initialise New Screenfrequency
 
-	move.l	D1,my_screen_freq
+	move.l	D1,my_screen_freq(a4)
 	move.l	#50*1000,D0
 	divu	D1,D0
 	and.l	#$0000FFFF,D0
-	move.l	D0,vbl_timer_inc
-	clr.l	vbl_timer
+	move.l	D0,vbl_timer_inc(a4)
+	clr.l	vbl_timer(a4)
 	
 freq_da:
 	
@@ -318,11 +337,11 @@ freq_da:
 	blt.s	lvt
 	sub.l	#(50*1000),D0
 lvt:
-	move.l	D0,vbl_timer
+	move.l	D0,vbl_timer(a4)
 
 	divu	#1000,D0
 	move.w	lv(PC),D1
-	move.w	D0,lv
+	move.w	D0,lv(a4)
 	sub.w	D1,D0
 	tst.w	D0
 	bne.s	dorep
@@ -332,10 +351,12 @@ lvt:
 
 dorep:	moveq	#0,D4
 	lea	$FFFF8800.w,A5
-	subq.w	#1,note_count
+	subq.w	#1,note_count(a4)
 	bne.s	do_fx_all
-L0002:	move.w	L0002,note_count
-L0003	=	*-8
+	
+	movea.l	ReNoteCntPtr(pc),a1
+	move.w	(a1),note_count(a4)
+	
 	movea.l	CurPatPtr(PC),A1
 	move.w	PatPos(PC),D0
 	move.w	D0,D1
@@ -344,18 +365,18 @@ L0003	=	*-8
 
 	add.w	D1,D0
 	adda.w	D0,A1
-	move.l	A1,PatPtr
-	tst.b	PatBreakFlag
+	move.l	A1,PatPtr(a4)
+	tst.b	PatBreakFlag(a4)
 	bpl.s	L0004
-	move	#$40,PatPos	; $$$ ben: pattern break fix
-	sf	PatBreakFlag
+	move	#$40,PatPos(a4)	; $$$ ben: pattern break fix
+	sf	PatBreakFlag(a4)
 	bra.s	L0005
 	
-L0004:	addq.w	#1,PatPos
-L0005:	cmpi.w	#$0040,PatPos	; $$$
+L0004:	addq.w	#1,PatPos(a4)
+L0005:	cmpi.w	#$0040,PatPos(a4)	; $$$
 	bne.s	L0006
 	
-	bsr	load_pos
+	bsr	load_pos	
 	
 L0006:	lea	VoiceData_A(PC),A0
 	bsr	getnote
@@ -391,7 +412,7 @@ do_fx_all:	lea	VoiceData_B(PC),A0
 	tst.b	hardw_buzz(A0)
 	bne.s	no_wow_a
 	
-	tst.w	SidOnOffA
+	tst.w	SidOnOffA(a4)
 	bpl.s	no_wow_a
 	cmpi.b	#5,tfmx_effect(A0)
 	bgt.s	no_wow_a
@@ -412,7 +433,7 @@ do_tfm_a:	move.w	(A6)+,D2
 	mulu	#$00A3,D2
 	divu	D2,D0
 	mulu	D1,D0
-	tst.w	SidDephaseA
+	tst.w	SidDephaseA(a4)
 	bne.s	nix_dual_a
 	addi.l	#$00002000,D0
 nix_dual_a:	addi.l	#$00002000,D0
@@ -442,16 +463,16 @@ DoSidVoiceB:
 	tst.b	hardw_buzz(A0)
 	bne.s	no_wow
 	
-	tst.w	SidOnOffB
+	tst.w	SidOnOffB(a4)
 	bpl.s	no_wow
 	cmpi.b	#5,tfmx_effect(A0)
 	bgt.s	no_wow
 	cmpi.b	#3,tfmx_effect(A0)
 	blt.s	no_wow
-	lea	wave_form1,A6
-L000D	= *-4
+	move.l	WavFormPtr(pc),A6
 	move.w	0(A0),D1
-scan_more:	tst.w	(A6)
+scan_more:
+	tst.w	(A6)
 	bmi.s	no_wow
 	cmp.w	(A6)+,D1
 	blt.s	do_tfm
@@ -463,7 +484,7 @@ do_tfm:	move.w	(A6)+,D2
 	mulu	#$00A3,D2
 	divu	D2,D0
 	mulu	D1,D0
-	tst.w	SidDephaseB
+	tst.w	SidDephaseB(a4)
 	bne.s	nix_dual_b
 	addi.l	#$00002000,D0
 nix_dual_b:	addi.l	#$00002000,D0
@@ -488,7 +509,7 @@ DoSidVoiceC:
 	lea	VoiceData_C(PC),A0
 	tst.b	hardw_buzz(A0)
 	bne.s	no_wow_c
-	tst.w	SidOnOffC
+	tst.w	SidOnOffC(a4)
 	bpl.s	no_wow_c
 	cmpi.b	#5,tfmx_effect(A0)
 	bgt.s	no_wow_c
@@ -508,7 +529,7 @@ do_tfm_c:	move.w	(A6)+,D2
 	mulu	#$00A3,D2
 	divu	D2,D0
 	mulu	D1,D0
-	tst.w	SidDephaseC
+	tst.w	SidDephaseC(a4)
 	bne.s	nix_dual_c
 	addi.l	#$00002000,D0
 nix_dual_c:	addi.l	#$00002000,D0
@@ -587,7 +608,7 @@ SetVoiceA:
 	move.w	#$0C00,D7
 	movep.w D7,0(A5)
 	
-no_hardw_auto_a:	tst.w	SidOnOffA
+no_hardw_auto_a:	tst.w	SidOnOffA(a4)
 	bpl.s	okay_a
 	cmpi.b	#3,tfmx_effect(A0)
 	blt.s	okay_a
@@ -631,7 +652,7 @@ SetVoiceB:	lea	VoiceData_B(PC),A0
 	move.w	#$0C00,D7
 	movep.w	D7,0(A5)
 	
-no_hardw_auto_b:	tst.w	SidOnOffB
+no_hardw_auto_b:	tst.w	SidOnOffB(a4)
 	bpl.s	okay_b
 	cmpi.b	#3,tfmx_effect(A0)
 	blt.s	okay_b
@@ -672,7 +693,8 @@ SetVoiceC:
 	movep.w	D7,0(A5)
 	move.w	#$0C00,D7
 	movep.w 	D7,0(A5)
-no_hardw_auto_c:	tst.w	SidOnOffC
+no_hardw_auto_c:
+	tst.w	SidOnOffC(a4)
 	bpl.s	okay_c
 	cmpi.b	#3,tfmx_effect(A0)
 	blt.s	okay_c
@@ -692,7 +714,8 @@ no_c:	rts
 ;	a1	Pattern Ptr
 ; 
 
-getnote:	tst.b	(A1)
+getnote:
+	tst.b	(A1)
 	beq	test_env
 	bmi	digi_
 	move.b	2(A1),D1
@@ -717,8 +740,11 @@ getnote:	tst.b	(A1)
 	subq.b	#1,D1
 	add.w	D1,D1
 	add.w	D1,D1
-	move.l	0(A6,D1.w),extend_wave_adr(A0)
-no_wave_control:	lsr.l	#8,D0
+	adda.l	0(A6,D1.w),a6
+	move.l	A6,extend_wave_adr(A0)
+
+no_wave_control:
+	lsr.l	#8,D0
 	tst.b	D0
 	beq.s	no_tone_control
 	lea	tone_table(PC),A6
@@ -727,8 +753,11 @@ no_wave_control:	lsr.l	#8,D0
 	subq.b	#1,D1
 	add.w	D1,D1
 	add.w	D1,D1
-	move.l	0(A6,D1.w),extend_tone_adr(A0)
-no_tone_control:	lsr.w	#8,D0
+	adda.l	0(A6,D1.w),a6
+	move.l	A6,extend_tone_adr(A0)
+
+no_tone_control:
+	lsr.w	#8,D0
 	tst.b	D0
 	beq.s	no_noise_control
 	lea	nois_table(PC),A6
@@ -737,12 +766,13 @@ no_tone_control:	lsr.w	#8,D0
 	subq.w	#1,D1
 	add.w	D1,D1
 	add.w	D1,D1
-	move.l	0(A6,D1.w),extend_noiz_adr(A0)
+	adda.l	0(A6,D1.w),a6
+	move.l	A6,extend_noiz_adr(A0)
 
-no_noise_control:	move.b	57(A0),D1
+no_noise_control:
+	move.b	57(A0),D1
 	andi.w	#$003F,D1
-L0026:	lea	L0026,A2
-InstBasePtr	= *-4
+	move.l	InstBasePtr(pc),A2
 	asl.w	#8,D1
 	adda.w	D1,A2
 	move.w	0(A2),D0
@@ -791,25 +821,32 @@ InstBasePtr	= *-4
 	
 	move.w	D0,54(A0)
 	
-same_instr:	move.b	1(A1),D1
+same_instr:
+	move.b	1(A1),D1
 	beq.s	no_calc_tie
 	sub.w	4(A0),D2
 	ext.l	D2
 	andi.l	#$000000FF,D1
-L0029:	muls	L0029,D1		; Speed
-L002A	= *-4
+
+	move.l	SpeedPtr(pc),a4
+	muls	(a4),d1		; Speed
+	lea	music(pc),a4
 	divs	D1,D2
+	
 	beq.s	no_calc_tie
 	move.w	D2,6(A0)
 	bra.s	yes_calc_tie
 	
-no_calc_tie:	move.w	2(A0),4(A0)
+no_calc_tie:
+	move.w	2(A0),4(A0)
 	move.w	D4,6(A0)
-yes_calc_tie:	move.b	3(A1),D0
+yes_calc_tie:
+	move.b	3(A1),D0
 	andi.w	#$001F,D0
 	move.b	D0,15(A0)
 	
-test_env:	addq.l	#3,A1
+test_env:
+	addq.l	#3,A1
 	move.b	(A1)+,D1
 	lsr.b	#6,D1
 	tst.b	D1
@@ -906,51 +943,52 @@ digi_:	btst	#2,hardw_buzz(A0)
 	bne.s	oka
 	cmpi.b	#$0E,2(A1)
 	bne.s	test_2
-	move.w	#$FFFF,PatBreakFlag
+	move.w	#$FFFF,PatBreakFlag(a4)
 	bra.s	oka
 	
 test_2:	cmpi.b	#$0F,2(A1)
 	bne.s	oka
-	move.w	#$FFFF,what
+	move.w	#$FFFF,what(a4)
 oka:	move.b	2(A1),D0
 	andi.w	#$000F,D0
 	asl.w	#2,D0
-	tst.w	what
+	tst.w	what(a4)
 	bmi.s	only_speed
 	moveq	#0,D0
 	move.b	3(A1),D0
 	ext.w	D0
 	add.w	D0,D0
 	add.w	D0,D0
-	movea.l	FxJmpTbl(PC,D0.w),A6
-	jsr	(A6)
+	jsr	FxJmpTbl(PC,D0.w)
 L0040:	addq.l	#4,A1
 	rts
 	
-only_speed:	move.b	3(A1),D0
+only_speed:
+	move.b	3(A1),D0
 	ext.w	D0
-	move.l	L002A,a6
+	move.l	SpeedPtr(pc),a6
 	move.w	D0,(a6)		; Grazey Portamento Fix
 	addq.l	#4,A1
-	move.w	D4,what
+	move.w	D4,what(a4)
 	rts
 	
-FxJmpTbl:	DC.L FxNone
-	DC.L ToggleSidDephaseA
-	DC.L ToggleSidDephaseB
-	DC.L ToggleSidDephaseC
-	DC.L ActivSidVoiceA
-	DC.L StopSidVoiceA
-	DC.L ActivSidVoiceB
-	DC.L StopSidVoiceB
-	DC.L ActivSidVoiceC
-	DC.L StopSidVoiceC
-	DC.L do_wave_1
-	DC.L do_wave_2
-	DC.L do_wave_3
-	DC.L reset_all
-	DC.L FxNone
-	DC.L FxNone
+FxJmpTbl:
+	BRA.W FxNone
+	BRA.W ToggleSidDephaseA
+	BRA.W ToggleSidDephaseB
+	BRA.W ToggleSidDephaseC
+	BRA.W ActivSidVoiceA
+	BRA.W StopSidVoiceA
+	BRA.W ActivSidVoiceB
+	BRA.W StopSidVoiceB
+	BRA.W ActivSidVoiceC
+	BRA.W StopSidVoiceC
+	BRA.W do_wave_1
+	BRA.W do_wave_2
+	BRA.W do_wave_3
+	BRA.W reset_all
+	BRA.W FxNone
+	BRA.W FxNone
 	
 	
 tb0:	= $0200
@@ -990,7 +1028,8 @@ sid_irqs_e:
 
 VoidIrq:	rte
 	
-do_tone_control:	move.l	#$01010100,D6
+do_tone_control:
+	move.l	#$01010100,D6
 	tst.b	extend_tone(A0)
 	beq.s	L004C
 	movea.l extend_tone_adr(A0),A6
@@ -1074,18 +1113,18 @@ wave_b:	move.l	A6,extend_wave_adr(A0)
 xno_hardw_auto_b:	bclr	#2,instr_type(A0)
 no_control_wave	rts
 
-; 
-; 
-; IN:	d6	sound-bit
-;	d7	noise-bit
-;	d0	current mixer bits
-;	a0	Voice data
-;	a5	YM hardware
-;
-; OUT:	d0	updated
-;	YM noise period updated 
-;
-; 
+;;; 
+;;; 
+;;; IN:	d6	sound-bit
+;;;	d7	noise-bit
+;;;	d0	current mixer bits
+;;;	a0	Voice data
+;;;	a5	YM hardware
+;;;
+;;; OUT:	d0	updated
+;;;	YM noise period updated 
+;;;
+;;; 
 SetMixerAndNoise:
 	btst	#0,instr_type(A0)
 	beq.s	.toneOFF
@@ -1095,9 +1134,11 @@ SetMixerAndNoise:
 	
 	tst.b	extend_noiz(A0)
 	beq.s	.toneOFF
-.toneON:	bclr	D6,D0
+.toneON:
+	bclr	D6,D0
 	
-.toneOFF:	btst	#1,instr_type(A0)
+.toneOFF:
+	btst	#1,instr_type(A0)
 	beq.s	.exit
 	tst.b	60(A0)
 	bne.s	.noNoiseCtl
@@ -1107,7 +1148,8 @@ SetMixerAndNoise:
 	movep.w	D5,0(A5)
 	bra.s	.noiseON
 	
-.noNoiseCtl:	movea.l	extend_noiz_adr(A0),A6
+.noNoiseCtl:
+	movea.l	extend_noiz_adr(A0),A6
 	move.b	(A6)+,D1
 	cmpi.b	#$FF,D1		; NOP
 	beq.s	.exit
@@ -1117,14 +1159,17 @@ SetMixerAndNoise:
 	subq.l	#1,A6
 	move.b	-1(A6),D1
 	
-.okSequence	move.l	A6,extend_noiz_adr(A0)
+.okSequence:
+	move.l	A6,extend_noiz_adr(A0)
 	move.w	#$0600,D5
 	move.b	D1,D5
 	movep.w	D5,0(A5)
 	tst.b	extend_tone_flag(A0)
 	beq.s	.exit
-.noiseON:	bclr	D7,D0
-.exit:	rts
+.noiseON:
+	bclr	D7,D0
+.exit:
+	rts
 
 
 
@@ -1434,81 +1479,93 @@ arp_spec:	DC.B $00,$09,$00,$08,$00,$07,$00,$06
 	DC.B $06,$07,$08,$09,$FF,$00
 	
 ToggleSidDephaseA:
-	not.w	SidDephaseA
+	not.w	SidDephaseA(a4)
 	rts
 	
 ToggleSidDephaseB:	
-	not.w	SidDephaseB
+	not.w	SidDephaseB(a4)
 	rts
 	
 ToggleSidDephaseC:	
-	not.w	SidDephaseC
+	not.w	SidDephaseC(a4)
 	rts
 	
-ActivSidVoiceA: 
-	move.l	#tb0,$00000120.w
-	st	SidOnOffA
+ActivSidVoiceA:
+	pea	tb0.w
+	move.l	(a7)+,$00000120.w
+	st	SidOnOffA(a4)
 	rts
 	
-ActivSidVoiceB: 
-	move.l	#ta0,$00000134.w
-	st	SidOnOffB
+ActivSidVoiceB:
+	pea	ta0.w
+	move.l	(a7)+,$00000134.w
+	st	SidOnOffB(a4)
 	rts
 	
-ActivSidVoiceC: 
-	move.l	#td0,$00000110.w
-	st	SidOnOffC
+ActivSidVoiceC:
+	pea	td0.w
+	move.l	(a7)+,$00000110.w
+	st	SidOnOffC(a4)
 	rts
 
 StopSidVoiceA:
-	move.l	#VoidIrq,$00000120.w
-	sf	SidOnOffA
+	pea	VoidIrq(pc)
+	move.l	(a7)+,$00000120.w
+	sf	SidOnOffA(a4)
 	rts
 	
 StopSidVoiceB:	
-	move.l	#VoidIrq,$00000134.w
-	sf	SidOnOffB
+	pea	VoidIrq(pc)
+	move.l	(a7)+,$00000134.w
+	sf	SidOnOffB(a4)
 	rts
 
 StopSidVoiceC:	
-	move.l	#VoidIrq,$00000110.w
-	sf	SidOnOffC
+	pea	VoidIrq(pc)
+	move.l	(a7)+,$00000110.w
+	sf	SidOnOffC(a4)
 	rts
 
-do_wave_1:	move.l	#wave_form1,L000D
+do_wave_1:
+	pea	wave_form1(pc)
+	move.l	(a7)+,WavFormPtr(a4)
 	rts
 	
-do_wave_2:	move.l	#wave_form2,L000D
+do_wave_2:
+	pea	wave_form2(pc)
+	move.l	(a7)+,WavFormPtr(a4)
 	rts
 	
-do_wave_3:	move.l	#wave_form3,L000D
-	
+do_wave_3:
+	pea	wave_form3(pc)
+	move.l	(a7)+,WavFormPtr(a4)
 FxNone:	rts
 	
 	
-reset_all:	move.l	#wave_form1,L000D
-	move.w	merk_speed(PC),offset
-	st	SidDephaseA
-	st	SidDephaseB
-	st	SidDephaseC
-	st	SidOnOffA
-	st	SidOnOffB
-	st	SidOnOffC
+reset_all:
+	pea	wave_form1(pc)
+	move.l	(a7)+,WavFormPtr(a4)
+	move.w	merk_speed(PC),offset(a4)
+	st	SidDephaseA(a4)
+	st	SidDephaseB(a4)
+	st	SidDephaseC(a4)
+	st	SidOnOffA(a4)
+	st	SidOnOffB(a4)
+	st	SidOnOffC(a4)
 	rts
 
 i_flag:	DC.W 0
 
 init_music:
+	lea	music(pc),a4
 	movem.l A0-A1,-(a7)
 
+	
+	
 	lea	i_flag(PC),A3
 	tst.w	(A3)
 	bne.s	already_in_relo
 	st	(A3)
-
-	IFEQ test
-	bsr	relocate_player
-	ENDC
 
 	bsr	save_MFP
 	bsr	save_h200
@@ -1516,37 +1573,37 @@ already_in_relo:
 	movem.l (a7)+,A0-A1
 
 	moveq	#0,D0		;3 SID-voices
-	move.w	D0,merk_d1
+	move.w	D0,merk_d1(a4)
 
 	move	#$2700,SR
 
-	move.l	A0,VoiceSetPtr	;Voiceset
-	move.l	A1,SoundDataPtr	;Sounddata
+	move.l	A0,VoiceSetPtr(a4)	;Voiceset
+	move.l	A1,SoundDataPtr(a4)	;Sounddata
 
 	movea.l	VoiceSetPtr(PC),A0
 	lea	516(A0),A0
-	move.l	A0,InstBasePtr
+	move.l	A0,InstBasePtr(a4)
 	
 	movea.l	SoundDataPtr(PC),A0
 	addq.l	#4,A0
-	move.w	(A0),merk_speed
+	move.w	(A0),merk_speed(a4)
 
-	bsr	reset_all	; ben: reset wavform for the least
+	bsr.s	reset_all
 	
-	move.l	A0,L0003
-	move.l	A0,L002A
+	move.l	A0,ReNoteCntPtr(a4)
+	move.l	A0,SpeedPtr(a4)
 	addq.l	#2,A0
-	move.l	A0,SongRePtr
+	move.l	A0,SongRePtr(a4)
 	addq.l	#2,A0
-	move.l	A0,SongLenPtr
+	move.l	A0,SongLenPtr(a4)
 	addq.l	#2,A0
-	move.l	A0,L009E
+	move.l	A0,SMC9E(a4)
 	addq.l	#2,A0
-	move.l	A0,SongBasePtr
+	move.l	A0,SongBasePtr(a4)
 	lea	120(A0),A0
-	move.l	A0,L00A0
-	move.l	A0,RePatPtr
-	move.l	A0,ReCurPatPtr
+	move.l	A0,SMCA0(a4)
+	move.l	A0,RePatPtr(a4)
+	move.l	A0,ReCurPatPtr(a4)
 	lea	CurInfo(PC),A1
 	
 	movea.l VoiceSetPtr(PC),A0
@@ -1588,8 +1645,8 @@ L0097:	move.l	#ta0,$00000134.w ;Timer A
 	bclr	#5,$FFFFFA07.w
 	bsr.s	YmReset
 
-	st	do_replay_flag
-	sf	music_off_flag
+	st	do_replay_flag(a4)
+	sf	music_off_flag(a4)
 	move	#$2300,SR
 	rts
 
@@ -1618,33 +1675,34 @@ YmReset:
 	move.b	D0,2(A0)
 	rts
 
-YmShadow:	DC.B $00,$00,$01,$00,$02,$00,$03,$00
+YmShadow:
+	DC.B $00,$00,$01,$00,$02,$00,$03,$00
 	DC.B $04,$00,$05,$00,$06,$00,$08,$00
 	DC.B $09,$00,$0A,$00,$0B,$00,$0C,$00
 	DC.B $0D,$00
 
 	
 L009C:	bsr.s	L009D
-	clr.w	PatPos
+	clr.w	PatPos(a4)
 	clr.b	ta1+4.w	;8
 	bra	L00AD
+
+L009D:	
+	move.l	SMC9E(PC),A0
+	move.w	#1,(A0)
 	
-L009D:	move.w	#1,L009D
-L009E	= *-4
 	moveq	#$1F,D0
-L009F:	lea	L009F,A0
-L00A0	= *-4
+	move.l	SMCA0(pc),A0
+	
 	move.l	#$00020005,D7
 	lea	PatPtrTbl(PC),A1
 L00A1:	move.l	A0,(A1)+
 	lea	768(A0),A0
 	dbra	D0,L00A1
-	move.w	#1,note_count
-	clr.w	CurSongPos
-L00A2:	move.l	#L00A2,PatPtr
-RePatPtr:	= *-8
-L00A4:	move.l	#L00A4,CurPatPtr
-ReCurPatPtr	= *-8
+	move.w	#1,note_count(a4)
+	clr.w	CurSongPos(a4)
+	move.l	RePatPtr(pc),PatPtr(a4)
+	move.l	ReCurPatPtr(pc),CurPatPtr(a4)
 
 	lea	L012E(PC),A1
 	lea	VoiceData_B(PC),A0
@@ -1664,26 +1722,29 @@ ReCurPatPtr	= *-8
 
 		
 load_pos:	
-	move.w	D4,PatPos
+	move.w	D4,PatPos(a4)
 	move.w	CurSongPos(PC),D0
 	addq.w	#1,D0
-L00A8:	cmp.w	L00A8,D0
-SongLenPtr:	= *-4
+
+	move.l	SongLenPtr(pc),a0
+	cmp.w	(a0),D0
 	bls.s	L00AC
-L00AA:	move.w	L00AA,D0
-SongRePtr:	= *-4
-	
-L00AC:	move.w	D0,CurSongPos
-L00AD:	lea	L00AD,A0
-SongBasePtr:	= *-4
+
+	move.l	SongRePtr(pc),a0
+	move.w	(a0),D0
+L00AC:
+	move.w	D0,CurSongPos(a4)
+L00AD:	
+	move.l	SongBasePtr(pc),a0
+
 	move.w	CurSongPos(PC),D0
 	move.b	0(A0,D0.w),D0
 	andi.w	#$007F,D0
-	move.w	D0,CurPatNum
+	move.w	D0,CurPatNum(a4)
 	lea	PatPtrTbl(PC),A0
 	add.w	D0,D0
 	add.w	D0,D0
-	move.l	0(A0,D0.w),CurPatPtr
+	move.l	0(A0,D0.w),CurPatPtr(a4)
 	rts
 
 SidDephaseA:	DC.B $00,$01
@@ -1694,14 +1755,16 @@ SidOnOffA	DC.B $FF,$FF
 SidOnOffB:	DC.B $FF,$FF
 SidOnOffC:	DC.B $FF,$FF
 	
-wave_form1:	DC.B $00,'h',$00,$04,$00,$01,$01,$05
+wave_form1:
+	DC.B $00,'h',$00,$04,$00,$01,$01,$05
 	DC.B $00,$0A,$00,$02,$01,$A2,$00,$10
 	DC.B $00,$03,$05,$1A,$00,'2',$00,$04
 	DC.B $06,$88,$00,'@',$00,$05,$0A,'5'
 	DC.B $00,'d',$00,$06,$0E,$EF,$00,$C8
 	DC.B $00,$07,$FF,$FF
 	
-wave_form2:	DC.B $00,'h',$00,$04,$00,$01,$01,$05
+wave_form2:
+	DC.B $00,'h',$00,$04,$00,$01,$01,$05
 	DC.B $00,$14,$00,$02,$01,$A0,$00,$10
 	DC.B $00,$03,$05,$19,$00,'d',$00,$04
 	DC.B $03,'@',$00,'@',$00,$05,$0A,'2'
@@ -1714,7 +1777,8 @@ wave_form2:	DC.B $00,'h',$00,$04,$00,$01,$01,$05
 	DC.B $0E,$A0,$01,$00,$00,$07,$0F,'K'
 	DC.B $FF,$FF
 	
-wave_form3:	DC.B $00,'h',$00,$04,$00,$01,$01,$05
+wave_form3:
+	DC.B $00,'h',$00,$04,$00,$01,$01,$05
 	DC.B $00,$1E,$00,$02,$01,$A0,$00,$10
 	DC.B $00,$03,$05,$19,$00,$96,$00,$04
 	DC.B $03,'@',$00,'@',$00,$05,$0A,'2'
@@ -1727,7 +1791,8 @@ wave_form3:	DC.B $00,'h',$00,$04,$00,$01,$01,$05
 	DC.B $0E,$A0,$01,$00,$00,$07,$0F,'K'
 	DC.B $FF,$FF
 	
-DefaultInfo:	DC.B $01,$01,$00,$00,$02,$02,$00,$00
+DefaultInfo:
+	DC.B $01,$01,$00,$00,$02,$02,$00,$00
 	DC.B $00,$00,$01,$00,$00,$00,$00,$03
 	DC.B $00,$00,$00,$03,$03,$03,$00,$01
 	DC.B $00,$00,$00,$01,$00,$00,$00,$02
@@ -1740,113 +1805,115 @@ DefaultInfo:	DC.B $01,$01,$00,$00,$02,$02,$00,$00
 
 	
 nois_table	
-	DC.L nois_BC
-	DC.L nois_BD
-	DC.L nois_BE
-	DC.L nois_BF
-	DC.L nois_C0
-	DC.L nois_C1
-	DC.L nois_C2
-	DC.L nois_C3
-	DC.L nois_C4
-	DC.L nois_C5
-	DC.L nois_C6
-	DC.L nois_C7
-	DC.L nois_C8
-	DC.L nois_C9
-	DC.L nois_CA
-	DC.L nois_CB
-	DC.L nois_CC
-	DC.L nois_CD
-	DC.L nois_CE
-	DC.L nois_CF
-	DC.L nois_D0
-	DC.L nois_D1
-	DC.L nois_D2
-	DC.L nois_D3
-	DC.L nois_D4
-	DC.L nois_D5
-	DC.L nois_D6
-	DC.L nois_D7
-	DC.L nois_D8
-	DC.L nois_D9
-	DC.L nois_DA
-	DC.L nois_DB
-	DC.L nois_DC
-	DC.L nois_DD
-	DC.L nois_DE
-	DC.L nois_DF
-	DC.L nois_E0
-	DC.L nois_E1
-	DC.L nois_E2
-	DC.L nois_E3
-	DC.L nois_E4
-	DC.L nois_E5
-	DC.L nois_E6
-	DC.L nois_E7
-	DC.L nois_E8
-	DC.L nois_E9
-	DC.L nois_EA
+	DC.L nois_BC-nois_table
+	DC.L nois_BD-nois_table
+	DC.L nois_BE-nois_table
+	DC.L nois_BF-nois_table
+	DC.L nois_C0-nois_table
+	DC.L nois_C1-nois_table
+	DC.L nois_C2-nois_table
+	DC.L nois_C3-nois_table
+	DC.L nois_C4-nois_table
+	DC.L nois_C5-nois_table
+	DC.L nois_C6-nois_table
+	DC.L nois_C7-nois_table
+	DC.L nois_C8-nois_table
+	DC.L nois_C9-nois_table
+	DC.L nois_CA-nois_table
+	DC.L nois_CB-nois_table
+	DC.L nois_CC-nois_table
+	DC.L nois_CD-nois_table
+	DC.L nois_CE-nois_table
+	DC.L nois_CF-nois_table
+	DC.L nois_D0-nois_table
+	DC.L nois_D1-nois_table
+	DC.L nois_D2-nois_table
+	DC.L nois_D3-nois_table
+	DC.L nois_D4-nois_table
+	DC.L nois_D5-nois_table
+	DC.L nois_D6-nois_table
+	DC.L nois_D7-nois_table
+	DC.L nois_D8-nois_table
+	DC.L nois_D9-nois_table
+	DC.L nois_DA-nois_table
+	DC.L nois_DB-nois_table
+	DC.L nois_DC-nois_table
+	DC.L nois_DD-nois_table
+	DC.L nois_DE-nois_table
+	DC.L nois_DF-nois_table
+	DC.L nois_E0-nois_table
+	DC.L nois_E1-nois_table
+	DC.L nois_E2-nois_table
+	DC.L nois_E3-nois_table
+	DC.L nois_E4-nois_table
+	DC.L nois_E5-nois_table
+	DC.L nois_E6-nois_table
+	DC.L nois_E7-nois_table
+	DC.L nois_E8-nois_table
+	DC.L nois_E9-nois_table
+	DC.L nois_EA-nois_table
 	
-tone_table:	DC.L tone_EB
-	DC.L tone_EC
-	DC.L tone_ED
-	DC.L tone_EE
-	DC.L tone_EF
-	DC.L tone_F0
-	DC.L tone_F1
-	DC.L tone_F2
-	DC.L tone_F3
-	DC.L tone_F4
-	DC.L tone_F5
-	DC.L tone_F6
-	DC.L tone_F7
-	DC.L tone_F8
-	DC.L tone_F9
-	DC.L tone_FA
-	DC.L tone_FB
-	DC.L tone_FC
-	DC.L tone_FD
-	DC.L tone_FE
-	DC.L tone_FF
-	DC.L tone_00
-	DC.L tone_01
-	DC.L tone_02
-	DC.L tone_03
-	DC.L tone_04
-	DC.L tone_05
-	DC.L tone_06
-	DC.L tone_07
-	DC.L tone_08
-	DC.L tone_09
-	DC.L tone_0A
-	DC.L tone_0B
-	DC.L tone_0C
+tone_table:
+	DC.L tone_EB-tone_table
+	DC.L tone_EC-tone_table
+	DC.L tone_ED-tone_table
+	DC.L tone_EE-tone_table
+	DC.L tone_EF-tone_table
+	DC.L tone_F0-tone_table
+	DC.L tone_F1-tone_table
+	DC.L tone_F2-tone_table
+	DC.L tone_F3-tone_table
+	DC.L tone_F4-tone_table
+	DC.L tone_F5-tone_table
+	DC.L tone_F6-tone_table
+	DC.L tone_F7-tone_table
+	DC.L tone_F8-tone_table
+	DC.L tone_F9-tone_table
+	DC.L tone_FA-tone_table
+	DC.L tone_FB-tone_table
+	DC.L tone_FC-tone_table
+	DC.L tone_FD-tone_table
+	DC.L tone_FE-tone_table
+	DC.L tone_FF-tone_table
+	DC.L tone_00-tone_table
+	DC.L tone_01-tone_table
+	DC.L tone_02-tone_table
+	DC.L tone_03-tone_table
+	DC.L tone_04-tone_table
+	DC.L tone_05-tone_table
+	DC.L tone_06-tone_table
+	DC.L tone_07-tone_table
+	DC.L tone_08-tone_table
+	DC.L tone_09-tone_table
+	DC.L tone_0A-tone_table
+	DC.L tone_0B-tone_table
+	DC.L tone_0C-tone_table
 	
-wave_table:	DC.L wave_0D
-	DC.L wave_0E
-	DC.L wave_0F
-	DC.L wave_10
-	DC.L wave_11
-	DC.L wave_12
-	DC.L wave_13
-	DC.L wave_14
-	DC.L wave_15
-	DC.L wave_16
-	DC.L wave_17
-	DC.L wave_18
-	DC.L wave_19
-	DC.L wave_1A
-	DC.L wave_1B
-	DC.L wave_1B
-	DC.L wave_1B
-	DC.L wave_1B
-	DC.L wave_1B
-	DC.L wave_1B
-	DC.L wave_1B
-	DC.L wave_1B
-	DC.L wave_1B
-	DC.L wave_1B
+wave_table:
+	DC.L wave_0D-wave_table
+	DC.L wave_0E-wave_table
+	DC.L wave_0F-wave_table
+	DC.L wave_10-wave_table
+	DC.L wave_11-wave_table
+	DC.L wave_12-wave_table
+	DC.L wave_13-wave_table
+	DC.L wave_14-wave_table
+	DC.L wave_15-wave_table
+	DC.L wave_16-wave_table
+	DC.L wave_17-wave_table
+	DC.L wave_18-wave_table
+	DC.L wave_19-wave_table
+	DC.L wave_1A-wave_table
+	DC.L wave_1B-wave_table
+	DC.L wave_1B-wave_table
+	DC.L wave_1B-wave_table
+	DC.L wave_1B-wave_table
+	DC.L wave_1B-wave_table
+	DC.L wave_1B-wave_table
+	DC.L wave_1B-wave_table
+	DC.L wave_1B-wave_table
+	DC.L wave_1B-wave_table
+	DC.L wave_1B-wave_table
 
 	;; Noise sequences
 	
@@ -1866,14 +1933,14 @@ nois_C8:	DC.B $0D,$09,$FE
 nois_C9:	DC.B $13,$0E,$0C,$0B,$04,$FE
 nois_CA:	DC.B $20,$20,$19,$0A,$05,$03,$02,$01,$FE
 nois_CB:	DC.B $01,$02,$03,$04,$05,$06,$07,$08
-	DC.B $07,$06,$05,$04,$03,$02,$01,$FE
+		DC.B $07,$06,$05,$04,$03,$02,$01,$FE
 nois_CC:	DC.B $0D,$03,$0D,$05,$0D,$11,$06,$11
-	DC.B $06,$FE
+		DC.B $06,$FE
 nois_CD:	DC.B $0E,$15,$FE
 nois_CE:	DC.B $0F,$18,$FE
 nois_CF:	DC.B $18,$FF
 nois_D0:	DC.B $06,$15,$0C,$15,$07,$15,$04,$15
-	DC.B $08,$FF
+		DC.B $08,$FF
 nois_D1:	DC.B $20,$FF
 nois_D2:	DC.B $0F,$16,$14,$16,$12,$11,$0D,$FF
 nois_D3:	DC.B $20,$20,$18,$10,$08,$FF
@@ -1900,23 +1967,23 @@ nois_E7:	DC.B $0C,$01,$04,$0E,$04,$10,$04,$12,$FF
 nois_E8:	DC.B $00,$00,$09,$FF
 nois_E9:	DC.B $00,$00,$09,$0C,$FF
 nois_EA:	DC.B $00,$00,$00,$01,$01,$01,$00,$00,$01
-	DC.B $01,$00,$01,$FF
+		DC.B $01,$00,$01,$FF
 tone_EB:	DC.B $01,$02,$FE
 tone_EC:	DC.B $03,$02,$02,$02,$01,$01,$FE
 tone_ED:	DC.B $03,$02,$FE
 tone_EE:	DC.B $07,$04,$04,$04,$02,$02,$FF
 tone_EF:	DC.B $01,$00,$00,$00,$01,$00,$0E,$0F
-	DC.B $0F,$0E,$0C,$08,$00,$FE
+		DC.B $0F,$0E,$0C,$08,$00,$FE
 tone_F0:	DC.B $00,$02,$02,$02,$02,$03,$00,$0E
-	DC.B $0D,$0C,$FE
+		DC.B $0D,$0C,$FE
 tone_F1:	DC.B $03,$00,$0E,$00,$0D,$0B,$09,$07,$05
-	DC.B $03,$01,$00,$FE
+		DC.B $03,$01,$00,$FE
 tone_F2:	DC.B $02,$0E,$00,$00,$02,$02,$00,$01
-	DC.B $10,$FE
+		DC.B $10,$FE
 tone_F3:	DC.B $0C,$04,$00,$00,$0C,$0D,$FE
 tone_F4:	DC.B $02,$03,$03,$00,$00,$0C,$0D,$FE
 tone_F5:	DC.B $01,$00,$00,$00,$02,$00,$0F,$0F,$0E
-	DC.B $0D,$0C,$0C,$00,$FE
+		DC.B $0D,$0C,$0C,$00,$FE
 tone_F6:	DC.B $06,$00,$00,$00,$00,$FE
 tone_F7:	DC.B $19,$14,$0F,$0A,$05,$00,$FE
 tone_F8:	DC.B $00,$01,$00,$07,$0C,$FE
@@ -1924,29 +1991,29 @@ tone_F9:	DC.B $00,$00,$18,$0C,$00,$FE
 tone_FA:	DC.B $14,$0A,$00,$FE
 tone_FB:	DC.B $03,$04,$FE
 tone_FC:	DC.B $08,$05,$05,$05,$05,$05,$05,$04,$04
-	DC.B $04,$03,$03,$02,$02,$01,$FE
+		DC.B $04,$03,$03,$02,$02,$01,$FE
 tone_FD:	DC.B $08,$07,$FE
 tone_FE:	DC.B $05,$04,$03,$02,$01,$02,$03,$04
-	DC.B $05,$06,$07,$08,$09,$0A,$FE
+		DC.B $05,$06,$07,$08,$09,$0A,$FE
 tone_FF:	DC.B $08,$0A,$FE
 tone_00:	DC.B $09,$08,$08,$08,$08,$08,$08,$08
-	DC.B $07,$07,$07,$06,$06,$05,$FE
+		DC.B $07,$07,$07,$06,$06,$05,$FE
 tone_01:	DC.B $09,$06,$FE
 tone_02:	DC.B $0A,$0B,$0C,$0D,$0E,$0F,$FE
 tone_03:	DC.B $0B,$0C,$0D,$0E,$0F,$FE
 tone_04:	DC.B $01,$0B,$01,$0C,$01,$0D,$FE
 tone_05:	DC.B '(',$04,'(',$04,'(',$04,'(',$FE
 tone_06:	DC.B $01,$02,$03,$04,$05,$06,$07,$08
-	DC.B $09,$0A,$09,$08,$07,$06,$05,$04
-	DC.B $03,$02,$01,$FE
+		DC.B $09,$0A,$09,$08,$07,$06,$05,$04
+		DC.B $03,$02,$01,$FE
 tone_07:	DC.B $09,$08,$07,$06,$05,$04,$03,$02
-	DC.B $01,$02,$03,$04,$05,$06,$07,$08
-	DC.B $09,$FE
+		DC.B $01,$02,$03,$04,$05,$06,$07,$08
+		DC.B $09,$FE
 tone_08:	DC.B $0A,$00,$09,$00,$08,$00,$07,$00
-	DC.B $06,$00,$05,$00,$04,$00,$03,$00
-	DC.B $02,$00,$01,$00,$FE
+		DC.B $06,$00,$05,$00,$04,$00,$03,$00
+		DC.B $02,$00,$01,$00,$FE
 tone_09:	DC.B $14,$12,$10,$0E,$0C,$0A,$08,$07,$06
-	DC.B $05,$04,$03,$02,$01,$FE
+		DC.B $05,$04,$03,$02,$01,$FE
 tone_0A:	DC.B $20,$01,$10,$02,$FE
 tone_0B:	DC.B $0A,$14,$00,$14,$0A,$FE
 tone_0C:	DC.B $0A,$05,$FE
@@ -1960,40 +2027,40 @@ wave_12:	DC.B $01,$01,$01,$01,$01,$FE
 wave_13:	DC.B $01,$01,$01,$01,$01,$01,$FE
 wave_14:	DC.B '(((((((',$FE
 wave_15:	DC.B $01,$01,$01,$01,$01,$01,$01,$01
-	DC.B $FE
+		DC.B $FE
 wave_16:	DC.B $01,$02,$01,$02,$01,$02,$01,$02,$FE
 wave_17:	DC.B $02,$01,$02,$01,$02,$01,$02,$01
-	DC.B $FE
+		DC.B $FE
 wave_18:	DC.B $01,$03,$01,$03,$01,$03,$01,$03,$FE
 wave_19:	DC.B $03,$01,$03,$01,$03,$01,$03,$01,$FE
 wave_1A:	DC.B $01,$04,$01,$04,$01,$04,$01,$04,$FE
 wave_1B:	DC.B $01,$01,$04,$01,$04,$01,$04,$01
-	DC.B $FE,$01,$01,$04,$01,$04,$01,$04
-	DC.B $01,$FE,$01,$01,$04,$01,$04,$01
-	DC.B $04,$01,$FE,$01,$01,$04,$01,$04
-	DC.B $01,$04,$01,$FE
+		DC.B $FE,$01,$01,$04,$01,$04,$01,$04
+		DC.B $01,$FE,$01,$01,$04,$01,$04,$01
+		DC.B $04,$01,$FE,$01,$01,$04,$01,$04
+		DC.B $01,$04,$01,$FE
 
 trem_table:	DC.B $00,$00,$01,$AC,$03,'T',$04,$F2
-	DC.B $06,$82,$08,$00,$09,'h',$0A,$B5
-	DC.B $0B,$E4,$0C,$F2,$0D,$DB,$0E,$9E
-	DC.B $0F,'8',$0F,$A6,$0F,$EA,$10,$00
-	DC.B $0F,$EA,$0F,$A6,$0F,'8',$0E,$9E
-	DC.B $0D,$DB,$0C,$F2,$0B,$E4,$0A,$B5
-	DC.B $09,'h',$08,$00,$06,$82,$04,$F2
-	DC.B $03,'T',$01,$AC,$00,$00,$FE,'T'
-	DC.B $FC,$AC,$FB,$0E,$F9,'~',$F8,$00
-	DC.B $F6,$98,$F5,'K',$F4,$1C,$F3,$0E
-	DC.B $F2,'%',$F1,'b',$F0,$C8,$F0,'Z'
-	DC.B $F0,$16,$F0,$00,$F0,$16,$F0,'Z'
-	DC.B $F0,$C8,$F1,'b',$F2,'%',$F3,$0E
-	DC.B $F4,$1C,$F5,'K',$F6,$98,$F8,$00
-	DC.B $F9,'~',$FB,$0E,$FC,$AC,$FE,'T'
+		DC.B $06,$82,$08,$00,$09,'h',$0A,$B5
+		DC.B $0B,$E4,$0C,$F2,$0D,$DB,$0E,$9E
+		DC.B $0F,'8',$0F,$A6,$0F,$EA,$10,$00
+		DC.B $0F,$EA,$0F,$A6,$0F,'8',$0E,$9E
+		DC.B $0D,$DB,$0C,$F2,$0B,$E4,$0A,$B5
+		DC.B $09,'h',$08,$00,$06,$82,$04,$F2
+		DC.B $03,'T',$01,$AC,$00,$00,$FE,'T'
+		DC.B $FC,$AC,$FB,$0E,$F9,'~',$F8,$00
+		DC.B $F6,$98,$F5,'K',$F4,$1C,$F3,$0E
+		DC.B $F2,'%',$F1,'b',$F0,$C8,$F0,'Z'
+		DC.B $F0,$16,$F0,$00,$F0,$16,$F0,'Z'
+		DC.B $F0,$C8,$F1,'b',$F2,'%',$F3,$0E
+		DC.B $F4,$1C,$F5,'K',$F6,$98,$F8,$00
+		DC.B $F9,'~',$FB,$0E,$FC,$AC,$FE,'T'
 
 merk_d0:	DC.B $00,$00
 merk_d1:	DC.B $00,$00
-offset:	DC.B $00,$00
-PatBreakFlag	DC.B $00,$00	; Pattern Break command
-what:	DC.B $00,$00	; Speed change flag
+offset:		DC.B $00,$00
+PatBreakFlag:	DC.B $00,$00	; Pattern Break command
+what:		DC.B $00,$00	; Speed change flag
 merk_speed:	DC.B $00,$00	; Speed merken
 	
 vols_y:	DS.W 12
@@ -2028,7 +2095,8 @@ vols_y:	DS.W 12
 	DC.B $04,$05,$06,$07,$08,$09,$0A,$0B
 	DC.B $0C,$0D,$0E,$0F,$FF,$00
 	
-note_2_freq:	DC.W $0FD1,$0EEE,$0E17,$0D4D,$0CBE,$0BD9,$0B2F,$0A8E
+note_2_freq:
+	DC.W $0FD1,$0EEE,$0E17,$0D4D,$0CBE,$0BD9,$0B2F,$0A8E
 	DC.W $09F7,$0967,$08E0,$0861
 	DC.W $07E8,$0777,$070C,$06A7,$0647,$05ED,$0598,$0547
 	DC.W $04FC,$04B4,$0470,$0431
@@ -2048,90 +2116,59 @@ note_2_freq:	DC.W $0FD1,$0EEE,$0E17,$0D4D,$0CBE,$0BD9,$0B2F,$0A8E
 	DC.W $0007,$0006,$0005,$0004,$0003,$0002,$0001,$0000
 	DC.W $0000
 
-	
-START_player_bss:
+;;; $$$ ben: starting to reverse that voice struct :)
+;;; 
+;;; +0.W tone period
+;;; +14.b current volume
 
-	;; $$$ ben: starting to reverse that voice struct :)
-	;; 
-	;; +0.W tone period
-	;; +14.b current volume
+;;; +43.b direct noise period
+;;; +58.b flags [bit-1 desactive chan A]
+;;; +60.b direct noise control (0:off)
+;;; +61.b flag, affect tone-mixer (!0:force tone ON (may be sid))
+;;; +78.l mask from mask table
+;;; +79.b sound-flag (0:tone-off)
 
-	;; +43.b direct noise period
-	;; +58.b flags [bit-1 desactive chan A]
-	;; +60.b direct noise control (0:off)
-	;; +61.b flag, affect tone-mixer (!0:force tone ON (may be sid))
-	;; +78.l mask from mask table
-	;; +79.b sound-flag (0:tone-off)
+;;; +64.l pointer to noise sequence
+;;; 
+;;; 
+;;; +72.l pointer to some sequence
 
-	;; +64.l pointer to noise sequence
-	;; 
-	;; 
-	;; +72.l pointer to some sequence
-
-	;; +44.b voice-flags
-	;;	bit-0:tone
-	;;	bit-1:noise
-	;;	bit-2:involved in env control (0:no-env control)
-	;;	bit-3:idem
-	;; +78.b yet another noise affect flag [0:no noise but sequence read]
+;;; +44.b voice-flags
+;;;	bit-0:tone
+;;;	bit-1:noise
+;;;	bit-2:involved in env control (0:no-env control)
+;;;	bit-3:idem
+;;; +78.b yet another noise affect flag [0:no noise but sequence read]
 	
 		rsreset
 vc_dummy:	rs.b	82
 vc_size:	rs.b	0
 
-VoiceData_B:	DS.B vc_size ;43-2	;Playdata
-VoiceData_C:	DS.B vc_size ;43-2	;Playdata
-VoiceData_A:	DS.B vc_size ;43-2	;Playdata
+VoiceData_B:	DS.B	vc_size ;43-2	;Playdata
+VoiceData_C:	DS.B	vc_size ;43-2	;Playdata
+VoiceData_A:	DS.B	vc_size ;43-2	;Playdata
 
-CurInfo:	DS.W 126	; $$$ ben: init copies 32*8 = 256 bytes !
-CurSongPos:	DC.W 0
-CurPatNum:	DC.W 0
-PatPtrTbl:	DS.L 120	; $$$ ben : should be 128 ?
-CurPatPtr:	DC.L 0
-PatPos:	DC.W 0
-PatPtr	DC.L 0
-L012E:	DS.W 5
-
-end_player_bss:
-
-note_count:	DC.B $00,$00
-
-SoundDataPtr:	DC.L 0	; sound
-VoiceSetPtr:	DC.L 0	; vset
-
-relocate_player:
-	movem.l D0-D1/A0-A3,-(a7)
-	lea	r_flag(PC),A3
-	tst.w	(A3)
-	bne.s	already_relocated
-	st	(A3)
-
-	lea	music(PC),A3
-	move.l	A3,D0
-
-	lea	r_base(PC),A1
-	adda.l	#relotab-r_base,A1
-
-	adda.l	(A1)+,A3
-	moveq	#0,D1
-L013F:	add.l	D0,(A3)
-L0140:	move.b	(A1)+,D1
-	beq.s	L0142
-	cmp.w	#2,D1
-	bcs.s	L0141
-	adda.w	D1,A3
-	bra.s	L013F
-L0141:	lea	254(A3),A3
-	bra.s	L0140
-L0142:
-
-already_relocated:
-	movem.l (a7)+,D0-D1/A0-A3
-
-	rts
-r_flag:	DC.W 0
-
-r_base:
-
-relotab:
-	even
+CurInfo:	DS.W	126	; $$$ ben: init copies 32*8 = 256 bytes !
+CurSongPos:	DC.W	0
+CurPatNum:	DC.W	0
+PatPtrTbl:	DS.L	120	; $$$ ben: should be 128 ?
+CurPatPtr:	DC.L	0
+PatPos:		DC.W	0
+PatPtr		DC.L	0
+L012E:		DS.W	5
+note_count:	DC.W 	0
+	
+;;; ben: added to remove self modified code and make PCR
+ReNoteCntPtr:	DC.L	0
+WavFormPtr:	DC.L	0
+SpeedPtr:	DC.L	0
+SMCA0:		DC.L	0
+SMC9E:		DC.L	0
+RePatPtr:	DC.L	0
+ReCurPatPtr:	DC.L	0
+SongBasePtr:	DC.L	0
+SongLenPtr:	DC.L	0
+SongRePtr:	DC.L	0
+InstBasePtr:	DC.L	0
+SoundDataPtr:	DC.L	0	; sound
+VoiceSetPtr:	DC.L	0	; vset
