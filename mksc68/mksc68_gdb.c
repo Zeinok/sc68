@@ -762,7 +762,7 @@ static int rsp_event(gdb_t * const gdb)
       break;
     default:
       msgdbg("unsupported breakpoint type '%c' @ 0x%x\n", type, adr);
-      ptr = 0;                        /* unsupported */
+      ptr = 0;                          /* unsupported */
       break;
     }
   } break;
@@ -794,7 +794,8 @@ static int rsp_event(gdb_t * const gdb)
         ptr = stpcpy(buf+1,"E01");
         break;
       }
-      /* msgdbg("COMMAND <%s-at,%02d,%06x>\n", step ? "step" : "continue", sig, adr); */
+      /* msgdbg("COMMAND <%s-at,%02d,%06x>\n", step ? "step" :
+       * "continue", sig, adr); */
       gdb->emu->reg.pc = adr;
     }
 
@@ -820,7 +821,7 @@ static int rsp_event(gdb_t * const gdb)
   }
 
   /* any command not supported by the stub, an empty response
-   * (‘$#00’) should be returned if (!ptr) { ptr=buf+1; *ptr = 0; }
+   * (‘$#00’) should be returned.
    */
   if (!ptr) {
     ptr=buf+1;

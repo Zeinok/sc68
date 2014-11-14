@@ -61,22 +61,22 @@ static const opt_t longopts[] = {
 };
 
 typedef struct {
-  volatile int  isplaying;
-  volatile int  debug;
+  volatile int  isplaying;              /* 1:play 2:init    */
+  volatile int  debug;                  /* run gdb mode     */
 
-  sc68_t      * sc68;       /* sc68 instance.    */
-  emu68_t     * emu68;      /* emu68 instance.   */
-  io68_t     ** ios68;      /* other chip.       */
-  gdb_t       * gdb;        /* gdb instance      */
-  vfs68_t     * out;        /* audio out stream  */
-  pthread_t     thread;     /* play thread       */
-  int           track;
-  int           loop;
-  int           code;
-  int           log2;
+  sc68_t      * sc68;                   /* sc68 instance    */
+  emu68_t     * emu68;                  /* emu68 instance   */
+  io68_t     ** ios68;                  /* other chip       */
+  gdb_t       * gdb;                    /* gdb instance     */
+  vfs68_t     * out;                    /* audio out stream */
+  pthread_t     thread;                 /* play thread      */
+  int           track;                  /* track to play    */
+  int           loop;                   /* number of loop   */
+  int           code;                   /* return code 0=OK */
+  int           log2;                   /* 68k memory size  */
 } playinfo_t;
 
-static playinfo_t playinfo;             /* unique playinfo */
+static playinfo_t playinfo;             /* unique playinfo  */
 
 static void play_info(playinfo_t * pi)
 {

@@ -1,11 +1,10 @@
 
 # Makefile for sc68 tools.
 #
-# Time-stamp: <2013-09-27 09:51:54 ben>
 
 CFLAGS   = -Wall -pedantic -g -O0
 
-all: gen68 insttest68 texinfo2man quar
+all: gen68 insttest68 texinfo2man unquar
 
 clean:
 	rm -f -- gen68 insttest68 texinfo2man quar

@@ -256,6 +256,8 @@ static int run_echo(cmd_t * me, int argc, char ** argv)
     }
     printf("%s%s",argv[i], sep);
   }
+  if (!errno)
+    fflush(stdout);
   return -!!errno;
 }
 
@@ -267,6 +269,7 @@ static int run_error(cmd_t * me, int argc, char ** argv)
    */
   for (i=1; i<argc; ++i)
     msgerr("%s%s",argv[i], i==argc-1?"\n":" ");
+  fflush(stderr);
   return exit_code;
 }
 

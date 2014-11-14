@@ -5,7 +5,7 @@
 ;
 ; by Benjamin Gerard <https://sourceforge.net/users/benjihan>
 ;
-; Time-stamp: <2013-12-30 20:50:18 ben>
+; Time-stamp: <2014-11-07 16:43:08 ben>
 ;
 
 ;;; TODO: supported replay rates
@@ -363,7 +363,7 @@ init_timers:
 	beq.s	.ok
 
 	;; all timers were not set properly, reset to default
-	move.l	#00020301,d7
+	move.l	#$00020301,d7
 .ok:
 	;; copy timer info struct
 	lea	timer_def_table(pc),a0
