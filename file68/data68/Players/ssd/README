@@ -1,5 +1,5 @@
                    Sc68 replay for SidSoundDesigner
-                                   
+
 This is the SidSoundSesigner replay for sc68.
 
   Sid Sound Designer is a music editor for the Atari-ST featuring SID
@@ -11,7 +11,7 @@ This is the SidSoundSesigner replay for sc68.
 FILES
 
   Makefile ...... Makefile using vasm to assemble the source
-  ssd_abd4.s .... SSD replay source
+  ssd.s ......... SSD replay source
   ssd1-sc68.s ... SSD stub for sc68
 
 
@@ -19,17 +19,17 @@ ABOUT THE STUB
 
   SidSoundDesigner uses separate files for music data (.tri) and sound
   data (.tvs).
-  
+
   sc68 ABI only supports a single address to be given to the player
   (a0 register). This stub use 2 embedded formats.
 
   A. Single music format
-  
+
      +0 ............. 'SSD1'
      +4 ............. TVSsz, size of .tvs file
      +8 ............. TRIsz, size of .tri file
-     +16 ............ .tvs file (voice)
-     +16+TVSsz ...... .tri file (song)
+     +12 ............ .tvs file (voice)
+     +12+TVSsz ...... .tri file (song)
 
   B. Multi music format
 
@@ -48,6 +48,8 @@ VERSIONS AND AUTHORS
   1.02 Pattern fix, Optimisation, comments by Ben/OVR
   1.03 Portamento fix, additional comments by Grazey/PHF
   1.04 Real PIC version by Ben/OVR
+  1.05 Clean source, reverse struct ...
+  1.06 (in progress) Runtime timer selection, more debuging/reversing
 
 
 LINKS

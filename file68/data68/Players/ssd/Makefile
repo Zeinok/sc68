@@ -2,38 +2,31 @@
 #
 # by Ben / OVR
 
-VERSION=103
-src=ssd_abd4.s
+VERSION=105
 
 AS=vasmm68k_mot
-TOSFLAGS=-m68000 -Ftos -devpac -no-opt
-BINFLAGS=-m68000 -Fbin -devpac -no-opt
+BINFLAGS=-m68000 -Fbin -devpac
 
 ## You should not edit after this
 
-tos=$(src:%.s=%.tos)
-tgt=ssd-$(VERSION).bin
-
 all: ssd1.bin
 
-ssd1.bin: ssd1-sc68.s
-	@echo "BIN $< -> $@"
-	@$(AS) $(BINFLAGS) -o $@ $< >/dev/null
+install: ssd1.bin
+	@cp -v -- $< ../../Replay
 
-ssd1.bin: $(tgt)
+ssd1.bin: ssd1-sc68.s ssd.bin
+	@echo "ASM $< -> $@"
+	@$(AS) $(BINFLAGS) -DVERSION=$(VERSION) -o $@ $< >/dev/null
 
-$(tgt): $(tos)
-	@echo "RAW $< -> $@"
-	@dd status=none iflag=binary oflag=binary skip=28 bs=1 if=$< of=$@
-
-%.tos: %.s
-	@echo "TOS $< -> $@"
-	@$(AS) $(TOSFLAGS) -o $@ $< >/dev/null
+ssd.bin: ssd.s
+	@echo "ASM $< -> $@ ($(VERSION))"
+	@$(AS) $(BINFLAGS) -o $@ $<
+	@cp -- $@ ssd-$(VERSION).bin
 
 clean:
-	-rm -f --  $(tgt) $(tos) ssd1.bin
+	-rm -f -- ssd1.bin ssd.bin
 
-.PHONY: all clean
+.PHONY: all clean install
 
 .INTERMEDIATE: $(tos)
 

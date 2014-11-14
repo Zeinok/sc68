@@ -1,42 +1,39 @@
-; sidsound designer sc68 wrapper
-; 
-; by Benjamin Gerard <http://sourceforge.net/users/benjihan>
-;
-; Time-stamp: <2014-10-30 13:50:43 ben>
-; 
-; sidsound designer original routines by 
-; synergy and animal mine. patched and updated
-; by defjam/checkpoint and FroST/Loud.
-; timer a, c & d are used for the sid-waveform 
-; emulation. this means you can use 
-; sid-instruments on all three voices.
-; ae@atari.org / dhs.atari.org
+;;; sidsound designer sc68 wrapper
+;;; 
+;;; by Benjamin Gerard <http://sourceforge.net/users/benjihan>
+;;;
+;;; Time-stamp: <2014-11-12 03:01:27 ben>
+;;; 
+;;; sidsound designer original routines by 
+;;; synergy and animal mine. patched and updated
+;;; by defjam/checkpoint and FroST/Loud.
+;;; timer a, c & d are used for the sid-waveform 
+;;; emulation. this means you can use 
+;;; sid-instruments on all three voices.
+;;; ae@atari.org / dhs.atari.org
 
-; ----------------------------------------------------------------------
-; 
-; SidSoundDesigner file for sc68.
-; 
-; One music format:	
-; ---------------- 
-; +0            'SSD1'
-; +4            TVSsz, size of .tvs file
-; +8            TRIsz, size of .tri file
-; +16           .tvs file (voice)
-; +16+TVSsz	.tri file (song)
-;
-; Multi music format
-; ------------------
-;
-; +0            'SSd1'
-; +4            number of music
-; per musics (8 bytes per music):	 
-; +0            offset to TVS from beginning of this table
-; +4		offset to TRI from beginning of this table
-; ... data ...
-;
-; ----------------------------------------------------------------------
-	
-	;; ORG	$0
+;;; ----------------------------------------------------------------------
+;;; 
+;;; SidSoundDesigner file for sc68.
+;;; 
+;;; One music format:   
+;;; ---------------- 
+;;; +0            'SSD1'
+;;; +4            TVSsz, size of .tvs file
+;;; +8            TRIsz, size of .tri file
+;;; +12           .tvs file (voice)
+;;; +12+TVSsz     .tri file (song)
+;;;
+;;; Multi music format
+;;; ------------------
+;;; +0            'SSd1'
+;;; +4            number of music
+;;; per musics (8 bytes per music):      
+;;; +0            offset to TVS from beginning of this table
+;;; +4          offset to TRI from beginning of this table
+;;; ... data ...
+;;;
+;;; ----------------------------------------------------------------------
 	
 begin:
 	bra	init		; +0
@@ -45,6 +42,7 @@ begin:
 play:	= begin+8
 
 	dc.b	"ssd1 replay for sc68",0
+	dc.b	VERSION
 	even
 
 init:
@@ -73,11 +71,10 @@ ok_SSD1:
 	movem.l	(a0)+,a1-a2	; get TVSsz, TRIsz
 	add.l	a0,a1		; .tri address (tvs is a0)
 
-;; Original SSD replay (with pattern break fix)
-
-;; a0 : voice (.tvs)
+	;; Original SSD replay
+	;; a0 : voice (.tvs)
 	;; a1 : song  (.tri)
 driver:
-	incbin	"ssd-103.bin"
+	incbin	"ssd.bin"
 	even
 	dc.b	"1dss"
