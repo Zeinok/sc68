@@ -2,7 +2,7 @@
 ; 
 ; by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 ;
-; Time-stamp: <2011-09-12 01:29:54 ben>
+; Time-stamp: <2014-10-30 13:50:43 ben>
 ; 
 ; sidsound designer original routines by 
 ; synergy and animal mine. patched and updated
@@ -40,10 +40,12 @@
 	
 begin:
 	bra	init		; +0
-	bra     exit_player	; +4
-play:				; +8
-	rts
-        bra     my_replay_music
+	bra     driver+8	; +4
+	bra	driver+4	; +8
+play:	= begin+8
+
+	dc.b	"ssd1 replay for sc68",0
+	even
 
 init:
 	lea	play(pc),a1
@@ -55,7 +57,7 @@ init:
 	beq.s	ok_multi_SDD1
 	rts
 ok_multi_SDD1:
-	move.w	#$4e71,(a1)	; 'NOP' at play location
+	move.w	#$6000,(a1)	; 'BRA' at play location
 	move	(a0)+,d7	; Get number of music
 	subq.w	#1,d0
 	divu	d7,d0
@@ -65,18 +67,17 @@ ok_multi_SDD1:
 	movem.l	0(a2,d0.w),a0-a1
 	add.l	a2,a0
 	add.l	a2,a1
-        bra     init_music
+        bra     driver
 ok_SSD1:
-	move.w	#$4e71,(a1)	; 'NOP' at play location
+	move.w	#$6000,(a1)	; 'BRA' at play location
 	movem.l	(a0)+,a1-a2	; get TVSsz, TRIsz
 	add.l	a0,a1		; .tri address (tvs is a0)
-        bra     init_music
-	
 
 ;; Original SSD replay (with pattern break fix)
 
 ;; a0 : voice (.tvs)
-;; a1 : song  (.tri)
- 	include "custom/ssd1-ben.s"
+	;; a1 : song  (.tri)
+driver:
+	incbin	"ssd-103.bin"
 	even
-	dc.w	0
+	dc.b	"1dss"
