@@ -43,13 +43,13 @@ ABOUT THE STUB
 
 VERSIONS AND AUTHORS
 
-  1.00 reassembled,fixed and new stuff added by .defjam./.checkpoint.
-  1.01 Falcon-IDE-fix by FroST
-  1.02 Pattern fix, Optimisation, comments by Ben/OVR
-  1.03 Portamento fix, additional comments by Grazey/PHF
-  1.04 Real PIC version by Ben/OVR
+  1.00 Reassembled,fixed and new stuff added (.defjam./.checkpoint.)
+  1.01 Falcon IDE fix (FroST)
+  1.02 Pattern fix, Optimisation, comments (Ben/OVR)
+  1.03 Portamento fix, additional comments (Grazey/PHF)
+  1.04 Real PIC version amd removed all Seld Modified Code (Ben/OVR)
   1.05 Clean source, reverse struct (Ben/OVR)
-  1.06 Runtime timer selection, more debuging/reversing (Ben/OVR)
+  1.06 RunTime Timer Selection, more debuging/reversing (Ben/OVR)
 
 
 LINKS

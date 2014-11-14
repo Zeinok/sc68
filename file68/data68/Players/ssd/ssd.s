@@ -27,16 +27,23 @@ music:	bra.w	init_player	; +0 a0:tvs a1:tri d0:'ABDC'
 	bra.w	play_player	; +4
 	bra.w	exit_player	; +8
 
-	opt	o-		; $$$ FOR NOW
+	opt	o+
 
-lall:	dc.b	"Sid Sound Designer by MC of Animal Mine 93-95 "
-	dc.b	"ver. 1.05 runtime-timer selection "
-	dc.b	"fixed by .defjam./.checkpoint. "
-	dc.b	"Falcon fix by FroST "
-	dc.b	"Pattern Break fix by Ben/OVR "
-	dc.b	"Portamento fix by Grazey/PHF"
-	dc.b	"PCR by Ben/OVR "
-	dc.b	"Clean source, reverse struct and debug by Ben/OVR "
+lall:	dc.b	"Sid Sound Designer by MC of Animal Mine 93-95 / "
+	dc.b	"V1.06 (PIC/RTTS)"
+	dc.b	0
+	dc.b	"V1.06 Run-Time Timer Selection, more fix (Ben/OVR)",0
+	dc.b	"V1.05 Clean source, reverse struct and debug (Ben/OVR)",0
+	dc.b	"V1.04 PIC and remove all SMC (Ben/OVR)",0
+	dc.b	"V1.03 Portamento fix (Grazey/PHF)",0
+	dc.b	"V1.02 Pattern Break fix (Ben/OVR)",0
+	dc.b	"V1.01 Falcon fix (FroST)",0
+	dc.b	"V1.00 Various fix (.defjam./.checkpoint.)",0
+	
+	dc.b    "Ben's latest source available at "
+	dc.b	"<http://sourceforge.net/p/sc68/code/HEAD/tree/"
+	dc.b	"file68/data68/Players/ssd/>",0
+	
 	even
 
 play_player:
@@ -303,7 +310,7 @@ ym_mute:
 	move.l	d4,(a5)+	; 0 1 2 3
 	move.l	d4,(a5)+	; 4 5 6 7
 	clr.w	(a5)+		; 8 9
-	move.l	#$FFFFFF,(a5)+	; A B C D
+	move.l	#$00FFFF00,(a5)	; A B C D
 	moveq	#0,d4		; restore d4 to 0
 	;; ... to be continued on ym_commit
 
