@@ -1,4 +1,4 @@
-                   Sc68 replay for SidSoundDesigner
+                   SC68 replay for SidSoundDesigner
 
 This is the SidSoundSesigner replay for sc68.
 
@@ -48,8 +48,8 @@ VERSIONS AND AUTHORS
   1.02 Pattern fix, Optimisation, comments by Ben/OVR
   1.03 Portamento fix, additional comments by Grazey/PHF
   1.04 Real PIC version by Ben/OVR
-  1.05 Clean source, reverse struct ...
-  1.06 (in progress) Runtime timer selection, more debuging/reversing
+  1.05 Clean source, reverse struct (Ben/OVR)
+  1.06 Runtime timer selection, more debuging/reversing (Ben/OVR)
 
 
 LINKS
