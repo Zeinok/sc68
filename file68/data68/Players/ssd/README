@@ -21,7 +21,7 @@ ABOUT THE STUB
   data (.tvs).
 
   sc68 ABI only supports a single address to be given to the player
-  (a0 register). This stub use 2 embedded formats.
+  (a0 register). This stub uses 2 embedded formats.
 
   A. Single music format
 
@@ -47,9 +47,9 @@ VERSIONS AND AUTHORS
   1.01 Falcon IDE fix (FroST)
   1.02 Pattern fix, Optimisation, comments (Ben/OVR)
   1.03 Portamento fix, additional comments (Grazey/PHF)
-  1.04 Real PIC version amd removed all Seld Modified Code (Ben/OVR)
+  1.04 Real PIC version amd removed all Self Modified Code (Ben/OVR)
   1.05 Clean source, reverse struct (Ben/OVR)
-  1.06 RunTime Timer Selection, more debuging/reversing (Ben/OVR)
+  1.06 RunTime Timer Selection, more debugging and reversing (Ben/OVR)
 
 
 LINKS

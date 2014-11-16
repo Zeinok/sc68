@@ -1,11 +1,11 @@
                     sc68 - DirectShow baseclasses
-                                   
-                   It is part of the sc68 project.
 
+                   It is part of the sc68 project
+                                   
                (C) COPYRIGHT 1998-2014 Benjamin Gerard
 
 
-*Synopsis*                                   
+SYNOPSIS
 
   The baseclasses project is part of Microsoft Platform SDK. It's a
   collection of classes and interfaces for DirectShow and COM.
@@ -15,7 +15,7 @@
   Visual C++ Express 2010).
 
 
-*Hierarchy*
+FILES
 
  7.1/                    - Using baseclasses from this version of MS SDK
  |- include/             - baseclasses headers
@@ -23,4 +23,4 @@
     |- strmbasd-mb.lib     - multibyte debug
     |- strmbasd.lib        - normal debug
     |- strmbase-mb.lib     - multibyte release
-    `- strmbase.lib        - norma; release
+    `- strmbase.lib        - normal release

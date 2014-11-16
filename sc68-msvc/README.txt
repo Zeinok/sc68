@@ -1,4 +1,8 @@
-		     sc68 for Microsoft Visual C
+                     sc68 for Microsoft Visual C
+
+                   It is part of the sc68 project
+                                   
+               (C) COPYRIGHT 1998-2014 Benjamin Gerard
 
 
 SYNOPSIS
@@ -38,4 +42,4 @@ LINKS
   sc68 website  <http://sc68.atari.org/>
   sc68 project  <http://sourceforge.net/p/sc68/>
   Visual Studio <http://www.visualstudio.com/>
-  zlib <http://www.zlib.net/>
+  zlib          <http://www.zlib.net/>

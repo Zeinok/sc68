@@ -16,35 +16,21 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
-		Debug-Dll|Win32 = Debug-Dll|Win32
 		Release|Win32 = Release|Win32
-		Release-Dll|Win32 = Release-Dll|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F3CE61A8-30BC-49F3-A786-90556F4C695A}.Debug|Win32.ActiveCfg = Debug|Win32
 		{F3CE61A8-30BC-49F3-A786-90556F4C695A}.Debug|Win32.Build.0 = Debug|Win32
-		{F3CE61A8-30BC-49F3-A786-90556F4C695A}.Debug-Dll|Win32.ActiveCfg = Debug-Dll|Win32
-		{F3CE61A8-30BC-49F3-A786-90556F4C695A}.Debug-Dll|Win32.Build.0 = Debug-Dll|Win32
 		{F3CE61A8-30BC-49F3-A786-90556F4C695A}.Release|Win32.ActiveCfg = Release|Win32
 		{F3CE61A8-30BC-49F3-A786-90556F4C695A}.Release|Win32.Build.0 = Release|Win32
-		{F3CE61A8-30BC-49F3-A786-90556F4C695A}.Release-Dll|Win32.ActiveCfg = Release-Dll|Win32
-		{F3CE61A8-30BC-49F3-A786-90556F4C695A}.Release-Dll|Win32.Build.0 = Release-Dll|Win32
 		{65AF7FE8-8C9E-43D7-9C84-43140F89F0D5}.Debug|Win32.ActiveCfg = Debug|Win32
 		{65AF7FE8-8C9E-43D7-9C84-43140F89F0D5}.Debug|Win32.Build.0 = Debug|Win32
-		{65AF7FE8-8C9E-43D7-9C84-43140F89F0D5}.Debug-Dll|Win32.ActiveCfg = Debug-Dll|Win32
-		{65AF7FE8-8C9E-43D7-9C84-43140F89F0D5}.Debug-Dll|Win32.Build.0 = Debug-Dll|Win32
 		{65AF7FE8-8C9E-43D7-9C84-43140F89F0D5}.Release|Win32.ActiveCfg = Release|Win32
 		{65AF7FE8-8C9E-43D7-9C84-43140F89F0D5}.Release|Win32.Build.0 = Release|Win32
-		{65AF7FE8-8C9E-43D7-9C84-43140F89F0D5}.Release-Dll|Win32.ActiveCfg = Release-Dll|Win32
-		{65AF7FE8-8C9E-43D7-9C84-43140F89F0D5}.Release-Dll|Win32.Build.0 = Release-Dll|Win32
 		{5E19938C-78A1-440A-9396-28F85F16F429}.Debug|Win32.ActiveCfg = Debug|Win32
 		{5E19938C-78A1-440A-9396-28F85F16F429}.Debug|Win32.Build.0 = Debug|Win32
-		{5E19938C-78A1-440A-9396-28F85F16F429}.Debug-Dll|Win32.ActiveCfg = Debug-Dll|Win32
-		{5E19938C-78A1-440A-9396-28F85F16F429}.Debug-Dll|Win32.Build.0 = Debug-Dll|Win32
 		{5E19938C-78A1-440A-9396-28F85F16F429}.Release|Win32.ActiveCfg = Release|Win32
 		{5E19938C-78A1-440A-9396-28F85F16F429}.Release|Win32.Build.0 = Release|Win32
-		{5E19938C-78A1-440A-9396-28F85F16F429}.Release-Dll|Win32.ActiveCfg = Release-Dll|Win32
-		{5E19938C-78A1-440A-9396-28F85F16F429}.Release-Dll|Win32.Build.0 = Release-Dll|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
