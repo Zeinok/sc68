@@ -313,7 +313,7 @@ ym_mute:
 ;;;
 ;;; ben: This function writes the YM registers for real. The first word
 ;;;	 is a mask of the registers to commit, followed by the 14 used
-;;;	 YM registters. The mask is cleared on exit.
+;;;	 YM registers. The mask is cleared on exit.
 ;;;	 The major pro of this method is that it prevents the heavy
 ;;;	 used of interruptions masking during the replay. It's also
 ;;;	 much easier to handle the register 7 hassle. As a bonus it
@@ -441,7 +441,6 @@ do_fx_all:
 
 
 	;; DO sid stuff
-	;; move	   #$2700,SR
 
 	lea	VoiceA(pc),a0
 	tst.b	vcHwBuzz(a0)
@@ -478,11 +477,6 @@ nix_dual_a:
 	add.l	d0,d0
 	add.l	d0,d0
 	swap	D0
-
-	;; move.b	volume(A0),tb1+4.w
-	;; move.b	d0,$fffffa21.w
-	;; move.b	d3,$fffffa1b.w
-	;; or.b #1,$fffffa07.w
 
 	move.l	vcTimerPtr(a0),a5
 	move.b	vcVol(a0),tmVolH(a5)
@@ -1644,7 +1638,7 @@ init_player:
 	cmp.l	#'TSST',triMagic(a1) ; Valid .tri file ?
 	bne	.exit
 
-	;; Store paramters
+	;; Store parameters
 	move.l	a0,TvsFilePtr(a4) ; Voice-Set
 	move.l	a1,TriFilePtr(a4) ; Sound-Data
 	move.l	d0,timer_map(a4)  ; Timer selection
@@ -1807,54 +1801,54 @@ song_read:
 ;;; $$$ ben: The 01 in the LSB of SidDephaseX void the toggle_dephase_SID
 ;;;	function. I have to assume this was a mistake.
 
-;; SidDephaseA:	   DC.B $00,$01
-;; SidDephaseB:	   DC.B $00,$01
-;; SidDephaseC:	   DC.B $00,$01
+;; SidDephaseA:	   dc.b $00,$01
+;; SidDephaseB:	   dc.b $00,$01
+;; SidDephaseC:	   dc.b $00,$01
 
-;; SidOnOffA	   DC.B $FF,$FF
-;; SidOnOffB:	   DC.B $FF,$FF
-;; SidOnOffC:	   DC.B $FF,$FF
+;; SidOnOffA	   dc.b $FF,$FF
+;; SidOnOffB:	   dc.b $FF,$FF
+;; SidOnOffC:	   dc.b $FF,$FF
 
 ;;; ben: reformat these tables (easier on the eyes)
 wave_form1:
-	DC.W $0068,$0004,$0001,$0105,$000a,$0002,$01a2,$0010
-	DC.W $0003,$051a,$0032,$0004,$0688,$0040,$0005,$0a35
-	DC.W $0064,$0006,$0eef,$00c8,$0007,$ffff
+	dc.w $0068,$0004,$0001,$0105,$000a,$0002,$01a2,$0010
+	dc.w $0003,$051a,$0032,$0004,$0688,$0040,$0005,$0a35
+	dc.w $0064,$0006,$0eef,$00c8,$0007,$ffff
 
 wave_form2:
-	DC.W $0068,$0004,$0001,$0105,$0014,$0002,$01a0,$0010
-	DC.W $0003,$0519,$0064,$0004,$0340,$0040,$0005,$0a32
-	DC.W $00c8,$0006,$0ea0,$0100,$0007,$0f4b,$0068,$0004
-	DC.W $0001,$0105,$0014,$0002,$01a0,$0010,$0003,$0519
-	DC.W $0064,$0004,$0340,$0040,$0005,$0a32,$00c8,$0006
-	DC.W $0ea0,$0100,$0007,$0f4b,$ffff
+	dc.w $0068,$0004,$0001,$0105,$0014,$0002,$01a0,$0010
+	dc.w $0003,$0519,$0064,$0004,$0340,$0040,$0005,$0a32
+	dc.w $00c8,$0006,$0ea0,$0100,$0007,$0f4b,$0068,$0004
+	dc.w $0001,$0105,$0014,$0002,$01a0,$0010,$0003,$0519
+	dc.w $0064,$0004,$0340,$0040,$0005,$0a32,$00c8,$0006
+	dc.w $0ea0,$0100,$0007,$0f4b,$ffff
 
 wave_form3:
-	DC.W $0068,$0004,$0001,$0105,$001e,$0002,$01a0,$0010
-	DC.W $0003,$0519,$0096,$0004,$0340,$0040,$0005,$0a32
-	DC.W $012c,$0006,$0ea0,$0100,$0007,$0f4b,$0068,$0004
-	DC.W $0001,$0105,$001e,$0002,$01a0,$0010,$0003,$0519
-	DC.W $0096,$0004,$0340,$0040,$0005,$0a32,$012c,$0006
-	DC.W $0ea0,$0100,$0007,$0f4b,$ffff
+	dc.w $0068,$0004,$0001,$0105,$001e,$0002,$01a0,$0010
+	dc.w $0003,$0519,$0096,$0004,$0340,$0040,$0005,$0a32
+	dc.w $012c,$0006,$0ea0,$0100,$0007,$0f4b,$0068,$0004
+	dc.w $0001,$0105,$001e,$0002,$01a0,$0010,$0003,$0519
+	dc.w $0096,$0004,$0340,$0040,$0005,$0a32,$012c,$0006
+	dc.w $0ea0,$0100,$0007,$0f4b,$ffff
 
 	;; This is the default "INFO" block (1 long by instrument)
 DefaultInfo:
-	DC.L $01010000,$02020000,$00000100,$00000003
-	DC.L $00000003,$03030001,$00000001,$00000002
-	DC.L $00000002,$00000002,$00000002,$00000001
-	DC.L $00000003,$00000000,$00000000,$00000000
-	DC.L $00000000,$00000000,$00000000,$00000000
-	DC.L $00000000,$00000000,$00000003,$00000000
-	DC.L $00000000,$00000000,$00000000,$00000000
-	DC.L $00000000,$00000000,$00000000,$00000000
-	DC.L $00000000,$00000000,$00000000,$00000000
-	DC.L $00000000,$00000000,$00000000,$00000000
-	DC.L $00000000,$00000000,$00000000,$00000000
-	DC.L $00000000,$00000000,$00000000,$00000000
-	DC.L $00000000,$00000000,$00000000,$00000000
-	DC.L $00000000,$00000000,$00000000,$00000000
-	DC.L $00000000,$00000000,$00000000,$00000000
-	DC.L $00000000,$00000000,$00000000,$00000000
+	dc.l $01010000,$02020000,$00000100,$00000003
+	dc.l $00000003,$03030001,$00000001,$00000002
+	dc.l $00000002,$00000002,$00000002,$00000001
+	dc.l $00000003,$00000000,$00000000,$00000000
+	dc.l $00000000,$00000000,$00000000,$00000000
+	dc.l $00000000,$00000000,$00000003,$00000000
+	dc.l $00000000,$00000000,$00000000,$00000000
+	dc.l $00000000,$00000000,$00000000,$00000000
+	dc.l $00000000,$00000000,$00000000,$00000000
+	dc.l $00000000,$00000000,$00000000,$00000000
+	dc.l $00000000,$00000000,$00000000,$00000000
+	dc.l $00000000,$00000000,$00000000,$00000000
+	dc.l $00000000,$00000000,$00000000,$00000000
+	dc.l $00000000,$00000000,$00000000,$00000000
+	dc.l $00000000,$00000000,$00000000,$00000000
+	dc.l $00000000,$00000000,$00000000,$00000000
 
 ;;; $$$ ben: PCR and optimize at the same time (no need for long words)
 ;;;	Only thing is to be sure those table are really indepedant else
@@ -1862,257 +1856,255 @@ DefaultInfo:
 ;;;	problem would be to use the same base for all 3 tables.
 
 nois_table:
-	DC.W nois_BC-nois_table ;00
-	DC.W nois_BD-nois_table
-	DC.W nois_BE-nois_table
-	DC.W nois_BF-nois_table
-	DC.W nois_C0-nois_table ;04
-	DC.W nois_C1-nois_table
-	DC.W nois_C2-nois_table
-	DC.W nois_C3-nois_table
-	DC.W nois_C4-nois_table ;08
-	DC.W nois_C5-nois_table
-	DC.W nois_C6-nois_table
-	DC.W nois_C7-nois_table
-	DC.W nois_C8-nois_table ;12
-	DC.W nois_C9-nois_table
-	DC.W nois_CA-nois_table
-	DC.W nois_CB-nois_table
-	DC.W nois_CC-nois_table ;16
-	DC.W nois_CD-nois_table
-	DC.W nois_CE-nois_table
-	DC.W nois_CF-nois_table
-	DC.W nois_D0-nois_table ;20
-	DC.W nois_D1-nois_table
-	DC.W nois_D2-nois_table
-	DC.W nois_D3-nois_table
-	DC.W nois_D4-nois_table ;24
-	DC.W nois_D5-nois_table
-	DC.W nois_D6-nois_table
-	DC.W nois_D7-nois_table
-	DC.W nois_D8-nois_table ;28
-	DC.W nois_D9-nois_table
-	DC.W nois_DA-nois_table
-	DC.W nois_DB-nois_table
-	DC.W nois_DC-nois_table ;32
-	DC.W nois_DD-nois_table
-	DC.W nois_DE-nois_table
-	DC.W nois_DF-nois_table
-	DC.W nois_E0-nois_table ;36
-	DC.W nois_E1-nois_table
-	DC.W nois_E2-nois_table
-	DC.W nois_E3-nois_table
-	DC.W nois_E4-nois_table ;40
-	DC.W nois_E5-nois_table
-	DC.W nois_E6-nois_table
-	DC.W nois_E7-nois_table
-	DC.W nois_E8-nois_table ;44
-	DC.W nois_E9-nois_table
-	DC.W nois_EA-nois_table
+	dc.w nois_BC-nois_table ;00
+	dc.w nois_BD-nois_table
+	dc.w nois_BE-nois_table
+	dc.w nois_BF-nois_table
+	dc.w nois_C0-nois_table ;04
+	dc.w nois_C1-nois_table
+	dc.w nois_C2-nois_table
+	dc.w nois_C3-nois_table
+	dc.w nois_C4-nois_table ;08
+	dc.w nois_C5-nois_table
+	dc.w nois_C6-nois_table
+	dc.w nois_C7-nois_table
+	dc.w nois_C8-nois_table ;12
+	dc.w nois_C9-nois_table
+	dc.w nois_CA-nois_table
+	dc.w nois_CB-nois_table
+	dc.w nois_CC-nois_table ;16
+	dc.w nois_CD-nois_table
+	dc.w nois_CE-nois_table
+	dc.w nois_CF-nois_table
+	dc.w nois_D0-nois_table ;20
+	dc.w nois_D1-nois_table
+	dc.w nois_D2-nois_table
+	dc.w nois_D3-nois_table
+	dc.w nois_D4-nois_table ;24
+	dc.w nois_D5-nois_table
+	dc.w nois_D6-nois_table
+	dc.w nois_D7-nois_table
+	dc.w nois_D8-nois_table ;28
+	dc.w nois_D9-nois_table
+	dc.w nois_DA-nois_table
+	dc.w nois_DB-nois_table
+	dc.w nois_DC-nois_table ;32
+	dc.w nois_DD-nois_table
+	dc.w nois_DE-nois_table
+	dc.w nois_DF-nois_table
+	dc.w nois_E0-nois_table ;36
+	dc.w nois_E1-nois_table
+	dc.w nois_E2-nois_table
+	dc.w nois_E3-nois_table
+	dc.w nois_E4-nois_table ;40
+	dc.w nois_E5-nois_table
+	dc.w nois_E6-nois_table
+	dc.w nois_E7-nois_table
+	dc.w nois_E8-nois_table ;44
+	dc.w nois_E9-nois_table
+	dc.w nois_EA-nois_table
 
 tone_table:
-	DC.W tone_EB-tone_table ;00
-	DC.W tone_EC-tone_table
-	DC.W tone_ED-tone_table
-	DC.W tone_EE-tone_table
-	DC.W tone_EF-tone_table ;04
-	DC.W tone_F0-tone_table
-	DC.W tone_F1-tone_table
-	DC.W tone_F2-tone_table
-	DC.W tone_F3-tone_table ;08
-	DC.W tone_F4-tone_table
-	DC.W tone_F5-tone_table
-	DC.W tone_F6-tone_table
-	DC.W tone_F7-tone_table ;12
-	DC.W tone_F8-tone_table
-	DC.W tone_F9-tone_table
-	DC.W tone_FA-tone_table
-	DC.W tone_FB-tone_table ;16
-	DC.W tone_FC-tone_table
-	DC.W tone_FD-tone_table
-	DC.W tone_FE-tone_table
-	DC.W tone_FF-tone_table ;20
-	DC.W tone_00-tone_table
-	DC.W tone_01-tone_table
-	DC.W tone_02-tone_table
-	DC.W tone_03-tone_table ;24
-	DC.W tone_04-tone_table
-	DC.W tone_05-tone_table
-	DC.W tone_06-tone_table
-	DC.W tone_07-tone_table ;28
-	DC.W tone_08-tone_table
-	DC.W tone_09-tone_table
-	DC.W tone_0A-tone_table
-	DC.W tone_0B-tone_table ;32
-	DC.W tone_0C-tone_table
+	dc.w tone_EB-tone_table ;00
+	dc.w tone_EC-tone_table
+	dc.w tone_ED-tone_table
+	dc.w tone_EE-tone_table
+	dc.w tone_EF-tone_table ;04
+	dc.w tone_F0-tone_table
+	dc.w tone_F1-tone_table
+	dc.w tone_F2-tone_table
+	dc.w tone_F3-tone_table ;08
+	dc.w tone_F4-tone_table
+	dc.w tone_F5-tone_table
+	dc.w tone_F6-tone_table
+	dc.w tone_F7-tone_table ;12
+	dc.w tone_F8-tone_table
+	dc.w tone_F9-tone_table
+	dc.w tone_FA-tone_table
+	dc.w tone_FB-tone_table ;16
+	dc.w tone_FC-tone_table
+	dc.w tone_FD-tone_table
+	dc.w tone_FE-tone_table
+	dc.w tone_FF-tone_table ;20
+	dc.w tone_00-tone_table
+	dc.w tone_01-tone_table
+	dc.w tone_02-tone_table
+	dc.w tone_03-tone_table ;24
+	dc.w tone_04-tone_table
+	dc.w tone_05-tone_table
+	dc.w tone_06-tone_table
+	dc.w tone_07-tone_table ;28
+	dc.w tone_08-tone_table
+	dc.w tone_09-tone_table
+	dc.w tone_0A-tone_table
+	dc.w tone_0B-tone_table ;32
+	dc.w tone_0C-tone_table
 
 wave_table:
-	DC.W wave_0D-wave_table ;00
-	DC.W wave_0E-wave_table
-	DC.W wave_0F-wave_table
-	DC.W wave_10-wave_table
-	DC.W wave_11-wave_table ;04
-	DC.W wave_12-wave_table
-	DC.W wave_13-wave_table
-	DC.W wave_14-wave_table
-	DC.W wave_15-wave_table ;08
-	DC.W wave_16-wave_table
-	DC.W wave_17-wave_table
-	DC.W wave_18-wave_table
-	DC.W wave_19-wave_table ;12
-	DC.W wave_1A-wave_table
-	DC.W wave_1B-wave_table
-	DC.W wave_1B-wave_table
-	DC.W wave_1B-wave_table ;16
-	DC.W wave_1B-wave_table
-	DC.W wave_1B-wave_table
-	DC.W wave_1B-wave_table
-	DC.W wave_1B-wave_table ;20
-	DC.W wave_1B-wave_table
-	DC.W wave_1B-wave_table
-	DC.W wave_1B-wave_table
+	dc.w wave_0D-wave_table ;00
+	dc.w wave_0E-wave_table
+	dc.w wave_0F-wave_table
+	dc.w wave_10-wave_table
+	dc.w wave_11-wave_table ;04
+	dc.w wave_12-wave_table
+	dc.w wave_13-wave_table
+	dc.w wave_14-wave_table
+	dc.w wave_15-wave_table ;08
+	dc.w wave_16-wave_table
+	dc.w wave_17-wave_table
+	dc.w wave_18-wave_table
+	dc.w wave_19-wave_table ;12
+	dc.w wave_1A-wave_table
+	dc.w wave_1B-wave_table
+	dc.w wave_1B-wave_table
+	dc.w wave_1B-wave_table ;16
+	dc.w wave_1B-wave_table
+	dc.w wave_1B-wave_table
+	dc.w wave_1B-wave_table
+	dc.w wave_1B-wave_table ;20
+	dc.w wave_1B-wave_table
+	dc.w wave_1B-wave_table
+	dc.w wave_1B-wave_table
 
 	;; Noise sequences
 
-nois_BC: DC.B $10,$FF
-nois_BD: DC.B $A,$11,$F,$11,$D,$C,$8,$FF
-nois_BE: DC.B $4,$FF
-nois_BF: DC.B $3,$FF
-nois_C0: DC.B $20,$20,$FF
-nois_C1: DC.B $9,$20,$20,$FF
-nois_C2: DC.B $20,$9,$C,$20,$FF
-nois_C3: DC.B $20,$4,$8,$E,$12,$16,$1A,$1E,$FE
-nois_C4: DC.B $20,$FE
-nois_C5: DC.B $20,$FE
-nois_C6: DC.B $11,$FE
-nois_C7: DC.B $20,$8,$FE
-nois_C8: DC.B $D,$9,$FE
-nois_C9: DC.B $13,$E,$C,$B,$4,$FE
-nois_CA: DC.B $20,$20,$19,$A,$5,$3,$2,$1,$FE
-nois_CB: DC.B $1,$2,$3,$4,$5,$6,$7,$8,$7,$6,$5,$4,$3,$2,$1,$FE
-nois_CC: DC.B $D,$3,$D,$5,$D,$11,$6,$11,$6,$FE
-nois_CD: DC.B $E,$15,$FE
-nois_CE: DC.B $F,$18,$FE
-nois_CF: DC.B $18,$FF
-nois_D0: DC.B $6,$15,$C,$15,$7,$15,$4,$15,$8,$FF
-nois_D1: DC.B $20,$FF
-nois_D2: DC.B $F,$16,$14,$16,$12,$11,$D,$FF
-nois_D3: DC.B $20,$20,$18,$10,$8,$FF
-nois_D4: DC.B $14,$1B,$19,$1B,$17,$16,$12,$FF
-nois_D5: DC.B $30,$8,$FF
-nois_D6: DC.B $2F,$5,$2F,$3,$3B,$1,$FF
-nois_D7: DC.B $8,$10,$50,$FF
-nois_D8: DC.B $14,$12,$10,$E,$C,$A,$8,$FF
-nois_D9: DC.B $12,$8,$FF
-nois_DA: DC.B $16,$12,$28,$2B,$3B,29,$28,$FF
-nois_DB: DC.B $4,$FF
-nois_DC: DC.B $2,$12,$31,$1,$25,$5,$36,$6,$FF
-nois_DD: DC.B $A,$B,$C,$D,$E,$F,$FF
-nois_DE: DC.B $29,$1,$FF
-nois_DF: DC.B $B,$FF
-nois_E0: DC.B $A,$0,$0,$0,$E,$4,$4,$FF
-nois_E1: DC.B $2B,$FF
-nois_E2: DC.B $15,$2,$FF
-nois_E3: DC.B $C,$1,$2,$1,$FF
-nois_E4: DC.B $D,$D,$D,$1,$3,$FF
-nois_E5: DC.B $1,$FF
-nois_E6: DC.B $14,$4,$A,$2,$FF
-nois_E7: DC.B $C,$1,$4,$E,$4,$10,$4,$12,$FF
-nois_E8: DC.B $0,$0,$9,$FF
-nois_E9: DC.B $0,$0,$9,$C,$FF
-nois_EA: DC.B $0,$0,$0,$1,$1,$1,$0,$0,$1,$1,$0,$1,$FF
+nois_BC: dc.b $10,$FF
+nois_BD: dc.b $A,$11,$F,$11,$D,$C,$8,$FF
+nois_BE: dc.b $4,$FF
+nois_BF: dc.b $3,$FF
+nois_C0: dc.b $20,$20,$FF
+nois_C1: dc.b $9,$20,$20,$FF
+nois_C2: dc.b $20,$9,$C,$20,$FF
+nois_C3: dc.b $20,$4,$8,$E,$12,$16,$1A,$1E,$FE
+nois_C4: dc.b $20,$FE
+nois_C5: dc.b $20,$FE
+nois_C6: dc.b $11,$FE
+nois_C7: dc.b $20,$8,$FE
+nois_C8: dc.b $D,$9,$FE
+nois_C9: dc.b $13,$E,$C,$B,$4,$FE
+nois_CA: dc.b $20,$20,$19,$A,$5,$3,$2,$1,$FE
+nois_CB: dc.b $1,$2,$3,$4,$5,$6,$7,$8,$7,$6,$5,$4,$3,$2,$1,$FE
+nois_CC: dc.b $D,$3,$D,$5,$D,$11,$6,$11,$6,$FE
+nois_CD: dc.b $E,$15,$FE
+nois_CE: dc.b $F,$18,$FE
+nois_CF: dc.b $18,$FF
+nois_D0: dc.b $6,$15,$C,$15,$7,$15,$4,$15,$8,$FF
+nois_D1: dc.b $20,$FF
+nois_D2: dc.b $F,$16,$14,$16,$12,$11,$D,$FF
+nois_D3: dc.b $20,$20,$18,$10,$8,$FF
+nois_D4: dc.b $14,$1B,$19,$1B,$17,$16,$12,$FF
+nois_D5: dc.b $30,$8,$FF
+nois_D6: dc.b $2F,$5,$2F,$3,$3B,$1,$FF
+nois_D7: dc.b $8,$10,$50,$FF
+nois_D8: dc.b $14,$12,$10,$E,$C,$A,$8,$FF
+nois_D9: dc.b $12,$8,$FF
+nois_DA: dc.b $16,$12,$28,$2B,$3B,29,$28,$FF
+nois_DB: dc.b $4,$FF
+nois_DC: dc.b $2,$12,$31,$1,$25,$5,$36,$6,$FF
+nois_DD: dc.b $A,$B,$C,$D,$E,$F,$FF
+nois_DE: dc.b $29,$1,$FF
+nois_DF: dc.b $B,$FF
+nois_E0: dc.b $A,$0,$0,$0,$E,$4,$4,$FF
+nois_E1: dc.b $2B,$FF
+nois_E2: dc.b $15,$2,$FF
+nois_E3: dc.b $C,$1,$2,$1,$FF
+nois_E4: dc.b $D,$D,$D,$1,$3,$FF
+nois_E5: dc.b $1,$FF
+nois_E6: dc.b $14,$4,$A,$2,$FF
+nois_E7: dc.b $C,$1,$4,$E,$4,$10,$4,$12,$FF
+nois_E8: dc.b $0,$0,$9,$FF
+nois_E9: dc.b $0,$0,$9,$C,$FF
+nois_EA: dc.b $0,$0,$0,$1,$1,$1,$0,$0,$1,$1,$0,$1,$FF
 
 	;; Tone (Pulse) sequences
 
-tone_EB: DC.B $1,$2,$FE
-tone_EC: DC.B $3,$2,$2,$2,$1,$1,$FE
-tone_ED: DC.B $3,$2,$FE
-tone_EE: DC.B $7,$4,$4,$4,$2,$2,$FF
-tone_EF: DC.B $1,$0,$0,$0,$1,$0,$E,$F,$F,$E,$C,$8,$0,$FE
-tone_F0: DC.B $0,$2,$2,$2,$2,$3,$0,$E,$D,$C,$FE
-tone_F1: DC.B $3,$0,$E,$0,$D,$B,$9,$7,$5,$3,$1,$0,$FE
-tone_F2: DC.B $2,$E,$0,$0,$2,$2,$0,$1,$10,$FE
-tone_F3: DC.B $C,$4,$0,$0,$C,$D,$FE
-tone_F4: DC.B $2,$3,$3,$0,$0,$C,$D,$FE
-tone_F5: DC.B $1,$0,$0,$0,$2,$0,$F,$F,$E,$D,$C,$C,$0,$FE
-tone_F6: DC.B $6,$0,$0,$0,$0,$FE
-tone_F7: DC.B $19,$14,$F,$A,$5,$0,$FE
-tone_F8: DC.B $0,$1,$0,$7,$C,$FE
-tone_F9: DC.B $0,$0,$18,$C,$0,$FE
-tone_FA: DC.B $14,$A,$0,$FE
-tone_FB: DC.B $3,$4,$FE
-tone_FC: DC.B $8,$5,$5,$5,$5,$5,$5,$4,$4,$4,$3,$3,$2,$2,$1,$FE
-tone_FD: DC.B $8,$7,$FE
-tone_FE: DC.B $5,$4,$3,$2,$1,$2,$3,$4,$5,$6,$7,$8,$9,$A,$FE
-tone_FF: DC.B $8,$A,$FE
-tone_00: DC.B $9,$8,$8,$8,$8,$8,$8,$8,$7,$7,$7,$6,$6,$5,$FE
-tone_01: DC.B $9,$6,$FE
-tone_02: DC.B $A,$B,$C,$D,$E,$F,$FE
-tone_03: DC.B $B,$C,$D,$E,$F,$FE
-tone_04: DC.B $1,$B,$1,$C,$1,$D,$FE
-tone_05: DC.B $28,$4,$28,$4,$28,$4,$28,$FE
-tone_06: DC.B $1,$2,$3,$4,$5,$6,$7,$8,$9,$A,$9,$8,$7,$6,$5,$4,$3,$2,$1,$FE
-tone_07: DC.B $9,$8,$7,$6,$5,$4,$3,$2,$1,$2,$3,$4,$5,$6,$7,$8,$9,$FE
-tone_08: DC.B $A,$0,$9,$0,$8,$0,$7,$0,$6,$0,$5,$0,$4,$0,$3,$0,$2,$0,$1,$0,$FE
-tone_09: DC.B $14,$12,$10,$E,$C,$A,$8,$7,$6,$5,$4,$3,$2,$1,$FE
-tone_0A: DC.B $20,$1,$10,$2,$FE
-tone_0B: DC.B $A,$14,$0,$14,$A,$FE
-tone_0C: DC.B $A,$5,$FE
+tone_EB: dc.b $1,$2,$FE
+tone_EC: dc.b $3,$2,$2,$2,$1,$1,$FE
+tone_ED: dc.b $3,$2,$FE
+tone_EE: dc.b $7,$4,$4,$4,$2,$2,$FF
+tone_EF: dc.b $1,$0,$0,$0,$1,$0,$E,$F,$F,$E,$C,$8,$0,$FE
+tone_F0: dc.b $0,$2,$2,$2,$2,$3,$0,$E,$D,$C,$FE
+tone_F1: dc.b $3,$0,$E,$0,$D,$B,$9,$7,$5,$3,$1,$0,$FE
+tone_F2: dc.b $2,$E,$0,$0,$2,$2,$0,$1,$10,$FE
+tone_F3: dc.b $C,$4,$0,$0,$C,$D,$FE
+tone_F4: dc.b $2,$3,$3,$0,$0,$C,$D,$FE
+tone_F5: dc.b $1,$0,$0,$0,$2,$0,$F,$F,$E,$D,$C,$C,$0,$FE
+tone_F6: dc.b $6,$0,$0,$0,$0,$FE
+tone_F7: dc.b $19,$14,$F,$A,$5,$0,$FE
+tone_F8: dc.b $0,$1,$0,$7,$C,$FE
+tone_F9: dc.b $0,$0,$18,$C,$0,$FE
+tone_FA: dc.b $14,$A,$0,$FE
+tone_FB: dc.b $3,$4,$FE
+tone_FC: dc.b $8,$5,$5,$5,$5,$5,$5,$4,$4,$4,$3,$3,$2,$2,$1,$FE
+tone_FD: dc.b $8,$7,$FE
+tone_FE: dc.b $5,$4,$3,$2,$1,$2,$3,$4,$5,$6,$7,$8,$9,$A,$FE
+tone_FF: dc.b $8,$A,$FE
+tone_00: dc.b $9,$8,$8,$8,$8,$8,$8,$8,$7,$7,$7,$6,$6,$5,$FE
+tone_01: dc.b $9,$6,$FE
+tone_02: dc.b $A,$B,$C,$D,$E,$F,$FE
+tone_03: dc.b $B,$C,$D,$E,$F,$FE
+tone_04: dc.b $1,$B,$1,$C,$1,$D,$FE
+tone_05: dc.b $28,$4,$28,$4,$28,$4,$28,$FE
+tone_06: dc.b $1,$2,$3,$4,$5,$6,$7,$8,$9,$A,$9,$8,$7,$6,$5,$4,$3,$2,$1,$FE
+tone_07: dc.b $9,$8,$7,$6,$5,$4,$3,$2,$1,$2,$3,$4,$5,$6,$7,$8,$9,$FE
+tone_08: dc.b $A,$0,$9,$0,$8,$0,$7,$0,$6,$0,$5,$0,$4,$0,$3,$0,$2,$0,$1,$0,$FE
+tone_09: dc.b $14,$12,$10,$E,$C,$A,$8,$7,$6,$5,$4,$3,$2,$1,$FE
+tone_0A: dc.b $20,$1,$10,$2,$FE
+tone_0B: dc.b $A,$14,$0,$14,$A,$FE
+tone_0C: dc.b $A,$5,$FE
 
 	;; Wave sequences
 
-wave_0D: DC.B $1,$1,$1,$FF
-wave_0E: DC.B $1,$1,$FF
-wave_0F: DC.B $1,$FF
-wave_10: DC.B $1,$1,$1,$1,$FE
-wave_11: DC.B $A,$B,$C,$D,$E,$F,$FE
-wave_12: DC.B $1,$1,$1,$1,$1,$FE
-wave_13: DC.B $1,$1,$1,$1,$1,$1,$FE
-wave_14: DC.B $28,$28,$28,$28,$28,$28,$28,$FE
-wave_15: DC.B $1,$1,$1,$1,$1,$1,$1,$1,$FE
-wave_16: DC.B $1,$2,$1,$2,$1,$2,$1,$2,$FE
-wave_17: DC.B $2,$1,$2,$1,$2,$1,$2,$1,$FE
-wave_18: DC.B $1,$3,$1,$3,$1,$3,$1,$3,$FE
-wave_19: DC.B $3,$1,$3,$1,$3,$1,$3,$1,$FE
-wave_1A: DC.B $1,$4,$1,$4,$1,$4,$1,$4,$FE
-wave_1B: DC.B $1,$1,$4,$1,$4,$1,$4,$1,$FE
+wave_0D: dc.b $1,$1,$1,$FF
+wave_0E: dc.b $1,$1,$FF
+wave_0F: dc.b $1,$FF
+wave_10: dc.b $1,$1,$1,$1,$FE
+wave_11: dc.b $A,$B,$C,$D,$E,$F,$FE
+wave_12: dc.b $1,$1,$1,$1,$1,$FE
+wave_13: dc.b $1,$1,$1,$1,$1,$1,$FE
+wave_14: dc.b $28,$28,$28,$28,$28,$28,$28,$FE
+wave_15: dc.b $1,$1,$1,$1,$1,$1,$1,$1,$FE
+wave_16: dc.b $1,$2,$1,$2,$1,$2,$1,$2,$FE
+wave_17: dc.b $2,$1,$2,$1,$2,$1,$2,$1,$FE
+wave_18: dc.b $1,$3,$1,$3,$1,$3,$1,$3,$FE
+wave_19: dc.b $3,$1,$3,$1,$3,$1,$3,$1,$FE
+wave_1A: dc.b $1,$4,$1,$4,$1,$4,$1,$4,$FE
+wave_1B: dc.b $1,$1,$4,$1,$4,$1,$4,$1,$FE
 
 ;;; $$$ ben: FIXME: this data should not be access but it is somehow
-	DC.B $1,$1,$4,$1,$4,$1,$4,$1,$FE
-	;; DC.B $1,$1,$4,$1,$4,$1,$4,$1,$FE
-	;; DC.B $1,$1,$4,$1,$4,$1,$4,$1,$FE
+	dc.b $1,$1,$4,$1,$4,$1,$4,$1,$FE
+	;; dc.b $1,$1,$4,$1,$4,$1,$4,$1,$FE
+	;; dc.b $1,$1,$4,$1,$4,$1,$4,$1,$FE
 
-	;; 60 values (5 octaves?)
+	;; 60 values (5 octaves ?) + 1 
 trem_table:
-	DC.W $0000,$01ac,$0354,$04f2,$0682,$0800,$0968,$0ab5
-	DC.W $0be4,$0cf2,$0ddb,$0e9e,$0f38,$0fa6,$0fea,$1000
-	DC.W $0fea,$0fa6,$0f38,$0e9e,$0ddb,$0cf2,$0be4,$0ab5
-	DC.W $0968,$0800,$0682,$04f2,$0354,$01ac,$0000,$fe54
-	DC.W $fcac,$fb0e,$f97e,$f800,$f698,$f54b,$f41c,$f30e
-	DC.W $f225,$f162,$f0c8,$f05a,$f016,$f000,$f016,$f05a
-	DC.W $f0c8,$f162,$f225,$f30e,$f41c,$f54b,$f698,$f800
-	DC.W $f97e,$fb0e,$fcac,$fe54
-
-	;; ben: these 2 bytes are not part of the volume table.
-	;;
-	;; DC.B $FF,$00
+	dc.w $0000,$01ac,$0354,$04f2,$0682,$0800,$0968,$0ab5
+	dc.w $0be4,$0cf2,$0ddb,$0e9e,$0f38,$0fa6,$0fea,$1000
+	dc.w $0fea,$0fa6,$0f38,$0e9e,$0ddb,$0cf2,$0be4,$0ab5
+	dc.w $0968,$0800,$0682,$04f2,$0354,$01ac,$0000,$fe54
+	dc.w $fcac,$fb0e,$f97e,$f800,$f698,$f54b,$f41c,$f30e
+	dc.w $f225,$f162,$f0c8,$f05a,$f016,$f000,$f016,$f05a
+	dc.w $f0c8,$f162,$f225,$f30e,$f41c,$f54b,$f698,$f800
+	dc.w $f97e,$fb0e,$fcac,$fe54
+	;; Outside the logical range of this table, keep it for safety
+	dc.w $ff00		
 
 YmPeriods:
-	DC.W $0FD1,$0EEE,$0E17,$0D4D,$0CBE,$0BD9,$0B2F,$0A8E
-	DC.W $09F7,$0967,$08E0,$0861,$07E8,$0777,$070C,$06A7
-	DC.W $0647,$05ED,$0598,$0547,$04FC,$04B4,$0470,$0431
-	DC.W $03F4,$03BB,$0385,$0353,$0323,$02F6,$02CB,$02A3
-	DC.W $027D,$0259,$0238,$0218,$01FA,$01DD,$01C2,$01A9
-	DC.W $0191,$017B,$0165,$0151,$013E,$012C,$011C,$010C
-	DC.W $00FD,$00EE,$00E1,$00D4,$00C8,$00BD,$00B2,$00A8
-	DC.W $009F,$0096,$008E,$0086,$007E,$0077,$0070,$006A
-	DC.W $0064,$005E,$0059,$0054,$004F,$004B,$0047,$0043
-	DC.W $003F,$003B,$0038,$0035,$0032,$002F,$002C,$003B
-	DC.W $0027,$0025,$0023,$0021,$001F,$001D,$001C,$001A
-	DC.W $0019,$0017,$0016,$0015,$0013,$0012,$0011,$0010
-	DC.W $000F,$000E,$000D,$000C,$000B,$000A,$0009,$0008
-	DC.W $0007,$0006,$0005,$0004,$0003,$0002,$0001,$0000
-	DC.W $0000
+	dc.w $0FD1,$0EEE,$0E17,$0D4D,$0CBE,$0BD9,$0B2F,$0A8E
+	dc.w $09F7,$0967,$08E0,$0861,$07E8,$0777,$070C,$06A7
+	dc.w $0647,$05ED,$0598,$0547,$04FC,$04B4,$0470,$0431
+	dc.w $03F4,$03BB,$0385,$0353,$0323,$02F6,$02CB,$02A3
+	dc.w $027D,$0259,$0238,$0218,$01FA,$01DD,$01C2,$01A9
+	dc.w $0191,$017B,$0165,$0151,$013E,$012C,$011C,$010C
+	dc.w $00FD,$00EE,$00E1,$00D4,$00C8,$00BD,$00B2,$00A8
+	dc.w $009F,$0096,$008E,$0086,$007E,$0077,$0070,$006A
+	dc.w $0064,$005E,$0059,$0054,$004F,$004B,$0047,$0043
+	dc.w $003F,$003B,$0038,$0035,$0032,$002F,$002C,$003B
+	dc.w $0027,$0025,$0023,$0021,$001F,$001D,$001C,$001A
+	dc.w $0019,$0017,$0016,$0015,$0013,$0012,$0011,$0010
+	dc.w $000F,$000E,$000D,$000C,$000B,$000A,$0009,$0008
+	dc.w $0007,$0006,$0005,$0004,$0003,$0002,$0001,$0000
+	dc.w $0000
 
 ;;; ------------------------------------------------------------
 ;;; TIMERS
@@ -2344,7 +2336,7 @@ vcBuzzIdx:	rs.b	1	; 83
 vcTimerPtr:	rs.l	1	; 84 pointer to the timer struct
 vcTimerAD:	rs.l	1	; 88 new timer interrupt (0:unchanged)
 vcTimerReg:	rs.l	0	; 92 timer registers
-vcTimerCD	rs.w	0	; 92 timer control and data shadow registers
+vcTimerCD:	rs.w	0	; 92 timer control and data shadow registers
 vcTimerCR:	rs.b	1	; 92 /timer control register shadow
 vcTimerDR:	rs.b	1	; 93 \timer data register shadow
 vcTimerIN:	rs.w	0	; 94 timer interruption shadow registers
