@@ -2,7 +2,7 @@
 ;;; 
 ;;; by Benjamin Gerard <http://sourceforge.net/users/benjihan>
 ;;;
-;;; Time-stamp: <2014-11-12 03:01:27 ben>
+;;; Time-stamp: <2014-11-14 18:29:49 ben>
 ;;; 
 ;;; sidsound designer original routines by 
 ;;; synergy and animal mine. patched and updated
@@ -72,8 +72,8 @@ ok_SSD1:
 	add.l	a0,a1		; .tri address (tvs is a0)
 
 	;; Original SSD replay
-	;; a0 : voice (.tvs)
-	;; a1 : song  (.tri)
+	;; a0 : sound (.tvs)
+	;; a1 : music (.tri)
 driver:
 	incbin	"ssd.bin"
 	even

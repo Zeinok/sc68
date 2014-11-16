@@ -2,22 +2,20 @@
 ;;;
 ;;; Animal Mine SidSoundDesigner Replayer by MC
 ;;;
-;;; 1.00 Reassembled,fixed and new stuff added by .defjam./.checkpoint.
-;;; 1.01 Falcon-IDE-fix by FroST
-;;; 1.02 Pattern fix, Optimisation, comments by Ben/OVR
-;;; 1.03 Portamento fix, additional comments by Grazey/PHF
-;;; 1.04 Position Independant Code (PIC) AKA PC Relative (PCR)
+;;; 1.00 Reassembled,fixed and new stuff (.defjam./.checkpoint.)
+;;; 1.01 Falcon-IDE-fix (FroST)
+;;; 1.02 Pattern fix, Optimisation, comments (Ben/OVR)
+;;; 1.03 Portamento fix, additional comments (Grazey/PHF)
+;;; 1.04 Position Independant Code (PIC) / Remove SMC (Ben/OVR)
 ;;; 1.05 Structure reverse
-;;; 1.06 (in progress) runtime timer selection, ym shadow, and more
+;;; 1.06 RunTime Timer Selection, ym shadow, and more (Ben/OVR)
 ;;;
 ;;; Tabs to 8 (standard)
 
 VERSION = 106
 
-	opt	a+,p+		; Auto PCR, Check for PCR
+	opt	o+,a+,p+	; Optimize, Auto PCR, Check for PCR
 	near	a4		; Relocate a4 displacement
-
-	opt	o-		; Don't opimize the jump table
 
 ;;; ben: TODO: re-write the header to match the standard one, remove the
 ;;;	 function we really don't care about. Keep it simple !
@@ -27,23 +25,20 @@ music:	bra.w	init_player	; +0 a0:tvs a1:tri d0:'ABDC'
 	bra.w	play_player	; +4
 	bra.w	exit_player	; +8
 
-	opt	o+
-
 lall:	dc.b	"Sid Sound Designer by MC of Animal Mine 93-95 / "
 	dc.b	"V1.06 (PIC/RTTS)"
 	dc.b	0
-	dc.b	"V1.06 Run-Time Timer Selection, more fix (Ben/OVR)",0
-	dc.b	"V1.05 Clean source, reverse struct and debug (Ben/OVR)",0
-	dc.b	"V1.04 PIC and remove all SMC (Ben/OVR)",0
-	dc.b	"V1.03 Portamento fix (Grazey/PHF)",0
-	dc.b	"V1.02 Pattern Break fix (Ben/OVR)",0
 	dc.b	"V1.01 Falcon fix (FroST)",0
-	dc.b	"V1.00 Various fix (.defjam./.checkpoint.)",0
-	
-	dc.b    "Ben's latest source available at "
+	dc.b	"V1.02 Pattern Break fix (Ben/OVR)",0
+	dc.b	"V1.03 Portamento fix (Grazey/PHF)",0
+	dc.b	"V1.04 PIC and remove all SMC (Ben/OVR)",0
+	dc.b	"V1.05 Clean source, reverse struct and debug (Ben/OVR)",0
+	dc.b	"V1.06 Run-Time Timer Selection, more fix (Ben/OVR)",0
+
+	dc.b	"Ben's latest source available at "
 	dc.b	"<http://sourceforge.net/p/sc68/code/HEAD/tree/"
 	dc.b	"file68/data68/Players/ssd/>",0
-	
+
 	even
 
 play_player:
@@ -258,7 +253,7 @@ mfp_commit:
 	and.b	d1,d0		     ; $X0 or $0X
 	not.b	d1		     ; $0F or $F0
 	and.b	(a2),d1		     ; $0Y or $Y0
-	or	d1,d0		     ; $XY or $YX
+	or.b	d1,d0		     ; $XY or $YX
 	move.b	vcTimerDR(a0),(a3)   ; -> TDR
 	move.b	d0,(a2)		     ; -> TCR
 .noProg:
@@ -310,7 +305,7 @@ ym_mute:
 	move.l	d4,(a5)+	; 0 1 2 3
 	move.l	d4,(a5)+	; 4 5 6 7
 	clr.w	(a5)+		; 8 9
-	move.l	#$00FFFF00,(a5)	; A B C D
+	move.l	#$00FFFF00,(a5) ; A B C D
 	moveq	#0,d4		; restore d4 to 0
 	;; ... to be continued on ym_commit
 
@@ -408,8 +403,8 @@ replay_music:
 	adda.w	d0,a1
 	move.l	a1,PatPtr(a4)
 	tst.b	PatBreakFlag(a4)
-	bpl.s	.noBreak
-	sf	PatBreakFlag(a4)
+	beq.s	.noBreak
+	sf.b	PatBreakFlag(a4)
 	bra.s	.stepSong
 .noBreak:
 	addq.w	#1,PatPos(a4)
@@ -542,10 +537,6 @@ nix_dual_b:
 	lsl.l	#2,d0
 	swap	D0
 
-	;; move.b  vcVol(a0),Voiceta1+4.w
-	;; move.b  d0,$FFFFFA1F.w
-	;; move.b  d3,$FFFFFA19.w
-	;; bset	   #5,$FFFFFA07.w
 	move.l	vcTimerPtr(a0),a5
 	move.b	vcVol(a0),tmVolH(a5)
 	move.b	d0,vcTimerDR(a0)
@@ -597,11 +588,6 @@ nix_dual_c:
 	lsl.l	#2,d0
 	swap	D0
 
-	;; move.b  vcVol(a0),td1+4.w
-	;; andi.b  #$F0,$FFFFFA1D.w
-	;; or.b	   d3,$FFFFFA1D.w
-	;; move.b  d0,$FFFFFA25.w
-	;; bset	   #4,$FFFFFA09.w
 	move.l	vcTimerPtr(a0),a5
 	move.b	vcVol(a0),tmVolH(a5)
 	move.b	d0,vcTimerDR(a0)
@@ -611,7 +597,6 @@ nix_dual_c:
 	bra.s	wow_c
 
 no_wow_c:
-	;; bclr	   #4,$FFFFFA09.w
 	sf.b	vcTimerIE(a0)
 
 	cmpi.b	#5,vcTFMX(a0)
@@ -621,7 +606,6 @@ no_wow_c:
 	bclr	#0,vcInsTyp(a0)
 
 wow_c:
-	;; move	   #$2300,SR
 	moveq	#$3F,d0		; d0: YM reg#7 Pulse/Noise OFF
 
 	lea	VoiceC(pc),a0	; a0: voice struct
@@ -649,11 +633,6 @@ SetMixer:
 	or.w	#%1<<$7,ymBits(a4)
 	move.b	d0,ymReg7(a4)
 
-	;; move.w  #$0700,d7
-	;; move.b  d0,d7
-	;; movep.w d7,0(a5)
-
-
 SetVoiceA:
 	lea	VoiceA(pc),a0
 	btst	#1,vcHwBuzz(a0)
@@ -664,15 +643,6 @@ SetVoiceA:
 	move.w	vcTonPer(a0),d0
 	move.b	d0,ymReg0(a4)
 	move.b	vcTonPerH(a0),ymReg1(a4)
-
-	;; move.w  vcTonPer(a0),d0
-	;; move.b  vcTonPerH(a0),d1
-	;; moveq   #0,d7
-	;; move.b  d0,d7
-	;; movep.w d7,0(a5)
-	;; move.w  #$0100,d7
-	;; move.b  d1,d7
-	;; movep.w d7,0(a5)
 
 	tst.b	vcHwBuzz(a0)
 	bne.s	no_hardw_auto_a
@@ -689,12 +659,6 @@ SetVoiceA:
 	move.b	d0,ymRegB(a4)
 	move.b	d4,ymRegC(a4)
 
-	;; move.w  #$0B00,d7
-	;; move.b  d0,d7
-	;; movep.w d7,0(a5)
-	;; move.w  #$0C00,d7
-	;; movep.w d7,0(a5)
-
 no_hardw_auto_a:
 	tst.b	vcSidOnOff(a0)
 	bpl.s	okay_a
@@ -709,10 +673,6 @@ okay_a:
 	or.w	#%1<<$8,ymBits(a4)
 	move.b	vcVol(a0),ymReg8(a4)
 
-	;; move.w  #$0800,d7
-	;; move.b  vcVol(a0),d7
-	;; movep.w d7,0(a5)
-
 SetVoiceB:
 	lea	VoiceB(pc),a0
 
@@ -721,15 +681,6 @@ SetVoiceB:
 	move.w	vcTonPer(a0),d0
 	move.b	d0,ymReg2(a4)
 	move.b	vcTonPerH(a0),ymReg3(a4)
-
-	;; move.w  vcTonPer(a0),d0
-	;; move.b  vcTonPerH(a0),d1
-	;; move.w  #$0200,d7
-	;; move.b  d0,d7
-	;; movep.w d7,0(a5)
-	;; move.w  #$0300,d7
-	;; move.b  d1,d7
-	;; movep.w d7,0(a5)
 
 	tst.b	vcHwBuzz(a0)
 	bne.s	no_hardw_auto_b
@@ -746,12 +697,6 @@ SetVoiceB:
 	move.b	d0,ymRegB(a4)
 	move.b	d4,ymRegC(a4)
 
-	;; move.w  #$0B00,d7
-	;; move.b  d0,d7
-	;; movep.w d7,0(a5)
-	;; move.w  #$0C00,d7
-	;; movep.w d7,0(a5)
-
 no_hardw_auto_b:
 	tst.b	vcSidOnOff(a0)
 	bpl.s	okay_b
@@ -766,10 +711,6 @@ okay_b:
 	or.w	#%1<<$9,ymBits(a4)
 	move.b	vcVol(a0),ymReg9(a4)
 
-	;; move.w  #$0900,d7
-	;; move.b  vcVol(a0),d7
-	;; movep.w d7,0(a5)
-
 
 SetVoiceC:
 	lea	VoiceC(pc),a0
@@ -779,16 +720,6 @@ SetVoiceC:
 	move.w	vcTonPer(a0),d0
 	move.b	d0,ymReg4(a4)
 	move.b	vcTonPerH(a0),ymReg5(a4)
-
-	;; move.w  vcTonPer(a0),d0
-	;; move.b  vcTonPerH(a0),d1
-	;; move.w  #$0400,d7
-	;; move.b  d0,d7
-	;; movep.w d7,0(a5)
-	;; move.w  #$0500,d7
-	;; move.b  d1,d7
-	;; movep.w d7,0(a5)
-
 
 	tst.b	vcHwBuzz(a0)
 	bne.s	no_hardw_auto_c
@@ -805,12 +736,6 @@ SetVoiceC:
 	move.b	d0,ymRegB(a4)
 	move.b	d4,ymRegC(a4)
 
-	;; move.w  #$0B00,d7
-	;; move.b  d0,d7
-	;; movep.w d7,0(a5)
-	;; move.w  #$0C00,d7
-	;; movep.w d7,0(a5)
-
 no_hardw_auto_c:
 	tst.b	vcSidOnOff(a0)
 	bpl.s	okay_c
@@ -824,19 +749,13 @@ okay_c:
 	or.w	#%1<<$A,ymBits(a4)
 	move.b	vcVol(a0),ymRegA(a4)
 
-	;; move.w  #$0A00,d7
-	;; move.b  vcVol(a0),d7
-	;; movep.w d7,0(a5)
-
 no_c:
 	rts
 
 ;;;
-
-; IN	a0	Voice struct
-;	a1	Pattern Ptr
-;
-
+;;; IN	a0	Voice struct
+;;;	a1	Pattern Ptr
+;;;
 getnote:
 	tst.b	(a1)
 	beq	test_env
@@ -1008,7 +927,6 @@ he_adsr:
 	beq.s	sustain_he
 	cmpi.b	#3,d1
 	beq	release_he
-	;; move	   #$2700,SR
 	btst	#3,vcInsTyp(a0)
 	bne.s	attack_hardw_aut
 
@@ -1016,48 +934,34 @@ he_adsr:
 	move.b	vcEnvPerL(a0),ymRegB(a4)
 	move.b	vcEnvPerH(a0),ymRegC(a4)
 
-	;; move.b  d7,(a5)	   ; Set YM envelop period
-	;; move.b  vcEnvPerL(a0),2(a5)
-	;; move.b  d6,(a5)
-	;; move.b  vcEnvPerH(a0),2(a5)
-
 attack_hardw_aut:
-	;; move.b  d5,(a5)	   ; Select YM envelop shape
 	btst	#0,vcBuzCtl(a0)
 	bne.s	yes_hardw_type
-
 	move.b	ymRegD(a4),d0	; get last programmed envelop shape
-	;; move.b  (a5),d0	   ; Get hardware envelop shape
-
 	cmp.b	vcBuzCtl(a0),d0 ; Same ?
 	beq.s	no_hardw_type
-yes_hardw_type:
 
+yes_hardw_type:
 	or.w	#%1<<$D,ymBits(a4)
 	move.b	vcBuzCtl(a0),ymRegD(a4)
-	;; move.b  vcBuzCtl(a0),2(a5)	   ; Set new YM envelop shape
 
 no_hardw_type:
 	move.w	d4,vcTremIdx(a0)
 	move.w	d4,vcPitchIdx(a0)
 	st	vcPitchFlag(a0)
-	bclr	#0,vcHwBuzz(a0)
-	bclr	#1,vcHwBuzz(a0)
+	bclr #0,vcHwBuzz(a0)
+	bclr #1,vcHwBuzz(a0)
 	beq.s	same_he
 
-	;; ben: Why only 2 voices ?
-	;; bclr	   #5,$FFFFFA07.w
-	;; bclr	   #0,$FFFFFA07.w
+	;; $$$ ben: Why only those 2 voices ?
 	sf.b	vcTimerIE+VoiceB(a4)
 	sf.b	vcTimerIE+VoiceA(a4)
 
 same_he:
-	;; move	   #$2300,SR
 cont_he:
 	rts
 
 sustain_he:
-	;; move	   #$2700,SR
 	btst	#3,vcInsTyp(a0)
 	bne.s	sustain_hardw_au
 
@@ -1065,40 +969,31 @@ sustain_he:
 	move.b	vcEnvPerL(a0),ymRegB(a4)
 	move.b	vcEnvPerH(a0),ymRegC(a4)
 
-	;; move.b  d7,(a5)
-	;; move.b  vcEnvPerL(a0),2(a5)
-	;; move.b  d6,(a5)
-	;; move.b  vcEnvPerH(a0),2(a5)
-
 
 sustain_hardw_au:
-	;; move.b  d5,(a5)
 	btst	#0,vcBuzCtl(a0)
 	bne.s	yes_sus_htype
 	move.b	ymRegD(a4),d0
-	;; move.b  (a5),d0
 	cmp.b	vcBuzCtl(a0),d0
 	beq.s	no_sus_htype
+
 yes_sus_htype:
 	or.w	#%1<<$D,ymBits(a4)
 	move.b	vcBuzCtl(a0),ymRegD(a4)
-	;; move.b  vcBuzCtl(a0),2(a5)
+
 no_sus_htype:
 	move.w	d4,vcTremIdx(a0)
 	move.w	vcPitchSus(a0),vcPitchIdx(a0)
 	st	vcPitchFlag(a0)
-	bclr	#0,vcHwBuzz(a0)
-	bclr	#1,vcHwBuzz(a0)
+	bclr #0,vcHwBuzz(a0)
+	bclr #1,vcHwBuzz(a0)
 	beq.s	same_sus_he
 
-	;; ben: Why only 2 voices ?
-	;; bclr	   #5,$FFFFFA07.w
-	;; bclr	   #0,$FFFFFA07.w
+	;; $$$ ben: Why only 2 voices ?
 	sf.b	vcTimerIE+VoiceA(a4)
 	sf.b	vcTimerIE+VoiceB(a4)
 
 same_sus_he:
-	;; move	   #$2300,SR
 	rts
 
 release_he:
@@ -1107,36 +1002,38 @@ release_he:
 
 digi_:
 	btst	#2,vcHwBuzz(a0)
-	bne.s	oka
+	bne.s	.no_setspd
 	cmpi.b	#$0E,2(a1)
-	bne.s	test_2
-	move.w	#$FFFF,PatBreakFlag(a4)
-	bra.s	oka
+	bne.s	.no_patbrk
+	st.b	PatBreakFlag(a4)
+	bra.s	.no_setspd
 
-test_2: cmpi.b	#$0F,2(a1)
-	bne.s	oka
-	move.w	#$FFFF,what(a4)
-oka:	move.b	2(a1),d0
+.no_patbrk:
+	cmpi.b	#$0F,2(a1)
+	bne.s	.no_setspd
+	st.b	SetSpeedFlag(a4)
+.no_setspd:
+	move.b	2(a1),d0
 	andi.w	#$000F,d0
 	asl.w	#2,d0
-	tst.w	what(a4)
-	bmi.s	only_speed
+	tst.b	SetSpeedFlag(a4)
+	bne.s	only_speed
 	moveq	#0,d0
 	move.b	3(a1),d0
 	ext.w	D0
 	add.w	d0,d0
 	add.w	d0,d0
 	jsr	FxJmpTbl(PC,d0.w)
-L0040:	addq.l	#4,a1
+	addq.l	#4,a1
 	rts
 
 only_speed:
 	move.b	3(a1),d0
 	ext.w	D0
-	move.l	SpeedPtr(pc),a6
-	move.w	d0,(a6)		; Grazey Portamento Fix
+	move.l	SpeedPtr(pc),a5
+	move.w	d0,(a5)		; Grazey Portamento Fix
 	addq.l	#4,a1
-	move.w	d4,what(a4)
+	sf.b	SetSpeedFlag(a4)
 	rts
 
 FxJmpTbl:
@@ -1251,12 +1148,9 @@ SetMixerAndNoise:
 	tst.b	vcXtNoiFlag(a0)
 	bne.s	.noNoiseCtl
 
+	;; Default noise period
 	or.w	#%1<<$6,ymBits(a4)
 	move.b	vcNoisePerL(a0),ymReg6(a4)
-
-	;; move.w  #$0600,d5
-	;; move.b  vcNoisePerL(a0),d5
-	;; movep.w d5,0(a5)
 	bra.s	.noiseON
 
 .noNoiseCtl:
@@ -1272,14 +1166,11 @@ SetMixerAndNoise:
 .okSequence:
 	move.l	a6,vcXtNoiPtr(a0)
 
+	;; Sequenced noise period
 	or.w	#%1<<$6,ymBits(a4)
 	move.b	d1,ymReg6(a4)
 
-	;; move.w  #$0600,d5
-	;; move.b  d1,d5
-	;; movep.w d5,0(a5)
-
-	tst.b	vcXtSets(a0)
+	tst.b	vcXtTonSet(a0)
 	beq.s	.exit
 .noiseON:
 	bclr	d7,d0
@@ -1309,15 +1200,10 @@ double:
 	add.b	vcBuzzIdx(a0),d0
 	andi.w	#$003F,d0
 
+	;; Set envelop period
 	or.w	#%11<<$B,ymBits(a4)
 	move.b	buzzPeriods(pc,d0.w),ymRegB(a4)
 	move.b	d4,ymRegC(a4)
-
-	;; lea	   $ffff8800.w,a6
-	;; move.b  #$0B,(a6)
-	;; move.b  buzzPeriods(pc,d0.w),2(a6)
-	;; move.b  #$0C,(a6)
-	;; move.b  d4,2(a6)
 
 	addq.b	#1,vcBuzzIdx(a0)
 	cmpi.b	#$3F,vcBuzzIdx(a0)
@@ -1642,19 +1528,16 @@ arp_spec:
 SIDfx:	macro
 
 toggle_dephase_SID_\1:
-	;; illegal
 	not.b	vcSidDephase+Voice\1(a4)
 	rts
 
 enable_SID_\1:
-	;; illegal
 	move.l	vcTimerPtr+Voice\1(pc),a6
 	move.l	tmIrqL(a6),vcTimerAD+Voice\1(a4)
 	st.b	vcSidOnOff+Voice\1(a4)
 	rts
 
 disable_SID_\1:
-	;; illegal
 	move.l	vcTimerPtr+Voice\1(pc),a6
 	pea	void_irq(pc)
 	move.l	(a7)+,vcTimerAD+Voice\1(a4)
@@ -1687,7 +1570,6 @@ fx_none:
 reset_all:
 	pea	wave_form1(pc)
 	move.l	(a7)+,WavFormPtr(a4)
-	;; move.w  merk_speed(pc),offset(a4)
 	st.b	vcSidDephase+VoiceA(a4)
 	st.b	vcSidDephase+VoiceB(a4)
 	st.b	vcSidDephase+VoiceC(a4)
@@ -1695,8 +1577,6 @@ reset_all:
 	st.b	vcSidOnOff+VoiceB(a4)
 	st.b	vcSidOnOff+VoiceC(a4)
 	rts
-
-;; i_flag: DC.W 0
 
 ;;; Perform runtime checks (only if RTCHECK is defined)
 runtime_check:
@@ -1715,6 +1595,7 @@ RTCHK:	macro
 	RTCHK	w,sndSize,256
 	RTCHK	w,tvsInfo,16900
 	RTCHK	w,patSize,768
+	RTCHK	w,tvsSounds,516
 	rts
 
 
@@ -1729,7 +1610,7 @@ clear_bss:
 	movem.l (a7)+,d0-d1/a0
 	rts
 
-;;;
+;;; Init the music player
 ;;;
 ;;; IN:	 D0  Select which timer the replay will use for which voice.
 ;;;	     To be valid it must be a combination of the upper case letter
@@ -1742,7 +1623,9 @@ clear_bss:
 ;;;	 A1  Pointer to the .TRI buffer
 ;;;
 ;;; USE: A4  Pointer to music for PIC access
-
+;;;
+;;; OUT: Z   0 on error, 1 on success
+;;;
 init_player:
 	movem.l d0-a6,-(a7)
 
@@ -1753,41 +1636,44 @@ init_player:
 	;; Clear "BSS" data
 	bsr	clear_bss
 
+	lea	music(pc),a4	     ; PIC data access
+
+	;; Check for valid parameters
+	cmp.l	#'TSSS',tvsMagic(a0) ; Valid .tvs file ?
+	bne	.exit
+	cmp.l	#'TSST',triMagic(a1) ; Valid .tri file ?
+	bne	.exit
+
 	;; Store paramters
-	lea	music(pc),a4	    ; PIC data access
-	move.l	a0,VoiceSetPtr(a4)  ; Voice-Set
-	move.l	a1,SoundDataPtr(a4) ; Sound-Data
-	move.l	d0,timer_map(a4)    ; Timer to use
+	move.l	a0,TvsFilePtr(a4) ; Voice-Set
+	move.l	a1,TriFilePtr(a4) ; Sound-Data
+	move.l	d0,timer_map(a4)  ; Timer selection
 
-	;; setup the timer structure
-	bsr	timers_init
-
-	;; save/init mfp
-	bsr	mfp_init
-
-
-	moveq	#0,d0		;3 SID-voices
-	move.w	d0,merk_d1(a4)
-
-	movea.l VoiceSetPtr(pc),a0
-	lea	516(a0),a0	; $$$ TODO symbolic
-	move.l	a0,InstBasePtr(a4)
-
-	movea.l SoundDataPtr(pc),a0 ; +0
-	addq.l	#4,a0		    ; +4
-	move.w	(a0),merk_speed(a4)
-
+	;; Reset a bunch of variable to their original state
 	bsr	reset_all
 
+	;; Setup the timer structure
+	bsr	timers_init
+
+	;; Save/Init MFP
+	bsr	mfp_init
+
+	;; Set a bunch of pointers
+	movea.l TvsFilePtr(pc),a0
+	lea	tvsSounds(a0),a0
+	move.l	a0,InstBasePtr(a4)
+
+	movea.l TriFilePtr(pc),a0
+	addq.l	#4,a0
 	move.l	a0,ReNoteCntPtr(a4)
 	move.l	a0,SpeedPtr(a4)
-	addq.l	#2,a0		; +6
+	addq.l	#2,a0
 	move.l	a0,SongRePtr(a4)
-	addq.l	#2,a0		; +8
+	addq.l	#2,a0
 	move.w	(a0),SongLen(a4)
-	addq.l	#2,a0		; +10
-	move.l	a0,SMC9E(a4)
-	addq.l	#2,a0		; +12
+	addq.l	#2,a0
+	;; move.l	a0,SMC9E(a4)	; unused ?
+	addq.l	#2,a0
 	move.l	a0,SongBasePtr(a4)
 	lea	120(a0),a0
 	move.l	a0,PattBasePtr(a4)
@@ -1799,7 +1685,7 @@ init_player:
 ;;;	 file provided one or the default one. It should be safe as it
 ;;;	 looks like it's read-only data.
 	lea	DefaultInfo(pc),a1
-	movea.l VoiceSetPtr(pc),a0
+	movea.l TvsFilePtr(pc),a0
 	lea	tvsInfo(a0),a0
 	cmpi.l	#"INFO",(a0)+
 	bne.s	.keepDefInfo
@@ -1807,28 +1693,19 @@ init_player:
 .keepDefInfo:
 	move.l	a1,CurInfo(a4)
 
-
-	bsr	L009C
-
 	bsr	player_reset
 	bsr	mfp_reset
 	bsr	ym_mute
 
-	;; move.w	#$2300,sr
 	st.b	ReplayFlag(a4)
+.exit:
+	tst.b	ReplayFlag(a4)	; notify error to caller in SR#ZN
 	movem.l (a7)+,d0-a6
-
 	rts
 
 
 player_reset:
 	lea	Voices(pc),a0
-
-	;; ben: again why only those 2 timers ?
-	;; bclr	   #5,$FFFFFA07.w  ;Timer A
-	;; bclr	   #4,$FFFFFA09.w  ;Timer D
-	;; clr.b	VoiceA+vcTimerIE(a4)
-	;; clr.b	VoiceC+vcTimerIE(a4)
 
 ;;; $$$ ben: Clearly this routine expects the Voice structure to be 82
 ;;;	bytes long (0+82=142 142+82=224).
@@ -1843,42 +1720,9 @@ player_reset:
 	;; st	   59(a0)
 	;; st	   141(a0)
 
-	;; ;; ben: replace the code commented just above
-	;; bset	   #0,60+0*vcSize(a0)
-	;; bset	   #0,60+1*vcSize(a0)
-	;; bset	   #0,60+2*vcSize(a0)
-	;; bclr	   #1,60+2*vcSize(a0) ; ben: why on this channel ?
-	;; st	   59+0*vcSize(a0)
-	;; st	   59+1*vcSize(a0)
-	;; st	   59+2*vcSize(a0)
-
-	;; ben: however this 59 thingy does not make sense...
-	bset	#0,60+0*vcSize(a0)
-	bset	#0,60+1*vcSize(a0)
-	bset	#0,60+2*vcSize(a0)
-	bclr	#1,60+2*vcSize(a0) ; ben: why on this channel ?
-	st	59+0*vcSize(a0)
-	st	59+1*vcSize(a0)
-	st	59+2*vcSize(a0)
-
-
-
-	rts
-
-
-
-L009C:	bsr.s	L009D
-	clr.w	PatPos(a4)
-
-	;; ben: ???
-	;; clr.b   ta1+4.w
-
-	bra	song_read
-
-L009D:
-	move.l	SMC9E(pc),a0
-	move.w	#1,(a0)
-
+	;; Unused ?
+	;; move.l	SMC9E(pc),a0
+	;; move.w	#1,(a0)
 
 	moveq	#$1F,d0		; $$$ ben: only 32 patterns ? I don't get it !
 	move.l	PattBasePtr(pc),a0
@@ -1886,7 +1730,7 @@ L009D:
 	lea	PatPtrTbl(pc),a1
 .lpPat:
 	move.l	a0,(a1)+
-	lea	patSize(a0),a0	; ben: FIXME make 768 symbolic (patSize)
+	lea	patSize(a0),a0
 	dbra	d0,.lpPat
 
 	move.w	#1,NoteCount(a4)
@@ -1904,28 +1748,35 @@ L009D:
 
 	lea	VoidSeq(pc),a1
 	lea	Voices(pc),a0
+
 	moveq	#3-1,d2		; For 3 channels
 .lpChannel:
-	clr.b	vcInsTyp(a0)
-	clr.b	vcPitchFlag(a0)
+	;; clr.b	vcInsTyp(a0)
+	;; clr.b	vcPitchFlag(a0)
+
+	move.b	#1,vcXtTonSet(a0) ; enable pulse ?
+	st	vcByte59(a0)	  ; ???
 
 	move.l	a1,vcAdsrPtr(a0)
-	move.w	#$0000,vcAdsrIdx(a0)
+	;; move.w	#$0000,vcAdsrIdx(a0)
 	move.w	#$0002,vcAdsrSus(a0)
 	move.w	#$0005,vcAdsrDec(a0)
 	move.w	#$0009,vcAdsrRel(a0)
 
 	move.l	a1,vcPitchPtr(a0)
-	move.w	#$0000,vcPitchIdx(a0)
+	;; move.w	#$0000,vcPitchIdx(a0)
 	move.w	#$0002,vcPitchSus(a0)
 	move.w	#$0005,vcPitchDec(a0)
 	move.w	#$0009,vcPitchRel(a0)
 
 	lea	vcSize(a0),a0
 	dbra	d2,.lpChannel
-	rts
 
-;;; a0:
+	;; clr.w	PatPos(a4)
+
+	;; Let's read the first position
+	bra	song_read
+
 	;; Step in the song
 song_step:
 	move.w	d4,PatPos(a4)		; reset pattern position
@@ -1953,9 +1804,12 @@ song_read:
 	move.l	0(a0,d0.w),CurPatPtr(a4)
 	rts
 
-;; VoiceA+vcSidDephase:	   DC.B $00,$01
-;; VoiceB+vcSidDephase:	   DC.B $00,$01
-;; VoiceC+vcSidDephase:	   DC.B $00,$01
+;;; $$$ ben: The 01 in the LSB of SidDephaseX void the toggle_dephase_SID
+;;;	function. I have to assume this was a mistake.
+
+;; SidDephaseA:	   DC.B $00,$01
+;; SidDephaseB:	   DC.B $00,$01
+;; SidDephaseC:	   DC.B $00,$01
 
 ;; SidOnOffA	   DC.B $FF,$FF
 ;; SidOnOffB:	   DC.B $FF,$FF
@@ -2303,7 +2157,7 @@ timers_init:
 	timerI	C
 	timerI	D
 
-	;; scan requested timers
+	;; Scan requested timers
 	moveq	#3,d7		; timer index
 	moveq	#0,d6
 .lp_test:
@@ -2514,45 +2368,40 @@ VoiceA:		ds.b	vcSize
 VoiceB:		ds.b	vcSize
 VoiceC:		ds.b	vcSize
 
-CurInfo:	dc.l	0	; Pointer to info block
-CurSongPos:	dc.w	0
-CurPatNum:	dc.w	0
+CurInfo:	ds.l	1	; Pointer to info block
+CurSongPos:	ds.w	1
+CurPatNum:	ds.w	1
 
 ;;; $$$ ben: changed this table to 128 entry insead of 120 as in the
 ;;;	code the index is from 0 to 127 (unless something prevents it).
 ;;;	It's a safe change anyway.
 ;;;
-PatPtrTbl:	ds.l	128	; Pointer to pattern data
-CurPatPtr:	dc.l	0
-PatPos:		dc.w	0
-PatPtr		dc.l	0
+PatPtrTbl:	ds.l	128	; Pointers to pattern data
+CurPatPtr:	ds.l	1
+PatPos:		ds.w	1
+PatPtr		ds.l	1
 VoidSeq:	ds.w	5
-NoteCount:	dc.w	0
+NoteCount:	ds.w	1
 
 
 ;;; ben: added to remove self modified code and make PCR
-ReNoteCntPtr:	dc.l	0
-WavFormPtr:	dc.l	0
-SpeedPtr:	dc.l	0
-PattBasePtr:	dc.l	0
-SMC9E:		dc.l	0
-RePatPtr:	dc.l	0
-ReCurPatPtr:	dc.l	0
-SongBasePtr:	dc.l	0
-SongRePtr:	dc.l	0
-InstBasePtr:	dc.l	0
-SoundDataPtr:	dc.l	0	; sound
-VoiceSetPtr:	dc.l	0	; vset
+ReNoteCntPtr:	ds.l	1
+WavFormPtr:	ds.l	1
+SpeedPtr:	ds.l	1
+PattBasePtr:	ds.l	1
+;; SMC9E:		ds.l	1	; unused ?
+RePatPtr:	ds.l	1
+ReCurPatPtr:	ds.l	1
+SongBasePtr:	ds.l	1
+SongRePtr:	ds.l	1
+InstBasePtr:	ds.l	1
+TriFilePtr:	ds.l	1	; .tri file buffer (music)
+TvsFilePtr:	ds.l	1	; .tvs file buffer (sound)
 
-SongLen:	dc.w	0	; Number of song position
-merk_d1:	dc.w	0
-	;; offset:	   DC.B $00,$00
-
-PatBreakFlag:	dc.w	0	; Pattern Break command
-what:		dc.w	0	; Speed change flag
-merk_speed:	dc.w	0	; Speed merken
-
-ReplayFlag:	dc.b	0	; 0:off
+SongLen:	ds.w	1	; Number of song position
+PatBreakFlag:	ds.b	1	; Pattern Break command
+SetSpeedFlag:	ds.b	1	; Speed change flag
+ReplayFlag:	ds.b	1	; 0:off
 
 ;;; ------------------------------------------------------------
 ;;; END OF PSEUDO BSS (memory buffer cleared by init code)
@@ -2581,9 +2430,10 @@ patSize:	rs.b	0	; 768
 triMagic:	rs.l	1	; 000 'TSST'
 triTempo:	rs.w	1	; 004 Tempo (speed)
 triSngRes:	rs.w	1	; 006 Song restart position
-triSngLen:	rs.w	1	; 008 Song lenght
-triSong:	rs.b	120	; 010 song data
-triPatterns:	rs.b	0	; 130 Pattern data
+triSngLen:	rs.w	1	; 008 Song length
+triSmc9E:	rs.w	1	; 010 ?? unused, set to 1 at init
+triSong:	rs.b	120	; 012 song data
+triPatterns:	rs.b	0	; 132 Pattern data
 
 	;; TODO
 
