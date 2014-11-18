@@ -20,7 +20,7 @@ FILES
  7.1/                    - Using baseclasses from this version of MS SDK
  |- include/             - baseclasses headers
  `- lib/                 - pre-compiled baseclasses libraries
-    |- strmbasd-mb.lib     - multibyte debug
-    |- strmbasd.lib        - normal debug
-    |- strmbase-mb.lib     - multibyte release
-    `- strmbase.lib        - normal release
+    |- strmbasd-mb.lib     - multibyte + MT/Debug RTL
+    |- strmbasd.lib        - widechar + MT/Debug RTL
+    |- strmbase-mb.lib     - multibyte + MT/Retail RTL
+    `- strmbase.lib        - widechar + MT/Retail RTL

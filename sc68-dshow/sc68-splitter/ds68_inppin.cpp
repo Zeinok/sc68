@@ -201,7 +201,7 @@ HRESULT Sc68InpPin::BreakConnect()
 }
 
 Sc68InpPin::Sc68InpPin(Sc68Splitter *pFilter, CCritSec *pLock, HRESULT *phr)
-  : CBasePin(_T("Sc68InpPin"), pFilter, pLock, phr, _T("Sc68"),PINDIR_INPUT)
+  : CBasePin(_T("Sc68InpPin"), pFilter, pLock, phr, L"Sc68",PINDIR_INPUT)
   , m_PullPin(this)
 {
   m_MediaTypes[0].SetType(&MEDIATYPE_Stream);

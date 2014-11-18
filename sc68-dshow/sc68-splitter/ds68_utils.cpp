@@ -32,7 +32,7 @@ wchar_t * GUIDtoW(GUID * id, wchar_t * tmp)
 {
   static wchar_t buf[64];
   if (!tmp) tmp = buf;
-  wsprintf(tmp,L"%08x-%04x-%04x-%02x%02x-%02x-%02x-%02x-%02x-%02x-%02x",
+  wsprintfW(tmp,L"%08x-%04x-%04x-%02x%02x-%02x-%02x-%02x-%02x-%02x-%02x",
            id->Data1,id->Data2,id->Data3,
            id->Data4[0],id->Data4[1],id->Data4[2],id->Data4[3],
            id->Data4[4],id->Data4[5],id->Data4[6],id->Data4[7]);

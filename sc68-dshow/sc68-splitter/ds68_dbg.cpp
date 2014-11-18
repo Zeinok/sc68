@@ -117,7 +117,7 @@ void dbg_error(int err, const wchar_t * fmt, ...)
     MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
     str, max, 0);
   if (i<=0)
-    i = wnsprintf(str,max,L"#%d",err);
+    i = wnsprintfW(str,max,L"#%d",err);
   else
     while (--i > 0 && isspace(str[i])) ;
 
@@ -125,7 +125,7 @@ void dbg_error(int err, const wchar_t * fmt, ...)
   if (fmt) {
     va_list list;
     va_start(list,fmt);
-    wvnsprintf(str,max,fmt,list);
+    wvnsprintfW(str,max,fmt,list);
     va_end(list);
     dbg("ERROR: %s", str);
   }
