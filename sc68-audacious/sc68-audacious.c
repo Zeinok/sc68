@@ -109,6 +109,7 @@ static inline void my_cond_signal()  { pthread_cond_signal(&ctrl_cond); }
 #include <sc68/sc68.h>
 #include <sc68/file68_tag.h>
 #include <sc68/file68_msg.h>
+#include <sc68/file68_str.h>
 
 
 static gboolean pause_flag;
@@ -212,7 +213,7 @@ const char * get_tag(const sc68_cinfo_t * const cinfo, const char * const key)
 {
   int i;
   for (i=0; i<cinfo->tags; ++i)
-    if (cinfo->tag[i].key && !stricmp(cinfo->tag[i].key, key))
+    if (cinfo->tag[i].key && !strcmp68(cinfo->tag[i].key, key))
       return cinfo->tag[i].val;
   return 0;
 }
@@ -238,7 +239,7 @@ static Tuple * tuple_from_track(const gchar * filename,
     if ( !sc68_music_info(sc68, &info, track, disk)) {
       const char * artist;
 
-      if (strcmp(info.album,info.title)) {
+      if (strcmp68(info.album,info.title)) {
         TUPLE_STR(tu, FIELD_ALBUM, NULL, info.album);
         TUPLE_STR(tu, FIELD_TITLE, NULL, info.title);
       } else {
@@ -270,19 +271,19 @@ static Tuple * tuple_from_track(const gchar * filename,
           sc68_tag_t * tag = cinfo->tag+i;
           const char * val = tag->val;
           int           id = -1;
-          if (!strcmp(tag->key, TAG68_COMMENT))
+          if (!strcmp68(tag->key, TAG68_COMMENT))
             id = FIELD_COMMENT;
-          else if (!strcmp(tag->key, TAG68_COPYRIGHT))
+          else if (!strcmp68(tag->key, TAG68_COPYRIGHT))
             id = FIELD_COPYRIGHT;
-          else if (!strcmp(tag->key, TAG68_COMPOSER))
+          else if (!strcmp68(tag->key, TAG68_COMPOSER))
             id = FIELD_COMPOSER;
-          else if (!strcmp(tag->key, TAG68_FORMAT))
+          else if (!strcmp68(tag->key, TAG68_FORMAT))
             id = FIELD_CODEC;
-          else if (!strcmp(tag->key, TAG68_YEAR)) {
+          else if (!strcmp68(tag->key, TAG68_YEAR)) {
             int year = year_of_str(val);
             if (year)
               TUPLE_INT(tu, FIELD_YEAR, NULL, year);
-          } else if (!strcmp(tag->key, TAG68_AKA)) {
+          } else if (!strcmp68(tag->key, TAG68_AKA)) {
             continue;
           }
 
