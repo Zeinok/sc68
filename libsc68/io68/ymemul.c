@@ -176,16 +176,22 @@ static int onchange_engine(const option68_t *opt, value68_t * val)
 {
   static int engs[3] = { YM_ENGINE_BLEP, YM_ENGINE_PULS, YM_ENGINE_DUMP };
   assert(val->num >= 0 && val->num < 3);
-  ym_engine(0, engs[val->num]);
-  return 0;
+  if (val->num >= 0 && val->num < 3) {
+    ym_engine(0, engs[val->num]);
+    return 0;
+  }
+  return -1;
 }
 
 static int onchange_volume(const option68_t *opt, value68_t * val)
 {
   static int vols[2] = { YM_VOL_ATARIST, YM_VOL_LINEAR };
   assert(val->num >= 0 && val->num < 2);
-  default_parms.volmodel = vols[val->num];
-  return 0;
+  if (val->num >= 0 && val->num < 2) {
+    default_parms.volmodel = vols[val->num];
+    return 0;
+  }
+  return -1;
 }
 
 static int onchange_ymchans(const option68_t *opt, value68_t * val)

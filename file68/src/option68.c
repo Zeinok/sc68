@@ -158,7 +158,8 @@ static void opt_set_strtol(option68_t * opt, int org, const char * val)
 
   case opt68_INT:
     ok = val[*val=='-' || *val=='+'];
-    if (ok >= '0' && ok <= '9') {
+    ok = ok >= '0' && ok <= '9';
+    if (ok) {
       res = strtol(val,0,0);
       ok = in_range(opt,res);
     }
