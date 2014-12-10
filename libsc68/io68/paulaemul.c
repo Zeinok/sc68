@@ -57,11 +57,8 @@ enum {
   PL_MIX_FIX = (PL_VOL_FIX+1+8-16)
 };
 
-#ifdef PAULA_CALCUL_TABLE
-
-# define LN_10_OVER_10 0.230258509299
-# define PL_N_DECIBEL 65
-
+#if 0
+/* Paula decibel (*10) */
 static const s16 Tvol[] = {
   0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 20, 21, 23,
   25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 48, 50, 52, 55, 58,
@@ -69,31 +66,10 @@ static const s16 Tvol[] = {
   115, 120, 126, 132, 138, 145, 153, 161, 170, 181, 192, 206,
   221, 241, 266, 301, 361, 450
 };
-static uint68_t volume[65];
-static uint68_t calc_volume(unsigned int vol, unsigned int mult)
-{
-  double r;
+#endif
 
-  if (!vol) {
-    return 0;
-  }
-  r = (double) mult / exp((double) Tvol[64 - vol] / 100.0);
-  return (uint68_t) r;
-}
-
-static void init_volume(void)
-{
-  int i;
-
-  for (i = 0; i < 65; i++) {
-    volume[i] = calc_volume(i, PL_VOL_MUL);
-    fprintf(stderr, "XXX:%08x\n", volume[i]);
-  }
-}
-
-#else
-
-/* This table has been precalculated with the above piece of code. */
+#if defined(PAULA_LEGACY_VOLUMES)
+/* sc68 Amiga volume factor legacy table */
 static const uint68_t volume[65] = {
   0x00000,0x006ec,0x00c9e,0x011e8,0x016fe,0x01c15,0x020a0,0x02588,
   0x029e5,0x02ec4,0x0332b,0x0376e,0x03c0c,0x04067,0x04462,0x0489d,
@@ -103,7 +79,23 @@ static const uint68_t volume[65] = {
   0x0a9e4,0x0ad53,0x0b0d3,0x0b466,0x0b80b,0x0bbc3,0x0bf8e,0x0c36c,
   0x0c75f,0x0cb66,0x0cf82,0x0d198,0x0d5d4,0x0da26,0x0dc57,0x0e0ca,
   0x0e30d,0x0e7a3,0x0e9f7,0x0eeb1,0x0f117,0x0f5f6,0x0f86f,0x0fd73,
-  0x10000,
+  0x10000
+};
+static void init_volume(void) {}
+
+#else
+
+/* sc68 Amiga volume factor new table (should be more accurate)*/
+static const uint68_t volume[65] = {
+  0x00000,0x00403,0x00801,0x00bf9,0x00ff8,0x0141a,0x017e4,0x01c12,
+  0x01fdc,0x02429,0x0281c,0x02bfa,0x03039,0x03445,0x03802,0x03c03,
+  0x0404e,0x0441d,0x04827,0x04c6d,0x05007,0x053cd,0x057c0,0x05be2,
+  0x06037,0x06398,0x0684a,0x06bf4,0x06fc0,0x073ad,0x077bd,0x07bf3,
+  0x0804e,0x0834b,0x087e8,0x08caf,0x08ff6,0x09350,0x0987d,0x09c0b,
+  0x09fad,0x0a365,0x0a734,0x0ab19,0x0af15,0x0b329,0x0b755,0x0bb9a,
+  0x0bff9,0x0c472,0x0c905,0x0cb59,0x0d016,0x0d4ee,0x0d766,0x0dc6a,
+  0x0def7,0x0e429,0x0e6cd,0x0ec2e,0x0eeea,0x0f47a,0x0f74f,0x0fd12,
+  0x10000
 };
 
 static void init_volume(void) {}
@@ -589,7 +581,8 @@ void paula_mix(paula_t * const paula, s32 * splbuf, int n)
 #endif
     clear_buffer(splbuf, n);
     for (i=0; i<4; i++) {
-      const int right = (i^msw_first)&1;
+      /* $$$ VERIFY: channel mapping ABCD => LRRL ? */
+      const int right = (i^(i>>1)^msw_first)&1;
 #if DEBUG_PL_O == 1
       paula_dbg(d+i, paula, i);
 #endif
