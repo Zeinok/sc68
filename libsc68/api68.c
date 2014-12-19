@@ -78,6 +78,10 @@ enum {
   TRAP_ADDR = 0x1000,
   /* # of instructions for music play code */
   TRAP_MAX_INST = 10000u,
+  /* Vector used for sc68 special function break */
+  BRKP_VECTOR = TRAP_VECTOR(0),
+  /* Special value for sc68 special functions */
+  BRKP_MAGIC = 0x5C68DB60,
   /* # of instructions for music play code */
   PLAY_MAX_INST = 1000000u,
   /* # of instructions for music init code */
@@ -118,9 +122,8 @@ static u8 trap_func[] = {
 
 /* Atari-ST trap categories
  */
-static const char * trap_type[16] =
-{ 0, "gemdos", 0, 0, 0, 0 , 0, 0, 0, 0 , 0, 0, 0, "bios" , "xbios", 0 };
-
+static const char * trap_name[16] =
+{ "sc68","gemdos",0,0,0,0,0,0,0,0,0,0,0,"bios","xbios",0 };
 
 /** Init flags, */
 static struct init_flags initflags;
@@ -486,7 +489,7 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
   char    irqname[32];
   const char * stname;
   int     dumpex, savest, subvec;
-  u32     sr, pc;
+  u32     sr, pc, text;
 
   /* Store last interruption */
   sc68->irq.pc     = emu68->inst_pc;   /* or real register values ? */
@@ -502,14 +505,15 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
        vector == 0X110/4 /* Timer-D */ )
     return;
 
-  /* Get fancy names */
+  /* Get exception fancy name */
   except_name(vector,irqname);
 
   /* Init vars */
   stname = emu68_status_name(emu68->status);
-  subvec = 0;
-  dumpex = 1;
-  savest = emu68->status;
+  text   = 0;                           /* Debug text */
+  subvec = 0;                           /* Trap number and whatnot */
+  dumpex = 1;                           /* Dump */
+  savest = emu68->status;               /* Save emulator status */
 
   switch (savest) {
   case EMU68_NRM:
@@ -537,7 +541,24 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
     if (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
       subvec = vector - TRAP_VECTOR(0);
       vector = TRAP_VECTOR(0);
-      if (trap_type[subvec]) {
+      if (!subvec) {
+        /* might be a breakpoint */
+        uint_t fct = Lpeek(emu68, emu68->reg.a[7]+6);
+        if ( (fct & ~0xF) == BRKP_MAGIC ) {
+          text = Lpeek(emu68, emu68->reg.a[7]+10);
+          TRACE68(sc68_cat,
+                  "libsc68: !!! BREAKPOINT: $%08X/$%06X\n", fct, text);
+          /* It's magic !! */
+          switch (sc68->irq.sysfct = fct & 0xF) {
+          case 0:                         /* function 0: just print */
+          case 1:                         /* function 1: break on debug */
+            emu68->status = savest;       /* no break */
+            break;
+          default:
+            break;
+          }
+        }
+      } else if (trap_name[subvec]) {
         sc68->irq.sysfct = Wpeek(emu68, emu68->reg.a[7]+6) & 0xFFFF;
         emu68->status    = savest;      /* Known trap: no break */
       }
@@ -603,6 +624,7 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
    */
   if (dumpex) {
     u8 * memptr = emu68_memptr(sc68->emu68,0,0);
+    const addr68_t msk = emu68->memmsk;
     const addr68_t adr = emu68->reg.a[7] & emu68->memmsk;
     const addr68_t bot = emu68->memmsk+1-16;
     char line[16 * 3];
@@ -611,34 +633,34 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
     if (vector == ILLEGAL_VECTOR)
       sprintf(irqname+l, "#$%02x-%02x",
               memptr[pc&emu68->memmsk], memptr[(pc+1)&emu68->memmsk]);
-    else if (vector == TRAP_VECTOR(0) && trap_type[subvec])
+    else if (vector == TRAP_VECTOR(0) && trap_name[subvec])
       sprintf(irqname, "%s(%d) ($%02x)",
-              trap_type[subvec], sc68->irq.sysfct, sc68->irq.sysfct);
+              trap_name[subvec], sc68->irq.sysfct, sc68->irq.sysfct);
 
     /* dump cpu status */
-    TRACE68(sc68_cat,
-            "libsc68: 68k interruption -- emu68<%s> sc68<%s>\n"
-            " status: in:%s out:%s\n"
-            "   intr: #%02x+%02x %s\n"
-            "   from: pc:%08x sr:%04x\n"
-            "   regs: pc:%08x sr:%04x\n"
-            "         d0:%08x d1:%08x d2:%08x d3:%08x\n"
-            "         d4:%08x d5:%08x d6:%08x d7:%08x\n"
-            "         a0:%08x a1:%08x a2:%08x a3:%08x\n"
-            "         a4:%08x a5:%08x a6:%08x a7:%08x\n",
-            emu68->name, sc68->name,
-            stname, emu68_status_name(emu68->status),
-            vector, subvec, irqname,
-            pc, sr,
-            emu68->reg.pc,   emu68->reg.sr,
-            emu68->reg.d[0], emu68->reg.d[1],
-            emu68->reg.d[2], emu68->reg.d[3],
-            emu68->reg.d[4], emu68->reg.d[5],
-            emu68->reg.d[6], emu68->reg.d[7],
-            emu68->reg.a[0], emu68->reg.a[1],
-            emu68->reg.a[2], emu68->reg.a[3],
-            emu68->reg.a[4], emu68->reg.a[5],
-            emu68->reg.a[6], emu68->reg.a[7]);
+    msg68x(sc68_cat, sc68,
+           "libsc68: 68k interruption -- emu68<%s> sc68<%s>\n"
+           " status: in:%s out:%s\n"
+           "   intr: #%02x+%02x %s\n"
+           "   from: pc:%08x sr:%04x\n"
+           "   regs: pc:%08x sr:%04x\n"
+           "         d0:%08x d1:%08x d2:%08x d3:%08x\n"
+           "         d4:%08x d5:%08x d6:%08x d7:%08x\n"
+           "         a0:%08x a1:%08x a2:%08x a3:%08x\n"
+           "         a4:%08x a5:%08x a6:%08x a7:%08x\n",
+           emu68->name, sc68->name,
+           stname, emu68_status_name(emu68->status),
+           vector, subvec, irqname,
+           pc, sr,
+           emu68->reg.pc,   emu68->reg.sr,
+           emu68->reg.d[0], emu68->reg.d[1],
+           emu68->reg.d[2], emu68->reg.d[3],
+           emu68->reg.d[4], emu68->reg.d[5],
+           emu68->reg.d[6], emu68->reg.d[7],
+           emu68->reg.a[0], emu68->reg.a[1],
+           emu68->reg.a[2], emu68->reg.a[3],
+           emu68->reg.a[4], emu68->reg.a[5],
+           emu68->reg.a[6], emu68->reg.a[7]);
 
     /* dump stack */
     line[0] = 0;
@@ -652,13 +674,24 @@ static void irqhandler(emu68_t* const emu68, int vector, void * cookie)
         j += 3;
       } else {
         line[j+2] = 0;
-        TRACE68(sc68_cat," %-6x: %s\n", (unsigned) adr + (i & ~15), line);
+        msg68x(sc68_cat,sc68,
+               " %-6x: %s\n", (unsigned) adr + (i & ~15), line);
         j = 0;
       }
     }
     if (j) {
       line[j-1] = 0;
-      TRACE68(sc68_cat," %-6x: %s\n", (unsigned) adr + (i & ~15), line);
+      msg68x(sc68_cat,sc68,
+             " %-6x: %s\n", (unsigned) adr + (i & ~15), line);
+    }
+
+    /* dump debug message */
+    if (text) {
+      char tmp[256];
+      for (i = 0; i < sizeof(tmp)-1 && (tmp[i] = memptr[(text+i)&msk]); ++i)
+        ;
+      tmp[i] = 0;
+      msg68x(sc68_cat, sc68, "\nlibsc68: %s\n\n", tmp);
     }
   }
 }
@@ -1368,8 +1401,8 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr, uint68_t maxinst)
       if (sc68->irq.vector >= TRAP_VECTOR(0) &&
           sc68->irq.vector <= TRAP_VECTOR(15)) {
         int n = sc68->irq.vector-TRAP_VECTOR(0);
-        if (trap_type[n])
-          sprintf(irqname+3, "%s-$%X", trap_type[n], sc68->irq.sysfct);
+        if (trap_name[n])
+          sprintf(irqname+3, "%s-$%X", trap_name[n], sc68->irq.sysfct);
       }
     } else if (status == EMU68_BRK && !emu68->instructions) {
       strcpy(irqname,"inst-overflow");
@@ -1431,7 +1464,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
     /* emu68_chkset(sc68->emu68,0,0,0); */
   }
   else
-    /* Cleare system varaible */
+    /* Clear system variables */
     emu68_memset(sc68->emu68,0x400,0,INTR_ADDR-0x400);
 
   memptr = emu68_memptr(sc68->emu68,0,0x1000);
@@ -1441,7 +1474,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
 
   /* Install non initialized exception detection code. */
   for (i=0; i<256; ++i) {
-    int vector = base + i*8, rte_or_reset;
+    int vector = base + i*8;
 
     /* setup vector [$000..$400] */
     memptr[ (i<<2) + 0 ] = vector >> 24;
@@ -1455,19 +1488,14 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
      * this interruption.
      */
 
-    rte_or_reset = i == 5 /* Divide-By-Zero ? */
-      ? 0x73                     /* RTE */
-      : 0x70                     /* RESET */
-      ;
-
     /* install instruction stop #$2FNN */
     memptr[ vector + 0 ] = 0x4e;
-    memptr[ vector + 1 ] = 0x72 /* + (i == 69) */;
-    memptr[ vector + 2 ] = 0x2F; /* magic SR value (see handler) */
-    memptr[ vector + 3 ] = i;    /* vector number                */
-    memptr[ vector + 4 ] = 0x4e; /* RESET or RTE                 */
-    memptr[ vector + 5 ] = rte_or_reset;
-    memptr[ vector + 6 ] = 0x4e; /* RTE                          */
+    memptr[ vector + 1 ] = 0x72    /* + (i == 69) */;
+    memptr[ vector + 2 ] = 0x2F;   /* magic SR value (see handler) */
+    memptr[ vector + 3 ] = i;      /* vector number                */
+    memptr[ vector + 4 ] = 0x4e;   /* RESET or RTE                 */
+    memptr[ vector + 5 ] = 0x70;   /* Always RESET                 */
+    memptr[ vector + 6 ] = 0x4e;   /* RTE                          */
     memptr[ vector + 7 ] = 0x73;
   }
 

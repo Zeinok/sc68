@@ -390,7 +390,8 @@ mt_CheckEfx:
 	BEQ	mt_VibratoPlusVolSlide
 	CMP.B	#$E,D0
 	BEQ	mt_E_Commands
-SetBack:	MOVE.W	n_period(A6),6(A5)
+SetBack:
+	MOVE.W	n_period(A6),6(A5)
 	CMP.B	#7,D0
 	BEQ	mt_Tremolo
 	CMP.B	#$A,D0
@@ -805,7 +806,7 @@ mt_PatternBreak:
 	RTS
 
 mt_SetSpeed:
-	MOVE.B	3(A6),D0
+	MOVE.B	n_cmdlo(A6),D0
 	BEQ	mt_Return2
 	CLR.B	mt_Counter(A4)
 	MOVE.B	D0,mt_speed(A4)

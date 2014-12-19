@@ -75,7 +75,7 @@
 #define STATUS(S,C,M) \
   if (1) { gdb->run = RUN_##S; gdb->code = CODE_##C; gdb->msg = M; } else
 #define SIGNAL(S,C,M) \
-if (1) { gdb->run = RUN_##S; gdb->code = -C; gdb->msg = M; } else
+  if (1) { gdb->run = RUN_##S; gdb->code = -C; gdb->msg = M; } else
 
 enum {
   default_port = 6800,
@@ -176,7 +176,11 @@ static const char * sock_error(void)
 
 static int decode_trap(char * s, int trapnum, emu68_t * emu)
 {
-  int fct, valid = 1;
+  const int sig_ok = SIGVAL_0;   /* known traps */
+  const int sig_no = SIGVAL_SYS; /* unknown traps (invalid syscall) */
+  int fct, sigval = sig_ok;      /* Ok by default */
+  char * const msg = s;          /* Keep track of this address */
+
   switch (trapnum) {
 
   case 1:
@@ -199,7 +203,7 @@ static int decode_trap(char * s, int trapnum, emu68_t * emu)
     case 0x49: s += sprintf(s, " free(0x%x.l)",  Lpeek(emu, emu->reg.a[7]+8));
       break;
     default:
-      valid = 0;
+      sigval = sig_no;
     }
     break;
 
@@ -207,8 +211,8 @@ static int decode_trap(char * s, int trapnum, emu68_t * emu)
     /***********************************************************************
      * Bios (trap #13)
      */
-    sprintf(s," bios(%02x)", Wpeek(emu, emu->reg.a[7]+6));
-    valid = 0;
+    s += sprintf(s," bios(%02x)", Wpeek(emu, emu->reg.a[7]+6));
+    sigval = sig_no;
     break;
 
   case 14:
@@ -238,28 +242,86 @@ static int decode_trap(char * s, int trapnum, emu68_t * emu)
       s += sprintf(s, " unlocksnd()");
       break;
     default:
-      valid = 0;
+      sigval = sig_no;
     }
     break;
+
+  case 0:
+    /***********************************************************************
+     * sc68 (trap #0)
+     */
+    fct = Lpeek(emu, emu->reg.a[7]+6);
+
+    if ((fct & 0xFFFFFFF0) == 0x5C68DB60) {
+      const char * typestr = 0;
+      const u8 * memptr = emu->mem;
+      const addr68_t msk  = emu->memmsk;
+      /* We Will return from exception manually and correct the stack
+       * manually (skip addq #8,a7 */
+      const u16 sr = Wpeek(emu, emu->reg.a[7]+0);
+      const u32 pc = (Lpeek(emu, emu->reg.a[7]+2) + 2) & msk;
+            u32 sp = emu->reg.a[7];
+
+      /* msgdbg("Will set PC/SR/SP = $%06X/$%04X/%06X\n", pc,sr,sp); */
+
+      fct &= 15;
+      switch (fct) {
+      case 0:                           /* message only */
+        typestr = "msg";
+        sigval  = SIGVAL_0;             /* Never breaks on message */
+        break;
+      case 1:                           /* breakpoint on debug */
+        typestr = "brk";
+        sigval  = SIGVAL_TRAP;          /* breaks on breakpoint */
+        emu->reg.pc = pc;               /* restore postion */
+        emu->reg.sr = sr;
+        sp += 14;
+        break;
+      case 2:
+        typestr = "stp";
+        sigval  = SIGVAL_TRAP;          /* break always */
+        emu->reg.pc = pc;
+        emu->reg.sr = sr;
+        sp +=14;
+        break;
+      case 3:
+        typestr = "hlt";
+        sigval  = SIGVAL_TRAP;          /* halt */
+        emu->reg.pc = pc;
+        emu->reg.sr = sr;
+        sp +=14;
+        break;
+
+      default:
+        typestr = "???";
+        sigval  = sig_no;               /* invalid sys-call */
+      }
+
+      s += sprintf(s," sc68<%s>(%x)", typestr, fct);
+      /* Get follow up text message */
+      fct = Lpeek(emu, emu->reg.a[7]+10);
+      emu->reg.a[7] = sp;
+      if (fct) {
+        int i;
+        char tmp[256];
+        for (i=0; i<sizeof(tmp)-1 && (tmp[i]=memptr[(fct+i)&msk]); ++i)
+          ;
+        tmp[i] = 0;
+        s += sprintf(s," \"%s\"", tmp);
+        msginf("gdb: %s\n", tmp);
+      }
+      break;
+    }
+    /* continue on default */
+
   default:
-    valid = 0;
+    sigval = sig_no;
     *s = 0;
   }
-  return valid;
-}
-/* GEMDOS */
-/* static const struct trap_S gemdos[] = { */
-/*   /\* 00 *\/ { "Pterm",    "0" }, */
-/*   /\* 01 *\/ { "Cconin",   "4" }, */
-/*   /\* 02 *\/ { "Cconout",  "02" }, */
-/*   /\* 03 *\/ { "Cauxin",   "2" }, */
-/*   /\* 04 *\/ { "Cauxout",  "02" }, */
-/*   /\* 05 *\/ { "Cprnout",  "02" }, */
-/*   /\* 06 *\/ { "Crawio",   "42" }, */
-/*   /\* 07 *\/ { "Crawcin",  "4" }, */
-/*   /\* 08 *\/ { "Cnecin",   "4" }, */
-/*   /\* 09 *\/ { "Cconws",   "04" }, */
+  msgdbg("trap_decode(%d) -> %d [%s]\n", trapnum, sigval, msg);
 
+  return sigval;
+}
 
 
 /* Create and bind ipv4/tcp server socket.
@@ -882,8 +944,8 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
     case PRIVV_VECTOR:
       sigval = SIGVAL_SEGV; break;
 
-      /* Timer interruptions: not always right as it depends on MFP VR
-       * register bits 4-7
+      /* $$$ FIXME: Timer interruptions: not always right as it
+       * depends on MFP VR register bits 4-7
        */
     case 0X134 >> 2: /* Timer-A */
       strcpy(fctname," timer-A");
@@ -909,10 +971,7 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
     case SPURIOUS_VECTOR:
     default:
       if  (vector >= TRAP_VECTOR(0) && vector <= TRAP_VECTOR(15)) {
-        sigval = decode_trap(fctname, vector-TRAP_VECTOR(0), gdb->emu)
-        ? SIGVAL_TRAP
-        : SIGVAL_SYS
-        ;
+        sigval = decode_trap(fctname, vector-TRAP_VECTOR(0), gdb->emu);
       } else
         sigval = SIGVAL_TRAP;
     }

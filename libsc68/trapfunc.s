@@ -4,8 +4,6 @@
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
-;;; Time-stamp: <2013-11-18 10:22:07 ben>
-
 
 	;; Unhandled trap vector and function will execute a stop with a
 	;; special value followed by a reset. The value is used to detect
@@ -53,6 +51,9 @@ install_trap:
 	;; move.l	a0,$5a0.w
 
 	;; Install trap vectors for GEMDOS and XBIOS
+	lea	irte(pc),a0
+	move.l	a0,$14.w	; divide-by-0
+	move.l	a0,$80.w	; trap #0 (sc68 special)
 	lea	gemdos(pc),a0
 	move.l	a0,$84.w
 	lea	xbios(pc),a0
@@ -117,6 +118,7 @@ trap_\1:
 
 trap_close:
 	close
+irte:	= *-2
 	
 	;; trap_n 0
 	;; trap_n 1
