@@ -39,68 +39,7 @@
 #endif
 int pl_cat = msg68_DEFAULT;
 
-/* Define this once to calculate and copy past the volume table. This
- * is required only if PL_VOL_FIX or Tvol[] are modified.
- */
-#undef PAULA_CALCUL_TABLE
-
-#ifdef PAULA_CALCUL_TABLE
-# include <math.h>
-# include <stdio.h>
-#endif
-
 #define PLHD "paula  : "
-
-enum {
-  PL_VOL_FIX = 16,
-  PL_VOL_MUL = (1<<PL_VOL_FIX),
-  PL_MIX_FIX = (PL_VOL_FIX+1+8-16)
-};
-
-#if 0
-/* Paula decibel (*10) */
-static const s16 Tvol[] = {
-  0, 1, 3, 4, 6, 7, 9, 10, 12, 13, 15, 16, 18, 20, 21, 23,
-  25, 27, 29, 31, 33, 35, 37, 39, 41, 43, 45, 48, 50, 52, 55, 58,
-  60, 63, 66, 69, 72, 75, 78, 82, 85, 89, 93, 97, 101, 105, 110,
-  115, 120, 126, 132, 138, 145, 153, 161, 170, 181, 192, 206,
-  221, 241, 266, 301, 361, 450
-};
-#endif
-
-#if defined(PAULA_LEGACY_VOLUMES)
-/* sc68 Amiga volume factor legacy table */
-static const uint68_t volume[65] = {
-  0x00000,0x006ec,0x00c9e,0x011e8,0x016fe,0x01c15,0x020a0,0x02588,
-  0x029e5,0x02ec4,0x0332b,0x0376e,0x03c0c,0x04067,0x04462,0x0489d,
-  0x04d1b,0x0510f,0x05537,0x05995,0x05d3d,0x0610b,0x06501,0x06920,
-  0x06d6b,0x070c0,0x0755a,0x078ed,0x07c9b,0x08067,0x08450,0x08857,
-  0x08c7e,0x08f55,0x093b2,0x09832,0x09b45,0x09e68,0x0a33b,0x0a687,
-  0x0a9e4,0x0ad53,0x0b0d3,0x0b466,0x0b80b,0x0bbc3,0x0bf8e,0x0c36c,
-  0x0c75f,0x0cb66,0x0cf82,0x0d198,0x0d5d4,0x0da26,0x0dc57,0x0e0ca,
-  0x0e30d,0x0e7a3,0x0e9f7,0x0eeb1,0x0f117,0x0f5f6,0x0f86f,0x0fd73,
-  0x10000
-};
-static void init_volume(void) {}
-
-#else
-
-/* sc68 Amiga volume factor new table (should be more accurate)*/
-static const uint68_t volume[65] = {
-  0x00000,0x00403,0x00801,0x00bf9,0x00ff8,0x0141a,0x017e4,0x01c12,
-  0x01fdc,0x02429,0x0281c,0x02bfa,0x03039,0x03445,0x03802,0x03c03,
-  0x0404e,0x0441d,0x04827,0x04c6d,0x05007,0x053cd,0x057c0,0x05be2,
-  0x06037,0x06398,0x0684a,0x06bf4,0x06fc0,0x073ad,0x077bd,0x07bf3,
-  0x0804e,0x0834b,0x087e8,0x08caf,0x08ff6,0x09350,0x0987d,0x09c0b,
-  0x09fad,0x0a365,0x0a734,0x0ab19,0x0af15,0x0b329,0x0b755,0x0bb9a,
-  0x0bff9,0x0c472,0x0c905,0x0cb59,0x0d016,0x0d4ee,0x0d766,0x0dc6a,
-  0x0def7,0x0e429,0x0e6cd,0x0ec2e,0x0eeea,0x0f47a,0x0f74f,0x0fd12,
-  0x10000
-};
-
-static void init_volume(void) {}
-
-#endif
 
 /* Filled by paula_init() to avoid field order dependencies */
 static paula_parms_t default_parms;
@@ -150,9 +89,6 @@ int paula_init(int * argc, char ** argv)
 
   if (pl_cat == msg68_DEFAULT)
     pl_cat = msg68_cat("paula","amiga sound emulator", DEBUG_PL_O);
-
-  /* Build (or not) volume table. */
-  init_volume();
 
   /* Setup little/big endian swap */
   msw_first = !(*(const u8 *)&msw);
@@ -441,12 +377,11 @@ static void mix_one(paula_t * const paula,
 
   hasloop = 0;
 
- /* $$$ dunno exactly what if volume is not in proper range [0..64] */
+ /* $$$ FIXME Dunno exactly what if volume is not in proper range [0..64] */
   vol = p[9] & 127;
-  if (vol >= 64) {
+  if (vol >= 64)
     vol = 64;
-  }
-  vol = volume[vol];
+  vol <<= 1;
 
   per = ( p[6] << 8 ) + p[7];
   if (!per) per = 1;                    /* or is it +1 for all ?? */
@@ -492,7 +427,6 @@ static void mix_one(paula_t * const paula,
 
     /* apply volume */
     v0  *= vol;
-    v0 >>= PL_MIX_FIX;
 
     assert(v0 >= -16384);
     assert(v0 <   16384);
@@ -562,9 +496,7 @@ void paula_dbg(paulav_dbg_t * d, paula_t * const paula, int i)
   d->end  = w->end << ct_fix;
   d->start  = w->start << ct_fix;
   d->vol = p[9] & 127;
-  if (d->vol >= 64) {
-    d->vol = 64;
-  }
+  if (d->vol >= 64) d->vol = 64;
   d->per = ( p[6] << 8 ) + p[7];
   if (!d->per) d->per = 1;
 }
