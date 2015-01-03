@@ -72,7 +72,7 @@ public:
     init.debug_set_mask = (1 << msg68_TRACE) - 1;
 #endif
     if (!sc68_init(&init)) {
-      const char * engine = 0;
+      int engine = 0;
 
       // aSID
       g_ym_asid = sc68_cntl(0, SC68_GET_ASID);
@@ -82,10 +82,9 @@ public:
       sc68_cntl(0, SC68_SET_ASID, SC68_ASID_ON); // Activate global aSID
         
       // YM-engine
-      sc68_cntl(0, SC68_GET_OPT, "ym-engine", &engine);
-      if (engine) {
-        msg68_debug("got default engine: '%s'\n", engine);
-        g_ym_engine = !strcmp68(engine,"pulse");
+      if (!sc68_cntl(0, SC68_GET_OPT, "ym-engine", &engine)) {
+        msg68_debug("got default engine: '%d'\n", engine);
+        g_ym_engine = !!engine;
       }
     }
     msg68_notice("SC68 component: %s - %s [%s]",
