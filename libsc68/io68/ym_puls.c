@@ -412,12 +412,7 @@ static int envelop_generator(ym_t * const ym, int ymcycles)
   unsigned int alt, altalt;
   int shape;
 
-#ifdef _DEBUG
-  if (ncycle < 0) {
-    BREAKPOINT68;
-    return 0;
-  }
-#endif
+  assert(ncycle >=0 );
 
   rem_cycle = ncycle & 7;
   if(!(ncycle >>= 3)) return rem_cycle;
@@ -615,7 +610,7 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
 
     sq = -(++ctB >= perB);
     levels ^= YM_OUT_MSK_B & sq;
-    ctB -= (perA & sq);
+    ctB -= (perB & sq);
 
     sq = -(++ctC >= perC);
     levels ^= YM_OUT_MSK_C & sq;
