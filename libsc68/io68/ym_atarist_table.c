@@ -3,7 +3,7 @@
  * @brief   YM-2149 emulator - Atari ST Volume Table
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (c) 1998-2014 Benjamin Gerard
+ * Copyright (c) 1998-2015 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -22,63 +22,44 @@
  *
  */
 
-/* Table of 4 bit D/A output level for 1 channel.*/
-static const u16 volumetable_original[32 * 32 * 32] =
+/* 2k9 volume table. */
+static const u16 vol2k9[32 * 32 * 32] =
 # include "ymout2k9.h"
   ;
 
 /* Create a non-linear 3 channels 5 bit per channels DAC table.
  */
 static void
-create_table(s16 * out, uint_t level, const char * name)
+create_table(s16 * out, const u16 * inp, uint_t level, const char * name)
 {
+  const int min = inp[0x0000];
+  const int max = inp[0x7fff];
+  const int div = max-min ? max-min : 1;
+  const int mid = ( level + 1 ) >> 1;
   int h;
 
-  if (!level) {
-    for (h=0; h<32*32*32; ++h) {
-      out[h] = 0;
-    }
-  } else {
-    for (h=0; h<32*32*32; ++h) {
-      out[h] = volumetable_original[h];
-    }
+  TRACE68(ym_cat,
+          "ym-2149: creating %s -- min:%d max:%d div:%d mid:%d\n",
+          name, min, max, div, mid);
+
+  assert(level > 254 && level < 65536u);
+  assert(max > min);
+
+  for (h=0; h<32*32*32; ++h) {
+    int tmp = inp[h], res;
+    assert(tmp >= min);
+    assert(tmp <= max);
+    res = (tmp-min) * level / div - mid;
+    out[h] = res;
   }
-
-  if (level) {
-    const int min = ((u16*)out)[0x0000];
-    const int max = ((u16*)out)[0x7fff];
-    const int div = max-min ? max-min : 1;
-    const int mid = ( level + 1 ) >> 1;
-
-    TRACE68(ym_cat,
-            "ym-2149: creating %s -- min:%d max:%d div:%d mid:%d\n",
-            name, min, max, div, mid);
-
-    assert(level < 65536u);
-    assert(max > min);
-
-    for (h=0; h<32*32*32; ++h) {
-      int tmp = ((u16*)out)[h], res;
-      assert(tmp >= min);
-      assert(tmp <= max);
-      res = (tmp-min) * level / div - mid;
-      out[h] = res;
-    }
-  }
-  msg68_notice("ym-2149: volume model -- *%s* -- [%d..%d]\n",
-               name, out[0], out[0x7FFF]);
+  TRACE68(ym_cat,
+          "ym-2149: volume model -- *%s* -- [%d..%d]\n",
+          name, out[0], out[0x7FFF]);
 }
 
 /* Create a non-linear 3 channels 5 bit per channels DAC table.
  */
 void ym_create_5bit_atarist_table(s16 * out, unsigned int level)
 {
-  create_table(out, level,"atarist-5bit-2k9");
-}
-
-/* Create a non-linear 3 channels 4 bit per channels DAC table.
- */
-void ym_create_4bit_atarist_table(s16 * out, unsigned int level)
-{
-  create_table(out, level,"atarist-4bit");
+  create_table(out, vol2k9, level, "atarist-5bit-2k9");
 }

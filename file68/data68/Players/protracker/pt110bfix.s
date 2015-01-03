@@ -332,12 +332,14 @@ mt_dskip:
 	BEQ.S	mt_dskc
 	MOVE.B	D0,mt_PattDelTime2(A4)
 	CLR.B	mt_PattDelTime(A4)
-mt_dskc:	TST.B	mt_PattDelTime2(A4)
+mt_dskc:
+	TST.B	mt_PattDelTime2(A4)
 	BEQ.S	mt_dska
 	SUBQ.B	#1,mt_PattDelTime2(A4)
 	BEQ.S	mt_dska
 	SUB.W	#16,mt_PatternPos(A4)
-mt_dska:	TST.B	mt_PBreakFlag(A4)
+mt_dska:
+	TST.B	mt_PBreakFlag(A4)
 	BEQ.S	mt_nnpysk
 	SF	mt_PBreakFlag(A4)
 	MOVEQ	#0,D0

@@ -3,7 +3,7 @@
  * @brief   YM-2149 emulator - Linear Volume Table
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (c) 1998-2014 Benjamin Gerard
+ * Copyright (c) 1998-2015 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -82,6 +82,7 @@ void ym_create_5bit_linear_table(s16 * out, unsigned int level)
          3u * min ) / 3u * level / div;
     out[i] = tmp - center;
   }
-  msg68_notice("ym-2149: volume model -- *linear* -- [%d..%d]\n",
-               out[0],out[0x7FFF]);
+  TRACE68(ym_cat,
+          "ym-2149: volume model -- *linear* -- [%d..%d]\n",
+          out[0],out[0x7FFF]);
 }

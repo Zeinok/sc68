@@ -3,7 +3,7 @@
  * @brief   YM-2149 emulator - YM-2149 pulse engine
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (c) 1998-2014 Benjamin Gerard
+ * Copyright (c) 1998-2015 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -108,9 +108,9 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
   puls->noise_ct           = 0;
 
   /* Reset tone generator */
-  puls->voice_ctA          = 0;
-  puls->voice_ctB          = 0;
-  puls->voice_ctC          = 0;
+  puls->voice_ctA          = 53;
+  puls->voice_ctB          = 109;
+  puls->voice_ctC          = 157;
   puls->levels             = 0;
 
   /* Reset filters */
@@ -422,25 +422,25 @@ static int envelop_generator(ym_t * const ym, int ymcycles)
   rem_cycle = ncycle & 7;
   if(!(ncycle >>= 3)) return rem_cycle;
 
-  b       = ym->envptr;
+  b       = ym->emu.puls.envptr;
 
   /* period */
-  ct      = ym->env_ct;
+  ct      = ym->emu.puls.env_ct;
   per     = ym->reg.index[YM_ENVL] | (ym->reg.index[YM_ENVH]<<8);
   per     |= !per;
   shape   = ym->reg.index[YM_ENVTYPE];
 
   /* bit */
-  bit     = ym->env_bit;
-  bitstp  = ym->env_bitstp;
+  bit     = ym->emu.puls.env_bit;
+  bitstp  = ym->emu.puls.env_bitstp;
   restp   = (shape & 1) ^ 1;
 
   /* continue */
-  cont    = ym->env_cont;
+  cont    = ym->emu.puls.env_cont;
   recont  = (-((shape>>3) & 0x1)) & 0x1F;
 
   /* alternate */
-  alt     = ym->env_alt;
+  alt     = ym->emu.puls.env_alt;
   altalt  = (-((shape ^ (shape>>1)) & 0x1)) & 0x1F;
 
   do {
@@ -478,12 +478,12 @@ static int envelop_generator(ym_t * const ym, int ymcycles)
 
   } while (ncycle);
 
-  ym->envptr     = b;
-  ym->env_ct     = ct;
-  ym->env_bit    = bit;
-  ym->env_bitstp = bitstp;
-  ym->env_cont   = cont;
-  ym->env_alt    = alt;
+  ym->emu.puls.envptr     = b;
+  ym->emu.puls.env_ct     = ct;
+  ym->emu.puls.env_bit    = bit;
+  ym->emu.puls.env_bitstp = bitstp;
+  ym->emu.puls.env_cont   = cont;
+  ym->emu.puls.env_alt    = alt;
 
   return rem_cycle;
 }
@@ -513,9 +513,11 @@ static void do_envelop(ym_t * const ym, cycle68_t ymcycle)
     int ymcycles = access->ymcycle-lastcycle;
 
     if (access->ymcycle > ymcycle) {
-      TRACE68(ym_cat,"%s access reg %X out of frame!! (%u>%u %u)\n",
+      TRACE68(ym_cat,
+              "ym-2149:w %s access reg %X out of frame!! (%u>%u %u)\n",
               regs->name, (unsigned) access->reg, (unsigned) access->ymcycle,
               (unsigned) ymcycle, (unsigned) (access->ymcycle/ymcycle) );
+      assert(!"ym-2149: envelop invalid access cycle");
       break;
     }
 
@@ -597,20 +599,27 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
   perC = ym->reg.name.per_c_lo | ((ym->reg.name.per_c_hi&0xF)<<8);
 
   levels = puls->levels;
+
+  /* TRACE68(ym_cat,"levels inp: %04x %02x %02x %02x\n", */
+  /*         levels, */
+  /*         0x1f&(levels>>10), */
+  /*         0x1f&(levels>> 5), */
+  /*         0x1f&(levels>> 0)); */
+
   do {
     int sq;
 
     sq = -(++ctA >= perA);
     levels ^= YM_OUT_MSK_A & sq;
-    ctA &= ~sq;
+    ctA -= (perA & sq);
 
     sq = -(++ctB >= perB);
     levels ^= YM_OUT_MSK_B & sq;
-    ctB &= ~sq;
+    ctB -= (perA & sq);
 
     sq = -(++ctC >= perC);
     levels ^= YM_OUT_MSK_C & sq;
-    ctC &= ~sq;
+    ctC -= (perC & sq);
 
     sq = levels;
     sq |= smsk;
@@ -619,14 +628,18 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
       sq &= eo; eo >>= 16;
       sq &= (eo&emsk) | vols;
     }
-
     sq &= mute;
-
     sq = (int) ym->ymout5[sq];
-
     *b++ = sq;
 
   } while (--ymcycles);
+
+  /* TRACE68(ym_cat,"levels out: %04x %02x %02x %02x A:%d B:%d C:%d\n", */
+  /*         levels, */
+  /*         0x1f&(levels >> 10), */
+  /*         0x1f&(levels >>  5), */
+  /*         0x1f&(levels >>  0), */
+  /*         ctA,ctB,ctC); */
 
   /* Save value for next pass */
   puls->tonptr    = b;
@@ -634,7 +647,7 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
   puls->voice_ctB = ctB;
   puls->voice_ctC = ctC;
   puls->levels    = levels;
-  finish:
+finish:
   return rem_cycles;
 }
 
@@ -660,7 +673,8 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
     const int ymcycles = access->ymcycle - lastcycle;
 
     if (access->ymcycle > ymcycle) {
-      TRACE68(ym_cat,"%s access reg %X out of frame!! (%u>%u %u)\n",
+      TRACE68(ym_cat,
+              "ym-2149: %s access reg %X out of frame!! (%u>%u %u)\n",
               regs->name, (unsigned) access->reg, (unsigned) access->ymcycle,
               (unsigned) ymcycle, (unsigned) (access->ymcycle/ymcycle));
       break;
@@ -769,8 +783,12 @@ static inline int clip(int o)
     msg68(ym_cat,"ym-2149: pulse -- pcm clip -- %d > 32767\n", o);
     o = 32767;
   }
-#endif
+  return o;
+#elif defined(CLIP)
   return CLIP(o);
+#else
+  return o;
+#endif
 }
 
 /* Resample ``n'' input samples from ``irate'' to ``orate''
@@ -1116,7 +1134,8 @@ int ym_puls_setup(ym_t * const ym)
 
   /* use default filter */
   puls->ifilter        = default_filter;
-  msg68_notice("ym-2149: filter -- *%s*\n", filters[puls->ifilter].name);
+
+  TRACE68(ym_cat,"ym-2149: filter -- *%s*\n", filters[puls->ifilter].name);
 
   return err;
 }
@@ -1125,11 +1144,8 @@ static int onchange_filter(const option68_t * opt, value68_t * val)
 {
   if (val->num >= 0 && val->num < n_filters) {
     default_filter = val->num;
-    msg68_notice("ym-2149: default filter -- *%s*\n",
-                 filters[default_filter].name);
     return 0;
   }
-  msg68_warning("ym-2149: invalid filter -- *%d*\n", val->num);
   return -1;
 }
 

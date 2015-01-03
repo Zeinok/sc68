@@ -6,7 +6,7 @@
  * @date      2009/02/10
  */
 
-/* Copyright (c) 1998-2014 Benjamin Gerard */
+/* Copyright (c) 1998-2015 Benjamin Gerard */
 
 /**
  * @defgroup  lib_io68_ym_puls  Pulse (sc68 legacy) YM engine.

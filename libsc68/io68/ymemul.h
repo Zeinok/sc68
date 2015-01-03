@@ -6,7 +6,7 @@
  * @date      1998/06/24
  */
 
-/* Copyright (c) 1998-2014 Benjamin Gerard */
+/* Copyright (c) 1998-2015 Benjamin Gerard */
 
 #ifndef IO68_YM_EMUL_H
 #define IO68_YM_EMUL_H
@@ -83,7 +83,7 @@ typedef struct
 {
   char name[4];               /**< Name (for debug).     */
   ym_waccess_t * head;        /**< First access in list. */
-  ym_waccess_t * tail;        /**< Last acces in list.   */
+  ym_waccess_t * tail;        /**< Last access in list.   */
 } ym_waccess_list_t;
 
 /**
@@ -145,9 +145,7 @@ enum ym_vol_e {
   YM_VOL_QUERY   = -1, /**< Query current or default volume model. */
   YM_VOL_DEFAULT = 0,  /**< Use default volume model.              */
   YM_VOL_ATARIST,      /**< Atari-ST volume table.                 */
-  YM_VOL_LINEAR,       /**< Linear mixing volume table.            */
-
-//  YM_VOL_ATARIST_4BIT, /**< Atari-ST volume table (4bit).          */
+  YM_VOL_LINEAR        /**< Linear mixing volume table.            */
 };
 
 /**

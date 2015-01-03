@@ -3,7 +3,7 @@
  * @brief   YM-2149 emulator
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (c) 1998-2014 Benjamin Gerard
+ * Copyright (c) 1998-2015 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -102,9 +102,10 @@ static void access_adjust_cycle(ym_waccess_list_t * const access_list,
 }
 
 
-/******************************************************
- *                  Yamaha reset                       *
- ******************************************************/
+/* ,-----------------------------------------------------------------.
+ * |                         Yamaha reset                            |
+ * `-----------------------------------------------------------------'
+ */
 
 int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 {
@@ -112,15 +113,15 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 
   static const struct ym2149_reg_s init_regs = {
     0xff, 0x0f, 0xff, 0x0f, 0xff, 0x0f, /* tone period A,B,C */
-    0x3f, 0xff,                         /* noise period & mixer */
+    0x1f, 0xff,                         /* noise period & mixer */
     0x00, 0x00, 0x00,                   /* Volume A,B,C */
     0xFF, 0xFF,                         /* envelop period */
     0x0A,                               /* envelop shape */
-    0,0                                 /* oi a,b */
+    0,0                                 /* I/O port a,b */
   };
 
   if (ym) {
-    /* reset registers */
+    /* Reset registers */
     ym->shadow.name = ym->reg.name = init_regs;
     ym->ctrl = 0;
 
@@ -142,9 +143,10 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
 }
 
 
-/******************************************************
- *                  Yamaha init                        *
- ******************************************************/
+/* ,-----------------------------------------------------------------.
+ * |                          Yamaha init                            |
+ * `-----------------------------------------------------------------'
+ */
 
 /* Select default engine */
 #ifndef YM_ENGINE
@@ -319,7 +321,7 @@ void ym_writereg(ym_t * const ym,
       access_list_add(ym, &ym->env_regs, reg, val, ymcycle);
       break;
 
-      /* Reg 7 modifies both noise &ym-> tone generators */
+      /* Reg 7 modifies both noise & tone generators */
     case YM_MIXER:
       access_list_add(ym, &ym->ton_regs, reg, val, ymcycle);
       /* Noise generator related registers. */
@@ -396,7 +398,6 @@ int ym_engine(ym_t * const ym, int engine)
 
   default:
     /* Invalid values */
-    /* msg68_warning(YMHD "unknown ym-engine -- *%d*\n", engine); */
   case YM_ENGINE_DEFAULT:
     /* Default values */
     engine = default_parms.engine;
@@ -435,10 +436,6 @@ int ym_clock(ym_t * const ym, int clock)
     clock = default_parms.clock;
 
   default:
-    /* if (clock != YM_CLOCK_ATARIST) { */
-    /*   msg68_warning(YMHD "unsupported clock -- *%u*\n", */
-    /*                 (unsigned int) clock); */
-    /* } */
     clock = YM_CLOCK_ATARIST;
     if (!ym) {
       default_parms.clock = clock;
@@ -479,7 +476,6 @@ int ym_volume_model(ym_t * const ym, int model)
     break;
 
   default:
-    /* msg68_warning(YMHD "unknown volume model -- %d\n", model); */
   case YM_VOL_DEFAULT:
     model = default_parms.volmodel;
   case YM_VOL_LINEAR:
@@ -595,7 +591,6 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
     ym->waccess     = ym->static_waccess;
     ym->waccess_nxt = ym->waccess;
     ym->clock       = p->clock;
-/*     ym->outlevel    = p->outlevel >> 2; */
     ym->voice_mute  = ym_smsk_table[7 & ym_default_chans];
     /* clearing sampling rate callback ensure requested rate to be in
        valid range. */
@@ -617,7 +612,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
       break;
 
     default:
-      msg68_critical(YMHD "engine %d -- *invalid*\n", p->engine);
+      assert(!"invalid ym-engine");
       err = -1;
     }
     if (!err)
@@ -639,11 +634,13 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
  */
 void ym_cleanup(ym_t * const ym)
 {
-  TRACE68(ym_cat,"%s",YMHD "cleanup\n");
+  TRACE68(ym_cat,YMHD "%s\n", "cleanup");
   if (ym) {
-    if (ym->overflow)
+    if (ym->overflow) {
       msg68_critical(YMHD "write access buffer has overflow -- *%u*\n",
                      ym->overflow);
+      assert(!"YM event list overflow");
+    }
     if (ym->cb_cleanup)
       ym->cb_cleanup(ym);
   }

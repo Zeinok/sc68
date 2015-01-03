@@ -3,7 +3,7 @@
  * @brief   Paula emulator (Amiga soundchip)
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (c) 1998-2014 Benjamin Gerard
+ * Copyright (c) 1998-2015 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -377,7 +377,9 @@ static void mix_one(paula_t * const paula,
 
   hasloop = 0;
 
- /* $$$ FIXME Dunno exactly what if volume is not in proper range [0..64] */
+  /* $$$ FIXME
+   * Dunno exactly what if volume is not in proper range [0..64]
+   */
   vol = p[9] & 127;
   if (vol >= 64)
     vol = 64;

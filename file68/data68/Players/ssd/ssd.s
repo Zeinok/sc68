@@ -842,12 +842,12 @@ same_instr:
 	divs	d1,d2
 
 	beq.s	no_calc_tie
-	move.w	d2,6(a0)
+	move.w	d2,vcStpPer(a0)
 	bra.s	yes_calc_tie
 
 no_calc_tie:
 	move.w	vcTgtPer(a0),vcCurPer(a0)
-	move.w	d4,6(a0)
+	move.w	d4,vcStpPer(a0)
 yes_calc_tie:
 	move.b	3(a1),d0
 	andi.w	#$001F,d0
@@ -1206,13 +1206,13 @@ no_sus_rep:
 	bcs.s	no_rel
 	bset	#0,vcHwBuzz(a0)
 no_rel: move.w	d0,vcAdsrIdx(a0)
-to_tie: move.w	6(a0),d0
+to_tie: move.w	vcStpPer(a0),d0
 	beq.s	no_tie
 	bmi.s	tie_lo
 	add.w	vcCurPer(a0),d0
 	cmp.w	vcTgtPer(a0),d0
 	blt.s	no_reach_tie_hi
-	move.w	d4,6(a0)
+	move.w	d4,vcStpPer(a0)
 	move.w	vcTgtPer(a0),d0
 no_reach_tie_hi:
 	move.w	d0,vcCurPer(a0)
@@ -1220,7 +1220,7 @@ no_reach_tie_hi:
 tie_lo: add.w	vcCurPer(a0),d0
 	cmp.w	vcTgtPer(a0),d0
 	bgt.s	no_reach_tie_lo
-	move.w	d4,6(a0)
+	move.w	d4,vcStpPer(a0)
 	move.w	vcTgtPer(a0),d0
 no_reach_tie_lo:
 	move.w	d0,vcCurPer(a0)

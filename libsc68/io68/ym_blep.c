@@ -3,7 +3,7 @@
  * @brief   YM-2149 emulator - YM-2149 Band-Limited stEP synthesis engine
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (c) 200?-2014 Antti Lankila
+ * Copyright (c) 200?-2015 Antti Lankila
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -119,9 +119,10 @@ const static s32 sine_integral[BLEP_SIZE] = {
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 };
 
-/* these are the envelopes. First 32 values are used for first iteration, the next 64
- * describe how the envelope loops. I know this is pretty lame, but I wanted as
- * simple implementation as possible. */
+/* These are the envelopes. First 32 values are used for first
+ * iteration, the next 64 describe how the envelope loops. I know this
+ * is pretty lame, but I wanted as simple implementation as
+ * possible. */
 static const uint8_t envelopes[16][32+64] = {
   { 31,30,29,28,27,26,25,24,23,22,21,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1,0,
     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, },
@@ -176,7 +177,7 @@ static void ym2149_new_output_level(ym_t * const ym)
   output = (ym->ymout5[dacstate] + 1) >> 1;
 
   if (output != orig->global_output_level) {
-    /* add a new blep before the others */
+    /* Add a new blep before the others */
     orig->blep_idx -= 1;
     orig->blep_idx &= MAX_BLEPS - 1;
 
@@ -209,7 +210,7 @@ static void ym2149_clock(ym_t * const ym, cycle68_t cycles)
     cycles -= iter;
     orig->time += iter;
 
-    /* clock subsystems forward */
+    /* Clock subsystems forward */
     for (i = 0; i < 3; i ++) {
       orig->tonegen[i].count -= iter;
       if (orig->tonegen[i].count == 0) {
@@ -288,12 +289,10 @@ static s32 highpass(ym_t * const ym, s32 output)
   return output;
 }
 
-/* run output synthesis for some clocks */
+/* Run output synthesis for some clocks */
 static int mix_to_buffer(ym_t * const ym, cycle68_t cycles, s32 *output)
 {
   ym_blep_t *orig = &ym->emu.blep;
-
- // assert(cycles >= 0);
 
   u32 len = 0;
   while (cycles) {
@@ -321,7 +320,7 @@ static int mix_to_buffer(ym_t * const ym, cycle68_t cycles, s32 *output)
   return len;
 }
 
-/* mix for ymcycles cycles. */
+/* Mix for ymcycles cycles. */
 static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
 {
   ym_blep_t *orig = &ym->emu.blep;
@@ -339,11 +338,11 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
               (unsigned) ymcycles);
     }
 
-    /* mix up to this cycle, update state */
+    /* Mix up to this cycle, update state */
     len += mix_to_buffer(ym, access->ymcycle - currcycle, output + len);
     ym->reg.index[access->reg] = access->val;
 
-    /* update various internal variables in response to writes.
+    /* Update various internal variables in response to writes.
      * unfortunately pointers don't work for this, so... */
     switch (access->reg) {
     case 0: /* per_x_lo, per_x_hi */
@@ -353,7 +352,8 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
     case 4:
     case 5:
       voice = access->reg >> 1;
-      newevent = ym->reg.index[voice << 1] | ((ym->reg.index[(voice << 1) + 1] & TONE_HI_MASK) << 8);
+      newevent = ym->reg.index[voice << 1]
+        | ((ym->reg.index[(voice << 1) + 1] & TONE_HI_MASK) << 8);
       if (newevent == 0)
         newevent = 1;
       newevent <<= 3;
@@ -396,9 +396,9 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
     case 9:
     case 10:
       voice = access->reg - 8;
-      orig->tonegen[voice].envmask = access->val & 0x10
+      orig->tonegen[voice].envmask = (access->val & 0x10)
         ? 0x1f << (voice*5) : 0;
-      orig->tonegen[voice].volmask = access->val & 0x10
+      orig->tonegen[voice].volmask = (access->val & 0x10)
         ? 0 : (((access->val & 0xf) << 1) | 1) << (voice*5);
       break;
 
@@ -425,18 +425,13 @@ static int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
     currcycle = access->ymcycle;
   }
 
-  /* mix stuff outside writes */
+  /* Mix stuff outside writes */
   len += mix_to_buffer(ym, ymcycles - currcycle, output + len);
 
   /* Reset all access lists. */
-
-  //ym_waccess_list_t * const regs_n = &ym->noi_regs;
-  //ym_waccess_list_t * const regs_e = &ym->env_regs;
-  //ym_waccess_list_t * const regs_t = &ym->ton_regs;
-
   ym->noi_regs.head = ym->noi_regs.tail =
-	  ym->env_regs.head = ym->env_regs.tail =
-	  ym->ton_regs.head = ym->ton_regs.tail = 0;
+    ym->env_regs.head = ym->env_regs.tail =
+    ym->ton_regs.head = ym->ton_regs.tail = 0;
 
   /* Set free ptr to start of list */
   ym->waccess = ym->static_waccess;

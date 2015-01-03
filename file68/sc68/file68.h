@@ -50,10 +50,15 @@
 
 #define SC68_NOFILENAME "n/a" /**< SC68 unknown filename or author. */
 
+/* Only for development purpose. Do not change that. */
+#ifndef SC68_DEFADDR
+# define SC68_DEFADDR 0x10000
+#endif
+
 enum {
   SC68_DISK_ID   = (('d' << 24) | ('i' << 16) | ('s' << 8) | 'k'),
-  SC68_LOADADDR  = 0x10000, /**< Default load address in 68K memory.    */
-  SC68_MAX_TRACK = 63,      /**< Maximum track per disk (2 digits max). */
+  SC68_LOADADDR  = SC68_DEFADDR, /**< Default load address in 68K memory. */
+  SC68_MAX_TRACK = 63,  /**< Maximum track per disk (2 digits max). */
 };
 
 /**

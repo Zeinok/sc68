@@ -6,7 +6,7 @@
  * @date      2009-01-30
  */
 
-/* Copyright (c) 1998-2014 Antti Lankila */
+/* Copyright (c) 200?-2015 Antti Lankila */
 
 /**
  * @defgroup  lib_io68_ym_blep  BLEP YM engine
