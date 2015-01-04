@@ -101,13 +101,13 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
 
   /* Reset envelop generator */
   puls->env_bit            = 0;
-  puls->env_ct             = 0;
+  puls->env_ct             = 1;
 
   /* Reset noise generator */
   puls->noise_gen          = 1;
-  puls->noise_ct           = 0;
+  puls->noise_ct           = 1;
 
-  /* Reset tone generator */
+  /* Reset tone generator (add bias to avoid cancelling sync effect). */
   puls->voice_ctA          = 53;
   puls->voice_ctB          = 109;
   puls->voice_ctC          = 157;
@@ -159,19 +159,20 @@ static int noise_generator(ym_t * const ym, int ymcycles)
   ct        = puls->noise_ct;
   noise_gen = puls->noise_gen;
   per       = ym->reg.name.per_noise & 0x1F;
+  per      += !per;
 
-  per     <<= 1;    /* because the noise generator base frequency is
-                       master/16 but we have to match the envelop
-                       generator frequency which is master/8.
-                    */
+  /* $$$ X/ME Because the noise generator base frequency is master/16
+     but we have to match the envelop generator frequency which is
+     master/8. */
+  per     <<= 1;
 
   msk       = ym_smsk_table[7 & (ym->reg.name.ctl_mixer >> 3)];
   v         = (u16)(-(noise_gen & 1) | msk);
   b         = puls->noiptr;
   do {
-    if (++ct >= per) {
-      ct = 0;
-
+    assert(ct>0);
+    if (!--ct) {
+      ct = per;
       /* *** Based on MAME. Bit have been reversed for optimzation :) ***
        *
        *   The Random Number Generator of the 8910 is a 17-bit shift
@@ -232,12 +233,13 @@ static void do_noise(ym_t * const ym, cycle68_t ymcycle)
  * `-----------------------------------------------------------------'
  */
 
-#if YM_ENV_TABLE
-
-#undef V
+#ifdef V
+# error OOOPS V() is already defined
+# undef V
+#endif
 #define V(X) YM_OUT_MSK(X,X,X)
 
-static const int env_uplo[64] = {
+static const int env_uplo[32*3] = {
   V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
   V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
   V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
@@ -247,9 +249,14 @@ static const int env_uplo[64] = {
   V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
   V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
   V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
+
+  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
+  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
+  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
+  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
 };
 
-static const int env_uphi[64] = {
+static const int env_uphi[32*3] = {
   V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
   V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
   V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
@@ -259,9 +266,19 @@ static const int env_uphi[64] = {
   V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
   V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
   V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
+
+  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
+  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
+  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
+  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
 };
 
-static const int env_upup[64] = {
+static const int env_upup[32*3] = {
+  V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
+  V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
+  V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
+  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037),
+
   V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
   V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
   V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
@@ -273,7 +290,7 @@ static const int env_upup[64] = {
   V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037)
 };
 
-static const int env_updw[64] = {
+static const int env_updw[32*3] = {
   V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
   V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
   V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
@@ -282,10 +299,15 @@ static const int env_updw[64] = {
   V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
   V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
   V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
-  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000)
+  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000),
+
+  V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
+  V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
+  V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
+  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037),
 };
 
-static const int env_dwlo[64] = {
+static const int env_dwlo[32*3] = {
   V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
   V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
   V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
@@ -295,9 +317,14 @@ static const int env_dwlo[64] = {
   V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
   V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
   V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
+
+  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
+  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
+  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
+  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
 };
 
-static const int env_dwhi[64] = {
+static const int env_dwhi[32*3] = {
   V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
   V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
   V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
@@ -307,9 +334,14 @@ static const int env_dwhi[64] = {
   V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
   V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
   V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
+
+  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
+  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
+  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
+  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
 };
 
-static const int env_dwup[64] = {
+static const int env_dwup[32*3] = {
   V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
   V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
   V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
@@ -318,10 +350,20 @@ static const int env_dwup[64] = {
   V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
   V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
   V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
-  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037)
+  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037),
+
+  V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
+  V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
+  V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
+  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000),
 };
 
-static const int env_dwdw[64] = {
+static const int env_dwdw[32*3] = {
+  V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
+  V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
+  V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
+  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000),
+
   V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
   V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
   V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
@@ -354,8 +396,6 @@ static  const int * waveforms[16] = {
   /*F /_ */ env_uplo
 };
 
-#endif
-
 /* Perform envelop generator for N ym-cycles
  *
  *   The envelop generator will use the 16 Lost Signifiant Bit of the
@@ -370,27 +410,23 @@ static  const int * waveforms[16] = {
  */
 
 static int envelop_generator(ym_t * const ym, int ymcycles)
-#if YM_ENV_TABLE
 {
   ym_puls_t * const puls = &ym->emu.puls;
   int rem_cycle = ymcycles & 7;
 
   if((ymcycles >>= 3)) {
-    const int shape = ym->reg.name.env_shape & 15;
-    const int * const waveform = waveforms[shape];
-    /* Do Not Repeat is NOT ([CONT] AND NOT [HOLD]) */
-    const int dnr = 1 & ~((shape>>3)&~shape);
+    const int * const waveform = waveforms[15 & ym->reg.name.env_shape];
     s32 *b  = puls->envptr;
     int ct  = puls->env_ct;
     int bit = puls->env_bit;
     int per = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi<<8);
-
+    per += !per;
     do {
-      int t = ++ct >= per;
-      bit += t;
-      ct &= ~-t;
-      bit |= -((bit >> 6) & dnr);
-      bit &= 63;
+      assert(ct > 0);
+      if (!--ct) {
+        ct = per;
+        if (++bit==96) bit = 32;
+      }
       *b++ |= waveform[bit]<<16;
     } while (--ymcycles);
 
@@ -401,89 +437,6 @@ static int envelop_generator(ym_t * const ym, int ymcycles)
   }
   return rem_cycle;
 }
-#else /* #if YM_ENV_TABLE */
-{
-  unsigned int ncycle = ymcycles;
-  int rem_cycle;
-  int *b;
-  int ct, per;
-  unsigned int bit, bitstp, restp;
-  unsigned int cont, recont;
-  unsigned int alt, altalt;
-  int shape;
-
-  assert(ncycle >=0 );
-
-  rem_cycle = ncycle & 7;
-  if(!(ncycle >>= 3)) return rem_cycle;
-
-  b       = ym->emu.puls.envptr;
-
-  /* period */
-  ct      = ym->emu.puls.env_ct;
-  per     = ym->reg.index[YM_ENVL] | (ym->reg.index[YM_ENVH]<<8);
-  per     |= !per;
-  shape   = ym->reg.index[YM_ENVTYPE];
-
-  /* bit */
-  bit     = ym->emu.puls.env_bit;
-  bitstp  = ym->emu.puls.env_bitstp;
-  restp   = (shape & 1) ^ 1;
-
-  /* continue */
-  cont    = ym->emu.puls.env_cont;
-  recont  = (-((shape>>3) & 0x1)) & 0x1F;
-
-  /* alternate */
-  alt     = ym->emu.puls.env_alt;
-  altalt  = (-((shape ^ (shape>>1)) & 0x1)) & 0x1F;
-
-  do {
-    int n;
-
-    n = per - ct;
-    if (n <= 0) {
-      int prev_bit;
-      ct = 0;
-      n = per;
-      prev_bit = bit;
-      bit += bitstp;
-      if ((bit^prev_bit) & 32) {
-        bitstp = restp;
-        cont = recont;
-        alt ^= altalt;
-      }
-    }
-
-    /* 5 bit version */
-    int v = (bit ^ alt) & cont;
-    v |= v<<5;
-    v |= v<<5;
-    v <<= 16;
-
-    if (n > ncycle) {
-      n = ncycle;
-    }
-    ncycle -= n;
-    ct += n;
-
-    do {
-      *b++ |= v;
-    } while (--n);
-
-  } while (ncycle);
-
-  ym->emu.puls.envptr     = b;
-  ym->emu.puls.env_ct     = ct;
-  ym->emu.puls.env_bit    = bit;
-  ym->emu.puls.env_bitstp = bitstp;
-  ym->emu.puls.env_cont   = cont;
-  ym->emu.puls.env_alt    = alt;
-
-  return rem_cycle;
-}
-
-#endif /* #if YM_ENV_TABLE */
 
 
 /*
@@ -507,14 +460,7 @@ static void do_envelop(ym_t * const ym, cycle68_t ymcycle)
   for (access=regs->head, lastcycle=0; access; access=access->link) {
     int ymcycles = access->ymcycle-lastcycle;
 
-    if (access->ymcycle > ymcycle) {
-      TRACE68(ym_cat,
-              "ym-2149:w %s access reg %X out of frame!! (%u>%u %u)\n",
-              regs->name, (unsigned) access->reg, (unsigned) access->ymcycle,
-              (unsigned) ymcycle, (unsigned) (access->ymcycle/ymcycle) );
-      assert(!"ym-2149: envelop invalid access cycle");
-      break;
-    }
+    assert(access->ymcycle <= ymcycle);
 
     if (ymcycles) {
       lastcycle = access->ymcycle - envelop_generator(ym,ymcycles);
@@ -522,19 +468,8 @@ static void do_envelop(ym_t * const ym, cycle68_t ymcycle)
 
     ym->reg.index[access->reg] = access->val;
     if(access->reg == YM_ENVTYPE) {
-#if YM_ENV_TABLE
       puls->env_bit = 0;
-      puls->env_ct  = 0; /* $$$ Needs to be verifed. It seems cleaner. */
-#else
-      int shape = access->val & 15;
-      /* Alternate mask start value depend on ATTack bit */
-      puls->env_alt    = (~((shape << (INTMSB-2)) >> INTMSB)) & 0x1F;
-      puls->env_bit    = 0;
-      puls->env_bitstp = 1;
-      puls->env_cont   = 0x1f;
-      puls->env_ct = 0; /* $$$ Needs to be verifed. It seems cleaner. */
-#endif
-
+      /* $$$ X/ME Should env_ct be initialized to the period value ? */
     }
   }
   envelop_generator(ym, ymcycle-lastcycle);
@@ -589,9 +524,9 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
   ctB = puls->voice_ctB;
   ctC = puls->voice_ctC;
 
-  perA = ym->reg.name.per_a_lo | ((ym->reg.name.per_a_hi&0xF)<<8);
-  perB = ym->reg.name.per_b_lo | ((ym->reg.name.per_b_hi&0xF)<<8);
-  perC = ym->reg.name.per_c_lo | ((ym->reg.name.per_c_hi&0xF)<<8);
+  perA = ym->reg.name.per_a_lo | ((ym->reg.name.per_a_hi&0xF)<<8); perA += !perA;
+  perB = ym->reg.name.per_b_lo | ((ym->reg.name.per_b_hi&0xF)<<8); perB += !perB;
+  perC = ym->reg.name.per_c_lo | ((ym->reg.name.per_c_hi&0xF)<<8); perC += !perC;
 
   levels = puls->levels;
 
@@ -603,26 +538,31 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
 
   do {
     int sq;
+    unsigned int eo;
 
-    sq = -(++ctA >= perA);
-    levels ^= YM_OUT_MSK_A & sq;
-    ctA -= (perA & sq);
-
-    sq = -(++ctB >= perB);
-    levels ^= YM_OUT_MSK_B & sq;
-    ctB -= (perB & sq);
-
-    sq = -(++ctC >= perC);
-    levels ^= YM_OUT_MSK_C & sq;
-    ctC -= (perC & sq);
-
-    sq = levels;
-    sq |= smsk;
-    {
-      unsigned int eo = *b; /* EEEENNNN */
-      sq &= eo; eo >>= 16;
-      sq &= (eo&emsk) | vols;
+    assert(ctA > 0);
+    if (!--ctA) {
+      levels ^= YM_OUT_MSK_A;
+      ctA = perA;
     }
+
+    assert(ctB > 0);
+    if (!--ctB) {
+      levels ^= YM_OUT_MSK_B;
+      ctB = perB;
+    }
+
+    assert(ctC > 0);
+    if (!--ctC) {
+      levels ^= YM_OUT_MSK_C;
+      ctC = perC;
+    }
+
+    sq = levels | smsk;
+    eo = *b; /* EEEENNNN */
+    sq &= eo;                           /* Apply noise */
+    eo >>= 16;
+    sq &= (eo&emsk) | vols;             /* Apply amplitude */
     sq &= mute;
     sq = (int) ym->ymout5[sq];
     *b++ = sq;

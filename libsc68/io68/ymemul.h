@@ -121,13 +121,6 @@ typedef union ym_reg_u {
 } ym_reg_t;
 
 /**
- * Toggle table/calculated envelop emulation.
- */
-#ifndef YM_ENV_TABLE
-# define YM_ENV_TABLE 1
-#endif
-
-/**
  * YM-2149 emulation engine identifiers.
  */
 enum ym_engine_e {
