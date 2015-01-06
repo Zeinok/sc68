@@ -43,6 +43,7 @@
 #include <sc68/file68_opt.h>
 
 extern int ym_cat;                      /* defined in ymemul.c */
+extern const u16 * ym_envelops[16];     /* defined in ym_envel.c */
 
 #ifndef INTMSB
 # define INTMSB (sizeof(int)*8-1)
@@ -95,407 +96,72 @@ static const char * f_names[] = { f_2poles,f_mixed,f_1pole,f_boxcar,f_none };
 static const int n_filters = sizeof(filters)/sizeof(*filters);
 static int default_filter = 0;
 
+#define PULS ym->emu.puls
+
 static int reset(ym_t * const ym, const cycle68_t ymcycle)
 {
-  ym_puls_t * const puls = &ym->emu.puls;
 
   /* Reset envelop generator */
-  puls->env_bit            = 0;
-  puls->env_ct             = 1;
+  PULS.envel_idx          = -1;     /* ct==1 triggers +1 instantly */
+  PULS.envel_ct           = 1;
 
   /* Reset noise generator */
-  puls->noise_gen          = 1;
-  puls->noise_ct           = 1;
+  PULS.noise_bit          = 1;
+  PULS.noise_ct           = 1;
 
-  /* Reset tone generator (add bias to avoid cancelling sync effect). */
-  puls->voice_ctA          = 53;
-  puls->voice_ctB          = 109;
-  puls->voice_ctC          = 157;
-  puls->levels             = 0;
+  /* Reset tone generator (add bias to avoid cancel-out sync effect). */
+#if 1
+  PULS.voice_ctA          = 1;
+  PULS.voice_ctB          = 1;
+  PULS.voice_ctC          = 1;
+  PULS.levels             = 0x7fff;
+#else
+  PULS.voice_ctA          = 53;
+  PULS.voice_ctB          = 109;
+  PULS.voice_ctC          = 157;
+  PULS.levels             = 0;
+#endif
 
   /* Reset filters */
-  puls->hipass_inp1 = 0;
-  puls->hipass_out1 = 0;
-  puls->lopass_out1 = 0;
+  PULS.hipass_inp1 = 0;
+  PULS.hipass_out1 = 0;
+  PULS.lopass_out1 = 0;
 
   /* Reset butterworth */
-  puls->btw.x[0] = puls->btw.x[1] = 0;
-  puls->btw.y[0] = puls->btw.y[1] = 0;
+  PULS.btw.x[0] = PULS.btw.x[1] = 0;
+  PULS.btw.y[0] = PULS.btw.y[1] = 0;
 
   /* Butterworth low-pass cutoff=15.625khz sampling=250khz */
-  puls->btw.a[0] =  0x01eac69f; /* fix 30 */
-  puls->btw.a[1] =  0x03d58d3f;
-  puls->btw.a[2] =  0x01eac69f;
-  puls->btw.b[0] = -0x5d1253b0;
-  puls->btw.b[1] =  0x24bd6e2f;
+  PULS.btw.a[0] =  0x01eac69f; /* fix 30 */
+  PULS.btw.a[1] =  0x03d58d3f;
+  PULS.btw.a[2] =  0x01eac69f;
+  PULS.btw.b[0] = -0x5d1253b0;
+  PULS.btw.b[1] =  0x24bd6e2f;
 
   return 0;
 }
 
 /* ,-----------------------------------------------------------------.
- * |                          Noise generator                        |
+ * |                          All in one                             |
  * `-----------------------------------------------------------------'
  */
 
-/* Perform noise generator for N ym-cycles
- *
- *   The noise generator will use the 16 Less Signifiant Bit of the
- *   32 output buffer for each entry. 16 Most Signifiant Bit are
- *   clear by this function.
- *
- *   **BEFORE** envelop_generator() and tone_generator().
- */
-static int noise_generator(ym_t * const ym, int ymcycles)
+
+static int generator(ym_t  * const ym, int ymcycles)
 {
-  ym_puls_t * const puls = &ym->emu.puls;
-  int rem_cycles;
-  int v, noise_gen, ct, per, msk;
-  s32 * b;
+  const u16 * waveform = ym_envelops[15 & ym->reg.name.env_shape];
 
-  rem_cycles = ymcycles & 7;
-  if(!(ymcycles >>= 3)) goto finish;
-
-  /* All inits */
-  ct        = puls->noise_ct;
-  noise_gen = puls->noise_gen;
-  per       = (ym->reg.name.per_noise & 0x1F) << 1;
-  /* $$$ X/ME << 1 because the noise generator base frequency is
-     master/16 but we have to match the envelop generator frequency
-     which is master/8. */
-  msk       = ym_smsk_table[7 & (ym->reg.name.ctl_mixer >> 3)];
-  v         = (u16)(-(noise_gen & 1) | msk);
-  b         = puls->noiptr;
-  do {
-    if (--ct <= 0) {
-      ct = per;
-      /* *** Based on MAME. Bit have been reversed for optimzation :) ***
-       *
-       *   The Random Number Generator of the 8910 is a 17-bit shift
-       *   register. The input to the shift register is bit0 XOR bit2.
-       *   bit0 is the output.
-       */
-
-      /* bit 17 := bit 0 ^ bit 2 */
-      noise_gen |= ((noise_gen^(noise_gen>>2)) & 1)<<17;
-      noise_gen >>= 1;
-      v = (u16)(-(noise_gen & 1) | msk);
-    }
-    *b++ = v;
-  } while (--ymcycles);
-
-  /* Save value for next pass */
-  puls->noiptr    = b;
-  puls->noise_gen = noise_gen;
-  puls->noise_ct  = ct;
-
-  finish:
-  /* return not mixed cycle */
-  return rem_cycles;
-}
-
-/* Flush all noise registers write access and perform noise generation
- * until given cycle. The given ymcycle should/must be greater than the
- * latest write access cycle stamp.
- */
-static void do_noise(ym_t * const ym, cycle68_t ymcycle)
-{
-  ym_puls_t * const puls = &ym->emu.puls;
-  ym_waccess_t * access;
-  ym_waccess_list_t * const regs = &ym->noi_regs;
-  cycle68_t lastcycle;
-
-  puls->noiptr = ym->outbuf;
-  if (!ymcycle) {
-    return;
-  }
-
-  for (access=regs->head, lastcycle=0; access; access=access->link) {
-    int ymcycles = access->ymcycle-lastcycle;
-
-    assert(access->ymcycle <= ymcycle);
-
-    if (ymcycles) {
-      lastcycle = access->ymcycle - noise_generator(ym,ymcycles);
-    }
-    ym->reg.index[access->reg] = access->val;
-  }
-  lastcycle = ymcycle - noise_generator(ym, ymcycle-lastcycle);
-  regs->head = regs->tail = 0;
-}
-
-/* ,-----------------------------------------------------------------.
- * |                         Envelop generator                       |
- * `-----------------------------------------------------------------'
- */
-
-#ifdef V
-# error OOOPS V() is already defined
-# undef V
-#endif
-#define V(X) YM_OUT_MSK(X,X,X)
-
-static const int env_uplo[32*3] = {
-  V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
-  V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
-  V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
-  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037),
-
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-};
-
-static const int env_uphi[32*3] = {
-  V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
-  V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
-  V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
-  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037),
-
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-};
-
-static const int env_upup[32*3] = {
-  V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
-  V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
-  V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
-  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037),
-
-  V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
-  V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
-  V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
-  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037),
-
-  V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
-  V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
-  V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
-  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037)
-};
-
-static const int env_updw[32*3] = {
-  V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
-  V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
-  V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
-  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037),
-
-  V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
-  V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
-  V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
-  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000),
-
-  V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
-  V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
-  V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
-  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037),
-};
-
-static const int env_dwlo[32*3] = {
-  V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
-  V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
-  V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
-  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000),
-
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-  V(000),V(000),V(000),V(000),V(000),V(000),V(000),V(000),
-};
-
-static const int env_dwhi[32*3] = {
-  V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
-  V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
-  V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
-  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000),
-
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-  V(037),V(037),V(037),V(037),V(037),V(037),V(037),V(037),
-};
-
-static const int env_dwup[32*3] = {
-  V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
-  V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
-  V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
-  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000),
-
-  V(000),V(001),V(002),V(003),V(004),V(005),V(006),V(007),
-  V(010),V(011),V(012),V(013),V(014),V(015),V(016),V(017),
-  V(020),V(021),V(022),V(023),V(024),V(025),V(026),V(027),
-  V(030),V(031),V(032),V(033),V(034),V(035),V(036),V(037),
-
-  V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
-  V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
-  V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
-  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000),
-};
-
-static const int env_dwdw[32*3] = {
-  V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
-  V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
-  V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
-  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000),
-
-  V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
-  V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
-  V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
-  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000),
-
-  V(037),V(036),V(035),V(034),V(033),V(032),V(031),V(030),
-  V(027),V(026),V(025),V(024),V(023),V(022),V(021),V(020),
-  V(017),V(016),V(015),V(014),V(013),V(012),V(011),V(010),
-  V(007),V(006),V(005),V(004),V(003),V(002),V(001),V(000)
-};
-
-#undef V
-
-static  const int * waveforms[16] = {
-  /*0 \_ */ env_dwlo,
-  /*1 \_ */ env_dwlo,
-  /*2 \_ */ env_dwlo,
-  /*3 \_ */ env_dwlo,
-  /*4 /_ */ env_uplo,
-  /*5 /_ */ env_uplo,
-  /*6 /_ */ env_uplo,
-  /*7 /_ */ env_uplo,
-  /*8 \\ */ env_dwdw,
-  /*9 \_ */ env_dwlo,
-  /*A \/ */ env_dwup,
-  /*B \- */ env_dwhi,
-  /*C // */ env_upup,
-  /*D /- */ env_uphi,
-  /*E /\ */ env_updw,
-  /*F /_ */ env_uplo
-};
-
-/* Perform envelop generator for N ym-cycles
- *
- *   The envelop generator will use the 16 Lost Signifiant Bit of the
- *   32 output buffer for each entry. 16 Mores Signifiant Bit are used
- *   by noise generator and have already been setted by
- *   envelop_generator() function calls so the value must be
- *   preserved.
- *
- *   **AFTER** noise_generator() and **BEFORE** tone_generator().
- *
- *   shape format : [CONTinue | ATTack | ALTernate | HOLD]
- */
-
-static int envelop_generator(ym_t * const ym, int ymcycles)
-{
-  ym_puls_t * const puls = &ym->emu.puls;
-  int rem_cycle = ymcycles & 7;
-
-  if((ymcycles >>= 3)) {
-    const int * const waveform = waveforms[15 & ym->reg.name.env_shape];
-    s32 *b  = puls->envptr;
-    int ct  = puls->env_ct;
-    int bit = puls->env_bit;
-    int per = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi<<8);
-    do {
-      if (--ct <= 0) {
-        ct = per;
-        if (++bit==96) bit = 32;
-      }
-      *b++ |= waveform[bit]<<16;
-    } while (--ymcycles);
-
-    /* Save value for next pass */
-    puls->envptr     = b;
-    puls->env_ct     = ct;
-    puls->env_bit    = bit;
-  }
-  return rem_cycle;
-}
-
-
-/*
- * Flush all envelop registers write access and perform envelop
- * generation until given cycle. The given ymcycle should/must be
- * greater than the latest write access cycle stamp.
- */
-static void do_envelop(ym_t * const ym, cycle68_t ymcycle)
-{
-  ym_puls_t * const puls = &ym->emu.puls;
-  ym_waccess_t * access;
-  ym_waccess_list_t * const regs = &ym->env_regs;
-
-  cycle68_t lastcycle;
-
-  puls->envptr = ym->outbuf;
-  if (!ymcycle) {
-    return;
-  }
-
-  for (access=regs->head, lastcycle=0; access; access=access->link) {
-    int ymcycles = access->ymcycle-lastcycle;
-
-    assert(access->ymcycle <= ymcycle);
-
-    if (ymcycles) {
-      lastcycle = access->ymcycle - envelop_generator(ym,ymcycles);
-    }
-
-    ym->reg.index[access->reg] = access->val;
-    if(access->reg == YM_ENVTYPE) {
-      puls->env_bit = 0;
-      /* $$$ X/ME Should env_ct be initialized to the period value ? */
-    }
-  }
-  envelop_generator(ym, ymcycle-lastcycle);
-  regs->head = regs->tail = 0;
-}
-
-/* ,-----------------------------------------------------------------.
- * |                  Tone generator and mixer                       |
- * `-----------------------------------------------------------------'
- */
-
-static int tone_generator(ym_t  * const ym, int ymcycles)
-{
-  ym_puls_t * const puls = &ym->emu.puls;
-
-  int ctA,  ctB,  ctC;
-  int perA, perB, perC;
-  int smsk, emsk, vols;
-
-  s32 * b;
+  /* int ctA,  ctB,  ctC,  ctN,  ctE; */
+  int perA, perB, perC, perN, perE;
+  int smsk, emsk, vols, nmsk;
   int rem_cycles, v;
-  int levels;
-  int mute;
 
   rem_cycles = ymcycles & 7;
   ymcycles >>= 3;
   if(!ymcycles) goto finish;
 
-  /* init buffer address */
-  b = puls->tonptr;
-
-  mute = ym->voice_mute & YM_OUT_MSK_ALL;
-  smsk = ym_smsk_table[7 & ym->reg.name.ctl_mixer];
+  smsk = ym_smsk_table[7 &  ym->reg.name.ctl_mixer      ];
+  nmsk = ym_smsk_table[7 & (ym->reg.name.ctl_mixer >> 3)];
 
   /* 3 voices buzz or lvl mask */
   emsk = vols = 0;
@@ -512,92 +178,100 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
   if(v&0x10) emsk |= YM_OUT_MSK_C;
   else       vols |= (v<<11)+(1<<10);
 
-  /* Mixer steps & couters */
-  ctA = puls->voice_ctA;
-  ctB = puls->voice_ctB;
-  ctC = puls->voice_ctC;
-
   perA = ym->reg.name.per_a_lo | ((ym->reg.name.per_a_hi&0xF)<<8);
   perB = ym->reg.name.per_b_lo | ((ym->reg.name.per_b_hi&0xF)<<8);
   perC = ym->reg.name.per_c_lo | ((ym->reg.name.per_c_hi&0xF)<<8);
+  perE = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi<<8);
+  perN = (ym->reg.name.per_noise & 0x1F) << 1;
 
-  levels = puls->levels;
+  /* $$$ X/ME << 1 because the noise generator base frequency is
+     master/16 but we have to match the envelop generator frequency
+     which is master/8. */
+
+  /* $$$ x/ME DELME XXX TEST */
+  if (!perA) perA = 1;
+  if (PULS.voice_ctA > perA) PULS.voice_ctA %= perA;
+  if (!perB) perB = 1;
+  if (PULS.voice_ctB > perB) PULS.voice_ctB %= perB;
+  if (!perC) perC = 1;
+  if (PULS.voice_ctC > perC) PULS.voice_ctC %= perC;
+  if (!perE) perE = 1;
+  if (PULS.envel_ct > perE) PULS.envel_ct %= perE;
+  if (!perN) perN = 1;
+  if (PULS.noise_ct > perN) PULS.noise_ct %= perN;
 
   do {
     int sq;
-    unsigned int eo;
 
-    if (--ctA <= 0) {
-      levels ^= YM_OUT_MSK_A;
-      ctA = perA;
+    if (--PULS.noise_ct <= 0) {
+      PULS.noise_ct = perN;
+      /* *** Based on MAME. Bit have been reversed for optimzation :) ***
+       *
+       *   The Random Number Generator of the 8910 is a 17-bit shift
+       *   register. The input to the shift register is bit0 XOR bit2.
+       *   bit0 is the output.
+       */
+
+      /* bit 17 := bit 0 ^ bit 2 */
+      PULS.noise_bit |= ((PULS.noise_bit^(PULS.noise_bit>>2)) & 1)<<17;
+      PULS.noise_bit >>= 1;
     }
 
-    if (--ctB <= 0) {
-      levels ^= YM_OUT_MSK_B;
+    if (--PULS.envel_ct <= 0) {
+      PULS.envel_ct = perE;
+      if (++PULS.envel_idx == 96) PULS.envel_idx = 32;
     }
 
-    if (--ctC <= 0) {
-      levels ^= YM_OUT_MSK_C;
-      ctC = perC;
+    if (--PULS.voice_ctA <= 0) {
+      PULS.levels ^= YM_OUT_MSK_A;
+      PULS.voice_ctA = perA;
     }
 
-    sq = levels | smsk;
-    eo = *b; /* EEEENNNN */
-    sq &= eo;                           /* Apply noise */
-    eo >>= 16;
-    sq &= (eo&emsk) | vols;             /* Apply amplitude */
-    sq &= mute;
+    if (--PULS.voice_ctB <= 0) {
+      PULS.levels ^= YM_OUT_MSK_B;
+      PULS.voice_ctB = perB;
+    }
+
+    if (--PULS.voice_ctC <= 0) {
+      PULS.levels ^= YM_OUT_MSK_C;
+      PULS.voice_ctC = perC;
+    }
+
+    sq = PULS.levels | smsk;                      /* Apply tone. */
+    sq &= (-(PULS.noise_bit&1) | nmsk);           /* Apply noise. */
+    sq &= (waveform[PULS.envel_idx]&emsk) | vols; /* Apply volume. */
+    sq &= ym->voice_mute;                          /* Apply mute. */
     sq = (int) ym->ymout5[sq];
-    *b++ = sq;
+    *ym->outptr++ = sq;
 
   } while (--ymcycles);
 
-  /* Save value for next pass */
-  puls->tonptr    = b;
-  puls->voice_ctA = ctA;
-  puls->voice_ctB = ctB;
-  puls->voice_ctC = ctC;
-  puls->levels    = levels;
 finish:
   return rem_cycles;
 }
 
-/*
- * Flush all tone registers write access and perform tone generation
- * and mixer until given cycle. The given ymcycle should/must be
- * greater than the latest write access cycle stamp.
- */
-static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
-{
-  ym_puls_t * const puls = &ym->emu.puls;
 
-  ym_waccess_t * access;
-  ym_waccess_list_t * const regs = &ym->ton_regs;
+static void simulation(ym_t * const ym, cycle68_t ymcycle)
+{
+  ym_event_t * event;
   cycle68_t lastcycle;
 
-  puls->tonptr = ym->outbuf;
-  if (!ymcycle) {
+  if (!ymcycle)
     return;
-  }
 
-  for (access=regs->head, lastcycle=0; access; access=access->link) {
-    const int ymcycles = access->ymcycle - lastcycle;
-
-    if (access->ymcycle > ymcycle) {
-      TRACE68(ym_cat,
-              "ym-2149: %s access reg %X out of frame!! (%u>%u %u)\n",
-              regs->name, (unsigned) access->reg, (unsigned) access->ymcycle,
-              (unsigned) ymcycle, (unsigned) (access->ymcycle/ymcycle));
-      break;
+  for (event = ym->event_buf, lastcycle = 0; event < ym->event_ptr; ++event) {
+    const int ymcycles = event->ymcycle - lastcycle;
+    assert(event->ymcycle <= ymcycle);
+    if (ymcycles)
+      lastcycle = event->ymcycle - generator(ym, ymcycles);
+    ym->reg.index[event->reg] = event->val;
+    if(event->reg == YM_ENVTYPE) {
+      /* $$$ X/ME Should env_ct be initialized to the period value ? */
+      PULS.envel_idx = -1;         /* ct==1 triggers +1 instantly */
+      PULS.envel_ct  = 1;
     }
-
-    if (ymcycles) {
-      lastcycle = access->ymcycle - tone_generator(ym, ymcycles);
-    }
-    ym->reg.index[access->reg] = access->val;
   }
-  tone_generator(ym, ymcycle-lastcycle);
-  regs->head = regs->tail = 0;
+  generator(ym, ymcycle-lastcycle);
 }
 
 /* ,-----------------------------------------------------------------.
@@ -740,19 +414,16 @@ static s32 * resampling(s32 * dst, const int n,
 
 static void filter_none(ym_t * const ym)
 {
-  ym_puls_t * const puls = &ym->emu.puls;
-  const int n = (puls->tonptr - ym->outbuf);
-
+  const int n = (ym->outptr - ym->outbuf);
   if (n > 0) {
     ym->outptr =
-      resampling(ym->outbuf, n, /* 64, */ ym->clock>>3, ym->hz);
+      resampling(ym->outbuf, n, ym->clock>>3, ym->hz);
   }
 }
 
 static void filter_boxcar2(ym_t * const ym)
 {
-  ym_puls_t * const puls = &ym->emu.puls;
-  const int n = (puls->tonptr - ym->outbuf) >> 1;
+  const int n = (ym->outptr - ym->outbuf) >> 1;
 
   if (n > 0) {
     int m = n;
@@ -764,14 +435,13 @@ static void filter_boxcar2(ym_t * const ym)
     } while (--m);
 
     ym->outptr =
-      resampling(ym->outbuf, n, /* 64, */ ym->clock>>(3+1), ym->hz);
+      resampling(ym->outbuf, n, ym->clock>>(3+1), ym->hz);
   }
 }
 
 static void filter_boxcar4(ym_t * const ym)
 {
-  ym_puls_t * const puls = &ym->emu.puls;
-  const int n = (puls->tonptr - ym->outbuf) >> 2;
+  const int n = (ym->outptr - ym->outbuf) >> 2;
 
   if (n > 0) {
     int m = n;
@@ -783,7 +453,7 @@ static void filter_boxcar4(ym_t * const ym)
     } while (--m);
 
     ym->outptr =
-      resampling(ym->outbuf, n, /* 64, */ ym->clock>>(3+2), ym->hz);
+      resampling(ym->outbuf, n, ym->clock>>(3+2), ym->hz);
   }
 }
 
@@ -804,14 +474,13 @@ static void filter_boxcar(ym_t * const ym) {
  */
 static void filter_mixed(ym_t * const ym)
 {
-  ym_puls_t * const puls = &ym->emu.puls;
-  const int n = (puls->tonptr - ym->outbuf) >> 2; /* Number of block */
+  const int n = (ym->outptr - ym->outbuf) >> 2; /* Number of block */
 
   if (n > 0) {
     s32 * src = ym->outbuf, * dst = src;
-    int68_t h_i1 = puls->hipass_inp1;
-    int68_t h_o1 = puls->hipass_out1;
-    int68_t l_o1 = puls->lopass_out1;
+    int68_t h_i1 = PULS.hipass_inp1;
+    int68_t h_o1 = PULS.hipass_out1;
+    int68_t l_o1 = PULS.lopass_out1;
     int m = n;
 
     do {
@@ -856,9 +525,9 @@ static void filter_mixed(ym_t * const ym)
 
     } while (--m);
 
-    puls->hipass_inp1 = h_i1;
-    puls->hipass_out1 = h_o1;
-    puls->lopass_out1 = l_o1;
+    PULS.hipass_inp1 = h_i1;
+    PULS.hipass_out1 = h_o1;
+    PULS.lopass_out1 = l_o1;
 
     ym->outptr =
       resampling(ym->outbuf, n, /* 64, */ ym->clock>>(3+2), ym->hz);
@@ -867,15 +536,14 @@ static void filter_mixed(ym_t * const ym)
 
 static void filter_1pole(ym_t * const ym)
 {
-  ym_puls_t * const puls = &ym->emu.puls;
-  const int n = puls->tonptr - ym->outbuf;
+  const int n = ym->outptr - ym->outbuf;
 
   if (n > 0) {
     s32 * src = ym->outbuf, * dst = src;
 
-    int68_t h_i1 = puls->hipass_inp1;
-    int68_t h_o1 = puls->hipass_out1;
-    int68_t l_o1 = puls->lopass_out1;
+    int68_t h_i1 = PULS.hipass_inp1;
+    int68_t h_o1 = PULS.hipass_out1;
+    int68_t l_o1 = PULS.lopass_out1;
     int m = n;
 
     do {
@@ -911,9 +579,9 @@ static void filter_1pole(ym_t * const ym)
 
     } while (--m);
 
-    puls->hipass_inp1 = h_i1;
-    puls->hipass_out1 = h_o1;
-    puls->lopass_out1 = l_o1;
+    PULS.hipass_inp1 = h_i1;
+    PULS.hipass_out1 = h_o1;
+    PULS.lopass_out1 = l_o1;
 
     ym->outptr =
       resampling(ym->outbuf, n, /* 64, */ ym->clock>>(3+0), ym->hz);
@@ -928,26 +596,25 @@ static void filter_1pole(ym_t * const ym)
  */
 static void filter_2pole(ym_t * const ym)
 {
-  ym_puls_t * const puls = &ym->emu.puls;
-  const int n = puls->tonptr - ym->outbuf;
+  const int n = ym->outptr - ym->outbuf;
 
   if (n > 0) {
     s32 * src = ym->outbuf, * dst = src;
     int m = n;
 
-    int68_t h_i1 = puls->hipass_inp1;
-    int68_t h_o1 = puls->hipass_out1;
+    int68_t h_i1 = PULS.hipass_inp1;
+    int68_t h_o1 = PULS.hipass_out1;
 
-    const int68_t a0 = puls->btw.a[0] >> 15;
-    const int68_t a1 = puls->btw.a[1] >> 15;
-    const int68_t a2 = puls->btw.a[2] >> 15;
-    const int68_t b0 = puls->btw.b[0] >> 15;
-    const int68_t b1 = puls->btw.b[1] >> 15;
+    const int68_t a0 = PULS.btw.a[0] >> 15;
+    const int68_t a1 = PULS.btw.a[1] >> 15;
+    const int68_t a2 = PULS.btw.a[2] >> 15;
+    const int68_t b0 = PULS.btw.b[0] >> 15;
+    const int68_t b1 = PULS.btw.b[1] >> 15;
 
-    int68_t x0 = puls->btw.x[0];
-    int68_t x1 = puls->btw.x[1];
-    int68_t y0 = puls->btw.y[0];
-    int68_t y1 = puls->btw.y[1];
+    int68_t x0 = PULS.btw.x[0];
+    int68_t x1 = PULS.btw.x[1];
+    int68_t y0 = PULS.btw.y[0];
+    int68_t y1 = PULS.btw.y[1];
 
     do {
       int68_t i0,o0;
@@ -980,13 +647,13 @@ static void filter_2pole(ym_t * const ym)
 
     } while (--m);
 
-    puls->btw.x[0] = x0;
-    puls->btw.x[1] = x1;
-    puls->btw.y[0] = y0;
-    puls->btw.y[1] = y1;
+    PULS.btw.x[0] = x0;
+    PULS.btw.x[1] = x1;
+    PULS.btw.y[0] = y0;
+    PULS.btw.y[1] = y1;
 
-    puls->hipass_inp1 = h_i1;
-    puls->hipass_out1 = h_o1;
+    PULS.hipass_inp1 = h_i1;
+    PULS.hipass_out1 = h_o1;
 
     ym->outptr =
       resampling(ym->outbuf, n, /* 64, */ ym->clock>>3, ym->hz);
@@ -996,20 +663,20 @@ static void filter_2pole(ym_t * const ym)
 static
 int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
 {
+  /* set pointers */
   ym->outbuf = ym->outptr = output;
 
-  do_noise(ym,ymcycles);
-  do_envelop(ym,ymcycles);
-  do_tone_and_mixer(ym,ymcycles);
+  /* run the simulation */
+  simulation(ym,ymcycles);
 
-  ym->waccess     = ym->static_waccess;
-  ym->waccess_nxt = ym->waccess;
-
+  /* post processing (filters, resample ...) */
   filters[ym->emu.puls.ifilter].filter(ym);
+
+  /* reset event list. */
+  ym->event_ptr = ym->event_buf;
 
   return ym->outptr - ym->outbuf;
 }
-
 
 static
 int buffersize(const ym_t * const ym, const cycle68_t ymcycles)
@@ -1024,7 +691,6 @@ void cleanup(ym_t * const ym)
 
 int ym_puls_setup(ym_t * const ym)
 {
-  ym_puls_t * const puls = &ym->emu.puls;
   int err = 0;
 
   /* fill callback functions */
@@ -1035,9 +701,9 @@ int ym_puls_setup(ym_t * const ym)
   ym->cb_sampling_rate = 0;
 
   /* use default filter */
-  puls->ifilter        = default_filter;
+  PULS.ifilter        = default_filter;
 
-  TRACE68(ym_cat,"ym-2149: filter -- *%s*\n", filters[puls->ifilter].name);
+  TRACE68(ym_cat,"ym-2149: filter -- *%s*\n", filters[PULS.ifilter].name);
 
   return err;
 }

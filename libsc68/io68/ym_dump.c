@@ -37,6 +37,7 @@
 #endif
 
 #include "ymemul.h"
+#include "emu68/assert68.h"
 #include <sc68/file68_msg.h>
 #include <sc68/file68_str.h>
 #include <sc68/file68_opt.h>
@@ -47,26 +48,6 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
   dump->base_cycle = 0;
   dump->pass       = 0;
   return 0;
-}
-
-static ym_waccess_t * advance_list( ym_waccess_t * regs[] )
-{
-  int j, i;
-  ym_waccess_t * w = 0;
-
-  for ( i = 0, j = -1; i < 3; ++i ) {
-    if ( ! regs[i] ) continue;
-    if ( j < 0 || regs[i]->ymcycle < regs[j]->ymcycle ) {
-      j = i;
-    }
-  }
-
-  if ( j >= 0 ) {
-    w = regs[j];
-    regs[j] = w->link;
-  }
-
-  return w;
 }
 
 static
@@ -89,67 +70,74 @@ int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
   ym_dump_t * const dump = &ym->emu.dump;
   cycle68_t curcycle;
   u64       longcycle;
-  int       i, len, ymreg[16], mute;
+  int       i, len, ymreg[16], reg_mute, mix_mute;
 
   char tmp [128], * buf;
-  ym_waccess_t * ptr, * regs[3];
+  ym_event_t * ptr = ym->event_buf;
 
-  regs[0] = ym->ton_regs.head;
-  regs[1] = ym->noi_regs.head;
-  regs[2] = ym->env_regs.head;
-
-  mute
+  /* voice mute bit#0=A / bit#1=B / bit#2=C */
+  mix_mute
     = ( ( ym->voice_mute >> 0  ) & 1 )
     | ( ( ym->voice_mute >> 5  ) & 2 )
     | ( ( ym->voice_mute >> 10 ) & 4 )
     ;
-  mute = ( mute | ( mute << 3 ) ) ^ 077;
 
+  /* mixer (reg#7) tone and noise mute */
+  mix_mute = ( mix_mute | ( mix_mute << 3 ) ) ^ 077;
+
+  /* register to ignore (1 bit per registers). Ignoring volume and
+   * tone registers of muted voices. */
+  reg_mute
+    = ( -( ( mix_mute >> 0 ) & 1 ) & 0x103)
+    | ( -( ( mix_mute >> 1 ) & 1 ) & 0x20c)
+    | ( -( ( mix_mute >> 2 ) & 1 ) & 0x430)
+    ;
+
+  /* mark registers as not accessed yet. */
   for ( i = 0; i < 16; ++i ) ymreg[i] = -1;
 
-  ptr = advance_list(regs);
-  do {
-    curcycle  = ptr ? ptr->ymcycle : 0;
+  if (ptr == ym->event_ptr) {
+    /* $$$ DIRTY TRICK: nothing happen but we style need to print at
+     * least one line, so let just pretend a false access to register
+     * 15. */
+    ptr->ymcycle = 0;
+    ptr->reg = 15;
+    ptr->val = 00;
+    ++ym->event_ptr;
+  }
+
+  /* Walk the events */
+  while (ptr < ym->event_ptr) {
+    curcycle  = ptr->ymcycle;
     longcycle = dump->base_cycle + (u64) curcycle;
 
-    /* Get all entry at this cycle */
-    while (ptr && ptr->ymcycle == curcycle) {
-      ymreg[ ptr->reg & 15 ] = ptr->val & 255;
-      ptr = advance_list(regs);
-    }
+    /* Walk all events at this cycle */
+    do {
+      assert( (unsigned int) ptr->reg < 16 );
+      ymreg[ptr->reg & 15] = ptr->val & 255;
+    } while (++ptr < ym->event_ptr && ptr->ymcycle == curcycle);
 
     buf = tmp;
 
     /* dump pass number */
-    for ( i = (PASS_DIGITS-1)*4; i >= 0; i -= 4) {
+    for ( i = (PASS_DIGITS-1)*4; i >= 0; i -= 4)
       *buf++ = hex [ 15 & (int)(dump->pass >> i) ];
-    }
     *buf++ = ' ';
 
     /* dump cycle number */
-    for ( i = (CYCLE_DIGITS-1)*4; i >= 0; i -= 4) {
+    for ( i = (CYCLE_DIGITS-1)*4; i >= 0; i -= 4)
       *buf++ = hex [ 15 & (int)(longcycle >> i) ];
-    }
+
     /* dump register list */
     for ( i = 0; i < 14; ++i ) {
 
-      /* disable access for muted voices */
-      switch (i) {
+      /* deal with muted voices */
+      if ( reg_mute & (1<<i) )
+        ymreg[i] = -1;                  /* Act as if never accessed */
+      else if (i == YM_MIXER && ymreg[i] >= 0)
+        ymreg[i] |= mix_mute;           /* Mask tone and noise. */
 
-      case 0x0: case 0x1: case 0x2: case 0x3: case 0x4: case 0x5:
-        if ( ( mute & ( 1 << ( i >> 1 ) ) ) ) ymreg[i] = -1;
-        break;
-
-      case 0x8: case 0x9: case 0xA:
-        if ( ( mute & ( 1 << ( i - 8 ) ) ) ) ymreg[i] = -1;
-        break;
-
-      case 0x7:
-        if ( ymreg[i] >= 0 ) ymreg[i] |= mute;
-        break;
-      }
-
-      *buf++ = (!i)  ? ' ' : '-';
+      *buf++ = "- "[!i];
       if (ymreg[i] < 0){
         *buf++ = '.';
         *buf++ = '.';
@@ -160,22 +148,20 @@ int run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
       ymreg[i] = -1;
     }
     *buf++ = 0;
+
     /* Dump only if actually active */
     if (dump->active) puts(tmp);
-  } while (ptr);
+  }
 
-  /* Reset write lists */
-  ym->ton_regs.head = ym->ton_regs.tail = 0;
-  ym->noi_regs.head = ym->noi_regs.tail = 0;
-  ym->env_regs.head = ym->env_regs.tail = 0;
-  ym->waccess_nxt = ym->waccess;
+  /* Reset event list */
+  ym->event_ptr = ym->event_buf;
 
   /* null terminated string and align to 32-bit */
   dump->base_cycle += (uint64_t) ymcycles;
   dump->pass++;
 
+  /* clear output PCMs */
   len = buffersize(ym, ymcycles);
-
   for (i=0; i<len; ++i) {
     output[i] = 0;
   }

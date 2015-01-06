@@ -137,6 +137,7 @@
     <ClCompile Include="..\..\libsc68\io68\ymemul.c" />
     <ClCompile Include="..\..\libsc68\io68\ym_blep.c" />
     <ClCompile Include="..\..\libsc68\io68\ym_dump.c" />
+    <ClCompile Include="..\..\libsc68\io68\ym_envel.c" />
     <ClCompile Include="..\..\libsc68\io68\ym_io.c" />
     <ClCompile Include="..\..\libsc68\io68\ym_puls.c" />
     <ClCompile Include="..\..\libsc68\libsc68.c" />

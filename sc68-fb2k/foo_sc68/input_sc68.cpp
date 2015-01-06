@@ -52,7 +52,7 @@ input_sc68::input_sc68() {
   if (!m_sc68) {
     throw exception_aborted();
   }
-  sc68_cntl(m_sc68, SC68_SET_OPT_STR, "ym-engine", !g_ym_engine ? "blep" : "pulse");
+  sc68_cntl(m_sc68, SC68_SET_OPT_INT, "ym-engine", !!g_ym_engine);
   sc68_cntl(m_sc68, SC68_SET_ASID, g_ym_asid);
 }
 

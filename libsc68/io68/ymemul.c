@@ -50,57 +50,6 @@ int ym_default_chans = 7;
  *  Using a table for non linear mixing.
  */
 static s16 ymout5[32*32*32];
-static inline
-void access_list_reset(ym_waccess_list_t * const access_list,
-                       const char * name,
-                       const cycle68_t ymcycle)
-{
-  if (!name) name = "und";
-  access_list->name[0] = name[0];
-  access_list->name[1] = name[1];
-  access_list->name[2] = name[2];
-  access_list->name[3] = 0;
-  access_list->head = access_list->tail = 0;
-}
-
-static void access_list_add(ym_t * const ym,
-                            ym_waccess_list_t * const access_list,
-                            const int reg, const int val,
-                            const cycle68_t ymcycle)
-{
-  ym_waccess_t * free_access = ym->waccess_nxt;
-
-  if (free_access >= ym->waccess+ym->waccess_max) {
-    /* No more free entries. */
-    /* $$$ TODO: realloc buffer, reloc all lists ... */
-    ++ym->overflow;
-    return;
-  }
-  ym->waccess_nxt = free_access+1;
-
-  free_access->ymcycle = ymcycle;
-  free_access->reg     = reg;
-  free_access->val     = val;
-  free_access->link    = 0;
-
-  if (access_list->tail) {
-    access_list->tail->link = free_access;
-  } else {
-    access_list->head = free_access;
-  }
-  access_list->tail = free_access;
-}
-
-static void access_adjust_cycle(ym_waccess_list_t * const access_list,
-                                const cycle68_t ymcycles)
-{
-  ym_waccess_t * access;
-  /* access_list->last_cycle -= ymcycles; */
-  for (access = access_list->head; access; access = access->link) {
-    access->ymcycle -= ymcycles;
-  }
-}
-
 
 /* ,-----------------------------------------------------------------.
  * |                         Yamaha reset                            |
@@ -130,11 +79,9 @@ int ym_reset(ym_t * const ym, const cycle68_t ymcycle)
       ym->cb_reset(ym,ymcycle);
     }
 
-    /* Reset access lists */
-    access_list_reset(&ym->ton_regs, "Ton", ymcycle);
-    access_list_reset(&ym->noi_regs, "Noi", ymcycle);
-    access_list_reset(&ym->env_regs, "Env", ymcycle);
-    ym->overflow = 0;
+    /* Reset event lists */
+    ym->event_ptr = ym->event_buf;
+    ym->event_ovf = 0;
 
     ret = 0;
   }
@@ -299,38 +246,24 @@ int ym_run(ym_t * const ym, s32 * output, const cycle68_t ymcycles)
  * `-----------------------------------------------------------------'
  */
 
+#define ELTOF(A) ( sizeof(A) / sizeof(*A) )
+
 void ym_writereg(ym_t * const ym,
                  const int val, const cycle68_t ymcycle)
 {
   const int reg = ym->ctrl;
+  const ym_event_t * const event_end = ym->event_buf+ELTOF(ym->event_buf);
 
-  if (reg >= 0 && reg < 16) {
+  if ( (unsigned int)reg < 16 ) {
+    assert( reg >= 0 && reg < 16 );
     ym->shadow.index[reg] = val;
-
-    switch(reg) {
-      /* Tone generator related registers. */
-    case YM_PERL(0): case YM_PERH(0):
-    case YM_PERL(1): case YM_PERH(1):
-    case YM_PERL(2): case YM_PERH(2):
-    case YM_VOL(0): case YM_VOL(1): case YM_VOL(2):
-      access_list_add(ym, &ym->ton_regs, reg, val, ymcycle);
-      break;
-
-      /* Envelop generator related registers. */
-    case YM_ENVL: case YM_ENVH: case YM_ENVTYPE:
-      access_list_add(ym, &ym->env_regs, reg, val, ymcycle);
-      break;
-
-      /* Reg 7 modifies both noise & tone generators */
-    case YM_MIXER:
-      access_list_add(ym, &ym->ton_regs, reg, val, ymcycle);
-      /* Noise generator related registers. */
-    case YM_NOISE:
-      access_list_add(ym, &ym->noi_regs, reg, val, ymcycle);
-      break;
-
-    default:
-      break;
+    if (ym->event_ptr >= event_end)
+      ++ym->event_ovf;
+    else {
+      ym->event_ptr->ymcycle = ymcycle;
+      ym->event_ptr->reg = reg;
+      ym->event_ptr->val = val;
+      ++ym->event_ptr;
     }
   }
 }
@@ -342,10 +275,19 @@ void ym_writereg(ym_t * const ym,
  */
 void ym_adjust_cycle(ym_t * const ym, const cycle68_t ymcycles)
 {
-  if (ym) {
-    access_adjust_cycle(&ym->ton_regs, ymcycles);
-    access_adjust_cycle(&ym->noi_regs, ymcycles);
-    access_adjust_cycle(&ym->env_regs, ymcycles);
+  if (ym && ymcycles) {
+    ym_event_t * event;
+    
+    /* Should not be run before events have been flushed or
+     * processed. It's not really an error, but with the current
+     * implementation it should not be happening. */
+    assert(ym->event_ptr == ym->event_buf);
+
+    /* Do the job anyway */
+    for (event = ym->event_buf; event < ym->event_ptr; ++event) {
+      assert(event->ymcycle >= ymcycles);
+      event->ymcycle -= ymcycles;
+    }
   }
 }
 
@@ -585,11 +527,7 @@ int ym_setup(ym_t * const ym, ym_parms_t * const parms)
           p->engine,p->hz,p->clock,256);
 
   if (ym) {
-    ym->overflow    = 0;
     ym->ymout5      = ymout5;
-    ym->waccess_max = sizeof(ym->static_waccess)/sizeof(*ym->static_waccess);
-    ym->waccess     = ym->static_waccess;
-    ym->waccess_nxt = ym->waccess;
     ym->clock       = p->clock;
     ym->voice_mute  = ym_smsk_table[7 & ym_default_chans];
     /* clearing sampling rate callback ensure requested rate to be in
@@ -636,9 +574,9 @@ void ym_cleanup(ym_t * const ym)
 {
   TRACE68(ym_cat,YMHD "%s\n", "cleanup");
   if (ym) {
-    if (ym->overflow) {
+    if (ym->event_ovf) {
       msg68_critical(YMHD "write access buffer has overflow -- *%u*\n",
-                     ym->overflow);
+                     ym->event_ovf);
       assert(!"YM event list overflow");
     }
     if (ym->cb_cleanup)

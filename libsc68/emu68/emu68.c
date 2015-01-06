@@ -494,10 +494,12 @@ int emu68_finish(emu68_t * const emu68, uint68_t instructions)
     emu68->instructions = instructions;
   }
 
-  for (io=emu68->iohead; io; io=io->next) {
-    io->adjust_cycle(io, emu68->cycle);
+  if (emu68->cycle) {
+    for (io=emu68->iohead; io; io=io->next) {
+      io->adjust_cycle(io, emu68->cycle);
+    }
+    emu68->cycle = 0;
   }
-  emu68->cycle = 0;
 
   emu68->status = EMU68_NRM;
   /* assert ( emu68->status == EMU68_NRM ); */

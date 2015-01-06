@@ -61,11 +61,10 @@ enum {
  */
 
 /**
- * YM write access structure.
+ * YM event (write access) struture.
  */
-struct ym_waccess_s
+struct ym_event_s
 {
-  struct ym_waccess_s * link; /**< Link to prev or next entry.   */
   cycle68_t ymcycle;          /**< CPU cycle this access occurs. */
   u8 reg;                     /**< YM register to write into.    */
   u8 val;                     /**< Value to write.               */
@@ -74,17 +73,7 @@ struct ym_waccess_s
 /**
  * YM write access type.
  */
-typedef struct ym_waccess_s ym_waccess_t;
-
-/**
- * Sorted list of YM write access.
- */
-typedef struct
-{
-  char name[4];               /**< Name (for debug).     */
-  ym_waccess_t * head;        /**< First access in list. */
-  ym_waccess_t * tail;        /**< Last access in list.   */
-} ym_waccess_list_t;
+typedef struct ym_event_s ym_event_t;
 
 /**
  * @}
@@ -205,25 +194,15 @@ struct ym_s {
   uint68_t clock;             /**< Master clock frequency in Hz.         */
 
   /**
-   * @name  Write access back storage.
+   * @name  Events (Write access) storage.
    * @{
    */
-  ym_waccess_list_t env_regs; /**< envelop generator access list.        */
-  ym_waccess_list_t noi_regs; /**< noise generator access list.          */
-  ym_waccess_list_t ton_regs; /**< tone generator access list.           */
-  int            waccess_max; /**< Maximum number of entry in waccess.   */
-  ym_waccess_t * waccess_nxt; /**< Next available ym_waccess_t.          */
-  ym_waccess_t * waccess;     /**< Static register entry list.           */
-  unsigned       overflow;    /**< count overflows                       */
+  ym_event_t  *event_ptr;       /**< Current number of entry in event. */
+  unsigned int event_ovf;       /**< count overflows.                  */
+  ym_event_t   event_buf[1600]; /**< Pre-allocated YM memory access.   */
   /**
    * @}
    */
-
-  /**
-   * Pre-allocated YM memory access.
-   * @note should be allocated
-   */
-  ym_waccess_t static_waccess[2048];
 
   /**
    * @name  Output

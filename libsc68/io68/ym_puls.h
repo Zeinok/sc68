@@ -47,14 +47,12 @@ typedef void (*ym_puls_filter_t)(ym_t * const);
  */
 struct ym2149_puls_s
 {
-
   /**
    *  @name  Envelop generator
    *  @{
    */
-  int env_ct;               /**< Envelop period counter.                 */
-  int env_bit;              /**< Envelop index [0..96].                  */
-  s32 * envptr;             /**< generated envelop pointer.              */
+  int envel_ct;                        /**< Envelop period counter. */
+  int envel_idx;                       /**< Envelop index [0..96].  */
   /**
    * @}
    */
@@ -63,9 +61,8 @@ struct ym2149_puls_s
    * @name  Noise generator
    * @{
    */
-  unsigned int noise_gen;   /**< Noise generator 17-bit shift register.  */
-  unsigned int noise_ct;    /**< Noise generator period counter.         */
-  s32 * noiptr;             /**< generated noise pointer.                */
+  int noise_bit;        /**< Noise generator 17-bit shift register. */
+  int noise_ct;         /**< Noise generator period counter.        */
   /**
    * @}
    */
@@ -74,11 +71,10 @@ struct ym2149_puls_s
    * @name  Tone generator
    * @{
    */
-  int voice_ctA;            /**< Canal A sound period counter.           */
-  int voice_ctB;            /**< Canal B sound period counter.           */
-  int voice_ctC;            /**< Canal C sound period counter.           */
-  unsigned int levels;      /**< Square level [C<<10|B<<5|A].            */
-  s32 * tonptr;             /**< generated tone pointer.                 */
+  int voice_ctA;                 /**< Canal A sound period counter. */
+  int voice_ctB;                 /**< Canal B sound period counter. */
+  int voice_ctC;                 /**< Canal C sound period counter. */
+  int levels;                    /**< Square level [C<<10|B<<5|A].  */
   /**
    * @}
    */
@@ -87,11 +83,11 @@ struct ym2149_puls_s
    * @name  Filter
    * @{
    */
-  int68_t hipass_inp1;      /**< high pass filter input.                 */
-  int68_t hipass_out1;      /**< high pass filter output.                */
-  int68_t lopass_out1;      /**< low pass filter output.                 */
+  int68_t hipass_inp1;                /**< high pass filter input.  */
+  int68_t hipass_out1;                /**< high pass filter output. */
+  int68_t lopass_out1;                /**< low pass filter output.  */
 
-  /** 2-poles butterworth filter */
+  /** 2-poles butterworth filter. */
   struct {
     int68_t x[2];                       /**< @nodoc */
     int68_t y[2];                       /**< @nodoc */
@@ -102,7 +98,7 @@ struct ym2149_puls_s
    * @}
    */
 
-  int ifilter;              /**< filter function to use.                 */
+  int ifilter;                         /**< filter function to use. */
 
 };
 
