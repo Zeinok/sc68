@@ -158,20 +158,15 @@ static int noise_generator(ym_t * const ym, int ymcycles)
   /* All inits */
   ct        = puls->noise_ct;
   noise_gen = puls->noise_gen;
-  per       = ym->reg.name.per_noise & 0x1F;
-  per      += !per;
-
-  /* $$$ X/ME Because the noise generator base frequency is master/16
-     but we have to match the envelop generator frequency which is
-     master/8. */
-  per     <<= 1;
-
+  per       = (ym->reg.name.per_noise & 0x1F) << 1;
+  /* $$$ X/ME << 1 because the noise generator base frequency is
+     master/16 but we have to match the envelop generator frequency
+     which is master/8. */
   msk       = ym_smsk_table[7 & (ym->reg.name.ctl_mixer >> 3)];
   v         = (u16)(-(noise_gen & 1) | msk);
   b         = puls->noiptr;
   do {
-    assert(ct>0);
-    if (!--ct) {
+    if (--ct <= 0) {
       ct = per;
       /* *** Based on MAME. Bit have been reversed for optimzation :) ***
        *
@@ -420,10 +415,8 @@ static int envelop_generator(ym_t * const ym, int ymcycles)
     int ct  = puls->env_ct;
     int bit = puls->env_bit;
     int per = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi<<8);
-    per += !per;
     do {
-      assert(ct > 0);
-      if (!--ct) {
+      if (--ct <= 0) {
         ct = per;
         if (++bit==96) bit = 32;
       }
@@ -524,36 +517,26 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
   ctB = puls->voice_ctB;
   ctC = puls->voice_ctC;
 
-  perA = ym->reg.name.per_a_lo | ((ym->reg.name.per_a_hi&0xF)<<8); perA += !perA;
-  perB = ym->reg.name.per_b_lo | ((ym->reg.name.per_b_hi&0xF)<<8); perB += !perB;
-  perC = ym->reg.name.per_c_lo | ((ym->reg.name.per_c_hi&0xF)<<8); perC += !perC;
+  perA = ym->reg.name.per_a_lo | ((ym->reg.name.per_a_hi&0xF)<<8);
+  perB = ym->reg.name.per_b_lo | ((ym->reg.name.per_b_hi&0xF)<<8);
+  perC = ym->reg.name.per_c_lo | ((ym->reg.name.per_c_hi&0xF)<<8);
 
   levels = puls->levels;
-
-  /* TRACE68(ym_cat,"levels inp: %04x %02x %02x %02x\n", */
-  /*         levels, */
-  /*         0x1f&(levels>>10), */
-  /*         0x1f&(levels>> 5), */
-  /*         0x1f&(levels>> 0)); */
 
   do {
     int sq;
     unsigned int eo;
 
-    assert(ctA > 0);
-    if (!--ctA) {
+    if (--ctA <= 0) {
       levels ^= YM_OUT_MSK_A;
       ctA = perA;
     }
 
-    assert(ctB > 0);
-    if (!--ctB) {
+    if (--ctB <= 0) {
       levels ^= YM_OUT_MSK_B;
-      ctB = perB;
     }
 
-    assert(ctC > 0);
-    if (!--ctC) {
+    if (--ctC <= 0) {
       levels ^= YM_OUT_MSK_C;
       ctC = perC;
     }
@@ -568,13 +551,6 @@ static int tone_generator(ym_t  * const ym, int ymcycles)
     *b++ = sq;
 
   } while (--ymcycles);
-
-  /* TRACE68(ym_cat,"levels out: %04x %02x %02x %02x A:%d B:%d C:%d\n", */
-  /*         levels, */
-  /*         0x1f&(levels >> 10), */
-  /*         0x1f&(levels >>  5), */
-  /*         0x1f&(levels >>  0), */
-  /*         ctA,ctB,ctC); */
 
   /* Save value for next pass */
   puls->tonptr    = b;
@@ -686,17 +662,9 @@ static void do_tone_and_mixer(ym_t * const ym, cycle68_t ymcycle)
 /******************************************************/
 
 
-#if 0
-/* What it should be ... */
-# define REVOL(V) ((V) * _vol >> 6)
-# define CLIP3(V,A,B) ( V < A ? A : ( V > B ? B : V ) )
-#else
-/* What it really is (BLEP does not honnor it anyway) */
-# define REVOL(V) ((V) >> 1)
-# define CLIP3(V,A,B) ( V < A ? A : ( V > B ? B : V ) )
-#endif
+#define REVOL(V) ((V) >> 1)
+#define CLIP3(V,A,B) ( V < A ? A : ( V > B ? B : V ) )
 #define CLIP(V) CLIP3(V,-32768,32767)
-
 
 static inline int clip(int o)
 {
@@ -713,8 +681,7 @@ static inline int clip(int o)
   if (o < -32768) {
     msg68(ym_cat,"ym-2149: pulse -- pcm clip -- %d < -32768\n", o);
     o = -32768;
-  }
-  if (o > 32767) {
+  } else if (o > 32767) {
     msg68(ym_cat,"ym-2149: pulse -- pcm clip -- %d > 32767\n", o);
     o = 32767;
   }
@@ -731,13 +698,13 @@ static inline int clip(int o)
  * @warning irate <= 262143 or 32bit overflow
  */
 static s32 * resampling(s32 * dst, const int n,
-/*                         const int _vol, */
                         const uint68_t irate, const uint68_t orate)
 {
   s32   * const src = dst;
   const int68_t stp = (irate << 14) / orate; /* step into source */
 
   if ( 0 == (stp & ((1<<14)-1)) ) {
+    /* integer step: fast down-sampling/ */
     const int istp = stp >> 14;
     const int iend = n;
     int idx        = 0;
@@ -751,13 +718,13 @@ static s32 * resampling(s32 * dst, const int n,
     int68_t       idx = 0;
 
     if (stp >= 1<<14) {
-      /* forward */
+      /* step > 1: down-sampling, do it forward */
       do {
         int o = REVOL(src[(int)(idx>>14)]);
         *dst++ = clip(o);
       } while ((idx += stp) < end);
     } else {
-      /* backward */
+      /* step < 0: up-sampling, do backward */
       const int m = (n * orate + irate - 1) / irate; /* output samples */
       dst  = src + m - 1;
       idx  = end;
