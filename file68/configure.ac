@@ -76,6 +76,12 @@ AC_ARG_ENABLE(
       [add built-in replay (~130kB) @<:@default=no@:>@])],
   [],[enable_replay_rom=no])
 
+AC_ARG_ENABLE(
+  [scheme],
+  [AS_HELP_STRING([--enable-scheme],
+      [select schemes/protocols available @<:@default=check@:>@])],
+  [],[enable_scheme=no])
+
 # ,----------------------------------------------------------------------.
 # | External libraries                                                   |
 # `----------------------------------------------------------------------'
@@ -87,6 +93,29 @@ SC68_WITH([unice68])
 SC68_WITH([z],[no],[gzdopen],[zlib.h],[zlib68])
 SC68_WITH([ao],[no],[ao_initialize],[ao/ao.h],[ao68])
 SC68_WITH([curl],[no],[],[curl/curl.h],[curl68])
+
+# Protocols/schemes
+# -----------------
+if test X"[$]has_curl" = Xno; then
+    enable_scheme='n/a'
+else
+  if test X"[$]enable_scheme" != check; then
+    curl_protocols='FILE HTTP'
+    if test X"[$]curl_org" = Xpkg-config; then
+        eval curl_protocols=`[$]pkgconfig libcurl --variable=supported_protocols`
+    fi
+    enable_scheme=''; CURL_SCHEMES=''
+    for protocol in $curl_protocols; do
+      case [$]protocol in
+        FILE | *FTP* | HTTP*)
+          enable_scheme="[$]enable_scheme[$]protocol "
+          CURL_SCHEMES="[$]CURL_SCHEMES[$]protocol\0"
+          ;;
+      esac
+    done
+  fi
+  AC_DEFINE_UNQUOTED([CURL_SCHEMES],["[$]CURL_SCHEMES]",[Enabled curl schemes])
+fi
 
 # Registry68 support
 # ------------------
@@ -258,6 +287,7 @@ AC_MSG_NOTICE([|   windows registry    : $enable_reg])
 AC_MSG_NOTICE([|   built-in replays    : $enable_replay_rom])
 AC_MSG_NOTICE([|   zlib support        : $has_z ($z_ver)])
 AC_MSG_NOTICE([|   curl support        : $has_curl ($curl_ver)])
+AC_MSG_NOTICE([|   curl schemes        : $enable_scheme])
 AC_MSG_NOTICE([|   ICE! support        : $has_unice68 ($unice68_ver)])
 AC_MSG_NOTICE([|   ao support          : $has_ao ($ao_ver)])
 AC_MSG_NOTICE([|   sc68 data dir       : $sc68datadir])

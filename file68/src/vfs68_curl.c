@@ -3,7 +3,7 @@
  * @brief   implements istream68 VFS for cURL
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (c) 1998-2014 Benjamin Gerard
+ * Copyright (c) 1998-2015 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -36,6 +36,8 @@
 # define DEBUG_CURL_O 0
 #endif
 static int curl_cat = msg68_DEFAULT;
+
+static const char curl_schemes[] = CURL_SCHEMES;
 
 #include "file68_vfs_def.h"
 #include "file68_uri.h"
@@ -76,7 +78,7 @@ typedef struct {
 
 /** vfs curl structure. */
 typedef struct {
-  vfs68_t vfs;       /**< vfs function.                 */
+  vfs68_t vfs;                   /**< vfs function.                 */
 
   CURLM * curm;              /**< CURL "multi" handle               */
   CURL  * curl;              /**< CURL "easy" handle.               */
@@ -120,13 +122,18 @@ static scheme68_t curl_scheme = {
 static int curl_ismine(const char * uri)
 {
   const int ok = SCHEME68_ISMINE | SCHEME68_READ;
+  const char * dot = strchr(uri,':');
 
-  if (0
-      || !strncmp68(uri,"ftp://",6)
-      || !strncmp68(uri,"http://",7)
-      || !strncmp68(uri,"sftp://",7)
-      || !strncmp68(uri,"https://",8))
-    return ok;
+  if (dot) {
+    const int len = dot - uri;
+    if (len < 16 && uri[len+1] == '/' && uri[len+2] == '/') {
+      int l;
+      const char * c;
+      for (c = curl_schemes; l = strlen(c), l; c += l+1)
+        if (l == len &&  !strncmp68(uri,c,l))
+          return ok;
+    }
+  }
   return 0;
 }
 
