@@ -6,7 +6,7 @@
  * @date      1999/07/27
  */
 
-/* Copyright (c) 1998-2014 Benjamin Gerard */
+/* Copyright (c) 1998-2015 Benjamin Gerard */
 
 #ifndef SC68_CONF68_H
 #define SC68_CONF68_H

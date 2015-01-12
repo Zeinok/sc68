@@ -6,7 +6,7 @@
  * @date      1999-03-17
  */
 
-/* Copyright (c) 1998-2014 Benjamin Gerard */
+/* Copyright (c) 1998-2015 Benjamin Gerard */
 
 #ifndef DESA68_H
 #define DESA68_H

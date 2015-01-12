@@ -1,10 +1,8 @@
 # -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 #
-# Time-stamp: <2013-06-12 11:45:06 ben>
-#
 # pkg-config file for @PACKAGE_NAME@
 #
-# (C) 2011-2013 Benjamin Gerard <http://sourceforge.net/users/benjihan>
+# (C) 2011-2015 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 #
 # Distributed under the term of the GPL3+
 

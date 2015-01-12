@@ -6,7 +6,7 @@
  * @date      2009/05/08
  */
 
-/* Copyright (c) 1998-2014 Benjamin Gerard */
+/* Copyright (c) 1998-2015 Benjamin Gerard */
 
 #ifndef EMU68_INL_EXCEPTION68_H
 #define EMU68_INL_EXCEPTION68_H

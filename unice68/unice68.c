@@ -3,7 +3,7 @@
  * @brief   program to pack and depack ICE! packed files
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (c) 1998-2014 Benjamin Gerard
+ * Copyright (c) 1998-2015 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -157,7 +157,7 @@ static int print_usage(void)
       "  -v --verbose   Be more verbose (multiple use possible)\n"
       "  -q --quiet     Be less verbose (multiple use possible)\n"
       "\n"
-      "Copyright (c) 1998-2014 Benjamin Gerard\n"
+      "Copyright (c) 1998-2015 Benjamin Gerard\n"
       "\n"
       "Visit <" PACKAGE_URL ">\n"
       "Report bugs to <" PACKAGE_BUGREPORT ">\n",
@@ -174,7 +174,7 @@ static int print_version(void)
   puts
     (
       "\n"
-      "Copyright (c) 1998-2014 Benjamin Gerard.\n"
+      "Copyright (c) 1998-2015 Benjamin Gerard.\n"
       "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
       "This is free software: you are free to change and redistribute it.\n"
       "There is NO WARRANTY, to the extent permitted by law.\n"

@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (c) 1998-2014 Benjamin Gerard */
+/* Copyright (c) 1998-2015 Benjamin Gerard */
 
 #ifndef _MKSC68_TAG_H_
 #define _MKSC68_TAG_H_

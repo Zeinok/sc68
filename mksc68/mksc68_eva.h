@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (c) 1998-2014 Benjamin Gerard */
+/* Copyright (c) 1998-2015 Benjamin Gerard */
 
 #ifndef MKSC68_EVA_H
 #define MKSC68_EVA_H

@@ -6,7 +6,7 @@
  * @date      1999/05/17
  */
 
-/* Copyright (c) 1998-2014 Benjamin Gerard */
+/* Copyright (c) 1998-2015 Benjamin Gerard */
 
 #ifndef MIXER68_H
 #define MIXER68_H

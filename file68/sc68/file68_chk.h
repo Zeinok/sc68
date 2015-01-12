@@ -6,7 +6,7 @@
  * @brief    Chunk definition header file.
  */
 
-/* Copyright (c) 1998-2014 Benjamin Gerard */
+/* Copyright (c) 1998-2015 Benjamin Gerard */
 
 #ifndef FILE68_CHK_H
 #define FILE68_CHK_H

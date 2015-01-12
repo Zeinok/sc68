@@ -5,7 +5,7 @@
  * @author  http://sourceforge.net/users/vincentp
  *
  * Copyright (c) 1993 Vincent Penne
- * Copyright (c) 1998-2014 Benjamin Gerard
+ * Copyright (c) 1998-2015 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -136,7 +136,7 @@ void putlong(FILE * fd, long n)
 
 #ifndef COPYRIGHT
 #define COPYRIGHT                                               \
-  "Copyright (c) 1993 Penne Vincent, 1998-2014 Benjamin Gerard"
+  "Copyright (c) 1993 Penne Vincent, 1998-2015 Benjamin Gerard"
 #endif
 
 #ifndef LICENCE
