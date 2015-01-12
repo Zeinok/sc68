@@ -3,7 +3,7 @@
  * @brief   implements istream68 for libao
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (c) 1998-2014 Benjamin Gerard
+ * Copyright (c) 1998-2015 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -173,8 +173,10 @@ static const char * isao_name(vfs68_t * vfs)
 
 static void dump_ao_info(const int id, const ao_info * info, const int full)
 {
+  const int cat = /* ao68_cat */ msg68_INFO;
   if (info) {
-    TRACE68(ao68_cat,
+    msg68(
+      cat,
       "\n"
       AOHD "ao_driver #%02d\n"
       "         ,------------\n"
@@ -191,10 +193,10 @@ static void dump_ao_info(const int id, const ao_info * info, const int full)
       strnevernull68(info->comment),info->priority);
     if (full) {
       int i;
-      TRACE68(ao68_cat, "         | options : %d --", info->option_count);
+      msg68(cat, "         | options : %d --", info->option_count);
       for (i=0; i<info->option_count; ++i)
-        TRACE68(ao68_cat, " %s",info->options[i]);
-      TRACE68(ao68_cat, "%c",'\n');
+        msg68(cat, " %s",info->options[i]);
+      msg68(cat, "%c",'\n');
     }
   }
 }
@@ -214,39 +216,47 @@ static int isao_open(vfs68_t * vfs)
   vfs68_ao_t * is = (vfs68_ao_t *)vfs;
   int err = -1;
   ao_info * info = 0;
-  char * url;
+  char * uri;
 
   TRACE68(ao68_cat,AOHD "open -- '%s'\n", vfs68_filename(vfs));
   if (!is || is->ao.device) {
     goto error;
   }
 
-  url = is->name;
+  uri = is->name+6;                     /* skip "audio:" */
   do {
-    char * s = strchr(url,'/'), *s2;
-    if (s) *s = '\0';
-    s2 = strchr(url,'=');
+    char * s = strchr(uri,'/'), *s2;
+    if (s == uri) {
+      ++uri; continue;                  /* skip "//" instance */
+    }
+    if (s) *s = 0;
+    s2 = strchr(uri,'=');
     if (s2) {
-      char * key = url;
+      char * key = uri;
       char * val = s2+1;
       *s2 = 0;
       TRACE68(ao68_cat,
               AOHD "open -- have a key -- [%s]='%s'\n", key, val);
-      if (!strcmp68(key,"output")) {
-        if (s) *s = '/';
-        s = 0;
-        TRACE68(ao68_cat,
-                AOHD "open -- *FILENAME* '%s'\n", val);
-        is->outname = val;
-      } else if (!strcmp68(key,"driver")) {
-        int id = !strcmp68(val,"default")
-          ? ao_default_driver_id()
-          : ao_driver_id(val);
-        info = ao_driver_info(id);
-        if (info) {
-          is->ao.driver_id = id;
-          TRACE68(ao68_cat,AOHD "open -- *DRIVER* #%d (%s) %s\n",
-                  id, info->short_name, info->name);
+      if (!strcmp68(key,"driver")) {
+        if (!strcmp68(val,"list") ) {
+          /* List all drivers in debug */
+          int id,n;
+          ao_info ** infolist = ao_driver_info_list(&n);
+          if (infolist) {
+            for (id=0; id<n; ++id) {
+              dump_ao_info(id,infolist[id],1);
+            }
+          }
+        } else {
+          int id = !strcmp68(val,"default")
+            ? ao_default_driver_id()
+            : ao_driver_id(val);
+          info = ao_driver_info(id);
+          if (info) {
+            is->ao.driver_id = id;
+            TRACE68(ao68_cat,AOHD "open -- *DRIVER* #%d (%s) %s\n",
+                    id, info->short_name, info->name);
+          }
         }
       } else if (!strcmp68(key,"rate")) {
         int frq = 0;
@@ -316,26 +326,21 @@ static int isao_open(vfs68_t * vfs)
       }
       *s2 = '=';
     } else {
-      /* Options w/out '=' */
-      if (!strcmp68(url,"drivers")) {
-        /* List all drivers in debug */
-        int id,n;
-        ao_info ** infolist = ao_driver_info_list(&n);
-        if (infolist) {
-          for (id=0; id<n; ++id) {
-            dump_ao_info(id,infolist[id],1);
-          }
-        }
-      }
+      /* not a key then use the remaining of URI as the output file
+       * name. */
+      if (s) *s = '/';          /* restore removed '/' in the URI */
+      s = 0;                    /* trick to end the options parsing */
+      is->outname = uri;
+      TRACE68(ao68_cat, AOHD "using '%s' as out file name\n", uri);
     }
 
     if (s) {
       *s = '/';
-      url = s+1;
+      uri = s+1;
     } else {
-      url = 0;
+      uri = 0;
     }
-  } while (url);
+  } while (uri);
 
   info = ao_driver_info(is->ao.driver_id);
   if (!info) {
@@ -363,7 +368,6 @@ static int isao_open(vfs68_t * vfs)
       ext = ".raw";
     }
 #endif
-
     strcpy(is->defoutname,"sc68");
     strcat68(is->defoutname,ext,sizeof(is->defoutname)-1);
     is->outname = is->defoutname;
@@ -499,10 +503,11 @@ static const vfs68_t vfs68_ao = {
   isao_destroy
 };
 
-/* ao stream URL is composed by /key=value pairs.
+/* ao stream URI is composed by /key=value pairs.
  *
  * Specific keys are:
  *
+ *  - driver=list
  *  - driver=[null|alsa|pulse|oss|esd|au|raw|wav ...]
  *  - rate=hz
  *  - format=[endianess][sign][channels][format]
@@ -513,6 +518,9 @@ static const vfs68_t vfs68_ao = {
  *        - format   := [W|B|F]
  *
  * Other keys will be used as ao driver options.
+ *
+ * First non-key component (without '=') is used as the output name
+ * (for file drivers).
  *
  */
 vfs68_t * vfs68_ao_create(const char * uri, int mode, int spr)
