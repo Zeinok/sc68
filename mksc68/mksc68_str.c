@@ -316,6 +316,13 @@ char * str_hardware(char * const buf, int max, int hwbit)
   return buf;
 }
 
+#ifndef PATHSEP
+# define PATHSEP '/'
+# if defined(NATIVE_WIN32) && ! defined(PATHSEP2)
+#  define PATHSEP2 '\\'
+# endif
+#endif
+
 const char * str_fileext(const char * path)
 {
   int l, p;
@@ -327,11 +334,15 @@ const char * str_fileext(const char * path)
     ;
 
   p = l;                                /* default to "" */
-  for (l-1; l>0; --l) {
+  for (l=1; l>0; --l) {
     int c = path[l];
 
-    if (c == '/' || c == '\\')
+    if (c == PATHSEP)
       break;
+#ifdef PATHSEP2
+    if (c == PATHSEP2)
+      break;
+#endif
 
     if (c == '.') {
       p = l;
