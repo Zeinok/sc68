@@ -171,9 +171,9 @@ static const char * isao_name(vfs68_t * vfs)
     ;
 }
 
-static void dump_ao_info(const int id, const ao_info * info, const int full)
+static void dump_ao_info(const int id, const int cat,
+                         const ao_info * info, const int full)
 {
-  const int cat = /* ao68_cat */ msg68_INFO;
   if (info) {
     msg68(
       cat,
@@ -244,7 +244,7 @@ static int isao_open(vfs68_t * vfs)
           ao_info ** infolist = ao_driver_info_list(&n);
           if (infolist) {
             for (id=0; id<n; ++id) {
-              dump_ao_info(id,infolist[id],1);
+              dump_ao_info(id, msg68_INFO, infolist[id], 1);
             }
           }
         } else {
@@ -347,26 +347,23 @@ static int isao_open(vfs68_t * vfs)
     goto error;
   }
 
-  dump_ao_info(is->ao.driver_id,info,1);
+  dump_ao_info(is->ao.driver_id, ao68_cat, info, 1);
 
   if (!is->outname) {
 #ifdef HAVE_AO_FILE_EXTENSION
     char * ext = ao_file_extension(is->ao.driver_id);
 #else
-    char * ext = ".out";
-    if (!strcmp68(info->short_name,"wav")) {
-      ext = ".wav";
-    } else if (!strcmp68(info->short_name,"au")) {
-      ext = ".au";
-    } else if (!strcmp68(info->short_name,"iff")) {
-      ext = ".iff";
-    } else if (!strcmp68(info->short_name,"mp3")) {
-      ext = ".mp3";
-    } else if (!strcmp68(info->short_name,"ogg")) {
-      ext = ".ogg";
-    } else if (!strcmp68(info->short_name,"raw")) {
-      ext = ".raw";
-    }
+    const char * ext = ".out";
+    static const char * exts[] = {
+      ".wav", ".iff", ".raw", ".au", ".mp3", ".ogg"
+    };
+    int e;
+    for (e = 0; e < sizeof(exts)/sizeof(*exts); ++e)
+      if (!strcmp68(info->short_name,exts[e]+1)) {
+        ext = exts[e];
+        break;
+      }
+
 #endif
     strcpy(is->defoutname,"sc68");
     strcat68(is->defoutname,ext,sizeof(is->defoutname)-1);
@@ -557,7 +554,7 @@ vfs68_t * vfs68_ao_create(const char * uri, int mode, int spr)
   }
 
 
-  /* -- Setup for default driver -- */
+  /* Setup for default driver */
   memset(&ao,0,sizeof(ao));
   ao.default_id         = ao_default_driver_id();
   ao.driver_id          = ao.default_id;
@@ -568,7 +565,6 @@ vfs68_t * vfs68_ao_create(const char * uri, int mode, int spr)
 
   /* Copy vfs functions. */
   memcpy(&isf->vfs, &vfs68_ao, sizeof(vfs68_ao));
-  /*   isf->mode = mode & (VFS68_OPEN_READ|VFS68_OPEN_WRITE); */
   isf->ao   = ao;
   strcpy(isf->name, uri);
 
