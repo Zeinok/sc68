@@ -115,7 +115,7 @@ struct gdb_s {
   int            sigval;                /* last signal                 */
 
   struct {
-    unsigned int ontimer_break;
+    uint8_t ontimer_break;
   } opt;
 
 
@@ -949,23 +949,35 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
        */
     case 0X134 >> 2: /* Timer-A */
       strcpy(fctname," timer-A");
-      if (gdb->opt.ontimer_break)
+      if ( gdb->opt.ontimer_break & 1) {
+        gdb->opt.ontimer_break = (gdb->opt.ontimer_break & ~1)
+          | ((gdb->opt.ontimer_break>>4) & 1);
         sigval = SIGVAL_TRAP;
+      }
       break;
     case 0X120 >> 2: /* Timer-B */
       strcpy(fctname," timer-B");
-      if (gdb->opt.ontimer_break)
+      if ( gdb->opt.ontimer_break & 2) {
+        gdb->opt.ontimer_break = (gdb->opt.ontimer_break & ~2)
+          | ((gdb->opt.ontimer_break>>4) & 2);
         sigval = SIGVAL_TRAP;
+      }
       break;
     case 0X114 >> 2: /* Timer-C */
       strcpy(fctname," timer-C");
-      if (gdb->opt.ontimer_break)
+      if ( gdb->opt.ontimer_break & 4) {
+        gdb->opt.ontimer_break = (gdb->opt.ontimer_break & ~4)
+          | ((gdb->opt.ontimer_break>>4) & 4);
         sigval = SIGVAL_TRAP;
+      }
       break;
     case 0X110 >> 2: /* Timer-D */
       strcpy(fctname," timer-D");
-      if (gdb->opt.ontimer_break)
+      if ( gdb->opt.ontimer_break & 8) {
+        gdb->opt.ontimer_break = (gdb->opt.ontimer_break & ~8)
+          | ((gdb->opt.ontimer_break>>4) & 8);
         sigval = SIGVAL_TRAP;
+      }
       break;
 
     case SPURIOUS_VECTOR:
@@ -1164,9 +1176,10 @@ gdb_t * gdb_create(void)
     if (gdb->fd == -1)
       goto error;
 
-    /* $$$ TEMP: options need to be set with gdb command */
-    gdb->opt.ontimer_break = 0;
-
+    /* $$$ TEMP: options need to be set with gdb command
+       ATM breaks on all timers but C (system timer)
+    */
+    gdb->opt.ontimer_break = ~0x44;
   }
   return gdb;
 
