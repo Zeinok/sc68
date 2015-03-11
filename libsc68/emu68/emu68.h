@@ -83,7 +83,9 @@ void emu68_shutdown(void);
 /**
  * Atari ST clock (as written on cristal clock chip).
  */
-#define EMU68_ATARIST_CLOCK (8010613u&~3u)
+enum {
+  EMU68_ATARIST_CLOCK = (8010613u&~3u)
+};
 
 /**
  * 68k emulator instance creation parameters. This structure have to

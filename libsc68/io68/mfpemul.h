@@ -209,10 +209,27 @@ enum mfp_timer_e {
   TIMER_D      /**< MFP timer 'D' */
 };
 
+
 /**
- * bogo-cycle definition (1 Bogo = 192 "8mhz 68K" = 625 "mfp" cycle).
+ * CPU clock of the Atari ST is 8010613Hz. sc68 rounds it to 8010612Hz
+ * (a mutliple of 4 because the YM clock is 1/4 of the CPU clock)
+ * However usually the Atari ST clock and the YM clock are rounded to
+ * respectively 8Mhz/2Mhz. Here in order to fasten the caculation the
+ * CPU clock is approxinate to 80006400Hz. As the MFP timer clocks
+ * runs at 2457600hz we got a power of 2 in the ratio (256:834).
+ * @{
+ */
+
+/**
+ * bogo cycles (common denominator between CPU/MFP-timers clocks).
  */
 typedef cycle68_t bogoc68_t;
+
+#define MFP_BOGO_MUL 256u               /**< BOGO cycles/cpu clock  */
+#define MFP_BOGO_DIV 834u               /**< BOGO cycle/mfp clock */
+/**
+ * @}
+ */
 
 /**
  * Timer definition struct.

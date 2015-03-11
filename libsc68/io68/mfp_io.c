@@ -93,8 +93,8 @@ typedef struct {
 } mfp_io68_t;
 
 /* $$$ Currently hardcoded for 8Mhz cpu */
-#define cpu2bogo(mfpio,cycle) ((bogoc68_t)((cycle)*192u))
-#define bogo2cpu(mfpio,bogoc) ((cycle68_t)((bogoc)/* +191u */)/192u)
+#define cpu2bogo(mfpio,cycle) ((bogoc68_t)((cycle) * MFP_BOGO_MUL))
+#define bogo2cpu(mfpio,bogoc) ((cycle68_t)((bogoc) / MFP_BOGO_MUL))
 
 /* 00/01 GPIP   General Purpose I/O */
 static int68_t mfpr_01(mfp_t * const mfp, const bogoc68_t bogoc) {
