@@ -2,7 +2,7 @@
 # |                                                                      |
 # |  unice68 -- Makefile.am -- Use with automake to produce Makefile.in  | 
 # |                                                                      |
-# |               Copyright (C) 2007-2014 Benjamin Gerard                |
+# |               Copyright (C) 2007-2015 Benjamin Gerard                |
 # |                                                                      |
 # |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
@@ -53,7 +53,7 @@ include_HEADERS      = unice68.h
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-dist_man1_MANS       = unice68.man
+# dist_man1_MANS       = unice68.man
 # info_TEXINFOS        = unice68.texi
 # MAINTAINERCLEANFILES = $(srcdir)/unice68.1
 

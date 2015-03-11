@@ -19,8 +19,8 @@ AC_INIT(
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68-audacious.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.14 silent-rules dist-xz])
-
+AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-xz
+                  no-installman no-installinfo])
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll disable-static])
 
@@ -109,26 +109,10 @@ if test -n "$aud_lflags"; then
   SC68_ADD_FLAGS([LIB_LFLAGS],$aud_lflags)
 fi
 
-dnl # Should not need to test glib as it is an audacious dependency
-dnl # but still testing glib version to select the proper mutex interface.
-dnl #
-dnl # if [$]pkgconfig audacious --atleast-version=3.2; then
-dnl #   glib_version="not required"
-dnl # else
-glib_pkg=glib-2.0
-dnl #   glib_version=[$]([$]pkgconfig [$]glib_pkg --modversion)
-dnl #   glib_cflags=[$]([$]pkgconfig [$]glib_pkg --cflags)
-dnl #   glib_lflags=[$]([$]pkgconfig [$]glib_pkg --libs)
-dnl #   if test -n "$glib_cflags"; then
-dnl #     SC68_ADD_FLAGS([LIB_CFLAGS],[$]glib_cflags)
-dnl #   fi
-dnl #   if test -n "$glib_lflags"; then
-dnl #     SC68_ADD_FLAGS([LIB_LFLAGS],[$]glib_lflags)
-dnl #   fi
 if [$]pkgconfig [$]glib_pkg --atleast-version=2.32; then
   AC_DEFINE([USE_NEW_GLIB_MUTEX],[1],[Use new mutex init for GLIB>=2.32])
 fi
-dnl # fi
+
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
@@ -154,6 +138,5 @@ AC_MSG_NOTICE([|   compile mode        : $compile_mode])
 AC_MSG_NOTICE([|   file68 headers      : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
 AC_MSG_NOTICE([|   audacious           : $audacious_ver ($audvnum)])
-dnl #AC_MSG_NOTICE([|   glib                : $glib_version])
 AC_MSG_NOTICE([|   plugin-dir          : $audacious_plugin_dir])
 AC_MSG_NOTICE([+-----------------------])

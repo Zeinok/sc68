@@ -18,8 +18,8 @@ AC_INIT(
   [sc68-ng],
   [http://sc68.atari.org])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu 1.14 silent-rules check-news dist-xz])
-
+AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-xz
+                  no-installman no-installinfo])
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
 

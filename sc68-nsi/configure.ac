@@ -18,7 +18,8 @@ AC_INIT(
   [sc68-nsis],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([sc68.nsi])
-AM_INIT_AUTOMAKE([foreign 1.14 silent-rules dist-xz])
+AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-xz
+		  no-installman no-installinfo])
 
 # ,----------------------------------------------------------------------.
 # | Locate pre-installed sc68 files (win32 / win64 / data)               |

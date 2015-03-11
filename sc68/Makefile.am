@@ -2,7 +2,7 @@
 # |                                                                      |
 # |    sc68 -- Makefile.am -- Use with automake to produce Makefile.in   |
 # |                                                                      |
-# |               Copyright (C) 2007-2014 Benjamin Gerard                |
+# |               Copyright (C) 2007-2015 Benjamin Gerard                |
 # |                                                                      |
 # |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
@@ -45,7 +45,7 @@ sc68_LDADD           = $(SC68_LA) $(FILE68_LA)
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-dist_man1_MANS       = sc68.man
+# dist_man1_MANS       = sc68.man
 # info_TEXINFOS        = sc68.texi
 # MAINTAINERCLEANFILES = $(srcdir)/sc68.1
 

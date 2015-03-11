@@ -2,7 +2,7 @@
 # |                                                                      |
 # | libsc68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |               Copyright (C) 2007-2014 Benjamin Gerard                |
+# |               Copyright (C) 2007-2015 Benjamin Gerard                |
 # |                                                                      |
 # |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
@@ -60,10 +60,13 @@ pkgincludedir      = $(includedir)/sc68
 $(builddir)/api68.lo: $(srcdir)/sc68/trap68.h
 trap68: $(srcdir)/sc68/trap68.h
 
+
+bin2h=$(hexdump) -ve '/1 "%d,"'
+
 $(srcdir)/sc68/trap68.h: $(srcdir)/trapfunc.s
-	e=false; $(as68) $< -o trapfunc.bin >/dev/null && \
-	$(od) -vtu1 trapfunc.bin | \
-	sed 's/^[0-9]* *//g; s/\([0-9]\)\([[:space:]]\{1,\}\|$$\)/\1,/g' >$@ && \
-	e=true; rm -f trapfunc.bin; $$e
+	$(as68) $< -o trapfunc.bin >/dev/null
+	$(bin2h) trapfunc.bin >$@
+	@rm trapfunc.bin
+
 
 MAINTAINERCLEANFILES = $(srcdir)/sc68/trap68.h

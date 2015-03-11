@@ -20,9 +20,9 @@ AC_INIT(
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([src/file68.c])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([foreign 1.14 silent-rules dist-xz subdir-objects])
+AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-xz subdir-objects
+                  no-installman no-installinfo])
 AC_CONFIG_HEADERS([config.h sc68/file68_features.h])
-
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
 

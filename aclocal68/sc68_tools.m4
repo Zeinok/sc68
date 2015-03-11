@@ -6,7 +6,7 @@ dnl# (C) 2009-2015 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20140310 sc68_tools.m4
+# serial 20150309 sc68_tools.m4
 
 # SC68_TOOLS()
 # ------------
@@ -28,7 +28,7 @@ AC_DEFUN_ONCE([SC68_TOOLS],[
     AC_PROG_INSTALL
     AC_PATH_PROG([help2man],[help2man],[false help2man])
     AC_PATH_PROG([texinfo2man],[texinfo2man],[false texinfo2man])
-    AC_PATH_PROG([od],[od],[false od])
+    AC_PATH_PROG([hexdump],[hexdump],[false hexdump])
     AC_PATH_PROG([as68],[as68],[false as68]) # $$$ bootstraping problem
     AC_PATH_PROG([pkgconfig],["pkg-config"],["false"]) # or use predef macros
   ])

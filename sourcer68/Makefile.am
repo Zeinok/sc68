@@ -2,7 +2,7 @@
 # |                                                                      |
 # |  desa68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |               Copyright (C) 2006-2014 Benjamin Gerard                |
+# |               Copyright (C) 2006-2015 Benjamin Gerard                |
 # |                                                                      |
 # |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
@@ -46,7 +46,7 @@ sourcer68_LDADD       = $(FILE68_LA) $(DESA68_LA)
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-dist_man1_MANS       = sourcer68.man
+# dist_man1_MANS       = sourcer68.man
 # info_TEXINFOS        = sourcer68.texi
 # MAINTAINERCLEANFILES = $(srcdir)/sourcer68.1
 

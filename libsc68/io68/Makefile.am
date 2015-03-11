@@ -19,8 +19,7 @@ mysources= io68.c mfp_io.c mfpemul.c mw_io.c mwemul.c paula_io.c	\
 
 myheaders= default.h io68.h io68_api.h mfp_io.h mfpemul.h mw_io.h	\
  mwemul.h paula_io.h paulaemul.h shifter_io.h ym_blep.h ym_dump.h	\
- ym_fixed_vol.h ym_io.h ym_puls.h ymemul.h ymout1c5bit.h ymoutorg.h	\
- ymout2k9.h
+ ym_fixed_vol.h ym_io.h ym_puls.h ymemul.h ymoutorg.h ymout2k9.h
 
 srcextra=\
  ym_atarist_table.c ym_linear_table.c

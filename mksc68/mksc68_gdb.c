@@ -1180,6 +1180,8 @@ gdb_t * gdb_create(void)
        ATM breaks on all timers but C (system timer)
     */
     gdb->opt.ontimer_break = ~0x44;
+    /* $$$ only once */
+    gdb->opt.ontimer_break = ~0xf4;
   }
   return gdb;
 

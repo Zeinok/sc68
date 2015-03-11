@@ -2,7 +2,7 @@
 # |                                                                      |
 # | sc68-doc -- Makefile.am -- Use with automake to produce Makefile.in  |
 # |                                                                      |
-# |               Copyright (C) 2007-2014 Benjamin Gerard                |
+# |               Copyright (C) 2007-2015 Benjamin Gerard                |
 # |                                                                      |
 # |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |

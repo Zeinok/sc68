@@ -54,7 +54,7 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;FOO_SC68_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../file68;$(SolutionDir)/../libsc68;C:\Cyg\Code\SDKs\foobar2000\foobar2000\SDK</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../file68;$(SolutionDir)/../libsc68;$(FB2KSDK)\foobar2000\SDK</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -81,7 +81,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;FOO_SC68_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(SolutionDir)/../file68;$(SolutionDir)/../libsc68;C:\Cyg\Code\SDKs\foobar2000\foobar2000\SDK</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../file68;$(SolutionDir)/../libsc68;$(FB2KSDK)\foobar2000\SDK</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

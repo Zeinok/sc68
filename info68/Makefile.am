@@ -2,7 +2,7 @@
 # |                                                                      |
 # |  info68 -- Makefile.am -- Use with automake to produce Makefile.in   | 
 # |                                                                      |
-# |               Copyright (C) 2006-2014 Benjamin Gerard                |
+# |               Copyright (C) 2006-2015 Benjamin Gerard                |
 # |                                                                      |
 # |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
@@ -37,7 +37,7 @@ noinst_HEADERS       =
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-dist_man1_MANS        = info68.man
+# dist_man1_MANS        = info68.man
 
 # info_TEXINFOS        = info68.texi
 # MAINTAINERCLEANFILES = $(srcdir)/info68.1

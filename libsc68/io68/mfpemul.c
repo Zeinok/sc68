@@ -35,7 +35,7 @@
 #define BGD    MFP_BOGO_DIV
 
 #define cpp(V)      (V*prediv_width[(int)ptimer->tcr])
-#define bogotohz(V) ((CPU*BGD)/(V))
+#define bogotohz(V) (((CPU>>2)*BGD)/((V)<<2))
 #define timerfrq(V) bogotohz(cpp(V))
 
 #define MYHD "mfp    : "

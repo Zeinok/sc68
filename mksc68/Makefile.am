@@ -2,7 +2,7 @@
 # |                                                                      |
 # |  mksc68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |               Copyright (C) 2009-2014 Benjamin Gerard                |
+# |               Copyright (C) 2009-2015 Benjamin Gerard                |
 # |                                                                      |
 # |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |
@@ -65,7 +65,7 @@ noinst_HEADERS       = $(headers)
 # | Documentation                                                        |
 # `----------------------------------------------------------------------'
 
-dist_man1_MANS       = mksc68.man
+# dist_man1_MANS       = mksc68.man
 
 # info_TEXINFOS        = mksc68.texi
 # MAINTAINERCLEANFILES = $(srcdir)/mksc68.1
