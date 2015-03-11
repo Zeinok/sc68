@@ -577,7 +577,7 @@ static int PlayLoop(vfs68_t * out, int track, int loop, int asid)
  */
 static char * build_output_uri(char * inname, char * outname)
 {
-  static char prefix[] = "audio://ao/driver=wav/output=";
+  static char prefix[] = "audio://driver=wav/output=";
   char scheme[32];
   char * namebuf = 0, * ext = 0;
   int len;
@@ -785,7 +785,7 @@ int main(int argc, char *argv[])
    *    backend.
    */
   if (outname && !strcmp(outname,"-")) {
-    outname = "stdout:sc68";
+    outname = "stdout:";
   }
 
 
@@ -800,10 +800,10 @@ int main(int argc, char *argv[])
 #endif
   } else if (!outname) {
 #ifndef FILE68_AO
-    outname = "null:sc68";
+    outname = "null:";
     Warning("libao is not supported, fallback to null: output\n");
 #else
-    outname = "audio://sc68";
+    outname = "audio:";
 #endif
   }
 
