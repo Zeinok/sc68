@@ -953,6 +953,36 @@ disk68_t * file68_load_mem(const void * buffer, int len)
 }
 
 
+static int sndh_flags(hwflags68_t * hw, const char * b, int len)
+{
+  int k;
+
+  TRACE68(file68_cat,
+          "file68: sndh -- FLAGS are '%s'\n", b);
+
+  hw->all = 0; hw->bit.timers = 1;
+  for (k=0; k<len && b[k]; ++k)
+    switch (b[k]) {
+    case '~': break;                    /* Ignore '~' */
+    case 'y': hw->bit.ym     = 1; break;
+    case 'e': hw->bit.ste    = 1; break;
+    case 'a': hw->bit.timera = 1; break;
+    case 'b': hw->bit.timerb = 1; break;
+    case 'c': hw->bit.timerc = 1; break;
+    case 'd': hw->bit.timerd = 1; break;
+    case 'p': hw->bit.amiga  = 1; break;
+    case 'f': break;                    /* reserved for SFX */
+    case 'g': break;                    /* reserved for digital only */
+    case 'j': break;                    /* reserved for jingles */
+    default:
+      TRACE68(file68_cat,"file68: sndh -- unexpected FLAG '%c'\n", b[k]);
+      assert(!"unexpected FLAG");
+    }
+  if (++k > len)
+    k = len;
+  return k;
+}
+
 static int st_isupper( int c )
 {
   return (c >= 'A' && c <= 'Z');
@@ -1108,29 +1138,30 @@ static int sndh_info(disk68_t * mb, int len)
       }
     } else if (!memcmp(b+i, "FLAG", 4)) {
       /* Track features (hardware,fx...) */
-      int j, max=0, tracks = mb->nb_mus <= 0 ? 1 : mb->nb_mus;
+
+      int j, max=0, tracks=mb->nb_mus <= 0 ? 1 : mb->nb_mus;
+
       t = i;
-      for ( j = 0; j < tracks; ++j ) {
-        music68_t * m = mb->mus+j;
-        int k, off = WPeekBE(b + i + 4 + j*2);
-        m->hwflags.bit.timers = 1;
-        TRACE68(file68_cat,
-                "file68: sndh -- FLAG #%02d -- %s\n", j+1, b+i+off);
-        /* parse the flad */
-        for (k=i+off; k<len && b[k]; ++k)
-          switch (b[k]) {
-          case 'y': m->hwflags.bit.ym     = 1; break;
-          case 'e': m->hwflags.bit.ste    = 1; break;
-          case 'a': m->hwflags.bit.timera = 1; break;
-          case 'b': m->hwflags.bit.timerb = 1; break;
-          case 'c': m->hwflags.bit.timerc = 1; break;
-          case 'd': m->hwflags.bit.timerd = 1; break;
-          case 'p': m->hwflags.bit.amiga  = 1; break;
-          }
-        if (k > max)
-          max = k;
+
+      /* Disambiguate FLAG 2 forms: unique string vs string table */
+      if ((i&1) || b[i+4] == '~') {
+        /* single string form */
+        max = i+5;
+        max += sndh_flags(&mb->hwflags, b+max, len-max);
+        for ( j = 0; j < tracks; ++j )
+          mb->mus[j].hwflags.all = mb->hwflags.all;
+      } else {
+        /* multiple string form */
+        for ( j = 0; j < tracks; ++j ) {
+          music68_t * m = mb->mus+j;
+          int k, off = WPeekBE(b+i+4+j*2);
+          k = i+off;
+          k += sndh_flags(&m->hwflags, b+k, len-k);
+          if (k > max)
+            max = k;
+        }
       }
-      i = max+1;
+      i = max;
 
     } else if ( !memcmp(b+i,"##",2) && ( (ctypes & 0xC00) == 0xC00 ) ) {
       mb->nb_mus = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' );

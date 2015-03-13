@@ -47,7 +47,7 @@ static
 int run_save(cmd_t * cmd, int argc, char ** argv)
 {
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
-  int ret = -1, gzip = 0, version = 0, i;
+  int ret = -1, gzip = -1, version = 0, i;
   char * filename = 0;
 
   opt_create_short(shortopts, longopts);
@@ -69,7 +69,9 @@ int run_save(cmd_t * cmd, int argc, char ** argv)
       gzip = *optarg - '0';
       break;
     case 'F':                           /* --format=sc68|sndh */
-      if (!strcmp68(optarg,"sc68")) {
+      if (!strcmp68(optarg,"auto")) {
+        version = 0;
+      } else if (!strcmp68(optarg,"sc68")) {
         version = 1;
       } else if (!strcmp68(optarg,"sndh")) {
         version = -1;
@@ -110,8 +112,15 @@ cmd_t cmd_save = {
   /* hlp */
   "The `save' command saves the disk.\n"
   "\n"
+  "If the format is ommited the filename extension is used [sc68|snd|sndh].\n"
+  "If it can not be determined automatically the previous format is used.\n"
+  "As a last resort sc68 is used.\n"
+  "\n"
+  "If compression level is ommited the default for the format is used.\n"
+  "sc68 defaults to uncompressed whereas sndh defaults to ICE! packed.\n"
+  "\n"
   "OPTIONS\n"
   /* *****************   ********************************************** */
   "  -z --gzip=#         Set compression level [0..9].\n"
-  "  -F --format=fmt     Set output format [sc68*,sndh]."
+  "  -F --format=fmt     Set output format [auto*,sc68,sndh].\n"
 };

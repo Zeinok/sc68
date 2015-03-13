@@ -148,7 +148,7 @@ int dsk_merge(const char * uri)
 }
 
 /* @param  version  0:auto >0:sc68 <0:sndh
- * @param  gzip     sc68: gzip level 0..9, sndh: 0=raw else ice!
+ * @param  gzip     sc68: gzip level 0..9 (-1:auto), sndh: 0=raw else ice!
  */
 int dsk_save(const char * uri, int version, int gzip)
 {
@@ -188,9 +188,11 @@ int dsk_save(const char * uri, int version, int gzip)
 
   if (version > 0) {
     fmt = "sc68";
+    if (gzip < 0) gzip = 0;       /* sc68 default is not compressed */
     err = file68_save_uri(uri, dsk_get_disk(), version-1, gzip);
   } else {
     fmt = "sndh";
+    if (gzip < 0) gzip = 1;          /* sndh default is ICE! packed */
     err = sndh_save(uri, dsk_get_disk(), -version-1, gzip);
   }
 
@@ -278,27 +280,33 @@ static unsigned int fr_to_ms(unsigned int fr, unsigned int hz)
 
 int dsk_validate(void)
 {
-  int t, has_infinite;
+  int t, has_inf = 0, has_hw = 1;
 
   if (!is_valid_disk())
     return -1;
 
   /* Validate time and loop */
   dsk.disk->time_ms = 0;
-  dsk.disk->hwflags.all = 0;
-  for (t = has_infinite = 0; t < dsk.disk->nb_mus; ++t) {
+  dsk.disk->hwflags.all = 0;            /* Clear all disk flags ... */
+
+  for (t = 0; t < dsk.disk->nb_mus; ++t) {
     music68_t * m = dsk.disk->mus + t;
+
+    /** $$$ XXX FIXME loops is not coherent */
     m->loops    = ( m->loops > 0 ) ? m->loops : 1;
     m->first_ms = fr_to_ms(m->first_fr, m->frq);
     m->loops_ms = fr_to_ms(m->loops_fr, m->frq);
     if (m->loops > 0)
       dsk.disk->time_ms += fr_to_ms(m->first_fr+m->loops_fr*(m->loops-1), m->frq);
     else
-      has_infinite = 1;
+      has_inf = 1;
+
+    has_hw &= m->hwflags.bit.timers;
     dsk.disk->hwflags.all |= m->hwflags.all;
   }
-  if (has_infinite)
+  if (has_inf)
     dsk.disk->time_ms = 0;
+  dsk.disk->hwflags.bit.timers = has_hw;
 
   return 0;
 }
@@ -336,7 +344,9 @@ const char * dsk_tag_get(int trk, const char * var)
     else if ( ! strcmp (var, TAG68_LENGTH)) {
       unsigned int ms = !trk
         ? dsk.disk->time_ms
-        : m->loops > 0 ? fr_to_ms(m->first_fr+m->loops_fr*(m->loops-1),m->frq) : 0;
+        : m->loops > 0
+        ? fr_to_ms(m->first_fr+m->loops_fr*(m->loops-1),m->frq)
+        : 0;
         ;
       /* unsigned int h, m , s; */
       /* h = ms / 3600000u; */

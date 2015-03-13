@@ -1120,6 +1120,7 @@ int time_measure(measureinfo_t * mi, int trk,
   /* Restore hardware flags (either unmodified in case of error, or
    * detected in case of success. */
   m->hwflags = mi->hwflags;
+  
 
   /* Just clean up the struct. */
   memset(mi,0,sizeof(*mi));

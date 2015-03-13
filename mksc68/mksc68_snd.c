@@ -1,6 +1,6 @@
 /*
  * @file    mksc68_snd.c
- * @brief   disk functions.
+ * @brief   sndh creation.
  * @author  http://sourceforge.net/users/benjihan
  *
  * Copyright (c) 1998-2015 Benjamin Gerard
@@ -497,7 +497,7 @@ static const char * tag(disk68_t *d, int track, const char * key)
   return s;
 }
 
-int sndh_save_buf(const char * uri, const void * buf, int len , int gz)
+static int sndh_save_buf(const char *uri, const void *buf, int len , int gz)
 {
   int ret = -1;
   if (!gz) {
@@ -537,8 +537,46 @@ int sndh_save_buf(const char * uri, const void * buf, int len , int gz)
   return ret;
 }
 
-static
-int create_sndh(uint8_t **_dbuf, sndh_header_t * hd, disk68_t * d)
+/* Build sndh 'FLAGS' string (alphabetical order is not required but
+ * it might be easier for comparing things later). */
+static int mk_flags(char * tmp, const hwflags68_t * hw)
+{
+  int j = 0;
+  if (hw->bit.timers) {
+    if (hw->bit.timera) tmp[j++] = 'a';
+    if (hw->bit.timerb) tmp[j++] = 'b';
+    if (hw->bit.timerc) tmp[j++] = 'c';
+    if (hw->bit.timerd) tmp[j++] = 'd';
+  }
+  if (hw->bit.ste) tmp[j++] = 'e';
+  if (hw->bit.ym)  tmp[j++] = 'y';
+  tmp[j++] = 0;
+  return j;
+}
+
+/* Look up for a matching substring in the previous string table
+ * entries. */
+static int substr_lookup(const char *what, int l, const uint8_t *data, int n)
+{
+  int i;
+  for (i=0; i<n; ++i) {
+    const int off = get_W(data+4+i*2);
+    const char * str = (const char *) data + off;
+    const int len = strlen(str)+1;
+    if (len < l)
+      continue;
+    if (!memcmp(what,str+len-l,l)) {
+      msgdbg("sndh: re-using string table entry #%d:%d:'%s' for '%s'\n",
+             i,len-l,data+off,what);
+      assert(off >= 4);
+      return off+len-l;
+    }
+  }
+  /* not found */
+  return 0;
+}
+
+static int create_sndh(uint8_t **_dbuf, sndh_header_t *hd, disk68_t *d)
 {
   uint8_t * dbuf = 0;
 
@@ -547,7 +585,7 @@ int create_sndh(uint8_t **_dbuf, sndh_header_t * hd, disk68_t * d)
    * - pass #2 do the real stuff
    */
   for (;;) {
-    char tmp[32];
+    char tmp[512];   /* large enough for flags string table */
     const char *s;
     int off , i;
 
@@ -587,9 +625,56 @@ int create_sndh(uint8_t **_dbuf, sndh_header_t * hd, disk68_t * d)
       off = w_S(dbuf, off, tmp);
     }
 
-    /* Duration */
-    /* FIXME: now just testing track #1 */
-    if (d->mus[0].first_ms) {
+    /* Flags */
+    if (d->hwflags.all) {
+      int diff;
+
+      /* check if all tracks share the same flags */
+      for (diff=i=0; i<d->nb_mus; ++i)
+        diff += d->hwflags.all != d->mus[i].hwflags.all;
+
+      if (!diff) {
+        /* All the same ! simple string "FLAG" */
+        tmp[0] = '~';
+        mk_flags(tmp+1, &d->hwflags);
+        off = w_TS(dbuf, off, "FLAG", tmp);
+      } else {
+        /* some flags differs */
+        int loc, luo;
+
+        memcpy(tmp,"FLAG",4);           /* write TAG */
+        loc = 4+2*d->nb_mus;            /* Skip the offset table */
+
+        for (i=0; i<d->nb_mus; ++i) {
+          char flag[16];
+          int l = mk_flags(flag, &d->mus[i].hwflags);
+
+          luo = substr_lookup(flag, l, (uint8_t *)tmp, i);
+          if (!luo) {
+            if (loc+l > sizeof(tmp)) {
+              msgerr("sndh: overflow computing FLAG tag (%d > %d)\n",
+                     loc+l, sizeof(tmp));
+              return -1;
+            }
+            memcpy(tmp+loc, flag, l);
+            luo = loc;
+            loc += l;
+          }
+          /* Write string offset */
+          assert( luo >= 4);
+          w_W((uint8_t *)tmp, 4+i*2, luo);       /* Fill offset to string */
+        }
+        assert(loc <= sizeof(tmp));
+
+        off = w_E(dbuf,off);
+        if (dbuf)
+          memcpy(dbuf+off, tmp, loc);   /* copy the whole tag data */
+        off += loc;
+      }
+    }
+
+    /* Disk time should be set only if all tracks duration is set.  */
+    if (d->time_ms > 0 ) {
       off = w_E(dbuf,off);
       off = w_D(dbuf,off,"TIME",4);
       for (i=0; i<d->nb_mus; ++i) {
@@ -610,7 +695,7 @@ int create_sndh(uint8_t **_dbuf, sndh_header_t * hd, disk68_t * d)
       tbl = w_D(dbuf,off,"!#SN",4);     /* Table after the tag */
       off = tbl+2*d->nb_mus;            /* Skip the table */
       for (i=0; i<d->nb_mus; ++i) {
-        w_W(dbuf,tbl+i*2,off-bas);           /* Fill offset to string */
+        w_W(dbuf,tbl+i*2,off-bas);      /* Fill offset to string */
         off = w_S(dbuf,off,d->mus[i].tags.tag.title.val);
       }
     }
@@ -623,7 +708,6 @@ int create_sndh(uint8_t **_dbuf, sndh_header_t * hd, disk68_t * d)
       if (dbuf) dbuf[off] = 0;
       off += 1;
     }
-    /* off  = w_E(dbuf, off); */              /* ensure even   */
     hd->hlen = off;                     /* header length */
     msgdbg("sndh: create-header: +$%04x/$%06x/$%06x\n",
            hd->hlen, hd->dlen, hd->hlen + hd->dlen);
@@ -653,8 +737,7 @@ int create_sndh(uint8_t **_dbuf, sndh_header_t * hd, disk68_t * d)
   return -1;
 }
 
-static
-int save_sndh(const char * uri, disk68_t * d, int vers, int gz)
+static int save_sndh(const char *uri, disk68_t *d, int vers, int gz)
 {
   int ret = -1;
 
@@ -678,26 +761,18 @@ int save_sndh(const char * uri, disk68_t * d, int vers, int gz)
 }
 
 
-static int save_sc68(const char * uri, disk68_t * d, int vers, int gz)
+static int save_sc68(const char *uri, disk68_t *d, int vers, int gz)
 {
   int ret = -1;
   msgerr("sndh: save '%s' version:%d compress:%d"
          " -- sc68 -> sndh unsupported\n", uri, vers, gz);
-
-  /* sndh_header_t hd; */
-  /* memset(&hd, 0, sizeof(hd)); */
-  /* hd.boot.sym.init = 0; */
-  /* hd.boot.sym.kill = 4; */
-  /* hd.boot.sym.play = 8; */
-  /* hd.boot.sym.data = 0; */
-
   return ret;
 }
 
-int sndh_save(const char * uri, void * _dsk, int vers, int gz)
+int sndh_save(const char *uri, void *dsk, int vers, int gz)
 {
   int ret;
-  disk68_t * d = (disk68_t *)_dsk;
+  disk68_t * d = (disk68_t *)dsk;
 
   if (!strcmp68(d->tags.array[TAG68_ID_FORMAT].val,"sc68"))
     ret = save_sc68(uri, d, vers, gz);
