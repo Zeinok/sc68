@@ -1673,6 +1673,11 @@ disk68_t * file68_load(vfs68_t * is)
         goto error;
       }
       f = LPeek(b);
+
+      /* force eXTenDed if anything is set at a higher rank. */
+      if (f & ~(SC68_XTD-1))
+        f |= SC68_XTD;
+
       cursix->hwflags.all = 0;
       cursix->hwflags.bit.psg       = !! (f & SC68_PSG);
       cursix->hwflags.bit.dma       = !! (f & SC68_DMA);
