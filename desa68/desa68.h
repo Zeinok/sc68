@@ -361,8 +361,7 @@ struct desa68_parm_s
     unsigned int addr; /**< reference address (if type is defined). */
   }
   sref,                       /**< source operand reference.        */
-  dref,                       /**< destination opererand reference. */
-  _ea;                        /**< internal (current) reference.    */
+  dref;                       /**< destination operand reference.   */
 
   unsigned char itype; /**< Instruction type. @see desa68_inst_types */
   unsigned char error; /**< Error flags. @see desa68_error_flags     */
