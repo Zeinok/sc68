@@ -59,9 +59,7 @@ static const char * symget(desa68_t * d, uint_t addr, int type)
   assert(dis);
   assert(dis->symbols);
 
-  return 0;
-  
-  
+
   sym = dis->symbols
     ? symbol_get(dis->symbols, symbol_byaddr(dis->symbols, addr, -1))
     : 0
@@ -73,8 +71,15 @@ static const char * symget(desa68_t * d, uint_t addr, int type)
   default:
     pc = ~0;
   }
-  dmsg("Looking for symbol @$%x type:%d pc:$%x -> %s\n",
-       addr, type, d->pc, sym?sym->name:"(null)");
+
+  dmsg("Looking for symbol @$%x type:%d pc:$%x -> \"%s\"\n",
+       addr, type, pc, sym ? sym->name : "(null)");
+
+  /* dmsg("Looking for symbol @$%x (%d) pc:$%x \"%p\"\n", */
+  /*      addr, type, pc, "(null)"); */
+
+  /* return 0; */
+
 
   return sym ? sym->name : 0;
 
