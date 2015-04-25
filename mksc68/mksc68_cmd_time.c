@@ -399,9 +399,27 @@ static const char * vectorname(int vector)
   return tmp;
 }
 
-
-
 extern void sc68_emulators(sc68_t *, emu68_t **, io68_t ***);
+
+static void dump_access_areas(measureinfo_t * mi)
+{
+  unsigned adr, stack, start = 0,
+    endsp = ( mi->emu68->reg.a[7] - 1 ) & mi->emu68->memmsk;
+
+  /* Walk the stack */
+  for ( stack = endsp;
+        stack >= start && ( mi->emu68->chk[stack] & ( EMU68_R | EMU68_W ) );
+        --stack)
+    ;
+
+  for (adr=start; adr<stack; ++adr) {
+    printf("MIB: 0x%06X %c%c%c\n", adr,
+           (mi->emu68->chk[adr] & EMU68_X)?'X':'.',
+           (mi->emu68->chk[adr] & EMU68_R)?'R':'.',
+           (mi->emu68->chk[adr] & EMU68_W)?'W':'.');
+  }
+}
+
 
 /* Find memory access range */
 static void access_range(measureinfo_t * mi)
@@ -414,6 +432,10 @@ static void access_range(measureinfo_t * mi)
   struct {
     unsigned min, max;
   } mod[4];                             /* R,W,X,A */
+
+  /* $$$ HAXXX */
+  if (getenv("SC68_DUMP_MIB"))
+    dump_access_areas(mi);
 
   /* Walk the stack */
   for ( stack = endsp;
