@@ -141,9 +141,11 @@ static int cmp_pobj(const void * pa, const void * pb)
 {
   const obj_t * a = *(const obj_t **)pa;
   const obj_t * b = *(const obj_t **)pb;
+
   if (a == b) return 0;
   if (!a) return 1;
   if (!b) return -1;
+  assert (*a == *b);
   return (*a)->cmp(a,b);
 }
 
@@ -201,7 +203,7 @@ int vec_find(vec_t * vec, const obj_t * obj, cmp_f cmp, int idx)
       }
     }
   } else {
-    idx = vec_iter_find(vec,obj, cmp, idx);
+    idx = vec_iter_find(vec, obj, cmp, idx);
   }
   return idx;
 }

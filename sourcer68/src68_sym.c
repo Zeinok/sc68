@@ -38,6 +38,10 @@ static int isymb_byname_only(const obj_t * oa,const obj_t * ob)
 {
   const sym_t * sa = (const sym_t *) oa;
   const sym_t * sb = (const sym_t *) ob;
+
+  assert(sa && sb);
+  assert(sa->obj == sb->obj);
+
   return strcmp(sa->name,sb->name);
 }
 
@@ -46,24 +50,36 @@ static int isymb_byname(const obj_t * oa,const obj_t * ob)
   const sym_t * sa = (const sym_t *) oa;
   const sym_t * sb = (const sym_t *) ob;
   int res;
+
+  assert(sa && sb);
+  assert(sa->obj == sb->obj);
+
   if (res = strcmp(sa->name,sb->name), !res)
     if (res = sa->addr - sb->addr, !res)
       res = sa-sb;
   return res;
 }
 
-/* static int isymb_byaddr_only(const obj_t * oa,const obj_t * ob) */
-/* { */
-/*   const sym_t * sa = (const sym_t *) oa; */
-/*   const sym_t * sb = (const sym_t *) ob; */
-/*   return sa->addr-sb->addr; */
-/* } */
+static int isymb_byaddr_only(const obj_t * oa,const obj_t * ob)
+{
+  const sym_t * sa = (const sym_t *) oa;
+  const sym_t * sb = (const sym_t *) ob;
+
+  assert(sa && sb);
+  assert(sa->obj == sb->obj);
+
+  return sa->addr-sb->addr;
+}
 
 static int isymb_byaddr(const obj_t * oa,const obj_t * ob)
 {
   const sym_t * sa = (const sym_t *) oa;
   const sym_t * sb = (const sym_t *) ob;
   int res;
+
+  assert(sa && sb);
+  assert(sa->obj == sb->obj);
+
   if (res = sa->addr - sb->addr, !res)
     if (res = strcmp(sa->name,sb->name), !res)
       res = sa-sb;
@@ -148,14 +164,10 @@ sym_t * symbol_get(vec_t * symbs, int index)
 
 int symbol_byname(vec_t * symbs, const char * name)
 {
-  int idx; sym_t sym;
+  sym_t sym;
   sym.obj  = symbs->iface;
   sym.name = (char*)name;
-  vec_sort(symbs, isymb_byname);       /* sort by name/addr/pointer */
-  symbs->sorted = isymb_byname_only;   /* pretend just by name */
-  idx = vec_find(symbs, &sym.obj, 0, -1);
-  symbs->sorted = isymb_byname;    /* restore the real sort */
-  return idx;
+  return vec_find(symbs, &sym.obj, isymb_byname_only, -1);
 }
 
 int symbol_byaddr(vec_t * symbs, unsigned int addr, int idx)
@@ -163,15 +175,19 @@ int symbol_byaddr(vec_t * symbs, unsigned int addr, int idx)
   sym_t sym;
   sym.obj  = symbs->iface;
   sym.addr = addr;
-  return vec_find(symbs, &sym.obj, 0, idx);
+  return vec_find(symbs, &sym.obj, isymb_byaddr_only, idx);
 }
 
 void symbol_sort_byname(vec_t * symbs)
 {
   vec_sort(symbs, isymb_byname);
+  /* Sort by name but pretend it's by name only ! */
+  symbs->sorted = isymb_byname_only;
 }
 
 void symbol_sort_byaddr(vec_t * symbs)
 {
   vec_sort(symbs, isymb_byaddr);
+  /* Sort by address but pretend it's by address only ! */
+  symbs->sorted = isymb_byaddr_only;
 }
