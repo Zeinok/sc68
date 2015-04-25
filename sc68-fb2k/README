@@ -22,6 +22,15 @@
   whatever name suit you and set *FB2KSDK* to that directory path.
 
 
+*Files*
+
+  sc68-fb2k.sln ................ MsVS express 2010 solution
+  foo_sc68/ .................... sc68 component source files location
+  lib/shared.lib ............... A copy of the foobar2000 SDK file
+  Debug/*.lib .................. Pre-built foobar2000 SDK libs (debug conf)
+  release/*.lib ................ Pre-built foobar2000 SDK libs (release conf)
+
+
 *Links*
 
   sc68 website
