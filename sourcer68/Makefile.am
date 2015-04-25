@@ -1,6 +1,6 @@
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# |  desa68 -- Makefile.am -- Use with automake to produce configure.in  |
+# | sourcer68 -- Makefile.am -- Use with automake to produce configure.in|
 # |                                                                      |
 # |               Copyright (C) 2006-2015 Benjamin Gerard                |
 # |                                                                      |
@@ -21,12 +21,12 @@ AM_LDFLAGS           = $(ALL_LFLAGS) $(BIN_LFLAGS)
 # `----------------------------------------------------------------------'
 
 if SOURCE_DESA68
-DESA68_LA  = $(desa68_dir)/libdesa68.la
+DESA68_LA = $(desa68_dir)/libdesa68.la
 @SET_MAKE@
 $(desa68_dir)/libdesa68.la:
 	$(MAKE) -C "$(desa68_dir)" $(AM_MAKEFLAGS) libdesa68.la
 else
-DESA68_LA  = 
+DESA68_LA = 
 endif
 
 if SOURCE_FILE68
@@ -38,9 +38,13 @@ else
 FILE68_LA =
 endif
 
-bin_PROGRAMS          = sourcer68
-sourcer68_SOURCES     = sourcer68.c
-sourcer68_LDADD       = $(FILE68_LA) $(DESA68_LA)
+bin_PROGRAMS      = sourcer68
+sourcer68_SOURCES = sourcer68.c src68_def.h src68_exe.c src68_exe.h	\
+ src68_eva.c src68_eva.h src68_sec.c src68_sec.h src68_mbk.c		\
+ src68_mbk.h src68_tos.c src68_tos.h src68_sym.c src68_sym.h		\
+ src68_opt.c src68_opt.h src68_msg.c src68_msg.h src68_vec.c		\
+ src68_vec.h src68_par.c src68_par.h src68_dis.c src68_dis.h
+sourcer68_LDADD   = $(FILE68_LA) $(DESA68_LA)
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |
