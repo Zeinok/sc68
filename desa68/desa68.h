@@ -163,6 +163,11 @@ enum {
    */
   DESA68_GRAPH_FLAG = DESA68_ASCII_FLAG|DESA68_ALNUM_FLAG,
 
+  /**
+   * Lowercase disassembly.
+   */
+  DESA68_LCASE_FLAG = (1<<5),
+
 };
 
 /**
@@ -386,8 +391,8 @@ struct desa68_parm_s
    * Intermediat opcode decoding.
    */
   unsigned int  _pc;       /**< pc origin at start of disassembly. */
-  signed   int  _w;        /**< Last decoded word (sign extended).  */
-  unsigned int  _opw;      /**< First decode word (opcode).         */
+  signed   int  _w;        /**< Last decoded word (sign extended). */
+  unsigned int  _opw;      /**< First decoded word (opcode).       */
   unsigned char _reg0;     /**< bit 2:0 of opcode word. */
   unsigned char _mode3;    /**< bit 5:3 of opcode word. */
   unsigned char _opsz;     /**< bit 7:6 of opcode word. */
@@ -396,6 +401,7 @@ struct desa68_parm_s
   unsigned char _line;     /**< bit F:C of opcode word. */
   unsigned char _adrm0;    /**< _mode3+_reg0. */
   unsigned char _adrm6;    /**< _mode6+_reg9. */
+  int           _quote;    /**< set when quoting. */
   char          _tmp[16];  /**< small scratch pad */
 
   /**

@@ -1,5 +1,5 @@
 /*
- * @file    de68.c
+ * @file    desa68.c
  * @brief   68000 disassembler
  * @author  http://sourceforge.net/users/benjihan
  *
@@ -132,8 +132,49 @@ static const u16 dbcc_ascii[16] = {
 #define BIT6(W) ( ( (W) >> 6 ) & 1 )
 #define BIT8(W) ( ( (W) >> 8 ) & 1 )
 
+static int my_isfalse(desa68_t * d, int c)
+{
+  return 0;
+}
+
+static int my_isalnum(desa68_t * d, int c)
+{
+  return 0
+    || (c>='a' && c<='z')
+    || (c>='A' && c<='Z')
+    || (c>='0' && c<='9');
+}
+
+static int my_isgraph(desa68_t * d, int c)
+{
+  return c >= 32 && c < 127 && c != '\'';
+}
+
+/* not really ASCII ... just a name */
+static int my_isascii(desa68_t * d, int c)
+{
+  return
+    c == '-' || c=='_' || c==' ' || c == '!' || c == '.' || c == '#'
+    || (c>='a' && c<='z')
+    || (c>='A' && c<='Z')
+    || (c>='0' && c<='9');
+}
+
+/* #define desa_char(D,C) (D)->strput((D),(C)) */
+
 /* Add a char to disassembly string */
-#define desa_char(D,C) (D)->strput((D),(C))
+static void desa_char(desa68_t *d, int c)
+{
+  if (d->_quote == c)
+    d->_quote = 0;
+  else if (!d->_quote) {
+    if (c == '\'')
+      d->_quote = c;
+    else if ( (d->flags & DESA68_LCASE_FLAG) && c >= 'A' && c <= 'Z')
+      c += 'a'-'A';
+  }
+  d->strput(d,c);
+}
 
 static void def_strput(desa68_t * d, int c)
 {
@@ -189,6 +230,14 @@ static void desa_str(desa68_t * d, const char * str)
     desa_char(d, c);
 }
 
+static void desa_str_notr(desa68_t * d, const char * str)
+{
+  int flags = d->flags;
+  d->flags &= ~DESA68_LCASE_FLAG;
+  desa_str(d,str);
+  d->flags = flags;
+}
+
 /* Add a string to disassembly string */
 static void desa_ascii(desa68_t * d, uint n)
 {
@@ -229,38 +278,11 @@ static void desa_usignifiant(desa68_t * d, uint n)
 /* idem desa_usignifiant, but signed */
 static void desa_signifiant(desa68_t * d, int n)
 {
-  if (n<0) {
+  if ( n < 0 ) {
     desa_char(d,'-');
     n = -n;
   }
   desa_usignifiant(d,n);
-}
-
-static int my_isfalse(desa68_t * d, int c)
-{
-  return 0;
-}
-
-static int my_isalnum(desa68_t * d, int c)
-{
-  return 0
-    || (c>='a' && c<='z')
-    || (c>='A' && c<='Z')
-    || (c>='0' && c<='9');
-}
-
-static int my_isgraph(desa68_t * d, int c) {
-  return c >= 32 && c < 127;
-}
-
-/* not really ASCII ... just a name */
-static int my_isascii(desa68_t * d, int c)
-{
-  return
-    c == '-' || c=='_' || c==' ' || c == '!' || c == '.' || c == '#'
-    || (c>='a' && c<='z')
-    || (c>='A' && c<='Z')
-    || (c>='0' && c<='9');
 }
 
 /* ======================================================================
@@ -495,16 +517,24 @@ static const char * def_symget(desa68_t * d, uint v, int type)
 static void desa_immL(desa68_t * d, uint v)
 {
   const char * symb = d->symget(d,v,DESA68_SYM_SIMM);
+
+  assert(!d->_quote);
+
   if (symb) {
     ref_set(&d->sref, v, SZ_ADDR);
-    desa_str(d,symb);
-  } else if (d->ischar(d,U8(v)) && d->ischar(d,U8(v>>8)) &&
-             d->ischar(d,U8(v>>16)) && d->ischar(d,U8(v>>24))) {
-    desa_char (d,'\'');
-    desa_ascii(d,U32(v));
-    desa_char (d,'\'');
+    desa_str_notr(d,symb);
   } else {
-    desa_signifiant(d,v);
+    int q = '\'';
+    if (d->ischar(d,U8(v)) && d->ischar(d,U8(v>>8)) &&
+        d->ischar(d,U8(v>>16)) && d->ischar(d,U8(v>>24))) {
+      desa_char (d,q);
+      d->_quote = q;
+      desa_ascii(d,U32(v));
+      d->_quote = 0;
+      desa_char(d,q);
+    } else {
+      desa_signifiant(d,S32(v));
+    }
   }
 }
 
@@ -512,7 +542,7 @@ static void desa_label(desa68_t * d, uint v, int stype)
 {
   const char * symb = d->symget(d,v,stype);
   if (symb)
-    desa_str(d,symb);
+    desa_str_notr(d,symb);
   else
     desa_usignifiant(d, v);
 }
@@ -1363,7 +1393,7 @@ static void desa_line7(desa68_t * d)
   if (d->_opw & 0400) {
     desa_dcw(d);
   } else {
-    int v = (int)S8(d->_opw);
+    int v = S8(d->_opw);
     desa_str(d,"MOVEQ");
     desa_space(d);
     desa_char(d,'#');
@@ -1665,15 +1695,12 @@ static void rtcheck(void)
   assert( sizeof(u16) >= 2 );
   assert( sizeof(s32) >= 4 );
   assert( sizeof(u32) >= 4 );
-
-  assert( U8(0x15D) == 0x5D);
-  assert( S8(0x181) == -127);
-
-  assert( U16(0x15D5D) == 0x5D5D);
-  assert( S16(0x18001) == -32767);
-
-  assert( U32(~0) == 0xFFFFFFFF);
-  assert( S32(~1) == -2);
+  assert( U8(0x15D) == 0x5D );
+  assert( S8(0x181) == -127 );
+  assert( U16(0x15D5D) == 0x5D5D );
+  assert( S16(0x18001) == -32767 );
+  assert( U32(~0) == 0xFFFFFFFF );
+  assert( S32(~1) == -2 );
 }
 
 void desa68(desa68_t * d)
@@ -1721,6 +1748,7 @@ void desa68(desa68_t * d)
   d->_pc = d->pc &= d->memmsk;
   read_pc(d);
 
+  d->_quote = 0;
   d->_opw   = U16(d->_w);
   d->_reg0  = REG0(d->_opw);
   d->_reg9  = REG9(d->_opw);
@@ -1736,9 +1764,6 @@ void desa68(desa68_t * d)
 
   /* Restore current status to caller struct */
   d->pc &= d->memmsk;
-
-  /* if not true we forgot to commit _ea at some point. */
-  /* assert(d->_ea.type == SZ_NDEF); */
 
   assert(d->sref.type == SZ_NDEF || d->sref.addr != ~0);
   assert(d->dref.type == SZ_NDEF || d->dref.addr != ~0);

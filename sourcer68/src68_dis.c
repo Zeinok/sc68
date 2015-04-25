@@ -363,7 +363,7 @@ int dis_pass(uint_t entry, mbk_t * mbk, vec_t * symbols)
   memset(&dis, 0, sizeof(dis));
 
   // TEMP FOR TESTING WE DON'T NEED SYMBOLS OR SPECIFIC DISASSEMBLY OPTION HERE
-  dis.desa.flags = DESA68_SYMBOL_FLAG | DESA68_GRAPH_FLAG;
+  dis.desa.flags = DESA68_SYMBOL_FLAG | DESA68_GRAPH_FLAG | DESA68_LCASE_FLAG;
 
   dis.addr = entry;
   dis.mbk = mbk;

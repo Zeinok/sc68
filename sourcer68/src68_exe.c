@@ -218,8 +218,8 @@ static exe_t * load_as_bin(char * uri, uint_t org, uint8_t * data, int size)
   memcpy(e->mbk->mem, data, size);
 
   section_add(e->sections, "DEFAULT", org, size, SECTION_X);
-  symbol_add(e->symbols, "bin_data", org, 0);
-  symbol_add(e->symbols, "bin_datasz", size, 0);
+  symbol_add(e->symbols, "Start", org, 0);
+  symbol_add(e->symbols, "End", org+size, 0);
   e->mbk->mib[0] |= MIB_ENTRY;
 
   exe = e;
