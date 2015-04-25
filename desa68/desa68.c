@@ -44,17 +44,18 @@ typedef int8_t   s8;
 typedef uint8_t  u8;
 typedef int16_t  s16;
 typedef uint16_t u16;
-/* typedef int32_t  s32; */
-/* typedef uint32_t u32; */
+typedef int32_t  s32;
+typedef uint32_t u32;
 #else
 typedef signed char    s8;
 typedef unsigned char  u8;
 typedef unsigned short u16;
 typedef short          s16;
-#endif
-
 typedef int            s32;
 typedef unsigned int   u32;
+#endif
+
+#define U32(v) ( (v) & 0xFFFFFFFF )
 
 #define REG0(W)         (((W))&7)
 #define REG9(W)         (((W)>>9)&7)
@@ -80,6 +81,15 @@ enum {
   MODE_dPC,
   MODE_dPCXI,
   MODE_IMM
+};
+
+enum {
+  SZ_BYTE = DESA68_OP_B,
+  SZ_WORD = DESA68_OP_W,
+  SZ_LONG = DESA68_OP_L,
+  SZ_IMPL = DESA68_OP_A,
+  SZ_ADDR = DESA68_OP_A,
+  SZ_NDEF = DESA68_OP_NDEF
 };
 
 /* Hexa digit table */
@@ -111,12 +121,6 @@ static const u16 dbcc_ascii[16] = {
   'VC','VS','PL','MI',
   'GE','LT','GT','LE'
 };
-
-/* static uint32_t regs[16] = { */
-/*   'D0','D1','D2','D3','D4','D5','D6','D7', */
-/*   'A0','A1','A2','A3','A4','A5','A6','A7', */
-/*   'USP', 'CCR', 'SR', 'PC' */
-/* }; */
 
 /* ======================================================================
  * String functions *
@@ -341,49 +345,57 @@ static int relPC(desa68_t * d)
  * General disassembly function
  * ====================================================================== */
 
-static void set_ea(desa68_t *d, unsigned int v)
+static inline void ea_unset(desa68_t *d)
+{
+  d->_ea.type = SZ_NDEF;
+}
+
+static inline void ea_set(desa68_t *d, unsigned int v)
 {
   /* if not true _ea has not been commited at some point. */
-  assert (d->_ea == DESA68_INVALID_ADDR);
-  d->_ea = v & d->memmask;
+  assert (d->_ea.type == SZ_NDEF);
+  d->_ea.type = SZ_ADDR;         /* default mode is just an address */
+  d->_ea.addr = v & d->memmask;
 }
 
-static void set_src_ref(desa68_t * d)
+static inline int has_ea(const desa68_t * d) {
+  return d->_ea.type != SZ_NDEF;
+}
+
+static void set_any_ref(desa68_t * d, struct desa68_ref * ref, int rtype)
 {
-  if (d->_ea != DESA68_INVALID_ADDR) {
-    d->sref = d->_ea;
-    d->_ea = DESA68_INVALID_ADDR;
-    d->regs |= 1 << DESA68_REG_SREF;
+  if (has_ea(d)) {
+    ref->type = rtype;
+    ref->addr = d->_ea.addr;
+    ea_unset(d);
   }
 }
 
-static void set_dst_ref(desa68_t * d)
+static void set_src_ref(desa68_t * d, int rtype)
 {
-  if (d->_ea != DESA68_INVALID_ADDR) {
-    d->dref = d->_ea;
-    d->_ea = DESA68_INVALID_ADDR;
-    d->regs |= 1 << DESA68_REG_DREF;
-  }
+  set_any_ref(d,&d->sref,rtype);
 }
 
-static void set_both_ref(desa68_t * d)
+static void set_dst_ref(desa68_t * d, int rtype)
 {
-  if (d->_ea != DESA68_INVALID_ADDR) {
-    d->sref = d->dref = d->_ea;
-    d->_ea = DESA68_INVALID_ADDR;
-    d->regs |= (1 << DESA68_REG_SREF) | (1 << DESA68_REG_DREF);
-  }
+  set_any_ref(d,&d->dref,rtype);
+}
+
+static void set_both_ref(desa68_t * d, int rtype)
+{
+  set_any_ref(d,&d->sref,rtype);
+  d->dref = d->sref;
 }
 
 static void set_branch(desa68_t * d, int itype)
 {
-  set_both_ref(d);
+  set_dst_ref(d,SZ_ADDR);
   d->itype = itype;
 }
 
 static void set_interrupt(desa68_t * d, unsigned int vector)
 {
-  set_ea(d,vector);
+  ea_set(d,vector);
   set_branch(d,DESA68_INT);
 }
 
@@ -430,6 +442,7 @@ static void desa_op_ANp(desa68_t * d, u8 reg)
   desa_char(d,'+');
 }
 
+/* Could use a table for that. */ 
 static void desa_op_anyreg(desa68_t * d, u8 reg)
 {
   unsigned int name;
@@ -438,7 +451,6 @@ static void desa_op_anyreg(desa68_t * d, u8 reg)
   else if (reg <= DESA68_REG_SP)
     name = 'A0'+(reg-DESA68_REG_AN);
   else
-
     switch (reg) {
     case DESA68_REG_USP: name = 'USP'; break;
     case DESA68_REG_CCR: name = 'CCR'; break;
@@ -462,12 +474,12 @@ static void desa_op_xi(desa68_t * d, u16 w)
   desa_ascii(d, ('.'<<8) | "WL"[ 1 & (w >> 11) ]);
 }
 
-static void desa_opsz(desa68_t *d, int size)
+static void desa_opsz(desa68_t *d, u8 size)
 {
-//  assert(size >= 0 && size < 3);
-  desa_char(d,'.');
-  desa_char(d,"BWL"[size]);
-  d->opsz = size;
+  if (size <= SZ_LONG) {
+    desa_char(d,'.');
+    desa_char(d,"BWL"[size]);
+  }
 }
 
 static void desa_label(desa68_t * d, unsigned int v)
@@ -501,7 +513,7 @@ static void desa_immL(desa68_t * d, int v, int pc)
     if (d->ischar(d,(u8)v2) && d->ischar(d,(u8)(v2>>8)) &&
         d->ischar(d,(u8)(v2>>16)) && d->ischar(d,(u8)(v2>>24))) {
       desa_char (d,'\'');
-      desa_ascii(d,(u32)v2);
+      desa_ascii(d,U32(v2));
       desa_char (d,'\'');
     } else {
       desa_signifiant(d,v);
@@ -523,7 +535,7 @@ static void desa_absL(desa68_t * d, int v, int pc)
   }
 }
 
-static void get_ea_2(desa68_t * d, u32 mode, u32 reg, u8 sz)
+static void get_ea_2(desa68_t * d, u8 mode, u8 reg, u8 immsz)
 {
   int v;
 
@@ -560,28 +572,32 @@ static void get_ea_2(desa68_t * d, u32 mode, u32 reg, u8 sz)
     desa_char(d,')');
     break;
   case MODE_ABSW:
-    set_ea(d, v = adrW(d));
+    ea_set(d, v = adrW(d));
     desa_absL(d, v, (d->pc-2) & 0xFFFFFF);
     desa_ascii(d,'.W');
     break;
   case MODE_ABSL:
-    set_ea(d, v = adrL(d));
+    ea_set(d, v = adrL(d));
     desa_absL(d, v, (d->pc - 4) & 0xFFFFFF);
     if ( (s16)v == v )
       desa_ascii(d,'.L');
     break;
   case MODE_dPC:
-    set_ea(d, v = relPC(d));
+    ea_set(d, v = relPC(d));
     if (d->flags & DESA68_SYMBOL_FLAG)
       desa_label(d, v);
     else
       desa_usignifiant(d, v);
-    desa_char(d,'(');
-    desa_op_anyreg(d, DESA68_REG_PC);
-    desa_char(d,')');
+    desa_ascii(d,'(PC)');
+    /* Don't use DESA68_REG_PC here, only for (PC,Xi). We don't really
+     * need to know if the addressing is PCR but we need to know if
+     * the reference is an effective address or a base address. 
+     *
+     * desa_op_anyreg(d, DESA68_REG_PC);
+     */
     break;
   case MODE_dPCXI:
-    set_ea(d, v = relPC(d));
+    ea_set(d, v = relPC(d));
     if (d->flags & DESA68_SYMBOL_FLAG)
       desa_label(d,v);
     else
@@ -593,31 +609,31 @@ static void get_ea_2(desa68_t * d, u32 mode, u32 reg, u8 sz)
     desa_char(d,')');
     break;
   case MODE_IMM:
-    switch (sz) {
-    case 1:
-    case 'B':
+    switch (immsz) {
+    case SZ_BYTE:
       v = immB(d);
       desa_char(d,'#');
       desa_signifiant(d,v);
       break;
-    case 2:
-    case 'W':
-      v = immW(d); /* should not be ok without cast */
+    case SZ_WORD:
+      v = immW(d);
       desa_char(d,'#');
       desa_signifiant(d,v);
       break;
-    case 4:
-    case 'L':
-      v = (u32)immL(d);
+    case SZ_LONG:
+      v = U32(immL(d));
       desa_immL(d, v, d->pc-4);
       break;
+
     default:
+      assert(!"invalid immediat size");
       desa_ascii(d,'#?');
       break;
     }
     break;
 
   default:
+    assert(!"invalid addressing mode");
     desa_char(d,'?');
     desa_usignifiant(d, mode);
     desa_char(d,'?');
@@ -629,7 +645,7 @@ static void get_ea_2(desa68_t * d, u32 mode, u32 reg, u8 sz)
  * bit : 0/6 -> src/dest
  * w   : current opcode
  */
-static void get_ea_move(desa68_t * d, int bit, s32 w, u32 easz)
+static void get_ea_move(desa68_t * d, int bit, int w, u8 easz)
 {
   int ea = (w>>bit) & 63;
 
@@ -643,10 +659,10 @@ static void get_ea_move(desa68_t * d, int bit, s32 w, u32 easz)
 static void desa_ry_rx(desa68_t * d, int inst, int size)
 {
   desa_ascii(d,inst);
-  if (size != DESA68_SZ_IMPL)
+  if (size != SZ_IMPL)
     desa_opsz(d,size);                  /* ADDX */
-  else
-    d->opsz = DESA68_SZ_BYTE;           /* ABCD */
+  /* else */
+  /*   d->opsz = SZ_BYTE; */            /* ABCD */
   desa_space(d);
   if (d->_mode3&1) {             /* -(Ay),-(Ax) */
     desa_op_pAN(d,d->_reg0);
@@ -657,27 +673,28 @@ static void desa_ry_rx(desa68_t * d, int inst, int size)
     desa_comma(d);
     desa_op_DN(d, d->_reg9);
   }
-  d->opsz = size;
+  /* d->opsz = size; */
 
 }
 
+/* Used by ALU (add/sub/or/eor/and) */
 static void desa_dn_ae(desa68_t * d, int name)
 {
   desa_ascii(d,name);
   desa_opsz(d,d->_opsz);
   desa_space(d);
   /*  dn,<ae> */
-  if (d->_w&0400) {
+  if (d->_opw&0400) {
     desa_op_DN(d,d->_reg9);
     desa_comma(d);
-    get_ea_2(d, d->_mode3, d->_reg0, d->_chsz);
-    set_dst_ref(d);
+    get_ea_2(d, d->_mode3, d->_reg0, d->_opsz);
+    set_dst_ref(d, d->_opsz);
   }
 
   /*  <ae>,dn */
   else {
-    get_ea_2(d, d->_mode3, d->_reg0, d->_chsz);
-    set_src_ref(d);
+    get_ea_2(d, d->_mode3, d->_reg0, d->_opsz);
+    set_src_ref(d, d->_opsz);
     desa_comma(d);
     desa_op_DN(d, d->_reg9);
   }
@@ -688,9 +705,8 @@ static void desa_dcw(desa68_t * d)
 {
   desa_ascii(d,'DC.W');
   desa_space(d);
-  desa_uhexacat(d,(u16)d->_w,4,'$');
+  desa_uhexacat(d,(u16)d->_opw,4,'$');
   d->itype = DESA68_DCW;
-  d->opsz  = DESA68_SZ_WORD;
 }
 
 /**************
@@ -705,7 +721,7 @@ static void desa_dcw(desa68_t * d)
 
 static int check_desa_bitop(desa68_t * d)
 {
-  static u32 fn[] = { 'BTST', 'BCHG', 'BCLR', 'BSET'};
+  static u32 fn[] = { 'BTST', 'BCHG', 'BCLR', 'BSET' };
   int modemsk = 00775;
   unsigned int inst;
 
@@ -713,9 +729,9 @@ static int check_desa_bitop(desa68_t * d)
     return 0;
 
   inst = fn[d->_opsz];
-  if (!(d->_w&0400)) {
+  if (!(d->_opw&0400)) {
     /* B... #x,<AE>*/
-    if ((d->_w&0xF00)!=0x800)
+    if ((d->_opw&0xF00)!=0x800)
       return 0;
     desa_ascii(d,inst);
     desa_space(d);
@@ -729,17 +745,21 @@ static int check_desa_bitop(desa68_t * d)
     desa_op_DN(d, d->_reg9);
   }
   desa_comma(d);
-  get_ea_2(d, d->_mode3, d->_reg0, 'B');
-  d->opsz = d->_mode3 ? DESA68_SZ_BYTE : DESA68_SZ_LONG;
+  get_ea_2(d, d->_mode3, d->_reg0, SZ_NDEF);
+
+  if (d->_mode3)
+    set_dst_ref(d, SZ_BYTE);            /* AE is not a register */
+  /* d->opsz = d->_mode3 ? SZ_BYTE : SZ_LONG; */
+
   return 1;
 }
 
 static int check_desa_IMM_SR(desa68_t * d)
 {
-  u32 modemsk = 1 + (1<<2) + (1<<10);
-  int mode = (d->_w>>8)&15, inst='ORI';
+  int modemsk = 1 + (1<<2) + (1<<10);
+  int mode = (d->_opw>>8)&15, inst='ORI';
 
-  if ((d->_w&0677)!=0074 || !(modemsk&(1<<mode)))
+  if ((d->_opw&0677)!=0074 || !(modemsk&(1<<mode)))
     return 0;
 
   switch(mode) {
@@ -758,32 +778,30 @@ static int check_desa_IMM_SR(desa68_t * d)
   desa_ascii(d,inst);
   desa_space(d);
   get_ea_2(d, MODE_ABSW, MODE_IMM-MODE_ABSW, 'W');
-  set_src_ref(d);
   desa_comma(d);
   desa_op_anyreg(d, (d->_mode6&1) ? DESA68_REG_SR : DESA68_REG_CCR);
-  d->opsz = DESA68_SZ_WORD;
   return 1;
 }
 
 static int check_desa_movep(desa68_t * d)
 {
-  if ((d->_w & 0470) != 0410 )
+  if ((d->_opw & 0470) != 0410 )
     return 0;
 
   desa_str(d,"MOVEP");
   desa_opsz(d,1+(d->_opsz&1));
   desa_space(d);
 
-  if (!(d->_w&(1<<7))) {
+  if (!(d->_opw&(1<<7))) {
     /* MOVEP.? d(Ax),Dy */
-    get_ea_2(d, MODE_dAN, d->_reg0, 0);
+    get_ea_2(d, MODE_dAN, d->_reg0, SZ_NDEF);
     desa_comma(d);
     desa_op_DN(d,d->_reg9);
   } else {
     /* MOVEP.? Dx,d(Ay) */
     desa_op_DN(d,d->_reg9);
     desa_comma(d);
-    get_ea_2(d, MODE_dAN, d->_reg0, 0);
+    get_ea_2(d, MODE_dAN, d->_reg0, SZ_NDEF);
   }
   return 1;
 }
@@ -796,17 +814,17 @@ static int check_desa_imm_op(desa68_t * d)
   };
   const int modemsk = 0x6F;
 
-  if ((d->_w&0x100) || !(modemsk&(1<<d->_reg9)) || d->_opsz==3)
+  if ((d->_opw&0x100) || !(modemsk&(1<<d->_reg9)) || d->_opsz==3)
     return 0;
 
   desa_ascii(d,fn[d->_reg9]);
   desa_opsz(d,d->_opsz);
   desa_space(d);
-  get_ea_2(d, MODE_ABSW, MODE_IMM-MODE_ABSW, d->_chsz);
-  set_src_ref(d);
+  get_ea_2(d, MODE_ABSW, MODE_IMM-MODE_ABSW, d->_opsz);
+  set_src_ref(d,SZ_ADDR);           /* LONG immediat can be address */
   desa_comma(d);
-  get_ea_2(d, d->_mode3, d->_reg0, d->_chsz);
-  set_dst_ref(d);
+  get_ea_2(d, d->_mode3, d->_reg0, SZ_NDEF);
+  set_dst_ref(d,d->_opsz);
   return 1;
 }
 
@@ -824,20 +842,21 @@ static void desa_line0(desa68_t * d)
 static void desa_move(desa68_t * d)
 {
   static u8 mvsz[4] = {
-    DESA68_SZ_UDEF, DESA68_SZ_BYTE, DESA68_SZ_LONG, DESA68_SZ_WORD
+    SZ_NDEF, SZ_BYTE, SZ_LONG, SZ_WORD
   };
-  s32 w = d->_w;
-  int movsz  = (u8)('WLB?' >> ((w&(3<<12))>>(12-3)));
+  int w = d->_opw;
+  int movsz = (u8)('WLB?' >> ((w&(3<<12))>>(12-3)));
+  int rtype = mvsz[3 & (w>>12)];
   desa_ascii(d,'MOVE');
   if (d->_adrm6==MODE_AN)
     desa_char(d,'A');                   /* MOVEA */
-  desa_opsz(d,mvsz[3 & (w>>12)]);
+  desa_opsz(d,rtype);
   desa_space(d);
   get_ea_move(d,0,w,movsz);
-  set_src_ref(d);
+  set_src_ref(d,rtype);
   desa_comma(d);
   get_ea_move(d,6,w,movsz);
-  set_dst_ref(d);
+  set_dst_ref(d,rtype);
 }
 
 /* Check and disassemble a valid move
@@ -912,55 +931,59 @@ static void get_movemreg(desa68_t * d, unsigned int v, unsigned int rev)
   }
 }
 
-static int desa_check_imp(desa68_t * d,
-                          unsigned int name, int mskmode)
+static int desa_check_imp(desa68_t * d, unsigned int name, int mskmode,
+                          u8 opsz, u8 memsz)
 {
-  if ((d->_w&0400) || !(mskmode&(1<<d->_adrm0)))
+  if ((d->_opw&0400) || !(mskmode&(1<<d->_adrm0)))
     return 0;
   desa_ascii(d,name);
-  desa_opsz(d,d->_opsz);
+  desa_opsz(d,opsz);
   desa_space(d);
-  get_ea_2(d, d->_mode3, d->_reg0, d->_chsz);
-  set_both_ref(d);
+  get_ea_2(d, d->_mode3, d->_reg0, SZ_NDEF);
+
+  if (opsz <= SZ_LONG)
+    set_both_ref(d,opsz);
+  else
+    set_src_ref(d,opsz);
   return 1;
 }
 
 static int check_desa_lea(desa68_t * d)
 {
   int modemsk = 03744;
-  if ((d->_w&0700) != 0700 || !(modemsk&(1<<d->_adrm0)))
+  if ((d->_opw&0700) != 0700 || !(modemsk&(1<<d->_adrm0)))
     return 0;
   desa_ascii(d,'LEA');
   desa_space(d);
-  get_ea_2(d, d->_mode3, d->_reg0, 0);
-  set_src_ref(d);
+  get_ea_2(d, d->_mode3, d->_reg0, SZ_NDEF);
+  set_src_ref(d,SZ_ADDR);
   desa_comma(d);
   desa_op_AN(d,d->_reg9);
-  d->opsz = DESA68_SZ_LONG;
+  /* d->opsz = SZ_LONG; */
   return 1;
 }
 
 static int check_desa_chk(desa68_t * d)
 {
   int modemsk = 07775;
-  if ((d->_w&0700) != 0600 || !(modemsk&(1<<d->_adrm0)))
+  if ((d->_opw&0700) != 0600 || !(modemsk&(1<<d->_adrm0)))
     return 0;
-  desa_ascii(d,'CHK ');
-  get_ea_2(d, d->_mode3, d->_reg0, 0);
-  set_src_ref(d);
+  desa_ascii(d,'CHK');
+  desa_space(d);
+  get_ea_2(d, d->_mode3, d->_reg0, SZ_WORD);
+  set_src_ref(d, SZ_WORD);
   desa_comma(d);
   desa_op_DN(d, d->_reg9);
   set_interrupt(d, 0x18);
-  desa_opsz(d,DESA68_SZ_IMPL);
   return 1;
 }
 
 static int check_desa_ext(desa68_t * d)
 {
-  if ((d->_w&07670)!=04200)
+  if ((d->_opw&07670)!=04200)
     return 0;
   desa_ascii(d,'EXT');
-  desa_opsz(d,1+(1&(d->_w>>6)));
+  desa_opsz(d,1+(1&(d->_opw>>6)));
   desa_space(d);
   desa_op_DN(d,d->_reg0);
   return 1;
@@ -969,34 +992,35 @@ static int check_desa_ext(desa68_t * d)
 static int check_desa_movem(desa68_t * d)
 {
   int modemsk, regmsk;
-  int mode3, reg0, w;
-  if ((d->_w&05600)!=04200)
+  int mode3, reg0, w, opsz;
+  if ((d->_opw&05600)!=04200)
     return 0;
-  modemsk = !(d->_w&02000) ? 00764 : 03754;
+  modemsk = !(d->_opw&02000) ? 00764 : 03754;
   if (!(modemsk&(1<<d->_adrm0)))
     return 0;
 
   desa_str(d,"MOVEM");
-  desa_opsz(d,1 + (1 & (d->_w>>6)));
+  opsz = 1 + (1 & (d->_opw>>6));
+  desa_opsz(d,opsz);
   desa_space(d);
 
-  w = d->_w;
+  w = d->_opw;
   mode3 = d->_mode3;
   reg0 = d->_reg0;
   regmsk = (u16) immW(d);
 
   if (w&02000) {
     /*  -> reg */
-    get_ea_2(d, mode3, reg0, 0);
-    set_src_ref(d);
+    get_ea_2(d, mode3, reg0, SZ_NDEF);
+    set_src_ref(d,opsz);
     desa_comma(d);
     get_movemreg(d,regmsk,0);
   } else {
     /* -> mem */
     get_movemreg(d, regmsk, (mode3==MODE_pAN) ? 15 : 0);
     desa_comma(d);
-    get_ea_2(d, mode3, reg0, 0);
-    set_dst_ref(d);
+    get_ea_2(d, mode3, reg0, SZ_NDEF);
+    set_dst_ref(d,opsz);
   }
   return 1;
 }
@@ -1004,7 +1028,7 @@ static int check_desa_movem(desa68_t * d)
 static int check_desa_jmp(desa68_t * d)
 {
   int modemsk = 03744;
-  if ((d->_w&07600) != 07200) {
+  if ((d->_opw&07600) != 07200) {
     return 0;
   }
   /* JMP / JSR */
@@ -1018,9 +1042,8 @@ static int check_desa_jmp(desa68_t * d)
       type = DESA68_BRA;
       desa_ascii(d,'MP');
     }
-    d->opsz = DESA68_SZ_IMPL;
     desa_space(d);
-    get_ea_2(d, d->_mode3, d->_reg0, d->_chsz);
+    get_ea_2(d, d->_mode3, d->_reg0, SZ_NDEF);
     set_branch(d, type);
     return 1;
   }
@@ -1047,9 +1070,8 @@ static int check_desa_line4_mode3(desa68_t * d)
     desa_space(d);
     desa_op_anyreg(d, DESA68_REG_SR);
     desa_comma(d);
-    get_ea_2(d, d->_mode3, d->_reg0, 'W');
-    set_dst_ref(d);
-    d->opsz = DESA68_SZ_WORD;
+    get_ea_2(d, d->_mode3, d->_reg0, SZ_WORD);
+    set_dst_ref(d,SZ_WORD);
     return 1;
 
   case 2:                               /* MOVE TO CCR */
@@ -1057,11 +1079,10 @@ static int check_desa_line4_mode3(desa68_t * d)
       break;
     desa_ascii(d,'MOVE');
     desa_space(d);
-    get_ea_2(d, d->_mode3, d->_reg0, 'B');
-    set_src_ref(d);
+    get_ea_2(d, d->_mode3, d->_reg0, SZ_BYTE);
+    set_src_ref(d,SZ_WORD);             /* Word indeed */
     desa_comma(d);
     desa_op_anyreg(d,DESA68_REG_CCR);
-    d->opsz = DESA68_SZ_WORD;           /* Word indeed */
     return 1;
 
   case 3:                               /* MOVE TO SR */
@@ -1069,22 +1090,18 @@ static int check_desa_line4_mode3(desa68_t * d)
       break;
     desa_ascii(d,'MOVE');
     desa_space(d);
-    get_ea_2(d, d->_mode3, d->_reg0, 'W');
-    set_src_ref(d);
+    get_ea_2(d, d->_mode3, d->_reg0, SZ_WORD);
+    set_src_ref(d,SZ_WORD);
     desa_comma(d);
     desa_op_anyreg(d,DESA68_REG_SR);
-    d->opsz = DESA68_SZ_WORD;
     return 1;
 
   case 5:                               /* TAS */
-    d->_chsz = 0;
-    if (desa_check_imp(d, 'TAS', 00775)) {
-      d->opsz = DESA68_SZ_BYTE;
+    if (desa_check_imp(d, 'TAS', 00775, SZ_IMPL, SZ_BYTE)) {
       return 1;
     } else if (d->_w == 0x4AFC) {
       desa_str(d,"ILLEGAL");
       set_interrupt(d, 0x10);
-      d->opsz = DESA68_SZ_IMPL;
       return 1;
     }
   }
@@ -1097,46 +1114,52 @@ static void desa_line4(desa68_t * d)
   switch (d->_mode6) {
 
   case 7:
-    if (check_desa_lea(d)) return;
+    if (check_desa_lea(d)) return;      /* LEA <ea>,An */
+    /* TODO for 32bit support */        /* EXTB.L (>=68020) */
     break;
-  case 5:
+
+  case 6:                               /* CHK <ea>,Dn*/
     if (check_desa_chk(d)) return;
     break;
-  case 2:
+
+  case 4:                               /* CHK.L (>=68020) */
+    break;
+
   case 3:
-    if (check_desa_ext(d)) return;
-    else if (check_desa_movem(d)) return;
-    else if (check_desa_jmp(d)) return;
-    if (check_desa_line4_mode3(d)) return;
+  case 2:
+    if (check_desa_ext(d))   return;
+    if (check_desa_movem(d)) return;
+    if (check_desa_jmp(d))   return;
+    if (check_desa_line4_mode3(d)) return; /* mode 3 only ? */
 
   default:
-
     switch(d->_reg9) {
     case 0:                             /* NEGX */
-      if (desa_check_imp(d, 'NEGX', 00775))
+      if (desa_check_imp(d, 'NEGX', 00775, d->_opsz, d->_opsz))
         return;
       break;
 
     case 1:                             /* CLR */
-      if (desa_check_imp(d, 'CLR', 00775))
+      if (desa_check_imp(d, 'CLR', 00775, d->_opsz, d->_opsz)) {
+        /* d->sref.type = SZ_NDEF; */ /* to keep only dst ref */
         return;
+      }
       break;
 
     case 2:                             /* NEG */
-      if (desa_check_imp(d, 'NEG', 00775))
+      if (desa_check_imp(d, 'NEG', 00775, d->_opsz, d->_opsz))
         return;
       break;
 
     case 3:                             /* NOT */
-      if (desa_check_imp(d, 'NOT', 00775))
+      if (desa_check_imp(d, 'NOT', 00775, d->_opsz, d->_opsz))
         return;
       break;
 
     case 4:
       if (d->_mode6==0) {
         /* NBCD */
-        d->_chsz = 0;
-        if (desa_check_imp(d, 'NBCD', 00775))
+        if (desa_check_imp(d, 'NBCD', 00775, SZ_IMPL, SZ_BYTE))
           return;
       } else if (d->_mode6==1) {
         if (d->_mode3 == MODE_DN) {
@@ -1144,20 +1167,20 @@ static void desa_line4(desa68_t * d)
           desa_ascii(d,'SWAP');
           desa_space(d);
           desa_op_DN(d, d->_reg0);
-          d->opsz = DESA68_SZ_LONG;
           return;
         } else {
           /* PEA */
-          d->_chsz = 0;
-          if (desa_check_imp(d, 'PEA', 0x7E4))
+          if (desa_check_imp(d, 'PEA', 0x7E4, SZ_IMPL, SZ_ADDR))
             return;
         }
       }
       break;
 
     case 5:                             /* TST */
-      if (desa_check_imp(d, 'TST', 00775))
+      if (desa_check_imp(d, 'TST', 00775, d->_opsz, d->_opsz)) {
+        /* d->dref.type = SZ_NDEF; */ /* to keep only src ref */
         return;
+      }
       break;
 
     case 6:
@@ -1169,13 +1192,13 @@ static void desa_line4(desa68_t * d)
         switch(d->_mode3) {
         case 0:
         case 1: {
-          const int num = d->_w & 0xF;
+          const int num = d->_opw & 0xF;
           desa_ascii(d,'TRAP');
           desa_space(d);
           desa_ascii(d,'#$');
           desa_char(d, Thex[num]);
           set_interrupt(d,0x80 + (num<<2));
-          d->opsz = DESA68_SZ_IMPL;
+          /* d->opsz = SZ_IMPL; */
         } return;
         case 2:
           desa_ascii(d,'LINK');
@@ -1184,14 +1207,14 @@ static void desa_line4(desa68_t * d)
           desa_comma(d);
           get_ea_2(d, MODE_ABSW, MODE_IMM-MODE_ABSW, 'W');
           d->regs |= 1 << DESA68_REG_SP;
-          d->opsz = DESA68_SZ_IMPL;
+          /* d->opsz = SZ_IMPL; */
           return;
         case 3:
           desa_ascii(d,'UNLK');
           desa_space(d);
           desa_op_AN(d,d->_reg0);
           d->regs |= 1 << DESA68_REG_SP;
-          d->opsz = DESA68_SZ_IMPL;
+          /* d->opsz = SZ_IMPL; */
           return;
         case 4:                         /* MOVE An,USP */
           desa_ascii(d,'MOVE');
@@ -1199,7 +1222,7 @@ static void desa_line4(desa68_t * d)
           desa_op_AN(d,d->_reg0);
           desa_comma(d);
           desa_op_anyreg(d,DESA68_REG_USP);
-          d->opsz = DESA68_SZ_LONG;
+          /* d->opsz = SZ_LONG; */
           return;
 
         case 5:                         /* MOVE USP,Sn */
@@ -1208,7 +1231,7 @@ static void desa_line4(desa68_t * d)
           desa_op_anyreg(d,DESA68_REG_USP);
           desa_comma(d);
           desa_op_AN(d,d->_reg0);
-          d->opsz = DESA68_SZ_LONG;
+          /* d->opsz = SZ_LONG; */
           return;
 
         case 6: {
@@ -1225,8 +1248,9 @@ static void desa_line4(desa68_t * d)
 
           desa_str(d, str[d->_reg0]);
           if (d->_reg0 == 2)
-            get_ea_2(d,MODE_IMM,0,'W');
-          d->opsz = DESA68_SZ_IMPL;
+            /* STOP */
+            get_ea_2(d,MODE_IMM,0,SZ_WORD);
+          /* d->opsz = SZ_IMPL; */
         } return;
         }
       }
@@ -1238,11 +1262,11 @@ static void desa_line4(desa68_t * d)
 
 /**************
  *
- *   LINE 5 :
- *   -ADDQ
- *   -SUBQ
- *   -Scc
- *   -Dcc
+ *   LINE 5:
+ *   - ADDQ #x,<ea>
+ *   - SUBQ #x,<ea>
+ *   - Scc <ea>
+ *   - Dcc dn,Addr
  *
  ***************/
 
@@ -1252,45 +1276,43 @@ static void desa_addq_subq(desa68_t * d)
 
   v = d->_reg9;
   v += (!v) << 3;
-  desa_ascii(d,(d->_w&0400) ? 'SUBQ':'ADDQ');
+  desa_ascii(d,(d->_opw&0400) ? 'SUBQ':'ADDQ');
   desa_opsz(d,d->_opsz);
   desa_space(d);
   desa_ascii(d,'#0' + v);
   desa_comma(d);
-  get_ea_2(d, d->_mode3, d->_reg0, d->_chsz);
-  set_dst_ref(d);
+  get_ea_2(d, d->_mode3, d->_reg0, d->_opsz);
+  set_dst_ref(d, d->_opsz);
 }
 
 static void desa_Dcc(desa68_t * d)
 {
   int v;
 
-  desa_ascii(d,('DB'<<16) + dbcc_ascii[(d->_w>>8)&15]);
+  desa_ascii(d,('DB'<<16) + dbcc_ascii[(d->_opw>>8)&15]);
   desa_space(d);
   desa_op_DN(d,d->_reg0);
   desa_comma(d);
-  set_ea(d, v = relPC(d));
+  ea_set(d, v = relPC(d));
   if (d->flags & DESA68_SYMBOL_FLAG)
     desa_label(d, v);
   else
     desa_usignifiant(d, v);
   set_branch(d,DESA68_BSR);
-  d->opsz = DESA68_SZ_IMPL;
 }
 
 static void desa_Scc(desa68_t * d)
 {
   desa_char(d,'S');
-  desa_ascii(d,scc_ascii[(d->_w>>8)&15]);
+  desa_ascii(d,scc_ascii[(d->_opw>>8)&15]);
   desa_space(d);
-  get_ea_2(d, d->_mode3, d->_reg0, d->_chsz);
-  d->opsz = DESA68_SZ_BYTE;
-  set_both_ref(d);
+  get_ea_2(d, d->_mode3, d->_reg0, SZ_NDEF);
+  set_dst_ref(d,SZ_BYTE);
 }
 
 static void desa_line5(desa68_t * d)
 {
-  if ( (d->_w&0370) == 0310 ) {
+  if ( (d->_opw&0370) == 0310 ) {
     desa_Dcc(d);
   } else if (d->_opsz == 3) {
     desa_Scc(d);
@@ -1310,29 +1332,27 @@ static void desa_line5(desa68_t * d)
 
 static void desa_line6(desa68_t * d)
 {
-  s32 a;
-
-  int cond = (d->_w>>8) & 0xF;
+  int a, cond = (d->_opw>>8) & 0xF;
 
   desa_ascii(d,('B'<<16) + bcc_ascii[cond]);
 
   /* Bcc.S */
-  if (d->_w & 255) {
+  if (d->_opw & 255) {
     desa_ascii(d,'.S');
-    a = (s32)(s8)d->_w;
-    a += (s32)d->pc;
-    d->opsz = DESA68_SZ_BYTE;
+    a = (int)(s8)d->_opw;
+    a += (int)d->pc;
+    /* d->opsz = SZ_BYTE; */
   }
   /* Bcc.W */
   else {
     desa_ascii(d,'.W');
     a = relPC(d);
-    d->opsz = DESA68_SZ_WORD;
+    /* d->opsz = SZ_WORD; */
 
   }
   desa_space(d);
   desa_absL(d, a, -1);
-  set_ea(d,a);
+  ea_set(d,a);
   set_branch(d, !cond ? DESA68_BRA : DESA68_BSR);
 
 }
@@ -1347,17 +1367,17 @@ static void desa_line6(desa68_t * d)
  ***************/
 static void desa_line7(desa68_t * d)
 {
-  if (d->_w & 0400) {
+  if (d->_opw & 0400) {
     desa_dcw(d);
   } else {
-    int v = (int)(s8)d->_w;
+    int v = (int)(s8)d->_opw;
     desa_str(d,"MOVEQ");
     desa_space(d);
     desa_char(d,'#');
     desa_signifiant(d,v);
     desa_comma(d);
     desa_op_DN(d,d->_reg9);
-    d->opsz = DESA68_SZ_LONG; /* DESA68_SZ_IMPL; */
+    /* d->opsz = SZ_LONG; */ /* SZ_IMPL; */
   }
 }
 
@@ -1365,23 +1385,25 @@ static void desa_line7(desa68_t * d)
 /**************
  *
  *   LINE B :
- *   -CMP
- *   -CMPM
- *   -EOR
+ *   -CMP  <ea>,Dn
+ *   -CMPA <ea>,An
+ *   -CMPM (An)+,(An)+,
+ *   -EOR  <ea>,Dn
  *
  ***************/
 
 static int check_desa_cmpa(desa68_t * d)
 {
-  int modemsk = 07777;
+  int modemsk = 07777, opsz;
 
   if ( d->_opsz != 3 || !(modemsk & (1<<d->_adrm0)) )
     return 0;
   desa_ascii(d,'CMPA');
-  desa_opsz(d,1+(1 & (d->_w >> 8)));
+  opsz = SZ_WORD + BIT8(d->_opw);
+  desa_opsz(d,opsz);
   desa_space(d);
-  get_ea_2(d,d->_mode3, d->_reg0, d->_chsz);
-  set_src_ref(d);
+  get_ea_2(d,d->_mode3, d->_reg0, opsz);
+  set_src_ref(d,opsz);
   desa_comma(d);
   desa_op_AN(d,d->_reg9);
   return 1;
@@ -1395,7 +1417,7 @@ static int check_desa_eor_cmp(desa68_t * d)
     return 0;
 
   /* EOR */
-  else if (d->_w & 0400) {
+  else if (d->_opw & 0400) {
     modemsk = 00775;
     inst = 'EOR';
   }
@@ -1415,7 +1437,7 @@ static int check_desa_eor_cmp(desa68_t * d)
 
 static int check_desa_cmpm(desa68_t * d)
 {
-  if ((d->_w&0470) != 0410)
+  if ((d->_opw&0470) != 0410)
     return 0;
   desa_ascii(d,'CMPM');
   desa_space(d);
@@ -1452,7 +1474,7 @@ static void desa_lineB(desa68_t * d)
 static int check_desa_exg(desa68_t * d)
 {
   unsigned int reg;
-  switch(d->_w&0770) {
+  switch(d->_opw&0770) {
   case 0500:
     reg = 0x0000;
     break;
@@ -1476,30 +1498,30 @@ static int check_desa_exg(desa68_t * d)
 static int check_desa_mul_div(desa68_t * d)
 {
   int modemsk = 0xFFD;
-  if ( (d->_w&0300) != 0300 || !( modemsk & (1<<d->_adrm0) ) )
+  if ( (d->_opw&0300) != 0300 || !( modemsk & (1<<d->_adrm0) ) )
     return 0;
   desa_ascii(d,(d->_line==0xC) ? 'MUL' : 'DIV');
-  desa_char(d,(d->_w&0x100) ? 'S' : 'U');
+  desa_char(d,(d->_opw&0x100) ? 'S' : 'U');
   desa_space(d);
-  get_ea_2(d, d->_mode3, d->_reg0, 'W');
-  set_src_ref(d);
+  get_ea_2(d, d->_mode3, d->_reg0, SZ_WORD);
+  set_src_ref(d, SZ_WORD);
   desa_comma(d);
   desa_op_DN(d,d->_reg9);
-  d->opsz = DESA68_SZ_LONG;
+  /* d->opsz = SZ_LONG; */
   return 1;
 }
 
 static int check_desa_abcd_sbcd(desa68_t * d)
 {
-  if ( (d->_w&0x1f0) != 0x100 )
+  if ( (d->_opw&0x1f0) != 0x100 )
     return 0;
-  desa_ry_rx(d,(d->_line==0xC) ? 'ABCD' : 'SBCD', DESA68_SZ_IMPL);
+  desa_ry_rx(d,(d->_line==0xC) ? 'ABCD' : 'SBCD', SZ_IMPL);
   return 1;
 }
 
 static int check_desa_and_or(desa68_t * d)
 {
-  int modemsk = !(d->_w&0400)? 0xFFD : 0x1FC;
+  int modemsk = !(d->_opw&0400)? 0xFFD : 0x1FC;
   if ( ! (modemsk & (1<<d->_adrm0) ) )
     return 0;
   desa_dn_ae(d, (d->_line==0xC) ? 'AND' : 'OR');
@@ -1527,7 +1549,7 @@ static void desa_lin8C(desa68_t * d)
 
 static int check_desa_addx_subx(desa68_t * d)
 {
-  if ( (d->_w&0460) != 0400 )
+  if ( (d->_opw&0460) != 0400 )
     return 0;
   desa_ry_rx(d,(d->_line==0xD) ? 'ADDX' : 'SUBX', d->_opsz);
   return 1;
@@ -1535,14 +1557,16 @@ static int check_desa_addx_subx(desa68_t * d)
 
 static int check_desa_adda_suba(desa68_t * d)
 {
+  int opsz;
   if (d->_opsz != 3)
     return 0;
 
+  opsz = SZ_WORD + BIT8(d->_opw);
   desa_ascii(d,(d->_line==0xD) ? 'ADDA' : 'SUBA');
-  desa_opsz(d,DESA68_SZ_WORD+BIT8(d->_w));
+  desa_opsz(d,opsz);
   desa_space(d);
-  get_ea_2(d, d->_mode3, d->_reg0, d->_chsz);
-  set_src_ref(d);
+  get_ea_2(d, d->_mode3, d->_reg0, opsz);
+  set_src_ref(d,opsz);
   desa_comma(d);
   desa_op_AN(d, d->_reg9);
   return 1;
@@ -1550,7 +1574,7 @@ static int check_desa_adda_suba(desa68_t * d)
 
 static int check_desa_add_sub(desa68_t * d)
 {
-  int modemsk = !(d->_w&0400) ? 07777 : 00774;
+  int modemsk = !(d->_opw&0400) ? 07777 : 00774;
 
   if (d->_opsz == 0) /* Fordib An for byte access size */
     modemsk &= ~(1<<MODE_AN);
@@ -1592,22 +1616,22 @@ static void desa_lineE(desa68_t * d)
     }
     desa_ascii(d,shf_ascii[type]);
     if (type==2) desa_char(d,'X');
-    desa_char (d, (d->_w&0400) ? 'L' :'R');
+    desa_char(d, (d->_opw&0400) ? 'L' :'R');
     desa_space(d);
-    get_ea_2(d, d->_mode3, d->_reg0, 0);
-    set_both_ref(d);
+    get_ea_2(d, d->_mode3, d->_reg0, SZ_NDEF);
+    set_both_ref(d, SZ_BYTE);
   }
 
   /* Register */
   else {
-    int type = (d->_w>>3)&3;
+    int type = (d->_opw>>3)&3;
     desa_ascii (d,shf_ascii[type]);
     if (type==2) desa_char(d,'X');
-    desa_char (d, (d->_w&0400) ? 'L' :'R');
+    desa_char (d, (d->_opw&0400) ? 'L' :'R');
     desa_opsz(d,d->_opsz);
     desa_space(d);
     /* dn,dn */
-    if (d->_w&(1<<5))
+    if (d->_opw&(1<<5))
       desa_op_DN(d,d->_reg9);
     /* #x,dn */
     else {
@@ -1634,9 +1658,9 @@ static void desa_linAF(desa68_t * d)
 {
   int vector = d->_line - 0xA;
   desa_dcw(d);                          /* set itype */
-  set_ea(d, 0x40 + ( (!!vector) <<2 ));
+  ea_set(d, 0x40 + ( (!!vector) <<2 ));
   set_branch(d, DESA68_INT);            /* restore valid itype */
-  d->opsz = DESA68_SZ_IMPL;
+  /* d->opsz = SZ_IMPL; */
 }
 
 static void (*desa_line[16])(desa68_t *) =
@@ -1650,12 +1674,13 @@ static void (*desa_line[16])(desa68_t *) =
 void desa68(desa68_t * d)
 {
   /* Clean slate. */
-  d->_ea   = DESA68_INVALID_ADDR;
-  /* d->branch = DESA68_INVALID_ADDR; */
-  d->sref  = DESA68_INVALID_ADDR;
-  d->dref  = DESA68_INVALID_ADDR;
+  d->_ea.type = SZ_NDEF;
+  d->_ea.addr = ~0;
+  d->sref  = d->_ea;
+  d->dref  = d->_ea;
   d->regs  = 0;                /* clear used registers. */
-  d->opsz  = DESA68_SZ_UDEF;   /* operand size */
+  /* d->branch = DESA68_INVALID_ADDR; */
+  /* d->opsz  = SZ_NDEF; */          /* operand size */
   d->itype = DESA68_INS;       /* assume valid generic instruction */
   d->error = 0;                /* clear error flags */
 
@@ -1688,15 +1713,16 @@ void desa68(desa68_t * d)
   d->_pc = d->pc &= d->memmask;
   read_pc(d);
 
-  d->_reg0  = REG0(d->_w);
-  d->_reg9  = REG9(d->_w);
-  d->_mode3 = MODE3(d->_w);
-  d->_mode6 = MODE6(d->_w);
-  d->_line  = LINE(d->_w);
-  d->_opsz  = OPSZ(d->_w);
+  d->_opw   = (u16)d->_w;
+  d->_reg0  = REG0(d->_opw);
+  d->_reg9  = REG9(d->_opw);
+  d->_mode3 = MODE3(d->_opw);
+  d->_mode6 = MODE6(d->_opw);
+  d->_line  = LINE(d->_opw);
+  d->_opsz  = OPSZ(d->_opw);
   d->_adrm0 = d->_mode3 + ((d->_mode3==MODE_ABSW)? d->_reg0 : 0);
   d->_adrm6 = d->_mode6 + ((d->_mode6==MODE_ABSW)? d->_reg9 : 0);
-  d->_chsz  = ('.'<<8) | (u8)('?LWB'>>(d->_opsz*8));
+  //d->_chsz  = ('.'<<8) | (u8)('?LWB'>>(d->_opsz*8));
 
   (desa_line[d->_line])(d);
   desa_char(d,0);
@@ -1705,10 +1731,10 @@ void desa68(desa68_t * d)
   d->pc &= d->memmask;
 
   /* if not true we forgot to commit _ea at some point. */
-  assert(d->_ea == DESA68_INVALID_ADDR);
+  assert(d->_ea.type == SZ_NDEF);
 
   /* if not true we forgot to set opsz or set it wrong. */
-  /* assert(d->opsz != DESA68_SZ_UDEF); */
+  /* assert(d->opsz != SZ_NDEF); */
 }
 
 int desa68_version(void)

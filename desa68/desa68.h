@@ -174,38 +174,29 @@ enum {
 
   /** Memory access failed. */
   DESA68_ERR_MEM  = 4,
-
-  /** Effectve address set. */
-  DESA68_ERR_EA   = 8,
 };
 
 /**
- * Operand types/
- * @anchor desa68_op_types
+ * Operand types.
+ */
+
+/**
+ * Reference type.
+ * @anchor desa68_ref_types
+ * @warning  DO NOT CHANGE ORDER.
  */
 enum {
-  DESA68_OP_UND,           /**< Operand is not defined. */
-  DESA68_OP_IMP,           /**< Operand is implicite. */
-  DESA68_OP_REG,           /**< Operand is a register. */
-  DESA68_OP_MVM,           /**< Operand is register list (movem). */
-  DESA68_OP_IMM,           /**< Operand is an immediat value. */
-  DESA68_OP_ABS,           /**< Operand is an absolute address. */
-  DESA68_OP_MEM,           /**< Operand is memory indexed by registers. */
-};
-
-enum {
-  DESA68_SZ_BYTE,
-  DESA68_SZ_WORD,
-  DESA68_SZ_LONG,
-  DESA68_SZ_QUAD,
-  DESA68_SZ_IMPL = 254,
-  DESA68_SZ_UDEF = 255
+  DESA68_OP_B,                          /**< Byte memory access. */
+  DESA68_OP_W,                          /**< Word memory access. */
+  DESA68_OP_L,                          /**< Long memory access. */
+  DESA68_OP_A,                          /**< Address Loaded.     */
+  DESA68_OP_NDEF = 255                  /**< Not defined.        */
 };
 
 /**
  * 68k registers identifier (8bit).
  *
- * @warning changing the order might require modifications in the code.
+ * @warning DO NOT CHANGE ORDER.
  */
 enum {
   DESA68_REG_DN  = 0,                 /**< First data register. */
@@ -215,15 +206,8 @@ enum {
   DESA68_REG_CCR,                     /**< Code condition register. */
   DESA68_REG_SR,                      /**< Status register. */
   DESA68_REG_PC,                      /**< Program counter. */
-
   DESA68_REG_LAST,                    /**< Not real registers. */
-  DESA68_REG_SREF, /**< used to signal that desa68_t::srcref is set. */
-  DESA68_REG_DREF  /**< used to signal that desa68_t::dstref is set. */
-};
-
-enum {
-  DESA68_INVALID_ADDR = -1
-};
+ };
 
 /**
  * type for the 68K disassemble pass parameters structure.
@@ -315,27 +299,20 @@ struct desa68_parm_s
    * @{
    */
 
-  unsigned int  regs;   /**< used registers bit mask.                 */
-  unsigned int  sref;   /**< src operand reference address.           */
-  unsigned int  dref;   /**< dst operand reference address.           */
-  unsigned char itype;  /**< Instruction type. @see desa68_inst_types */
-  unsigned char opsz;   /**< operands size.                           */
-  unsigned char error;  /**< Error flags. @see desa68_error_flags     */
+  unsigned int  regs; /**< used registers bit mask.                 */
+  struct desa68_ref {
+    unsigned int type; /**< reference types. @see desa68_ref_types  */
+    unsigned int addr; /**< reference address (if type is defined). */
+  }
+  sref,                       /**< source operand reference.        */
+  dref,                       /**< destination opererand reference. */
+  _ea;                        /**< internal (current) reference.    */
+
+  unsigned char itype; /**< Instruction type. @see desa68_inst_types */
+  unsigned char error; /**< Error flags. @see desa68_error_flags     */
 
   /**
-   * Branch or interrupt vector address.
-   *
-   * If the dissassembled instruction was a branch a call or a
-   * sotfware interrupt the desa68_parm_t::branch is set to the jump
-   * address or the interrupt vector involved.
-   *
-   * @see status for more information on instruction type.
-   */
-  unsigned int _branch;
-
-
-  /**
-   * Number of char output.
+   * Output char count.
    */
   unsigned int out;
 
@@ -354,18 +331,19 @@ struct desa68_parm_s
    * Intermediat opcode decoding.
    */
   unsigned int  _pc;       /**< pc origin at start of disassembly. */
-  unsigned int  _ea;       /**< temporarly decoded effective address. */
-  unsigned int  _chsz;     /**< holds '.[BWL]'  */
-  signed   int  _w;        /**< Last decoded word (sign extended).  */
+  // unsigned int  _ea;       /**< temporarly decoded effective address. */
+  //unsigned int  _chsz;     /**< holds '.[BWL]'  */
 
+  signed   int  _w;        /**< Last decoded word (sign extended).  */
+  unsigned int  _opw;      /**< First decode word (opcode).         */
   unsigned char _reg0;     /**< bit 2:0 of opcode word. */
   unsigned char _mode3;    /**< bit 5:3 of opcode word. */
   unsigned char _opsz;     /**< bit 7:6 of opcode word. */
   unsigned char _mode6;    /**< bit 8:6 of opcode word. */
-  unsigned char _reg9;     /**< bit 11:9 of opcode word. */
-  unsigned char _line;     /**< bit 15:12 of opcode word. */
-  unsigned char _adrm0;    /**< _mode3 / _reg0 union. */
-  unsigned char _adrm6;    /**< _mode6 / _reg9 union. */
+  unsigned char _reg9;     /**< bit B:9 of opcode word. */
+  unsigned char _line;     /**< bit F:C of opcode word. */
+  unsigned char _adrm0;    /**< _mode3+_reg0. */
+  unsigned char _adrm6;    /**< _mode6+_reg9. */
 
   /**
    * @}

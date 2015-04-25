@@ -1,0 +1,51 @@
+                 desa68 - M68000 disassembler library
+                                           
+                  desa68 is part of the sc68 project
+                       
+               (C) Copyright 1998-2015 Benjamin Gerard
+
+
+*Synopsis*
+
+  desa68 is a simple 68000 disassembler library designed to help to
+  source 68000 code. Some features like branch following, typed-data
+  tracking, registers involved or instruction types helps in that
+  regard.
+
+
+*Files*
+
+  desa68.h .......... desa68 sole API header.
+  desa68.c .......... The disassembler source file.
+
+
+*Version*
+
+  20090117
+
+    The previous stable version.
+
+  20150319
+
+    A slightly different API. Some fields in the main structure have
+    changed but the general idea did not really changed. User
+    callbacks for memory access, output string generation, symbol
+    lookup and their private user data companion field (cookie).
+    Memory references (wrongly named effective address in the previous
+    version) are now better tracked, including the type of reference
+    (branch, address, memory access).
+
+
+*Using*
+
+  A good sample may be found in the sourcer68 directory. This library
+  is also used by the cdbg68 (discontinued) program.
+
+
+*Links*
+
+  sc68 website
+       <http://sc68.atari.org>
+
+  sc68 development project
+       <http://sourceforge.net/projects/sc68>
