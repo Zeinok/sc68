@@ -88,7 +88,6 @@
  *   replace defined by the 2 fields desa68_t::immsym_min and
  *   desa68_t::immsym_max.
  *
- *
  * @{
  */
 
@@ -117,14 +116,15 @@ enum {
    * than desa68_t::immsym_max.
    */
   DESA68_SYMBOL_FLAG = (1<<0),
+
   /**
-   * Force source operand symbol disassembly.
-   **/
+   * Force source operand to be a valid candidat for symbol.
+   */
   DESA68_SRCSYM_FLAG = (1<<1),
 
   /**
-   * Force destination operand symbol disassembly.
-   **/
+   * Force destiantion operand to be a valid candidat for symbol.
+   */
   DESA68_DSTSYM_FLAG = (1<<2),
 
   /**
@@ -261,6 +261,8 @@ enum {
   DESA68_SYM_SIMM,       /**< source operand immediat value.        */
   DESA68_SYM_SPCR,       /**< source operand pc relativ address.    */
   DESA68_SYM_SPCI,       /**< source operand pc indexed address.    */
+
+  DESA68_SYM_LAST
 };
 
 /**
@@ -302,7 +304,7 @@ struct desa68_parm_s
   /** 68K memory buffer. */
   unsigned char *memptr;
 
-  /** start address of the memory buffer. */
+  /** Start address of the memory buffer. */
   unsigned int   memorg;
 
   /** Size of memory. */
@@ -336,13 +338,14 @@ struct desa68_parm_s
   const char * (*symget)(desa68_t *, unsigned int addr, int type);
 
   /**
-   * Minimum value to interpret long immediat or absolute long as symbol.
+   * Minimum value to select long immediate as symbol.
    * @see DESA68_SYMBOL_FLAG for more details
    * @see immsym_max
    */
   unsigned int   immsym_min;
+
   /**
-   * Maximum value to interpret long immediat or absolute long as symbol.
+   * Maximum value to select long immediate as symbol.
    * @see DESA68_SYMBOL_FLAG for more details
    * @see immsym_min
    */
