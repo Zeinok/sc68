@@ -36,12 +36,7 @@
 
 #include "file68_vfs_def.h"
 #include "file68_vfs.h"
-/* #include "file68_vfs_file.h" */
-/* #include "file68_vfs_fd.h" */
-/* #include "file68_vfs_curl.h" */
-/* #include "file68_vfs_mem.h" */
 #include "file68_vfs_z.h"
-/* #include "file68_vfs_null.h" */
 #include "file68_ice.h"
 #include "file68_zip.h"
 #include "file68_uri.h"
@@ -59,7 +54,7 @@
 #endif
 
 #ifndef u64
-# error "u64 must be defined as an integer of at least 64 bit"
+# error u64 must be defined as an integer of at least 64 bit
 #endif
 
 #include <string.h>
@@ -78,10 +73,6 @@
 const char file68_idstr_v1[] = SC68_IDSTR;
 const char file68_idstr_v2[] = SC68_IDSTR_V2;
 const char file68_mimestr[]  = SC68_MIMETYPE;
-/* maximum number of guessed loop allowed */
-#define MAX_TRACK_LP 4
-/* below this value, force a few loops */
-#define MIN_TRACK_MS (45*1000u)
 
 #ifndef DEBUG_FILE68_O
 # define DEBUG_FILE68_O 0
@@ -89,6 +80,10 @@ const char file68_mimestr[]  = SC68_MIMETYPE;
 int file68_cat = msg68_DEFAULT;
 
 #define ISCHK(A,B) ( (A)[0] == (B)[0] && (A)[1] == (B)[1] )
+
+#define MIN_TRACK_MS (45u*1000u)      /* minimum time to be played. */
+#define MAX_TRACK_LP 4u               /* max guessed loop allowed */
+
 
 /* Array of static strings, mainly used by metatags. */
 static /* const */ struct strings_table {
@@ -148,9 +143,12 @@ static /* const */ struct strings_table {
 /* valid year ? */
 static int is_year(const char * const s) {
   int year = 0;
-  if ( ( (*s=='1' && s[1]=='9') || (*s=='2' && s[1] =='0') ) &&
-       isdigit((int)s[2]) && isdigit((int)s[3]) )
-    year = (*s-'0')*1000 + (s[1]-'0')*100 + (s[2]-'0')*10 + (s[3]-'0');
+  if (isdigit((int)s[0]) && isdigit((int)s[1]) &&
+      isdigit((int)s[2]) && isdigit((int)s[3]) )
+    year = (s[0]-'0')*1000u + (s[1]-'0')*100u
+      + (s[2]-'0')*10u + (s[3]-'0');
+  if (year < 1980 || year >= 2100)      /* Hopefully :) */
+    year = 0;
   return year;
 }
 
@@ -252,12 +250,11 @@ static int myatoi(const char *s, int i, int max, int * pv)
 {
   int v = 0;
   for (; i<max; ++i) {
-    int c = s[i] & 255;
-    if (c>='0' && c<='9') {
+    int c = s[i];
+    if (isdigit(c))
       v = v * 10 + c - '0';
-    } else {
+    else
       break;
-    }
   }
   if (pv) *pv = v;
   return i;
@@ -276,7 +273,7 @@ static int is_valid_key(const char * key)
   return 1;
 }
 
-/* Searching a key (key can be 0 to search an empty slot) */
+/* Searching a key (key can be nullptr to search an empty slot) */
 static int get_customtag(const tagset68_t * tags, const char * key)
 {
   int i;
@@ -466,15 +463,14 @@ static int read_header(vfs68_t * const is, unsigned int * hptr)
   const int idv2_req = sizeof(file68_idstr_v2);
   const int sndh_req = 32;
   int have = 0;
-  const char * missing_id = "not a sc68 file (no magic)";
+  const char missing_id[] = "not a sc68 file (no magic)";
 
   assert( idv1_req == 56 );
   assert( idv2_req ==  8 );
 
   /* Read ID v2 string */
-  if(have = ensure_header(is, id, have, idv2_req, hptr), !have) {
+  if(have = ensure_header(is, id, have, idv2_req, hptr), !have)
     return -1;
-  }
 
   if (!memcmp(id, file68_idstr_v1, idv2_req)) {
     /* looks like idv1; need more bytes to confirm */
@@ -498,7 +494,7 @@ static int read_header(vfs68_t * const is, unsigned int * hptr)
       TRACE68(file68_cat,"file68: found %s signature\n","ICE!");
       return -ice_cc;
     } else {
-      /* Must be done after gzip or ice becausez id-string may appear
+      /* Must be done after gzip or ice because id-string may appear
        * in compressed buffer too.
        */
       if (sndh_is_magic(id,sndh_req,0)) {
@@ -554,6 +550,10 @@ static unsigned int ms_to_fr(unsigned int ms, unsigned int hz)
   return (unsigned int) fr;
 }
 
+static inline int is_aka_char(int c) {
+  return c >= 32 && c != ')';
+}
+
 /* match ".+ ([^)]+)$" */
 static int has_parenthesis(char * name, char ** sptr, char ** eptr)
 {
@@ -562,8 +562,8 @@ static int has_parenthesis(char * name, char ** sptr, char ** eptr)
   if (l < 5 || name[l-1] != ')')
     return 0;
   for (i = l-2; i > 1 && name[i] != '('; --i)
-    if (name[i] == ')') return 0;
-  if (i <= 1 || i == l-2 || name[i-1] != ' ')
+    if (!is_aka_char(name[i])) return 0;
+  if (i < 2 || i == l-2 || name[i-1] != ' ')
     return 0;
   *sptr = name+i;
   *eptr = name+l-1;
@@ -595,29 +595,29 @@ static int decode_artist(disk68_t * mb, tagset68_t * tags)
          !has_parenthesis(tags->tag.artist.val, &s, &e) ||
          !strncmp68(tags->tag.artist.val,"unknown",7) )
       return id_aka;
-    s[-1] = e[0] = 0;                   /* remove `(' and `)' */
+    s[-1] = e[0] = 0;                   /* strip  */
     id_aka = set_customtag(mb, tags, tagstr.aka, s+1);
     TRACE68(file68_cat, "file68 guessed %s='%s'\n", tagstr.aka, s+1);
   } else {
-    /* not sc68 file format */
+    /* Some sndhs have a "(year)" in the title or in the artist. Only
+     * search for it if the file does not provide a YEAR tag. */
     if (get_customtag(&mb->tags, tagstr.year) < 0 &&
          (
            (
              ( tags->tag.title.val &&
                has_parenthesis(tags->tag.title.val, &s, &e) &&
-               is_year(s+1) >= 1990 )
+               e - s == 5 && is_year(s+1) )
              ||
              ( tags->tag.artist.val &&
                has_parenthesis(tags->tag.artist.val, &s, &e) &&
-               is_year(s+1) >= 1990 )
+               e - s == 5 && is_year(s+1) )
              )
            )
       ) {
-      s[-1] = e[0] = 0;                   /* remove `(' and `)' */
+      s[-1] = e[0] = 0;                 /* strip */
       set_customtag(mb, &mb->tags, tagstr.year, s+1);
       TRACE68(file68_cat, "file68 guessed %s='%s'\n",
               tagstr.year, s+1);
-
     }
   }
   return id_aka;
@@ -630,7 +630,7 @@ static int decode_artist(disk68_t * mb, tagset68_t * tags)
 static int valid(disk68_t * mb)
 {
   music68_t *m;
-  int i, pdatasz = 0, has_infinite = 0;
+  int i, pdatasz = 0, has_xtd = 1, has_time = 0;
   void * pdata   = 0;
   char * title, * artist, * aalias;
   int is_sndh = mb->tags.tag.genre.val == tagstr.sndh;
@@ -642,7 +642,7 @@ static int valid(disk68_t * mb)
   if (mb->def_mus < 0 || mb->def_mus >= mb->nb_mus)
     mb->def_mus = 0;
 
-  /* default album is 'noname' */
+  /* default album is 'n/a' */
   if (!mb->tags.tag.title.val)
     mb->tags.tag.title.val = tagstr.n_a;
   /* default title is album */
@@ -663,12 +663,6 @@ static int valid(disk68_t * mb)
   /* Init all music in this file */
   for (m = mb->mus, i = 0; m < mb->mus + mb->nb_mus; m++, i++) {
 
-    /* $$$ TEMP $$$ hack tao_tsd, to remove ym from hardware flags */
-    if (!strcmp68(m->replay,"tao_tsd")) {
-      m->hwflags.bit.ym     = 0;
-      m->hwflags.bit.ste    = 1;
-    }
-
     /* Default load address */
     if ( (m->has.pic = !m->a0) )
       m->a0 = SC68_LOADADDR;
@@ -681,45 +675,39 @@ static int valid(disk68_t * mb)
     if ( (m->has.time = m->first_fr > 0u) ) {
       m->first_ms = fr_to_ms(m->first_fr, m->frq);
     } else {
-      if ( !(m->has.time = m->first_ms > 0) )
-        /* m->first_ms = DEF_TRACK_MS */;
+      m->has.time = m->first_ms > 0u;
       m->first_fr = ms_to_fr(m->first_ms, m->frq);
     }
 
-    if (is_sndh && !m->has.time) {
+    /* For sndh file that does not have time or hardware flags look up
+     * in sc68 hardcoded database. */
+    if (is_sndh && ( ! m->has.time || ! m->hwflags.bit.xtd) ) {
       unsigned int frames;
       int flags;
 
       /* TODO: check sndh time */
-      msg68_notice("searching track #%02d:%08x in sndh timedb\n",
-                   i+1, mb->hash);
+      TRACE68(file68_cat,
+              "file68: searching track #%02d:%08x in sndh timedb\n",
+              i+1, mb->hash);
 
       if (-1 != timedb68_get(mb->hash, i, &frames, &flags)) {
         m->has.time = 1;
         m->first_fr = frames;
         m->first_ms = fr_to_ms(m->first_fr, m->frq);
 
-        m->hwflags.bit.ste    = !!(flags & TDB_STE);
-        /* timers set means we have the timer information, not that
-         * any timer is actually used ! Previous assumption (at least
-         * 1 timer have to be unused) was wrong.
-         */
-        m->hwflags.bit.timers = 1;
-        if (m->hwflags.bit.timers) {
-          /* Invert the flag as timerdb knows about unused timers. */
-          m->hwflags.bit.timera = ! (flags & TDB_TA);
-          m->hwflags.bit.timerb = ! (flags & TDB_TB);
-          m->hwflags.bit.timerc = ! (flags & TDB_TC);
-          m->hwflags.bit.timerd = ! (flags & TDB_TD);
-        }
-        msg68_notice("found track #%02d:%08x in sndh timedb"
-                     " -- %d ms, %d frames, %c%c%c%c%s\n",
-                     i+1, mb->hash, m->first_ms, m->first_fr,
-                     m->hwflags.bit.timera ? 'A' : '.',
-                     m->hwflags.bit.timerb ? 'B' : '.',
-                     m->hwflags.bit.timerc ? 'C' : '.',
-                     m->hwflags.bit.timerd ? 'D' : '.',
-                     m->hwflags.bit.ste ? ",STE" : "");
+        m->hwflags.bit.xtd = 1;
+        m->hwflags.bit.dma = m->hwflags.bit.lmc = !!(flags & TDB_STE);
+        /* Invert the flag as timerdb knows about unused timers. */
+        m->hwflags.bit.mfp = 15^(flags&(TDB_TA|TDB_TB|TDB_TC|TDB_TD))/TDB_TA;
+        TRACE68(file68_cat,
+                "file68: found track #%02d:%08x in sndh timedb"
+                " -- %d ms, %d frames, %c%c%c%c%s\n",
+                i+1, mb->hash, m->first_ms, m->first_fr,
+                (m->hwflags.bit.mfp & 1) ? 'A' : '.',
+                (m->hwflags.bit.mfp & 2) ? 'B' : '.',
+                (m->hwflags.bit.mfp & 4) ? 'C' : '.',
+                (m->hwflags.bit.mfp & 8) ? 'D' : '.',
+                m->hwflags.bit.dma ? ",STE" : "");
       }
     }
 
@@ -747,22 +735,21 @@ static int valid(disk68_t * mb)
         m->loops = MAX_TRACK_LP;
     }
 
-    if (m->loops > 0)
+    if (m->loops > 0) {
       mb->time_ms += fr_to_ms(m->first_fr+m->loops_fr*(m->loops-1), m->frq);
-    else {
+      has_time ++;
+    } else
       m->loops = 0;
-      has_infinite = 1;
-    }
 
-    /* default mode is YM2149 (Atari ST) */
-    if (!m->hwflags.all) {
-      m->hwflags.bit.ym = 1;
-    }
+    /* default mode is Atari-ST YM2149 PSG */
+    if (!m->hwflags.all)
+      m->hwflags.bit.psg = 1;
     mb->hwflags.all |= m->hwflags.all;
+    has_xtd &= m->hwflags.bit.xtd;
 
     /* default genre */
     if (!m->tags.tag.genre.val)
-      m->tags.tag.genre.val = (m->hwflags.bit.amiga)
+      m->tags.tag.genre.val = (m->hwflags.bit.aga)
         ? tagstr.amiga_chiptune
         : tagstr.atari_st_chiptune
         ;
@@ -804,85 +791,20 @@ static int valid(disk68_t * mb)
                     mb->mus[mb->def_mus].tags.array[i].val);
   }
 
-  if (has_infinite)
+  /* All tracks must have time onfo for disk tine info to be valid. */
+  if (has_time != mb->nb_mus)
     mb->time_ms = 0;
+
+  /* All tracks must have extended info for the disk to have it. */
+  mb->hwflags.bit.xtd = has_xtd;        /* all tracks must have it  */
 
   return 0;
 }
 
 int file68_is_our(const char * uri, const char * exts, int * is_remote)
 {
-  assert(!"do not use, needs a refresh");
+  assert(!"do not use, needs a freshen up");
   return 0;
-
-#if 0
-  const char * uri_end, *u;
-  char protocol[16], *p;
-  int has_protocol, remote, is_our;
-
-  TRACE68(file68_cat,"file68: check uri --\n",uri);
-  is_our = remote = 0;
-  if (!uri || !*uri) {
-    goto exit;
-  }
-
-  /* Default supported extensions */
-  if (!exts) {
-    exts = ".sc68\0.sndh\0.snd\0";
-  }
-
-  uri_end = uri + strlen(uri);
-  has_protocol = !uri68_get_protocol(protocol, sizeof(protocol), uri);
-
-  if (has_protocol) {
-    is_our = !strcmp68(protocol,"SC68");
-    if (!is_our && !strcmp68(protocol,"RSC68") && uri+14<uri_end) {
-      is_our = strncmp(uri+8, "music/", 6);
-    }
-
-    if (is_our)  {
-      /* $$$ Not really sure; may be remote or not. The only way to
-         know is to check for the corresponding local file.
-      */
-      remote = 0;
-      goto exit;
-    }
-  }
-
-  /* Check remote for other protocol */
-  remote = !uri68_local_protocol(protocol);
-
-  /* Check extension ... */
-  p = protocol+sizeof(protocol);
-  *--p = 0;
-  for (u=uri_end; u > uri && p > protocol; ) {
-    int c = *--u & 255;
-    if (c == '/') {
-      break;
-    }
-    *--p = c;
-    if (c == '.') {
-      if (!strcmp68(p,".GZ")) {
-        p = protocol+sizeof(protocol)-1;
-      } else {
-        break;
-      }
-    }
-  }
-
-  while (*exts) {
-    is_our = !strcmp68(p,exts);
-    if (is_our) {
-      break;
-    }
-    exts += strlen(exts)+1;
-  }
-
-exit:
-  if (is_remote) *is_remote = remote;
-  TRACE68(file68_cat, "file68: check uri -- [%s]\n", ok_int(!is_our));
-  return is_our;
-#endif
 }
 
 static vfs68_t * uri_or_file_create(const char * uri, int mode,
@@ -960,18 +882,24 @@ static int sndh_flags(hwflags68_t * hw, const char * b, int len)
   TRACE68(file68_cat,
           "file68: sndh -- FLAGS are '%s'\n", b);
 
-  hw->all = 0; hw->bit.timers = 1;
+  hw->all = 0; hw->bit.xtd = 1;
   for (k=0; k<len && b[k]; ++k)
     switch (b[k]) {
     case '~': break;                    /* Ignore '~' */
-    case 'y': hw->bit.ym     = 1; break;
-    case 'e': hw->bit.ste    = 1; break;
-    case 'a': hw->bit.timera = 1; break;
-    case 'b': hw->bit.timerb = 1; break;
-    case 'c': hw->bit.timerc = 1; break;
-    case 'd': hw->bit.timerd = 1; break;
-    case 'p': hw->bit.amiga  = 1; break;
-    case 'f': break;                    /* reserved for SFX */
+    case 'y': hw->bit.psg    = 1; break;
+    case 'e': hw->bit.dma    = 1; break;
+    case 'a': hw->bit.mfp   |= 1; break;
+    case 'b': hw->bit.mfp   |= 2; break;
+    case 'c': hw->bit.mfp   |= 4; break;
+    case 'd': hw->bit.mfp   |= 8; break;
+    case 'p': hw->bit.aga    = 1; break;
+
+    case 'l': hw->bit.lmc    = 1; break;
+    case 's': hw->bit.dsp    = 1; break;
+    case 't': hw->bit.blt    = 1; break;
+    case 'h': hw->bit.hbl    = 1; break;
+
+    case 'x': break;                    /* reserved for SFX */
     case 'g': break;                    /* reserved for digital only */
     case 'j': break;                    /* reserved for jingles */
     default:
@@ -1303,10 +1231,11 @@ static int sndh_info(disk68_t * mb, int len)
     mb->mus[i].d0    = i+1;
     mb->mus[i].loops = 0;
     mb->mus[i].frq   = frq ? frq : vbl;
-    if (!mb->mus[i].hwflags.bit.timers) {
+    if (!mb->mus[i].hwflags.bit.xtd) {
       /* Did not have the 'FLAG' tag, fallback to YM+STE */
-      mb->mus[i].hwflags.bit.ym  = 1;
-      mb->mus[i].hwflags.bit.ste = 1;
+      mb->mus[i].hwflags.bit.psg = 1;
+      mb->mus[i].hwflags.bit.dma = 1;
+      mb->mus[i].hwflags.bit.lmc = 1;
     }
   }
   return 0;
@@ -1745,15 +1674,17 @@ disk68_t * file68_load(vfs68_t * is)
       }
       f = LPeek(b);
       cursix->hwflags.all = 0;
-      cursix->hwflags.bit.ym        = !! (f & SC68_YM);
-      cursix->hwflags.bit.ste       = !! (f & SC68_STE);
-      cursix->hwflags.bit.amiga     = !! (f & SC68_AMIGA);
-      cursix->hwflags.bit.stechoice = !! (f & SC68_STECHOICE);
-      cursix->hwflags.bit.timers    = !! (f & SC68_TIMERS);
-      cursix->hwflags.bit.timera    = !! (f & SC68_TIMERA);
-      cursix->hwflags.bit.timerb    = !! (f & SC68_TIMERB);
-      cursix->hwflags.bit.timerc    = !! (f & SC68_TIMERC);
-      cursix->hwflags.bit.timerd    = !! (f & SC68_TIMERD);
+      cursix->hwflags.bit.psg       = !! (f & SC68_PSG);
+      cursix->hwflags.bit.dma       = !! (f & SC68_DMA);
+      cursix->hwflags.bit.aga       = !! (f & SC68_AGA);
+      cursix->hwflags.bit.xtd       = !! (f & SC68_XTD);
+      cursix->hwflags.bit.lmc       = !! (f & SC68_LMC);
+      cursix->hwflags.bit.mfp       = 15 & (f >> SC68_MFP_BIT);
+
+      cursix->hwflags.bit.hbl       = !! (f & SC68_HBL);
+      cursix->hwflags.bit.blt       = !! (f & SC68_BLT);
+      cursix->hwflags.bit.dsp       = !! (f & SC68_DSP);
+
     }
     /* meta data */
     else if (ISCHK(chk, CH68_TAG)) {
@@ -2103,15 +2034,15 @@ static const char * save_sc68(vfs68_t * os, const disk68_t * mb,
   for (mus = mb->mus; mus < mb->mus + mb->nb_mus; mus++) {
     int flags
       = 0
-      | (mus->hwflags.bit.ym        ? SC68_YM     : 0)
-      | (mus->hwflags.bit.ste       ? SC68_STE    : 0)
-      | (mus->hwflags.bit.amiga     ? SC68_AMIGA  : 0)
-      | (mus->hwflags.bit.stechoice ? SC68_STE    : 0)
-      | (mus->hwflags.bit.timers    ? SC68_TIMERS : 0)
-      | (mus->hwflags.bit.timera    ? SC68_TIMERA : 0)
-      | (mus->hwflags.bit.timerb    ? SC68_TIMERB : 0)
-      | (mus->hwflags.bit.timerc    ? SC68_TIMERC : 0)
-      | (mus->hwflags.bit.timerd    ? SC68_TIMERD : 0)
+      | (mus->hwflags.bit.psg  ? SC68_PSG : 0)
+      | (mus->hwflags.bit.dma  ? SC68_DMA : 0)
+      | (mus->hwflags.bit.aga  ? SC68_AGA : 0)
+      | (mus->hwflags.bit.xtd  ? SC68_XTD : 0)
+      | (mus->hwflags.bit.mfp << SC68_MFP_BIT)
+      | (mus->hwflags.bit.lmc  ? SC68_LMC : 0)
+      | (mus->hwflags.bit.hbl  ? SC68_HBL : 0)
+      | (mus->hwflags.bit.blt  ? SC68_BLT : 0)
+      | (mus->hwflags.bit.dsp  ? SC68_DSP : 0)
       ;
 
     /* Save track-name, author, composer, replay */

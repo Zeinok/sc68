@@ -542,14 +542,14 @@ static int sndh_save_buf(const char *uri, const void *buf, int len , int gz)
 static int mk_flags(char * tmp, const hwflags68_t * hw)
 {
   int j = 0;
-  if (hw->bit.timers) {
-    if (hw->bit.timera) tmp[j++] = 'a';
-    if (hw->bit.timerb) tmp[j++] = 'b';
-    if (hw->bit.timerc) tmp[j++] = 'c';
-    if (hw->bit.timerd) tmp[j++] = 'd';
+  if (hw->bit.xtd) {
+    if (hw->bit.mfp & 1) tmp[j++] = 'a';
+    if (hw->bit.mfp & 2) tmp[j++] = 'b';
+    if (hw->bit.mfp & 3) tmp[j++] = 'c';
+    if (hw->bit.mfp & 4) tmp[j++] = 'd';
   }
-  if (hw->bit.ste) tmp[j++] = 'e';
-  if (hw->bit.ym)  tmp[j++] = 'y';
+  if (hw->bit.dma|hw->bit.lmc) tmp[j++] = 'e';
+  if (hw->bit.psg) tmp[j++] = 'y';
   tmp[j++] = 0;
   return j;
 }

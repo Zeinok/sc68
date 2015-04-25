@@ -639,13 +639,14 @@ static void timemeasure_init(measureinfo_t * mi)
   mi->hwflags  = mus->hwflags;          /* Save hwflags */
 
   /* Set all hardware flags. */
-  if (mus->hwflags.bit.amiga) {
-    mus->hwflags.all       = 0;
-    mus->hwflags.bit.amiga = 1;
+  if (mus->hwflags.bit.aga) {
+    mus->hwflags.all     = 0;
+    mus->hwflags.bit.aga = 1;
   } else {
     mus->hwflags.all       = 0;
-    mus->hwflags.bit.ym    = 1;
-    mus->hwflags.bit.ste   = 1;         /* force STE */
+    mus->hwflags.bit.psg   = 1;
+    mus->hwflags.bit.dma   = 1;         /* force STE/DMA */
+    mus->hwflags.bit.lmc   = 1;         /* force STE/LMC */
   }
 
   if (sc68_play(mi->sc68, mi->track, SC68_INF_LOOP) < 0)
@@ -1093,16 +1094,20 @@ int time_measure(measureinfo_t * mi, int trk,
     m->has.time = 1;
     m->has.loop = 1;
 
-    mi->hwflags.all           = 0;
-    mi->hwflags.bit.ym        = mi->hw.bit.ym;
-    mi->hwflags.bit.ste       = mi->hw.bit.mw;
-    mi->hwflags.bit.amiga     = mi->hw.bit.pl;
-    mi->hwflags.bit.stechoice = 0;
-    mi->hwflags.bit.timers    = 1;
-    mi->hwflags.bit.timera    = mi->hw.bit.ta;
-    mi->hwflags.bit.timerb    = mi->hw.bit.tb;
-    mi->hwflags.bit.timerc    = mi->hw.bit.tc;
-    mi->hwflags.bit.timerd    = mi->hw.bit.td;
+    mi->hwflags.all     = 0;
+    mi->hwflags.bit.xtd = 1;
+    mi->hwflags.bit.psg = mi->hw.bit.ym;
+
+    mi->hwflags.bit.dma = mi->hw.bit.mw;
+    mi->hwflags.bit.lmc = mi->hw.bit.mw;
+
+    mi->hwflags.bit.aga = mi->hw.bit.pl;
+    mi->hwflags.bit.mfp = 0
+      | (mi->hw.bit.ta<<0)
+      | (mi->hw.bit.tb<<1)
+      | (mi->hw.bit.tc<<2)
+      | (mi->hw.bit.td<<3)
+      ;
 
     /* mi->minaddr; */
     /* mi->maxaddr; */
@@ -1120,7 +1125,7 @@ int time_measure(measureinfo_t * mi, int trk,
   /* Restore hardware flags (either unmodified in case of error, or
    * detected in case of success. */
   m->hwflags = mi->hwflags;
-  
+
 
   /* Just clean up the struct. */
   memset(mi,0,sizeof(*mi));

@@ -231,13 +231,10 @@ static const char * HWflags(const hwflags68_t f)
 {
   static const char hex[] = "0123456789ABCDEF";
   static char flags[] = "YSA0";
-  flags[0] = f.bit.ym     ? 'Y' : 'y';
-  flags[1] = f.bit.ste    ? 'S' : 's';
-  flags[2] = f.bit.amiga  ? 'A' : 'a';
-  flags[3] = f.bit.timers
-    ? hex[f.bit.timera+(f.bit.timerb<<1)+(f.bit.timerc<<2)+(f.bit.timerd<<3)]
-    : '.'
-    ;
+  flags[0] = "yY"[f.bit.psg];
+  flags[1] = "sS"[f.bit.dma|f.bit.lmc];
+  flags[2] = "aA"[f.bit.aga];
+  flags[3] = f.bit.xtd ? hex[f.bit.mfp] : '.';
   return flags;
 }
 
@@ -453,10 +450,10 @@ int main(int argc, char ** argv)
       PutS(out,"track: ");    PutI(out,i);           PutC(out,'\n');
       // PutS(out,"remap: ");    PutI(out,m->track);    PutC(out,'\n');
       PutS(out,"loops: ");    PutI(out,m->loops);    PutC(out,'\n');
-      PutS(out,"time-ms: ");   PutI(out,m->first_ms); PutC(out,'\n');
-      PutS(out,"time-fr: ");   PutI(out,m->first_fr); PutC(out,'\n');
-      PutS(out,"loop-ms: ");   PutI(out,m->loops_ms); PutC(out,'\n');
-      PutS(out,"loop-fr: ");   PutI(out,m->loops_fr); PutC(out,'\n');
+      PutS(out,"time-ms: ");  PutI(out,m->first_ms); PutC(out,'\n');
+      PutS(out,"time-fr: ");  PutI(out,m->first_fr); PutC(out,'\n');
+      PutS(out,"loop-ms: ");  PutI(out,m->loops_ms); PutC(out,'\n');
+      PutS(out,"loop-fr: ");  PutI(out,m->loops_fr); PutC(out,'\n');
 
       PutS(out,"hardware: "); PutS(out,HWflags(m->hwflags)); PutC(out,'\n');
       for (j=0; !file68_tag_enum(d, i, j, &key, &val); ++j) {

@@ -288,30 +288,26 @@ char * str_hardware(char * const buf, int max, int hwbit)
   hwflags68_t hw;
   hw.all = hwbit;
 
-  i = catflag(buf, 0, max, hw.bit.ym,    "YM");
-  i = catflag(buf, i, max, hw.bit.ste,   "STE");
-  i = catflag(buf, i, max, hw.bit.amiga, "AGA");
-  if (!i)
-    i = catflag(buf, 0, max, 1, "NONE");
-
-  if (hw.bit.timers) {
-    i = catflag(buf, i, max, hw.bit.timera, "TA");
-    i = catflag(buf, i, max, hw.bit.timerb, "TB");
-    i = catflag(buf, i, max, hw.bit.timerc, "TC");
-    i = catflag(buf, i, max, hw.bit.timerd, "TD");
+  i = 0;
+  i = catflag(buf, i, max, hw.bit.aga, "AGA");
+  i = catflag(buf, i, max, hw.bit.psg, "PSG");
+  i = catflag(buf, i, max, hw.bit.dma, "DMA");
+  if (!hw.bit.xtd) {
+    i = catflag(buf, i, max, 1, "?");
   } else {
-    i = catflag(buf, i, max, 1, "T?");
+    i = catflag(buf, i, max, hw.bit.lmc, "LMC");
+    i = catflag(buf, i, max, hw.bit.mfp & 1, "TiA");
+    i = catflag(buf, i, max, hw.bit.mfp & 2, "TiB");
+    i = catflag(buf, i, max, hw.bit.mfp & 4, "TiC");
+    i = catflag(buf, i, max, hw.bit.mfp & 8, "TiD");
+    i = catflag(buf, i, max, hw.bit.hbl, "HBL");
+    i = catflag(buf, i, max, hw.bit.blt, "BLT");
+    i = catflag(buf, i, max, hw.bit.dsp, "DSP");
   }
+  if (!i)
+    i = catflag(buf, 0, max, 1, "N/A");
 
-  if (!i) {
-    msgwrn("unexpecteed hardware bit value -- 0x%x\n", hwbit);
-  }
-
-  /* safety fisrt */
-  if (i < max)
-    buf[i] = 0;
-  else
-    buf[max-1] = 0;
+  buf[i<max ? i : max-1] = 0;
 
   return buf;
 }
@@ -334,7 +330,7 @@ const char * str_fileext(const char * path)
     ;
 
   p = l;                                /* default to "" */
-  for (l=1; l>0; --l) {
+  while (--l > 0) {
     int c = path[l];
 
     if (c == PATHSEP)
@@ -343,7 +339,10 @@ const char * str_fileext(const char * path)
     if (c == PATHSEP2)
       break;
 #endif
-
+#ifdef NATIVE_WIN32
+    if (c == ':' && l == 1)
+      break;
+#endif
     if (c == '.') {
       p = l;
       break;

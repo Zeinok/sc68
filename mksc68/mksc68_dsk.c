@@ -301,12 +301,12 @@ int dsk_validate(void)
     else
       has_inf = 1;
 
-    has_hw &= m->hwflags.bit.timers;
+    has_hw &= m->hwflags.bit.xtd;
     dsk.disk->hwflags.all |= m->hwflags.all;
   }
   if (has_inf)
     dsk.disk->time_ms = 0;
-  dsk.disk->hwflags.bit.timers = has_hw;
+  dsk.disk->hwflags.bit.xtd = has_hw;
 
   return 0;
 }

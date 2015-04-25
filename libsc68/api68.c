@@ -67,6 +67,7 @@
 
 #define MK4CC(A,B,C,D) (((int)(A)<<24)|((int)(B)<<16)|((int)(C)<<8)|((int)(D)))
 
+
 /* Bunch of constant use by sc68
  */
 enum {
@@ -331,12 +332,9 @@ static inline int in_disk(const disk68_t * disk, const int track) {
 static inline int trk_can_asid(const music68_t * const m)
 {
   return 1
-    &&  m->hwflags.bit.ym
-    &&  m->hwflags.bit.timers
-    && !m->hwflags.bit.timera
-    && !m->hwflags.bit.timerb
-    && !m->hwflags.bit.timerc
-    && !m->hwflags.bit.timerd;
+    &&  m->hwflags.bit.psg
+    &&  m->hwflags.bit.xtd
+    && !m->hwflags.bit.mfp;
 }
 
 /***********************************************************************
@@ -1434,19 +1432,20 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
   emu68_ioplug_unplug_all(sc68->emu68);
   emu68_mem_reset(sc68->emu68);
 
-  if (hw->bit.amiga) {
+  if (hw->bit.aga) {
     TRACE68(sc68_cat," -> %s\n","add Paula hardware");
     emu68_ioplug(sc68->emu68, sc68->paulaio);
     TRACE68(sc68_cat," -> %s\n","set PAULA as interruptible");
     emu68_set_interrupt_io(sc68->emu68, sc68->paulaio);
-  }
-  if (hw->bit.ym) {
-    TRACE68(sc68_cat," -> %s\n","add YM hardware");
-    emu68_ioplug(sc68->emu68, sc68->ymio);
-  }
-  if (hw->bit.ym|hw->bit.ste) {
-    TRACE68(sc68_cat," -> %s\n","add MW (STE) hardware");
-    emu68_ioplug(sc68->emu68, sc68->mwio);
+  } else {
+    if (hw->bit.psg) {
+      TRACE68(sc68_cat," -> %s\n","add YM hardware");
+      emu68_ioplug(sc68->emu68, sc68->ymio);
+    }
+    if (hw->bit.dma|hw->bit.lmc) {
+      TRACE68(sc68_cat," -> %s\n","add MW (STE) hardware");
+      emu68_ioplug(sc68->emu68, sc68->mwio);
+    }
     TRACE68(sc68_cat," -> %s\n","add SHIFTER hardware");
     emu68_ioplug(sc68->emu68, sc68->shifterio);
     TRACE68(sc68_cat," -> %s\n","add MFP hardware");
@@ -1500,7 +1499,7 @@ static int reset_emulators(sc68_t * sc68, const hwflags68_t * const hw)
   }
 
   /* Install TOS trap emulator unless AMIGA */
-  if (!hw->bit.amiga) {
+  if (!hw->bit.aga) {
     int status;
 
     TRACE68(sc68_cat," -> Load TOS trap emulator @$%06x-$%06x\n",
@@ -1559,7 +1558,7 @@ static int aSIDifier(sc68_t * sc68, const music68_t * m)
   assert(is_sc68(sc68));
 
   /* No YM no aSID even if forced !*/
-  if ( ! m->hwflags.bit.ym )
+  if ( ! m->hwflags.bit.psg )
     goto done;
 
   /* Config is OFF and instance is OFF */
@@ -1577,13 +1576,13 @@ static int aSIDifier(sc68_t * sc68, const music68_t * m)
   /* In case of forced aSID try to assign free timer first. But
    * usually it won't help much.
    */
-  if (m->hwflags.bit.timers) {
-    if (m->hwflags.bit.timera)
+  if (m->hwflags.bit.xtd) {
+    if (m->hwflags.bit.mfp & 1)         /* A ? */
       res = MK4CC('B','C','D','A');
-    if (m->hwflags.bit.timerc)
+    if (m->hwflags.bit.mfp & 4)         /* C ? */
       res = MK4CC('A','B','D','C');
-    if (m->hwflags.bit.timerd)
-      res = MK4CC('A','C','B','D');
+    if (m->hwflags.bit.mfp & 8)
+      res = MK4CC('A','C','B','D');     /* D ? */
   }
 
 done:
@@ -1611,7 +1610,7 @@ static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
 
   /* Set 68K registers. */
   sc68->emu68->reg.d[0] = m->d0;
-  sc68->emu68->reg.d[1] = !m->hwflags.bit.ste;
+  sc68->emu68->reg.d[1] = !(m->hwflags.bit.dma|m->hwflags.bit.lmc);
   sc68->emu68->reg.d[2] = m->datasz;
   sc68->emu68->reg.d[6] = log2hz(m->frq);
 
@@ -1762,7 +1761,7 @@ static int change_track(sc68_t * sc68, int track)
     ;
   TRACE68(sc68_cat," -> cycle (exact)   : %u\n", sc68->mix.cycleperpass);
 
-  if (m->hwflags.bit.ym) {
+  if (m->hwflags.bit.psg) {
     cycle68_t cycles;
     /* Make sure ym-cycle are mutiple of 32 as required by current
      * emulator.
@@ -1802,14 +1801,14 @@ static int change_track(sc68_t * sc68, int track)
 
   /* Compute *REAL* required size (in PCM) for buffer and realloc */
   if (1) {
-    sc68->mix.bufreq = m->hwflags.bit.ym
+    sc68->mix.bufreq = m->hwflags.bit.psg
       ? ymio_buffersize(sc68->ymio, sc68->mix.cycleperpass)
       : sc68->mix.stdlen
       ;
     TRACE68(sc68_cat," -> mix buffer len  : %u\n", sc68->mix.bufreq);
 
     /* Should not happen. Anyway it does not hurt. */
-    if (m->hwflags.bit.amiga && sc68->mix.stdlen > sc68->mix.bufreq)
+    if (m->hwflags.bit.aga && sc68->mix.stdlen > sc68->mix.bufreq)
       sc68->mix.bufreq = sc68->mix.stdlen;
 
     TRACE68(sc68_cat," -> required PCM buffer size -- *%u pcm*\n",
@@ -1968,13 +1967,13 @@ int sc68_process(sc68_t * sc68, void * buf16st, int * _n)
         sc68->mix.buflen = sc68->mix.bufreq;
 
         /* Fill pcm buufer depending on architecture */
-        if (sc68->mus->hwflags.bit.amiga) {
+        if (sc68->mus->hwflags.bit.aga) {
           /* Amiga - Paula */
           paula_mix(sc68->paula,(s32*)sc68->mix.buffer,sc68->mix.buflen);
           mixer68_blend_LR(sc68->mix.buffer, sc68->mix.buffer, sc68->mix.buflen,
                            sc68->mix.aga_blend, 0, 0);
         } else {
-          if (sc68->mus->hwflags.bit.ym) {
+          if (sc68->mus->hwflags.bit.psg) {
             int err =
               ymio_run(sc68->ymio, (s32*)sc68->mix.buffer,
                        sc68->mix.cycleperpass);
@@ -1988,7 +1987,7 @@ int sc68_process(sc68_t * sc68, void * buf16st, int * _n)
             mixer68_fill(sc68->mix.buffer, sc68->mix.buflen=sc68->mix.bufreq, 0);
           }
 
-          if (sc68->mus->hwflags.bit.ste)
+          if (sc68->mus->hwflags.bit.dma|sc68->mus->hwflags.bit.lmc)
             /* STE / MicroWire */
             mw_mix(sc68->mw, (s32 *)sc68->mix.buffer, sc68->mix.buflen);
           else
@@ -2305,9 +2304,9 @@ static void music_info(sc68_t * sc68, sc68_music_info_t * f, const disk68_t * d,
   f->dsk.time_ms = sc68
     ? sc68->tinfo[0].len_ms : calc_disk_len(d, loops);
   strtime68(f->dsk.time, f->tracks, (f->dsk.time_ms+999u)/1000u);
-  f->dsk.ym      = d->hwflags.bit.ym;
-  f->dsk.ste     = d->hwflags.bit.ste;
-  f->dsk.amiga   = d->hwflags.bit.amiga;
+  f->dsk.ym      = d->hwflags.bit.psg;
+  f->dsk.ste     = d->hwflags.bit.dma|d->hwflags.bit.lmc;
+  f->dsk.amiga   = d->hwflags.bit.aga;
   f->dsk.asid    = dsk_can_asid(d) > 0;
   f->dsk.hw      = hwtable[f->dsk.ym+(f->dsk.ste<<1)+(f->dsk.amiga<<2)];
   f->dsk.tags    = file68_tag_count(d, 0);
@@ -2318,9 +2317,9 @@ static void music_info(sc68_t * sc68, sc68_music_info_t * f, const disk68_t * d,
     ? sc68->tinfo[track].len_ms : calc_track_len(d, track, loops);
   strtime68(f->trk.time, track,(f->trk.time_ms+999u)/1000u);
 
-  f->trk.ym    = m->hwflags.bit.ym;
-  f->trk.ste   = m->hwflags.bit.ste;
-  f->trk.amiga = m->hwflags.bit.amiga;
+  f->trk.ym    = m->hwflags.bit.psg;
+  f->trk.ste   = m->hwflags.bit.dma|m->hwflags.bit.lmc;
+  f->trk.amiga = m->hwflags.bit.aga;
   f->trk.asid  = trk_can_asid(m);
   f->trk.hw    = hwtable[f->trk.ym+(f->trk.ste<<1)+(f->trk.amiga<<2)];
   f->trk.tags  = file68_tag_count(d, track);

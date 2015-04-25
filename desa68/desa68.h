@@ -59,6 +59,36 @@
  * deprecated @ref prg_debug68 debug68 and @ref prg_cdbg68 cdbg68
  * programs.
  *
+ * Memory access
+ *
+ *   There is 2 ways for the disassembler to access instruction data
+ *   bytes. The legacy method and the new user callback method. The
+ *   callback field desa68_t::memget is set to a function that is
+ *   called by the disassembler or each bytes. The legacy method is a
+ *   buffer pointed by desa68_t::memptr of desa68_t::memlen bytes
+ *   starting at address/origin desa68_t::memorg. Internally the
+ *   legacy method calls its own callback so in term of performance
+ *   it's mostly the same (depending on the user callback
+ *   complexity). When using the callback method desa68_t::memptr can
+ *   be null. It's also possible not to set desa68_t::memorg and
+ *   desa68_t::memlen fileds, only if a user callback is used for
+ *   symbols or the disassembler is set not to generated symbols.
+ *
+ * Symbol lookup
+ *
+ *   Just as memory access there is 2 ways for the disassembler to
+ *   replace an address value by a symbol. The legacy method and the
+ *   new user callback method. The callback field desa68_t::symget is
+ *   set to a function that is called by the disassembler or each time
+ *   it needs to determine if a value is a symbol. The legacy method
+ *   is limited to simple generated symbol (L123456). If the
+ *   DESA68_SYMBOL_FLAG is set in desa68_t::flags and the value is in
+ *   the memory range, an address will be replaced by its
+ *   symbol. There is an additionnal range for immediat long to be
+ *   replace defined by the 2 fields desa68_t::immsym_min and
+ *   desa68_t::immsym_max.
+ *
+ *
  * @{
  */
 
@@ -73,61 +103,66 @@
  * Use bitwise OR operation with these values to set the the
  * desa68_parm_t::flags in order to configure the disassembler.
  *
+ * @note DESA68_ASCII_FLAG, DESA68_ALNUM_FLAG and DESA68_GRAPH_FLAG
+ * are mutualy exclusive.
  */
 enum {
   /**
    * Disassemble with symbol.
    *
-   * If the DESA68_SYMBOL_FLAG is set in the desa68_parm_t::flags and
-   * the value of absolute long addressing mode or an immediat long is
-   * in greater or equal to desa68_parm_t::immsym_min and less than
-   * desa68_parm_t::immsym_max then the disassembler replaces the
-   * value by a named symbol.  The named symbol constist on the value
-   * transformed to an 6 hexadecimal digit number with a prefixed 'L'.
+   * DESA68_SYMBOL_FLAG bit controls the general symbolic
+   * disassembly. If it is set all valid candidats are transformed to
+   * symbol. A valid candidat is an address within the memory range or
+   * an immediat higher or equal to desa68_t::immsym_min and lower
+   * than desa68_t::immsym_max.
    */
   DESA68_SYMBOL_FLAG = (1<<0),
+  /**
+   * Force source operand symbol disassembly.
+   **/
+  DESA68_SRCSYM_FLAG = (1<<1),
 
   /**
-   * Disassemble with ASCII chars.
+   * Force destination operand symbol disassembly.
+   **/
+  DESA68_DSTSYM_FLAG = (1<<2),
+
+  /**
+   * Disassemble immediate values to ASCII chars.
    *
-   * If the DESA68_ASCII_FLAG is set in the desa68_parm_t::flags
-   * immediat values are converted to a tring string if its byte are
-   * in a special set including alpha-numeric, space and a few other
-   * chars [-_ !.#].
+   * DESA68_ASCII_FLAG is set to enable the conversion of immediate
+   * values to a corresponding quoted string if all its bytes belong
+   * to a special char set (alpha-numeric, space and a few other chars
+   * [-_!.#]).
    *
-   * @warning The name of this flag is misleading.
-   *
+   * @warning The name of this flag cab be misleading.
+   * @see DESA68_ALNUM_FLAG
+   * @see DESA68_GRAPH_FLAG
    */
-  DESA68_ASCII_FLAG = (1<<1),
+  DESA68_ASCII_FLAG = (1<<3),
 
   /**
-   * Disassemble with alpha-numerical chars.
+   * Disassemble immediate values to alpha-numeric chars.
    *
-   * If the DESA68_ALNUM_FLAG is set in the desa68_parm_t::flags
-   * immediat values are converted to a string if its bytes are in the
-   * alpha-numeric range [0-9A-za-z].
+   * DESA68_ALNUM_FLAG works like DESA68_ASCII_FLAG but for a pure
+   * alpha-numeric charset.
+   *
+   * @see DESA68_ASCII_FLAG
+   * @see DESA68_GRAPH_FLAG
    */
-  DESA68_ALNUM_FLAG = (1<<2),
+  DESA68_ALNUM_FLAG = (1<<4),
 
   /**
-   * Disassemble with graphical chars [32-126].
+   * Disassemble immediate values to graphic chars.
    *
-   * If the DESA68_GRAPH_FLAG is set in the desa68_parm_t::flags
-   * immediat values are converted to a string if its bytes are in
-   * the range 32 to 126.
+   * DESA68_GRAPH_FLAG works like DESA68_ASCII_FLAG but for a graphical
+   * charset [32 to 126].
    *
+   * @see DESA68_ASCII_FLAG
+   * @see DESA68_ALNUM_FLAG
    */
   DESA68_GRAPH_FLAG = DESA68_ASCII_FLAG|DESA68_ALNUM_FLAG,
 
-  /**
-   * Force symbol disassemble.
-   *
-   * The DESA68_FORCESYMB_FLAG is a set of 5 bits [8-12]. If the N-th
-   * bit is set it forces a symbolic dissassembly for a long starting
-   * at the Nth word.  Since 68000 instructions are not more than 10
-   * bytes long 5 bit is just enough.
-   */
-  DESA68_FORCESYMB_FLAG = (1<<8),
 };
 
 /**
@@ -199,15 +234,27 @@ enum {
  * @warning DO NOT CHANGE ORDER.
  */
 enum {
-  DESA68_REG_DN  = 0,                 /**< First data register. */
-  DESA68_REG_AN  = 8,                 /**< First address register. */
-  DESA68_REG_SP  = 15,                /**< Stack pointer.  */
-  DESA68_REG_USP,                     /**< User stack pointer. */
+  DESA68_REG_DN  = 0,                 /**< First data register.     */
+  DESA68_REG_AN  = 8,                 /**< First address register.  */
+  DESA68_REG_SP  = 15,                /**< Stack pointer.           */
+  DESA68_REG_USP,                     /**< User stack pointer.      */
   DESA68_REG_CCR,                     /**< Code condition register. */
-  DESA68_REG_SR,                      /**< Status register. */
-  DESA68_REG_PC,                      /**< Program counter. */
-  DESA68_REG_LAST,                    /**< Not real registers. */
+  DESA68_REG_SR,                      /**< Status register.         */
+  DESA68_REG_PC,                      /**< Program counter.         */
+  DESA68_REG_LAST,                    /**< Not real registers.      */
  };
+
+/**
+ * Symbol type for the desa68_t::symget() type argument.
+ */
+enum {
+  DESA68_SYM_NDEF,       /**< Undefined.                            */
+  DESA68_SYM_DABS,       /**< destination operand absolute address. */
+  DESA68_SYM_SABS,       /**< source operand absolute address.      */
+  DESA68_SYM_SIMM,       /**< source operand immediat value.        */
+  DESA68_SYM_SPCR,       /**< source operand pc relativ address.    */
+  DESA68_SYM_SPCI,       /**< source operand pc indexed address.    */
+};
 
 /**
  * type for the 68K disassemble pass parameters structure.
@@ -217,22 +264,21 @@ typedef struct desa68_parm_s desa68_t;
 /**
  * 68K disassemble pass parameters.
  *
- * The desa68_parm_t data structure contains the information necessary to
+ * The desa68_t data structure contains the information necessary to
  * disassemble 68K instructions.
  *
  * There are 3 categories of fields in this structure.
  * - Input parameters; Must be set before calling the desa68() function.
  * - Output parameters; Information on disassembled instruction
  *                          filled by desa68() function.
- * - Miscellaneous internal fields.
+ * - Internal fields (start with an underscore "_").
  *
- * @note The desa68_parm_t::pc field is both input and output since it is use
- *       to set the address of the instruction to decode and returns with
- *       the value of the next one.
+ * @note The desa68_t::pc field is both input and output since it
+ *       is use to set the address of the instruction to decode and
+ *       returns with the value of the next one.
  */
 struct desa68_parm_s
 {
-
   /**
    * @name Input parameters.
    *
@@ -246,12 +292,17 @@ struct desa68_parm_s
 
   /** Function to read memory (or null) */
   int          (*memget)(desa68_t *, unsigned int addr);
-  /** Base of 68K memory. */
-  unsigned char *mem;
-  /** Size of memory - 1 (mask). */
-  unsigned int   memsize;
+  /** 68K memory buffer. */
+  unsigned char *memptr;
+
+  /** start address of the memory buffer. */
+  unsigned int   memorg;
+
+  /** Size of memory. */
+  unsigned int   memlen;
+
   /** 68k memory addressing space (normally 24 bits). */
-  unsigned int   memmask;
+  unsigned int   memmsk;
 
   /**
    * Address (Offset in mem) of instruction to disassemble; Returns
@@ -265,14 +316,17 @@ struct desa68_parm_s
    * appropriate function is selected according to desa68_t::flags
    * DESA68_GRAPH_FLAG family flags.
    */
-  int (*ischar)(desa68_t *, int);
+  int          (*ischar)(desa68_t *, int);
 
   /** Writer function (0:use default writer). */
-  void          (*strput)(desa68_t *, int);
+  void         (*strput)(desa68_t *, int);
   /** String used by default writer (can be 0) */
   char          *str;
   /** Size of the buffer pointed by str (forced to 0 on null pointer). */
   int            strmax;
+
+  /** Output symbol function (or 0). */
+  const char * (*symget)(desa68_t *, unsigned int addr, int type);
 
   /**
    * Minimum value to interpret long immediat or absolute long as symbol.
@@ -331,9 +385,6 @@ struct desa68_parm_s
    * Intermediat opcode decoding.
    */
   unsigned int  _pc;       /**< pc origin at start of disassembly. */
-  // unsigned int  _ea;       /**< temporarly decoded effective address. */
-  //unsigned int  _chsz;     /**< holds '.[BWL]'  */
-
   signed   int  _w;        /**< Last decoded word (sign extended).  */
   unsigned int  _opw;      /**< First decode word (opcode).         */
   unsigned char _reg0;     /**< bit 2:0 of opcode word. */
@@ -344,6 +395,7 @@ struct desa68_parm_s
   unsigned char _line;     /**< bit F:C of opcode word. */
   unsigned char _adrm0;    /**< _mode3+_reg0. */
   unsigned char _adrm6;    /**< _mode6+_reg9. */
+  char          _tmp[16];  /**< small scratch pad */
 
   /**
    * @}

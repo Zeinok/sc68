@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [sourcer68],
-  [20090117],
+  [20150319],
   [http://sourceforge.net/projects/sc68/],
   [sourcer68],
   [http://sc68.atari.org])
@@ -21,6 +21,7 @@ AC_CONFIG_SRCDIR([sourcer68.c])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-xz
                   no-installman no-installinfo])
+AC_CONFIG_HEADERS([config.h])
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
 
@@ -38,6 +39,12 @@ SC68_TOOLS
 SC68_CHECKS
 SC68_WITH([desa68],[yes])
 SC68_WITH([file68],[no],[],[sc68/file68.h])
+
+# ,----------------------------------------------------------------------.
+# | Standard headers and functions                                       |
+# `----------------------------------------------------------------------'
+AC_CHECK_HEADERS([stdint.h unistd.h libgen.h getopt.h])
+AC_CHECK_FUNCS([basename getopt getopt_long])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |

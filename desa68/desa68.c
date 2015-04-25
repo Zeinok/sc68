@@ -69,18 +69,9 @@ typedef unsigned int   u32;
  ******************************/
 
 enum {
-  MODE_DN=0,
-  MODE_AN,
-  MODE_iAN,
-  MODE_ANp,
-  MODE_pAN,
-  MODE_dAN,
-  MODE_dANXI,
-  MODE_ABSW,
-  MODE_ABSL,
-  MODE_dPC,
-  MODE_dPCXI,
-  MODE_IMM
+  MODE_DN,   MODE_AN,  MODE_iAN,   MODE_ANp,
+  MODE_pAN,  MODE_dAN, MODE_dANXI, MODE_ABSW,
+  MODE_ABSL, MODE_dPC, MODE_dPCXI, MODE_IMM
 };
 
 enum {
@@ -179,7 +170,7 @@ static inline void desa_comma(desa68_t * d)
 }
 
 /* Add a string to disassembly string */
-static void desa_str(desa68_t * d, char *str)
+static void desa_str(desa68_t * d, const char * str)
 {
   char c;
   while (c=*str++, c)
@@ -266,10 +257,10 @@ static int my_isascii(desa68_t * d, int c)
 
 static int def_memget(desa68_t * d, unsigned int addr)
 {
-  addr &= d->memmask;
-  return (addr >= d->memsize)
+  addr &= d->memmsk;
+  return (addr >= d->memlen)
     ? -1
-    : (u8)d->mem[addr]
+    : (u8)d->memptr[addr]
     ;
 }
 
@@ -338,7 +329,7 @@ static int adrL(desa68_t * d)
 static int relPC(desa68_t * d)
 {
   read_pc(d);
-  return (d->pc + d->_w - 2) & d->memmask;
+  return (d->pc + d->_w - 2) & d->memmsk;
 }
 
 /* ======================================================================
@@ -355,7 +346,7 @@ static inline void ea_set(desa68_t *d, unsigned int v)
   /* if not true _ea has not been commited at some point. */
   assert (d->_ea.type == SZ_NDEF);
   d->_ea.type = SZ_ADDR;         /* default mode is just an address */
-  d->_ea.addr = v & d->memmask;
+  d->_ea.addr = v & d->memmsk;
 }
 
 static inline int has_ea(const desa68_t * d) {
@@ -442,7 +433,7 @@ static void desa_op_ANp(desa68_t * d, u8 reg)
   desa_char(d,'+');
 }
 
-/* Could use a table for that. */ 
+/* Could use a table for that. */
 static void desa_op_anyreg(desa68_t * d, u8 reg)
 {
   unsigned int name;
@@ -482,57 +473,78 @@ static void desa_opsz(desa68_t *d, u8 size)
   }
 }
 
-static void desa_label(desa68_t * d, unsigned int v)
-{
-  desa_uhexacat(d, v, 6, 'L');
-}
 
-static int desa_is_symbol(desa68_t * d, unsigned int v2, unsigned int bit)
-{
-  int r =
-    ((d->flags & DESA68_SYMBOL_FLAG)
-     &&
-     ( (bit < 5u && (d->flags & (DESA68_FORCESYMB_FLAG<<bit)))
-       || (v2>=d->immsym_min && v2<d->immsym_max))
-      );
-  return r;
-}
+/* static int desa_is_symbol(desa68_t * d, unsigned int v2, unsigned int bit) */
+/* { */
+/*   int r = */
+/*     ((d->flags & DESA68_SYMBOL_FLAG) */
+/*      && */
+/*      ( (bit < 5u && (d->flags & (DESA68_FORCESYMB_FLAG<<bit))) */
+/*        || (v2>=d->immsym_min && v2<d->immsym_max)) */
+/*       ); */
+/*   return r; */
+/* } */
 
-static void desa_immL(desa68_t * d, int v, int pc)
-{
-  unsigned int v2 = v;
-  const int bit = (pc == -1)
-    ? 256
-    : ( ((pc - d->_pc) & d->memmask) >> 1);
 
-  desa_char(d,'#');
-  if (desa_is_symbol(d, v, bit)) {
-    desa_label(d,v2);
-    /* $$$ TODO add potential reference address. */
+static const char * def_symget(desa68_t * d, unsigned int v, int type)
+{
+  unsigned int min, max;
+  const int flag = (type == DESA68_SYM_DABS)
+    ? DESA68_DSTSYM_FLAG : DESA68_SRCSYM_FLAG;
+
+  if (type == DESA68_SYM_SIMM) {
+    min = d->immsym_min;
+    max = d->immsym_max;
   } else {
-    if (d->ischar(d,(u8)v2) && d->ischar(d,(u8)(v2>>8)) &&
-        d->ischar(d,(u8)(v2>>16)) && d->ischar(d,(u8)(v2>>24))) {
-      desa_char (d,'\'');
-      desa_ascii(d,U32(v2));
-      desa_char (d,'\'');
-    } else {
-      desa_signifiant(d,v);
-    }
+    min = d->memorg;
+    max = min+d->memlen;
+  }
+
+  if ( (d->flags & flag) ||
+       ( ( d->flags & DESA68_SYMBOL_FLAG ) &&
+         v >= min && v < max ) ) {
+    char * s = d->_tmp; int j;
+    *s++ = 'L';
+    for (j=4*5; j>=0; j-=4)
+      *s++ = Thex[ 15 & (v>>j) ];
+    *s = 0;
+    return d->_tmp;
+  }
+  return 0;
+}
+
+static void desa_immL(desa68_t * d, int v)
+{
+  const char * symb = d->symget(d,v,DESA68_SYM_SIMM);
+  if (symb)
+    desa_str(d,symb);
+  else if (d->ischar(d,(u8)v) && d->ischar(d,(u8)(v>>8)) &&
+           d->ischar(d,(u8)(v>>16)) && d->ischar(d,(u8)(v>>24))) {
+    desa_char (d,'\'');
+    desa_ascii(d,U32(v));
+    desa_char (d,'\'');
+  } else {
+    desa_signifiant(d,v);
   }
 }
 
-static void desa_absL(desa68_t * d, int v, int pc)
+static void desa_label(desa68_t * d, unsigned int v, int stype)
 {
-  unsigned int v2 = v & 0xFFFFFF;
-  const int bit = (pc == -1)
-    ? 256
-    : ( (pc - d->_pc) >> 1);
-
-  if (desa_is_symbol(d, v, bit)) {
-    desa_uhexacat(d, v2, 6, 'L');
-  } else {
+  const char * symb = d->symget(d,v,stype);
+  if (symb)
+    desa_str(d,symb);
+  else
     desa_usignifiant(d, v);
-  }
+}
+
+static void desa_absL(desa68_t * d, int v, int stype)
+{
+  desa_label(d,v,stype);
+}
+
+static void desa_jmp_label(desa68_t * d, int v)
+{
+  desa_label(d,v,DESA68_SYM_SPCR);
 }
 
 static void get_ea_2(desa68_t * d, u8 mode, u8 reg, u8 immsz)
@@ -584,24 +596,18 @@ static void get_ea_2(desa68_t * d, u8 mode, u8 reg, u8 immsz)
     break;
   case MODE_dPC:
     ea_set(d, v = relPC(d));
-    if (d->flags & DESA68_SYMBOL_FLAG)
-      desa_label(d, v);
-    else
-      desa_usignifiant(d, v);
+    desa_label(d,v,DESA68_SYM_SPCR);
     desa_ascii(d,'(PC)');
     /* Don't use DESA68_REG_PC here, only for (PC,Xi). We don't really
      * need to know if the addressing is PCR but we need to know if
-     * the reference is an effective address or a base address. 
+     * the reference is an effective address or a base address.
      *
      * desa_op_anyreg(d, DESA68_REG_PC);
      */
     break;
   case MODE_dPCXI:
     ea_set(d, v = relPC(d));
-    if (d->flags & DESA68_SYMBOL_FLAG)
-      desa_label(d,v);
-    else
-      desa_usignifiant(d, v);
+    desa_label(d,v,DESA68_SYM_SPCI);
     desa_char(d,'(');
     desa_op_anyreg(d, DESA68_REG_PC);
     desa_comma(d);
@@ -609,20 +615,19 @@ static void get_ea_2(desa68_t * d, u8 mode, u8 reg, u8 immsz)
     desa_char(d,')');
     break;
   case MODE_IMM:
+    desa_char(d,'#');
     switch (immsz) {
     case SZ_BYTE:
       v = immB(d);
-      desa_char(d,'#');
       desa_signifiant(d,v);
       break;
     case SZ_WORD:
       v = immW(d);
-      desa_char(d,'#');
       desa_signifiant(d,v);
       break;
     case SZ_LONG:
       v = U32(immL(d));
-      desa_immL(d, v, d->pc-4);
+      desa_immL(d, v);
       break;
 
     default:
@@ -841,21 +846,20 @@ static void desa_line0(desa68_t * d)
  */
 static void desa_move(desa68_t * d)
 {
-  static u8 mvsz[4] = {
+  static const u8 mvsz[4] = {
     SZ_NDEF, SZ_BYTE, SZ_LONG, SZ_WORD
   };
-  int w = d->_opw;
-  int movsz = (u8)('WLB?' >> ((w&(3<<12))>>(12-3)));
-  int rtype = mvsz[3 & (w>>12)];
+  const int w = d->_opw;
+  const int rtype = mvsz[3 & (w>>12)];
   desa_ascii(d,'MOVE');
   if (d->_adrm6==MODE_AN)
     desa_char(d,'A');                   /* MOVEA */
   desa_opsz(d,rtype);
   desa_space(d);
-  get_ea_move(d,0,w,movsz);
+  get_ea_move(d,0,w,rtype);
   set_src_ref(d,rtype);
   desa_comma(d);
-  get_ea_move(d,6,w,movsz);
+  get_ea_move(d,6,w,rtype);
   set_dst_ref(d,rtype);
 }
 
@@ -1294,10 +1298,7 @@ static void desa_Dcc(desa68_t * d)
   desa_op_DN(d,d->_reg0);
   desa_comma(d);
   ea_set(d, v = relPC(d));
-  if (d->flags & DESA68_SYMBOL_FLAG)
-    desa_label(d, v);
-  else
-    desa_usignifiant(d, v);
+  desa_jmp_label(d, v);
   set_branch(d,DESA68_BSR);
 }
 
@@ -1351,7 +1352,7 @@ static void desa_line6(desa68_t * d)
 
   }
   desa_space(d);
-  desa_absL(d, a, -1);
+  desa_jmp_label(d, a);
   ea_set(d,a);
   set_branch(d, !cond ? DESA68_BRA : DESA68_BSR);
 
@@ -1687,8 +1688,12 @@ void desa68(desa68_t * d)
   /* Setup 68k memory access. */
   if (!d->memget)
     d->memget = def_memget;
-  if (!d->memmask)
-    d->memmask = (1<<24)-1;
+  if (!d->memmsk)
+    d->memmsk = (1<<24)-1;
+
+  /* Setup symbol control */
+  if (!d->symget)
+    d->symget = def_symget;
 
   /* Setup output string writer. */
   if (!d->strput)
@@ -1710,7 +1715,7 @@ void desa68(desa68_t * d)
   }
 
   /* Setup instruction decoder */
-  d->_pc = d->pc &= d->memmask;
+  d->_pc = d->pc &= d->memmsk;
   read_pc(d);
 
   d->_opw   = (u16)d->_w;
@@ -1728,7 +1733,7 @@ void desa68(desa68_t * d)
   desa_char(d,0);
 
   /* Restore current status to caller struct */
-  d->pc &= d->memmask;
+  d->pc &= d->memmsk;
 
   /* if not true we forgot to commit _ea at some point. */
   assert(d->_ea.type == SZ_NDEF);
