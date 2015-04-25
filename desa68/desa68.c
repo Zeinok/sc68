@@ -330,8 +330,8 @@ static int adrL(desa68_t * d)
 
 static int relPC(desa68_t * d)
 {
-  read_pc(d);
-  return (d->pc + d->_w - 2) & d->memmsk;
+  const int w = read_pc(d);
+  return (d->pc + w - 2) & d->memmsk;
 }
 
 /* ======================================================================
@@ -476,7 +476,8 @@ static void desa_op_xi(desa68_t * d, u16 w)
     desa_op_AN(d,r);
   else
     desa_op_DN(d,r);
-  desa_ascii(d, ('.'<<8) | "WL"[ 1 & (w >> 11) ]);
+  desa_char(d,'.');
+  desa_char(d,"WL"[ 1 & (w >> 11)]);
 }
 
 static void desa_opsz(desa68_t *d, u8 size)
@@ -594,7 +595,7 @@ static void get_ea_2(desa68_t * d, struct desa68_ref * ref,
     break;
   case MODE_dANXI:
     v = read_pc(d);                       /* control word */
-    desa_signifiant(d,(s8)(v>>8));
+    desa_signifiant(d,(s8)v);
     desa_char(d,'(');
     desa_op_AN(d,reg);
     desa_comma(d);
@@ -634,8 +635,8 @@ static void get_ea_2(desa68_t * d, struct desa68_ref * ref,
   case MODE_dPCXI:
     assert(is_src);
     /* ea_set(d, v = relPC(d)); DELME */
-    v = relPC(d);
-    _desa_label(d,v,DESA68_SYM_SPCI);
+    v = read_pc(d);
+    _desa_label(d, d->pc-2+(s8)v, DESA68_SYM_SPCI);
     desa_char(d,'(');
     desa_op_anyreg(d, DESA68_REG_PC);
     desa_comma(d);
