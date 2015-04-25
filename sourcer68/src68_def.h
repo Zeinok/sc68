@@ -22,6 +22,18 @@
 # include <stdint.h>
 #endif
 
-typedef unsigned int uint_t;
+typedef unsigned int  uint_t;
+typedef uint8_t  byte_t;
+typedef uint16_t word_t;
+typedef uint32_t long_t;
+
+enum {
+  ERR_OK,                               /* No error */
+  ERR_ERR,                              /* Genric error */
+  ERR_MEM,                              /* Memory allocation */
+  ERR_IO,                               /* File/IO and such */
+  ERR_ARG,                              /* Invalid argument */
+  ERR_OVF,                              /* buffer overflow */
+};
 
 #endif

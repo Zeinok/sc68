@@ -33,7 +33,6 @@ typedef struct {
   int       loadas;
   vec_t   * sections;
   vec_t   * symbols;
-
   mbk_t   * mbk;
   parts_t * parts;
 } exe_t;

@@ -31,16 +31,7 @@
 #include "src68_msg.h"
 #include "src68_eva.h"
 #include "src68_dis.h"
-
-#ifdef USE_FILE68
-# include <sc68/file68.h>
-# include <sc68/file68_msg.h>
-# include <sc68/file68_opt.h>
-int sourcer68_cat = msg68_NEVER;
-#endif
-char *inp_uri = 0, *out_uri = 0, *opt_origin = 0, *opt_format = 0;
-
-const char prg[] = PACKAGE_NAME;
+#include "src68_src.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,6 +39,48 @@ const char prg[] = PACKAGE_NAME;
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
+
+#ifdef USE_FILE68
+# include <sc68/file68.h>
+# include <sc68/file68_msg.h>
+# include <sc68/file68_opt.h>
+# include <sc68/file68_uri.h>
+/* static */ int sourcer68_cat = msg68_NEVER;
+static vfs68_t * out_hdl;
+static void close_hdl(vfs68_t * hdl) {
+  vfs68_destroy(hdl);
+}
+static vfs68_t * open_hdl(const char * path) {
+  vfs68_t *hdl =  0;
+  if (!strcmp(path,"-"))
+    path = "stdout://sourcer68";
+  hdl = uri68_vfs(path, 2, 0);
+  if (vfs68_open(hdl) == -1) {
+    vfs68_destroy(hdl);
+    hdl = 0;
+  }
+  return hdl;
+}
+#else
+static FILE * out_hdl;
+static void close_hdl(FILE * hdl) {
+  if (hdl && hdl != stderrr && hdl != stdout)
+    fclose(hdl);
+}
+static FILE * open_hdl(const char * path) {
+  FILE * hdl = 0;
+  if (!strcmp(path,"-") || !strncmp(path,"stdout:",7))
+    hdl = stdout;
+  else if (!strncmp(path,"stderr:",7))
+    hdl = stderr;
+  else
+    hdl = fopen(path,"wt");
+  return hdl;
+}
+#endif
+
+char *inp_uri = 0, *out_uri = 0, *opt_origin = 0, *opt_format = 0;
+const char prg[] = PACKAGE_NAME;
 
 #ifdef HAVE_LIBGEN_H
 # include <libgen.h>
@@ -136,7 +169,7 @@ static void print_usage(void)
       "  A 68000 disassembler/sourcer\n"
       "\n"
 #ifndef USE_FILE68
-      "input := binary or tos executable path\n"
+      "input := binary or tos executable file path\n"
 #else
       "input := sc68 or binary or tos executable URI\n"
 #endif
@@ -156,10 +189,10 @@ static void print_usage(void)
       /* "  --no-symbol            Disable symbol in disassembly output\n", */
 
 #ifdef USE_FILE68
-  puts
-    (
-      "  --no-sc68              Disable sc68 mode\n"
-      );
+  /* puts */
+  /*   ( */
+  /*     "  --no-sc68              Disable sc68 mode\n" */
+  /*     ); */
   option68_help(stdout,print_option);
 #endif
   puts
@@ -347,6 +380,8 @@ int main(int argc, char **argv)
 
   if (exe->sections) {
     uint_t i;
+
+
     dmsg("sections: %d\n", exe->sections->cnt);
     for (i=0; i<exe->sections->cnt; ++i) {
       sec_t * sec = section_get(exe->sections, i);
@@ -361,14 +396,33 @@ int main(int argc, char **argv)
         continue;
       for (a=0; a<sec->size; a += 2) {
         const uint_t adr = sec->addr + a;
-        const uint_t off = adr - exe->mbk->org;
-        if (off < exe->mbk->len && (exe->mbk->mib[off] & MIB_ENTRY))
-          dis_pass(adr,exe->mbk,exe->symbols);
+        /* const uint_t off = adr - exe->mbk->org; */
+        if (mbk_getmib(exe->mbk, adr) & MIB_ENTRY) {
+          walk_t walk;
+          memset(&walk,0,sizeof(walk));
+          walkopt_set_default(&walk.opt);
+          walk.adr = adr;
+          walk.exe = exe;
+          dis_walk(&walk);
+        }
       }
     }
+
+
   }
 
-  exe_del(exe);
+  if (exe) {
+    fmt_t * fmt = 0;
+    if (!out_uri)
+      out_uri = "-";
+    out_hdl = open_hdl(out_uri);
+    fmt = fmt_new(out_hdl);
+    src_exec(fmt, exe);
+    close_hdl(out_hdl);
+    fmt_del(fmt);
+    exe_del(exe);
+  }
+
   /* Verify if input is an sc68 file */
   return ECODE_OK;
 }

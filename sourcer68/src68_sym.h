@@ -25,6 +25,7 @@ enum {
   SYM_WORD = 1<<5,        /**< word access. */
   SYM_LONG = 1<<6,        /**< long access. */
   SYM_XTRN = 1<<8,        /**< External symbol */
+  SYM_WEAK = 1<<9,        /**< Weak symbol */
 };
 
 /**

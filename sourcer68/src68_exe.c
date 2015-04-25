@@ -45,7 +45,8 @@
 
 static void * myopen(char * uri)
 {
-  vfs68_t *is = uri68_vfs(uri, 1, 0);
+  vfs68_t *is =
+    uri68_vfs( (uri[0]=='-' && !uri[1]) ? "stdin://sourcer68" : uri, 1, 0);
   if (vfs68_open(is) == -1) {
     vfs68_destroy(is);
     is = 0;
@@ -77,14 +78,15 @@ static int myread(void * file, void * buf, int bytes)
 
 static void * myopen(char * uri)
 {
-  FILE * f = fopen(uri,"rb");
+  FILE * f;
+  f = (uri[0]=='-' && !uri[1]) ? stdin : fopen(uri,"rb");
   return f;
 }
 
 static void myclose(void * file)
 {
   FILE * f = (FILE*) file;
-  if (f)
+  if (f && f != stdin)
     fclose(f);
 }
 
@@ -220,13 +222,12 @@ static exe_t * load_as_bin(char * uri, uint_t org, uint8_t * data, int size)
   section_add(e->sections, "DEFAULT", org, size, SECTION_X);
   symbol_add(e->symbols, "Start", org, 0);
   symbol_add(e->symbols, "End", org+size, 0);
-  e->mbk->mib[0] |= MIB_ENTRY;
+  mbk_setmib(e->mbk,e->mbk->org+0,0,MIB_ENTRY);
 
   exe = e;
   e = 0;
 error:
   exe_del(e);
-  return exe;
 
   return exe;
 }
@@ -269,8 +270,7 @@ static exe_t * load_as_sc68(char * uri, uint_t org, uint8_t * data, int size)
     e->mbk = mbk_new(org, full_len);
     if (!e->mbk)
       goto error;
-    dmsg("memblock: $%x %p %p %u\n",
-         e->mbk->org, e->mbk->mem, e->mbk->mib, e->mbk->len);
+    dmsg("memblock: $%x %u\n", e->mbk->org, e->mbk->len);
 
     if (replay_len)
       memcpy(e->mbk->mem, replay_buf, replay_len);
@@ -293,9 +293,9 @@ static exe_t * load_as_sc68(char * uri, uint_t org, uint8_t * data, int size)
       section_add(e->sections, "DATA", org+data_off, mus->datasz, 0);
     }
 
-    e->mbk->mib[0] |= MIB_ENTRY;
-    e->mbk->mib[4] |= MIB_ENTRY;
-    e->mbk->mib[8] |= MIB_ENTRY;
+    mbk_setmib(e->mbk, e->mbk->org+0, 0, MIB_ENTRY);
+    mbk_setmib(e->mbk, e->mbk->org+4, 0, MIB_ENTRY);
+    mbk_setmib(e->mbk, e->mbk->org+8, 0, MIB_ENTRY);
     /* TODO: add parts for code / data */
   }
 
@@ -322,8 +322,7 @@ static void reloc_callback(tosexec_t * e, unsigned int org, unsigned int off)
 
   dmsg("relocating org:%06x off:$%06x/%06x\n",
        org,off,mbk->len);
-  if (!(off&1) && off+3 < mbk->len)
-    mbk->mib[off] |= MIB_RELOC;
+  mbk_setmib(mbk, org+off, 0, MIB_RELOC);
 }
 
 
@@ -430,7 +429,7 @@ static exe_t * load_as_tos(char * uri, uint_t org, uint8_t * data, int size)
            symb->name, symb->addr, symb->flag);
   }
 
-  e->mbk->mib[0] |= MIB_ENTRY;
+  mbk_setmib(e->mbk, e->mbk->org+0, 0, MIB_ENTRY);
 
   exe = e;
   e = 0;

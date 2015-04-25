@@ -1,6 +1,6 @@
 /*
  * @file    src68_dis.c
- * @brief   disassembler sourcer.
+ * @brief   disassembler and code walker.
  * @author  http://sourceforge.net/users/benjihan
  *
  * Copyright (c) 1998-2015 Benjamin Gerard
@@ -37,73 +37,82 @@
 
 #include <desa68.h>
 
+enum {
+  DIS_AUTO_SYMBOL = 1
+};
+
 typedef struct {
   desa68_t desa;
-  uint_t  maxdepth;
-  uint_t  addr;
-  uint_t  flag;
-  uint_t  mib;
-  char    str[256];
-  mbk_t  *mbk;
-  vec_t  *symbols;
-  int     result;
-
+  uint_t   maxdepth;
+  uint_t   addr;
+  uint_t   flag;
+  uint_t   mib;
+  mbk_t   *mbk;
+  vec_t   *symbols;
+  int      result;
+  char     sym[16];
+  char     str[256];
 } dis_t;
 
 static const char * symget(desa68_t * d, uint_t addr, int type)
 {
   dis_t * dis = d->user;
-  sym_t * sym;
-  uint_t pc;
+  char * name = 0;
+  int wanted = 0;
 
-  assert(dis);
-  assert(dis->symbols);
+  sym_t * sym = dis->symbols
+    ? symbol_get(dis->symbols, symbol_byaddr(dis->symbols, addr, -1)) : 0;
 
+  /* Honor desa68 forced symbols request. */
+  if (type <= DESA68_SYM_DABL)
+    wanted = (d->flags & DESA68_DSTSYM_FLAG);
+  else
+    wanted = (d->flags & DESA68_SRCSYM_FLAG);
 
-  sym = dis->symbols
-    ? symbol_get(dis->symbols, symbol_byaddr(dis->symbols, addr, -1))
-    : 0
-    ;
+  if (sym)
+    name = sym->name;
+  else if (!wanted) {
+    uint_t off;
+    /* Long word that have been relocated should always be
+     * disassembled as symbol */
+    if (type == DESA68_SYM_SABL || type == DESA68_SYM_SIMM) {
+      off = ( (d->pc - 4) & d->memmsk ) - dis->mbk->org;
+      wanted = mbk_getmib(dis->mbk, dis->mbk->org+off) & MIB_RELOC;
+    }
+    if (!wanted) {
+      off = addr - dis->mbk->org;
+      if (off < dis->mbk->len) {
+        uint8_t mask = MIB_ADDR | ( (off&1) ? 0 : MIB_ENTRY);
+        wanted = mbk_getmib(dis->mbk, dis->mbk->org+off) & mask;
+      }
+    }
 
-  switch (type) {
-  case DESA68_SYM_DABL: case DESA68_SYM_SABL: case DESA68_SYM_SIMM:
-    pc = (d->pc - 4) & d->memmsk; break;
-  default:
-    pc = ~0;
+    /* REquested to autodetect symbols inside the memory range */
+    if (!wanted && (dis->flag & DIS_AUTO_SYMBOL)) {
+      if (type == DESA68_SYM_SIMM)
+        wanted = addr >= d->immsym_min  && addr < d->immsym_max;
+      else
+        wanted = addr >= d->memorg && addr < d->memorg + d->memlen;
+    }
+  }
+  if ( wanted && !name ) {
+    sprintf(name = dis->sym, "L%06X", addr & d->memmsk);
+    /* TODO add the symbol ? */
   }
 
-  dmsg("Looking for symbol @$%x type:%d pc:$%x -> \"%s\"\n",
-       addr, type, pc, sym ? sym->name : "(null)");
-
-  /* dmsg("Looking for symbol @$%x (%d) pc:$%x \"%p\"\n", */
-  /*      addr, type, pc, "(null)"); */
-
-  /* return 0; */
-
-
-  return sym ? sym->name : 0;
-
+  return name;
 }
 
 
-static int memget(desa68_t * d, unsigned int addr)
+static int memget(desa68_t * d, unsigned int adr)
 {
   dis_t * dis = d->user;
-  mbk_t * mbk = dis->mbk;
-  int mib, old;
+  int bits = MIB_READ | ( (-(adr==dis->addr)) & MIB_EXEC );
 
-  mib = MIB_READ | ( (-(addr == dis->addr)) & MIB_EXEC );
-
-  addr -= mbk->org;
-  if (addr >= mbk->len)
-    return -1;
-
-  old  = mbk->mib[addr];
-  mib |= old;
-  mbk->mib[addr] = mib;
-  dis->mib |= mib ^ old;                /* what's up doc ? */
-
-  return mbk->mem[addr];
+  if (bits = mbk_setmib(dis->mbk, adr, 0, bits), !bits)
+    return 0;
+  dis->mib |= bits & MIB_ALL;
+  return dis->mbk->mem[adr - dis->mbk->org];
 }
 
 static const char hexa[] = "0123456789ABCDEF";
@@ -160,7 +169,7 @@ static const char * regname(uint8_t reg)
 }
 
 enum {
-  BRK_NOT, BRK_RTS, BRK_JMP, BRK_JTB, BRK_EXE, BRK_OOR
+  BRK_NOT, BRK_DCW, BRK_RTS, BRK_JMP, BRK_JTB, BRK_EXE, BRK_OOR
 };
 
 static const char * itypestr(int itype)
@@ -198,7 +207,7 @@ static void r_dis_pass(dis_t * dis, int depth)
     /* dmsg("<<<< %08x $%08x $%02x $%02x \n", */
     /*      dis->desa.pc,off,dis->mbk->mib[off], dis->mib); */
 
-    if ( off < dis->mbk->len && (dis->mbk->mib[off] & MIB_EXEC)) {
+    if ( mbk_getmib(dis->mbk,dis->mbk->org+off) & MIB_EXEC ) {
       rts = BRK_EXE;
       break;
     }
@@ -226,7 +235,6 @@ static void r_dis_pass(dis_t * dis, int depth)
         if (dis->desa.regs & (1<<r))
           dmsg(" %s", regname(r));
       dmsg("\n");
-
     }
 
 
@@ -243,7 +251,9 @@ static void r_dis_pass(dis_t * dis, int depth)
            dis->desa.error);
 
     if (dis->desa.itype == DESA68_DCW) {
-      wmsg(dis->addr, "invalid opcode -- %04x\n", dis->desa._w);
+      wmsg(dis->addr, "invalid opcode -- %04x\n",
+           0xFFFF & dis->desa._w);
+      rts = BRK_DCW;
       break;
     }
 
@@ -268,7 +278,7 @@ static void r_dis_pass(dis_t * dis, int depth)
         mbk_t * mbk = dis->mbk;
         struct desa68_ref * ref = !i ? &dis->desa.sref : &dis->desa.dref;
         uint_t adr = ref->addr, off = ref->addr - mbk->org, end = off;
-        int mib = MIB_ADDR, old;
+        int mib = MIB_ADDR;
 
         if (ref->type == DESA68_OP_NDEF) /* set ? */
           continue;
@@ -284,7 +294,7 @@ static void r_dis_pass(dis_t * dis, int depth)
           } else {
             const int log2 = ref->type - DESA68_OP_B;
             end = off + ( 1 << log2 ) - 1;
-            mib = MIB_BYTE << log2;
+            mib |= MIB_BYTE << log2;
           }
           break;
         default:
@@ -293,17 +303,15 @@ static void r_dis_pass(dis_t * dis, int depth)
         }
         if (end < off || off >= mbk->len) /* out of range ? */
           continue;
-        old = mbk->mib[off];
-        mib |= old;
-        mbk->mib[off] = mib;
-        dis->mib |= mib ^ old;          /* what's up doc ? */
-
-        if (mib ^ old)
-          dmsg("tag $%06x = $%02x + $%02x\n", adr, old, mib ^ old);
+        dis->mib |= mbk_setmib(mbk, adr, 0, mib) & MIB_ALL;
       }
     } break;
 
     case DESA68_BRA:
+      if (dis->desa.dref.type != DESA68_OP_NDEF)
+        dis->mib |=
+          mbk_setmib(dis->mbk, dis->desa.dref.addr,0,MIB_ADDR) & MIB_ALL;
+
       if (dis->desa.dref.type == DESA68_OP_A) {
         if (! (dis->desa.regs & (1<<DESA68_REG_PC) )) {
           dis->desa.pc = dis->desa.dref.addr;
@@ -321,6 +329,7 @@ static void r_dis_pass(dis_t * dis, int depth)
         uint_t save_pc = dis->desa.pc;
         if (! (dis->desa.regs & (1<<DESA68_REG_PC) )) {
           dis->addr = dis->desa.dref.addr;
+          dis->mib |= mbk_setmib(dis->mbk,dis->addr,0,MIB_ADDR) & MIB_ALL;
           r_dis_pass(dis,depth+1);
         } else {
           /* jsr table : $$$ TODO */
@@ -335,11 +344,13 @@ static void r_dis_pass(dis_t * dis, int depth)
            dis->desa.itype);
       break;
     }
-  } while (!rts);
+  }
 
   switch (rts) {
   /* case BRK_NOT: */
   /*   dmsg(";;; ?????????????????????????????????????????\n"); break; */
+  case BRK_DCW:
+    dmsg(";;; #########################################\n"); break;
   case BRK_RTS:
     dmsg(";;; -----------------------------------------\n"); break;
   case BRK_JMP:
@@ -356,14 +367,14 @@ static void r_dis_pass(dis_t * dis, int depth)
 }
 
 
-int dis_pass(uint_t entry, mbk_t * mbk, vec_t * symbols)
+int dis_walk(walk_t * walk)
 {
+  uint_t entry = walk->adr;
+  mbk_t * mbk = walk->exe->mbk;
+  vec_t * symbols = walk->exe->symbols;
   dis_t dis;
 
   memset(&dis, 0, sizeof(dis));
-
-  // TEMP FOR TESTING WE DON'T NEED SYMBOLS OR SPECIFIC DISASSEMBLY OPTION HERE
-  dis.desa.flags = DESA68_SYMBOL_FLAG | DESA68_GRAPH_FLAG | DESA68_LCASE_FLAG;
 
   dis.addr = entry;
   dis.mbk = mbk;
@@ -386,4 +397,42 @@ int dis_pass(uint_t entry, mbk_t * mbk, vec_t * symbols)
 
   r_dis_pass(&dis, 0);
   return dis.result;
+}
+
+int dis_disa(exe_t * exe, uint_t * adr, char * buf, uint_t max)
+{
+  dis_t dis;
+
+  memset(&dis, 0, sizeof(dis));
+
+  dis.addr        = *adr;
+  dis.mbk         = exe->mbk;
+  dis.flag        = DIS_AUTO_SYMBOL;
+
+  dis.desa.pc     = dis.addr;
+  dis.desa.user   = &dis;
+  dis.desa.memget = memget;
+  dis.desa.memorg = exe->mbk->org;
+  dis.desa.memlen = exe->mbk->len;
+  dis.desa.str    = buf;
+  dis.desa.strmax = max;
+  dis.desa.flags  =
+    DESA68_SYMBOL_FLAG | DESA68_GRAPH_FLAG | DESA68_LCASE_FLAG;
+
+  dis.symbols     = exe->symbols;
+  if (dis.symbols)
+    dis.desa.symget = symget;
+
+  desa68(&dis.desa);
+
+  if (dis.desa.itype != DESA68_DCW)
+    *adr = dis.desa.pc;
+  return dis.desa.itype;
+}
+
+void walkopt_set_default(walkopt_t * wopt)
+{
+  if (wopt)
+    memset(wopt, 0, sizeof(*wopt));
+  /* $$$ XXX TODO */
 }

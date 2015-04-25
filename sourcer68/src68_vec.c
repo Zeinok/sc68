@@ -191,17 +191,19 @@ int vec_find(vec_t * vec, const obj_t * obj, cmp_f cmp, int idx)
     cmp_f sav = vec->iface->cmp;
     vec->iface->cmp = cmp;
     pobj = bsearch(&obj, vec->obj, vec->cnt, sizeof(obj), cmp_pobj);
-    vec->iface->cmp = sav;
     if (pobj) {
       if (idx == -1)
         idx = pobj - vec->obj;
       else {
         int i;                          /* find first match */
-        for (i = pobj-vec->obj; i >= 0 && !cmp(obj, vec->obj[i]); --i);
+        for (i = pobj-vec->obj; i > 0 && !cmp(obj, vec->obj[i-1]); --i);
+        assert (i>=0 && i <vec->cnt);
         i += idx;                       /* add the index */
         idx = (i<vec->cnt && !cmp(obj, vec->obj[i])) ? i : -1;
       }
-    }
+    } else
+      idx = -1;
+    vec->iface->cmp = sav;
   } else {
     idx = vec_iter_find(vec, obj, cmp, idx);
   }

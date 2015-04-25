@@ -43,7 +43,8 @@ sourcer68_SOURCES = sourcer68.c src68_def.h src68_exe.c src68_exe.h	\
  src68_eva.c src68_eva.h src68_sec.c src68_sec.h src68_mbk.c		\
  src68_mbk.h src68_tos.c src68_tos.h src68_sym.c src68_sym.h		\
  src68_opt.c src68_opt.h src68_msg.c src68_msg.h src68_vec.c		\
- src68_vec.h src68_par.c src68_par.h src68_dis.c src68_dis.h
+ src68_vec.h src68_par.c src68_par.h src68_dis.c src68_dis.h		\
+ src68_src.c src68_src.h src68_fmt.c src68_fmt.h
 sourcer68_LDADD   = $(FILE68_LA) $(DESA68_LA)
 
 # ,----------------------------------------------------------------------.
