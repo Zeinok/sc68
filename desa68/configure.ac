@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [desa68],
-  [20130703],
+  [20150326],
   [http://sourceforge.net/projects/sc68/],
   [desa68],
   [libdesa68],
