@@ -249,8 +249,10 @@ enum {
  */
 enum {
   DESA68_SYM_NDEF,       /**< Undefined.                            */
-  DESA68_SYM_DABS,       /**< destination operand absolute address. */
-  DESA68_SYM_SABS,       /**< source operand absolute address.      */
+  DESA68_SYM_DABW,       /**< destination operand absolute address. */
+  DESA68_SYM_DABL,       /**< destination operand absolute address. */
+  DESA68_SYM_SABW,       /**< source operand absolute address.      */
+  DESA68_SYM_SABL,       /**< source operand absolute address.      */
   DESA68_SYM_SIMM,       /**< source operand immediat value.        */
   DESA68_SYM_SPCR,       /**< source operand pc relativ address.    */
   DESA68_SYM_SPCI,       /**< source operand pc indexed address.    */

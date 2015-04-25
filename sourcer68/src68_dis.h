@@ -12,6 +12,8 @@
 #define SOURCER68_DIS_H
 
 #include "src68_mbk.h"
-int dis_pass(uint_t entry, mbk_t * mbk);
+#include "src68_vec.h"
+
+int dis_pass(uint_t entry, mbk_t * mbk, vec_t * sym);
 
 #endif

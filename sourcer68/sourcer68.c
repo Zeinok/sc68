@@ -363,7 +363,7 @@ int main(int argc, char **argv)
         const uint_t adr = sec->addr + a;
         const uint_t off = adr - exe->mbk->org;
         if (off < exe->mbk->len && (exe->mbk->mib[off] & MIB_ENTRY))
-          dis_pass(adr,exe->mbk);
+          dis_pass(adr,exe->mbk,exe->symbols);
       }
     }
   }

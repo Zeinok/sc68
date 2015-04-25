@@ -29,12 +29,14 @@
 
 #include "src68_dis.h"
 #include "src68_mbk.h"
+#include "src68_sym.h"
 #include "src68_msg.h"
 
 #include <string.h>
 #include <stdio.h>
 
 #include <desa68.h>
+
 typedef struct {
   desa68_t desa;
   uint_t  maxdepth;
@@ -43,9 +45,41 @@ typedef struct {
   uint_t  mib;
   char    str[256];
   mbk_t  *mbk;
+  vec_t  *symbols;
   int     result;
 
 } dis_t;
+
+static const char * symget(desa68_t * d, uint_t addr, int type)
+{
+  dis_t * dis = d->user;
+  sym_t * sym;
+  uint_t pc;
+
+  assert(dis);
+  assert(dis->symbols);
+
+  return 0;
+  
+  
+  sym = dis->symbols
+    ? symbol_get(dis->symbols, symbol_byaddr(dis->symbols, addr, -1))
+    : 0
+    ;
+
+  switch (type) {
+  case DESA68_SYM_DABL: case DESA68_SYM_SABL: case DESA68_SYM_SIMM:
+    pc = (d->pc - 4) & d->memmsk; break;
+  default:
+    pc = ~0;
+  }
+  dmsg("Looking for symbol @$%x type:%d pc:$%x -> %s\n",
+       addr, type, d->pc, sym?sym->name:"(null)");
+
+  return sym ? sym->name : 0;
+
+}
+
 
 static int memget(desa68_t * d, unsigned int addr)
 {
@@ -317,12 +351,13 @@ static void r_dis_pass(dis_t * dis, int depth)
 }
 
 
-int dis_pass(uint_t entry, mbk_t * mbk)
+int dis_pass(uint_t entry, mbk_t * mbk, vec_t * symbols)
 {
   dis_t dis;
+
   memset(&dis, 0, sizeof(dis));
 
-  // TEMP
+  // TEMP FOR TESTING WE DON'T NEED SYMBOLS OR SPECIFIC DISASSEMBLY OPTION HERE
   dis.desa.flags = DESA68_SYMBOL_FLAG | DESA68_GRAPH_FLAG;
 
   dis.addr = entry;
@@ -331,8 +366,11 @@ int dis_pass(uint_t entry, mbk_t * mbk)
   dis.desa.memget = memget;
   dis.desa.memorg = mbk->org;
   dis.desa.memlen = mbk->len;
+  dis.symbols = symbols;
+  if (symbols)
+    dis.desa.symget = symget;
 
-  // TEMP
+  /* used only if symget is null */
   dis.desa.immsym_min = mbk->org;
   dis.desa.immsym_max = mbk->len + dis.desa.immsym_min;
 
