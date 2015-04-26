@@ -71,7 +71,6 @@
 /* #include <arpa/inet.h> */
 /* #include <netdb.h> */
 
-
 #define STATUS(S,C,M) \
   if (1) { gdb->run = RUN_##S; gdb->code = CODE_##C; gdb->msg = M; } else
 #define SIGNAL(S,C,M) \
@@ -91,6 +90,36 @@ static inline int xdigit(const int v) {
   if (v >= '0' && v <= '9') return v - '0';
   if (v >= 'a' && v <= 'f') return v - 'a' + 10;
   if (v >= 'A' && v <= 'F') return v - 'A' + 10;
+  return -1;
+}
+
+static int strtoux(char ** pptr, uint_t * pval)
+{
+  char * ptr = *pptr; uint_t val = 0; int d;
+  if (d = xdigit(*ptr), d >= 0) {
+    val = d;
+    while (d = xdigit(*++ptr), d >= 0)
+      val = (val << 4) | d;
+    *pval = val;
+    *pptr = ptr;
+    return 0;
+  }
+  return -1;
+}
+
+static int strtox(char ** pptr, int * pval) {
+  char * ptr = *pptr; int minus = 0;
+  uint_t uval;
+
+  if (*ptr == '-') {
+    ++ptr;
+    minus = 1;
+  }
+  if (!strtoux(&ptr,&uval)) {
+    *pval = minus ? -uval : uval;
+    *pptr = ptr;
+    return 0;
+  }
   return -1;
 }
 
@@ -115,9 +144,14 @@ struct gdb_s {
   int            sigval;                /* last signal                 */
 
   struct {
-    uint8_t ontimer_break;
+    uint_t ontimer_break:8;             /* 4-bit:reset | 4-bit: */
   } opt;
 
+  struct {
+    uint_t noack:1;                        /* QStartNoAckMode+ */
+    uint_t nonstop:1;                      /* QNonStop+ */
+    uint_t attached:1;                     /* QAttached */
+  } mode;
 
   const char   * msg;                   /* last message                */
   char           buf[1024];             /* buffer for send/recv        */
@@ -196,11 +230,14 @@ static int decode_trap(char * s, int trapnum, emu68_t * emu)
     case 0x20:
       s += sprintf(s, " super(0x%x.l)" , Lpeek(emu, emu->reg.a[7]+8));
       break;
-    case 0x30: s += sprintf(s, " version()");
+    case 0x30:
+      s += sprintf(s, " version()");
       break;
-    case 0x48: s += sprintf(s, " malloc(%d.l)", Lpeek(emu, emu->reg.a[7]+8));
+    case 0x48:
+      s += sprintf(s, " malloc(%d.l)", Lpeek(emu, emu->reg.a[7]+8));
       break;
-    case 0x49: s += sprintf(s, " free(0x%x.l)",  Lpeek(emu, emu->reg.a[7]+8));
+    case 0x49:
+      s += sprintf(s, " free(0x%x.l)",  Lpeek(emu, emu->reg.a[7]+8));
       break;
     default:
       sigval = sig_no;
@@ -385,20 +422,29 @@ static int send_packet(gdb_t * gdb)
   buf[0] = '$';
   for (i=1, sum=0; !!(c = buf[i]); ++i)
     sum += c;
-  j = i;
-  buf[i++] = '#';
-  buf[i++] = thex[ (sum>>4) & 15 ];
-  buf[i++] = thex[  sum     & 15 ];
+  j = i;                              /* '#' marker index */
+  buf[i++] = '#';                     /* write '#' marker */
+  buf[i++] = thex[ (sum>>4) & 15 ];   /* write checksum   */
+  buf[i++] = thex[  sum     & 15 ];   /* write checksum   */
   buf[i] = 0;
 
-  if (send(gdb->fd, buf, i, 0) != i) goto fail;
-  buf[j] = 0;
+  msgdbg("SEND <%s>\n",buf);
+
+  if (send(gdb->fd, buf, i, 0) != i)  /* send the packet */
+    goto fail;
+  buf[j] = 0;                         /* remove '#' marker */
+
+  if (gdb->mode.noack)
+    return 0;
+
+  /* Waiting for ACK (either '-' or '+') */
   do {
-    if (recv(gdb->fd, &c, 1, 0) != 1) goto fail;
-    if (c == '+') {
+    if (recv(gdb->fd, &c, 1, 0) != 1) /* recv ACK */
+      goto fail;
+    if (c == '+')
       return 0;
-    }
   } while (c != '-');
+
   return 1;
 fail:
   STATUS(EXIT,ERROR,strerror(errno));
@@ -444,10 +490,13 @@ static int rsp_event(gdb_t * const gdb)
   char * ptr;
 
   /* read a packet */
+
+  /* look for packet header '$' */
   do {
     if (recv(gdb->fd, &c, 1, 0) != 1) goto fail;
   } while (c != '$');
 
+  /* fill the buffer to the footer '#' */
   ptr = buf;
   do {
     if (recv(gdb->fd, &c, 1, 0) != 1) goto fail;
@@ -456,18 +505,22 @@ static int rsp_event(gdb_t * const gdb)
   } while (ptr < max);
 
   *ptr = 0;
+
+  msgdbg("<<<< %s\n",buf);
   if (c != '#')
     goto fail;
 
-  /* skip check sum */
+  /* skip check sum, our line is reliable :) */
   if (recv(gdb->fd, &c, 1, 0) != 1) goto fail;
   if (recv(gdb->fd, &c, 1, 0) != 1) goto fail;
 
   /* trace("got: [%s]\n", buf); */
 
-  /* ack */
-  c = '+';
-  if (send(gdb->fd, &c, 1, 0) != 1) goto fail;
+  /* unless noAck mode, send ACK '+' */
+  if (!gdb->mode.noack) {
+    c = '+';
+    if (send(gdb->fd, &c, 1, 0) != 1) goto fail;
+  }
 
   ptr = buf;
   switch(*ptr) {
@@ -478,9 +531,9 @@ static int rsp_event(gdb_t * const gdb)
 
   case '?': {
     /***********************************************************************
-     * ? (why target is halted)
+     * ? request status (why target is halted)
      */
-    /* msgdbg("COMMAND <WHY?>\n"); */
+    msgdbg("RECV <%s>\n",ptr);
     ptr = stpcpy(buf+1,"S05");          /* $$$ TODO */
   } break;
 
@@ -488,27 +541,23 @@ static int rsp_event(gdb_t * const gdb)
     /***********************************************************************
      * P n...=r... (Write register)
      * p n (Read register)
+     *
+     * Register mapping for 68k targets:
+     *  00-07 D0-D7     32-bit
+     *  08-15 A0-A7     32-bit
+     *  16    SR/PS     16-bit
+     *  17    PC        32-bit
+     *  18-25 FP0-FP7   80-bit but 64-bit for gdb
+     *  26    FPC       32-bit
+     *  27    FPS       32-bit
+     *  28    FPI       32-bit
      */
-    int n, v, l;
-    int read = *ptr == 'p';
-    errno = 0;
-    n = strtoul(++ptr, &ptr, 16);
-    if (errno)
-      break;
-    /* trace("Got reg-num: %d\n", n); */
-    if (read) {
-      /* msgdbg("COMMAND <read-register,%02d>\n", n); */
-      /* Register mapping:
-         00-07 D0-D7     32-bit
-         08-15 A0-A7     32-bit
-         16    SR/PS     16-bit
-         17    PC        32-bit
-         18-25 FP0-FP7   80-bit but 64-bit for gdb
-         26    FPC       32-bit
-         27    FPS       32-bit
-         28    FPI       32-bit
-      */
+    uint_t n, v, l, read = *ptr++ == 'p';
 
+    if (strtoux(&ptr, &n))
+      break;
+    if (read) {
+      msgdbg("RECV <read-register,%02d>\n", n);
       v = 0;                          /* default value */
       l = 8;                          /* default length of 8 xdigit */
       if (n < 8)
@@ -527,11 +576,8 @@ static int rsp_event(gdb_t * const gdb)
       break;
     } else if (*ptr == '=') {
       char * end=++ptr;
-
-      v = strtoul(end, &end, 16);
-      if (!errno) {
-        /* int l = (end-ptr)/\* , m = (1<<(l<<2))-1 *\/; */
-        /* msgdbg("COMMAND <write-register,%02d,0x%x>\n",n,v); */
+      if (!strtoux(&end, &v)) {
+        msgdbg("RECV <write-register,%02d,0x%x>\n",n,v);
         ptr = stpcpy(buf+1,"OK");
         if (n < 8)
           gdb->emu->reg.d[n] = v;
@@ -555,7 +601,7 @@ static int rsp_event(gdb_t * const gdb)
      */
     int i,j;
 
-    /* msgdbg("COMMAND <read-general-register>\n"); */
+    msgdbg("RECV <read-general-register>\n");
     ptr = buf+1;
     for (i=0;i<8;++i)
       for (j=0; j<8; ++j)
@@ -574,41 +620,34 @@ static int rsp_event(gdb_t * const gdb)
     /***********************************************************************
      * m addr,length (read memory)
      */
-    int read = *ptr == 'm';
-    int adr, len;
-    errno = 0;
-    adr = strtoul(++ptr, &ptr, 16);
-    if (!errno && *ptr == ',') {
-      len = strtoul(++ptr, &ptr, 16);
-      if (!errno) {
-        u8 * mem;
-        int i /* ,n = (max - buf - 4) >> 1 */;
-        /* msgdbg("COMMAND <memory-%cet,0x%06x,%d>\n",read["sg"],adr,len); */
-
-        mem = emu68_memptr(gdb->emu, adr, len);
-        if (!mem) {
-          gdb->msg = emu68_error_get(gdb->emu);
-          msgnot("gdb tried to access invalid memory [0x%x..0x%x]\n",
-                 adr,adr+len-1);
-        } else if (read && !*ptr) {
-          for (i=0, ptr = buf+1; i<len; ++i) {
-            *ptr++ = thex[ mem[i] >> 4 ];
-            *ptr++ = thex[ mem[i] & 15 ];
-          }
-          assert(ptr < max);
-          *ptr = 0;
-          break;
-        } else if (!read && *ptr == ':') {
-          for (i=0; i<len; ++i) {
-            int a,b;
-            if ( (a = xdigit(*++ptr)) >= 0 && (b = xdigit(*++ptr)) >= 0)
-              mem[i] = (a<<4) + b;
-            else
-              break;
-          }
-          if (i == len)
+    uint_t adr, len, read = *ptr++ == 'm';
+    if ( !strtoux(&ptr, &adr) && *ptr++ == ',' && !strtoux(&ptr, &len)) {
+      u8 * mem;
+      int i;
+      msgdbg("RECV <memory-%cet,0x%06x,+%u>\n",read["sg"],adr,len);
+      mem = emu68_memptr(gdb->emu, adr, len);
+      if (!mem) {
+        gdb->msg = emu68_error_get(gdb->emu);
+        msgnot("gdb tried to access invalid memory [$%x..$%x]\n",
+               adr,adr+len-1);
+      } else if (read && !*ptr) {
+        for (i=0, ptr = buf+1; i<len; ++i) {
+          *ptr++ = thex[ mem[i] >> 4 ];
+          *ptr++ = thex[ mem[i] & 15 ];
+        }
+        assert(ptr < max);
+        *ptr = 0;
+        break;
+      } else if (!read && *ptr == ':') {
+        for (i=0; i<len; ++i) {
+          int a,b;
+          if ( (a = xdigit(*++ptr)) >= 0 && (b = xdigit(*++ptr)) >= 0)
+            mem[i] = (a<<4) + b;
+          else
             break;
         }
+        if (i == len)
+          break;
       }
     }
     ptr = stpcpy(buf+1,"E01");
@@ -618,6 +657,7 @@ static int rsp_event(gdb_t * const gdb)
     /***********************************************************************
      * k (kill)
      */
+    msgdbg("RECV <kill>\n");
     STATUS(EXIT,KILL,"properly killed");
     return 0;
   } break;
@@ -632,30 +672,44 @@ static int rsp_event(gdb_t * const gdb)
     end = strchr(ptr+1,':');
     if (end) {
       *end = 0;
-      errno = 0;
-      pid = strtoul(end+1, &ptr, 16);
-      if (errno) pid = -1;
+      ptr = end+1;
+      pid = -1;
+      strtox(&ptr, &pid);
     }
-    msgdbg("COMMAND <detach,%d>\n", pid);
+    msgdbg("RECV <detach,%d>\n", pid);
     ptr = stpcpy(buf+1, "OK");
     STATUS(SKIP,DETACH,"detached");
+  } break;
+
+  case 'T': {
+    /***********************************************************************
+     * T thread-id (is thread alive ?)
+     */
+    int tid;
+    ptr = buf+1;
+    msgdbg("RECV <thread-status> <%s>\n", ptr);
+    if (strtox(&ptr,&tid))
+      ptr = stpcpy(buf+1,"E01");
+    else if (tid != 1)                  /* my thread ? */
+      ptr = stpcpy(buf+1,"E02");
+    else
+      ptr = stpcpy(buf+1, "OK");
   } break;
 
   case 'H': {
     /***********************************************************************
      * H op thread-id (Thread Operation)
      */
-    int    op = *++ptr;
-    char * tid = op ? ++ptr : 0;
+    int op  = *++ptr;
+    int tid = op ? ++ptr : "";
 
     switch (op) {
     case 'g':
-      msgdbg("COMMAND <thread-op-general> <%s>\n", tid);
+      msgdbg("RECV <thread-op-general> <%s>\n", tid);
       ptr = stpcpy(buf+1,"OK");
       break;
-
     case 'c':
-      msgdbg("COMMAND <thread-op-continue> <%s>\n", tid);
+      msgdbg("RECV <thread-op-continue> <%s>\n", tid);
       ptr = stpcpy(buf+1,"OK");
       break;
     default:
@@ -668,9 +722,8 @@ static int rsp_event(gdb_t * const gdb)
      * q Query (General Query)
      * Q Query (General Set)
      */
-    int query = *ptr++ == 'q';
-    char * name;
-    char * end;
+    const int query = *ptr++ == 'q';
+    char * name, * end;
 
     /* looking for query name separator */
     name = ptr;
@@ -682,70 +735,103 @@ static int rsp_event(gdb_t * const gdb)
       ptr = name + strlen(name);
     }
 
+
     /* First looking for legacy queries qC, qP and qL */
-    if (query && !strcmp(name, "C")) {
-      /* query current thread */
-      msgdbg("COMMAND <query-thread-id>\n");
-      sprintf(ptr = buf+1, "QC%08x", 5568);
-    } else if (query &&  !strcmp(name, "P")) {
-      /* qP mode thread-id ( */
-      /* Deprecated by qThreadExtraInfo */
-      ptr = 0;
-    } else if (query && !strcmp(name, "L")) {
-      /* qL startflag threadcount nextthread */
-      /* Deprecated by qfThreadInfo */
-      ptr = 0;
-    } else if (query && !strcmp(name,"Offsets")) {
-      /* query section relocations */
-      msgdbg("COMMAND <query-offsets>\n");
-      ptr = buf + 1 + sprintf(buf+1, "Text=%x;Data=%x;Bss=0",0,0);
-    } else if (!query && !strcmp(name,"NonStop")) {
-      switch (*ptr) {
-      case '0':                       /* all-stop */
-        msgdbg("COMMAND <set-all-stop>\n");
-        ptr = stpcpy(buf+1,"OK");
-        break;
-      case '1':                       /* non-stop */
-        msgdbg("COMMAND <set-non-stop>\n");
-        ptr = stpcpy(buf+1,"E01");
-        break;
-      default:
+    if (query) {
+      /*************************************************************
+       * Query
+       */
+      if (!strcmp(name, "C")) {
+        /* <qC> query current thread-id */
+        msgdbg("RECV <query-thread-id>\n");
+        ptr = stpcpy(buf+1,"QC1");
+      } else if (!strcmp(name, "P")) {
+        /* qP mode thread-id */
+        /* Deprecated by qThreadExtraInfo */
         ptr = 0;
+      } else if (!strcmp(name, "L")) {
+        /* qL startflag threadcount nextthread */
+        /* Deprecated by qfThreadInfo */
+        ptr = 0;
+
+        /* int startflag, threadcount, a , b; */
+        /* char * next; */
+
+        /* /\* startflag *\/ */
+        /* if (*ptr != '0' && *ptr != '1') { */
+        /*   ptr = stpcpy(buf+1,"E01"); */
+        /*   break; */
+        /* } */
+        /* startflag = *ptr++ == '1'; */
+
+        /* /\* threadcount *\/ */
+        /* if ( (a = xdigit(ptr[0]) < 0 || (b = xdigit(ptr[1]) < 0)) ) { */
+        /*   ptr = stpcpy(buf+1,"E02"); */
+        /*   break; */
+        /* } */
+        /* threadcount = (a<<4) + b; */
+        /* ptr += 2; */
+
+        /* next = ptr; */
+        /* msgdbg("RECV <query-thread-info,%s,%u,%s>\n", */
+        /*        startflag?"start":"next", threadcount, next); */
+        /* ptr = buf+1+sprintf(buf+1,"qM%02x%x%s%x",1,1,next,1); */
+      } else if (!strcmp(name,"Offsets")) {
+        /* query section relocations */
+        msgdbg("RECV <query-offsets>\n");
+        ptr = buf + 1 + sprintf(buf+1, "Text=%x;Data=%x;Bss=0",0,0);
+      } else if (!strcmp(name,"Supported")) {
+        static const char supported[] =
+          "QStartNoAckMode+"            /* + noAck mode  */
+          ";" "multiprocess-"           /* - multi process */
+          ";" "xmlRegisters-"           /* - */
+          ";" "qRelocInsn-"             /* - */
+          ";" "QNonStop-"               /* - nonStop mode */
+          ;
+        msgdbg("RECV <query-supported,%s>\n", ptr);
+        ptr = stpcpy(buf+1, supported);
+        ptr += sprintf(ptr,";PacketSize=%u",sizeof(gdb->buf)-1);
+      } else if (!strcmp(name,"Attached")) {
+        /* qAttached(:pid) -- created or attached process
+         * Change the behavior on gdb session end to either kill or detach.
+         */
+        buf[1] = '0' + gdb->mode.attached;
+        buf[2] = 0;
+        ptr = buf+2;
+      } else if (!strcmp(name,"TStatus")) {
+        /* TStatus -- Tracepoints status ( )*/
+        msgdbg("RECV <query-tracepoint-status>\n");
+        ptr = stpcpy(buf+1, "T0;tnotrun:0");
+        ptr = 0;                        /* force unsupported */
+      } else {
+        msgdbg("RECV *UNSUPPORTED* <query-%s,%s>\n",name,ptr);
+        ptr = 0; /* stpcpy(buf+1,"E55"); */
       }
-    } else if (query && !strcmp(name,"Supported")) {
-      if (*ptr) {
-        char * feat = ptr, *end, *rep;
-        msgdbg("SUPPORTED[%s]\n",ptr);
-        ptr = buf+1;
-        msgdbg("COMMAND <query-suported,%s>\n",feat);
-        while (*feat) {
-          rep = 0;
-          end = strchr(feat, ';');
-          if (end) *end = 0;
-          if (!strncmp(feat, "multiprocess", 12))
-            rep="multiprocess-";
-          else if (!strncmp(feat, "xmlRegisters", 12))
-            rep="xmlRegisters-";
-          else if (!strncmp(feat, "qRelocInsn", 10))
-            rep="qRelocInsn-";
-          if (rep) {
-            if (ptr != buf+1)
-              *ptr++ = ';';
-            ptr = stpcpy( ptr, rep);
-          }
-          feat = end ? end+1 : feat+strlen(feat);
-        }
-      }
-    } else if (query && !strcmp(name,"Attached")) {
-      ptr = stpcpy(buf+1, "0");       /* new process */
-      ptr = stpcpy(buf+1, "1");       /* attached to an existing process */
-    } else if (query && !strcmp(name,"TStatus")) {
-      /* Tracepoints status ( )*/
-      msgdbg("COMMAND <query-tracepoint-status>\n");
-      ptr = stpcpy(buf+1, "T0;tnotrun:0");
-      ptr = 0;                        /* force unsupported */
     } else {
-      ptr = 0; /* stpcpy(buf+1,"E55"); */
+      /*************************************************************
+       * Set
+       */
+      if (!strcmp(name,"StartNoAckMode")) {
+        msgdbg("RECV <set-%s>\n", name);
+        gdb->mode.noack = 1;
+        ptr = stpcpy(buf+1,"OK");
+      } else if (!strcmp(name,"NonStop")) {
+        switch (*ptr) {
+        case '0':                       /* all-stop */
+          msgdbg("RECV <set-all-stop>\n");
+          ptr = stpcpy(buf+1,"OK");
+          break;
+        case '1':                       /* non-stop */
+          msgdbg("RECV <set-non-stop>\n");
+          ptr = stpcpy(buf+1,"E01");
+          break;
+        default:
+          ptr = 0;
+        }
+      }  else {
+        msgdbg("RECV *UNSUPPORTED* <set-%s,%s>\n",name,ptr);
+        ptr = 0; /* stpcpy(buf+1,"E55"); */
+      }
     }
   } break;
 
@@ -763,36 +849,34 @@ static int rsp_event(gdb_t * const gdb)
     /*   "access-watchpoint" }; */
 
 
-    int remove = *ptr++ == 'z';
-    int type   = *ptr++;
-    int adr    = gdb->emu->reg.pc;    /* $$$ default to pc ? */
-    int kind   = -1;                  /* undef */
+    const int remove = *ptr++ == 'z';
+    const int type = *ptr++;
+    uint_t adr  = gdb->emu->reg.pc;    /* $$$ default to pc ? */
+    uint_t kind = -1;                  /* undef */
 
     if (type < '0' || type > '4')     /* Those are only know types */
       break;
 
     if (*ptr == ',') {
-      errno = 0;
-      adr = strtoul(++ptr, &ptr, 16);
-      if (errno) {
+      ++ptr;
+      if (strtoux(&ptr, &adr)) {
         ptr = stpcpy(buf+1,"E01");
         break;
       }
     }
 
     if (*ptr == ',') {
-      errno = 0;
-      kind = strtoul(++ptr, &ptr, 16);
-      if (errno) {
+      ++ptr;
+      if (strtoux(&ptr, &kind)) {
         ptr = stpcpy(buf+1,"E02");
         break;
       }
     }
     kind = kind;
 
-    /* msgdbg("COMMAND <%s-%s,%x,%d%s>\n", */
-    /*      remove?"remove":"insert", types[type-'0'], */
-    /*      adr, kind, ptr); */
+    msgdbg("RECV <%s-type%c,%x,%d%s>\n",
+           remove?"remove":"insert", type,
+           adr, kind, ptr);
 
     switch (type) {
     case '0':
@@ -839,25 +923,25 @@ static int rsp_event(gdb_t * const gdb)
     int sig  = -1;
 
     if (!*++ptr) {
-      /* msgdbg("COMMAND <%s>\n", step ? "step" : "continue"); */
+      msgdbg("RECV <%s>\n", step ? "step" : "cont");
     } else {
-      int adr;
+      uint_t adr;
       errno = 0;
       if (cmd == 'C') {
-        sig = strtoul(++ptr, &ptr, 16);
-        if (errno) {
+        ++ptr;
+        if (strtox(&ptr, &sig)) {
           ptr = stpcpy(buf+1,"E02");
           break;
         }
         if (*ptr != ';') *ptr = 0;
       }
-      adr = strtoul(++ptr, &ptr, 16);
-      if (errno) {
+      ++ptr;
+      if (strtoux(&ptr, &adr)) {
         ptr = stpcpy(buf+1,"E01");
         break;
       }
-      /* msgdbg("COMMAND <%s-at,%02d,%06x>\n", step ? "step" :
-       * "continue", sig, adr); */
+      msgdbg("RECV <%s-at,S%02x,$%06x>\n",
+             step ? "step" : "cont", sig, adr);
       gdb->emu->reg.pc = adr;
     }
 

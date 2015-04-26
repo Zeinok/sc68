@@ -475,7 +475,7 @@ enum emu68_status_e {
   EMU68_NRM  = 0x00,        /**< Execution running normally.                */
   EMU68_STP  = 0x01,        /**< Execution stopped by the stop instruction. */
   EMU68_HLT  = 0x12,        /**< Execution halted (double fault or user).   */
-  EMU68_BRK  = 0x13,        /**< Execution breaked by user.                 */
+  EMU68_BRK  = 0x13,        /**< Execution break by user.                   */
   EMU68_XCT  = 0x24         /**< Execution in exception.                    */
 };
 
