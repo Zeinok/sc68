@@ -48,7 +48,7 @@ enum {
 
 struct fmt_s {
   out_t out;                            /* output file */
-  int errno;                            /* error number */
+  int error;                            /* error number */
   int lineno;                           /* current line number */
 
   struct {
@@ -66,7 +66,7 @@ static int check(fmt_t * fmt)
 {
   if (!fmt)
     return FMT_EARG;
-  return fmt->errno;
+  return fmt->error;
 }
 
 
@@ -78,7 +78,7 @@ static int outwrite(fmt_t * fmt, const void * dat, int len)
   int n = fwrite(dat, 1, len, fmt->out);
 #endif
   if (n != len) {
-    fmt->errno = FMT_EIO;
+    fmt->error = FMT_EIO;
     return -1;
   }
   return 0;
@@ -107,7 +107,7 @@ int fmt_cat(fmt_t * fmt, const void * dat, int len)
   if (check(fmt) < 0)
     return -1;
   if (!dat || len < 0) {
-    fmt->errno = FMT_EARG;
+    fmt->error = FMT_EARG;
     return -1;
   }
   assert(fmt->pos <= fmt->cur);
