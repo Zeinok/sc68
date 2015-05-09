@@ -46,4 +46,10 @@ EXTERN68 void msg_init(int level);
 EXTERN68 void msg_lock(void);
 EXTERN68 void msg_unlock(void);
 
+#ifdef DEBUG
+# define TRACE(FMT,...) msgdbg(FMT, ##__VA_ARGS__)
+#else
+# define TRACE(FMT,...) do {} while(0)
+#endif
+
 #endif

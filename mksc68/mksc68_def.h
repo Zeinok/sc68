@@ -20,6 +20,10 @@
 #  endif
 # endif
 
+#if defined(MKSC68_DEBUG) && !defined(DEBUG)
+# define DEBUG MKSC68_DEBUG
+#endif
+
 #ifdef HAVE_ASSERT_H
 # include <assert.h>
 # else
