@@ -45,7 +45,7 @@ SC68_WITH_HEADER([unice68],[yes],[unice68.h])
 
 AC_CHECK_HEADERS([stdio.h stdlib.h stdarg.h stdint.h string.h])
 AC_CHECK_HEADERS([unistd.h io.h fcntl.h time.h])
-AC_CHECK_HEADERS([sys/socket.h netdb.h])
+AC_CHECK_HEADERS([sys/socket.h sys/ioctl.h netdb.h])
 
 # ,----------------------------------------------------------------------.
 # | Extra libraries                                                      |

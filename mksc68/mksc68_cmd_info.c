@@ -53,7 +53,10 @@ static void pinf(const char * label, const char * value)
 {
   const int ll = 11;                    /* label length */
   if (label && *label && value)
-    msginf("%c%-*s : %s\n", toupper((int) label[0]), ll-1, label+1, value);
+    /* using msginf or printf ?
+     * Choosing the later as this is a specific command.
+     */
+    printf("%c%-*s : %s\n", toupper((int) label[0]), ll-1, label+1, value);
 }
 
 static void iinf(const char * label, int value)

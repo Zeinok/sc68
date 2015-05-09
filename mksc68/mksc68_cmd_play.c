@@ -83,14 +83,12 @@ static void play_info(playinfo_t * pi)
   sc68_music_info_t info;
   if (!sc68_music_info(pi->sc68,&info,SC68_CUR_TRACK,0)) {
     int i, len = 11;
-    msginf("%-*s : %d/%d\n",  len, "Track",   info.trk.track, info.tracks);
-    msginf("%-*s : %s\n",     len, "Album",   info.album);
-    msginf("%-*s : %s\n",     len, "Title",   info.title);
-    msginf("%-*s : %s\n",     len, "Artist",  info.artist);
-    msginf("%-*s : %s\n",     len, "Hardware",info.trk.hw);
-    /* msginf("%-*s : %u:%02u\n",len, "Start time", */
-    /*       info.start_ms/60000u, (info.start_ms/1000u)%60u); */
-    msginf("%-*s : %s\n",len, "Duration", info.trk.time);
+    msginf("%-*s : %d/%d\n", len, "Track",    info.trk.track,info.tracks);
+    msginf("%-*s : %s\n",    len, "Album",    info.album);
+    msginf("%-*s : %s\n",    len, "Title",    info.title);
+    msginf("%-*s : %s\n",    len, "Artist",   info.artist);
+    msginf("%-*s : %s\n",    len, "Hardware", info.trk.hw);
+    msginf("%-*s : %s\n",    len, "Duration", info.trk.time);
 
     if (info.dsk.tags) {
       msginf("Disk tags:\n");
@@ -111,36 +109,63 @@ static void play_info(playinfo_t * pi)
                info.trk.tag[i].key+1,
                info.trk.tag[i].val);
     }
-
-
   }
 }
 
 static void play_hdl(emu68_t* const emu68, int vector, void * cookie)
 {
-  playinfo_t * pi = cookie;
-  assert(pi == &playinfo);
+  int gdbstat, gdbcode;
+  playinfo_t * const pi = cookie;
+  const char * gdbmsg;
 
-  switch (gdb_event(pi->gdb, vector, emu68)) {
+  assert(pi == &playinfo);
+  assert(emu68 == pi->emu68);
+  assert(pi->gdb);
+
+  gdbstat = gdb_event(pi->gdb, vector, emu68);
+  gdbcode = gdb_error(pi->gdb, &gdbmsg);
+
+  switch (gdbstat) {
 
   case RUN_EXIT:
+    msgdbg("gdb-stub *EXIT* (%d) \"%s\", halting 68k\n", gdbcode, gdbmsg);
+    emu68_error_add(emu68,"mksc68:play: "
+                    "gdb *EXIT* (%d) \"%s\" -- %s(%d) => %s(%d)",
+                    gdbcode, gdbmsg,
+                    emu68_status_name(emu68->status), emu68->status,
+                    emu68_status_name(EMU68_ERR), EMU68_ERR);
     emu68->status = EMU68_HLT;
   case RUN_CONT:
     break;
 
   case RUN_SKIP:
+    msgdbg("destroying gdb stub and unregister 68k event handler\n");
     emu68_set_handler(emu68,0);
     gdb_destroy(pi->gdb);
     pi->gdb = 0;
     break;
 
   case RUN_STOP:
-    assert(!"gdb status is stopped but we are not stopped !!!");
+    /* msgdbg("stopped by interrupt or something\n"); */
+    assert(!"gdb-stub *STOP* but we are not stopped !!!");
+    emu68_error_add(emu68,"mksc68:play: "
+                    "gdb-stub *STOP* -- %s(%d) => %s(%d)",
+                    emu68_status_name(emu68->status), emu68->status,
+                    emu68_status_name(EMU68_ERR), EMU68_ERR);
     emu68->status = EMU68_ERR;
     break;
 
   default:
     assert(!"unhandled or invalid gdb status");
+    msgerr("gdb-stub: invalid status(%d,%d,\"%s\")\n",
+           gdbstat, gdbcode, gdbmsg);
+    emu68_error_add(emu68,
+                    "mksc68:play: invalid gdb status(%d,%d,\"%s\")"
+                    " -- %s(%d) => %s(%d)",
+                    gdbstat, gdbcode, gdbmsg,
+                    gdbstat,
+                    emu68_status_name(emu68->status), emu68->status,
+                    emu68_status_name(EMU68_ERR), EMU68_ERR);
     emu68->status = EMU68_ERR;
   }
 }

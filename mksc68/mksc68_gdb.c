@@ -51,6 +51,10 @@
 #include <fcntl.h>
 #include <time.h>
 
+#ifdef HAVE_SYS_IOCTL_H
+#include <sys/ioctl.h>
+#endif
+
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #else
@@ -71,10 +75,10 @@
 /* #include <arpa/inet.h> */
 /* #include <netdb.h> */
 
-#define STATUS(S,C,M) \
-  if (1) { gdb->run = RUN_##S; gdb->code = CODE_##C; gdb->msg = M; } else
-#define SIGNAL(S,C,M) \
-  if (1) { gdb->run = RUN_##S; gdb->code = -C; gdb->msg = M; } else
+#define STATUS(S,C,M)                                                   \
+  do { gdb->run = RUN_##S; gdb->code = CODE_##C; gdb->msg = M; } while(0)
+#define SIGNAL(S,C,M)                                                   \
+  do { gdb->run = RUN_##S; gdb->code = -C; gdb->msg = M; } while(0)
 
 enum {
   default_port = 6800,
@@ -154,6 +158,10 @@ struct gdb_s {
   } mode;
 
   const char   * msg;                   /* last message                */
+  char           msgbuf[128];           /* for formatted msg           */
+
+  int            bmax;                  /* buffer max - 1              */
+  int            blen;                  /* bufferered chars (0:empty)  */
   char           buf[1024];             /* buffer for send/recv        */
 };
 
@@ -206,6 +214,17 @@ static const char * sock_error(void)
 #else
   return "undefined network error";
 #endif
+}
+
+static const char * msgf(gdb_t * gdb, const char * fmt, ...)
+{
+  const int max = sizeof(gdb->msgbuf);
+  va_list list;
+  va_start(list,fmt);
+  if ( max == vsnprintf(gdb->msgbuf,max,fmt,list) )
+    gdb->msgbuf[max-1]=0;
+  va_end(list);
+  return gdb->msgbuf;
 }
 
 static int decode_trap(char * s, int trapnum, emu68_t * emu)
@@ -297,7 +316,7 @@ static int decode_trap(char * s, int trapnum, emu68_t * emu)
        * manually (skip addq #8,a7 */
       const u16 sr = Wpeek(emu, emu->reg.a[7]+0);
       const u32 pc = (Lpeek(emu, emu->reg.a[7]+2) + 2) & msk;
-            u32 sp = emu->reg.a[7];
+      u32 sp = emu->reg.a[7];
 
       /* msgdbg("Will set PC/SR/SP = $%06X/$%04X/%06X\n", pc,sr,sp); */
 
@@ -408,14 +427,128 @@ error:
   return -1;
 }
 
+static int mysend(gdb_t * gdb, char * buf, int len)
+{
+  int n;
+  assert(len >= 0);
+  n = send(gdb->fd, buf, len, 0);
+  if (n == -1) {
+    STATUS(EXIT,ERROR,
+           msgf(gdb,"send failed (#%d %s)", errno, strerror(errno)));
+    msgerr("gdb-stub: socket -- %s\n", gdb->msg);
+  } else if (n != len) {
+    STATUS(EXIT,ERROR,
+           msgf(gdb,"send closed (got %d/%d)", n, len));
+    msgerr("gdb-stub: socket -- %s\n", gdb->msg);
+  }
+  return n;
+}
+
+static int myrecv(gdb_t * const gdb, int len, char ** ptr)
+{
+  const int bmax = sizeof(gdb->buf);
+  int n, blen;
+  char * buf;
+  assert(len >= 0 && len < bmax);
+
+  blen = gdb->blen + len;
+  if (blen >= bmax) {
+    errno = 0;
+    STATUS(EXIT,ERROR,
+           msgf(gdb,"recv buffer overflow (%d>=%d)\n", blen, bmax));
+           msgerr("gdb-stub: %s\n", gdb->msg);
+           return -1;
+  }
+
+  buf = gdb->buf+gdb->blen;
+  if (ptr)
+    *ptr = buf;
+  n = recv(gdb->fd, buf, len, 0);
+  if (n == -1) {
+    STATUS(EXIT,ERROR,
+           msgf(gdb,"recv failed (#%d %s)",errno,strerror(errno)));
+    msgerr("gdb-stub: %s\n", gdb->msg);
+  } else {
+    if (n != len) {
+      STATUS(EXIT,ERROR,
+             msgf(gdb,"recv closed (got %d out of %d)", n, len));
+      msgerr("gdb-stub: %s\n", gdb->msg);
+      blen = gdb->blen + n;
+    }
+    gdb->blen = blen;
+  }
+
+  assert (gdb->blen <= gdb->bmax);
+  gdb->buf[gdb->blen] = 0;
+  /* msgdbg("got %d [%s]\n", n, gdb->buf); */
+  return n;
+}
+
+static int recv_nowait(gdb_t * gdb, char * ptr)
+{
+  int n = 0;
+
+  if (gdb->blen+1 < gdb->bmax) {
+#ifndef MSG_DONTWAIT
+# define MSG_DONTWAIT 0
+# if defined(FIONREAD) && defined(HAVE_IOCTL)
+    if (ioctl(gdb->fd,FIONREAD,&n) < 0) {
+      STATUS(EXIT,ERROR,
+             msgf(gdb,"recv failed (#%d %s)",errno,strerror(errno)));
+      msgerr("gdb-stub: %s\n", gdb->msg);
+      return -1;
+    }
+    if (n < 1)
+      return 0;
+    n = 0;
+# else
+    /* No alternative method ... bailing out */
+    return 0;
+# endif
+#endif
+    n = recv(gdb->fd, &gdb->buf[gdb->blen], 1, MSG_DONTWAIT);
+    if (n > 0) {
+      assert(n == 1);
+      if (ptr) *ptr = gdb->buf[gdb->blen];
+      gdb->buf[++gdb->blen] = 0;
+    } else if (n < 0) {
+      assert (n == -1);
+      if (errno == EAGAIN || errno == EWOULDBLOCK)
+        n = 0;                           /* not an error  */
+      else {
+        STATUS(EXIT,ERROR,
+               msgf(gdb,"recv failed (#%d %s)",errno,strerror(errno)));
+        msgerr("gdb-stub: %s\n", gdb->msg);
+      }
+    } else {
+      assert(n == 0);
+    }
+
+  }
+  return n;
+}
+
+static int recv_ch(gdb_t * gdb)
+{
+  return (myrecv(gdb, 1, 0) == 1)
+    ? gdb->buf[gdb->blen-1]
+    : -1
+    ;
+}
+
+/* Generate an error on later use of recv/send */
+#define send(FD,BUF,LEN,FLAG) err_mysend(gdb,BUF,LEN)
+#define recv(FD,BUF,LEN,FLAG) err_myrecv(gdb,BUF,LEN)
+
+
 /**
- *  @retval  0  on success (packet has been ack)
+ *  @retval  0  on success (packet has been ack or does not need ack)
  *  @retval  1  on error   (packet has not been ack)
  *  @retval -1  on failure (communication failure)
  */
 static int send_packet(gdb_t * gdb)
 {
-  int  i, j, sum = 0;
+  int  n, i, j, sum = 0;
   char c;
   char * const buf = gdb->buf;
 
@@ -428,27 +561,35 @@ static int send_packet(gdb_t * gdb)
   buf[i++] = thex[  sum     & 15 ];   /* write checksum   */
   buf[i] = 0;
 
-  msgdbg("SEND <%s>\n",buf);
+  msgdbg("SEND <%s> (%d)\n", buf, i);
 
-  if (send(gdb->fd, buf, i, 0) != i)  /* send the packet */
-    goto fail;
+  errno = 0;
+  if ( (n = mysend(gdb, buf, i)) != i )
+    return -1;
   buf[j] = 0;                         /* remove '#' marker */
 
   if (gdb->mode.noack)
     return 0;
 
   /* Waiting for ACK (either '-' or '+') */
+  gdb->blen = 0;
   do {
-    if (recv(gdb->fd, &c, 1, 0) != 1) /* recv ACK */
-      goto fail;
+    char * ptr;
+    if (myrecv(gdb, 1, &ptr) != 1) /* recv ACK */
+      return -1;
+    c = *ptr;
     if (c == '+')
       return 0;
   } while (c != '-');
-
   return 1;
-fail:
-  STATUS(EXIT,ERROR,strerror(errno));
-  return -1;
+
+/* fail: */
+/*   if (n == -1) */
+/*     msgf(gdb, "fd#%d errno#%d (%s)", gdb->fd, errno, strerror(errno)); */
+/*   else */
+/*     msgf(gdb, "fd#%d only %d bytes (errno=%d)", gdb->fd, n, errno); */
+/*   STATUS(EXIT,ERROR,gdb->msgbuf); */
+/*   return -1; */
 }
 
 /**
@@ -458,8 +599,10 @@ fail:
 static int send_or_fail(gdb_t * gdb)
 {
   int ret;
-  while (ret = send_packet(gdb), ret > 0)
+  while ( (ret = send_packet(gdb)) > 0)
     ;
+
+  msgdbg("send_or_fail -> [%d]\n", ret);
   return ret;
 }
 
@@ -480,49 +623,58 @@ static int send_reply(gdb_t * gdb, int type, int code)
 
 /**
  *  @retval  0  on success
- *  @retval  1  om failure
+ *  @retval  1  on failure
  */
 static int rsp_event(gdb_t * const gdb)
 {
-  char c;
   char * const buf = gdb->buf;
-  char * const max = gdb->buf + sizeof(gdb->buf) - 1;
+  char * const max = gdb->buf + gdb->bmax;
   char * ptr;
+  int v; char c;
 
-  /* read a packet */
+  assert(gdb->run == RUN_IDLE);
+  assert(gdb->code == CODE_IDLE);
 
-  /* look for packet header '$' */
+  errno = 0;
+  gdb->code = CODE_IDLE;
+  gdb->msg = "waiting for command";
+
+  /* Read a packet */
+
+  /* Look for packet header '$' */
   do {
-    if (recv(gdb->fd, &c, 1, 0) != 1) goto fail;
-  } while (c != '$');
+    gdb->blen = 0;
+    if ( (v = recv_ch(gdb)) < 0)
+      return -1;
+  } while (v != '$');
 
-  /* fill the buffer to the footer '#' */
-  ptr = buf;
-  do {
-    if (recv(gdb->fd, &c, 1, 0) != 1) goto fail;
-    if (c == '#') break;
-    *ptr++ = c;
-  } while (ptr < max);
-
-  *ptr = 0;
-
+  /* Fill the buffer to the footer '#' */
+  for (;;) {
+    if ( (v = recv_ch(gdb)) < 0)
+      return -1;
+    if (v == '#') break;
+    if (v == '$') {
+      msgwrn("gdb-stub: unexpected header at #%d\n",gdb->blen);
+      buf[0] = '$';
+      buf[1] = 0;
+      gdb->blen = 1;
+    }
+  }
+  /* Skip check sum, our line is reliable :) */
+  if ( myrecv(gdb, 2 , 0) != 2 ) return -1;
   msgdbg("<<<< %s\n",buf);
-  if (c != '#')
-    goto fail;
+  /* Kill checksum */
+  gdb->buf[gdb->blen-3] = 0;
 
-  /* skip check sum, our line is reliable :) */
-  if (recv(gdb->fd, &c, 1, 0) != 1) goto fail;
-  if (recv(gdb->fd, &c, 1, 0) != 1) goto fail;
-
-  /* trace("got: [%s]\n", buf); */
-
-  /* unless noAck mode, send ACK '+' */
+  /* Unless noAck mode, send ACK '+' */
   if (!gdb->mode.noack) {
+    gdb->msg = "sending ACK";
     c = '+';
-    if (send(gdb->fd, &c, 1, 0) != 1) goto fail;
+    if ( mysend(gdb, &c, 1) != 1 ) return -1;
   }
 
-  ptr = buf;
+  gdb->msg = "parsing command";
+  ptr = buf+1;
   switch(*ptr) {
 
     /* Minimal commands for a stub to implement are
@@ -569,8 +721,13 @@ static int rsp_event(gdb_t * const gdb)
         l = 4;
       } else if (n == 17) {
         v = gdb->emu->reg.pc;
-      } else if (n < 26) {
+      } else if (0 && n < 26) {
         l = 16;                         /* 64-bit ? */
+      } else {
+        /* Don't support FP or extra registers but do not reply just
+         * ignore to tell gdb we do not support this register. */
+        ptr = 0; /* stpcpy(buf+1,"E05"); */
+        break;
       }
       ptr = buf + 1 + sprintf(buf+1,"%0*x",l,v);
       break;
@@ -701,7 +858,7 @@ static int rsp_event(gdb_t * const gdb)
      * H op thread-id (Thread Operation)
      */
     int op  = *++ptr;
-    int tid = op ? ++ptr : "";
+    const char * tid = op ? ++ptr : "";
 
     switch (op) {
     case 'g':
@@ -790,7 +947,7 @@ static int rsp_event(gdb_t * const gdb)
           ;
         msgdbg("RECV <query-supported,%s>\n", ptr);
         ptr = stpcpy(buf+1, supported);
-        ptr += sprintf(ptr,";PacketSize=%u",sizeof(gdb->buf)-1);
+        ptr += sprintf(ptr,";PacketSize=%u", gdb->bmax);
       } else if (!strcmp(name,"Attached")) {
         /* qAttached(:pid) -- created or attached process
          * Change the behavior on gdb session end to either kill or detach.
@@ -854,9 +1011,6 @@ static int rsp_event(gdb_t * const gdb)
     uint_t adr  = gdb->emu->reg.pc;    /* $$$ default to pc ? */
     uint_t kind = -1;                  /* undef */
 
-    if (type < '0' || type > '4')     /* Those are only know types */
-      break;
-
     if (*ptr == ',') {
       ++ptr;
       if (strtoux(&ptr, &adr)) {
@@ -874,7 +1028,7 @@ static int rsp_event(gdb_t * const gdb)
     }
     kind = kind;
 
-    msgdbg("RECV <%s-type%c,%x,%d%s>\n",
+    msgdbg("RECV <%s-brkp-type%c,%x,%d%s>\n",
            remove?"remove":"insert", type,
            adr, kind, ptr);
 
@@ -894,7 +1048,8 @@ static int rsp_event(gdb_t * const gdb)
           ptr = stpcpy(buf+1,"E03");
         } else {
           emu68_bp_del(gdb->emu, id);
-          /* msgdbg("delete breakpoint #%02d @ 0x%x\n", id, adr); */
+          ptr = stpcpy(buf+1,"OK");
+          msgdbg("removed breakpoint #%02d @ 0x%x\n", id, adr);
         }
       } else {
         int id = emu68_bp_set(gdb->emu, -1, adr, 1, 1);
@@ -902,7 +1057,8 @@ static int rsp_event(gdb_t * const gdb)
           msgnot("could not add breakpoint @ 0x%x\n", adr);
           ptr = stpcpy(buf+1,"E03");
         } else {
-          /* msgdbg("set breakpoint #%02d @ 0x%x\n", id, adr); */
+          msgdbg("insert breakpoint #%02d @ 0x%x\n", id, adr);
+          ptr = stpcpy(buf+1,"OK");
         }
       }
       break;
@@ -955,10 +1111,17 @@ static int rsp_event(gdb_t * const gdb)
     switch (sig) {
     case 1: case 2: case 3: case 6:
       SIGNAL(EXIT,sig,"signal");
-      sprintf(ptr = buf+1,"X%02u", sig % 100u);
+      sprintf(ptr = buf+1, "X%02u", sig % 100u);
       break;
     default:
-      return 0;                         /* skip sending reply */
+      /* Do we or do we not send a reply here ?  If we don't gdb will
+       * wait passively for the next packet we send, that would be for
+       * instance a S## or whatever.
+       */
+      if (0)
+        ptr = stpcpy(buf+1,"OK");       /* send OK */
+      else
+        return 0;                       /* skip sending reply */
     }
   } break;
 
@@ -966,30 +1129,43 @@ static int rsp_event(gdb_t * const gdb)
     ptr = 0;
   }
 
-  /* any command not supported by the stub, an empty response
+  /* Any command not supported by the stub, an empty response
    * (‘$#00’) should be returned.
    */
-  if (!ptr) {
-    ptr=buf+1;
-    *ptr = 0;
-  }
-
+  if (!ptr)
+    buf[1] = 0;
   return send_or_fail(gdb);
-
-fail:
-  STATUS(EXIT,ERROR,strerror(errno));
-  return -1;
 }
+
 
 int gdb_event(gdb_t * gdb, int vector, void * emu)
 {
   int  pc, sr, st;
   char irqname[32], fctname[128];
 
-  assert (gdb->run == RUN_CONT);
+  assert(gdb);
+  assert(emu);
+  assert(!gdb->emu || emu == gdb->emu);
+
+  /* assert failed when interrupt by keyboard (RUN_STOP) */
+  assert(gdb->run == RUN_CONT);
+
+  errno = 0;
+
+  switch ( recv_nowait(gdb, 0) ) {
+  case -1:
+    return -1;
+  case 1:
+    if (gdb->buf[gdb->blen-1] == 3) {
+      /* gdb interrupt special char */
+      --gdb->blen;
+      SIGNAL(STOP,SIGVAL_INT,"interrupt by gdb");
+      goto skip;
+    }
+  }
 
   /* Escape this as fast as possible */
-  if (vector == HWTRACE_VECTOR) {
+  if (vector == HWTRACE_VECTOR /* && gdb->run == RUN_CONT */) {
     if (!gdb->step || --gdb->step)
       return gdb->run;
     gdb->sigval = SIGVAL_TRAP;
@@ -1020,7 +1196,7 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
     case ILLEGAL_VECTOR:
       sigval = SIGVAL_ILL; break;
     case DIVIDE_VECTOR: case TRAPV_VECTOR:
-      sigval = SIGVAL_FPE; break;
+      sigval  = SIGVAL_FPE; break;
     case LINEA_VECTOR: case LINEF_VECTOR: case CHK_VECTOR:
       sigval = SIGVAL_EMT; break;
     case TRACE_VECTOR:
@@ -1174,17 +1350,24 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
   }
 
 
+skip:
   for (;;) {
     switch (gdb->run) {
 
     case RUN_STOP:
-      if (send_reply(gdb, 'S', gdb->code) < 0)
+      if (send_reply(gdb, 'S', gdb->code) < 0) {
+        msgerr("gdb-stub: failed send reply *STOP* (%d) \"%s\"\n",
+               gdb->code, gdb->msg);
         goto exit;
+      }
       STATUS(IDLE,IDLE,"waiting for gdb commands");
       msgnot("waiting for gdb commands\n");
     case RUN_IDLE:
-      if (rsp_event(gdb) < 0)
+      if (rsp_event(gdb) < 0) {
+        msgerr("gdb-stub: failed to handle event *IDLE* (%d) \"%s\"\n",
+               gdb->code, gdb->msg);
         goto exit;
+      }
       break;
 
     case RUN_SKIP:
@@ -1203,6 +1386,7 @@ int gdb_event(gdb_t * gdb, int vector, void * emu)
 exit:
   return gdb->run;
 }
+
 
 void gdb_destroy(gdb_t * gdb)
 {
@@ -1232,6 +1416,7 @@ gdb_t * gdb_create(void)
     gdb->server = &serverinfo;
     if (server_tcp(gdb->server, 1) < 0)
       goto error;
+    gdb->bmax = sizeof(gdb->buf) - 1;
 
     STATUS(CONT,IDLE,"started");
     gdb->step = 1;
@@ -1241,6 +1426,7 @@ gdb_t * gdb_create(void)
       msgerr("listen -- %s\n", strerror(errno));
       goto error;
     }
+    gdb->msg = "waiting for connection";
 
     /* Wait for a client to connect */
     msginf("waiting for gdb to connect:\n"
@@ -1250,9 +1436,7 @@ gdb_t * gdb_create(void)
            (gdb->server->addr >>  8) & 255,
            (gdb->server->addr >>  0) & 255,
            gdb->server->port);
-
     gdb->fd = accept(gdb->server->fd , 0, 0);
-
     /* Don't need that socket anymore */
     close(gdb->server->fd);
     gdb->server->fd = -1;
@@ -1266,6 +1450,8 @@ gdb_t * gdb_create(void)
     gdb->opt.ontimer_break = (uint8_t)~0x44;
     /* $$$ only once */
     gdb->opt.ontimer_break = (uint8_t)~0xf4;
+    gdb->msg = "ready";
+    msgdbg("gdb-stub: ready\n");
   }
   return gdb;
 

@@ -764,7 +764,7 @@ static void timemeasure_run(measureinfo_t * mi)
   }
 
   /* sil_val==0 won't trigger silent detection */
-  sil_val = (mi->sil_ms > 0) ? 0x40 * slice * 2 : 0;
+  sil_val = (mi->sil_ms > 0) ? 0x08 * slice * 2 : 0;
   sil_frm = sil_nop;
 
   sil_max = ms2fr(mi->sil_ms, cpf, mi->emu68->clock);
@@ -815,8 +815,12 @@ static void timemeasure_run(measureinfo_t * mi)
     }
     /* msgdbg(" -> "); */
 
-    /* msgdbg("frame #%u/%u: acu=%d sil_val=%d\n", */
-    /*        frm_cnt, sli_cnt, acu, sil_val); */
+    if (0) {
+      static int acu_avg = 0;
+      acu_avg = (n*acu_avg + acu) / (n+1);
+      msgdbg("frame #%u/%u: acu=%d avg=%d sil_val=%d\n",
+             frm_cnt, sli_cnt, acu, acu_avg, sil_val);
+    }
 
     if ( acu < sil_val ) {
       /* This slice is silent */
@@ -881,7 +885,8 @@ static void timemeasure_run(measureinfo_t * mi)
     mi->curfrm = ++frm_cnt;
 
     if ( frm_cnt > frm_max ) {
-      msgerr("reach max limit (%ufr %ums)\n", frm_max, mi->max_ms);
+      msgerr("#%02d: reach max limit (%ufr %ums)\n",
+             mi->track, frm_max, mi->max_ms);
       mi->code = EXIT_MAX_PASS;
       break;
     }
@@ -889,14 +894,14 @@ static void timemeasure_run(measureinfo_t * mi)
     if ( frm_cnt > frm_lim ) {
       if ( !updated && upd_frm != sil_nop ) {
         /* found something */
-        msgdbg("end of track detected at frame %u (%s)\n",
-               upd_frm,
+        msgdbg("#%02d: end of track detected at frame %u (%s)\n",
+               mi->track, upd_frm,
                str_timefmt(str+0x00,0x20,fr2ms(upd_frm, cpf, mi->emu68->clock)));
         mi->frames = upd_frm;
         break;
       } else {
-        msgdbg("unable to detect end of track at frame %u (%s)\n",
-               frm_lim,
+        msgdbg("#%02d: unable to detect end of track at frame %u (%s)\n",
+               mi->track, frm_lim,
                str_timefmt(str+0x00,0x20,fr2ms(frm_lim, cpf, mi->emu68->clock)));
         frm_lim += frm_stp;
         updated = 0;
@@ -912,7 +917,7 @@ static void timemeasure_run(measureinfo_t * mi)
 
   /* Got only silent ? */
   if (sil_frm < 4) {
-    msgwrn("is this a song of silent ???\n");
+    msgwrn("#%02d is this a song of silent ???\n", mi->track);
     /* $$$ Do we want this to be an error ? */
     mi->code = EXIT_SILENT;
     return;
@@ -939,7 +944,7 @@ static void timemeasure_run(measureinfo_t * mi)
              mi->vector[i].cnt, mi->vector[i].fst, mi->vector[i].lst);
 
   if (!mi->hw.bit.ym && !mi->hw.bit.mw && !mi->hw.bit.pl) {
-    msgerr("no relevant hardware detected ???\n");
+    msgerr("#%02d: no relevant hardware detected ???\n", mi->track);
     mi->code = EXIT_NOHW;
     return;
   }
@@ -1065,12 +1070,12 @@ int time_measure(measureinfo_t * mi, int trk,
   assert(trk > 0 && trk <= tracks);
 
   if (trk <= 0 || trk > tracks) {
-    msgerr("track #%02d out of range\n", trk);
+    msgerr("#%02d: track out of range\n", trk);
     goto error;
   }
 
   if (mi->isplaying) {
-    msgerr("busy\n");
+    msgerr("#%02d: busy\n", trk);
     goto error;
   }
 
@@ -1081,7 +1086,7 @@ int time_measure(measureinfo_t * mi, int trk,
   mi->track  = trk;
 
   if ( pthread_create(&mi->thread, 0, time_thread, mi) ) {
-    msgerr("failed to create time thread\n");
+    msgerr("#%02d: failed to create time thread\n", trk);
     goto error;
   }
 
