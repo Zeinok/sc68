@@ -575,13 +575,13 @@ static void desa_immL(desa68_t * d, uint v)
     ref_set(&d->sref, v, SZ_ADDR);
     desa_str_notr(d,symb);
   } else {
-    int q = '\'';
+    const int q = '\'';
     if (d->ischar(d,U8(v)) && d->ischar(d,U8(v>>8)) &&
         d->ischar(d,U8(v>>16)) && d->ischar(d,U8(v>>24))) {
-      desa_char (d,q);
+      desa_char(d,q);
       d->_quote = q;
       desa_ascii(d,U32(v));
-      d->_quote = 0;
+      /* d->_quote = 0; */
       desa_char(d,q);
     } else {
       desa_signifiant(d,S32(v));
