@@ -610,7 +610,7 @@ int main(int argc, char *argv[])
     }
 
     message(D,"output: %s (%d)\n", fout, olen);
-    if (!fout) {
+    if (!out) {
       syserror(fout);
       goto error;
     }
