@@ -24,10 +24,12 @@ AC_CONFIG_HEADERS([config.h])
 # ,----------------------------------------------------------------------.
 # | build tools                                                          |
 # `----------------------------------------------------------------------'
+
 AC_CHECK_TOOL([WINDRES],[windres],[false])
-if test x/"$WINDRES" = x/false; then
-  AC_MSG_ERROR([Missing required build tool -- windres])
-fi
+dnl # if test x/"$WINDRES" = x/false; then
+dnl #   AC_MSG_ERROR([Missing required build tool -- windres])
+dnl # fi
+
 AC_CHECK_TOOL([STRIP],[strip],[false])
 if test x/"$STRIP" = x/false; then
   AC_MSG_ERROR([Missing required build tool -- strip])

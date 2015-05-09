@@ -109,7 +109,7 @@ static /* const */ struct strings_table {
   char amiga_chiptune[15];
   char atari_st_chiptune[18];
 
-  char _reserved;
+  char _reserved;                       /* must be last */
 } tagstr = {
   SC68_NOFILENAME,
   TAG68_AKA,

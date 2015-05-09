@@ -286,13 +286,6 @@ int paula_reset(paula_t * const paula)
 
 void paula_cleanup(paula_t * const paula) {}
 
-static void pl_info(paula_t * const paula)
-{
-  msg68_notice(PLHD "engine -- *%s*\n", pl_engine_name(paula->engine));
-  msg68_notice(PLHD "clock -- *%s*\n", pl_clock_name(paula->clock));
-  msg68_notice(PLHD "sampling rate -- *%dhz*\n", (int)paula->hz);
-}
-
 int paula_setup(paula_t * const paula,
                 paula_setup_t * const setup)
 {
@@ -318,7 +311,10 @@ int paula_setup(paula_t * const paula,
   paula_reset(paula);
   set_clock(paula, setup->parms.clock, setup->parms.hz);
 
-  pl_info(paula);
+  /* Debug trace */
+  TRACE68(pl_cat, PLHD "engine -- *%s*\n", pl_engine_name(paula->engine));
+  TRACE68(pl_cat, PLHD "clock -- *%s*\n", pl_clock_name(paula->clock));
+  TRACE68(pl_cat, PLHD "sampling rate -- *%dhz*\n", (int)paula->hz);
 
   return 0;
 }

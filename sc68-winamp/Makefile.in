@@ -2,7 +2,7 @@
 #
 # sc68-winamp @configure_input@
 #
-# (C) 2013-2014 https://sourceforge.net/users/benjihan
+# (C) 2013-2015 https://sourceforge.net/users/benjihan
 #
 
 # Autoconf stuff
@@ -49,16 +49,15 @@ WINDRES      := @WINDRES@	#$(CC:%gcc=%windres)
 VPATH = @srcdir@
 
 OBJS := in_sc68.o transcoder.o fileinfo.o configdlg.o dll.o dbg.o	\
- tracksel.o cache.o resource.o
-# nobug.o
-# resource.o
+ tracksel.o cache.o
+# resource.o should not be needed as the resource should be in the
+# libsc68 library. At least it will after the bug
+# <https://sourceforge.net/p/sc68/bugs/15/> is fix.
 
 all: in_sc68.dll
 
 in_sc68.dll: $(OBJS)
-#	$(CC) -shared -o $@ $^ -static-libgcc -static $(LDFLAGS)
 	$(CC) -v -mdll -o $@ $^ -static-libgcc -static $(LDFLAGS)
-	$(CC:%gcc=%objdump) -x $@ | grep rsrc
 
 %.a: %.o
 	$(CC:%gcc=%ar) -cms $@ $<

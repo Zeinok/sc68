@@ -27,6 +27,9 @@
 #include "config.h"
 #endif
 
+/* see <https://sourceware.org/bugzilla/show_bug.cgi?id=17196> */
+volatile int dial68_rc_force;
+
 /* sc68 */
 #include "sc68/sc68.h"                  /* for sc68_dial_f */
 
@@ -837,6 +840,8 @@ static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
   if (!cntl)
     return 0;
 
+  dial68_rc_force = ~dial68_rc_force;
+
   ZeroMemory(&tmp,sizeof(tmp));
   tmp.magic   = magic;
   tmp.idd     = IDC_STATIC;
@@ -960,3 +965,4 @@ int dial68_frontend(void * data, sc68_dial_f cntl)
     : dialog_modless(data,cntl)
     ;
 }
+
