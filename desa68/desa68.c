@@ -223,7 +223,7 @@ static void def_strput(desa68_t * d, int c)
   if (d->out < d->strmax)
     d->str[d->out++] = c;
   else if (d->str) {
-    d->flags |= DESA68_ERR_OUT;
+    d->error |= DESA68_ERR_OUT;
     if (d->strmax > 0)
       d->str[d->strmax-1] = 0;
   }
@@ -244,7 +244,7 @@ static void def_strput(desa68_t * d, int c)
       d->str[d->out++] = c;
     else {
       if (d->str) {
-        d->flags |= DESA68_ERR_OUT;
+        d->error |= DESA68_ERR_OUT;
         if (d->strmax > 0)
           d->str[d->strmax-1] = 0;
       }
@@ -374,7 +374,7 @@ static void desa_signifiant(desa68_t * d, int n)
  * Memory access
  * ====================================================================== */
 
-static int def_memget(desa68_t * d, uint addr)
+static int def_memget(desa68_t * d, uint addr, int flag)
 {
   addr &= d->memmsk;
   return (addr >= d->memlen)
@@ -383,9 +383,9 @@ static int def_memget(desa68_t * d, uint addr)
     ;
 }
 
-static int get_uB(desa68_t * d, uint addr)
+static int _uB(desa68_t * d, uint addr, int flag)
 {
-  int c = d->memget(d,addr);
+  int c = d->memget(d,addr,flag);
   if (c < 0) {
     d->error |= DESA68_ERR_MEM;
     c = 0;
@@ -393,46 +393,65 @@ static int get_uB(desa68_t * d, uint addr)
   return c;
 }
 
-#if 0 /* unused */
-static int get_sB(desa68_t * d, uint addr)
+static int _sB(desa68_t * d, uint addr, int flag)
 {
-  return S8(get_uB(d,addr));
+  return S8(_uB(d,addr,flag));
 }
-#endif
 
-static int get_uW(desa68_t * d, uint addr)
+static int _uW(desa68_t * d, uint addr)
 {
   if ( addr & 1 )
     d->error |= DESA68_ERR_ODD;
-  return ( get_uB(d,addr) << 8 ) | get_uB(d,addr+1);
+  return ( _uB(d,addr,2) << 8 ) | _uB(d,addr+1,0);
 }
 
-static int get_sW(desa68_t * d, uint addr)
+static int _sW(desa68_t * d, uint addr)
 {
-  return S16(get_uW(d,addr));
+  return S16(_uW(d,addr));
+}
+
+static int _sL(desa68_t * d, uint addr)
+{
+  if ( addr & 1 )
+    d->error |= DESA68_ERR_ODD;
+  return 0
+    | (_sB(d, addr+0,4)<<24)
+    | (_uB(d, addr+1,0)<<16)
+    | (_uB(d, addr+2,0)<<8)
+    | (_uB(d, addr+3,0)<<0)
+    ;
 }
 
 /* Read next word and increment pc */
-static int read_pc(desa68_t * d)
+static int _pcW(desa68_t * d)
 {
-  d->_w = get_sW(d, d->pc);
+  d->_w = _sW(d, d->pc);
   d->pc += 2;
   return d->_w;
 }
 
+/* Read next long and increment pc */
+static int _pcL(desa68_t * d)
+{
+  int r = _sL(d, d->pc);
+  d->_w = S16(r);
+  d->pc += 4;
+  return r;
+}
+
 static int immB(desa68_t * d)
 {
-  return S8(read_pc(d));
+  return S8(_pcW(d));
 }
 
 static int immW(desa68_t * d)
 {
-  return read_pc(d);
+  return _pcW(d);
 }
 
 static int immL(desa68_t * d)
 {
-  return (read_pc(d)<<16) | U16(read_pc(d));
+  return _pcL(d);
 }
 
 static int adrW(desa68_t * d)
@@ -447,7 +466,7 @@ static int adrL(desa68_t * d)
 
 static int relPC(desa68_t * d)
 {
-  const int w = read_pc(d);
+  const int w = _pcW(d);
   return (d->pc + w - 2) & d->memmsk;
 }
 
@@ -637,14 +656,14 @@ static void get_ea_2(desa68_t * d,
     desa_op_ANp(d,reg);
     break;
   case MODE_dAN:
-    read_pc(d);
+    _pcW(d);
     desa_signifiant(d,d->_w);
     /* continue on MODE_iAN */
   case MODE_iAN:
     desa_op_iAN(d,reg);
     break;
   case MODE_dANXI:
-    v = read_pc(d);                       /* control word */
+    v = _pcW(d);                       /* control word */
     desa_signifiant(d,S8(v));
     desa_char(d,'(');
     desa_op_AN(d,reg);
@@ -684,7 +703,7 @@ static void get_ea_2(desa68_t * d,
   case MODE_dPCXI: {
     uint addr;
     assert(is_src);
-    v = read_pc(d);
+    v = _pcW(d);
     addr = d->pc-2+S8(v);
     ref_set(ref,addr,rtype);
     desa_addr(d, addr, DESA68_SYM_SPCI);
@@ -821,7 +840,7 @@ static int desa_check_bitop(desa68_t * d)
     desa_ascii(d,inst);
     desa_space(d);
     desa_char(d,'#');
-    read_pc(d);
+    _pcW(d);
     desa_usignifiant(d,U8(d->_w));
   } else {
     /* B... dn,<AE>*/
@@ -1815,7 +1834,7 @@ static void rtcheck(void)
   assert( S32(~1) == -2 );
 }
 
-void desa68(desa68_t * d)
+int desa68(desa68_t * d)
 {
   rtcheck();
 
@@ -1862,7 +1881,7 @@ void desa68(desa68_t * d)
 
   /* Setup instruction decoder. */
   d->_pc = d->pc &= d->memmsk;
-  read_pc(d);
+  _pcW(d);
 
   d->_quote = 0;
   d->_opw   = U16(d->_w);
@@ -1893,6 +1912,8 @@ void desa68(desa68_t * d)
     d->dref.addr &= d->memmsk;
   else
     d->dref.addr = ~0;
+
+  return d->error ? -1 : d->itype;
 }
 
 int desa68_version(void)

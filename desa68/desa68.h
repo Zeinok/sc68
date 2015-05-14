@@ -179,6 +179,9 @@ enum {
  *
  */
 enum {
+  /* An error occured. */
+  DESA68_ERR = -1,
+
   /** Invalid instruction (disassembled as data). */
   DESA68_DCW = 0,
 
@@ -299,8 +302,8 @@ struct desa68_parm_s
   /** User private data (cookie). */
   void          *user;
 
-  /** Function to read memory (or null) */
-  int          (*memget)(desa68_t *, unsigned int addr);
+  /** Function to read memory (or null). */
+  int          (*memget)(desa68_t *, unsigned int addr, int flag);
   /** 68K memory buffer. */
   unsigned char *memptr;
 
@@ -418,8 +421,9 @@ DESA68_API
  * Disassemble a single 68000 instruction.
  *
  * @param  d  Pointer to disassemble pass parameter structure.
+ * @return @ref desa68_inst_types instruction type
  */
-void desa68(desa68_t *d);
+int desa68(desa68_t *d);
 
 
 DESA68_API
