@@ -234,6 +234,8 @@ static const opt_t longopts[] = {
 
 static char shortopts[(sizeof(longopts)/sizeof(*longopts))*3+1];
 
+// $$$ TEMP
+
 int main(int argc, char **argv)
 {
   int i;
@@ -249,6 +251,7 @@ int main(int argc, char **argv)
   msg68_set_handler(0);
 # endif
 #endif
+
 
   dmsg("Debug messages are ON\n");
 
@@ -417,7 +420,7 @@ int main(int argc, char **argv)
       out_uri = "-";
     out_hdl = open_hdl(out_uri);
     fmt = fmt_new(out_hdl);
-    src_exec(fmt, exe);
+    src_exec(fmt, exe/* , inp_uri */);
     close_hdl(out_hdl);
     fmt_del(fmt);
     exe_del(exe);

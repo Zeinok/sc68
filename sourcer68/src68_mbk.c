@@ -28,6 +28,7 @@
 #endif
 
 #include "src68_mbk.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -37,14 +38,18 @@ const char * mbk_mibstr(int mib, char * str)
   static const char bits[] = "RABWLEXP";
   char *s; int bit;
   if (!str) str = tmp;
-  s = str;
-
+  s = str + sprintf(str,"$%04X/", mib);
   if (mib & MIB_SET) {
     *s++ = (mib & MIB_ODD) ? '1' : '0';
     *s++ = '/';
   }
-  for (bit=sizeof(bits)-1; bit>=0; --bit)
-    if (mib & (1<<bit)) *s++ = bits[bit];
+  for (bit=0; bit<sizeof(bits)-1; ++bit)
+    *s++ = (mib & (1<<bit)) ? bits[bit] : '.';
+  bit = (mib & MIB_OPSZ_MSK) >> MIB_OPSZ_BIT;
+  if (bit) {
+    *s++ = '/';
+    *s++ = '0' + bit;
+  }
   *s = 0;
   return str;
 }
@@ -85,7 +90,7 @@ int mbk_getmib(const mbk_t * mbk, uint_t adr)
     if ( adr & 1 )
       mib = (mib & MIB_BOTH) | MIB_ODD | MIB_SET;
     else
-      mib |= ((mbk->_mib[adr+1] & ~MIB_BOTH) << 8) | MIB_SET;
+      mib |= ((mbk->_mib[adr+1] >> MIB_BOTH_BITS) << 8) | MIB_SET;
   } else
     mib = 0;
   return mib;
@@ -119,7 +124,7 @@ int mbk_setmib(const mbk_t * mbk, uint_t adr, int clr, int set)
       int mib2;
       assert(!(adr&1));
       mbk->_mib[adr] = mib;
-      mib2 = ( mib & MIB_ALL & ~(MIB_BOTH<<8) ) >> 8;
+      mib2 = (( mib & MIB_ALL ) >> 8) << MIB_BOTH_BITS;
       assert ( (mib2 & ~MIB_BOTH) == mib2 );
       mbk->_mib[adr+1] = (mbk->_mib[adr+1] & MIB_BOTH) | mib2;
     }

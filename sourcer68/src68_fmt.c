@@ -185,7 +185,7 @@ fmt_t * fmt_new(void * out)
     fmt->tab.stops[0] = 0;
     fmt->tab.stops[1] = 13;
     fmt->tab.stops[2] = 22;
-    fmt->tab.stops[3] = 40;
+    fmt->tab.stops[3] = 52;
   }
   return fmt;
 }

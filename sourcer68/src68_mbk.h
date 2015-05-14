@@ -17,12 +17,13 @@
  * @anchor sourcer68_mib_value
  */
 enum {
-  /* Both Even and odd address. */
+  /* Both Even and odd address lines. */
   MIB_READ  = 1,                    /**< Read by disassembler. */
   MIB_ADDR  = 2,                    /**< Symbol/address.       */
   MIB_BYTE  = 4,                    /**< Byte access.          */
 
   MIB_BOTH  = (MIB_BYTE*2)-1,           /**< Mask previous bits.  */
+  MIB_BOTH_BITS = 3,              /**< Number of flag in both lines */
 
   /* Even address only. */
   MIB_WORD  = MIB_BYTE*2,           /**< word access.               */
@@ -31,7 +32,10 @@ enum {
   MIB_EXEC  = 64,                   /**< Instruction start address. */
   MIB_RELOC = 128,                  /**< Long has been relocated.   */
 
-  MIB_ALL   = 0xFFFF,                /**< Mask for real bits only.  */
+  MIB_OPSZ_BIT = 8,                  /**< 3 bits word opcode size.  */
+  MIB_OPSZ_MSK = 7<<MIB_OPSZ_BIT,    /**< correspoding bit mask.    */
+
+  MIB_ALL   = 0xFFFF>>MIB_BOTH_BITS, /**< Mask for real bits only.  */
 
   MIB_ODD   = MIB_ALL+1,                /**< odd address replies. */
   MIB_SET   = MIB_ODD*2                 /**< success replies.  */

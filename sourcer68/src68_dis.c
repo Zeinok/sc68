@@ -42,19 +42,22 @@ enum {
 };
 
 typedef struct {
-  desa68_t desa;
-  uint_t   maxdepth;
-  uint_t   addr;
+  desa68_t desa;                        /* disassembler instance */
+  uint_t   maxdepth;                    /* maximum recursive depth */
+  uint_t   addr;                        /* instruction address */
   uint_t   flag;
-  uint_t   mib;
-  mbk_t   *mbk;
-  vec_t   *symbols;
-  int      result;
-  char     sym[16];
-  char     str[256];
+  mbk_t   *mbk;                         /* memory block */
+  vec_t   *symbols;                     /* symbols container */
+  int      result;                      /* result code (0 for success) */
+
+  uint_t   mib[10];         /* temporary mib buffer (1 instruction) */
+  char     sym[16];         /* symbol buffer for auto label (LXXXXXX) */
+  char     str[256];        /* disassemblt buffer */
 } dis_t;
 
-static const char * symget(desa68_t * d, uint_t addr, int type)
+static
+/* callback for desa68() symbol lookup. */
+const char * symget(desa68_t * d, uint_t addr, int type)
 {
   dis_t * dis = d->user;
   char * name = 0;
@@ -87,7 +90,7 @@ static const char * symget(desa68_t * d, uint_t addr, int type)
       }
     }
 
-    /* REquested to autodetect symbols inside the memory range */
+    /* Requested to autodetect symbols inside the memory range */
     if (!wanted && (dis->flag & DIS_AUTO_SYMBOL)) {
       if (type == DESA68_SYM_SIMM)
         wanted = addr >= d->immsym_min  && addr < d->immsym_max;
@@ -104,18 +107,24 @@ static const char * symget(desa68_t * d, uint_t addr, int type)
 }
 
 
-static int memget(desa68_t * d, unsigned int adr)
+static
+/* callback for desa68() memory access. */
+int memget(desa68_t * d, unsigned int adr, int flag)
 {
   dis_t * dis = d->user;
-  int bits = MIB_READ | ( (-(adr==dis->addr)) & MIB_EXEC );
+  int bits = MIB_READ
+    | ( (-(adr==dis->addr)) & MIB_EXEC )
+    | ( (flag & 7) * MIB_BYTE )
+    ;
 
-  if (bits = mbk_setmib(dis->mbk, adr, 0, bits), !bits)
-    return 0;
-  dis->mib |= bits & MIB_ALL;
+  assert( (adr-dis->addr) < 10 );
+  dis->mib[adr-dis->addr] = bits;
+  if (!mbk_ismyaddress(dis->mbk,adr))
+    return -1;
   return dis->mbk->mem[adr - dis->mbk->org];
 }
 
-static const char hexa[] = "0123456789ABCDEF";
+const char hexa[] = "0123456789ABCDEF";
 static void hexordot(char *s, int v)
 {
   if (v >= 0 && v < 256) {
@@ -186,9 +195,32 @@ static const char * itypestr(int itype)
   return "???";
 }
 
+
+static
+/* Commit temporary mib and set MIB opcode size for the instruction. */
+int commit_mib(dis_t * d)
+{
+  int i, len = 0;
+
+  assert ( d->desa.itype != DESA68_DCW );
+  assert ( !(d->addr & 1) );
+  assert ( ! d->desa.error );
+
+  len = d->desa.pc - d->addr;
+  assert( !(len & 1) && len >=2 && len <= 10);
+  len = (len + 1) >> 1;             /* number of 16bit words */
+  d->mib[0] |= len << MIB_OPSZ_BIT;
+
+  for (i=0; i<len; ++i)
+    if ( ! mbk_setmib(d->mbk, d->addr+i, 0, d->mib[i]) )
+      assert(!"mib access out of range ?");
+
+  return len << 1;
+}
+
 static void r_dis_pass(dis_t * dis, int depth)
 {
-  char rts; uint_t save_mib;
+  char rts;
 
   dmsg(";;; ENTER $%08X (%d)\n", dis->addr, depth);
 
@@ -197,17 +229,13 @@ static void r_dis_pass(dis_t * dis, int depth)
     return;
   }
 
-  save_mib = dis->mib;
-  dis->mib = 0;
   dis->desa.pc = dis->addr;
 
   for (rts=BRK_NOT; rts == BRK_NOT; ) {
-    unsigned int off = dis->desa.pc - dis->mbk->org;
+    uint_t off = dis->desa.pc - dis->mbk->org;
+    uint_t mib = mbk_getmib(dis->mbk,dis->desa.pc);
 
-    /* dmsg("<<<< %08x $%08x $%02x $%02x \n", */
-    /*      dis->desa.pc,off,dis->mbk->mib[off], dis->mib); */
-
-    if ( mbk_getmib(dis->mbk,dis->mbk->org+off) & MIB_EXEC ) {
+    if (mib & MIB_EXEC) {
       rts = BRK_EXE;
       break;
     }
@@ -218,25 +246,33 @@ static void r_dis_pass(dis_t * dis, int depth)
     }
 
     dis->addr = dis->desa.pc;
-    desa68(&dis->desa);
 
+    if (desa68(&dis->desa) <= DESA68_DCW) {
+      /* On error or data */
+      rts = BRK_DCW;
+      break;
+    }
+    commit_mib(dis);
+
+#ifdef DEBUG
     if (1) {
-      int r;
+      int r/* , mib = mbk_getmib(dis->mbk,dis->addr) */;
       dmsg("\n"
-           "type: %s $%04X\n", itypestr(dis->desa.itype), dis->desa._opw );
-      dmsg("src-ref: %c %08x\n",
+           "type: %s $%04X MIB:%s\n",
+           itypestr(dis->desa.itype), dis->desa._opw, mbk_mibstr(mib,0));
+      dmsg("refs: %c %08x ",
            "?BWL-"[1+(signed char)dis->desa.sref.type],
            dis->desa.sref.addr);
-      dmsg("dst-ref: %c %08x\n",
+      dmsg("/ %c %08x ",
            "?BWL-"[1+(signed char)dis->desa.dref.type],
            dis->desa.dref.addr);
-      dmsg("regs:");
+      dmsg("/");
       for (r=0; r<DESA68_REG_LAST; ++r)
         if (dis->desa.regs & (1<<r))
           dmsg(" %s", regname(r));
       dmsg("\n");
     }
-
+#endif
 
     /* dmsg(">>>> %08x $%08x $%02x $%02x \n", */
     /*      dis->desa.pc_org,off,dis->mbk->mib[off], dis->mib); */
@@ -246,16 +282,6 @@ static void r_dis_pass(dis_t * dis, int depth)
     /*      (uint16_t) dis->desa.w, */
     /*      dis->desa.pc_org, dis->desa.pc, dis->desa.pc-dis->desa.pc_org); */
 
-    if (dis->desa.error)
-      wmsg(dis->addr, "disassembler error (ignored) -- %d\n",
-           dis->desa.error);
-
-    if (dis->desa.itype == DESA68_DCW) {
-      wmsg(dis->addr, "invalid opcode -- %04x\n",
-           0xFFFF & dis->desa._w);
-      rts = BRK_DCW;
-      break;
-    }
 
     dmsg("$%08x%*s%-*s ;; %s\n", dis->addr,
          /* (depth+1)*2 */2, "",
@@ -282,6 +308,7 @@ static void r_dis_pass(dis_t * dis, int depth)
 
         if (ref->type == DESA68_OP_NDEF) /* set ? */
           continue;
+
         switch (ref->type) {
         case DESA68_OP_A: break;
         case DESA68_OP_B: case DESA68_OP_W: case DESA68_OP_L:
@@ -303,14 +330,13 @@ static void r_dis_pass(dis_t * dis, int depth)
         }
         if (end < off || off >= mbk->len) /* out of range ? */
           continue;
-        dis->mib |= mbk_setmib(mbk, adr, 0, mib) & MIB_ALL;
+        mbk_setmib(mbk, adr, 0, mib);
       }
     } break;
 
     case DESA68_BRA:
       if (dis->desa.dref.type != DESA68_OP_NDEF)
-        dis->mib |=
-          mbk_setmib(dis->mbk, dis->desa.dref.addr,0,MIB_ADDR) & MIB_ALL;
+        mbk_setmib(dis->mbk, dis->desa.dref.addr,0,MIB_ADDR);
 
       if (dis->desa.dref.type == DESA68_OP_A) {
         if (! (dis->desa.regs & (1<<DESA68_REG_PC) )) {
@@ -329,7 +355,7 @@ static void r_dis_pass(dis_t * dis, int depth)
         uint_t save_pc = dis->desa.pc;
         if (! (dis->desa.regs & (1<<DESA68_REG_PC) )) {
           dis->addr = dis->desa.dref.addr;
-          dis->mib |= mbk_setmib(dis->mbk,dis->addr,0,MIB_ADDR) & MIB_ALL;
+          mbk_setmib(dis->mbk,dis->addr,0,MIB_ADDR);
           r_dis_pass(dis,depth+1);
         } else {
           /* jsr table : $$$ TODO */
@@ -362,8 +388,6 @@ static void r_dis_pass(dis_t * dis, int depth)
   default:
     assert(!"invalid rts");
   }
-
-  dis->mib = save_mib;
 }
 
 
@@ -402,6 +426,7 @@ int dis_walk(walk_t * walk)
 int dis_disa(exe_t * exe, uint_t * adr, char * buf, uint_t max)
 {
   dis_t dis;
+  int itype;
 
   memset(&dis, 0, sizeof(dis));
 
@@ -423,11 +448,11 @@ int dis_disa(exe_t * exe, uint_t * adr, char * buf, uint_t max)
   if (dis.symbols)
     dis.desa.symget = symget;
 
-  desa68(&dis.desa);
-
-  if (dis.desa.itype != DESA68_DCW)
+  if (itype = desa68(&dis.desa), itype > DESA68_DCW) {
+    commit_mib(&dis);
     *adr = dis.desa.pc;
-  return dis.desa.itype;
+  }
+  return itype;
 }
 
 void walkopt_set_default(walkopt_t * wopt)

@@ -33,13 +33,49 @@
 #include <desa68.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+extern const char hexa[];               /* in src68_dis.c */
+
+typedef struct {
+  const char * uri;                     /* input URI */
+  fmt_t * fmt;                          /* formatter */
+  exe_t * exe;                          /* executable */
+
+  /* segment */
+  struct {
+    uint_t org;                         /* segment origin */
+    uint_t end;                         /* segment end address */
+    uint_t len;                         /* segment length */
+    uint_t adr;                         /* segment current address */
+  } seg;
+
+  /* disassebler options */
+  struct {
+    uint_t show_opcode:1;         /* show opcodes */
+    char * star_symbol;           /* symbol for current address (*) */
+  } opt;
+
+  /* disassemby temp buffer */
+  struct {
+    char * buf;                         /* disassebly buffer */
+    uint_t max;                         /* sizeof of buf in byte */
+  } str;
+
+} src_t;
+
+static char strbuf[1024];    /* static srting buffer for disassembly */
 
 static
 /*
  * Print all symbols from address adr+ioff.
+ * ioff == 0 -> Label:
+ * ioff != 0 -> Label: = *+
  */
-int symb_exactly_at(fmt_t * fmt, exe_t * exe, uint_t adr, uint_t ioff)
+int symb_exactly_at(src_t * src, uint_t adr, uint_t ioff)
 {
+  exe_t * const exe = src->exe;
+
   int i = 0;
   int mib = mbk_getmib(exe->mbk, adr+ioff);
   int isym = symbol_byaddr(exe->symbols, adr+ioff, i);
@@ -47,17 +83,14 @@ int symb_exactly_at(fmt_t * fmt, exe_t * exe, uint_t adr, uint_t ioff)
     /* At least one */
     do {
       sym_t * sym = symbol_get(exe->symbols, isym);
-
-      /* dmsg("symbol #%d at $%x+%d [%s]\n", i, adr,ioff,sym?sym->name:"auto"); */
-
-      fmt_eol(fmt,0);                   /* next line if needed */
+      fmt_eol(src->fmt,0);                   /* next line if needed */
       if (sym)
-        fmt_putf(fmt, "%s:", sym->name);
+        fmt_putf(src->fmt, "%s:", sym->name);
       else
-        fmt_putf(fmt, "L%06X:", adr+ioff);
+        fmt_putf(src->fmt, "L%06X:", adr+ioff);
       if (ioff) {
-        fmt_putf(fmt, " = *%+d", ioff);
-        fmt_eol(fmt,0);
+        fmt_putf(src->fmt, " = %s%+d", src->opt.star_symbol, ioff);
+        fmt_eol(src->fmt,0);
       }
       isym = symbol_byaddr(exe->symbols, adr+ioff, ++i);
     } while (isym >= 0);
@@ -69,22 +102,20 @@ static
 /*
  * Print all symbols from address adr up to adr+len exclusive.
  */
-int symb_at(fmt_t * fmt, exe_t * exe, uint_t adr, uint_t len)
+int symb_at(src_t * src, uint_t adr, uint_t len)
 {
   uint_t ioff;
 
-  /* dmsg("symbol from $%x to $%x\n", adr, adr+len); */
-
-  /* for each address in the instruction range */
+  /* For each address in range */
   for (ioff = 0; ioff < len; ++ioff)
-    if (symb_exactly_at(fmt, exe, adr, ioff) < 0)
+    if (symb_exactly_at(src, adr, ioff) < 0)
       return -1;
   return 0;
 }
 
 static
 /*
- * get data type from mib [0:untyped 1:byte 2:word 4:long
+ * Get data type from mib [0:untyped 1:byte 2:word 4:long
  */
 int mib2type(int mib, int deftype)
 {
@@ -111,6 +142,17 @@ int mib2type(int mib, int deftype)
   return 4;
 }
 
+static uint_t data_max(mbk_t * mbk, uint_t adr, uint_t len)
+{
+  uint_t off;
+
+  for (off = 0 ; off < len; off+=2) {
+    uint_t mib = mbk_getmib(mbk, adr+off);
+    if ( ( mib & (MIB_SET|MIB_EXEC) ) != MIB_SET )
+      break;             /* break if EXEC or not SET (out of range) */
+  }
+  return off;
+}
 
 static
 /*
@@ -156,7 +198,6 @@ int one_data(fmt_t * fmt, exe_t * exe, uint_t adr, uint_t len)
 static
 int src_data(fmt_t * fmt, exe_t * exe, uint_t adr, uint_t len)
 {
-  char str[256];
   mbk_t * mbk = exe->mbk;
   uint_t off, end;
 
@@ -193,14 +234,33 @@ int src_bss(fmt_t * fmt, exe_t * exe, uint_t adr, uint_t len)
 }
 
 static
+int inst_fmt(fmt_t * fmt, char * str)
+{
+  int err;
+  char * space = strchr(str,' ');
+  err = fmt_tab(fmt);
+  if (space) {
+    err |= fmt_cat(fmt, str, space-str);
+    err |= fmt_tab(fmt);
+  } else {
+    space = str-1;
+  }
+  err |= fmt_puts(fmt,space+1);
+  return err;
+}
+
+static
 /*
  * Source from address adr to adr+len exclusive as code.
  */
-int src_code(fmt_t * fmt, exe_t * exe, const uint_t adr, const uint_t len)
+int src_code(src_t * src, const uint_t adr, const uint_t len)
 {
   char str[256];
-  mbk_t * const mbk = exe->mbk;
   uint_t off, end;
+
+  fmt_t * const fmt = src->fmt;
+  exe_t * const exe = src->exe;
+  mbk_t * const mbk = src->exe->mbk;
 
   /* should be tested upstream */
   assert(adr >= mbk->org && adr+len <= mbk->org+mbk->len);
@@ -228,7 +288,7 @@ int src_code(fmt_t * fmt, exe_t * exe, const uint_t adr, const uint_t len)
     }
 
     /* Labels in instruction range */
-    if (symb_at(fmt, exe, adr0, ilen) < 0)
+    if (symb_at(src, adr0, ilen) < 0)
       return -1;
 
     fmt_tab(fmt);
@@ -244,16 +304,9 @@ int src_code(fmt_t * fmt, exe_t * exe, const uint_t adr, const uint_t len)
         assert(ilen == 1);
       }
     } else {
-      char * space;
-      space = strchr(str,' ');
-      if (space) {
-        fmt_cat(fmt, str, space-str);
-        fmt_tab(fmt);
-      } else {
-        space = str-1;
-      }
-      fmt_puts(fmt,space+1);
+      inst_fmt(fmt, str);
     }
+
     fmt_eol(fmt,0);
 
     /* else it would loop forever ! */
@@ -265,12 +318,115 @@ int src_code(fmt_t * fmt, exe_t * exe, const uint_t adr, const uint_t len)
   return -1;
 }
 
-int src_exec(fmt_t * fmt, exe_t * exe/* , const char * uri */)
+
+static
+int inst(src_t * src)
 {
+  mbk_t * const mbk = src->exe->mbk;
+  int err = 0, itype;
+  uint_t ilen, iadr = src->seg.adr;
+
+  assert( ! (iadr & 1 ) );
+
+  itype = dis_disa(src->exe, &src->seg.adr, src->str.buf, src->str.max);
+  if (itype <= DESA68_DCW) {
+    /* Error or data */
+    src->seg.adr = iadr;                /* restore position */
+    return 0;
+  }
+
+  ilen = src->seg.adr - iadr;
+  assert(ilen >= 2 && ilen <= 10);
+  assert(!(ilen & 1));
+
+  /* Symbols */
+  symb_at(src, iadr, ilen);
+
+  /* Instruction */
+  err |= inst_fmt(src->fmt, src->str.buf);
+
+  /* Opcode bytes */
+  if (ilen && src->opt.show_opcode) {
+    uint_t i;
+    char * s = src->str.buf;
+    strcpy(s,"; "); s += 3;
+    for (i=0; i<ilen; ++i) {
+      const uint8_t byte = mbk->buf[iadr+i-mbk->org];
+      *s++ = hexa[byte>>4];
+      *s++ = hexa[byte&15];
+      if ( (i & 1) ) {
+        if ( i > 2 && i+3 <= ilen && mbk_getmib(mbk, iadr+i-1) & MIB_LONG )
+          continue;
+        *s++ = '-';
+      }
+    }
+    s[-1] = 0;
+    err |= fmt_tab(src->fmt);
+    err |= fmt_cat(src->fmt, src->str.buf, s-src->str.buf);
+  }
+
+  /* next line */
+  err |= fmt_eol(src->fmt,0);
+
+  /* $$$ XXX ignore errors for now */
+
+  return ilen;
+}
+
+static
+/* auto detect code and data blocks */
+int mixed(src_t * src, const uint_t adr, const uint_t len)
+{
+  mbk_t * const mbk = src->exe->mbk;
+
+  assert(adr >= mbk->org);
+  assert(adr+len <= mbk->org+mbk->len);
+
+  src->seg.adr = adr;                   /* segment address.     */
+  src->seg.len = len;                   /* segment length.      */
+  src->seg.end = adr + len;             /* segment end address. */
+
+  while (src->seg.adr < src->seg.end) {
+    uint_t mib = mbk_getmib(mbk, src->seg.adr);
+    assert(mib);
+
+    if ( !(mib & MIB_EXEC) || inst(src) <= 0) {
+      uint_t ilen = data_max(src->exe->mbk, src->seg.adr, src->seg.end-src->seg.adr);
+      assert (ilen > 0);
+      fmt_tab(src->fmt);
+      fmt_putf(src->fmt, ";; TODO DATA %x to %x (%d)",
+               src->seg.adr, src->seg.adr+ilen-1, ilen);
+      fmt_eol(src->fmt,0);
+
+      src->seg.adr += ilen;
+    }
+  }
+
+  return 0;
+}
+
+
+int src_exec(fmt_t * fmt, exe_t * exe)
+{
+  src_t src;
+
   if (!fmt || !exe)
     return -1;
-  src_code(fmt, exe, exe->mbk->org, exe->mbk->len);
-  src_data(fmt, exe, exe->mbk->org, exe->mbk->len);
+
+  /* setup sourcer info struct */
+  memset(&src,0,sizeof(src));
+
+  src.fmt = fmt;
+  src.exe = exe;
+  src.str.buf = strbuf;                 /* tmp string buffer */
+  src.str.max = sizeof(strbuf);
+  src.opt.star_symbol = "*";            /* star symbol */
+  src.opt.show_opcode = 1;
+
+  mixed(&src, exe->mbk->org, exe->mbk->len);
+
+  /* src_code(fmt, exe, exe->mbk->org, exe->mbk->len); */
+  /* src_data(fmt, exe, exe->mbk->org, exe->mbk->len); */
   /* src_bss (fmt, exe, exe->mbk->org, exe->mbk->len); */
 
 /*
