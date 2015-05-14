@@ -54,7 +54,7 @@ mksc68_cmd_info.c mksc68_cmd_gdb.c mksc68_cmd_extract.c
 
 headers = mksc68_cli.h mksc68_cmd.h mksc68_def.h mksc68_dsk.h		\
 mksc68_eva.h mksc68_gdb.h mksc68_msg.h mksc68_opt.h mksc68_snd.h	\
-mksc68_str.h mksc68_tag.h
+mksc68_str.h mksc68_tag.h mksc68_oplen.h
 
 bin_PROGRAMS         = mksc68
 mksc68_SOURCES       = $(sources)
