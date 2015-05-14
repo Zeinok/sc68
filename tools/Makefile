@@ -14,4 +14,7 @@ LINES = ../libsc68/emu68/lines/
 gen: gen68
 	./gen68 $(GEN68OPT) -- all "$(LINES)"
 
-.PHONY: all clean gen
+oplen: oplen68
+oplen68: LDLIBS=-ldesa68
+
+.PHONY: all clean gen oplen
