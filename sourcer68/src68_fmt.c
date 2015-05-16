@@ -126,14 +126,13 @@ int fmt_cat(fmt_t * fmt, const void * dat, int len)
   return 0;
 }
 
-static int vcatf(fmt_t * fmt, const char * pft, va_list list)
+int fmt_vputf(fmt_t * fmt, const char * pft, va_list list)
 {
   char tmp[128];
   int len;
   len = vsnprintf(tmp, sizeof(tmp), pft, list);
   return fmt_cat(fmt,tmp,len);
 }
-
 
 int fmt_puts(fmt_t * fmt,const char * str)
 {
@@ -145,7 +144,7 @@ int fmt_putf(fmt_t * fmt, const char * pft, ...)
   int err;
   va_list list;
   va_start(list, pft);
-  err = vcatf(fmt, pft, list);
+  err = fmt_vputf(fmt, pft, list);
   va_end(list);
   return err;
 }

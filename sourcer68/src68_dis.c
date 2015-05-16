@@ -208,14 +208,17 @@ int commit_mib(dis_t * d)
 
   len = d->desa.pc - d->addr;
   assert( !(len & 1) && len >=2 && len <= 10);
-  len = (len + 1) >> 1;             /* number of 16bit words */
-  d->mib[0] |= len << MIB_OPSZ_BIT;
+  d->mib[0] |= ( (len + 1) >> 1 ) << MIB_OPSZ_BIT;
 
-  for (i=0; i<len; ++i)
+  for (i=0; i<len; ++i) {
     if ( ! mbk_setmib(d->mbk, d->addr+i, 0, d->mib[i]) )
       assert(!"mib access out of range ?");
+    /* dmsg("COMMIT:%x:%02x:%06x:%s\n", */
+    /*      i, d->mbk->buf[d->addr+i-d->mbk->org], d->addr, */
+    /*      mbk_mibstr(mbk_getmib(d->mbk,d->addr+i),0)); */
+  }
 
-  return len << 1;
+  return len;
 }
 
 static void r_dis_pass(dis_t * dis, int depth)
@@ -271,6 +274,14 @@ static void r_dis_pass(dis_t * dis, int depth)
         if (dis->desa.regs & (1<<r))
           dmsg(" %s", regname(r));
       dmsg("\n");
+
+      for (r=0; dis->addr+r<dis->desa.pc; ++r) {
+        uint_t adr = dis->addr+r;
+        dmsg("%x:%02x:%06x:%s\n",
+             r, dis->mbk->buf[adr-dis->mbk->org], adr,
+             mbk_mibstr(mbk_getmib(dis->mbk,adr),0));
+      }
+
     }
 #endif
 

@@ -104,4 +104,14 @@ int fmt_puts(fmt_t * fmt,const char * str);
  */
 int fmt_putf(fmt_t * fmt, const char * pft, ...);
 
+/**
+ * Format string data to buffer (variable argument version).
+ *
+ * @param  fmt  formatter object.
+ * @param  pft  printf-like format dtring
+ * @retval  0 on success
+ * @retval -1 on error
+ */
+int fmt_vputf(fmt_t * fmt, const char * pft, va_list list);
+
 #endif

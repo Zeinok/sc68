@@ -104,6 +104,7 @@ int mbk_getmib(const mbk_t * mbk, uint_t adr);
 
 /**
  * Clear and set memory info at that address.
+ *
  * @param  mbk  memory block descriptor.
  * @param  adr  address
  * @param  clr  bits to clear
@@ -118,5 +119,53 @@ int mbk_setmib(const mbk_t * mbk, uint_t adr, int clr, int set);
  * Get a string description of mib value.
  */
 const char * mbk_mibstr(int mib, char * str);
+
+static inline
+/**
+ * Read a 68k memory long.
+ *
+ * @param  mbk  memory block descriptor.
+ * @param  adr  address
+ * @return unsigned 32-bit long value.
+ */
+uint_t mbk_long(const mbk_t * mbk, uint_t adr)
+{
+  assert (!(adr&1));
+  adr -= mbk->org;
+  assert (adr < mbk->len && adr+3 < mbk->len);
+  return (mbk->buf[adr]<<24) | (mbk->buf[adr+1]<<16)
+    | (mbk->buf[adr+2]<<8) | mbk->buf[adr+3];
+}
+
+static inline
+/**
+ * Read a 68k memory word.
+ *
+ * @param  mbk  memory block descriptor.
+ * @param  adr  address
+ * @return unsigned 16-bit word value.
+ */
+uint_t mbk_word(const mbk_t * mbk, uint_t adr)
+{
+  assert (!(adr&1));
+  adr -= mbk->org;
+  assert (adr < mbk->len && adr+1 < mbk->len);
+  return (mbk->buf[adr]<<8) | mbk->buf[adr+1];
+}
+
+static inline
+/**
+ * Read a 68k memory word.
+ *
+ * @param  mbk  memory block descriptor.
+ * @param  adr  address
+ * @return unsigned byte value.
+ */
+uint_t mbk_byte(const mbk_t * mbk, uint_t adr)
+{
+  adr -= mbk->org;
+  assert (adr < mbk->len);
+  return mbk->buf[adr];
+}
 
 #endif

@@ -133,7 +133,6 @@ int mbk_setmib(const mbk_t * mbk, uint_t adr, int clr, int set)
     mib ^= old;
     assert(mib & MIB_SET);
     assert( !( adr & 1 ) == !( mib & MIB_ODD ) );
-
     assert( (mbk_getmib(mbk, adr + mbk->org) & (MIB_SET|set)) == (MIB_SET|set));
   }
   return mib;
