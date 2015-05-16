@@ -1868,16 +1868,18 @@ int desa68(desa68_t * d)
   d->out = 0;
 
   /* Setup the ASCII disassembly. */
-  switch(d->flags & DESA68_GRAPH_FLAG) {
-  case 0:
-    d->ischar = my_isfalse; break;
-  case DESA68_ASCII_FLAG:
-    d->ischar = my_isascii; break;
-  case DESA68_ALNUM_FLAG:
-    d->ischar = my_isalnum; break;
-  case DESA68_GRAPH_FLAG:
-    d->ischar = my_isgraph; break;
-  }
+  if (!d->ischar)
+    switch(d->flags & DESA68_GRAPH_FLAG) {
+    case DESA68_ASCII_FLAG:
+      d->ischar = my_isascii; break;
+    case DESA68_ALNUM_FLAG:
+      d->ischar = my_isalnum; break;
+    case DESA68_GRAPH_FLAG:
+      d->ischar = my_isgraph; break;
+    case 0:
+    default:
+      d->ischar = my_isfalse; break;
+    }
 
   /* Setup instruction decoder. */
   d->_pc = d->pc &= d->memmsk;
