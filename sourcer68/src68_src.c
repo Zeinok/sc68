@@ -159,7 +159,7 @@ int label_exactly_at(src_t * src, uint_t adr, uint_t ioff)
   int i = 0;
   int mib = mbk_getmib(exe->mbk, adr+ioff);
   int isym = symbol_byaddr(exe->symbols, adr+ioff, i);
- if ( (isym >= 0) || (mib & (MIB_ADDR|MIB_ENTRY)) ) {
+  if ( (isym >= 0) || (mib & (MIB_ADDR|MIB_ENTRY)) ) {
     /* At least one */
     do {
       sym_t * sym = symbol_get(exe->symbols, isym);
@@ -265,11 +265,11 @@ int one_data(fmt_t * fmt, exe_t * exe, uint_t adr, uint_t len)
       type = mib2type(mib, dtype);
 
 
-    if (!dtype)
-      ;
+      if (!dtype)
+        ;
 
-    if (type != dtype && type && dtype)
-      dtype = type;
+      if (type != dtype && type && dtype)
+        dtype = type;
     }
     mib = mbk_getmib(exe->mbk, ++adr);
   }
@@ -396,7 +396,7 @@ int data(src_t * src, uint max)
 {
   static const int  maxpl[] = { 8,  8,  16, 16, 16 };
   static const char typec[] = {'0','b','w','3','l' };
-  static const char quote = '\'';
+  const char quote = '"';
   mbk_t * const mbk = src->exe->mbk;
   vec_t * const smb = src->exe->symbols;
 
@@ -426,7 +426,6 @@ int data(src_t * src, uint max)
     else if (mib & MIB_RELOC)           /* relocated are always long */
       type = 4;
     else {
-
       if (mib & MIB_BYTE)               /* could use byte */
         type = 1;
       else if (mib & MIB_WORD)          /* could use word */
@@ -434,18 +433,18 @@ int data(src_t * src, uint max)
       else if (mib & MIB_LONG)          /* could use long */
         type = 4;
       else if (typed)
-        /* if (src_islabel(src,iadr+1)) */
-        type = typed;                   /* continue if possible */
+        type = typed;
       else
-        type = src_islabel(src,iadr+1)
-          ? 1                           /* Have a label */
-          : src->opt.dc_size;           /* else use default */
+        type = src->opt.dc_size;
 
       assert (type == 1 || type == 2 || type == 4);
-
-      if (type > 1 && ( src_islabel(src, iadr+2) ||
-                        src_islabel(src, iadr+3) ) )
-        type = 2;
+      if (type > 1) {
+        if (src_islabel(src, iadr+1))
+          type = 1;
+        else if ( type > 2 && ( src_islabel(src, iadr+2) ||
+                                src_islabel(src, iadr+3) ) )
+          type = 2;
+      }
     }
 
     while (type > ilen)                 /* ensure in range */
@@ -489,13 +488,12 @@ int data(src_t * src, uint max)
     case 4:
       v = mbk_long(mbk, iadr);
       if ( mib & MIB_RELOC ) {
-        assert(typed == 4);
         symbol_at(src, v);
       } else {
         if (src_ischar(src, v, 4))
           src_putf(src, "%c%c%c%c%c%c", quote,
                    (char)(v>>24), (char)(v>>16), (char)(v>>8), (char)v,
-                   quote);
+                   quote) ;
         else
           src_putf(src, "$%08X",v);
       }
@@ -510,7 +508,6 @@ int data(src_t * src, uint max)
 
     if (count + typed > maxpl[typed])
       break;
-
   }
 
   src_eol(src,IFNEEDED);
@@ -519,7 +516,7 @@ int data(src_t * src, uint max)
   assert(ilen == count);
   src->seg.adr = iadr;
 
-  return ilen;
+  return src->result ? -1 : ilen;
 }
 
 static
@@ -648,14 +645,14 @@ int src_exec(fmt_t * fmt, exe_t * exe)
 /*
   section = section_get(exe->sections, section_idx = 0);
   for (off = 0; off < mbk->len; ) {
-    adr = off + mbk->org;
-    while (section && adr < section->addr) {
-      if ( !(adr & 1) && (mbk->mib[off] & MIB_MIB_EXEC) ) {
-        // disassemble
-      } else {
-        // data
-      }
-    }
+  adr = off + mbk->org;
+  while (section && adr < section->addr) {
+  if ( !(adr & 1) && (mbk->mib[off] & MIB_MIB_EXEC) ) {
+  // disassemble
+  } else {
+  // data
+  }
+  }
   }
 */
 }
