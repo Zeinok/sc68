@@ -89,6 +89,13 @@ static int src_ischar(src_t * src, uint_t v, int type)
   return 1;
 }
 
+static int src_islabel(src_t * src, uint_t adr)
+{
+  return 0 &
+    ( symbol_byaddr(src->exe->symbols, adr, 0) >= 0 ) ||
+    ( mbk_getmib(src->exe->mbk,adr) & (MIB_ADDR|MIB_ENTRY) );
+}
+
 static int src_eol(src_t * src, int always)
 {
   int err = fmt_eol(src->fmt, always);
@@ -389,11 +396,12 @@ int data(src_t * src, uint max)
 {
   static const int  maxpl[] = { 8,  8,  16, 16, 16 };
   static const char typec[] = {'0','b','w','3','l' };
+  static const char quote = '\'';
   mbk_t * const mbk = src->exe->mbk;
   vec_t * const smb = src->exe->symbols;
 
   int typed = 0;                       /* 0:untyped 1:byte 2:word 4:long */
-  int count;                            /* byte current lines.  */
+  int count = 0;                       /* byte current lines.  */
   uint_t ilen, iadr, iend, v;
 
   iadr = src->seg.adr;
@@ -402,13 +410,17 @@ int data(src_t * src, uint max)
     iend = src->seg.end;
 
   while (!src->result && (ilen = iend - iadr)) {
-    int type, mib = mbk_getmib(mbk, iadr);
+    int type, mib;
 
     assert( (int)ilen > 0);
 
-    if (mib & MIB_EXEC)                 /* instruction ? time to leave */
+    /* Break for label */
+    if (count > 0 && src_islabel(src, iadr))
       break;
 
+    mib = mbk_getmib(mbk, iadr);
+    if (mib & MIB_EXEC)                 /* instruction ? time to leave */
+      break;
     if (mib & MIB_ODD)                  /* odd address always byte */
       type = 1;
     else if (mib & MIB_RELOC)           /* relocated are always long */
@@ -422,18 +434,21 @@ int data(src_t * src, uint max)
       else if (mib & MIB_LONG)          /* could use long */
         type = 4;
       else if (typed)
+        /* if (src_islabel(src,iadr+1)) */
         type = typed;                   /* continue if possible */
       else
-        type = src->opt.dc_size;        /* else use default */
+        type = src_islabel(src,iadr+1)
+          ? 1                           /* Have a label */
+          : src->opt.dc_size;           /* else use default */
 
       assert (type == 1 || type == 2 || type == 4);
 
-      if (type > 1 && ( symbol_byaddr(smb, iadr+2, 0) >= 0 ||
-                        symbol_byaddr(smb, iadr+3, 0) >=0 ) )
+      if (type > 1 && ( src_islabel(src, iadr+2) ||
+                        src_islabel(src, iadr+3) ) )
         type = 2;
     }
 
-    while (type > ilen)               /* ensure in range */
+    while (type > ilen)                 /* ensure in range */
       type >>= 1;
 
     if ( (mib & MIB_RELOC) && type != 4 )
@@ -459,27 +474,28 @@ int data(src_t * src, uint max)
     case 1:
       v = mbk_byte(mbk, iadr);
       if (src_ischar(src, v, 1))
-        src_putf(src, "\"%c\"", v);
+        src_putf(src, "%cc%c", quote, v, quote);
       else
         src_putf(src, "$%02X", v);
       break;
     case 2:
       v = mbk_word(mbk, iadr);
       if (src_ischar(src, v, 2))
-        src_putf(src, "\"%c%c\"", (char)(v>>8), (char)v);
+        src_putf(src, "%c%c%c%c",
+                 quote, (char)(v>>8), (char)v, quote);
       else
         src_putf(src, "$%04X",v);
       break;
     case 4:
-
       v = mbk_long(mbk, iadr);
       if ( mib & MIB_RELOC ) {
         assert(typed == 4);
         symbol_at(src, v);
       } else {
         if (src_ischar(src, v, 4))
-          src_putf(src, "\"%c%c%c%c\"",
-                   (char)(v>>24), (char)(v>>16), (char)(v>>8), (char)v);
+          src_putf(src, "%c%c%c%c%c%c", quote,
+                   (char)(v>>24), (char)(v>>16), (char)(v>>8), (char)v,
+                   quote);
         else
           src_putf(src, "$%08X",v);
       }
@@ -496,9 +512,11 @@ int data(src_t * src, uint max)
       break;
 
   }
+
   src_eol(src,IFNEEDED);
 
   ilen = iadr - src->seg.adr;
+  assert(ilen == count);
   src->seg.adr = iadr;
 
   return ilen;
@@ -551,7 +569,7 @@ int inst(src_t * src)
   if (ilen && src->opt.show_opcode) {
     uint_t i;
     char * s = src->str.buf;
-    strcpy(s,"; "); s += 3;
+    strcpy(s,"; "); s += 2;
     for (i=0; i<ilen; ++i) {
       const uint8_t byte = mbk->buf[iadr+i-mbk->org];
       *s++ = hexa[byte>>4];
@@ -563,7 +581,7 @@ int inst(src_t * src)
       }
       /* dmsg("%s%d:%s\n",!i?"\n":"",i,mbk_mibstr(mbk_getmib(mbk, iadr+i),0)); */
     }
-    s[-1] = 0;
+    *--s = 0;
     src_tab(src);
     src_cat(src, src->str.buf, s-src->str.buf);
   }
