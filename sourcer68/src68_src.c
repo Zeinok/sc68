@@ -441,6 +441,14 @@ int src_exec(fmt_t * fmt, exe_t * exe)
   src.opt.dc_size = 2;                  /* default to dc.w */
 
   symbol_sort_byaddr(exe->symbols);     /* to walk symbols in order */
+
+  src_tab(&src);
+  src_puts(&src,"org");
+  src_tab(&src);
+  src_putf(&src,"$%x", exe->mbk->org);
+  src_eol(&src,ALWAYS);
+  src_eol(&src,ALWAYS);
+
   mixed(&src, exe->mbk->org, exe->mbk->len);
 
   return src.result;

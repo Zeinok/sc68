@@ -278,8 +278,10 @@ static const char * def_symget(desa68_t * d, uint v, int type)
   if ( (d->flags & flag) || (v >= min && v < max ) ) {
     char * s = d->_tmp; int j;
     *s++ = 'L';
-    for (j=4*5; j>=0; j-=4)
+    j = (v >= 0x1000000 ? 5 : 7 ) << 2;
+    do {
       *s++ = Thex[ 15 & (v>>j) ];
+    } while ( j -= 4 >= 0);
     *s = 0;
     return d->_tmp;
   }
@@ -441,7 +443,21 @@ static int _pcL(desa68_t * d)
 
 static int immB(desa68_t * d)
 {
-  return S8(_pcW(d));
+  int w = _pcW(d), v = S8(w);
+
+  /* How to handle the MSB ?  Need testing on a real 68k but it's most
+   * probable that it's simply ignored. However when it comes to
+   * disassembly and more specially to sourcing it can be a problem.
+   * A re-assembly could differ because of that. Moreover if the MSB
+   * is not $00 or the sign extension it is highly probable we are not
+   * dealing with a real instruction.
+   */
+  if (v != w) {
+    w &= 0xFF00;                        /* sign extension */
+    if (w && w != ( v & 0xff00 ) )
+      d->error |= DESA68_ERR_IMM;
+  }
+  return v;
 }
 
 static int immW(desa68_t * d)
@@ -584,6 +600,18 @@ static void desa_opsz(desa68_t *d, u8 size)
   }
 }
 
+
+/* Immediate long values can sometime be disassembled as symbols. The
+ * default symbol lookup function will do that if the source symbol
+ * disassembly is forced (with DESA68_SRCSYM_FLAG) or if the value is
+ * in the range [immsym_min:immsym_max-1].
+ *
+ * It means the source reference is only set if the immediate value is
+ * detected as a symbol. It can only happen if DESA68_SYMBOL_FLAG is
+ * set. Not sure this is the best way to do it. It could be useful to
+ * have eligible address value to the source reference even if the
+ * disassembler is not producing auto symbols.
+ */
 static void desa_immL(desa68_t * d, uint v)
 {
   const char * symb = desa_symget(d,v,DESA68_SYM_SIMM);
@@ -593,10 +621,16 @@ static void desa_immL(desa68_t * d, uint v)
   if (symb) {
     ref_set(&d->sref, v, SZ_ADDR);
     desa_str_notr(d,symb);
+#if 0                                   /* See comment paragraph 2. */
+  } else if ( v >= d->immsym_min && v < d->immsym_max ) {
+    ref_set(&d->sref, v, SZ_ADDR);
+    desa_signifiant(d,S32(v));
+#endif
   } else {
     const int q = '\'';
-    if (d->ischar(d,U8(v)) && d->ischar(d,U8(v>>8)) &&
-        d->ischar(d,U8(v>>16)) && d->ischar(d,U8(v>>24))) {
+    if (
+      d->ischar(d,U8(v)) && d->ischar(d,U8(v>>8)) &&
+      d->ischar(d,U8(v>>16)) && d->ischar(d,U8(v>>24))) {
       desa_char(d,q);
       d->_quote = q;
       desa_ascii(d,U32(v));
@@ -1828,7 +1862,7 @@ static void rtcheck(void)
   assert( sizeof(u16) >= 2 );
   assert( sizeof(s32) >= 4 );
   assert( sizeof(u32) >= 4 );
-  assert( U8(0x15D) == 0x5D );
+  assert( U8(0x18D) == 0x8D );
   assert( S8(0x181) == -127 );
   assert( U16(0x15D5D) == 0x5D5D );
   assert( S16(0x18001) == -32767 );
@@ -1917,7 +1951,7 @@ int desa68(desa68_t * d)
   else
     d->dref.addr = ~0;
 
-  return d->error ? -1 : d->itype;
+  return d->error ? DESA68_ERR : d->itype;
 }
 
 int desa68_version(void)

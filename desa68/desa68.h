@@ -217,6 +217,9 @@ enum {
 
   /** Memory access failed. */
   DESA68_ERR_MEM  = 4,
+
+  /** Uncommon byte immediate MSB. */
+  DESA68_ERR_IMM  = 8
 };
 
 /**
@@ -341,14 +344,14 @@ struct desa68_parm_s
   const char * (*symget)(desa68_t *, unsigned int addr, int type);
 
   /**
-   * Minimum value to select long immediate as symbol.
+   * Minimum value to select long immediate as symbol or address.
    * @see DESA68_SYMBOL_FLAG for more details
    * @see immsym_max
    */
   unsigned int   immsym_min;
 
   /**
-   * Maximum value to select long immediate as symbol.
+   * Maximum value to select long immediate as symbol or address.
    * @see DESA68_SYMBOL_FLAG for more details
    * @see immsym_min
    */

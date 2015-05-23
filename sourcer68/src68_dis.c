@@ -37,14 +37,11 @@
 
 #include <desa68.h>
 
-enum {
-  DIS_AUTO_SYMBOL = 1
-};
-
+/* Walker returned status. */
 enum {
   BRK_ERR = -1,                         /* break on error */
   BRK_NOT = 0,                          /* don't break */
-  BRK_DCW,                              /* not a vald instruction */
+  BRK_DCW,                              /* not a valid instruction */
   BRK_OOR,                              /* out of memory range */
 
   /* Valid scout replies: !!! BRK_EXE must be first !!! */
@@ -52,6 +49,11 @@ enum {
   BRK_RTS,                              /* rts */
   BRK_JMP,                              /* undefined jump */
   BRK_JTB                               /* jump table */
+};
+
+/* Walker flag value. */
+enum {
+  DIS_AUTO_SYMBOL = 1,                  /* produce auto symbols */
 };
 
 typedef struct {
@@ -103,7 +105,7 @@ const char * symget(desa68_t * d, uint_t addr, int type)
     if (!wanted)
       wanted = mbk_getmib(dis->mbk, addr) & (MIB_ADDR|MIB_ENTRY);
 
-    /* Requested to autodetect symbols inside the memory range */
+    /* Requested to auto-detect symbols inside the memory range */
     if (!wanted && (dis->flag & DIS_AUTO_SYMBOL)) {
       if (type == DESA68_SYM_SIMM)
         wanted = addr >= d->immsym_min && addr < d->immsym_max;
@@ -319,7 +321,7 @@ static int r_dis_pass(dis_t * dis)
       // INFO: this is not good as it will disassemble too much. We
       // need a multi pass walk to sort this out.
       //
-      if (!dis->scouting) {
+      if (0 && !dis->scouting) {
         int scout;
         /* Don't scout a scouter */
         dis->scouting = dis->maxscout;
