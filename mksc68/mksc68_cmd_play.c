@@ -191,11 +191,12 @@ static void play_init(playinfo_t * pi)
   if ( !(pi->sc68 = sc68_create(&create68) ) ) return;
   if (pi->debug) {
     sc68_cntl(pi->sc68, SC68_EMULATORS, &pi->ios68);
-    emu68_set_cookie(pi->emu68, pi);
     pi->emu68 = (emu68_t *)*pi->ios68++;
+    emu68_set_cookie(pi->emu68, pi);
     pi->gdb = gdb_create();
-    if (pi->gdb)
-      emu68_set_handler(pi->emu68, play_hdl);
+    if (!pi->gdb)
+      return;
+    emu68_set_handler(pi->emu68, play_hdl);
   }
 
   if ( sc68_open(pi->sc68, (sc68_disk_t) dsk_get_disk() ) ) return;
@@ -242,6 +243,7 @@ static void play_end(playinfo_t * pi)
 static void * play_thread(void * userdata)
 {
   playinfo_t * pi = (playinfo_t *) userdata;
+
   assert( pi == &playinfo );
   play_init(pi);
   if (!pi->code) play_run(pi);
