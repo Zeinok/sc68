@@ -61,13 +61,13 @@ typedef struct {
 
   /* disassemby temp buffer */
   struct {
-    char * buf;                         /* disassebly buffer */
+    char * buf;                         /* disassembly buffer */
     uint_t max;                         /* sizeof of buf in byte */
   } str;
 
 } src_t;
 
-static char strbuf[1024];    /* static srting buffer for disassembly */
+static char strbuf[1024];    /* static string buffer for disassembly */
 
 enum {
   IFNEEDED = 0, ALWAYS = 1
@@ -136,7 +136,7 @@ static int src_putf(src_t * src, const char * fmt, ...)
 }
 
 static
-/* print label a given address */
+/* print symbol a given address */
 int symbol_at(src_t * src, uint_t adr)
 {
   vec_t * const smb = src->exe->symbols;
@@ -148,8 +148,7 @@ int symbol_at(src_t * src, uint_t adr)
 }
 
 static
-/*
- * Print all labels from address adr+ioff.
+/* Print all labels from address adr+ioff.
  * ioff == 0 -> Label:
  * ioff != 0 -> Label: = *+
  */
@@ -163,7 +162,7 @@ int label_exactly_at(src_t * src, uint_t adr, uint_t ioff)
     /* At least one */
     do {
       sym_t * sym = symbol_get(exe->symbols, isym);
-      fmt_eol(src->fmt,IFNEEDED);       /* next line if needed */
+      src_eol(src,IFNEEDED);
       if (sym)
         src_putf(src, "%s:", sym->name);
       else
@@ -194,211 +193,17 @@ int label_at(src_t * src, uint_t adr, uint_t len)
 }
 
 static
-/*
- * Get data type from mib [0:untyped 1:byte 2:word 4:long
+/* Disassemble a single data line at segment current address. Never
+ * more than <max> bytes can be consume.
+ *
+ * @return number of bytes consumed
  */
-int mib2type(int mib, int deftype)
-{
-  assert(deftype == 0 || deftype == 1 || deftype == 2 || deftype == 4);
-
-  /* Odd address always byte */
-  if ( mib & MIB_ODD )
-    return 1;
-
-  /* Relocated are always long */
-  if ( mib & MIB_RELOC )
-    return 4;
-
-  /* no data type: keep default (can be undef) */
-  if ( !(mib & (MIB_LONG|MIB_WORD|MIB_BYTE)) )
-    return deftype;
-
-  /* have a matching default */
-  if (deftype > 0 && (mib & (MIB_BYTE*deftype)))
-    return deftype;
-
-  /* else get the smaller type first */
-  if (mib & MIB_BYTE)
-    return 1;
-  else if (mib & MIB_WORD)
-    return 2;
-  assert (mib & MIB_LONG);              /* Must be long */
-  return 4;
-}
-
-static uint_t data_max(mbk_t * mbk, uint_t adr, uint_t len)
-{
-  uint_t off;
-
-  for (off = 0 ; off < len; off+=2) {
-    uint_t mib = mbk_getmib(mbk, adr+off);
-    if ( ( mib & (MIB_SET|MIB_EXEC) ) != MIB_SET )
-      break;             /* break if EXEC or not SET (out of range) */
-  }
-  return off;
-}
-
-static
-/*
- * Format one line of data from address adr with a maximum of len.
- */
-int one_data(fmt_t * fmt, exe_t * exe, uint_t adr, uint_t len)
-{
-#if 0
-  mbk_t * const mbk = exe->mbk;
-  int dtype = 0, mib, isym;
-
-  assert (adr >= mbk->org && adr+len <= mbk->org+mbk->len);
-
-  if (label_at(fmt, exe, adr, 1) < 0)
-    return -1;
-
-  /* Scan to determine data-type (dtype) */
-  if (adr & 1)
-    dtype = 1;                /* on odd address request byte format */
-  else {
-    uint_t ioff;
-    for (ioff = 0; ioff < len; ++ioff) {
-      int type;
-
-      mib = mbk_getmib(mbk, adr+ioff);
-      type = mib2type(mib, dtype);
-
-
-      if (!dtype)
-        ;
-
-      if (type != dtype && type && dtype)
-        dtype = type;
-    }
-    mib = mbk_getmib(exe->mbk, ++adr);
-  }
-  return ilen;
-
-#endif
-  return len;
-}
-
-static
-int src_data(fmt_t * fmt, exe_t * exe, uint_t adr, uint_t len)
-{
-  /* mbk_t * mbk = exe->mbk; */
-  /* uint_t off, end; */
-
-  /* /\* should be tested upstream *\/ */
-  /* assert (adr >= mbk->org && adr+len <= mbk->org+mbk->len); */
-
-  /* for (off=adr-mbk->org, end=off+len; off < end; ) { */
-  /*   uint_t adr0, ioff, ilen, mib; */
-  /*   int ityp; */
-
-  /*   adr0 = ioff = mbk->org + off;       /\* instrution address *\/ */
-  /*   ilen = len - off;                   /\* remaining byte(s) *\/ */
-  /*   ityp = DESA68_DCW;                  /\* default instruction type *\/ */
-
-  /*   /\* For each address in the instruction range *\/ */
-  /*   for (ioff = 0; ioff < ilen; ++ioff ) { */
-  /*     uint_t adr = adr0 + ioff; */
-  /*     int isym, atleast1; */
-
-  /*     mib = mbk_getmib(mbk, adr); */
-  /*     if (mib & MIB_ENTRY) */
-  /*     atleast1 = mib & (MIB_ADDR|MIB_ENTRY); */
-  /*   } */
-
-  /*   off += ilen; */
-  /* } */
-  return -1;
-}
-
-static
-int src_bss(fmt_t * fmt, exe_t * exe, uint_t adr, uint_t len)
-{
-  return -1;
-}
-
-
-static
-/*
- * Source from address adr to adr+len exclusive as code.
- */
-int src_code(src_t * src, const uint_t adr, const uint_t len)
-{
-  /* char str[256]; */
-  /* uint_t off, end; */
-
-  /* fmt_t * const fmt = src->fmt; */
-  /* exe_t * const exe = src->exe; */
-  /* mbk_t * const mbk = src->exe->mbk; */
-
-  /* /\* should be tested upstream *\/ */
-  /* assert(adr >= mbk->org && adr+len <= mbk->org+mbk->len); */
-
-  /* for (off = adr-mbk->org, end = off+len; off < end; ) { */
-  /*   uint_t adr0, ioff, ilen, mib, ityp; */
-
-  /*   adr0 = ioff = mbk->org + off;       /\* instruction address *\/ */
-  /*   ilen = len - off;                   /\* remaining byte(s) *\/ */
-  /*   ityp = DESA68_DCW;                  /\* default instruction type *\/ */
-  /*   if (ilen >= 2 && !(adr0 & 1)) { */
-  /*     ityp = dis_disa(exe, &ioff, str, sizeof(str)); */
-  /*     ioff -= mbk->org; */
-  /*     if (ioff > end)        /\* instruction decoding has overflowed *\/ */
-  /*       ityp = DESA68_DCW; */
-  /*     else if (ityp != DESA68_DCW) */
-  /*       ilen = ioff - off; */
-  /*   } */
-
-  /*   /\* $$$ XXX For now just one data at a time *\/ */
-  /*   if (ityp == DESA68_DCW) { */
-  /*     ilen = 2 - (adr0&1); */
-  /*     if (off+ilen > end) */
-  /*       ilen = end - off; */
-  /*   } */
-
-  /*   /\* Labels in instruction range *\/ */
-  /*   if (label_at(src, adr0, ilen) < 0) */
-  /*     return -1; */
-
-  /*   fmt_tab(fmt); */
-  /*   if (ityp == DESA68_DCW) { */
-  /*     if (ilen >= 2) { */
-  /*       fmt_puts(fmt, "dc.w"); */
-  /*       fmt_tab(fmt); */
-  /*       fmt_putf(fmt, "$%02x%02x\n",mbk->mem[off],mbk->mem[off+1]); */
-  /*       ilen = 2; */
-  /*     } else { */
-  /*       fmt_puts(fmt, "dc.b"); */
-  /*       fmt_putf(fmt, "$%02x\n", mbk->mem[off]); */
-  /*       assert(ilen == 1); */
-  /*     } */
-  /*   } else { */
-  /*     inst_fmt(fmt, str); */
-  /*   } */
-
-  /*   fmt_eol(fmt,0); */
-
-  /*   /\* else it would loop forever ! *\/ */
-  /*   assert (ilen > 0 || off == len); */
-
-  /*   off += ilen; */
-  /* } */
-
-  return -1;
-}
-
-static
-/* Disasseble a single data line at segment current address, never
- * more than length.
- *  @return number of bytes consumed
- */
-int data(src_t * src, uint max)
+int data(src_t * src, uint_t max)
 {
   static const int  maxpl[] = { 8,  8,  16, 16, 16 };
   static const char typec[] = {'0','b','w','3','l' };
   const char quote = '"';
   mbk_t * const mbk = src->exe->mbk;
-  vec_t * const smb = src->exe->symbols;
 
   int typed = 0;                       /* 0:untyped 1:byte 2:word 4:long */
   int count = 0;                       /* byte current lines.  */
@@ -419,8 +224,10 @@ int data(src_t * src, uint max)
       break;
 
     mib = mbk_getmib(mbk, iadr);
-    if (mib & MIB_EXEC)                 /* instruction ? time to leave */
+    if ( (mib & (MIB_EXEC|MIB_DATA) ) == MIB_EXEC )
+      /* instruction ? time to leave */
       break;
+
     if (mib & MIB_ODD)                  /* odd address always byte */
       type = 1;
     else if (mib & MIB_RELOC)           /* relocated are always long */

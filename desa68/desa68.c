@@ -719,10 +719,12 @@ static void get_ea_2(desa68_t * d,
     switch (immsz) {
     case SZ_BYTE:
       v = immB(d);
+      if (v < -0x3f) v = U8(v);
       desa_signifiant(d,v);
       break;
     case SZ_WORD:
       v = immW(d);
+      if (v < -0x3fff) v = U16(v);
       desa_signifiant(d,v);
       break;
     case SZ_LONG:

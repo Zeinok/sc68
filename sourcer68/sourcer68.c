@@ -193,6 +193,7 @@ static void print_usage(void)
   /*   ( */
   /*     "  --no-sc68              Disable sc68 mode\n" */
   /*     ); */
+  puts("");
   option68_help(stdout,print_option);
 #endif
   puts

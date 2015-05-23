@@ -41,19 +41,38 @@ enum {
   DIS_AUTO_SYMBOL = 1
 };
 
+enum {
+  BRK_ERR = -1,                         /* break on error */
+  BRK_NOT = 0,                          /* don't break */
+  BRK_DCW,                              /* not a vald instruction */
+  BRK_OOR,                              /* out of memory range */
+
+  /* Valid scout replies: !!! BRK_EXE must be first !!! */
+  BRK_EXE,                              /* already walk dis way */
+  BRK_RTS,                              /* rts */
+  BRK_JMP,                              /* undefined jump */
+  BRK_JTB                               /* jump table */
+};
+
 typedef struct {
   desa68_t desa;                        /* disassembler instance */
   uint_t   maxdepth;                    /* maximum recursive depth */
+  uint_t   curdepth;                    /* current recursive depth */
   uint_t   addr;                        /* instruction address */
   uint_t   flag;
   mbk_t   *mbk;                         /* memory block */
   vec_t   *symbols;                     /* symbols container */
   int      result;                      /* result code (0 for success) */
+  uint_t   scouting;                    /* scouting countdown */
+  uint_t   maxscout;                    /* scouting amount */
 
   uint_t   mib[10];         /* temporary mib buffer (1 instruction) */
   char     sym[16];         /* symbol buffer for auto label (LXXXXXX) */
-  char     str[256];        /* disassemblt buffer */
+  char     str[256];        /* disassembly buffer */
 } dis_t;
+
+const char hexa[] = { '0','1','2','3','4','5','6','7','8',
+                      '9','A','B','C','D','E','F' };
 
 static
 /* callback for desa68() symbol lookup. */
@@ -66,41 +85,47 @@ const char * symget(desa68_t * d, uint_t addr, int type)
   sym_t * sym = dis->symbols
     ? symbol_get(dis->symbols, symbol_byaddr(dis->symbols, addr, -1)) : 0;
 
-  /* Honor desa68 forced symbols request. */
-  if (type <= DESA68_SYM_DABL)
+  /* Honor desa68 forced symbols request */
+  if (type <= DESA68_SYM_DABL)          /* those are destination ref */
     wanted = (d->flags & DESA68_DSTSYM_FLAG);
-  else
+  else                                  /* all others are source ref */
     wanted = (d->flags & DESA68_SRCSYM_FLAG);
 
   if (sym)
     name = sym->name;
   else if (!wanted) {
-    uint_t off;
-    /* Long word that have been relocated should always be
-     * disassembled as symbol */
-    if (type == DESA68_SYM_SABL || type == DESA68_SYM_SIMM) {
-      off = ( (d->pc - 4) & d->memmsk ) - dis->mbk->org;
-      wanted = mbk_getmib(dis->mbk, dis->mbk->org+off) & MIB_RELOC;
-    }
-    if (!wanted) {
-      off = addr - dis->mbk->org;
-      if (off < dis->mbk->len) {
-        uint8_t mask = MIB_ADDR | ( (off&1) ? 0 : MIB_ENTRY);
-        wanted = mbk_getmib(dis->mbk, dis->mbk->org+off) & mask;
-      }
-    }
+
+    /* A long words that has been relocated should always be
+     * disassembled as a symbol */
+    if (type == DESA68_SYM_SABL || type == DESA68_SYM_SIMM)
+      wanted = mbk_getmib(dis->mbk, (d->pc - 4) & d->memmsk) & MIB_RELOC;
+
+    if (!wanted)
+      wanted = mbk_getmib(dis->mbk, addr) & (MIB_ADDR|MIB_ENTRY);
 
     /* Requested to autodetect symbols inside the memory range */
     if (!wanted && (dis->flag & DIS_AUTO_SYMBOL)) {
       if (type == DESA68_SYM_SIMM)
-        wanted = addr >= d->immsym_min  && addr < d->immsym_max;
+        wanted = addr >= d->immsym_min && addr < d->immsym_max;
       else
         wanted = addr >= d->memorg && addr < d->memorg + d->memlen;
     }
   }
+
+  /* Finally automatic symbol */
   if ( wanted && !name ) {
     sprintf(name = dis->sym, "L%06X", addr & d->memmsk);
-    /* TODO add the symbol ? */
+    /* TODO add the symbol ?
+     *
+     * Pros: Doesn't have to keep the automatic symbol generation
+     *       coherent between this function and the sourcer, specially
+     *       when generating labels or symbols in dc.l
+     *
+     * Cons: I don't know. Probably not much. We might generate too
+     *       much symbols but that's not really a big deal.
+     *
+     * Idea: Possibly add a flag for those automatic symbols.
+     */
   }
 
   return name;
@@ -108,23 +133,36 @@ const char * symget(desa68_t * d, uint_t addr, int type)
 
 
 static
-/* callback for desa68() memory access. */
+/* callback for desa68() memory access.
+ *
+ * @param d    desa68 instance
+ * @param adr  address of byte to read
+ * @param flag 0:subsequent bytes 1:byte 2:word 4:long
+ */
 int memget(desa68_t * d, unsigned int adr, int flag)
 {
-  dis_t * dis = d->user;
-  int bits = MIB_READ
-    | ( (-(adr==dis->addr)) & MIB_EXEC )
-    | ( (flag & 7) * MIB_BYTE )
-    ;
+  dis_t * const dis = d->user;
+  const int bits = MIB_READ | ( (flag & 7) * MIB_BYTE );
 
-  assert( (adr-dis->addr) < 10 );
-  dis->mib[adr-dis->addr] = bits;
+  assert( (adr-dis->addr) < 10 );       /* <= 10 bytes long */
+  dis->mib[adr-dis->addr] = bits;       /* write instruction mib */
   if (!mbk_ismyaddress(dis->mbk,adr))
     return -1;
   return dis->mbk->mem[adr - dis->mbk->org];
 }
 
-const char hexa[] = "0123456789ABCDEF";
+static
+/* simple wrapper for mbk_setmib() to ignore when scouting.
+ */
+int dis_setmib(dis_t *d, uint_t adr, int mib)
+{
+  return d->scouting
+    ? 0
+    : mbk_setmib(d->mbk, adr, 0, mib)
+    ;
+}
+
+#if 0
 static void hexordot(char *s, int v)
 {
   if (v >= 0 && v < 256) {
@@ -172,14 +210,9 @@ static const char * regname(uint8_t reg)
     case DESA68_REG_PC:  return "PC";
     }
   }
-  dmsg("invalid register -- %d\n", reg);
   assert(!"invalid register");
   return "?";
 }
-
-enum {
-  BRK_NOT, BRK_DCW, BRK_RTS, BRK_JMP, BRK_JTB, BRK_EXE, BRK_OOR
-};
 
 static const char * itypestr(int itype)
 {
@@ -195,114 +228,118 @@ static const char * itypestr(int itype)
   return "???";
 }
 
+#endif
 
 static
 /* Commit temporary mib and set MIB opcode size for the instruction. */
 int commit_mib(dis_t * d)
 {
-  int i, len = 0;
+  int i, len, mib=0;
 
   assert ( d->desa.itype != DESA68_DCW );
   assert ( !(d->addr & 1) );
   assert ( ! d->desa.error );
+  assert ( ! d->scouting );
 
   len = d->desa.pc - d->addr;
   assert( !(len & 1) && len >=2 && len <= 10);
-  d->mib[0] |= ( (len + 1) >> 1 ) << MIB_OPSZ_BIT;
+  d->mib[0] |= MIB_EXEC | MIB_WALK | ( ((len+1)>>1) << MIB_OPSZ_BIT );
 
-  for (i=0; i<len; ++i) {
-    if ( ! mbk_setmib(d->mbk, d->addr+i, 0, d->mib[i]) )
+  for (i=len; --i >= 0; )
+    if ( ! ( mib = mbk_setmib(d->mbk, d->addr+i, 0, d->mib[i])) )
       assert(!"mib access out of range ?");
-    /* dmsg("COMMIT:%x:%02x:%06x:%s\n", */
-    /*      i, d->mbk->buf[d->addr+i-d->mbk->org], d->addr, */
-    /*      mbk_mibstr(mbk_getmib(d->mbk,d->addr+i),0)); */
-  }
 
-  return len;
+  return mib;
 }
 
-static void r_dis_pass(dis_t * dis, int depth)
+static int r_dis_pass(dis_t * dis)
 {
+  const uint_t save_pc = dis->desa.pc;
   char rts;
 
-  dmsg(";;; ENTER $%08X (%d)\n", dis->addr, depth);
-
-  if (dis->maxdepth && depth > dis->maxdepth) {
-    wmsg(dis->addr,"skip (level %u is too deep)\n", depth);
-    return;
+  if (dis->maxdepth && dis->curdepth > dis->maxdepth) {
+    wmsg(dis->addr,"skip (level %u is too deep)\n", dis->curdepth);
+    return BRK_NOT;
   }
+  ++dis->curdepth;
 
   dis->desa.pc = dis->addr;
 
   for (rts=BRK_NOT; rts == BRK_NOT; ) {
     uint_t off = dis->desa.pc - dis->mbk->org;
     uint_t mib = mbk_getmib(dis->mbk,dis->desa.pc);
+    int ityp, ilen;
 
-    if (mib & MIB_EXEC) {
+    if ( mib & MIB_WALK ) {
+      /* Already walked dis way */
       rts = BRK_EXE;
       break;
     }
 
     if (off >= dis->mbk->len) {
+      /* Offset out of range */
       rts = BRK_OOR;
       break;
     }
 
     dis->addr = dis->desa.pc;
 
-    if (desa68(&dis->desa) <= DESA68_DCW) {
-      /* On error or data */
+    ityp = desa68(&dis->desa);
+    if (ityp < 0) {
+      /* On error */
+      dis->result = dis->desa.error ? dis->desa.error : -1;
+      rts = BRK_ERR;
+      break;
+    }
+
+    if (ityp == DESA68_DCW) {
+      /* On data */
       rts = BRK_DCW;
       break;
     }
-    commit_mib(dis);
 
-#ifdef DEBUG
-    if (1) {
-      int r/* , mib = mbk_getmib(dis->mbk,dis->addr) */;
-      dmsg("\n"
-           "type: %s $%04X MIB:%s\n",
-           itypestr(dis->desa.itype), dis->desa._opw, mbk_mibstr(mib,0));
-      dmsg("refs: %c %08x ",
-           "?BWL-"[1+(signed char)dis->desa.sref.type],
-           dis->desa.sref.addr);
-      dmsg("/ %c %08x ",
-           "?BWL-"[1+(signed char)dis->desa.dref.type],
-           dis->desa.dref.addr);
-      dmsg("/");
-      for (r=0; r<DESA68_REG_LAST; ++r)
-        if (dis->desa.regs & (1<<r))
-          dmsg(" %s", regname(r));
-      dmsg("\n");
-
-      for (r=0; dis->addr+r<dis->desa.pc; ++r) {
-        uint_t adr = dis->addr+r;
-        dmsg("%x:%02x:%06x:%s\n",
-             r, dis->mbk->buf[adr-dis->mbk->org], adr,
-             mbk_mibstr(mbk_getmib(dis->mbk,adr),0));
-      }
-
+    if ( ! dis->scouting )
+      commit_mib(dis);
+    else if (! --dis->scouting ) {
+      /* Scout over */
+      rts = BRK_RTS;                    /* pretend it's a RTS ? */
+      break;
     }
-#endif
 
-    /* dmsg(">>>> %08x $%08x $%02x $%02x \n", */
-    /*      dis->desa.pc_org,off,dis->mbk->mib[off], dis->mib); */
+    ilen = dis->desa.pc - dis->addr;
 
-    /* dmsg(";;; itype:%02x err:%02x flags:%08x w:$%04X org:%x-%x (%d)\n", */
-    /*      dis->desa.itype, dis->desa.error, dis->desa.flags, */
-    /*      (uint16_t) dis->desa.w, */
-    /*      dis->desa.pc_org, dis->desa.pc, dis->desa.pc-dis->desa.pc_org); */
-
-
-    dmsg("$%08x%*s%-*s ;; %s\n", dis->addr,
-         /* (depth+1)*2 */2, "",
-         32-(depth+1)*2,dis->str,
-         hexstr(dis->mbk,dis->addr,dis->desa.pc));
-
-    switch (dis->desa.itype) {
+    switch (ityp) {
 
     case DESA68_RTS:
       rts = BRK_RTS;
+
+      //////////////////////////////////////////////////////////////////////
+      // $$$ test scouting
+      //
+      // INFO: this is not good as it will disassemble too much. We
+      // need a multi pass walk to sort this out.
+      //
+      if (!dis->scouting) {
+        int scout;
+        /* Don't scout a scouter */
+        dis->scouting = dis->maxscout;
+        dis->addr = dis->desa.pc;
+        scout = r_dis_pass(dis);
+
+        dis->scouting = 0;
+        if (scout >= BRK_EXE) {
+          /* Scout was a success ! Let's do this for real */
+          dis->addr = dis->desa.pc;
+          r_dis_pass(dis);
+        } else {
+          dmsg("RTS scouting was not successfull @$%06X -- %d\n",
+               dis->desa.pc, scout);
+        }
+      }
+      //
+      // $$$ test scouting
+      //////////////////////////////////////////////////////////////////////
+
       break;
 
     case DESA68_INT: case DESA68_NOP:
@@ -310,16 +347,19 @@ static void r_dis_pass(dis_t * dis, int depth)
 
     case DESA68_INS:
     {
-      int i;
-      for (i = 0; i < 2; ++i) {
+      int i, types;
+      uint_t adrs[2];
+
+      for (types = i = 0; i < 2; ++i) {
         mbk_t * mbk = dis->mbk;
         struct desa68_ref * ref = !i ? &dis->desa.sref : &dis->desa.dref;
         uint_t adr = ref->addr, off = ref->addr - mbk->org, end = off;
         int mib = MIB_ADDR;
 
+        types = (types << 8) + (ref->type&255);
+        adrs[i] = adr;
         if (ref->type == DESA68_OP_NDEF) /* set ? */
           continue;
-
         switch (ref->type) {
         case DESA68_OP_A: break;
         case DESA68_OP_B: case DESA68_OP_W: case DESA68_OP_L:
@@ -339,66 +379,117 @@ static void r_dis_pass(dis_t * dis, int depth)
           assert(!"invalid reference type");
           continue;
         }
+        dis_setmib(dis, adr, mib);
         if (end < off || off >= mbk->len) /* out of range ? */
           continue;
-        mbk_setmib(mbk, adr, 0, mib);
+
       }
+
+      /* Detects move.l #ADR,$VECTOR */
+      if ( types == DESA68_OP_A*256+DESA68_OP_L
+           && !(adrs[1] & 3) && adrs[1] >= 8 && adrs[1] < 0x200
+           && !(adrs[0] & 1) && mbk_ismyaddress(dis->mbk,adrs[0])) {
+        dis->addr = adrs[0];
+        r_dis_pass(dis);
+      }
+
+
     } break;
 
     case DESA68_BRA:
-      if (dis->desa.dref.type != DESA68_OP_NDEF)
-        mbk_setmib(dis->mbk, dis->desa.dref.addr,0,MIB_ADDR);
+      rts = BRK_JMP;                    /* assume unknown jump */
 
-      if (dis->desa.dref.type == DESA68_OP_A) {
-        if (! (dis->desa.regs & (1<<DESA68_REG_PC) )) {
-          dis->desa.pc = dis->desa.dref.addr;
-          dmsg(";;; . . . . . . . . . . . . . . . . . . . . .\n");
-          break;
-        } else {
-          /* jmp table : $$$ TODO */
+      if (dis->desa.dref.type == DESA68_OP_NDEF)
+        /* no reference address: he could have a jump table relative
+         * to an address register xi(An,Rn). It would be nice to at
+         * least produce a warning in that case.
+         */
+        break;
+
+      assert(dis->desa.dref.type == DESA68_OP_A);
+      if (dis->desa.dref.type != DESA68_OP_A)
+        /* Should not happen but just in case */
+        break;
+      dis_setmib(dis, dis->desa.dref.addr, MIB_ADDR);
+
+      if (! (dis->desa.regs & (1<<DESA68_REG_PC) )) {
+        /* Address is known ( even jmp(pc) ) */
+        const uint_t base = dis->addr;
+        const uint_t jmppc = dis->desa.dref.addr;
+        const uint_t opw = mbk_word(dis->mbk, dis->addr);
+        uint_t nxtpc, mask = 0xFFFF;
+
+        if ( (opw & 0xFF00) == 0x6000 && opw > 0x6000)
+          mask = 0xFF00;                /* bra.s */
+
+        for (nxtpc = dis->desa.pc;
+             mbk_ismyaddress(dis->mbk, nxtpc+ilen-1);
+             nxtpc += ilen) {
+          const uint_t w = mbk_word(dis->mbk, nxtpc);
+
+          dmsg("jmp table @$%06x[%02u]/$%06x opw:%04x got:%04x\n",
+               base, (nxtpc-base) / ilen, nxtpc,
+               opw, w);
+
+          if ( (opw^w) & mask )
+            break;
+          dis->addr = nxtpc;
+          r_dis_pass(dis);
         }
+
+        //////////////////////////////////////////////////////////////////////
+        // $$$ test scouting
+        //
+        if (!dis->scouting) {
+          int scout;
+          /* Don't scout a scouter */
+          dis->scouting = dis->maxscout;
+          dis->addr = dis->desa.pc;
+          scout = r_dis_pass(dis);
+
+          dis->scouting = 0;
+          if (scout >= BRK_EXE) {
+            /* Scout was a success ! Let's do this for real */
+            dis->addr = dis->desa.pc;
+            r_dis_pass(dis);
+          } else {
+            dmsg("BRA scouting was not successfull @$%06X -- %d\n",
+                 dis->desa.pc, scout);
+          }
+        }
+        //
+        // $$$ test scouting
+        //////////////////////////////////////////////////////////////////////
+
+        dis->desa.pc = jmppc;
+        rts = BRK_NOT;                  /* resume as it was */
+      } else {
+        /* jmp table : $$$ TODO */
       }
-      rts = BRK_JMP;                    /* unknown jump */
       break;
 
     case DESA68_BSR:
       if (dis->desa.dref.type == DESA68_OP_A) {
-        uint_t save_pc = dis->desa.pc;
         if (! (dis->desa.regs & (1<<DESA68_REG_PC) )) {
           dis->addr = dis->desa.dref.addr;
-          mbk_setmib(dis->mbk,dis->addr,0,MIB_ADDR);
-          r_dis_pass(dis,depth+1);
+          dis_setmib(dis, dis->addr, MIB_ADDR);
+          r_dis_pass(dis);
         } else {
           /* jsr table : $$$ TODO */
         }
-        dis->desa.pc = save_pc;
+        /* dis->desa.pc = save_pc; */
       }
       break;
 
     default:
       assert(!"unknowm instruction type");
-      wmsg(dis->addr,"unknowm instruction type -- %d [$%x]\n",
-           dis->desa.itype);
       break;
     }
   }
 
-  switch (rts) {
-  /* case BRK_NOT: */
-  /*   dmsg(";;; ?????????????????????????????????????????\n"); break; */
-  case BRK_DCW:
-    dmsg(";;; #########################################\n"); break;
-  case BRK_RTS:
-    dmsg(";;; -----------------------------------------\n"); break;
-  case BRK_JMP:
-    dmsg(";;; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"); break;
-  case BRK_EXE:
-    dmsg(";;; .........................................\n"); break;
-  case BRK_OOR:
-    dmsg(";;; =========================================\n"); break;
-  default:
-    assert(!"invalid rts");
-  }
+  --dis->curdepth;
+  dis->desa.pc = save_pc;
+  return rts;
 }
 
 
@@ -411,26 +502,31 @@ int dis_walk(walk_t * walk)
 
   memset(&dis, 0, sizeof(dis));
 
-  dis.addr = entry;
-  dis.mbk = mbk;
-  dis.desa.user = &dis;
+  dis.addr        = entry;
+  dis.mbk         = mbk;
+  dis.flag        = DIS_AUTO_SYMBOL;
+
+  dis.desa.user   = &dis;
   dis.desa.memget = memget;
   dis.desa.memorg = mbk->org;
   dis.desa.memlen = mbk->len;
-  dis.symbols = symbols;
-  if (symbols)
-    dis.desa.symget = symget;
+  dis.desa.flags  = DESA68_SYMBOL_FLAG; /* need to follow symbolic reference */
 
-  /* used only if symget is null */
-  dis.desa.immsym_min = mbk->org;
-  dis.desa.immsym_max = mbk->len + dis.desa.immsym_min;
+  dis.symbols = symbols;
+  if (dis.symbols)
+    dis.desa.symget = symget;
 
   dis.desa.str = dis.str;
   dis.desa.strmax = sizeof(dis.str);
+
   dis.maxdepth = 64;
+  dis.maxscout = 5;
+
   dis.result = 0;
 
-  r_dis_pass(&dis, 0);
+  r_dis_pass(&dis);
+  assert(!dis.curdepth);
+
   return dis.result;
 }
 

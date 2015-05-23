@@ -123,7 +123,7 @@ enum {
   DESA68_SRCSYM_FLAG = (1<<1),
 
   /**
-   * Force destiantion operand to be a valid candidat for symbol.
+   * Force destination operand to be a valid candidat for symbol.
    */
   DESA68_DSTSYM_FLAG = (1<<2),
 

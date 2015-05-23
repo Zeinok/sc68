@@ -35,7 +35,7 @@
 const char * mbk_mibstr(int mib, char * str)
 {
   static char tmp[32];
-  static const char bits[] = "RABWLEXP";
+  static const char bits[] = "RABWLEXDP";
   char *s; int bit;
   if (!str) str = tmp;
   s = str + sprintf(str,"$%04X/", mib);

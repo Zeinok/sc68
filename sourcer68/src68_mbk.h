@@ -22,23 +22,25 @@ enum {
   MIB_ADDR  = 2,                    /**< Symbol/address.       */
   MIB_BYTE  = 4,                    /**< Byte access.          */
 
-  MIB_BOTH  = (MIB_BYTE*2)-1,           /**< Mask previous bits.  */
-  MIB_BOTH_BITS = 3,              /**< Number of flag in both lines */
+  MIB_BOTH  = (MIB_BYTE*2)-1,       /**< Mask previous bits.   */
+  MIB_BOTH_BITS = 3,                /**< Common bits.          */
 
   /* Even address only. */
-  MIB_WORD  = MIB_BYTE*2,           /**< word access.               */
-  MIB_LONG  = MIB_WORD*2,           /**< Long access.               */
-  MIB_ENTRY = 32,                   /**< Disassembly entry point.   */
-  MIB_EXEC  = 64,                   /**< Instruction start address. */
-  MIB_RELOC = 128,                  /**< Long has been relocated.   */
+  MIB_WORD  = MIB_BYTE*2,           /**< word access.             */
+  MIB_LONG  = MIB_WORD*2,           /**< Long access.             */
+  MIB_ENTRY = 32,                   /**< Disassembly entry point. */
+  MIB_WALK  = 64,                   /**< Walked.                  */
+  MIB_EXEC  = 128,                  /**< Valid instruction.       */
+  MIB_DATA  = 256,                  /**< Data ( > Exec ).         */
+  MIB_RELOC = 512,                  /**< Long has been relocated. */
 
-  MIB_OPSZ_BIT = 8,                  /**< 3 bits word opcode size.  */
-  MIB_OPSZ_MSK = 7<<MIB_OPSZ_BIT,    /**< correspoding bit mask.    */
+  MIB_OPSZ_BIT = 10,                /**< 3 bits word opcode size. */
+  MIB_OPSZ_MSK = 7<<MIB_OPSZ_BIT,   /**< correspoding bit mask.   */
 
   MIB_ALL   = 0xFFFF>>MIB_BOTH_BITS, /**< Mask for real bits only.  */
 
-  MIB_ODD   = MIB_ALL+1,                /**< odd address replies. */
-  MIB_SET   = MIB_ODD*2                 /**< success replies.  */
+  MIB_ODD   = MIB_ALL+1,           /**< Set by odd address reply. */
+  MIB_SET   = MIB_ODD*2            /**< Set on success reply.     */
 };
 
 typedef struct {
