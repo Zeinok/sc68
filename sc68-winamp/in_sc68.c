@@ -76,12 +76,6 @@ static char *argv[] = { appname };
 
 int g_usehook = -1, g_useufi = -1;
 
-/* sc68 dialogs dll */
-/* static const char    sc68dlg_dll[] = "sc68dlg.dll"; */
-/* HMODULE              g_cfgdll = 0; */
-/* dialog_f             dialog_modless = 0; */
-/* dialog_f             dialog_modal = 0; */
-
 #ifdef USE_LOCK
 static HANDLE        g_lock;       /* mutex handle           */
 #endif
@@ -176,7 +170,6 @@ void sc68_unlock(sc68_t * sc68) {
   if (sc68 == g_sc68 && g_sc68)
     unlock();
 }
-
 
 /* static */
 /*****************************************************************************
@@ -348,7 +341,7 @@ void about(HWND hwnd)
 #ifndef NDEBUG
            "\n" "buid on " __DATE__
 #endif
-           "\n(c) 1998-2014 Benjamin Gerard",
+           "\n(c) 1998-2015 Benjamin Gerard",
            sc68_versionstr(),file68_versionstr());
 
   MessageBox(hwnd,
@@ -982,21 +975,6 @@ void init()
   }
 #endif
 
-  /* g_cfgdll = LoadLibrary(sc68dlg_dll); */
-  /* if (!g_cfgdll) { */
-  /*   DBG("unable to load sc68 dialiogs dll -- %s", sc68dlg_dll); */
-  /* } else { */
-  /*   DBG("Have loaded DLL -- %s", sc68dlg_dll); */
-  /*   dialog_modal = (dialog_f) GetProcAddress(g_cfgdll, "dialog_modal"); */
-  /*   if (!dialog_modal) { */
-  /*     DBG("could not find function \"%s\"\n", "dialog_modal"); */
-  /*   } */
-  /*   dialog_modless = (dialog_f) GetProcAddress(g_cfgdll, "dialog_modless"); */
-  /*   if (!dialog_modless) { */
-  /*     DBG("could not find function \"%s\"\n", "dialog_modless"); */
-  /*   } */
-  /* } */
-
   DBG("init completed\n");
 }
 
@@ -1198,6 +1176,8 @@ int set_asid(int asid)
   return res;
 }
 
+#if 0
+//Not used anymore config is saved by the dial68 handler
 int save_config(void)
 {
   int res;
@@ -1212,3 +1192,4 @@ int save_config(void)
   DBG("save config -> %d\n", res);
   return res;
 }
+#endif

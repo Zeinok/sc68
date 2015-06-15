@@ -2,6 +2,10 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sc68-splitter", "sc68-splitter\sc68-splitter.vcxproj", "{C5F41793-D75D-48B5-9F4E-7B50A75A8583}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F6D5883B-D3D6-44CA-BB91-D778FB99B932} = {F6D5883B-D3D6-44CA-BB91-D778FB99B932}
+		{5E19938C-78A1-440A-9396-28F85F16F429} = {5E19938C-78A1-440A-9396-28F85F16F429}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "unice68", "..\sc68-msvc\unice68\unice68.vcxproj", "{F3CE61A8-30BC-49F3-A786-90556F4C695A}"
 EndProject

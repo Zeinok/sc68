@@ -55,6 +55,13 @@
 # define FMT12
 #endif
 
+/* Try to keep this in sync for non configured package (msvc)
+ * the original value can be found in the configure.ac file.
+ */
+#ifndef PACKAGE_VERSION
+# define PACKAGE_VERSION "0.5"
+#endif
+
 #include "sc68/sc68.h"
 
 /* in_sc68.c */
@@ -80,20 +87,11 @@ EXTERN void msgfct(const int, void *, const char *, va_list);
 # endif
 #endif
 
-/* sc68dlg.dll */
-/* #include <stdint.h> */
-/* #include <sc68/sc68.h> */
-typedef struct cookie_s cookie_t;
-/* typedef int (*dlgmsg_f)(sc68_dial_t *, const char *, int, sc68_dialval_t *); */
-/* EXTERN dialog_f dialog_modless; */
-/* EXTERN dialog_f dialog_modal; */
-
 /* cache.c */
 EXTERN int   wasc68_cache_init(void);
 EXTERN void  wasc68_cache_kill(void);
 EXTERN void* wasc68_cache_get(const char * uri);
 EXTERN void  wasc68_cache_release(void * disk, int dont_keep);
-
 
 #define DLGHWND  g_mod.hMainWindow
 #define DLGHINST g_mod.hDllInstance

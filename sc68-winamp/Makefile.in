@@ -70,12 +70,15 @@ in_sc68.dll: $(OBJS)
 # ======================================================================
 
 install: in_sc68.dll
+	install -D -s $< $(libexecdir)/$<
+
+install-strip: in_sc68.dll
 	install --strip-program=$(STRIP) -D -s $< $(libexecdir)/$<
 
 winamp: in_sc68.dll
 	test -n $(WADIR)
 	test -d $(WADLL)
-	install --strip-program=$(STRIP) -D -s $< $(WADLL)/$<
+	install -D -s $< $(WADLL)/$<
 
 uninstall:
 	@rm -f -v -- $(libexecdir)/in_sc68.dll

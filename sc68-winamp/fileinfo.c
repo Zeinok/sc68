@@ -34,6 +34,7 @@
 #include <windows.h>
 
 /* libc */
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -44,25 +45,23 @@
 
 static const int magic = ('F'<<24)|('I'<<16)|('N'<<8)|'F';
 
-struct cookie_s {
+struct infcookie_s {
   int          magic;                   /* Points on me */
   HINSTANCE    hinst;                   /* HMOD of sc68cfg DLL */
   HWND         hwnd;                    /* Parent window */
   const char * uri;                     /* Uri of the file */
   sc68_disk_t  disk;                    /* sc68 disk */
 };
+typedef struct infcookie_s cookie_t;
 
 static inline int ismagic(cookie_t * cookie) {
-  const int res = cookie && cookie->magic == magic;
-  if (!res) {
-    DBG(" !!! NOT MAGIC !!!\n");
-  }
-  return res;
+  return cookie && cookie->magic == magic;
 }
 
 static void del_cookie(cookie_t * cookie)
 {
-  DBG("fileinfo\n");
+  DBG("fileinfo <%p>\n", (void *) cookie);
+  assert(ismagic(cookie));
   if (ismagic(cookie)) {
     free((void*)cookie->uri);
     sc68_disk_free(cookie->disk);
@@ -76,6 +75,10 @@ static int cntl(void * _cookie, const char * key, int op, sc68_dialval_t *val)
 {
   cookie_t * cookie = (cookie_t *) _cookie;
 
+  assert(ismagic(cookie));
+  assert(key);
+  assert(val);
+
   if (!key || !ismagic(cookie))
     return -1;
 
@@ -86,7 +89,7 @@ static int cntl(void * _cookie, const char * key, int op, sc68_dialval_t *val)
     else if (keyis(SC68_DIAL_HELLO))
       val->s = "fileinfo";
     else if (keyis(SC68_DIAL_WAIT))
-      val->i = 0;
+      val->i = 1;              /* winamp unified is modal, so do we */
     else if (keyis("instance"))
       val->s = (const char *) cookie->hinst;
     else if (keyis("parent"))
@@ -101,20 +104,20 @@ static int cntl(void * _cookie, const char * key, int op, sc68_dialval_t *val)
     else break;
     return 0;
   }
-  DBG("\"%s\" unknown command #%02d \"%s\"",  "fileinfo", op, key);
   return 1;
 }
+
 
 /* Only exported function. */
 int fileinfo_dialog(HINSTANCE hinst, HWND hwnd, const char * uri)
 {
   int res = -1;
-  cookie_t * cookie = malloc(sizeof(cookie_t));
+  cookie_t * cookie = (cookie_t *) malloc(sizeof(cookie_t));
   if (cookie) {
     cookie->magic = magic;
     cookie->hinst = hinst;
     cookie->hwnd  = hwnd;
-    cookie->uri   = strdup(uri);
+    cookie->uri   = uri ? strdup(uri) : uri;
     if (!cookie->uri ||
         !(cookie->disk = sc68_load_disk_uri(uri)))
       del_cookie(cookie);
@@ -128,6 +131,6 @@ int fileinfo_dialog(HINSTANCE hinst, HWND hwnd, const char * uri)
       g_useufi = 1;
     }
   }
-  DBG("%s() -> %d\n", __FUNCTION__, res);
+  DBG("*%d*\n", res);
   return res;
 }

@@ -34,8 +34,11 @@ static void message_cb(const int bit, sc68_t * sc68, const char *fmt, va_list li
   //vsnprintf(tmp,sizeof(tmp),fmt,list);
   //tmp[sizeof(tmp)-1] = 0;
   //temp = tmp;
-  uPrintfV(temp,fmt,list);
 
+  // I know uPrintfV() is deprecated don't tell me about it.
+# pragma warning(suppress : 4995) 
+  uPrintfV(temp,fmt,list);
+  
   switch (bit) {
   case msg68_CRITICAL: case msg68_ERROR:
     console::error(temp); break;

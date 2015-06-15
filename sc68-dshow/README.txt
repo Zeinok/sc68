@@ -2,7 +2,7 @@
                                    
                    It is part of the sc68 project.
 
-               (C) COPYRIGHT 1998-2014 Benjamin Gerard
+               (C) COPYRIGHT 1998-2015 Benjamin Gerard
 
 
 *Synopsis*                                   

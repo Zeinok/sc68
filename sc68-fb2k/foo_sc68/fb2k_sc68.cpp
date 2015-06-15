@@ -39,7 +39,7 @@ static pfc::string_formatter g_get_component_about()
     "\n" << sc68_versionstr() <<
     "\n" << file68_versionstr() <<
     "\n"
-    "\n" "Copyright (C) 2001-2014 Benjamin Gerard.";
+    "\n" "Copyright (C) 2001-2015 Benjamin Gerard.";
   return about;
 }
 

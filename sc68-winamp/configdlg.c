@@ -37,6 +37,7 @@
 #include <commctrl.h>
 
 /* libc */
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -49,43 +50,40 @@
 
 static const int magic = ('C'<<24)|('O'<<16)|('N'<<8)|'F';
 
-struct cookie_s {
-  int          magic;                   /* Points on me */
-  HINSTANCE    hinst;                   /* HMOD of sc68cfg DLL */
+struct cfgcookie_s {
+  int          magic;                   /* Points on me  */
+  HINSTANCE    hinst;                   /* DLL hmodule   */
   HWND         hwnd;                    /* Parent window */
 };
+typedef struct cfgcookie_s cookie_t;
 
 static inline int ismagic(cookie_t * cookie) {
-  const int res = cookie && cookie->magic == magic;
-  if (!res) {
-    DBG(" !!! NOT MAGIC !!!\n");
-  }
-  return res;
+  return cookie && cookie->magic == magic;
 }
 
 static inline void del_cookie(cookie_t * cookie)
 {
-  DBG("config\n");
-  if (ismagic(cookie)) {
+  DBG("config <%p>\n", (void *) cookie);
+  if (ismagic(cookie))
     free(cookie);
-  }
 }
 
 static inline int get_int(const char * key, int def)
 {
-  const option68_t * opt
-    = option68_get(key,opt68_ISSET);
+  const option68_t * opt = option68_get(key,opt68_ISSET);
   return opt ? !!opt->val.num : def;
 }
 
 #define keyis(N) !strcmp(key,N)
 
-
 static int cntl(void * _cookie, const char * key, int op, sc68_dialval_t *val)
 {
   cookie_t * cookie = (cookie_t *) _cookie;
 
-  if (!key || !ismagic(cookie))
+  assert(ismagic(cookie));
+  assert(key && val);
+
+  if (!key || !val || !ismagic(cookie))
     return -1;
 
   switch (op) {
@@ -100,24 +98,25 @@ static int cntl(void * _cookie, const char * key, int op, sc68_dialval_t *val)
       val->s = (const char *) cookie->hinst;
     else if (keyis("parent"))
       val->s = (const char *) cookie->hwnd;
+    else if (keyis("asid"))
+      set_asid(val->i);
     else break;
     return 0;
   }
-  DBG("\"%s\" unknown command #%02d \"%s\"",  "config", op, key);
   return 1;
 }
 
 /* Only exported function. */
 int config_dialog(HINSTANCE hinst, HWND hwnd)
 {
- int res = -1;
-  cookie_t * cookie = malloc(sizeof(cookie_t));
+  int res = -1;
+  cookie_t * cookie = (cookie_t *) malloc(sizeof(cookie_t));
   if (cookie) {
     cookie->magic = magic;
     cookie->hinst = hinst;
     cookie->hwnd  = hwnd;
     res = sc68_cntl(0, SC68_DIAL, cookie, cntl);
   }
-  DBG("%s() -> %d\n", __FUNCTION__, res);
+  DBG("*%d*\n", res);
   return res;
 }
