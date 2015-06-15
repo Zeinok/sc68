@@ -69,7 +69,6 @@ vec_t * vec_new(unsigned int max, objif_t * iface)
   return vec;
 }
 
-
 void vec_del(vec_t * vec)
 {
   if (vec) {

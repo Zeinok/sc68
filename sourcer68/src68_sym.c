@@ -161,7 +161,6 @@ sym_t * symbol_get(vec_t * symbs, int index)
   return (sym_t *)vec_get(symbs, index);
 }
 
-
 int symbol_byname(vec_t * symbs, const char * name)
 {
   sym_t sym;

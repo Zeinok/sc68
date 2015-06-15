@@ -26,12 +26,15 @@
 # include "config.h"
 #endif
 
+const char prg[] = PACKAGE_NAME;
+
 #include "src68_opt.h"
 #include "src68_exe.h"
 #include "src68_msg.h"
 #include "src68_eva.h"
 #include "src68_dis.h"
 #include "src68_src.h"
+#include "src68_adr.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,6 +42,14 @@
 #include <string.h>
 #include <errno.h>
 #include <ctype.h>
+
+/* Program exit codes. */
+enum {
+  ECODE_OK, ECODE_ARG, ECODE_INP, ECODE_OUT
+};
+
+static char *inp_uri, *out_uri, *opt_origin, *opt_format;
+static int opt_interactive, opt_usage;
 
 #ifdef USE_FILE68
 # include <sc68/file68.h>
@@ -79,8 +90,6 @@ static FILE * open_hdl(const char * path) {
 }
 #endif
 
-char *inp_uri = 0, *out_uri = 0, *opt_origin = 0, *opt_format = 0;
-const char prg[] = PACKAGE_NAME;
 
 #ifdef HAVE_LIBGEN_H
 # include <libgen.h>
@@ -93,32 +102,6 @@ const char prg[] = PACKAGE_NAME;
 #ifdef HAVE_GETOPT_H
 # include <getopt.h>
 #endif
-
-/* #ifndef HAVE_BASENAME */
-/* extern char * basename(char *); */
-/* #endif */
-
-enum {
-  ECODE_OK,
-  ECODE_ARG,
-  ECODE_INP,
-  ECODE_OUT,
-};
-
-enum {
-  SRC68_RELOC = (1<<7), /**< Color relocated memory              */
-  SRC68_INST  = (1<<6), /**< Color valid instruction cels        */
-  SRC68_ENTRY = (1<<5), /**< Color entry points (need Label def) */
-  SRC68_RTS   = (1<<4), /**< Color rts instructions              */
-  SRC68_DONE  = (1<<3), /**< Color processed memory              */
-  SRC68_SIZE  = (7<<0)  /**< Color opcode size (in word)         */
-};
-
-
-/* static void syserr(char *object) */
-/* { */
-/*   fprintf(stderr,"%s: %s -- %s",ptrg, strerr(errno), object?object:""); */
-/* } */
 
 
 #if defined(USE_FILE68) && defined(DEBUG)
@@ -175,47 +158,22 @@ static void print_usage(void)
 #endif
       "\n"
       "Options:\n"
-      "  -h --help --usage      This message and exit\n"
-      "  -V --version           Display version and exit\n"
-      "  -t --tab=[STRING]      Set tabulation string\n"
-      "  -F --format=FORMAT     Set output format options\n"
-      "  -O --org=ADDR          Load address (default: @0)\n"
-      "  -E --entry=ENTRY-LIST  Add entry points\n"
-      "  -P --part=PART         Add a partition\n"
-      );
+      "  -h --help --usage      Print help and exit (more for help)\n"
 
-      /* "  --opcode               Print opcodes\n" */
-      /* "  --ascii                Convert immediat to ASCII\n" */
-      /* "  --no-symbol            Disable symbol in disassembly output\n", */
+      /* "  -t --tab=[STRING]      Set tabulation string\n" */
+      /* "  -F --format=FORMAT     Set output format options\n" */
+      /* "  -O --org=ADDR          Load address (default: @0)\n" */
+      /* "  -E --entry=ENTRY-LIST  Add entry points\n" */
+      /* "  -P --part=PART         Add a partition\n" */
+      );
 
 #ifdef USE_FILE68
-  /* puts */
-  /*   ( */
-  /*     "  --no-sc68              Disable sc68 mode\n" */
-  /*     ); */
-  puts("");
-  option68_help(stdout,print_option);
+  if (opt_usage > 1) {
+    puts("");
+    option68_help(stdout,print_option);
+  }
 #endif
-  puts
-    (
-      "\n"
-      "  ENTRY-LIST := ENTRY|RANGE(,ENTRY|RANGE ...)\n"
-      "\n"
-      "  It consist on a coma ',' separated list of ENTRY or RANGE.\n"
-      "\n"
-      "  Basically an ENTRY is a number corresponding to an address\n"
-      "  where to start a disassemble pass.\n"
-      "\n"
-      "  RANGE := [ENTRY,ENTRY]\n"
-      "\n"
-      "  A range starts as many passes needed to disassemble the range.\n"
-      "  Using one or more indirection 'l' before a range will use the range\n"
-      "  as an indirect table of entry. And using a '+' before a range adds\n"
-      "  origin to each value of the range (for all indirections too).\n"
-      "  Expression can be used mixing \"C\" like numbers, operators,\n"
-      "  and parenthesis '()'. Operators are '+-/*&|^<>' with '<' and '>' for\n"
-      "  shifting. Warning: NO PRECEDENCE !!!.\n"
-      );
+
   puts
     ("Copyright (c) 1998-2015 Benjamin Gerard.\n"
      "\n"
@@ -224,9 +182,11 @@ static void print_usage(void)
 }
 
 static const opt_t longopts[] = {
+  { "version",    0, 0, 'V' },
   { "help",       0, 0, 'h' },
   { "usage",      0, 0, 'h' },
-  { "version",    0, 0, 'V' },
+  { "interactive",0, 0, 'i' },
+
   { "format",     1, 0, 'F' },
   { "origin",     1, 0, 'O' },
   { "entry",      1, 0, 'E' },
@@ -253,7 +213,6 @@ int main(int argc, char **argv)
 # endif
 #endif
 
-
   dmsg("Debug messages are ON\n");
 
   /* create the short options from long */
@@ -269,6 +228,7 @@ int main(int argc, char **argv)
 
     switch (val) {
     case  -1: break;                /* Scan finish */
+
     case 1:                         /* when preserving ordering */
       if (!inp_uri)
         inp_uri = opt_arg();
@@ -293,12 +253,16 @@ int main(int argc, char **argv)
       return ECODE_ARG;
 
     case 'h':                           /* --help */
-      print_usage();
-      return ECODE_OK;
+      ++opt_usage;
+      break;
 
     case 'V':                           /* --version */
       print_version();
       return ECODE_OK;
+
+    case 'i':                           /* --interactive */
+      opt_interactive = 1;
+      break;
 
     case 'F':                           /* --format= */
       gotarg = opt_arg() ? &opt_format : 0;
@@ -331,6 +295,11 @@ int main(int argc, char **argv)
     }
   }
 
+  if (opt_usage) {
+    print_usage();
+    return ECODE_OK;
+  }
+
   i = opt_ind();
   if (!inp_uri && i < argc)
     inp_uri = argv[i++];
@@ -340,6 +309,9 @@ int main(int argc, char **argv)
     emsg(-1,"too many arguments. Try --help.\n");
     return ECODE_ARG;
   }
+
+
+
 
   /* Eval --origin */
   if (opt_origin) {
@@ -382,9 +354,16 @@ int main(int argc, char **argv)
   if (!exe)
     return ECODE_INP;
 
+  if (exe->entries) {
+    adr_t * adr;
+    for (i=0; (adr = addr_get(exe->entries, i)); ++i) {
+      dmsg("entry point at $%06x\n", adr->adr);
+      mbk_setmib(exe->mbk, adr->adr, 0, MIB_ENTRY);
+    }
+  }
+
   if (exe->sections) {
     uint_t i;
-
 
     dmsg("sections: %d\n", exe->sections->cnt);
     for (i=0; i<exe->sections->cnt; ++i) {
@@ -404,7 +383,7 @@ int main(int argc, char **argv)
         if (mbk_getmib(exe->mbk, adr) & MIB_ENTRY) {
           walk_t walk;
           memset(&walk,0,sizeof(walk));
-          walkopt_set_default(&walk.opt);
+          /* walkopt_set_default(&walk.opt); */
           walk.adr = adr;
           walk.exe = exe;
           dis_walk(&walk);

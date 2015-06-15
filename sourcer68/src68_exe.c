@@ -165,7 +165,7 @@ error:
   if (pbuf)
     *pbuf = b;
 
-  dmsg("load-binary \"%s\" (%d)\n", uri, byte);
+  dmsg("loaded binary \"%s\" (%d)\n", uri, byte);
   return byte;
 }
 
@@ -192,6 +192,10 @@ static exe_t * exe_new(char * uri)
     goto error;
   if (exe->symbols = symbols_new(256), !exe->symbols)
     goto error;
+  if (exe->relocs = address_new(256), !exe->relocs)
+    goto error;
+  if (exe->entries = address_new(256), !exe->entries)
+    goto error;
   goto done;
 
 error:
@@ -203,26 +207,72 @@ done:
   return exe;
 }
 
+static int myishex(int c) {
+  if (c>='0' && c<='9') return c-'0';
+  if (c>='a' && c<='f') return c-'a'+10;
+  if (c>='A' && c<='F') return c-'A'+10;
+  return -1 - (c=='.' || c==0);         /* -1 or -2 for valid term */
+}
+
+static uint_t address_from_name(char *uri)
+{
+  uint_t org = EXE_DEFAULT, adr; int c;
+  char *sl1 = strrchr(uri,'/');
+  char *sl2 = 0;
+#ifdef NATIVE_WIN32
+  sl2 = strrchr(uri,'\\');
+#endif
+  if (sl2 > sl1)
+    sl1 = sl2;                          /* get which ever is last */
+  if (sl1)
+    ++sl1;                              /* skip '/' */
+  for (sl2=sl1, adr=0; (c = myishex(*sl2)) >= 0; ++sl2)
+    adr = adr*16 + c;
+  if (sl2-sl1 >= 4 && c == -2)
+    org = adr;
+  return org;
+}
 
 static exe_t * load_as_bin(char * uri, uint_t org, uint8_t * data, int size)
 {
   exe_t *exe = 0, *e = 0;
+  int bss_size = 0;
 
   if (org == (uint_t) EXE_DEFAULT)
-    org = EXE_ORIGIN;
+    org = address_from_name(uri);
 
   if (e = exe_new(uri), !e)
     goto error;
 
-  e->mbk = mbk_new(org, size);
-  if (!e->mbk)
+  e->loadas = LOAD_AS_BIN;
+  e->ispic  = org == (uint_t) EXE_DEFAULT;
+  if (e->ispic)
+    org = EXE_ORIGIN;
+  if (e->mbk = mbk_new(org, size), !e->mbk)
     goto error;
   memcpy(e->mbk->mem, data, size);
 
-  section_add(e->sections, "DEFAULT", org, size, SECTION_X);
+  /* $$$ TODO: optional auto BSS finder */
+  if (1) {
+    int i;
+    for (i = size-1; i >= 0 && !data[i]; --i)
+      ;
+    if (++i < size)
+      bss_size = size - i;
+  }
+
   symbol_add(e->symbols, "Start", org, 0);
   symbol_add(e->symbols, "End", org+size, 0);
-  mbk_setmib(e->mbk,e->mbk->org+0,0,MIB_ENTRY);
+
+  if (size - bss_size > 0) {
+    section_add(e->sections, "TEXT", org, size-bss_size, SECTION_X);
+    addr_add(e->entries,org);
+  }
+  if (bss_size > 0) {
+    uint_t bss_org = org + size - bss_size;
+    section_add(e->sections, "BSS", bss_org, bss_size, SECTION_0);
+    symbol_add(e->symbols, "Bss", bss_org, 0);
+  }
 
   exe = e;
   e = 0;
@@ -251,12 +301,16 @@ static exe_t * load_as_sc68(char * uri, uint_t org, uint8_t * data, int size)
     if (e = exe_new(uri), !e)
       goto error;
 
+    e->loadas = LOAD_AS_SC68;
+    e->ispic  = mus->has.pic;
+
     dmsg("replay ? %s\n", mus->replay?mus->replay:"");
 
     if (mus->replay) {
-      char replay[256];
+      char replay[64];
       strcpy(replay,"sc68://replay/");
-      strcat(replay,mus->replay);
+      strncat(replay,mus->replay, sizeof(replay));
+      replay[sizeof(replay)-1] = 0;
       replay_len = load_bin(replay, &replay_buf);
       dmsg("replay '%s'  loaded as %d bytes\n", replay, replay_len);
       if (replay_len < 0)
@@ -270,7 +324,6 @@ static exe_t * load_as_sc68(char * uri, uint_t org, uint8_t * data, int size)
     e->mbk = mbk_new(org, full_len);
     if (!e->mbk)
       goto error;
-    dmsg("memblock: $%x %u\n", e->mbk->org, e->mbk->len);
 
     if (replay_len)
       memcpy(e->mbk->mem, replay_buf, replay_len);
@@ -293,13 +346,11 @@ static exe_t * load_as_sc68(char * uri, uint_t org, uint8_t * data, int size)
       section_add(e->sections, "DATA", org+data_off, mus->datasz, 0);
     }
 
-    mbk_setmib(e->mbk, e->mbk->org+0, 0, MIB_ENTRY);
-    mbk_setmib(e->mbk, e->mbk->org+4, 0, MIB_ENTRY);
-    mbk_setmib(e->mbk, e->mbk->org+8, 0, MIB_ENTRY);
-    /* TODO: add parts for code / data */
+    addr_add(e->entries,e->mbk->org+0);
+    addr_add(e->entries,e->mbk->org+4);
+    addr_add(e->entries,e->mbk->org+8);
   }
 
-  e->loadas = LOAD_AS_SC68;
   exe = e;
   e = 0;
 error:
@@ -313,18 +364,13 @@ error:
 
 static void reloc_callback(tosexec_t * e, unsigned int org, unsigned int off)
 {
-  mbk_t * mbk = e->user;
+  vec_t * rel = e->user;
 
-  assert(mbk);
-  assert(org == mbk->org);
-  assert(!(off&1));
-  assert(off+3 < mbk->len);
-
-  dmsg("relocating org:%06x off:$%06x/%06x\n",
-       org,off,mbk->len);
-  mbk_setmib(mbk, org+off, 0, MIB_RELOC);
+  assert(rel);
+  dmsg("relocating org:%06x off:$%06x\n", org, off);
+  addr_add(rel, org+off);
+  /* mbk_setmib(mbk, org+off, 0, MIB_RELOC); */
 }
-
 
 static exe_t * load_as_tos(char * uri, uint_t org, uint8_t * data, int size)
 {

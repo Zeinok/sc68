@@ -17,11 +17,26 @@
  * Walk options.
  */
 typedef struct {
-  uint_t brk_on_ndef_jmp:1;           /**< stop the walk. */
+  uint_t def_maxdepth;            /**< default max depth. */
+  uint_t def_maxscout;            /**< default max scout. */
+  uint_t brk_on_ndef_jmp:1;       /**< stop walk on undefined jump. */
+  uint_t brk_on_rts:1;            /**< don't walk after rts. */
 } walkopt_t;
 
-void walkopt_set_default(walkopt_t * wopt);
 
+/**
+ * Disassembler options.
+ */
+typedef struct {
+  uint_t auto_symbol:1;    /**< produce symbol instead of address. */
+  uint_t ascii_imm:1;      /**< */
+  uint_t ascii_dcb:1;      /**< */
+  uint_t print_opcode:1;   /**< */
+  uint_t print_address:1;  /**< */
+
+} disaopt_t;
+
+/* void walkopt_set_default(walkopt_t * wopt); */
 
 typedef struct {
   /**

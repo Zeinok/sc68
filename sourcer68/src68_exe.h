@@ -15,26 +15,40 @@
 #include "src68_sym.h"
 #include "src68_mbk.h"
 #include "src68_sec.h"
+#include "src68_adr.h"
+#include "src68_rel.h"
 
+/**
+ * Executable types.
+ * @anchor src68_load_as
+ */
 enum {
-  LOAD_AS_AUTO, LOAD_AS_BIN, LOAD_AS_TOS, LOAD_AS_SC68
+  LOAD_AS_AUTO,                         /**< automatically select. */
+  LOAD_AS_BIN,                          /**< binary */
+  LOAD_AS_TOS,                          /**< Atari TOS.  */
+  LOAD_AS_SC68                          /* *< sc68 compatible file. */
 };
 
-struct parts_s;
-typedef struct parts_s parts_t;
-
 enum {
-  EXE_ORIGIN = 0x10000,
-  EXE_DEFAULT = -1
+  EXE_ORIGIN = 0x10000,                 /**< Default origin address. */
+  EXE_DEFAULT = -1                      /**< Used default origin. */
 };
 
+/**
+ * Loaded executable.
+ */
 typedef struct {
-  char    * uri;
-  int       loadas;
-  vec_t   * sections;
-  vec_t   * symbols;
-  mbk_t   * mbk;
-  parts_t * parts;
+  char    * uri;                        /**< source URI. */
+  /**/
+  uint8_t loadas;                       /**< loaded as.  */
+  uint8_t ispic;                        /**< position independant code ? */
+  /**/
+  vec_t   * sections;                   /**< sections container. */
+  vec_t   * symbols;                    /**< symbols container.  */
+  vec_t   * relocs;                     /**< relocations container. */
+  vec_t   * entries;                    /**< entry points container. */
+  /**/
+  mbk_t   * mbk;                        /**< memory block. */
 } exe_t;
 
 /**
@@ -42,8 +56,8 @@ typedef struct {
  *
  * @param  uri   file path or IRI.
  * @param  org   address to load the file at.
- * @param  type  Loas as type.
- * @return pointer to loaded exeutable.
+ * @param  type  Load as type.
+ * @return pointer to loaded executable.
  * @retval 0  on error
  */
 exe_t * exe_load(char * uri, uint_t org, int loadas);

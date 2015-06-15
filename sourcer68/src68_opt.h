@@ -22,4 +22,17 @@ int    opt_ind(void);
 int    opt_opt(void);
 char * opt_arg(void);
 
+enum {
+  OPT_TYPE_BOOL,
+  OPT_TYPE_INT,
+  OPT_TYPE_UINT,
+  OPT_TYPE_STR
+};
+
+typedef struct {
+  int type;
+  const char * name;
+  intptr_t val;
+} optdef_t;
+
 #endif

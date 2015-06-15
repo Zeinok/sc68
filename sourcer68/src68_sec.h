@@ -13,18 +13,24 @@
 
 #include "src68_vec.h"
 
+/**
+ * section flags. @anchor src68_section_flags
+ */
 enum {
-  SECTION_N = 0,
-  SECTION_X = 1<<1,
-  SECTION_0 = 1<<2,
+  SECTION_N = 0,                 /**< no flag. */
+  SECTION_X = 1<<1,              /**< section is executable (text). */
+  SECTION_0 = 1<<2,              /**< section is zeroed (bss). */
 };
 
+/**
+ * section object.
+ */
 typedef struct {
   obj_t  obj;                           /* must be first */
-  char * name;
-  uint_t addr;
-  uint_t size;
-  uint_t flag;
+  char * name;                          /**< section name.  */
+  uint_t addr;                          /**< section origin address. */
+  uint_t size;                          /**< section size in byte. */
+  uint_t flag;                          /**< @see src68_section_flags. */
 } sec_t;
 
 /**

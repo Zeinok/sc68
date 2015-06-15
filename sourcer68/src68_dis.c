@@ -51,17 +51,15 @@ enum {
   BRK_JTB                               /* jump table */
 };
 
-/* Walker flag value. */
-enum {
-  DIS_AUTO_SYMBOL = 1,                  /* produce auto symbols */
-};
-
 typedef struct {
   desa68_t desa;                        /* disassembler instance */
   uint_t   maxdepth;                    /* maximum recursive depth */
   uint_t   curdepth;                    /* current recursive depth */
   uint_t   addr;                        /* instruction address */
-  uint_t   flag;
+
+  walkopt_t walkopt;                    /* walk options. */
+  disaopt_t disaopt;                    /* disassembly options. */
+
   mbk_t   *mbk;                         /* memory block */
   vec_t   *symbols;                     /* symbols container */
   int      result;                      /* result code (0 for success) */
@@ -102,11 +100,12 @@ const char * symget(desa68_t * d, uint_t addr, int type)
     if (type == DESA68_SYM_SABL || type == DESA68_SYM_SIMM)
       wanted = mbk_getmib(dis->mbk, (d->pc - 4) & d->memmsk) & MIB_RELOC;
 
+    /* Reference or entry points have to be symbols. */
     if (!wanted)
       wanted = mbk_getmib(dis->mbk, addr) & (MIB_ADDR|MIB_ENTRY);
 
     /* Requested to auto-detect symbols inside the memory range */
-    if (!wanted && (dis->flag & DIS_AUTO_SYMBOL)) {
+    if (!wanted && (dis->disaopt.auto_symbol)) {
       if (type == DESA68_SYM_SIMM)
         wanted = addr >= d->immsym_min && addr < d->immsym_max;
       else
@@ -164,74 +163,6 @@ int dis_setmib(dis_t *d, uint_t adr, int mib)
     ;
 }
 
-#if 0
-static void hexordot(char *s, int v)
-{
-  if (v >= 0 && v < 256) {
-    s[0] = hexa[(v >> 4) & 15];
-    s[1] = hexa[v & 15];
-  } else
-    s[0] = s[1] = '.';
-}
-
-static char * hexstr(const mbk_t * mbk, uint_t a, uint_t b)
-{
-  static char tmp[64];
-  const int max = sizeof(tmp)-1;
-  int i;
-  a -= mbk->org;
-  b -= mbk->org;
-  for (i=0; a<b; ++a) {
-    if (i>0 && i<max)
-      tmp[i++] = '-';
-    if (i+2<max) {
-      hexordot(tmp+i, (a < mbk->len) ? mbk->mem[a] : -1);
-      i += 2;
-    }
-  }
-  tmp[i] = 0;
-  return tmp;
-}
-
-static const char * regname(uint8_t reg)
-{
-  static int rol;
-  static char tmp[64];
-
-  if (reg < 16) {
-    char *s = tmp + (rol++ & 15) * 4;
-    s[0] = "DA"[reg>>3];
-    s[1] = '0' + (reg&7);
-    s[2] = 0;
-    return s;
-  } else  {
-    switch (reg) {
-    case DESA68_REG_USP: return "USP";
-    case DESA68_REG_CCR: return "CCR";
-    case DESA68_REG_SR:  return "SR";
-    case DESA68_REG_PC:  return "PC";
-    }
-  }
-  assert(!"invalid register");
-  return "?";
-}
-
-static const char * itypestr(int itype)
-{
-  switch (itype) {
-  case DESA68_DCW: return "DCW";
-  case DESA68_INS: return "INS";
-  case DESA68_BRA: return "BRA";
-  case DESA68_BSR: return "BSR";
-  case DESA68_RTS: return "RTS";
-  case DESA68_INT: return "INT";
-  case DESA68_NOP: return "NOP";
-  }
-  return "???";
-}
-
-#endif
-
 static
 /* Commit temporary mib and set MIB opcode size for the instruction. */
 int commit_mib(dis_t * d)
@@ -254,6 +185,27 @@ int commit_mib(dis_t * d)
   return mib;
 }
 
+static int r_dis_pass(dis_t * dis);
+
+static int scout_pass(dis_t * dis)
+{
+  int scout = BRK_NOT;
+
+  if (! dis->scouting) {
+    /* Don't scout a scouter */
+    dis->scouting = dis->maxscout;
+    dis->addr = dis->desa.pc;
+    scout = r_dis_pass(dis);
+    dis->scouting = 0;
+    if (scout >= BRK_EXE) {
+      /* Scout was a success ! Let's do this for real */
+      dis->addr = dis->desa.pc;
+      scout = r_dis_pass(dis);
+    }
+  }
+  return scout;
+}
+
 static int r_dis_pass(dis_t * dis)
 {
   const uint_t save_pc = dis->desa.pc;
@@ -266,6 +218,7 @@ static int r_dis_pass(dis_t * dis)
   ++dis->curdepth;
 
   dis->desa.pc = dis->addr;
+  dmsg("%*s$%06x (%u)\n", dis->curdepth, "", dis->curdepth);
 
   for (rts=BRK_NOT; rts == BRK_NOT; ) {
     uint_t off = dis->desa.pc - dis->mbk->org;
@@ -315,29 +268,16 @@ static int r_dis_pass(dis_t * dis)
     case DESA68_RTS:
       rts = BRK_RTS;
 
+
+
       //////////////////////////////////////////////////////////////////////
       // $$$ test scouting
       //
       // INFO: this is not good as it will disassemble too much. We
       // need a multi pass walk to sort this out.
       //
-      if (0 && !dis->scouting) {
-        int scout;
-        /* Don't scout a scouter */
-        dis->scouting = dis->maxscout;
-        dis->addr = dis->desa.pc;
-        scout = r_dis_pass(dis);
-
-        dis->scouting = 0;
-        if (scout >= BRK_EXE) {
-          /* Scout was a success ! Let's do this for real */
-          dis->addr = dis->desa.pc;
-          r_dis_pass(dis);
-        } else {
-          dmsg("RTS scouting was not successfull @$%06X -- %d\n",
-               dis->desa.pc, scout);
-        }
-      }
+      if (0)
+        scout_pass(dis);
       //
       // $$$ test scouting
       //////////////////////////////////////////////////////////////////////
@@ -442,23 +382,7 @@ static int r_dis_pass(dis_t * dis)
         //////////////////////////////////////////////////////////////////////
         // $$$ test scouting
         //
-        if (!dis->scouting) {
-          int scout;
-          /* Don't scout a scouter */
-          dis->scouting = dis->maxscout;
-          dis->addr = dis->desa.pc;
-          scout = r_dis_pass(dis);
-
-          dis->scouting = 0;
-          if (scout >= BRK_EXE) {
-            /* Scout was a success ! Let's do this for real */
-            dis->addr = dis->desa.pc;
-            r_dis_pass(dis);
-          } else {
-            dmsg("BRA scouting was not successfull @$%06X -- %d\n",
-                 dis->desa.pc, scout);
-          }
-        }
+        scout_pass(dis);
         //
         // $$$ test scouting
         //////////////////////////////////////////////////////////////////////
@@ -506,7 +430,16 @@ int dis_walk(walk_t * walk)
 
   dis.addr        = entry;
   dis.mbk         = mbk;
-  dis.flag        = DIS_AUTO_SYMBOL;
+
+  /* walker options */
+  dis.walkopt.def_maxdepth = 32;
+  dis.walkopt.def_maxscout = 5;
+
+  dis.walkopt.brk_on_ndef_jmp = 1;
+  dis.walkopt.brk_on_rts = 1;
+
+  /* disassembler options */
+  dis.disaopt.auto_symbol  = 1;
 
   dis.desa.user   = &dis;
   dis.desa.memget = memget;
@@ -521,10 +454,13 @@ int dis_walk(walk_t * walk)
   dis.desa.str = dis.str;
   dis.desa.strmax = sizeof(dis.str);
 
-  dis.maxdepth = 64;
-  dis.maxscout = 5;
+  dis.maxdepth = dis.walkopt.def_maxdepth;
+  dis.maxscout = dis.walkopt.def_maxscout;
 
   dis.result = 0;
+
+  dmsg("Starting walking '%s'\n", walk->exe->uri);
+  dmsg(" mem [$%06x-$%06x (%u)\n", mbk->org, mbk->org+mbk->len-1, mbk->len);
 
   r_dis_pass(&dis);
   assert(!dis.curdepth);
@@ -541,7 +477,7 @@ int dis_disa(exe_t * exe, uint_t * adr, char * buf, uint_t max)
 
   dis.addr        = *adr;
   dis.mbk         = exe->mbk;
-  dis.flag        = DIS_AUTO_SYMBOL;
+  dis.disaopt.auto_symbol = 1;
 
   dis.desa.pc     = dis.addr;
   dis.desa.user   = &dis;
@@ -564,9 +500,3 @@ int dis_disa(exe_t * exe, uint_t * adr, char * buf, uint_t max)
   return itype;
 }
 
-void walkopt_set_default(walkopt_t * wopt)
-{
-  if (wopt)
-    memset(wopt, 0, sizeof(*wopt));
-  /* $$$ XXX TODO */
-}
