@@ -27,14 +27,16 @@
 #include "config.h"
 #endif
 
-/* see <https://sourceware.org/bugzilla/show_bug.cgi?id=17196> */
-volatile int dial68_rc_force;
-
 /* sc68 */
 #include "sc68/sc68.h"                  /* for sc68_dial_f */
 
-/* windows */
-/* #include <windef.h> */
+/* stdc */
+#include <assert.h>
+
+/* Used to glue the Windows resource into the library (using partial linking)
+ * see <https://sourceware.org/bugzilla/show_bug.cgi?id=17196>
+ */
+SC68_EXTERN volatile int dial68_rc_force;
 
 /* Needed for UDM32 family defines */
 #ifndef WINVER
@@ -57,41 +59,31 @@ volatile int dial68_rc_force;
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
-
-/* #include "winui_dbg.h" */
+#include <ctype.h>
 
 /* resource */
 #include "resource.h"
 
-/* Fail safe just in case the message are not defined */
-#ifndef UDM_SETRANGE32
-# define UDM_SETRANGE32 (WM_USER+111)
+/* Index used to store dialog private pointer */
+#ifndef USERCOOKIE
+# define USERCOOKIE DWLP_USER
 #endif
-#ifndef UDM_GETRANGE32
-# define UDM_GETRANGE32 (WM_USER+112)
+/* Index used to store dialog result */
+#ifndef USERRESULT
+# define USERRESULT DWLP_MSGRESULT
 #endif
-#ifndef UDM_SETPOS32
-# define UDM_SETPOS32 (WM_USER+113)
+/* The function used for GetWindowLong() */
+#ifndef GetWindowLongF
+# define GetWindowLongF(H,I) GetWindowLongPtrA(H,I)
 #endif
-#ifndef UDM_GETPOS32
-# define UDM_GETPOS32 (WM_USER+114)
-#endif
-
-#if !defined(DWL_USER) && defined(DWLP_USER)
-#define USERCOOKIE DWLP_USER
-#else
-#define USERCOOKIE DWL_USER
+/* The function used for SetWindowLong() */
+#ifndef SetWindowLongF
+# define SetWindowLongF(H,I,V) SetWindowLongPtrA(H,I,(LONG_PTR)(V))
 #endif
 
-#if !defined(DWL_MSGRESULT) && defined(DWLP_MSGRESULT)
-#define USERRESULT DWLP_MSGRESULT
-#else
-#define USERRESULT DWL_MSGRESULT
-#endif
-
-#define GET_USERCOOKIE(H) ((dialog_t *)GetWindowLongPtr(H,USERCOOKIE))
-#define SET_USERCOOKIE(H,V) SetWindowLongPtr(H,USERCOOKIE,(LONG_PTR)(V))
-#define SET_RESULT(H,V) SetWindowLongPtr(H, USERRESULT, (LONG_PTR)(V))
+#define GET_USERCOOKIE(H) ((dialog_t *)GetWindowLongF(H,USERCOOKIE))
+#define SET_USERCOOKIE(H,V) SetWindowLongF(H,USERCOOKIE,V)
+#define SET_RESULT(H,V) SetWindowLongF(H, USERRESULT,V)
 
 /* typedef */
 typedef struct keydef_s keydef_t;
@@ -104,21 +96,10 @@ struct keydef_s {
   const int    idc;                     /* dialog resource id */
 };
 
-/* struct keyval_s { */
-/*   const char * key;               /\* key name also defines its type *\/ */
-/*   union { */
-/*     int      i;                         /\* integer value       *\/ */
-/*     float    f;                         /\* float value         *\/ */
-/*     char *   s;                         /\* string value        *\/ */
-/*     intptr_t iptr;                      /\* ensure size is good *\/ */
-/*   } val; */
-/* }; */
-
 typedef sc68_dial_f dlgmsg_f;
 
 struct dlgdef_s {
   const char * ident;
-  int          idd;
   int        (*init)(dialog_t*);
 };
 
@@ -131,28 +112,87 @@ struct dialog_s {
   HWND         hdlg;                  /* My window                  */
   int          modal;                 /* created modal or modless   */
   int          retval;                /* dialog return code         */
-  int          idd;                   /* dialog resource identifier */
+  int          iid;                   /* dialog integer identifier  */
   const char * ident;                 /* dialog string identifier   */
   dlgmsg_f     cntl;                  /* dialog user function       */
   void       * cookie;                /* user provided private data */
 };
+
+
+/* Forward declarations. */
 
 static int  init_config(dialog_t *);
 static int  init_fileinfo(dialog_t *);
 static int  init_trackselect(dialog_t *);
 static void kill_dialog(dialog_t *);
 static dialog_t * new_dialog(void *, dlgmsg_f);
+static inline int isdial(dialog_t * dial) {
+  return dial && dial->magic == magic;
+}
+
+static int dial_cntl(dialog_t * dial, const char * key,
+                     int fct, sc68_dialval_t * v)
+{
+  int res;
+  assert(isdial(dial));
+  assert(key);
+  assert(v);
+  res = dial->cntl(dial->cookie, key, fct, v);
+  assert (res >= -1 && res <= 1);
+  return res;
+}
+
+static int dial_call(dialog_t * dial, const char * key, sc68_dialval_t * v)
+{
+  return dial_cntl(dial, key, SC68_DIAL_CALL, v);
+}
+
+static int dial_enum(dialog_t * dial, const char * key, sc68_dialval_t * v)
+{
+  return dial_cntl(dial, key, SC68_DIAL_ENUM, v);
+}
+
+static int dial_geti(dialog_t * dial, const char * key, sc68_dialval_t * v)
+{
+  return dial_cntl(dial, key, SC68_DIAL_GETI, v);
+}
+
+static int dial_seti(dialog_t * dial, const char * key, sc68_dialval_t * v)
+{
+  return dial_cntl(dial, key, SC68_DIAL_SETI, v);
+}
+
+static int dial_gets(dialog_t * dial, const char * key, sc68_dialval_t * v)
+{
+  return dial_cntl(dial, key, SC68_DIAL_GETS, v);
+}
+
+#if 0
+static int dial_sets(dialog_t * dial, const char * key, sc68_dialval_t * v)
+{
+  return dial_cntl(dial, key, SC68_DIAL_SETS, v);
+}
+#endif
+
+static int dial_mini(dialog_t * dial, const char * key, sc68_dialval_t * v)
+{
+  return dial_cntl(dial, key, SC68_DIAL_MIN, v);
+}
+
+static int dial_maxi(dialog_t * dial, const char * key, sc68_dialval_t * v)
+{
+  return dial_cntl(dial, key, SC68_DIAL_MAX, v);
+}
 
 static dlgdef_t dlgdef[3] = {
-  { "config",      IDD_DLG_CONFIG,      init_config      },
-  { "fileinfo",    IDD_DLG_FILEINFO,    init_fileinfo    },
-  { "trackselect", IDD_DLG_TRACKSELECT, init_trackselect },
+  { "config",      init_config      },
+  { "fileinfo",    init_fileinfo    },
+  { "trackselect", init_trackselect },
 };
 
-/* Forward declarations. */
-
-/* intptr_t dialog_modless(void * cookie, dlgmsg_f cntl); */
-/* intptr_t dialog_modal(void * cookie, dlgmsg_f cntl); */
+enum {
+  IID_CONFIG = 0, IID_FILEINFO, IID_TRACKSELECT
+};
 
 static intptr_t CALLBACK DialogProc(HWND,UINT,WPARAM,LPARAM);
 
@@ -185,8 +225,10 @@ void dbg(const char * fmt, ...)
   if (i > max) i = max;
   s[i] = 0;
   if (hdl = GetStdHandle(STD_ERROR_HANDLE),
-      (hdl != NULL && hdl != INVALID_HANDLE_VALUE))
+      (hdl != NULL && hdl != INVALID_HANDLE_VALUE)) {
     WriteFile(hdl,s,i,&i,NULL);
+    FlushFileBuffers(hdl);
+  }
   else
     OutputDebugStringA(s);
   va_end(list);
@@ -197,24 +239,29 @@ void dbg_error(int err, const char * fmt, ...)
 {
   char str[512];
   int max = sizeof(str), i;
-  i = FormatMessageA(
-    FORMAT_MESSAGE_FROM_SYSTEM, 0, err,
-    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-    str, max, 0);
-  if (i<=0)
-    i = _snprintf(str,max,"#%d",err);
-  else
-    while (--i > 0 && isspace(str[i])) ;
 
-  dbg("ERROR: %s\n",str);
   if (fmt) {
     va_list list;
     va_start(list,fmt);
-    vsnprintf(str,max,fmt,list);
+    i = vsnprintf(str,max,fmt,list);
     va_end(list);
-    dbg("ERROR: %s\n", str);
+  }
+  if (i < max)
+    i += snprintf(str+i,max-i," -- ");
+  if (i < max) {
+    int n =
+      FormatMessageA(
+        FORMAT_MESSAGE_FROM_SYSTEM, 0, err,
+        MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+        str+i, max-i, 0);
+    if (n <= 0)
+      n = snprintf(str+i,max-i,"#%d",err);
+    while (--n > 0 && isspace((int)str[i+n]))
+      str[i+n] = 0;
+    i += n;
   }
   str[max-1] = 0;
+  dbg("ERROR: %s\n",str);
 }
 
 #else
@@ -267,7 +314,7 @@ static int SetFormat(HWND hdlg, int id, const char * fmt, ...)
   va_list list;
 
   va_start(list,fmt);
-  _vsnprintf(buffer, sizeof(buffer), fmt, list);
+  vsnprintf(buffer, sizeof(buffer), fmt, list);
   va_end(list);
   buffer[sizeof(buffer)-1] = 0;
   return SetText(hdlg, id, buffer);
@@ -326,7 +373,7 @@ static inline int GetSlidePos(HWND hdlg, int idc)
 static int init_int(dialog_t * dial, int idc, const char * key)
 {
   sc68_dialval_t v;
-  if (!dial->cntl(dial->cookie, key, SC68_DIAL_GETI, &v)) {
+  if (dial_geti(dial, key, &v)) {
     DBG("%s(%d,%s) <- %d\n", __FUNCTION__, idc, key, v.i);
     return SetInt(dial->hdlg, idc, v.i);
   }
@@ -339,7 +386,7 @@ static int return_int(dialog_t * dial, int idc, const char * key)
   sc68_dialval_t v;
   if (!GetInt(dial->hdlg, idc, &v.i)) {
     DBG("%s(%d,%s) -> %d\n", __FUNCTION__, idc, key, v.i);
-    return dial->cntl(dial->cookie, key, SC68_DIAL_SETI, &v);
+    return dial_seti(dial, key, &v);
   }
   return -1;
 }
@@ -347,7 +394,7 @@ static int return_int(dialog_t * dial, int idc, const char * key)
 static int init_text(dialog_t * dial, int idc, const char * key)
 {
   sc68_dialval_t v;
-  if (!dial->cntl(dial->cookie, key, SC68_DIAL_GETS, &v)) {
+  if (!dial_gets(dial, key, &v)) {
     DBG("%s(%d,%s) <- \"%s\"\n", __FUNCTION__, idc, key, v.s);
     return SetText(dial->hdlg, idc, v.s);
   }
@@ -362,7 +409,7 @@ static int return_text(dialog_t * dial, int idc, const char * key)
     sc68_dialval_t v;
     v.s = s;
     DBG("%s(%d,%s) -> \"%s\"\n", __FUNCTION__, idc, key, s);
-    return dial->cntl(dial->cookie, key, SC68_DIAL_SETS, &v);
+    return dial_sets(dial, key, &v);
   }
   return -1;
 }
@@ -371,7 +418,7 @@ static int return_text(dialog_t * dial, int idc, const char * key)
 static int init_time(dialog_t * dial, int idc, const char * key)
 {
   sc68_dialval_t v;
-  if (!dial->cntl(dial->cookie, key, SC68_DIAL_GETI, &v))
+  if (!dial_geti(dial, key, &v))
     return SetFormat(dial->hdlg, idc, "%02u:%02u",
                      (unsigned)v.i/60u,  (unsigned)v.i%60u);
   return -1;
@@ -380,12 +427,12 @@ static int init_time(dialog_t * dial, int idc, const char * key)
 static int init_check(dialog_t * dial, int idc, const char * key)
 {
   sc68_dialval_t v;
-  if (!dial->cntl(dial->cookie, key, SC68_DIAL_GETI, &v)) {
+  int res = dial_geti(dial, key, &v);
+  if (!res) {
     DBG("%s(%d,%s) <- %s\n", __FUNCTION__, idc, key, v.i?"On":"Off");
     SetCheck(dial->hdlg, idc, v.i);
-    return 0;
   }
-  return -1;
+  return res;
 }
 
 static int return_check(dialog_t * dial, int idc, const char * key)
@@ -394,7 +441,7 @@ static int return_check(dialog_t * dial, int idc, const char * key)
   v.i = GetCheck(dial->hdlg, idc);
   if (v.i >= 0) {
     DBG("%s(%d,%s) -> %d\n", __FUNCTION__, idc, key, v.i);
-    return dial->cntl(dial->cookie, key, SC68_DIAL_SETI, &v);
+    return dial_seti(dial, key, &v);
   }
   return -1;
 }
@@ -409,13 +456,13 @@ static int init_combo(dialog_t * dial, int idc, const char * key)
   DBG("%s(%d,%s)\n", __FUNCTION__, idc, key);
   SendMessageA(hcb, CB_RESETCONTENT,  0, 0);
   for (i=0;
-       (v.i = i), !dial->cntl(dial->cookie, key, SC68_DIAL_ENUM, &v);
+       (v.i = i), !dial_enum(dial, key, &v);
        ++i) {
     DBG("%s(%d) %s[%d] = \"%s\"\n", __FUNCTION__,
         idc, key, i, v.s);
     SendMessageA(hcb, CB_ADDSTRING, 0, (LPARAM)v.s);
   }
-  if (!dial->cntl(dial->cookie, key, SC68_DIAL_GETI, &v)) {
+  if (!dial_geti(dial, key, &v)) {
     DBG("%s(%d) %s[@] = %d\n", __FUNCTION__, idc, key, v.i);
     SendMessageA(hcb, CB_SETCURSEL, v.i, 0);
   }
@@ -428,7 +475,7 @@ static int return_combo(dialog_t * dial, int idc, const char * key)
   v.i = SendDlgItemMessageA(dial->hdlg, idc, CB_GETCURSEL,0,0);
   if (v.i >= 0) {
     DBG("%s(%d,%s) -> %d\n", __FUNCTION__, idc, key, v.i);
-    return dial->cntl(dial->cookie, key, SC68_DIAL_SETI, &v);
+    return dial_seti(dial, key, &v);
   }
   return -1;
 }
@@ -441,9 +488,9 @@ static int init_slide(dialog_t * dial, int idc, const char * key,
 
   DBG("%s(%d,%s,%d,%d)\n", __FUNCTION__, idc, key, bud, ntics);
 
-  if (!dial->cntl(dial->cookie, key, SC68_DIAL_MIN,  &min) &&
-      !dial->cntl(dial->cookie, key, SC68_DIAL_MAX,  &max) &&
-      !dial->cntl(dial->cookie, key, SC68_DIAL_GETI, &num )) {
+  if (!dial_mini(dial, key, &min) &&
+      !dial_maxi(dial, key, &max) &&
+      !dial_geti(dial, key, &num )) {
 
     DBG("slide \"%s\" %d<%d<%d\n", key, min.i, num.i, max.i);
 
@@ -486,7 +533,7 @@ static int return_slide(dialog_t * dial, int idc, const char * key)
   v.i = GetSlidePos(dial->hdlg,idc);
   if (v.i >= 0) {
     DBG("%s(%d,%s) -> %d\n", __FUNCTION__, idc, key, v.i);
-    return dial->cntl(dial->cookie, key, SC68_DIAL_SETI, &v);
+    return dial_seti(dial, key, &v);
   }
   return -1;
 }
@@ -496,9 +543,9 @@ static int init_spin(dialog_t * dial, int idc, const char * key, int bud)
   sc68_dialval_t min , max, num;
 
   DBG("%s(%d,%s,%d)\n", __FUNCTION__, idc, key, bud);
-  if (!dial->cntl(dial->cookie, key, SC68_DIAL_MIN, &min) &&
-      !dial->cntl(dial->cookie, key, SC68_DIAL_MAX, &max) &&
-      !dial->cntl(dial->cookie, key, SC68_DIAL_GETI, &num)) {
+  if (!dial_mini(dial, key, &min) &&
+      !dial_maxi(dial, key, &max) &&
+      !dial_geti(dial, key, &num)) {
     DBG("spin \"%s\" %d<%d<%d\n", key,min.i,num.i,max.i);
 
     SendDlgItemMessage(dial->hdlg, idc, UDM_SETRANGE32, min.i, max.i);
@@ -518,7 +565,7 @@ static int return_spin(dialog_t * dial, int idc, const char * key)
   v.i = SendDlgItemMessageA(dial->hdlg,idc,UDM_GETPOS32,0,(LPARAM)&failed);
   if (!failed) {
     DBG("%s(%d,%s) -> %d\n", __FUNCTION__, idc, key, v.i);
-    return dial->cntl(dial->cookie, key, SC68_DIAL_SETI, &v);
+    return dial_seti(dial, key, &v);
   }
   return -1;
 }
@@ -534,6 +581,10 @@ static int update_spr(dialog_t * dial)
 static int init_config(dialog_t * dial)
 {
   int res = 0;
+
+  assert(dial);
+  assert(dial->iid == IID_CONFIG);
+
   res |= init_combo(dial,IDC_CFG_YMENGINE,  "ym-engine");
   res |= init_combo(dial,IDC_CFG_YMFILTER,  "ym-filter");
   res |= init_combo(dial,IDC_CFG_YMVOLUME,  "ym-volmodel");
@@ -546,12 +597,15 @@ static int init_config(dialog_t * dial)
   res |= init_spin(dial, IDC_CFG_TIMESPIN,  "default-time", IDC_CFG_DEFTIME);
   res |= init_check(dial,IDC_CFG_UFI,       "ufi");
   res |= init_check(dial,IDC_CFG_HOOK,      "hook");
-  return -!!res;
+  return res;
 }
 
 static int return_config(dialog_t * dial)
 {
   int res = 0;
+
+  assert(dial);
+  assert(dial->iid == IID_CONFIG);
 
   res |= return_combo(dial,IDC_CFG_YMENGINE,  "ym-engine");
   res |= return_combo(dial,IDC_CFG_YMFILTER,  "ym-filter");
@@ -560,24 +614,31 @@ static int return_config(dialog_t * dial)
   res |= IsEnabled(dial->hdlg,IDC_CFG_USRSPR)
     ? return_int(dial,IDC_CFG_USRSPR, "sampling-rate")
     : return_combo(dial,IDC_CFG_SPR,  "sampling-rate")
-  ;
+    ;
   res |= return_check(dial,IDC_CFG_AGAFILTER, "amiga-filter");
   res |= return_slide(dial,IDC_CFG_AGABLEND,  "amiga-blend");
   res |= return_spin(dial, IDC_CFG_TIMESPIN,  "default-time");
   res |= return_check(dial,IDC_CFG_UFI,       "ufi");
   res |= return_check(dial,IDC_CFG_HOOK,      "hook");
 
-  if (!res) {
+  if (res >= 0) {
     sc68_dialval_t v;
-    if (dial->cntl(dial->cookie,"save",SC68_DIAL_CALL, &v) || v.i)
-      res = -1;
+    res = dial_call(dial,"save",&v);
+    if (!res)
+      res = -!!v.i;
+    else if (res > 0)
+      res = 0;
   }
-  return dial->retval = res ? -3 : 0;
+  return dial->retval = res<0 ? -3 : 0;
 }
 
 static int update_fileinfo(dialog_t * dial, int what)
 {
   int res = 0;
+
+  assert(dial);
+  assert(dial->iid == IID_FILEINFO);
+
   if (what & 1) {
     init_time(dial, IDC_INF_TIME,      "time");
     init_text(dial, IDC_INF_FORMAT,    "format");
@@ -596,7 +657,8 @@ static int update_fileinfo(dialog_t * dial, int what)
     sc68_dialval_t v;
     v.i = GetComboPos(dial->hdlg, IDC_INF_TAGNAME);
     if (v.i >= 0 &&
-        !dial->cntl(dial->cookie, "tag-val", SC68_DIAL_ENUM, &v)) {
+        !dial_enum(dial,"tag-val",&v)
+      ) {
       SetText(dial->hdlg, IDC_INF_TAGVALUE, v.s);
     }
   }
@@ -607,6 +669,10 @@ static int update_fileinfo(dialog_t * dial, int what)
 static int init_fileinfo(dialog_t * dial)
 {
   int res = 0;
+
+  assert(dial);
+  assert(dial->iid == IID_FILEINFO);
+
   init_text(dial, IDC_INF_URI,     "uri");
   init_combo(dial, IDC_INF_TRACK,  "track");
   init_combo(dial,IDC_INF_TAGNAME, "tag-key");
@@ -624,6 +690,9 @@ static int init_trackselect(dialog_t * dial)
   void * user = dial->cookie;
   sc68_dialval_t v;
 
+  assert(dial);
+  assert(dial->iid == IID_TRACKSELECT);
+
   DBG("remember:%s track:%d asid:%d\n",
       sel_remember.set?"On":"Off", sel_remember.track, sel_remember.asid);
 
@@ -633,14 +702,14 @@ static int init_trackselect(dialog_t * dial)
 
   if (sel_remember.set) {
     v.i = sel_remember.track;
-    dial->cntl(user, "track", SC68_DIAL_SETI, &v);
+    dial_seti(user, "track", &v);
     SetComboPos(dial->hdlg, IDC_SEL_TRACK, v.i);
     v.i = sel_remember.asid;
-    dial->cntl(user, "asid", SC68_DIAL_SETI, &v);
+    dial_seti(user, "asid", &v);
     SetComboPos(dial->hdlg, IDC_SEL_ASID, v.i);
   }
   SetCheck(hdlg, IDC_SEL_REMEMBER, sel_remember.set);
-  if (!dial->cntl(dial->cookie,"hw_asid", SC68_DIAL_GETI, &v))
+  if (!dial_geti(dial,"hw_asid", &v))
     SetEnable(hdlg,IDC_SEL_ASID,!!v.i);
   DBG("%s() -> %d\n", __FUNCTION__, res);
 
@@ -649,10 +718,15 @@ static int init_trackselect(dialog_t * dial)
 
 static int return_tracksel(dialog_t * dial)
 {
-  int track = GetComboPos(dial->hdlg, IDC_SEL_TRACK);
-  int asid  = GetComboPos(dial->hdlg, IDC_SEL_ASID);
+  int track, asid;
+
+  assert(dial);
+  assert(dial->iid == IID_TRACKSELECT);
+
+  track = GetComboPos(dial->hdlg, IDC_SEL_TRACK);
   if (track < 0) track = 0;
-  if (asid  < 0) asid = 0;
+  asid = GetComboPos(dial->hdlg, IDC_SEL_ASID);
+  if (asid < 0) asid = 0;
   dial->retval = track & 255;
   if (IsEnabled(dial->hdlg,IDC_SEL_ASID))
     dial->retval |= asid << 8;
@@ -672,31 +746,51 @@ static intptr_t CALLBACK DialogProc(
 {
   dialog_t * dial = GET_USERCOOKIE(hdlg);
   sc68_dialval_t v;
-  int i;
 
   /* To set a result : */
   /* SetWindowLong(hdlg, DWL_MSGRESULT, lResult); return TRUE; */
 
-  switch(umsg)
-  {
+  DBG("DialogProc: 0x%03x %p\n", umsg, (void *) dial);
+
+
+  switch (umsg) {
+
   case WM_INITDIALOG:
     DBG("%s() -- WM_INITDIALOG:\n", __FUNCTION__);
-    dial = (dialog_t *)lparam;
-    if (!dial || dial->magic != magic)  {
+    dial = (dialog_t *) lparam;
+    if (!isdial(dial))  {
       DBG("%s() WARNING user cookie corrupted\n", __FUNCTION__);
       dial = 0;
     } else {
+      const int max_iid = sizeof(dlgdef)/sizeof(*dlgdef);
       dial->hdlg = hdlg;
+      SET_USERCOOKIE(hdlg, dial);
+      if (dial->iid >= 0 && dial->iid < max_iid)
+        dlgdef[dial->iid].init(dial);
+      else
+        DBG("%s() -- \"%s\" iid out of range -- %d\n",
+            dial->ident, dial->iid);
     }
+    return TRUE; /* set the focus to the control specified by wParam */
 
-    SET_USERCOOKIE(hdlg, dial);
-    for (i=0; i<sizeof(dlgdef)/sizeof(*dlgdef); ++i) {
-      if (!strcmp(dial->ident, dlgdef[i].ident )) {
-        dlgdef[i].init(dial);
+  case WM_NCDESTROY:
+    DBG("WM_NCDESTROY %p\n", (void *) dial);
+    if (isdial(dial)) {
+      if (!dial->modal) {
+        DBG("WM_NCDESTROY %p -- Kill modless dialog\n", (void *) dial);
+        dial->hdlg = 0;
+        kill_dialog(dial);
       }
+      SET_USERCOOKIE(hdlg, 0);
     }
-    return TRUE;
+    return FALSE;
+  }
 
+  if (!isdial(dial))
+    return FALSE;
+
+  switch(umsg)
+  {
   case WM_COMMAND: {
     /* int wNotifyCode = HIWORD(wparam); // notification code */
     int wID = LOWORD(wparam); // item, control, or accelerator identifier
@@ -709,14 +803,14 @@ static intptr_t CALLBACK DialogProc(
        * ---------------------------------------------------------------- */
 
     case IDOK:
-      switch (dial->idd) {
+      switch (dial->iid) {
 
         /* OK on trackselect */
-      case IDD_DLG_TRACKSELECT:
+      case IID_TRACKSELECT:
         return_tracksel(dial); break;
 
         /* OK on config */
-      case IDD_DLG_CONFIG:
+      case IID_CONFIG:
         return_config(dial); break;
 
         /* OK on others */
@@ -733,10 +827,10 @@ static intptr_t CALLBACK DialogProc(
     case IDC_SEL_ASID:
     case IDC_CFG_ASID:
       v.i = SendMessageA(hwndCtl, CB_GETCURSEL, 0, 0);
-      if (v.i >=0 && v.i<3) {
-        dial->cntl(dial->cookie,"asid", SC68_DIAL_SETI, &v);
+      if (v.i >= 0 && v.i < 3) {
+        dial_seti(dial, "asid", &v);
         if (wID == IDC_CFG_ASID)
-          dial->cntl(dial->cookie,"asid", SC68_DIAL_CALL, &v);
+          dial_call(dial, "asid", &v);
       }
       return TRUE;
 
@@ -746,13 +840,13 @@ static intptr_t CALLBACK DialogProc(
     case IDC_SEL_TRACK:
     case IDC_INF_TRACK:
       if (HIWORD(wparam) == CBN_SELCHANGE) {
-        v.i = SendMessage(hwndCtl,CB_GETCURSEL,0,0);
+        v.i = SendMessageA(hwndCtl,CB_GETCURSEL,0,0);
         if (v.i != CB_ERR) {
-          dial->cntl(dial->cookie,"track", SC68_DIAL_SETI, &v);
+          dial_seti(dial, "track", &v);
           if (wID == IDC_INF_TRACK) {
             update_fileinfo(dial,1);
           } else /* if (wID == IDC_SEL_TRACK) */ {
-            if (!dial->cntl(dial->cookie,"hw_asid", SC68_DIAL_GETI, &v))
+            if (!dial_geti(dial,"hw_asid", &v))
               SetEnable(hdlg,IDC_SEL_ASID,!!v.i);
           }
         }
@@ -771,14 +865,14 @@ static intptr_t CALLBACK DialogProc(
     case IDC_CFG_AGAFILTER:
       /* Real Time apply */
       v.i = GetCheck(hdlg, IDC_CFG_AGAFILTER) == 1;
-      if (!dial->cntl(dial->cookie,"amiga-filter", SC68_DIAL_CALL, &v))
+      if (!dial_call(dial, "amiga-filter", &v))
         DBG("Real-Time amiga-filter => %d\n", v.i);
       return TRUE;
 
     case IDC_CFG_AGABLEND:
       /* Real Time apply */
       v.i = GetSlidePos(hdlg, IDC_CFG_AGABLEND);
-      if (v.i>=0 && !dial->cntl(dial->cookie,"amiga-blend", SC68_DIAL_CALL, &v))
+      if (v.i >= 0 && !dial_call(dial,"amiga-blend", &v))
         DBG("Real-Time amiga-blend => %d\n", v.i);
       return TRUE;
 
@@ -799,17 +893,14 @@ static intptr_t CALLBACK DialogProc(
       DestroyWindow(hdlg);
     }
     return TRUE;
-
-  case WM_DESTROY: {
-    DBG("WM_DESTROY retval = %d\n", dial->retval);
-    if (!dial->modal)
-      kill_dialog(dial);
-    SET_USERCOOKIE(hdlg, 0);
-    dial->hdlg = 0;
-  } break;
-
   }
 
+  /* DBG("%s(dlg:x%x,msg:x%x,wpar:x%x,lpar:x%x) *unhandled message*\n", */
+  /*     __FUNCTION__, */
+  /*     (unsigned) hdlg, */
+  /*     (unsigned) umsg, */
+  /*     (unsigned) wparam, */
+  /*     (unsigned) lparam); */
   return FALSE;
 }
 
@@ -819,15 +910,34 @@ static intptr_t CALLBACK DialogProc(
 
 static void kill_dialog(dialog_t * dial)
 {
+  assert(dial);
+  assert(dial->cntl);
+  assert(dial->cookie);
+
   if (dial) {
     DBG("kill dialog \"%s\"\n",dial->ident?dial->ident:"(nil)");
     if (dial->cntl) {
       sc68_dialval_t v;
       v.i = dial->retval;
-      dial->cntl(dial->cookie,SC68_DIAL_KILL, SC68_DIAL_CALL, &v);
+      dial_call(dial, SC68_DIAL_KILL, &v);
     }
     free(dial);
   }
+}
+
+static HMODULE get_hmodule(void)
+{
+#if 1
+  return GetModuleHandleA(0);
+#else
+  HMODULE hModule = NULL;
+  static int avar;
+  GetModuleHandleExA(
+    GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS,
+    (LPCTSTR) &avar,
+    &hModule);
+  return hModule;
+#endif
 }
 
 static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
@@ -844,21 +954,21 @@ static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
 
   ZeroMemory(&tmp,sizeof(tmp));
   tmp.magic   = magic;
-  tmp.idd     = IDC_STATIC;
+  tmp.iid     = -1;
   tmp.cookie  = cookie;
   tmp.cntl    = cntl;
   tmp.retval  = -2;
 
   /* Introducing myself  */
   v.s =  "win32/native";
-  if (cntl(cookie,SC68_DIAL_HELLO,SC68_DIAL_CALL,&v ))
+  if (cntl(cookie,SC68_DIAL_HELLO,SC68_DIAL_CALL,&v))
     goto failed;
   DBG("connected to \"%s\"\n", v.s);
 
   /* Do I know you ? */
   for (i=0; i<maxdef; ++i) {
     if (!strcmp(dlgdef[i].ident,v.s)) {
-      tmp.idd = dlgdef[i].idd;
+      tmp.iid = i;
       tmp.ident = dlgdef[i].ident;
       break;
     }
@@ -868,8 +978,11 @@ static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
     goto failed;
   }
 
-  if (cntl(cookie, "instance", SC68_DIAL_CALL, &v) || !v.s) {
-    v.s = (void*)GetModuleHandleA(0);
+  /* Instance / Hmodule */
+  if (cntl(cookie, "instance", SC68_DIAL_CALL, &v))
+    v.s = 0;
+  if (!v.s) {
+    v.s = (void*) get_hmodule();
     DBG("User did not provide a instance handle -> default is %p\n",v.s);
     if (!v.s)
       goto failed;
@@ -878,7 +991,15 @@ static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
   DBG("win32 instance -> %p\n", (void*) tmp.hinst);
 
   if (cntl(cookie, "parent", SC68_DIAL_CALL, &v))
-    v.s = 0;                          /* Is there a better choice ? */
+    v.s = 0;
+  if (!v.s) {
+    /* User did not provide a parent window; let's try some
+     * reasonnable guess. */
+    v.s = (void*) GetActiveWindow();     /* thread msg Q window */
+    if (!v.s)
+      v.s = (void*) GetDesktopWindow(); /* desktop windows */
+    DBG("User did not provide a parent window -> default is %p\n", v.s);
+  }
   tmp.hparent = (HWND) v.s;
   DBG("win32 parent window -> %p\n", (void*) tmp.hparent);
 
@@ -898,27 +1019,72 @@ failed:
   return 0;
 }
 
+#ifdef DEBUG
+#define DOENUM 1
+
 static
-intptr_t dialog_modal(void * cookie, dlgmsg_f cntl)
+BOOL CALLBACK myenum(
+  HMODULE  hModule,
+  LPCTSTR  lpszType,
+  LPTSTR   lpszName,
+  LONG_PTR lParam
+  ) {
+  dialog_t * dial = (dialog_t *) lParam;
+  if (IS_INTRESOURCE(lpszName))
+    DBG("%s: int %d\n", dial->ident, (int)lpszName);
+  else
+    DBG("%s: str \"%s\"\n", dial->ident, lpszName);
+  return TRUE;                          /* continue */
+}
+
+static void dialog_enum(dialog_t * dial)
+{
+  BOOL res = EnumResourceNamesA(
+    dial->hinst,
+    RT_DIALOG,
+    myenum,
+    (LONG_PTR)dial);
+  if (!res) {
+    int err = GetLastError();
+    ERR(err, "enum/%s (failed)", dial->ident);
+  }
+}
+
+#endif
+
+static intptr_t dialog_modal(void * data, dlgmsg_f cntl)
 {
   intptr_t ret;
-  dialog_t * dial = new_dialog(cookie, cntl);
-
-  DBG("%s -- new_dialog() -> %p\n", __FUNCTION__, dial);
+  dialog_t * dial = new_dialog(data, cntl);
 
   if (!dial)
     ret = -1;
   else {
+    DWORD err;
+    const char * tpl = dial->ident;
+
+#ifdef DOENUM
+    dialog_enum(dial);
+#endif
+
     dial->modal = 1;
-    /* return the result of EndDialog() */
-    ret = DialogBoxParam(dial->hinst,
-                         MAKEINTRESOURCE(dial->idd),
-                         dial->hparent,
-                         (DLGPROC) DialogProc,
-                         (LPARAM)dial);
+    SetLastError(ERROR_SUCCESS);
+    /* returns the result of EndDialog() */
+    ret = DialogBoxParamA(dial->hinst, tpl, dial->hparent,
+                          (DLGPROC) DialogProc, (LPARAM)dial);
+    err = GetLastError();
     if (ret <= 0) {
-      ERR(GetLastError(), "%s(\"%s\")", __FUNCTION__, dial->ident);
+      if (ret == 0) {
+        ERR(err, "%s/%s (Invalid parent window)", "modal", dial->ident);
+      } else if (ret == -1) {
+        ERR(err, "%s/%s", "modal", dial->ident);
+      } else {
+        ERR(err, "%s/%s (unexpected code %d)", "modal", dial->ident, ret);
+      }
+      ret = -1;
     } else {
+      if (err != ERROR_SUCCESS)
+        ERR(err,"%s/%s (non fatal)", "modal", dial->ident);
       ret = dial->retval;
     }
     kill_dialog(dial);
@@ -927,31 +1093,37 @@ intptr_t dialog_modal(void * cookie, dlgmsg_f cntl)
   return ret;
 }
 
-static
-intptr_t dialog_modless(void * cookie, dlgmsg_f cntl)
+static intptr_t dialog_modless(void * data, dlgmsg_f cntl)
 {
   intptr_t ret;
-  dialog_t * dial = new_dialog(cookie, cntl);
-
-  DBG("%s -- new_dialog() -> %p\n", __FUNCTION__, dial);
-
+  dialog_t * dial = new_dialog(data, cntl);
 
   if (!dial)
     ret = -1;
   else {
+    DWORD err;
+    const char * tpl = dial->ident;
+
+#ifdef DOENUM
+    // $$$ TEMP
+    dialog_enum(dial);
+#endif
+
     dial->modal = 0;
+    SetLastError(ERROR_SUCCESS);
     dial->hdlg =
-      CreateDialogParam(dial->hinst,
-                        MAKEINTRESOURCE(dial->idd),
-                        dial->hparent,
-                        (DLGPROC) DialogProc,
-                        (LPARAM)dial);
+      CreateDialogParamA(dial->hinst, tpl, dial->hparent,
+                         (DLGPROC) DialogProc, (LPARAM)dial);
+    err = GetLastError();
     if (!dial->hdlg) {
-      ERR(GetLastError(), "%s(\"%s\")\n", __FUNCTION__, dial->ident);
+      ERR(err, "%s/%s", "modless", dial->ident);
       kill_dialog(dial);
       ret = -1;
-    } else
+    } else {
+      if (err != ERROR_SUCCESS)
+        ERR(err,"%s/%s (non fatal)", "modless", dial->ident);
       ret = 0;
+    }
   }
   DBG("%s -> %d\n", __FUNCTION__, (int) ret);
   return ret;
@@ -959,10 +1131,14 @@ intptr_t dialog_modless(void * cookie, dlgmsg_f cntl)
 
 int dial68_frontend(void * data, sc68_dial_f cntl)
 {
+  int ret;
   sc68_dialval_t v;
-  return !cntl(data,SC68_DIAL_WAIT,SC68_DIAL_CALL,&v) && v.i
-    ? dialog_modal(data,cntl)
-    : dialog_modless(data,cntl)
-    ;
+  assert(cntl && data);
+  if (!data || !cntl)
+    ret = -1;
+  else if (!cntl(data,SC68_DIAL_WAIT,SC68_DIAL_CALL,&v) && v.i)
+    ret = dialog_modal(data,cntl);
+  else
+    ret = dialog_modless(data,cntl);
+  return ret;
 }
-

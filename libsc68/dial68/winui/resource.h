@@ -2,9 +2,6 @@
 #define IDC_STATIC (-1)
 #endif
 
-#define IDD_DLG_FILEINFO                        102
-#define IDD_DLG_CONFIG                          104
-#define IDD_DLG_TRACKSELECT                     107
 #define IDC_INF_URI                             1003
 #define IDC_INF_FORMAT                          1005
 #define IDC_INF_GENRE                           1009

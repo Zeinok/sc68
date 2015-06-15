@@ -308,7 +308,7 @@ static uint_t crc32b(uint_t crc, u8 * ptr, int len)
     int j;
     crc ^= *ptr++;
     for (j = 7; j >= 0; j--) {
-      const uint_t mask = -(crc & 1);
+      const int mask = -(int)(crc & 1);
       crc = (crc >> 1) ^ (0xEDB88320 & mask);
     }
   }

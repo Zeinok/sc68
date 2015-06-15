@@ -48,7 +48,7 @@
 /* windows */
 #include <windows.h>
 
-HMODULE g_hmod = 0;
+HMODULE winui_hmod = 0;
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
@@ -56,14 +56,14 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
   switch (fdwReason) {
   case DLL_PROCESS_ATTACH:
-    if (!g_hmod)
-      g_hmod = hinstDLL;
-    else if (g_hmod != hinstDLL)
+    if (!winui_hmod)
+      winui_hmod = hinstDLL;
+    else if (winui_hmod != hinstDLL)
       ret = FALSE;
     break;
   case DLL_PROCESS_DETACH:
-    if (g_hmod == hinstDLL)
-      g_hmod = 0;
+    if (winui_hmod == hinstDLL)
+      winui_hmod = 0;
     break;
   }
 

@@ -24,7 +24,7 @@ AM_INIT_AUTOMAKE([foreign 1.11 silent-rules dist-xz
 AC_CONFIG_HEADERS([config.h])
 AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
-LT_PROG_RC
+LT_LANG([Windows Resource])
 
 # ,----------------------------------------------------------------------.
 # | sc68                                                                 |
@@ -59,6 +59,8 @@ if test x"${enable_dialog}" = xyes; then
   enable_dialog=no
   if test x"${ac_sys_native_win32}" = xyes; then
       enable_dialog=winui; 
+      LT_LANG([Windows Resource])
+      dnl #LT_PROG_RC
   fi
 fi
 

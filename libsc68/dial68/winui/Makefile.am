@@ -11,21 +11,37 @@
 
 ACLOCAL_AMFLAGS = -I m4 --install
 AM_CFLAGS       = $(ALL_CFLAGS) $(LIB_CFLAGS) -mwin32
-AM_CPPFLAGS     = -I$(top_srcdir)
+AM_CPPFLAGS     = -I$(top_srcdir) -DFORCE_RSC=1
 
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |
 # `----------------------------------------------------------------------'
 
-noinst_LTLIBRARIES  = libwinui.la
-libwinui_la_SOURCES = winui_dlg.c resource.rc
-libwinui_la_LDFLAGS = -avoid-version
+noinst_LTLIBRARIES        = libwinui.la
+libwinui_la_SOURCES       = winui_dlg.c resource.h
+libwinui_la_DEPENDENCIES  = do-glued
+libwinui_la_LIBADD        = winui_glu.lo
+EXTRA_libwinui_la_SOURCES = resource.rc winui_rsc.c winui_dll.c
+libwinui_la_LDFLAGS       = -avoid-version
 
-if dll_winui
-EXTRA_DIST          = winui_dll.c
-endif
+do-glued: winui_glu.lo
 
-.rc.lo: 
-	$(LIBTOOL) --tag=RC --mode=compile $(RC) $< -o $@
+# *** EVIL DIRTY HACK ***
+#
+# To create winui_glu.lo (and associated .o) we used libtool as it
+# almost work. It runs the proper link command (-r) but it does not
+# create the .lo file. The hack just transform winui_rsc.lo into a
+# suitable winui_glu.lo
+#
+winui_glu.lo: winui_rsc.lo resource.lo
+	$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=link $(CCLD) -o $@ $^
+	test -f winui_glu.o && cp winui_glu.o .libs/winui_glu.o
+	sed 's/winui_rsc/winui_glu/g' $< >$@
 
-noinst_HEADERS      = resource.h
+# Does not have a default automake rule for that
+.rc.lo:
+	$(LIBTOOL) $(AM_V_lt) --tag=RC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(RC) -o $@ -i $<
+
+.PHONY: do-glued

@@ -27,9 +27,7 @@ dialsub=
 endif
 
 noinst_LTLIBRARIES   = libdial68.la
-libdial68_la_SOURCES = dial68.c config.c tracksel.c fileinfo.c
+libdial68_la_SOURCES = dial68.c dial_conf.c dial_tsel.c dial_finf.c
 libdial68_la_LDFLAGS = -avoid-version
 libdial68_la_LIBADD  = $(dialsub)
 noinst_HEADERS       = dial68.h
-
-# config.c  fileinfo.c trackselect.c

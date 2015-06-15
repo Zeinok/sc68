@@ -232,8 +232,10 @@ static int print_usage(void)
       "  -h --help           Print this message and exit\n"
       "  -v --version        Print sc68 version x.y.z and licence and exit\n"
       "  -D --debug-list     Print debug categories and exit\n"
+
       "  -C --config         Open configuration dialog and exit\n"
       "  -I --info           Open file info dialog and exit\n"
+
       "  -v --verbose        Print more info\n"
       "  -q --quiet          Do not display music info\n"
       "  -r --rate=<val>     Sampling rate (in hz)\n"
@@ -329,8 +331,10 @@ static int conf_dialog(void)
    fileinfo dialog
    ====================================================================== */
 
+
 struct finf {
-  sc68_t     * sc68;
+  int loaded;
+  sc68_disk_t disk;
   const char * uri;
 };
 
@@ -346,24 +350,32 @@ static int finf_f(void * data, const char * key, int op, sc68_dialval_t * v)
     return 1;
   else if (!strcmp(key,SC68_DIAL_WAIT))
     v->i = 1;
-  else if (!strcmp(key,SC68_DIAL_KILL))
+  else if (!strcmp(key,SC68_DIAL_KILL)) {
+    sc68_disk_free(fi->disk);
+    fi->loaded = 0;
+    fi->disk   = 0;
     return 1;
+  }
   else if (!strcmp(key,SC68_DIAL_HELLO))
     v->s = "fileinfo";
-  else if (!strcmp(key,"sc68"))
-    v->s = (void*) fi->sc68;
   else if (!strcmp(key,"disk")) {
-    if (sc68_cntl(fi->sc68, SC68_GET_DISK, &v->s))
-      return -1;
-  } else
+    if (!fi->loaded) {
+      fi->disk = sc68_load_disk_uri(fi->uri);
+      fi->loaded = 1;
+    }
+    v->s = fi->disk;
+    return 0;
+  }
+  else
     return 1;                           /* comtinue */
   return 0;                             /* taken */
 }
 
-static int finf_dialog(sc68_t * sc68, const char * uri)
+static int finf_dialog(const char * uri)
 {
   static struct finf fi;
-  fi.sc68 = sc68;
+  fi.loaded = 0;
+  fi.disk = 0;
   fi.uri  = uri;
   return sc68_cntl(sc68,SC68_DIAL,&fi,finf_f);
 }
@@ -732,7 +744,7 @@ int main(int argc, char *argv[])
     if (val == -1) break;
   };
 #else
-  fprintf(stderr,"sc68: getopt() need to be implemented\n");
+  fprintf(stderr,"%s: getopt() need to be implemented\n", argv[0]);
   err = -1;
   goto error;
 #endif
@@ -764,18 +776,23 @@ int main(int argc, char *argv[])
     goto exit;
   }
 
-
   /* Select input */
 
   if (!inname && i<argc) {
     inname = argv[i];
   }
   if (!inname) {
-    fprintf(stderr, "%s: missing input file. Try --help.\n",argv[0]);
+    fprintf(stderr, "%s: missing input file. Try --help.\n", argv[0]);
     goto error;
   }
   if (!strcmp(inname,"-")) {
     inname = "stdin:sc68";
+  }
+
+  /* track info dialog ? */
+  if (opt_info) {
+    err = finf_dialog(inname);
+    goto exit;
   }
 
   /* Select output
@@ -854,19 +871,16 @@ int main(int argc, char *argv[])
 
   out = sc68_vfs(outname, 2, 1, create68.sampling_rate);
   if (!out) {
+    fprintf(stderr,"%s: failed to create output -- %s\n", argv[0], outname);
     goto error;
   }
   if (vfs68_open(out)) {
+    fprintf(stderr,"%s: failed to open output -- %s\n", argv[0], outname);
     goto error;
   }
 
   if (sc68_load_uri(sc68, inname)) {
     goto error;
-  }
-
-  if (opt_info) {
-    err = finf_dialog(sc68,inname);
-    goto exit;
   }
 
   /* Parse --track= */

@@ -238,7 +238,9 @@ static int isao_open(vfs68_t * vfs)
 
     TRACE68(ao68_cat,
             AOHD "open -- KEY[%s]='%s'\n", key, val?val:"");
-    if (!strcmp68(key,"driver")) {
+    if (!*key) {
+      /* nothing to do */
+    } else if (!strcmp68(key,"driver")) {
       /* key: driver=list|default|name */
       if (!strcmp68(val,"list") ) {
         /* List all drivers in debug */
@@ -562,6 +564,22 @@ vfs68_t * vfs68_ao_create(const char * uri, int mode, int spr)
   /* Setup for default driver */
   memset(&ao,0,sizeof(ao));
   ao.default_id         = ao_default_driver_id();
+  if (ao.default_id < 0) {
+    /* Could not find a default driver, that's probably bad not fatal
+     * yet.
+     *
+     * Following code tries to set libao null driver as the default
+     * driver but that's probably not such a good idea. We'd rather
+     * know if for some reason there is no working driver.
+     */
+#if 0
+    ao.default_id = ao_driver_id("null");
+    if (ao.default_id < 0)
+      msg68_warning(AOHD "could not find a default driver\n");
+    else
+      msg68_warning(AOHD "using *null* driver as default\n");
+#endif
+  }
   ao.driver_id          = ao.default_id;
   ao.format.bits        = 16;
   ao.format.channels    = 2;
