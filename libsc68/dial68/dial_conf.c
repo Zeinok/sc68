@@ -103,19 +103,36 @@ static int getopt(const char * key, int op, sc68_dialval_t * val)
           val->s = opt->val.str;
           ret = 0;
         }
-      } else
+      }
+      else if (opt->type != opt68_ENU) {
+        if (isset) {
+          val->s = opt->val.num[(const char **)opt->set];
+          ret = 0;
+        }
+      }
+      else
         ret = -1;
       break;
 
     case SC68_DIAL_ENUM:
-      if (opt->type == opt68_ENU &&
-          val->i >= 0 && val->i < (int)opt->sets) {
-        if (isset) {
-          val->s = val->i[(const char **)opt->set];
+      if (opt->type != opt68_ENU)
+        ret = -1;
+      else {
+        int idx = -1;
+        if (val->i == -1) {
+          if (isset)
+            idx = opt->val.num;
+        } else if (val->i >= 0 && val->i < (int)opt->sets) {
+          idx = val->i;
+        } else
+          ret = -1;                     /* out of range */
+
+        if (idx >= 0) {
+          assert(idx < (int)opt->sets);
+          val->s = idx[(const char **)opt->set];
           ret = 0;
         }
-      } else
-        ret = -1;
+      }
       break;
 
     case SC68_DIAL_SETI:

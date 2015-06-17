@@ -181,7 +181,7 @@ int finf(void * data, const char * key, int op, sc68_dialval_t *val)
       else if (keyis("year"))
         val->s = dial->info.year;
       else
-        res = -1;
+        res = 1;
       break;
 
     case SC68_DIAL_GETI:
@@ -196,7 +196,7 @@ int finf(void * data, const char * key, int op, sc68_dialval_t *val)
       else if (keyis("tag-key"))
         val->i = 0;
       else
-        res = -1;
+        res = 1;
       break;
 
     case SC68_DIAL_ENUM:
@@ -212,16 +212,14 @@ int finf(void * data, const char * key, int op, sc68_dialval_t *val)
                 ? dial->info.trk.tag[val->i-a].key
                 : dial->info.trk.tag[val->i-a].val )
             ;
-          break;
-        } else {
-          TRACE68(dial_cat, P "index out of range \"%s\"[%d] > %d\n",
-                  key,val->i,n);
+        } else
           res = -1;
-        }
-      } break;
+      } else
+        res = 1;
+      break;
 
     default:
-      res = -1;
+      res = 1;
     }
   }
 

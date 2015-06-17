@@ -99,8 +99,10 @@ struct keydef_s {
 typedef sc68_dial_f dlgmsg_f;
 
 struct dlgdef_s {
-  const char * ident;
-  int        (*init)(dialog_t*);
+  const char * ident;                   /* identifier */
+  int          idd;                     /* Windows int identifier */
+  const char * locator;                 /* Windows str identifier */
+  int        (*init)(dialog_t*);        /* init callback */
 };
 
 static const int magic = ('W'<<24)|('D'<<16)|('L'<<8)|'G';
@@ -114,6 +116,7 @@ struct dialog_s {
   int          retval;                /* dialog return code         */
   int          iid;                   /* dialog integer identifier  */
   const char * ident;                 /* dialog string identifier   */
+  const char * locator;               /* dialog resource name.      */
   dlgmsg_f     cntl;                  /* dialog user function       */
   void       * cookie;                /* user provided private data */
 };
@@ -184,10 +187,22 @@ static int dial_maxi(dialog_t * dial, const char * key, sc68_dialval_t * v)
   return dial_cntl(dial, key, SC68_DIAL_MAX, v);
 }
 
+#ifndef IDD_CFG
+# define IDD_CFG IDC_STATIC
+#endif
+
+#ifndef IDD_INF
+# define IDD_INF IDC_STATIC
+#endif
+
+#ifndef IDD_SEL
+# define IDD_SEL IDC_STATIC
+#endif
+
 static dlgdef_t dlgdef[3] = {
-  { "config",      init_config      },
-  { "fileinfo",    init_fileinfo    },
-  { "trackselect", init_trackselect },
+  { "config",      IDD_CFG, "sc68-conf", init_config      },
+  { "fileinfo",    IDD_INF, "sc68-finf", init_fileinfo    },
+  { "trackselect", IDD_SEL, "sc68-tsel", init_trackselect },
 };
 
 enum {
@@ -455,12 +470,30 @@ static int init_combo(dialog_t * dial, int idc, const char * key)
 
   DBG("%s(%d,%s)\n", __FUNCTION__, idc, key);
   SendMessageA(hcb, CB_RESETCONTENT,  0, 0);
+  i = 0;
+  while (i >= 0) {
+    v.i = i++;
+    switch (dial_enum(dial, key, &v)) {
+    case 0:
+      if (!v.s) v.s = "<undef>";
+      SendMessageA(hcb, CB_ADDSTRING, 0, (LPARAM)v.s);
+      break;
+
+    default:
+      assert(!"unexepected return");
+    case 1:
+    case -1:
+      i = -1;
+      break;
+    }
+  }
+
   for (i=0;
        (v.i = i), !dial_enum(dial, key, &v);
        ++i) {
+    assert(v.s && v.i != i);
     DBG("%s(%d) %s[%d] = \"%s\"\n", __FUNCTION__,
-        idc, key, i, v.s);
-    SendMessageA(hcb, CB_ADDSTRING, 0, (LPARAM)v.s);
+        idc, key, i, v.s?v.s:"(null)");
   }
   if (!dial_geti(dial, key, &v)) {
     DBG("%s(%d) %s[@] = %d\n", __FUNCTION__, idc, key, v.i);
@@ -750,8 +783,7 @@ static intptr_t CALLBACK DialogProc(
   /* To set a result : */
   /* SetWindowLong(hdlg, DWL_MSGRESULT, lResult); return TRUE; */
 
-  DBG("DialogProc: 0x%03x %p\n", umsg, (void *) dial);
-
+  /* DBG("DialogProc: 0x%03x %p\n", umsg, (void *) dial); */
 
   switch (umsg) {
 
@@ -963,13 +995,18 @@ static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
   v.s =  "win32/native";
   if (cntl(cookie,SC68_DIAL_HELLO,SC68_DIAL_CALL,&v))
     goto failed;
+
+
   DBG("connected to \"%s\"\n", v.s);
 
   /* Do I know you ? */
   for (i=0; i<maxdef; ++i) {
     if (!strcmp(dlgdef[i].ident,v.s)) {
-      tmp.iid = i;
-      tmp.ident = dlgdef[i].ident;
+      tmp.iid   = i;
+      tmp.ident = v.s;
+      tmp.locator = dlgdef[i].idd == IDC_STATIC
+        ? dlgdef[i].locator
+        : MAKEINTRESOURCE(dlgdef[i].idd);
       break;
     }
   }
@@ -1061,7 +1098,7 @@ static intptr_t dialog_modal(void * data, dlgmsg_f cntl)
     ret = -1;
   else {
     DWORD err;
-    const char * tpl = dial->ident;
+    const char * tpl = dial->locator;
 
 #ifdef DOENUM
     dialog_enum(dial);
@@ -1072,19 +1109,17 @@ static intptr_t dialog_modal(void * data, dlgmsg_f cntl)
     /* returns the result of EndDialog() */
     ret = DialogBoxParamA(dial->hinst, tpl, dial->hparent,
                           (DLGPROC) DialogProc, (LPARAM)dial);
-    err = GetLastError();
-    if (ret <= 0) {
-      if (ret == 0) {
-        ERR(err, "%s/%s (Invalid parent window)", "modal", dial->ident);
-      } else if (ret == -1) {
-        ERR(err, "%s/%s", "modal", dial->ident);
-      } else {
-        ERR(err, "%s/%s (unexpected code %d)", "modal", dial->ident, ret);
-      }
+    switch (ret) {
+    case 0: /* For Windows compatibily reason */
+      err = GetLastError();
+      ERR(err, "%s/%s (Invalid parent window)", "modal", dial->ident);
       ret = -1;
-    } else {
-      if (err != ERROR_SUCCESS)
-        ERR(err,"%s/%s (non fatal)", "modal", dial->ident);
+      break;
+    case -1:
+      err = GetLastError();
+      ERR(err, "%s/%s", "modal", dial->ident);
+      break;
+    default:
       ret = dial->retval;
     }
     kill_dialog(dial);
@@ -1102,7 +1137,7 @@ static intptr_t dialog_modless(void * data, dlgmsg_f cntl)
     ret = -1;
   else {
     DWORD err;
-    const char * tpl = dial->ident;
+    const char * tpl = dial->locator;
 
 #ifdef DOENUM
     // $$$ TEMP

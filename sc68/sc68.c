@@ -887,7 +887,7 @@ int main(int argc, char *argv[])
   if (!strcmp(tracks,"sel")) {
     int t = tsel_dialog(sc68);
     if (t < 0) {
-      Error("%s\n", "user abort (track selector)");
+      fprintf(stderr,"%s: track selector -- user abort\n", argv[0]);
       goto error;
     } else {
       asid  = (t >> 8) & 3;

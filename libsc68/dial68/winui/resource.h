@@ -2,6 +2,9 @@
 #define IDC_STATIC (-1)
 #endif
 
+#define IDD_INF                                 103
+#define IDD_SEL                                 104
+#define IDD_CFG                                 105
 #define IDC_INF_URI                             1003
 #define IDC_INF_FORMAT                          1005
 #define IDC_INF_GENRE                           1009

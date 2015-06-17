@@ -17,6 +17,7 @@ AM_CPPFLAGS     = -I$(top_srcdir) -DFORCE_RSC=1
 # | Libtool library                                                      |
 # `----------------------------------------------------------------------'
 
+# Version with glued resource
 noinst_LTLIBRARIES        = libwinui.la
 libwinui_la_SOURCES       = winui_dlg.c resource.h
 libwinui_la_DEPENDENCIES  = do-glued
@@ -45,3 +46,9 @@ winui_glu.lo: winui_rsc.lo resource.lo
 	--mode=compile $(RC) -o $@ -i $<
 
 .PHONY: do-glued
+
+## Version without glued resource
+# noinst_LTLIBRARIES        = libwinui.la
+# libwinui_la_SOURCES       = winui_dlg.c resource.h winui_rsc.c
+# EXTRA_libwinui_la_SOURCES = resource.rc winui_dll.c
+# libwinui_la_LDFLAGS       = -avoid-version

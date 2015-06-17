@@ -172,26 +172,34 @@ int tsel(void * data, const char * key, int op, sc68_dialval_t *val)
     switch (op) {
     case SC68_DIAL_CNT:
       val->i = max;
-      TRACE68(dial_cat,P "asid entries = %d\n",max);
       assert(!res);
       break;
     case SC68_DIAL_GETI:
+      assert (dial->asid >= 0 && dial->asid < max);
       val->i = dial->asid;
       assert(!res);
       break;
     case SC68_DIAL_SETI:
-      if (val->i < 0 || val->i >= max)
-        val->i = 0;
-      dial->asid = val->i;
-      assert(!res);
+      assert (val->i >= 0 && val->i < max);
+      if (val->i >= 0 && val->i < max) {
+        dial->asid = val->i;
+        assert(!res);
+      } else
+        res = -1;
       break;
 
     case SC68_DIAL_ENUM:
-      if (val->i >= 0 && val->i < max) {
+      if (val->i == -1) {
+        assert (dial->asid >= 0 && dial->asid < max);
+        val->s = asid[dial->asid];
+        assert(!res);
+      } else if (val->i >= 0 && val->i < max) {
         val->s = asid[val->i];
         assert(!res);
-        break;
-      }
+      } else
+        res = -1;
+      break;
+
     default:
       res = -1;
     }
