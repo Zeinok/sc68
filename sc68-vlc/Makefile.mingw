@@ -22,7 +22,7 @@ DEVEL    := $(shell realpath "$$HOME/_Code")
 CC	 := $(TOOLCHAIN)-gcc
 STRIP	 := $(TOOLCHAIN)-strip
 SYSROOT  := /usr/$(TOOLCHAIN)/sys-root
-PREFIX   := $(ARCHBASE)/$(TOOLCHAIN)/vlc$(RELEASE)
+PREFIX   := $(ARCHBASE)/$(TOOLCHAIN)/sc68-vlc$(RELEASE)
 libexec  := $(PREFIX)/libexec
 
 VLCSDK     := $(shell realpath ./sdk)
@@ -85,13 +85,23 @@ libsc68_plugin.dll: $(obj)
 .c.o:
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
-install: $(sos)
-#	test -e "$(VLCPLUGDIR)" || mkdir -pv "$(VLCPLUGDIR)"
-	install --strip-program=$(STRIP) -s -D $^ "$(VLCPLUGDIR)"/$^
+install-plugin: $(sos)
 	install --strip-program=$(STRIP) -s -D $^ "$(libexec)"/$^
 
-uninstall:
-	rm -f "$(VLCPLUGDIR)"/libsc68_* "$(libexec)"/libsc68_*
+install-vlc: $(sos)
+	install --strip-program=$(STRIP) -s -D $^ "$(VLCPLUGDIR)"/$^
+
+
+install: install-plugin install-vlc
+
+
+uninstall-plugin:
+	rm -f "$(libexec)"/libsc68_*
+
+uninstall-vlc:
+	rm -f "$(VLCPLUGDIR)"/libsc68_*
+
+uninstall: uninstall-plugin uninstall-vlc
 
 clean:
 	rm -f *.o *.so *.dll *.la *.a *.lo .libs/*
@@ -103,6 +113,8 @@ info:
 	@echo '******************************'
 	@echo INFO :
 	@echo '******************************'
+	@echo "PREFIX=[$(PREFIX)"
+	@echo "PKGCONFIG=[$(PKGCONFIG)"
 	@$(PKGCONFIG) --libs sc68 vlc-plugin $(VLCFIXSDK)
 	@$(PKGCONFIG) --cflags sc68 vlc-plugin $(VLCFIXSDK)
 	@$(PKGCONFIG) --modversion sc68 vlc-plugin
@@ -119,4 +131,6 @@ info:
 	@echo
 
 
-.PHONY: all clean install uninstall info
+.PHONY: all clean info
+.PHONY: install install-plugin install-vlc
+.PHONY: uninstall uninstall-plugin uninstall-vlc

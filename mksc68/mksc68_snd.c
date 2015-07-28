@@ -157,6 +157,10 @@ static int w_T99(uint8_t * dst, int off, const char * t, int v) {
   return off;
 }
 
+static int isvalidstr(const char * s) {
+  return s && *s;
+}
+
 static int16_t get_W(const uint8_t * buf) {
   return (((int16_t)(int8_t)buf[0]) << 8) | buf[1];
 }
@@ -362,8 +366,8 @@ static int decode_header(const uint8_t * buf, int len, sndh_header_t * hd)
       continue;
     }
 
-    /* '##xx' and '#!xx' */
-    know = buf[i+0] == '#' && (buf[i+1] == '#' || buf[i+1] == '!')
+    /* '##xx' and '!#xx' */
+    know = (buf[i] == '#' || buf[i] == '!') && buf[i+1] == '#'
       && isdigit(buf[i+2]) && isdigit(buf[i+3]);
     if (know) {
       int n = 0, * ptr;
@@ -377,7 +381,7 @@ static int decode_header(const uint8_t * buf, int len, sndh_header_t * hd)
         msgwrn("sndh: tag '%c%c' not zero terminated\n",
                buf[tag], buf[tag+1]);
 
-      ptr = (buf[tag+1] == '#') ? &hd->ntune : &hd->dtune;
+      ptr = (buf[tag+0] == '#') ? &hd->ntune : &hd->dtune;
       if (!n) n = 1;         /* Fix dodgy file */
       if (*ptr && n != *ptr) {
         msgerr("sndh: already have a differnt value for '#%c' -- %d != %d\n",
@@ -411,12 +415,12 @@ static int decode_header(const uint8_t * buf, int len, sndh_header_t * hd)
     }
 
     /* Song names or song flags */
-    know = !memcmp("#!SN", buf+i,4) || !memcmp("FLAG", buf+i,4);
+    know = !memcmp("!#SN", buf+i,4) || !memcmp("FLAG", buf+i,4);
     if (know) {
       int base = i, max;
       if (!hd->ntune) {
         msgwrn("sndh: '%s' before '##'\n",
-               buf[i] == '#' ? "#!SN" : "FLAG");
+               buf[i] == 'F' ? "FLAG" : "!#SN");
         hd->ntune = 1;
       }
       i += 4;
@@ -653,7 +657,7 @@ static int create_sndh(uint8_t **_dbuf, sndh_header_t *hd, disk68_t *d)
           if (!luo) {
             if (loc+l > sizeof(tmp)) {
               msgerr("sndh: overflow computing FLAG tag (%d > %d)\n",
-                     loc+l, sizeof(tmp));
+                     (int)loc+l, (int)sizeof(tmp));
               return -1;
             }
             memcpy(tmp+loc, flag, l);
@@ -685,18 +689,34 @@ static int create_sndh(uint8_t **_dbuf, sndh_header_t *hd, disk68_t *d)
       }
     }
 
-    /* Sub names */
+    /* Song titles */
+
+    /* looking for a track that have a valid title that differs from
+     * the album title. */
     for (i=0; i<d->nb_mus; ++i)
-      if (strcmp(d->tags.tag.title.val, d->mus[i].tags.tag.title.val))
+      if (isvalidstr(d->mus[i].tags.tag.title.val) &&
+          strcmp68(d->tags.tag.title.val, d->mus[i].tags.tag.title.val))
         break;
+
     if (i != d->nb_mus) {
       int tbl, bas;
       bas = off = w_E(dbuf,off);        /* Even / base string offset */
       tbl = w_D(dbuf,off,"!#SN",4);     /* Table after the tag */
       off = tbl+2*d->nb_mus;            /* Skip the table */
       for (i=0; i<d->nb_mus; ++i) {
+        const char * s;
         w_W(dbuf,tbl+i*2,off-bas);      /* Fill offset to string */
-        off = w_S(dbuf,off,d->mus[i].tags.tag.title.val);
+        char tmp[12];
+
+        if (isvalidstr(d->mus[i].tags.tag.title.val))
+          s = d->mus[i].tags.tag.title.val;
+        else if (isvalidstr(d->mus[i].tags.tag.title.val))
+          s = d->mus[i].tags.tag.title.val;
+        else {
+          sprintf(tmp, "Track #%u",i+1);
+          s = tmp;
+        }
+        off = w_S(dbuf,off,s);
       }
     }
 

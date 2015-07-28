@@ -43,7 +43,11 @@ winui_glu.lo: winui_rsc.lo resource.lo
 # Does not have a default automake rule for that
 .rc.lo:
 	$(LIBTOOL) $(AM_V_lt) --tag=RC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=compile $(RC) -o $@ -i $<
+	--mode=compile $(RC) -Jrc -Ocoff -o $@ -i $<
+
+.res.lo:
+	$(LIBTOOL) $(AM_V_lt) --tag=RC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+	--mode=compile $(RC) -Jres -Ocoff -o $@ -i $<
 
 .PHONY: do-glued
 

@@ -923,7 +923,7 @@ static int st_isdigit( int c )
 
 static int st_istag( int c )
 {
-  return c == '!' || c == '#' || c == '*';
+  return c == '!' || c == '#';
 }
 
 static int st_isgraph( int c )
@@ -1095,8 +1095,8 @@ static int sndh_info(disk68_t * mb, int len)
       mb->nb_mus = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' );
       /* assert(0); */
       t = i; i += 4;
-    } else if (!memcmp(b+i,"!#SN",4)) {
-      /* track names */
+    } else if (!memcmp(b+i,"!#SN",4) || !memcmp(b+i,"#!SN",4)) {
+      /* track names (which it is ? The doc uses both ! */
       int j, max=0, tracks = mb->nb_mus <= 0 ? 1 : mb->nb_mus;
 
       int faulty = 0;
@@ -1133,18 +1133,23 @@ static int sndh_info(disk68_t * mb, int len)
         ;
       for (; i < len && !b[i] ; i++ )
         ;
-    } else if ( !memcmp(b+i,"!#",2) && ( (ctypes & 0xC00) == 0xC00 ) ) {
+    } else if ( ( !memcmp(b+i,"!#",2) || !memcmp(b+i,"#!",2) )
+                && ( (ctypes & 0xC00) == 0xC00 ) ) {
       mb->def_mus = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' ) - 1;
       t = i; i += 4;
     } else if ( !memcmp(b+i,"!V",2) && ( (ctypes & 0xC00) == 0xC00 ) ) {
       vbl = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' );
       i += 4;
+#if 0
+      /* Deprecated / Unknown anyway */
     } else if (!memcmp(b+i,"**",2)) {
       /* FX + string 2 char ??? */
       msg68_warning("file68: sndh -- what to do with tag ? -- '**%c%c'\n",
                     b[i+2], b[i+3]);
       i += 4;
-    } else if ( b[i] == 'T' && b[i+1] >= 'A' && b[i+1] <= 'D') {
+#endif
+    } else if ( b[i] == 'T' && b[i+1] >= 'A' && b[i+1] <= 'D'
+                && ( (ctypes & 0xC00) == 0xC00 ) ) {
       t = i; s = i += 2;
       myatoi(b, i, len, &frq);
     } else if( memcmp( b + i, empty_tag, 4 ) == 0 ||

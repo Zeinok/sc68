@@ -226,6 +226,8 @@ static uint_t address_from_name(char *uri)
     sl1 = sl2;                          /* get which ever is last */
   if (sl1)
     ++sl1;                              /* skip '/' */
+  else
+    sl1 = uri;
   for (sl2=sl1, adr=0; (c = myishex(*sl2)) >= 0; ++sl2)
     adr = adr*16 + c;
   if (sl2-sl1 >= 4 && c == -2)
