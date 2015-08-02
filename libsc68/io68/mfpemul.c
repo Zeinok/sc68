@@ -30,12 +30,12 @@
 #include <sc68/file68_msg.h>
 #include <assert.h>
 
-#define CPU    8010612u                 /* that or 8000000u */
+#define CPU    8010612u                 /* or 8000000u or 80006400u ? */
 #define BGM    MFP_BOGO_MUL
 #define BGD    MFP_BOGO_DIV
 
-#define cpp(V)      (V*prediv_width[(int)ptimer->tcr])
-#define bogotohz(V) (((CPU>>2)*BGD)/((V)<<2))
+#define cpp(V)      ((V)*prediv_width[(int)ptimer->tcr])
+#define bogotohz(V) ( ( (CPU)*BGM ) / (uint68_t)(V) )
 #define timerfrq(V) bogotohz(cpp(V))
 
 #define MYHD "mfp    : "
@@ -60,8 +60,8 @@ int mfp_cat = msg68_DEFAULT;
  *   multiple of the 68K one (~8Mhz).
  *   In order to convert 68K cycles to MFP ones the emulator use an
  *   internal cycle unit : a "BOGO" cycle.
- *   - 1 "BOGO" cycle => 256 "8mhz 68K" cycles
- *   - 1 "BOGO" cycle => 834 "mfp" cycle
+ *   - 1 "BOGO" cycle => BGM (256) "8mhz 68K" cycles
+ *   - 1 "BOGO" cycle => BGD (834) "mfp" cycle
  */
 
 static const mfp_timer_def_t timer_def[4] =
