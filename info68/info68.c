@@ -231,10 +231,42 @@ static const char * HWflags(const hwflags68_t f)
 {
   static const char hex[] = "0123456789ABCDEF";
   static char flags[] = "YSA0";
-  flags[0] = "yY"[f.bit.psg];
-  flags[1] = "sS"[f.bit.dma|f.bit.lmc];
-  flags[2] = "aA"[f.bit.aga];
-  flags[3] = f.bit.xtd ? hex[f.bit.mfp] : '.';
+  flags[0] = "yY"[!!(f & SC68_PSG)];
+  flags[1] = "sS"[!!(f & (SC68_DMA|SC68_LMC))];
+  flags[2] = "aA"[!!(f & SC68_AGA)];
+  flags[3] = (f & SC68_XTD) ? hex[15 & (f>>SC68_MFP_BIT)] : '.';
+  return flags;
+}
+
+static const char * Xflags(const hwflags68_t f)
+{
+  static char flags[32];
+  static const struct {
+    int letter, mask;
+  } xf[] = {
+    { 'y', SC68_PSG }, 
+    { 'e', SC68_DMA },
+    { 'a', SC68_MFP_TA },
+    { 'b', SC68_MFP_TB },
+    { 'c', SC68_MFP_TC },
+    { 'd', SC68_MFP_TD },
+    { 'p', SC68_AGA },
+    { 'l', SC68_LMC },
+    { 's', SC68_DSP },
+    { 't', SC68_BLT },
+    { 'h', SC68_HBL },
+    { 'x', 0 },                        /* reserved for SFX */
+    { 'g', 0 },                        /* reserved for digital only */
+    { 'j', 0 },                        /* reserved for jingles */
+    { 0,0 }
+  };
+
+  int i,j;
+  flags[0] = '~';
+  for (i=0, j=1; xf[i].letter; ++i)
+    if (f & xf[i].mask)
+      flags[j++] = xf[i].letter;
+  flags[j] = 0;
   return flags;
 }
 
@@ -363,6 +395,7 @@ int main(int argc, char ** argv)
 {
   int  i, opt_all = 0, code = 127;
   /*   hwflags68_t diskHW; */
+  int has_time, has_loop;
   const disk68_t *d = 0;
   int curTrack, toTrack;
   char *trackList;
@@ -431,6 +464,14 @@ int main(int argc, char ** argv)
     goto finish;
   }
 
+  /* determine if disk has time and loop for all its tracks */
+  for (has_loop = has_time = i = 0; i<d->nb_mus; ++i) {
+    has_time += d->mus[i].has.time;
+    has_loop += d->mus[i].has.loop;
+  }
+  has_time = has_time == d->nb_mus;
+  has_loop = has_loop == d->nb_mus;
+
   if (opt_all) {
     int i, j;
     const char * key, * val;
@@ -439,7 +480,9 @@ int main(int argc, char ** argv)
     PutS(out,"hash: ");     PutX32(out,d->hash);  PutC(out,'\n');
     PutS(out,"tracks: ");   PutI(out,d->nb_mus);  PutC(out,'\n');
     PutS(out,"default: ");  PutI(out,d->def_mus); PutC(out,'\n');
-    PutS(out,"time-ms: ");  PutI(out,d->time_ms); PutC(out,'\n');
+    if (has_time) {
+      PutS(out,"time-ms: ");  PutI(out,d->time_ms); PutC(out,'\n');
+    }
     PutS(out,"hardware: "); PutS(out,HWflags(d->hwflags)); PutC(out,'\n');
     for (j=0; !file68_tag_enum(d, 0, j, &key, &val); ++j) {
       PutS(out,key); PutS(out,": "); PutS(out,val); PutC(out,'\n');
@@ -449,13 +492,29 @@ int main(int argc, char ** argv)
       const music68_t *m = d->mus+(i-1);
       PutS(out,"track: ");    PutI(out,i);           PutC(out,'\n');
       // PutS(out,"remap: ");    PutI(out,m->track);    PutC(out,'\n');
-      PutS(out,"loops: ");    PutI(out,m->loops);    PutC(out,'\n');
-      PutS(out,"time-ms: ");  PutI(out,m->first_ms); PutC(out,'\n');
-      PutS(out,"time-fr: ");  PutI(out,m->first_fr); PutC(out,'\n');
-      PutS(out,"loop-ms: ");  PutI(out,m->loops_ms); PutC(out,'\n');
-      PutS(out,"loop-fr: ");  PutI(out,m->loops_fr); PutC(out,'\n');
+      if (m->has.time) {
+        PutS(out,"time-ms: ");  PutI(out,m->first_ms); PutC(out,'\n');
+        PutS(out,"time-fr: ");  PutI(out,m->first_fr); PutC(out,'\n');
+      }
+      if (m->has.loop) {
+        PutS(out,"loops: ");    PutI(out,m->loops);    PutC(out,'\n');
+        PutS(out,"loop-ms: ");  PutI(out,m->loops_ms); PutC(out,'\n');
+        PutS(out,"loop-fr: ");  PutI(out,m->loops_fr); PutC(out,'\n');
+      }
+
+      PutS(out,"address: ");
+      if (m->has.pic)
+        PutS(out,"PIC");
+      else
+        PutX(out,m->a0);
+      PutC(out,'\n');
 
       PutS(out,"hardware: "); PutS(out,HWflags(m->hwflags)); PutC(out,'\n');
+      if (m->hwflags & SC68_XTD) {
+        PutS(out,"x-hardware: ");
+        PutS(out,Xflags(m->hwflags)); PutC(out,'\n');
+      }
+
       for (j=0; !file68_tag_enum(d, i, j, &key, &val); ++j) {
         PutS(out,key); PutS(out,": "); PutS(out,val); PutC(out,'\n');
       }
@@ -555,10 +614,10 @@ int main(int argc, char ** argv)
             PutS(out,file68_tag_get(d,0,TAG68_CONVERTER));
             break;
           case 'T':
-            PutI(out,d->time_ms/1000u);
+            PutI(out, has_time*d->time_ms/1000u);
             break;
           case 'Y':
-            PutS(out,strtime68(0, d->nb_mus, d->time_ms/1000u));
+            PutS(out,strtime68(0, d->nb_mus, has_time*d->time_ms/1000u));
             break;
           case 'H':
             PutS(out,HWflags(d->hwflags));
@@ -590,13 +649,13 @@ int main(int argc, char ** argv)
             PutS(out, m->replay ? m->replay : "built-in");
             break;
           case 't':
-            PutI(out,m->first_ms/1000u);
+            PutI(out,m->has.time*m->first_ms/1000u);
             break;
           case 'y':
-            PutS(out,strtime68(0, curTrack+1, m->first_ms/1000u));
+            PutS(out,strtime68(0, curTrack+1, m->has.time*m->first_ms/1000u));
             break;
           case 'm':
-            PutI(out,m->first_fr);
+            PutI(out,m->has.time*m->first_fr);
             break;
           case 'h':
             PutS(out, HWflags(m->hwflags));

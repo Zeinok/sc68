@@ -630,7 +630,7 @@ static int decode_artist(disk68_t * mb, tagset68_t * tags)
 static int valid(disk68_t * mb)
 {
   music68_t *m;
-  int i, pdatasz = 0, has_xtd = 1, has_time = 0;
+  int i, pdatasz = 0, has_xtd = SC68_XTD, has_time = 0;
   void * pdata   = 0;
   char * title, * artist, * aalias;
   int is_sndh = mb->tags.tag.genre.val == tagstr.sndh;
@@ -658,7 +658,7 @@ static int valid(disk68_t * mb)
   mb->time_ms = 0;
 
   /* Clear flags */
-  mb->hwflags.all = 0;
+  mb->hwflags = 0;
 
   /* Init all music in this file */
   for (m = mb->mus, i = 0; m < mb->mus + mb->nb_mus; m++, i++) {
@@ -681,7 +681,7 @@ static int valid(disk68_t * mb)
 
     /* For sndh file that does not have time or hardware flags look up
      * in sc68 hardcoded database. */
-    if (is_sndh && ( ! m->has.time || ! m->hwflags.bit.xtd) ) {
+    if (is_sndh && ( ! m->has.time || ! (m->hwflags & SC68_XTD) ) ) {
       unsigned int frames;
       int flags;
 
@@ -695,19 +695,21 @@ static int valid(disk68_t * mb)
         m->first_fr = frames;
         m->first_ms = fr_to_ms(m->first_fr, m->frq);
 
-        m->hwflags.bit.xtd = 1;
-        m->hwflags.bit.dma = m->hwflags.bit.lmc = !!(flags & TDB_STE);
+        m->hwflags |= SC68_XTD;
+        if (flags & TDB_STE)
+          m->hwflags |= (SC68_DMA|SC68_LMC);
         /* Invert the flag as timerdb knows about unused timers. */
-        m->hwflags.bit.mfp = 15^(flags&(TDB_TA|TDB_TB|TDB_TC|TDB_TD))/TDB_TA;
+        m->hwflags |=
+          (15^(flags&(TDB_TA|TDB_TB|TDB_TC|TDB_TD))/TDB_TA) << SC68_MFP_BIT;
         TRACE68(file68_cat,
                 "file68: found track #%02d:%08x in sndh timedb"
                 " -- %d ms, %d frames, %c%c%c%c%s\n",
                 i+1, mb->hash, m->first_ms, m->first_fr,
-                (m->hwflags.bit.mfp & 1) ? 'A' : '.',
-                (m->hwflags.bit.mfp & 2) ? 'B' : '.',
-                (m->hwflags.bit.mfp & 4) ? 'C' : '.',
-                (m->hwflags.bit.mfp & 8) ? 'D' : '.',
-                m->hwflags.bit.dma ? ",STE" : "");
+                (m->hwflags & SC68_MFP_TA) ? 'A' : '.',
+                (m->hwflags & SC68_MFP_TB) ? 'B' : '.',
+                (m->hwflags & SC68_MFP_TC) ? 'C' : '.',
+                (m->hwflags & SC68_MFP_TD) ? 'D' : '.',
+                (m->hwflags & SC68_DMA) ? ",STE" : "");
       }
     }
 
@@ -742,14 +744,14 @@ static int valid(disk68_t * mb)
       m->loops = 0;
 
     /* default mode is Atari-ST YM2149 PSG */
-    if (!m->hwflags.all)
-      m->hwflags.bit.psg = 1;
-    mb->hwflags.all |= m->hwflags.all;
-    has_xtd &= m->hwflags.bit.xtd;
+    if (!m->hwflags)
+      m->hwflags |= SC68_PSG;
+    mb->hwflags |= m->hwflags;
+    has_xtd &= (m->hwflags & SC68_XTD);
 
     /* default genre */
     if (!m->tags.tag.genre.val)
-      m->tags.tag.genre.val = (m->hwflags.bit.aga)
+      m->tags.tag.genre.val = (m->hwflags & SC68_AGA)
         ? tagstr.amiga_chiptune
         : tagstr.atari_st_chiptune
         ;
@@ -796,7 +798,7 @@ static int valid(disk68_t * mb)
     mb->time_ms = 0;
 
   /* All tracks must have extended info for the disk to have it. */
-  mb->hwflags.bit.xtd = has_xtd;        /* all tracks must have it  */
+  mb->hwflags |= has_xtd;               /* all tracks must have it */
 
   return 0;
 }
@@ -877,28 +879,25 @@ disk68_t * file68_load_mem(const void * buffer, int len)
 
 static int sndh_flags(hwflags68_t * hw, const char * b, int len)
 {
-  int k;
+  int k, f;
 
   TRACE68(file68_cat,
           "file68: sndh -- FLAGS are '%s'\n", b);
 
-  hw->all = 0; hw->bit.xtd = 1;
-  for (k=0; k<len && b[k]; ++k)
+  for (f=SC68_XTD, k=0; k<len && b[k]; ++k)
     switch (b[k]) {
     case '~': break;                    /* Ignore '~' */
-    case 'y': hw->bit.psg    = 1; break;
-    case 'e': hw->bit.dma    = 1; break;
-    case 'a': hw->bit.mfp   |= 1; break;
-    case 'b': hw->bit.mfp   |= 2; break;
-    case 'c': hw->bit.mfp   |= 4; break;
-    case 'd': hw->bit.mfp   |= 8; break;
-    case 'p': hw->bit.aga    = 1; break;
-
-    case 'l': hw->bit.lmc    = 1; break;
-    case 's': hw->bit.dsp    = 1; break;
-    case 't': hw->bit.blt    = 1; break;
-    case 'h': hw->bit.hbl    = 1; break;
-
+    case 'y': f |= SC68_PSG; break;
+    case 'e': f |= SC68_DMA; break;
+    case 'a': f |= SC68_MFP_TA; break;
+    case 'b': f |= SC68_MFP_TB; break;
+    case 'c': f |= SC68_MFP_TC; break;
+    case 'd': f |= SC68_MFP_TD; break;
+    case 'p': f |= SC68_AGA; break;
+    case 'l': f |= SC68_LMC; break;
+    case 's': f |= SC68_DSP; break;
+    case 't': f |= SC68_BLT; break;
+    case 'h': f |= SC68_HBL; break;
     case 'x': break;                    /* reserved for SFX */
     case 'g': break;                    /* reserved for digital only */
     case 'j': break;                    /* reserved for jingles */
@@ -908,6 +907,7 @@ static int sndh_flags(hwflags68_t * hw, const char * b, int len)
     }
   if (++k > len)
     k = len;
+  *hw = f;
   return k;
 }
 
@@ -1077,7 +1077,7 @@ static int sndh_info(disk68_t * mb, int len)
         max = i+5;
         max += sndh_flags(&mb->hwflags, b+max, len-max);
         for ( j = 0; j < tracks; ++j )
-          mb->mus[j].hwflags.all = mb->hwflags.all;
+          mb->mus[j].hwflags = mb->hwflags;
       } else {
         /* multiple string form */
         for ( j = 0; j < tracks; ++j ) {
@@ -1236,11 +1236,9 @@ static int sndh_info(disk68_t * mb, int len)
     mb->mus[i].d0    = i+1;
     mb->mus[i].loops = 0;
     mb->mus[i].frq   = frq ? frq : vbl;
-    if (!mb->mus[i].hwflags.bit.xtd) {
+    if (!(mb->mus[i].hwflags & SC68_XTD)) {
       /* Did not have the 'FLAG' tag, fallback to YM+STE */
-      mb->mus[i].hwflags.bit.psg = 1;
-      mb->mus[i].hwflags.bit.dma = 1;
-      mb->mus[i].hwflags.bit.lmc = 1;
+      mb->mus[i].hwflags |= SC68_PSG | SC68_DMA | SC68_LMC;
     }
   }
   return 0;
@@ -1682,19 +1680,7 @@ disk68_t * file68_load(vfs68_t * is)
       /* force eXTenDed if anything is set at a higher rank. */
       if (f & ~(SC68_XTD-1))
         f |= SC68_XTD;
-
-      cursix->hwflags.all = 0;
-      cursix->hwflags.bit.psg       = !! (f & SC68_PSG);
-      cursix->hwflags.bit.dma       = !! (f & SC68_DMA);
-      cursix->hwflags.bit.aga       = !! (f & SC68_AGA);
-      cursix->hwflags.bit.xtd       = !! (f & SC68_XTD);
-      cursix->hwflags.bit.lmc       = !! (f & SC68_LMC);
-      cursix->hwflags.bit.mfp       = 15 & (f >> SC68_MFP_BIT);
-
-      cursix->hwflags.bit.hbl       = !! (f & SC68_HBL);
-      cursix->hwflags.bit.blt       = !! (f & SC68_BLT);
-      cursix->hwflags.bit.dsp       = !! (f & SC68_DSP);
-
+      cursix->hwflags = f;
     }
     /* meta data */
     else if (ISCHK(chk, CH68_TAG)) {
@@ -2042,18 +2028,7 @@ static const char * save_sc68(vfs68_t * os, const disk68_t * mb,
   aname = mb->tags.tag.artist.val;
   /* cname =  */data = 0;
   for (mus = mb->mus; mus < mb->mus + mb->nb_mus; mus++) {
-    int flags
-      = 0
-      | (mus->hwflags.bit.psg  ? SC68_PSG : 0)
-      | (mus->hwflags.bit.dma  ? SC68_DMA : 0)
-      | (mus->hwflags.bit.aga  ? SC68_AGA : 0)
-      | (mus->hwflags.bit.xtd  ? SC68_XTD : 0)
-      | (mus->hwflags.bit.mfp << SC68_MFP_BIT)
-      | (mus->hwflags.bit.lmc  ? SC68_LMC : 0)
-      | (mus->hwflags.bit.hbl  ? SC68_HBL : 0)
-      | (mus->hwflags.bit.blt  ? SC68_BLT : 0)
-      | (mus->hwflags.bit.dsp  ? SC68_DSP : 0)
-      ;
+    int flags = mus->hwflags;
 
     /* Save track-name, author, composer, replay */
     if (0
@@ -2081,7 +2056,7 @@ static const char * save_sc68(vfs68_t * os, const disk68_t * mb,
         || save_nonzero(os, CH68_FRAME,  mus->has.time    * mus->first_fr)
         || save_nonzero(os, CH68_LOOP,   mus->has.loop    * mus->loops)
         || ( mus->has.loop &&
-             save_number(os, CH68_LOOPFR,  mus->loops_fr) )
+             save_number(os, CH68_LOOPFR, mus->loops_fr) )
         || save_number (os, CH68_TYP,    flags)
         || ( mus->has.sfx &&
              save_chunk(os, CH68_SFX, 0, 0) )

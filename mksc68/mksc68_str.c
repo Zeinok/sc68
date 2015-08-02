@@ -286,23 +286,23 @@ char * str_hardware(char * const buf, int max, int hwbit)
 {
   int i;
   hwflags68_t hw;
-  hw.all = hwbit;
+  hw = hwbit;
 
   i = 0;
-  i = catflag(buf, i, max, hw.bit.aga, "AGA");
-  i = catflag(buf, i, max, hw.bit.psg, "PSG");
-  i = catflag(buf, i, max, hw.bit.dma, "DMA");
-  if (!hw.bit.xtd) {
+  i = catflag(buf, i, max, hw & SC68_AGA, "AGA");
+  i = catflag(buf, i, max, hw & SC68_PSG, "PSG");
+  i = catflag(buf, i, max, hw & SC68_DMA, "DMA");
+  if (! (hw & SC68_XTD) ) {
     i = catflag(buf, i, max, 1, "?");
   } else {
-    i = catflag(buf, i, max, hw.bit.lmc, "LMC");
-    i = catflag(buf, i, max, hw.bit.mfp & 1, "TiA");
-    i = catflag(buf, i, max, hw.bit.mfp & 2, "TiB");
-    i = catflag(buf, i, max, hw.bit.mfp & 4, "TiC");
-    i = catflag(buf, i, max, hw.bit.mfp & 8, "TiD");
-    i = catflag(buf, i, max, hw.bit.hbl, "HBL");
-    i = catflag(buf, i, max, hw.bit.blt, "BLT");
-    i = catflag(buf, i, max, hw.bit.dsp, "DSP");
+    i = catflag(buf, i, max, hw & SC68_LMC, "LMC");
+    i = catflag(buf, i, max, hw & SC68_MFP_TA, "TiA");
+    i = catflag(buf, i, max, hw & SC68_MFP_TB, "TiB");
+    i = catflag(buf, i, max, hw & SC68_MFP_TC, "TiC");
+    i = catflag(buf, i, max, hw & SC68_MFP_TD, "TiD");
+    i = catflag(buf, i, max, hw & SC68_HBL, "HBL");
+    i = catflag(buf, i, max, hw & SC68_BLT, "BLT");
+    i = catflag(buf, i, max, hw & SC68_DSP, "DSP");
   }
   if (!i)
     i = catflag(buf, 0, max, 1, "N/A");

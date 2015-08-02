@@ -543,17 +543,17 @@ static int sndh_save_buf(const char *uri, const void *buf, int len , int gz)
 
 /* Build sndh 'FLAGS' string (alphabetical order is not required but
  * it might be easier for comparing things later). */
-static int mk_flags(char * tmp, const hwflags68_t * hw)
+static int mk_flags(char * tmp, const hwflags68_t hw)
 {
   int j = 0;
-  if (hw->bit.xtd) {
-    if (hw->bit.mfp & 1) tmp[j++] = 'a';
-    if (hw->bit.mfp & 2) tmp[j++] = 'b';
-    if (hw->bit.mfp & 3) tmp[j++] = 'c';
-    if (hw->bit.mfp & 4) tmp[j++] = 'd';
+  if (hw & SC68_XTD) {
+    if (hw & SC68_MFP_TA) tmp[j++] = 'a';
+    if (hw & SC68_MFP_TB) tmp[j++] = 'b';
+    if (hw & SC68_MFP_TC) tmp[j++] = 'c';
+    if (hw & SC68_MFP_TD) tmp[j++] = 'd';
   }
-  if (hw->bit.dma|hw->bit.lmc) tmp[j++] = 'e';
-  if (hw->bit.psg) tmp[j++] = 'y';
+  if (hw & (SC68_DMA|SC68_LMC)) tmp[j++] = 'e';
+  if (hw & SC68_PSG) tmp[j++] = 'y';
   tmp[j++] = 0;
   return j;
 }
@@ -630,17 +630,17 @@ static int create_sndh(uint8_t **_dbuf, sndh_header_t *hd, disk68_t *d)
     }
 
     /* Flags */
-    if (d->hwflags.all) {
+    if (d->hwflags) {
       int diff;
 
       /* check if all tracks share the same flags */
       for (diff=i=0; i<d->nb_mus; ++i)
-        diff += d->hwflags.all != d->mus[i].hwflags.all;
+        diff += d->hwflags != d->mus[i].hwflags;
 
       if (!diff) {
         /* All the same ! simple string "FLAG" */
         tmp[0] = '~';
-        mk_flags(tmp+1, &d->hwflags);
+        mk_flags(tmp+1, d->hwflags);
         off = w_TS(dbuf, off, "FLAG", tmp);
       } else {
         /* some flags differs */
@@ -651,7 +651,7 @@ static int create_sndh(uint8_t **_dbuf, sndh_header_t *hd, disk68_t *d)
 
         for (i=0; i<d->nb_mus; ++i) {
           char flag[16];
-          int l = mk_flags(flag, &d->mus[i].hwflags);
+          int l = mk_flags(flag, d->mus[i].hwflags);
 
           luo = substr_lookup(flag, l, (uint8_t *)tmp, i);
           if (!luo) {

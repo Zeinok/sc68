@@ -62,7 +62,7 @@ enum {
 };
 
 /**
- * @name  Features flag definitions for music68_t.
+ * @name  Features flag definitions for file flags (portability). 
  * @{
  */
 enum  {
@@ -81,6 +81,7 @@ enum  {
   SC68_HBL       = 1 << 9,   /**< HBL interrupt.                  */
   SC68_BLT       = 1 << 10,  /**< STE blitter.                    */
   SC68_DSP       = 1 << 11,  /**< Falcon DSP.                     */
+
 };
 /**
  * @}
@@ -93,22 +94,25 @@ enum  {
 /**
  * Hardware and features flags.
  */
-typedef union {
+typedef unsigned int hwflags68_t;
 
-  struct {
-    unsigned psg:1;       /**< Require YM-2149 (ST PSG)       */
-    unsigned dma:1;       /**< Require STE DMA sound.         */
-    unsigned aga:1;       /**< Require Amiga/paula hardware.  */
-    unsigned xtd:1;       /**< Extended info available.       */
-    unsigned lmc:1;       /**< xtd: Require LMC-1992.         */
-    unsigned mfp:4;       /**< xtd: MFP timers (1 bit/timer). */
-    unsigned hbl:1;       /**< xtd: HBL interrupt.            */
-    unsigned blt:1;       /**< xtd: STE/Mega-ST blitter.      */
-    unsigned dsp:1;       /**< xtd: Falcon DSP.               */
-  } bit;                  /**< Flags bit field.               */
+/* typedef union { */
+/*   struct { */
+/*     unsigned psg:1;       /\**< Require YM-2149 (ST PSG)       *\/ */
+/*     unsigned dma:1;       /\**< Require STE DMA sound.         *\/ */
+/*     unsigned aga:1;       /\**< Require Amiga/paula hardware.  *\/ */
+/*     unsigned xtd:1;       /\**< Extended info available.       *\/ */
+/*     unsigned lmc:1;       /\**< xtd: Require LMC-1992.         *\/ */
+/*     unsigned mfp:4;       /\**< xtd: MFP timers (1 bit/timer). *\/ */
+/*     unsigned hbl:1;       /\**< xtd: HBL interrupt.            *\/ */
+/*     unsigned blt:1;       /\**< xtd: STE/Mega-ST blitter.      *\/ */
+/*     unsigned dsp:1;       /\**< xtd: Falcon DSP.               *\/ */
+/*   } bit;                  /\**< Flags bit field.               *\/ */
+/*   unsigned clr;           /\**< All flags (clear only).        *\/ */
+/* } hwflags68_t; */
 
-  unsigned all;           /**< All flags in one.              */
-} hwflags68_t;
+
+
 
 
 /**

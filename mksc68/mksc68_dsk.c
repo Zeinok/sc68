@@ -280,14 +280,14 @@ static unsigned int fr_to_ms(unsigned int fr, unsigned int hz)
 
 int dsk_validate(void)
 {
-  int t, has_inf = 0, has_hw = 1;
+  int t, has_inf = 0, has_hw = SC68_XTD;
 
   if (!is_valid_disk())
     return -1;
 
   /* Validate time and loop */
   dsk.disk->time_ms = 0;
-  dsk.disk->hwflags.all = 0;            /* Clear all disk flags ... */
+  dsk.disk->hwflags = 0;            /* Clear all disk flags ... */
 
   for (t = 0; t < dsk.disk->nb_mus; ++t) {
     music68_t * m = dsk.disk->mus + t;
@@ -301,12 +301,13 @@ int dsk_validate(void)
     else
       has_inf = 1;
 
-    has_hw &= m->hwflags.bit.xtd;
-    dsk.disk->hwflags.all |= m->hwflags.all;
+    has_hw &= m->hwflags & SC68_XTD;
+    dsk.disk->hwflags |= m->hwflags;
   }
   if (has_inf)
     dsk.disk->time_ms = 0;
-  dsk.disk->hwflags.bit.xtd = has_hw;
+  if (!has_hw)
+    dsk.disk->hwflags &= SC68_XTD-1;
 
   return 0;
 }
@@ -364,7 +365,7 @@ const char * dsk_tag_get(int trk, const char * var)
     }
     else if ( ! strcmp (var, TAG68_HARDWARE)) {
       val = str_hardware(str, max,
-                         !trk ? dsk.disk->hwflags.all : m->hwflags.all);
+                         !trk ? dsk.disk->hwflags : m->hwflags);
     }
   }
   return val;

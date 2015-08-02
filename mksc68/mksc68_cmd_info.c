@@ -75,7 +75,7 @@ static void tinf(const char * label, unsigned int ms)
 static void hinf(const char * label, hwflags68_t hw)
 {
   char tmp[256];
-  str_hardware(tmp, sizeof(tmp), hw.all);
+  str_hardware(tmp, sizeof(tmp), hw);
   pinf(label, tmp);
 }
 

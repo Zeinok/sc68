@@ -661,14 +661,10 @@ static void timemeasure_init(measureinfo_t * mi)
   mi->hwflags  = mus->hwflags;          /* Save hwflags */
 
   /* Set all hardware flags. */
-  if (mus->hwflags.bit.aga) {
-    mus->hwflags.all     = 0;
-    mus->hwflags.bit.aga = 1;
+  if (mus->hwflags & SC68_AGA) {
+    mus->hwflags = SC68_AGA;
   } else {
-    mus->hwflags.all       = 0;
-    mus->hwflags.bit.psg   = 1;
-    mus->hwflags.bit.dma   = 1;         /* force STE/DMA */
-    mus->hwflags.bit.lmc   = 1;         /* force STE/LMC */
+    mus->hwflags = SC68_PSG|SC68_DMA|SC68_LMC;
   }
 
   if (sc68_play(mi->sc68, mi->track, SC68_INF_LOOP) < 0)
@@ -1121,20 +1117,15 @@ int time_measure(measureinfo_t * mi, int trk,
     m->has.time = 1;
     m->has.loop = 1;
 
-    mi->hwflags.all     = 0;
-    mi->hwflags.bit.xtd = 1;
-    mi->hwflags.bit.psg = mi->hw.bit.ym;
-
-    mi->hwflags.bit.dma = mi->hw.bit.mw;
-    mi->hwflags.bit.lmc = mi->hw.bit.mw;
-
-    mi->hwflags.bit.aga = mi->hw.bit.pl;
-    mi->hwflags.bit.mfp = 0
-      | (mi->hw.bit.ta<<0)
-      | (mi->hw.bit.tb<<1)
-      | (mi->hw.bit.tc<<2)
-      | (mi->hw.bit.td<<3)
-      ;
+    mi->hwflags  = 0;
+    mi->hwflags |= SC68_XTD;
+    mi->hwflags |= mi->hw.bit.ym ? SC68_PSG : 0;
+    mi->hwflags |= mi->hw.bit.mw ? SC68_DMA|SC68_LMC : 0;
+    mi->hwflags |= mi->hw.bit.pl ? SC68_AGA : 0;
+    mi->hwflags |= mi->hw.bit.ta ? SC68_MFP_TA : 0;
+    mi->hwflags |= mi->hw.bit.tb ? SC68_MFP_TB : 0;
+    mi->hwflags |= mi->hw.bit.tc ? SC68_MFP_TC : 0;
+    mi->hwflags |= mi->hw.bit.td ? SC68_MFP_TD : 0;
 
     /* mi->minaddr; */
     /* mi->maxaddr; */
@@ -1145,7 +1136,7 @@ int time_measure(measureinfo_t * mi, int trk,
            m->loops-1,
            m->loops_ms ? str_timefmt(s2,sizeof(s2),m->loops_ms) : "no loop",
            str_timefmt(s3,sizeof(s3),/* m-> */total_ms),
-           str_hardware(s4,sizeof(s4),mi->hwflags.all)
+           str_hardware(s4,sizeof(s4),mi->hwflags)
       );
   }
 
