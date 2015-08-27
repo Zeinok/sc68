@@ -244,7 +244,7 @@ static const char * Xflags(const hwflags68_t f)
   static const struct {
     int letter, mask;
   } xf[] = {
-    { 'y', SC68_PSG }, 
+    { 'y', SC68_PSG },
     { 'e', SC68_DMA },
     { 'a', SC68_MFP_TA },
     { 'b', SC68_MFP_TB },
@@ -393,7 +393,7 @@ static char * get_tag(const disk68_t * dsk, int trk, const char * key)
 
 int main(int argc, char ** argv)
 {
-  int  i, opt_all = 0, code = 127;
+  int  i, j, opt_all = 0, code = 127;
   /*   hwflags68_t diskHW; */
   int has_time, has_loop;
   const disk68_t *d = 0;
@@ -465,9 +465,9 @@ int main(int argc, char ** argv)
   }
 
   /* determine if disk has time and loop for all its tracks */
-  for (has_loop = has_time = i = 0; i<d->nb_mus; ++i) {
-    has_time += d->mus[i].has.time;
-    has_loop += d->mus[i].has.loop;
+  for (has_loop = has_time = j = 0; j<d->nb_mus; ++j) {
+    has_time += d->mus[j].has.time;
+    has_loop += d->mus[j].has.loop;
   }
   has_time = has_time == d->nb_mus;
   has_loop = has_loop == d->nb_mus;
@@ -501,6 +501,14 @@ int main(int argc, char ** argv)
         PutS(out,"loop-ms: ");  PutI(out,m->loops_ms); PutC(out,'\n');
         PutS(out,"loop-fr: ");  PutI(out,m->loops_fr); PutC(out,'\n');
       }
+
+      if (m->replay) {
+        PutS(out,"replay: ");
+        PutS(out, m->replay);
+        PutC(out,'\n');
+      }
+
+      PutS(out,"rate: "); PutI(out,m->frq); PutC(out,'\n');
 
       PutS(out,"address: ");
       if (m->has.pic)
