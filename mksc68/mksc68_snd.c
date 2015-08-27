@@ -555,6 +555,8 @@ static int mk_flags(char * tmp, const hwflags68_t hw)
   if (hw & (SC68_DMA|SC68_LMC)) tmp[j++] = 'e';
   if (hw & SC68_PSG) tmp[j++] = 'y';
   tmp[j++] = 0;
+
+  msgdbg("mksndh: flags:0x%x %s (%d)\n",hw,tmp,j);
   return j;
 }
 

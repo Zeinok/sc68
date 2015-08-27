@@ -193,7 +193,16 @@ int ym_init(int * argc, char ** argv)
                 opt68_NOTSET, opt68_CFG);
   option68_iset(opts+2, ym_default_chans, opt68_NOTSET, opt68_CFG);
 
-  /* Parse options */
+  /* Add ym-puls options */
+  ym_puls_add_options();
+
+  /* Add ym-dump options */
+  ym_dump_add_options();
+
+  /* Add ym-blep options */
+  ym_blep_add_options();
+
+  /* Parse options. */
   *argc = option68_parse(*argc,argv);
 
   /* Set volume table (unique for all instance) */
@@ -206,9 +215,6 @@ int ym_init(int * argc, char ** argv)
   default:
     ym_create_5bit_atarist_table(ymout5, output_level);
   }
-
-  /* Process ym-puls options */
-  *argc = ym_puls_options(*argc, argv);
 
   return 0;
 }
@@ -277,7 +283,7 @@ void ym_adjust_cycle(ym_t * const ym, const cycle68_t ymcycles)
 {
   if (ym && ymcycles) {
     ym_event_t * event;
-    
+
     /* Should not be run before events have been flushed or
      * processed. It's not really an error, but with the current
      * implementation it should not be happening. */

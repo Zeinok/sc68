@@ -458,3 +458,7 @@ int ym_blep_setup(ym_t * const ym)
   ym->cb_sampling_rate = sampling_rate;
   return 0;
 }
+
+void ym_blep_add_options(void)
+{
+}

@@ -728,7 +728,7 @@ static option68_t opts[] = {
 };
 #undef prefix
 
-int ym_puls_options(int argc, char ** argv)
+void ym_puls_add_options(void)
 {
   const int n_opts = sizeof(opts) / sizeof(*opts);
 
@@ -737,9 +737,4 @@ int ym_puls_options(int argc, char ** argv)
 
   /* Default option values */
   option68_iset(opts+0, default_filter, opt68_NOTSET, opt68_CFG);
-
-  /* Parse options */
-  argc = option68_parse(argc,argv);
-
-  return argc;
 }
