@@ -42,6 +42,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifndef UNUSED
+# define UNUSED(X) X = X
+#endif
+
 /** vfs vlc structure. */
 typedef struct {
   vfs68_t   vfs; /**< vfs function.   */
@@ -50,19 +54,19 @@ typedef struct {
 
 static const char * isf_name(vfs68_t * vfs)
 {
-  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs; UNUSED(isf);
   return "vlc://slave"; /* $$$ probably vlc stream has a name somewhere  */
 }
 
 static int isf_open(vfs68_t * vfs)
 {
-  vfs68_vlc_t * isf = (vfs68_vlc_t *) vfs;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *) vfs; UNUSED(isf);
   return 0;
 }
 
 static int isf_close(vfs68_t * vfs)
 {
-  vfs68_vlc_t * isf = (vfs68_vlc_t *) vfs;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *) vfs; UNUSED(isf);
   return 0;
 }
 
@@ -74,13 +78,13 @@ static int isf_read(vfs68_t * vfs, void * data, int n)
 
 static int isf_write(vfs68_t * vfs, const void * data, int n)
 {
-  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs; UNUSED(isf);
   return -1;
 }
 
 static int isf_flush(vfs68_t * vfs)
 {
-  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs;
+  vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs; UNUSED(isf);
   return -1;
 }
 

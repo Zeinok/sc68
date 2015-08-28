@@ -5,7 +5,7 @@
 #
 # this file is part of the sc68 project <http://sc68.atari.org/>
 #
-# Copyright (C) 2007-2014 Benjamin Gerard
+# Copyright (C) 2007-2015 Benjamin Gerard
 #
 
 
@@ -191,10 +191,10 @@ mkdir -p m4 && testdir m4 fatal
 
 # Bootstrap all sub-directories.
 dirs="as68 desa68 file68 info68 unice68 file68 sourcer68 libsc68"
-dirs="$dirs sc68 mksc68 sc68-gst sc68-audacious sc68-doc"
+dirs="$dirs sc68 mksc68 sc68-gst sc68-audacious sc68-vlc sc68-doc"
 err=0
 for dir in ${dirs}; do
-    bootstrap_dir ${dir} "$@" || err=$((err+1))
+    bootstrap_dir ${dir} "$@" || let err=err+1
 done
 
 if test ${err} -ne 0; then

@@ -84,16 +84,21 @@ SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[[$]enable_sc68_cli])
 SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_sc68_cli])
 
 # PLUGINS
-def_audacious=no;def_sc68_gst=no
+def_audacious=no; def_sc68_gst=no; def_sc68_vlc=no
 AS_CASE(["x$enable_sc68_plugin"],
   [xno|xyes],
-  [def_audacious=$enable_sc68_plugin;def_sc68_gst=$enable_sc68_plugin],
+  [
+    def_audacious=[$]enable_sc68_plugin
+    def_sc68_gst=[$]enable_sc68_plugin
+    def_sc68_vlc=[$]enable_sc68_plugin],
   [
     $pkgconfig audacious --exists && def_audacious=check
     $pkgconfig gstreamer-0.10 --exists && def_sc68_gst=check
+    $pkgconfig vlc-plugin --exists && def_sc68_vlc=check
   ])
 SC68_ENABLE_PACKAGE([sc68-audacious],[sc68 plugin for audacious],[$def_audacious])
 SC68_ENABLE_PACKAGE([sc68-gst],[sc68 plugin for gstreamer (0.10)],[$def_sc68_gst])
+SC68_ENABLE_PACKAGE([sc68-vlc],[sc68 plugin for vlc],[$def_sc68_vlc])
 
 # DOC
 SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])
@@ -148,6 +153,10 @@ fi
 
 if test Xyes = X"${enable_sc68_gst}"
 then AC_CONFIG_SUBDIRS([sc68-gst])
+fi
+
+if test Xyes = X"${enable_sc68_vlc}"
+then AC_CONFIG_SUBDIRS([sc68-vlc])
 fi
 
 if test Xyes = X"${enable_mksc68}"
