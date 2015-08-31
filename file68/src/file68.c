@@ -931,6 +931,32 @@ static int st_isgraph( int c )
   return st_isupper(c) || st_isdigit(c) || st_istag(c);
 }
 
+/* check memory range, trims space, clean control chars and returns
+ * its length */
+static int chkstr(char *b, int off, int len)
+{
+  const int max = 256, org = off;    /* limit string length to that */
+  int spc = off;
+  if (off+max < len)
+    len = off+max;                      /* limit string length */
+  for (; off < len; ++off) {
+    int c = b[off];
+    if (!c) {                           /* end of string */
+      if (spc+1<len)
+        b[spc+1] = 0;                /* trim space */
+      return off-org;                /* return real length not trim */
+    }
+    if (c <= 32)
+      b[off] = 32;                      /* remove cntl char */
+    else {
+      spc = off;                        /* last non-space char */
+      if (c & 128)
+        /* TODO ? */;
+    }
+  }
+  return -1;                            /* reach the limit */
+}
+
 /* @see http://sndh.atari.org/fileformat.php
  */
 static int sndh_info(disk68_t * mb, int len)
@@ -1051,7 +1077,7 @@ static int sndh_info(disk68_t * mb, int len)
     } else if (!memcmp(b+i,"TIME",4)) {
       /* Time in second */
       int j, tracks = mb->nb_mus <= 0 ? 1 : mb->nb_mus;
-      t = i; i += 4;
+      t = i; i += 4 + (i&1);        /* Force alignment on the table */
       for ( j = 0; j < tracks; ++j ) {
         if (i < len-2 && j < SC68_MAX_TRACK)
           mb->mus[j].first_ms = 1000u *
@@ -1097,13 +1123,15 @@ static int sndh_info(disk68_t * mb, int len)
       t = i; i += 4;
     } else if (!memcmp(b+i,"!#SN",4) || !memcmp(b+i,"#!SN",4)) {
       /* track names (which it is ? The doc uses both ! */
-      int j, max=0, tracks = mb->nb_mus <= 0 ? 1 : mb->nb_mus;
+      int torg, tend, j, max=0, tracks = mb->nb_mus <= 0 ? 1 : mb->nb_mus;
 
-      int faulty = 0;
+      torg = t = i;          /* tag offset can be unaligned */
+      i += 4 + (i&1);        /* the table however has to be aligned */
+      tend = i+tracks*2;     /* offset end of table */
 
-      t = i;
-      /* assert(0); */
-
+      if (tend >= len) {
+        i = len; continue;             /* mark the end */
+      }
 
       /* FIXME: normally (according to the documentation) the subname
        * table are offset relative the tag itself. However in some
@@ -1112,27 +1140,48 @@ static int sndh_info(disk68_t * mb, int len)
        * loading them by guessing the offset is wrong since it points
        * in middle of the offset table instead of an actual string. */
       for (j = 0; j < tracks; ++j) {
-        int off = WPeekBE(b + i + 4 + j*2); /* string offset */
-        if (off < 4+tracks*2) {
-          /* assert(!"faulty !#SN"); */
-          faulty = 4+tracks*2;
+        int off = WPeekBE(b + i + j*2); /* string offset */
+        if (t+off < tend) {
+          TRACE68(file68_cat,
+                  "file68: sndh -- faulty !#SN (table:%u-%u string#%d:%u)\n",
+                  t,tend,j+1,t+off);
+          torg = tend;     /* origin is the end of the offset table */
           break;
         }
       }
 
-      for (j = 0; j < tracks; ++j) {
-        int off = faulty + WPeekBE(b + i + 4 + j*2); /* string offset */
-        if (off > max) max = off;
-        mb->mus[j].tags.tag.title.val = b + i + off;
-        TRACE68(file68_cat,
-                "file68: sndh -- !#SN #%02d pos:%d -- '%s'\n",
-                j+1, i+off, mb->mus[j].tags.tag.title.val);
+      /* Now we can start the real thing ! */
+      for (j = 0; j < tracks; ++j, i+=2) {
+        int off = WPeekBE(b + i);       /* string offset */
+        off += torg;                    /* add table origin */
+        if ( (unsigned int) off >= (unsigned int) len ) {
+          /* This is bad !!! the string is outside! */
+          TRACE68(file68_cat,
+                  "file68: sndh -- !#SN[%02d] @%d out of range\n",j+1,off);
+          assert(!"subsong name offset out of range");
+        } else {
+          int l = chkstr(b, off, len);
+          if (l >= 0) {
+            mb->mus[j].tags.tag.title.val = b + off;
+            TRACE68(file68_cat,
+                    "file68: sndh -- !#SN[%02d] @%d:+%d -- '%s' \n",
+                    j+1, off, l, mb->mus[j].tags.tag.title.val);
+            off += l+1;
+            if (off > max)
+              max = off;
+          } else {
+            TRACE68(file68_cat,
+                    "file68: sndh -- !#SN[%02d] @%d overflow\n",
+                    j+1, off);
+            max = len;
+          }
+        }
       }
-      /* Position on the last sub name and skip it. */
-      for (i += max; i < len && b[i] ; i++ )
+      /* Position on the last sub name and skip zeros. */
+      for (i = max; i < len && !b[i] ; i++ )
         ;
-      for (; i < len && !b[i] ; i++ )
-        ;
+      TRACE68(file68_cat,
+              "file68: sndh -- !#SN @%d-%d\n", t, i);
     } else if ( ( !memcmp(b+i,"!#",2) || !memcmp(b+i,"#!",2) )
                 && ( (ctypes & 0xC00) == 0xC00 ) ) {
       mb->def_mus = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' ) - 1;
@@ -1185,40 +1234,24 @@ static int sndh_info(disk68_t * mb, int len)
       unknowns = 0; /* Reset successive unkwown. */
 
       if (s >= 0) {
-        int j, k;
-        for ( j = s, k = s - 1; j < len && b[j]; ++j) {
-          if ( b[j] < 32 ) b[j] = 32;
-          else k = j;                   /* k is last non space char */
-        }
-
-        if (k+1 < len) {
-          b[k+1] = 0;                   /* Strip trailing space */
-          i = k+2;
+        int l = chkstr(b, s, len);
+        if (l < 0) {
+          TRACE68(file68_cat,
+                  "file68: sndh -- string out of range @%d\n", s);
+          i = len;
+        } else {
+          TRACE68(file68_cat,
+                  "file68: sndh -- %s ARG -- '%s'\n",
+                  p ? "store" : "got", b+s);
           if (p)
             *p = b+s;                   /* store tag */
-          else
-            TRACE68(file68_cat,"file68: sndh -- not storing -- '%s'\n",
-                    b+s);
-
-          /* HAXXX: using name can help determine STE needs */
-          /* if (p == &mb->tags.tag.title.val) */
-          /*   steonly = 0 */
-          /*     || !!strstr(mb->tags.tag.title.val,"STE only") */
-          /*     || !!strstr(mb->tags.tag.title.val,"(STe)") */
-          /*     || !!strstr(mb->tags.tag.title.val,"(STE)") */
-          /*     ; */
-
-          TRACE68(file68_cat,
-                  "file68: sndh -- got ARG -- '%s'\n",
-                  b+s);
-
+          i = s + l + 1;
         }
 
-        /* skip the trailing null chars */
+        /* skip trailing '\0' */
         for ( ; i < len && !b[i] ; i++ )
           ;
       }
-
     }
   }
 
