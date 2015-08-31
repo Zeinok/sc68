@@ -46,14 +46,14 @@ vlc_min='2.1.0'       # Not sure exactly which versions are supported
 PKG_CHECK_MODULES([VLC],[vlc-plugin >= [$]vlc_min])
 
 vlc_ver=[$]([$]pkgconfig --modversion vlc-plugin || echo 'n/a')
-vlc_dir=[$]([$]pkgconfig --variable=pluginsdir vlc-plugin || echo '-')
+if test x[$]{VLC_PLUGIN_DIR+set} = xset; then
+    vlc_dir="[$]{VLC_PLUGIN_DIR}"
+else
+  vlc_dir=[$]([$]pkgconfig --variable=pluginsdir vlc-plugin)
+fi
 
-if test x"[$]{vlc_dir}" = x-; then
-    if test x${VLC_PLUGIN_DIR+set} = xset; then
-        vlc_dir="[$]{VLC_PLUGIN_DIR}"
-    else
-      AC_MSG_ERROR([Unable to locate vlc plugin dir (set VLC_PLUGIN_DIR)])
-    fi
+if test x"[$]{vlc_dir}" = x; then
+    AC_MSG_ERROR([Unable to locate vlc plugin dir (set VLC_PLUGIN_DIR)])
 fi
 
 plugindir=[$]{vlc_dir}/demux
