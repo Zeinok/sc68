@@ -30,32 +30,34 @@
 #define N_(str) (str)
 
 #include <vlc_common.h>
-#include <vlc_input.h>
-#include <vlc_plugin.h>
-#include <vlc_demux.h>
-#include <vlc_codec.h>
-#include <vlc_meta.h>
+#include <vlc_stream.h>
+
+/* #include <vlc_input.h> */
+/* #include <vlc_plugin.h> */
+/* #include <vlc_demux.h> */
+/* #include <vlc_codec.h> */
+/* #include <vlc_meta.h> */
 
 #include <sc68/file68_vfs_def.h>
-
-#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 #ifndef UNUSED
-# define UNUSED(X) X = X
+# define UNUSED(X) (void)(X)
 #endif
 
 /** vfs vlc structure. */
 typedef struct {
-  vfs68_t   vfs; /**< vfs function.   */
-  stream_t    * f;       /**< vlc slaved stream.  */
+  vfs68_t   vfs;                        /**< vfs function.   */
+  stream_t *f;                          /**< vlc slaved stream.  */
+  /** !!! always last !!! */
+  char uri[1];                          /**< URI or filename */
 } vfs68_vlc_t;
 
 static const char * isf_name(vfs68_t * vfs)
 {
   vfs68_vlc_t * isf = (vfs68_vlc_t *)vfs; UNUSED(isf);
-  return "vlc://slave"; /* $$$ probably vlc stream has a name somewhere  */
+  return isf->uri;
 }
 
 static int isf_open(vfs68_t * vfs)
@@ -131,24 +133,30 @@ static const vfs68_t vfs68_vlc = {
   isf_destroy
 };
 
-vfs68_t * vfs68_vlc_create(stream_t * vlc)
+vfs68_t * vfs68_vlc_create(stream_t * vlc, const char * uri)
 {
   vfs68_vlc_t * isf;
+  int l = 0;
 
   if (!vlc) {
     return 0;
   }
+  if (uri)
+    l = strlen(uri);
 
-  isf = malloc(sizeof(vfs68_vlc_t));
-  if (!isf) {
+  isf = malloc(sizeof(vfs68_vlc_t) + l);
+  if (!isf)
     return 0;
-  }
 
-  /* Copy vfs functions. */
+  /* copy vfs functions. */
   memcpy(&isf->vfs, &vfs68_vlc, sizeof(vfs68_vlc));
 
   /* set vlc stream handle. */
   isf->f = vlc;
+
+  /* copy URI */
+  memcpy(isf->uri,uri,l);
+  isf->uri[l] = 0;                      /* zero terminated */
 
   return &isf->vfs;
 }

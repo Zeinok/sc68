@@ -40,13 +40,21 @@ SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
 # | vlc                                                                  |
 # `----------------------------------------------------------------------'
 
-vlc_ver='n/a'                   # see if we can get that from pkgc
-vlc_min='2.1.0'                 # Not sure which version exactly
+vlc_ver='n/a'         # get that later from pkg-config
+vlc_min='2.1.0'       # Not sure exactly which versions are supported
 
-PKG_CHECK_MODULES([VLC],[vlc-plugin >= 2.1.0])
+PKG_CHECK_MODULES([VLC],[vlc-plugin >= [$]vlc_min])
 
 vlc_ver=[$]([$]pkgconfig --modversion vlc-plugin || echo 'n/a')
 vlc_dir=[$]([$]pkgconfig --variable=pluginsdir vlc-plugin || echo '-')
+
+if test x"[$]{vlc_dir}" = x-; then
+    if test x${VLC_PLUGIN_DIR+set} = xset; then
+        vlc_dir="[$]{VLC_PLUGIN_DIR}"
+    else
+      AC_MSG_ERROR([Unable to locate vlc plugin dir (set VLC_PLUGIN_DIR)])
+    fi
+fi
 
 plugindir=[$]{vlc_dir}/demux
 AC_SUBST([plugindir])
@@ -71,6 +79,6 @@ AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
 AC_MSG_NOTICE([|   file68 headers      : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
-AC_MSG_NOTICE([|   vlc                 : $vlc_ver])
+AC_MSG_NOTICE([|   vlc                 : yes ($vlc_ver)])
 AC_MSG_NOTICE([|   plugin-dir          : $vlc_dir])
 AC_MSG_NOTICE([+-----------------------])

@@ -52,7 +52,7 @@
 
 enum { ALLIN1 = 1 };
 
-vfs68_t * vfs68_vlc_create(stream_t * vlc);
+vfs68_t * vfs68_vlc_create(stream_t * vlc, const char * uri);
 
 #ifndef _
 # define _(str)  (str)
@@ -158,14 +158,16 @@ static volatile int mmm_init = 0;
 /* Declare VLC module */
 vlc_module_begin()
 {
-#ifdef DEBUG  
+#ifdef DEBUG
   fprintf(stderr,"sc68-vlc: ENTER %s() with mmm_init=%d !\n", __FUNCTION__, mmm_init);
   fflush(stderr);
 #endif
   assert(mmm_init == 0);
   ++mmm_init;
-  cannot_unload_broken_library(); /* $$$ TEMP EVIL FIX FOR NOT UNLOADING PROPERLY ATM */
-  
+
+  /* $$$ TEMP EVIL FIX FOR NOT UNLOADING PROPERLY ATM */
+  cannot_unload_broken_library();
+
   if (vlc_init_sc68()) {
     goto error;
   }
@@ -307,17 +309,17 @@ static int vlc_init_sc68(void)
   static char * argv[] = { appname/* , message */ };
 
   if (vlc_initialized) {
-#ifdef DEBUG    
+#ifdef DEBUG
     fprintf(stderr, "%s() already initialized ? [%d]\n",
-	    __FUNCTION__, vlc_initialized);
+            __FUNCTION__, vlc_initialized);
     fflush(stderr);
-#endif    
+#endif
     msg_Err((demux_t*)0, "%s() already initialized ? [%d]\n",
-	    __FUNCTION__, vlc_initialized);
+            __FUNCTION__, vlc_initialized);
     return -1;
   }
   assert(vlc_initialized == 0);
-  vlc_initialized = 2;		/* 2: during init */
+  vlc_initialized = 2;          /* 2: during init */
 
   meta_lut_sort();
   memset(&init68,0,sizeof(init68));
@@ -341,33 +343,33 @@ static void vlc_shutdown_sc68(void)
     vlc_initialized = 3;
     sc68_shutdown();
   } else {
-#ifdef DEBUG    
+#ifdef DEBUG
     fprintf(stderr, "%s() not initialized ? [%d]\n",
-    	    __FUNCTION__, vlc_initialized);
+            __FUNCTION__, vlc_initialized);
     fflush(stderr);
-#endif    
+#endif
     msg_Err((demux_t*)0,"%s() not initialized ? [%d]\n",
-    	    __FUNCTION__, vlc_initialized);
+            __FUNCTION__, vlc_initialized);
   }
-  vlc_initialized = 0;  
+  vlc_initialized = 0;
 }
 
 /* Shutdown sc68 demux module private */
 static void sys_shutdown(demux_t * p_demux)
 {
-#ifdef DEBUG  
+#ifdef DEBUG
   fprintf(stderr,"sc68-vlc: ENTER %s() demux:%p mmm_init=%d !\n",
-	  __FUNCTION__, (void*)p_demux,mmm_init);
+          __FUNCTION__, (void*)p_demux,mmm_init);
   fflush(stderr);
-#endif  
-  
+#endif
+
   dbg(p_demux, "Enter %s()\n", __FUNCTION__);
   if (p_demux) {
     demux_sys_t * p_sys = p_demux->p_sys;
     p_demux->p_sys = 0;
     if (p_sys) {
       if (p_sys->meta)
-	vlc_meta_Delete(p_sys->meta);
+        vlc_meta_Delete(p_sys->meta);
       sc68_cntl(p_sys->sc68,SC68_CONFIG_SAVE);
       sc68_destroy(p_sys->sc68);
       free(p_sys);
@@ -503,22 +505,28 @@ static int Open(vlc_object_t * p_this)
 
   es_format_t fmt;
 
-#ifdef DEBUG  
+#ifdef DEBUG
   fprintf(stderr,"sc68-vlc: Enter %s() demux:%p mmm_init=%d !\n",
-	  __FUNCTION__, (void*)p_demux,mmm_init);
+          __FUNCTION__, (void*)p_demux,mmm_init);
 #endif
-  dbg(p_demux,"Enter %s()", __FUNCTION__);
+  dbg(p_demux,"Enter %s(%s)", __FUNCTION__, p_demux->psz_file);
 
   assert(vlc_initialized == 1);
   if (vlc_initialized != 1) {
-#ifdef DEBUG  
+#ifdef DEBUG
     fprintf(stderr, "sc68-vlc: wrong stat (%d)\n",vlc_initialized);
     fflush(stderr);
-#endif    
+#endif
     msg_Err(p_demux, "sc68-vlc wrong stat (%d)\n",vlc_initialized);
     return -1;
   }
   /* assert(!p_demux->sc68); */
+
+  /* if (!p_demux->s) { */
+  /*   dbg(p_demux,"no stream ?"); */
+  /*   goto exit; */
+  /* } */
+  assert(p_demux->s);
 
   /* Check if we are dealing with a sc68 file */
   if (i = stream_Peek(p_demux->s, &p_peek, 16), i < 16) {
@@ -610,7 +618,7 @@ static int Open(vlc_object_t * p_this)
   sc68_cntl(p_demux->p_sys->sc68, SC68_SET_COOKIE, p_demux);
 
   /* Load and prepare sc68 file */
-  stream68 = vfs68_vlc_create(p_demux->s);
+  stream68 = vfs68_vlc_create(p_demux->s, p_demux->psz_file);
   if (unlikely(!stream68))
     goto error;
   if (sc68_load(p_demux->p_sys->sc68, stream68))
@@ -740,7 +748,7 @@ static int Demux( demux_t *p_demux )
 
   p_block = block_Alloc(p_sys->pcm_per_loop << 2);
   if (unlikely(!p_block)) {
-    return 0;			/* Shouldn't we return -1 ? */
+    return 0;                   /* Shouldn't we return -1 ? */
   }
 
   pcm_per_loop = p_block->i_buffer >> 2;
@@ -1074,7 +1082,7 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
 
   default:
     dbg(p_demux, "unhandled cntl query -- %s (%d)\n",
-	qstr(i_query), i_query);
+        qstr(i_query), i_query);
   }
 
   return VLC_EGENERIC;
