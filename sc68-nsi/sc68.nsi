@@ -4,7 +4,7 @@
 # @author https://sourceforge.net/users/benjihan
 # @brief  Installer for sc68
 #
-# Time-stamp: <2015-09-02 11:09:17 ben>
+# Time-stamp: <2015-09-02 11:11:51 ben>
 # Init-stamp: <2013-07-29 04:43:45 ben>
 
 #--------------------------------
@@ -218,7 +218,6 @@ LicenseForceSelection checkbox
 
 !ifndef DEBUG
 Page license
-!error "Don't want that now"
 !endif
 Page components
 Page directory
