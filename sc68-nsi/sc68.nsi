@@ -4,7 +4,7 @@
 # @author https://sourceforge.net/users/benjihan
 # @brief  Installer for sc68
 #
-# Time-stamp: <2015-09-02 11:11:51 ben>
+# Time-stamp: <2015-09-02 11:15:00 ben>
 # Init-stamp: <2013-07-29 04:43:45 ben>
 
 #--------------------------------
@@ -487,12 +487,3 @@ FunctionEnd
 Function un.onInit
     !insertmacro SetCommonVars
 FunctionEnd
-
-# Function .onGUIInit
-#    # 1028 is the id of the branding text control
-#    GetDlgItem $R0 $HWNDPARENT 1028
-#    CreateFont $R1 "Tahoma" 10 700
-#    SendMessage $R0 ${WM_SETFONT} $R1 0
-#    # set background color to white and text color to red
-#    SetCtlColors $R0 FFFFFF FF0000
-#  FunctionEnd
