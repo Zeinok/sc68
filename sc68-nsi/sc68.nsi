@@ -4,7 +4,7 @@
 # @author https://sourceforge.net/users/benjihan
 # @brief  Installer for sc68
 #
-# Time-stamp: <2013-07-30 19:04:33 ben>
+# Time-stamp: <2015-09-02 11:09:17 ben>
 # Init-stamp: <2013-07-29 04:43:45 ben>
 
 #--------------------------------
@@ -16,7 +16,7 @@
 !Define HKLM_SC68    "${HKLM_SASHIPA}\sc68"
 
 Name          "${NAME}"
-Caption       "${CAPTION}"
+Caption       "${CAPTION} (${__DATE__})"
 Icon          "${SRCDIR}/sc68-icon-32.ico"
 UninstallIcon "${SRCDIR}/sc68-icon-32.ico"
 OutFile       "${OUTFILE}"
@@ -26,54 +26,176 @@ SetCompressor /SOLID lzma
 InstProgressFlags smooth colored
 SetOverwrite  On
 
-Var /GLOBAL VlcDir              # VLC base install dir
-Var /GLOBAL WmpDir              # Winamp base install dir
-Var /GLOBAL FooDir              # Foobar2000 base install dir
-
-Var /GLOBAL VlcFile             # Installed VLC plugin
-Var /GLOBAL WmpFile             # Installed Winamp plugin
-Var /GLOBAL FooFile             # Installed Foobar2000 plugin
-
-var /GLOBAL Win                 # either "win32" or "win64"
-
 # ----------------------------------------------------------------------
 #
-# Functions and Macros to locate installation directories
+# Globals
 #
 # ----------------------------------------------------------------------
 
-Function FindPreviousInstall
-    ReadRegStr $0 HKLM ${HKLM_SC68} "Install_Dir"
-    StrCmp "" $0 +2 0
-    StrCpy $INSTDIR $0
-FunctionEnd
+Var /GLOBAL vlcdir              # VLC base install dir
+Var /GLOBAL Vlcfile             # Installed VLC plugin
+Var /GLOBAL Vlcarc              # either 32 or 64
+Var /GLOBAL wmpdir              # Winamp base install dir
+Var /GLOBAL wmpfile             # Installed Winamp plugin
+Var /GLOBAL foodir              # Foobar2000 base install dir
+Var /GLOBAL foofile             # Installed Foobar2000 plugin
+Var /GLOBAL winarch             # either 32 or 64
+
+# ----------------------------------------------------------------------
+#
+# !!! MUST BE MACROS !!! (because uninstall needs them too)
+#
+# ----------------------------------------------------------------------
+
+!macro SetArch
+    IntOp $winarch 32 + 0
+    ${If} ${RunningX64}
+    IntOp $winarch 64 + 0
+    ${EndIf}
+!macroend
+
+!macro SetDefaultInstallDir
+    StrCpy $INSTDIR "$PROGRAMFILES32\sc68"
+    IntCmp $winarch 32 +2
+    StrCpy $INSTDIR "$PROGRAMFILES64\sc68"
+!macroend
 
 !macro FindWinamp
-    ReadRegStr $WmpDir HKCU "Software\Winamp" ""
-    StrCpy $WmpFile ""
-    IfFileExists "$WmpDir\winamp.exe" 0 +2
-    StrCpy $WmpFile "$WmpDir\Plugins\in_sc68.dll"
+    StrCpy $wmpfile ""
+    ClearErrors
+    ReadRegStr $Wmpdir HKCU "Software\Winamp" ""
+    IfErrors +3
+    IfFileExists "$wmpdir\winamp.exe" 0 +2
+    StrCpy $wmpfile "$wmpdir\Plugins\in_sc68.dll"
 !macroend
 
 !macro FindFoobar
-    ReadRegStr $FooDir HKLM "SOFTWARE\foobar2000" "InstallDir"
-    StrCpy $FooFile ""
-    IfFileExists "$FooDir\foobar2000.exe" 0 +2
-    StrCpy $FooFile "$FooDir\components\foo_sc68.dll"
+    StrCpy $foofile ""
+    ClearErrors
+    ReadRegStr $foodir HKLM "SOFTWARE\foobar2000" "InstallDir"
+    IfErrors +3
+    IfFileExists "$foodir\foobar2000.exe" 0 +2
+    StrCpy $foofile "$foodir\components\foo_sc68.dll"
 !macroend
 
 !macro FindVlc
-    ReadRegStr $VlcDir HKLM "SOFTWARE\VideoLAN\VLC" "InstallDir"
-    StrCpy $VlcFile ""
-    IfFileExists "$VlcDir\vlc.exe" 0 +2
-    StrCpy $VlcFile "$VlcDir\plugins\demux\libsc68_plugin.dll"
+    StrCpy $vlcfile ""
+    ClearErrors
+    ReadRegStr $vlcdir HKLM "Software\VideoLAN\VLC" "InstallDir"
+    IfErrors +3
+    IfFileExists "$Vlcdir\vlc.exe" 0 +2
+    StrCpy $vlcfile "$Vlcdir\plugins\demux\libsc68_plugin.dll"
 !macroend
 
 !macro FindPlugins
-    !insertmacro FindWinamp
+    ${If} ${RunningX64}
+    SetRegview 64
     !insertmacro FindVlc
+    SetRegview lastused
+    IntOp $vlcarc 64 + 0
+    StrCmp "" $vlcfile 0 vlc_done
+    ${Endif}
+    IntOp $vlcarc 32 + 0
+    !insertmacro FindVlc
+vlc_done:
+
+!ifdef DEBUG
+    MessageBox MB_OK "vlc arc: [$vlcarc] dir: [$Vlcdir] dll: [$vlcfile]"
+!endif
+    !insertmacro FindWinamp
     !insertmacro FindFoobar
 !macroend
+
+!macro SetCommonVars
+    !insertmacro SetArch
+    !insertmacro SetDefaultInstallDir
+    !insertmacro FindPlugins
+!macroend
+
+# ----------------------------------------------------------------------
+#
+# Functions
+#
+# ----------------------------------------------------------------------
+
+# Inp: None
+# Out: $INSTDIR
+# Use: $0
+Function FindPreviousInstall
+    ClearErrors
+    ReadRegStr $0 HKLM ${HKLM_SC68} "Install_Dir"
+    IfErrors +2
+    StrCpy $INSTDIR $0
+FunctionEnd
+
+# In:  $0 file-hnadle
+# Out: $1 Word
+# Use: $2
+Function FileReadWord
+    FileReadByte $0 $1           # $1 = byte[0]
+    FileReadByte $0 $2           # $2 = byte[1]
+    IntOp $2 $2 << 8             # $2 = byte[1]<<8
+    IntOp $1 $1 + $2             # $1 = (byte[1]<<8) | byte[0]
+FunctionEnd
+
+# In:  $0 file-handle
+# Out: $1 Dword
+# Use: $2
+Function FileReadDword
+    Call FileReadWord           # $1 = word[0]
+    push $1                     # push word[0]
+    Call FileReadWord           # $1 = word[1]
+    pop $2                      # $2 = word[0]
+    IntOp $1 $1 << 16           # $1 = word[1]<<16
+    IntOp $1 $1 + $2            # $1 = (word[1]<<16) | word[0]
+FunctionEnd
+
+
+!ifdef GUESS_PLATFORM_EXE
+
+# Guess .exe architecture
+# Inp: $0 exe path
+# Out: $0 0:invalid 32:win32 64:win64
+# Use: $2
+Function GuessPlatformExe
+    ClearErrors
+    FileOpen $0 $0 r
+    IfErrors notfound
+    
+    FileSeek $0 0x3C SET        # Seek to <Pointer to PE/Coff Header>
+    Call FileReadDword          # $1 = <Pointer to PE/Coff Header>
+
+    MessageBox MB_OK "Pointer to PE/Coff Header: is [$1]"
+
+    IntOp $2 $1 + 0x18          # $2 = <Pointer to Standard Coff Fields>
+    push $2                     # Push <Pointer to Standard Coff Fields>
+    FileSeek $0 $1 SET          # Seek to <Pointer to PE/Coff Header>
+    Call FileReadDword          # $1 = <PE signature>
+
+    IntFmt $2 "0x%08X" $1
+    MessageBox MB_OK "Signature $2"
+    
+    IntCmpU $1 0x00004550 0 notfound notfound
+    pop $1                      # $1 = <Pointer to Standard Coff Fields>
+    FileSeek $0 $1 SET          # Seek to <Pointer to Standard Coff Fields>
+    Call FileReadWord           # $1 = <coff magic>
+
+    IntFmt $2 "0x%04X" $1
+    MessageBox MB_OK "magic $2"
+
+    FileClose $0
+    IfErrors NotFound
+    
+    IntOp $0 32 + 0
+    IntCmpU $1 0x010B found
+    IntOp $0 64 + 0
+    IntCmpU $1 0x020B found
+notfound:
+    IntOp $0 0 + 0
+found:
+FunctionEnd   
+
+!endif
 
 # ----------------------------------------------------------------------
 #
@@ -81,10 +203,12 @@ FunctionEnd
 #
 # ----------------------------------------------------------------------
 
+!ifndef DEBUG
 LicenseBkColor /windows
 LicenseText "license"
 LicenseData ${SRCDIR}\..\COPYING
 LicenseForceSelection checkbox
+!endif
 
 # ----------------------------------------------------------------------
 #
@@ -92,7 +216,10 @@ LicenseForceSelection checkbox
 #
 # ----------------------------------------------------------------------
 
+!ifndef DEBUG
 Page license
+!error "Don't want that now"
+!endif
 Page components
 Page directory
 Page instfiles
@@ -107,15 +234,19 @@ SectionGroup /e "!sc68 plugins"
 
 # WINAMP
 Section "sc68 for winamp" s_wmp
-    file /oname=$WmpFile ${WMPDLL}
+    file /oname=$wmpfile ${WMPDLL}
 SectionEnd
 
-Section "sc68 for vlc" s_vlc
-    file /oname=$VlcFile ${VLCDLL}
+Section "sc68 for vlc (32-bit)" s_vlc32
+    file /oname=$vlcfile ${VLC32DLL}
+SectionEnd
+
+Section "sc68 for vlc (64-bit)" s_vlc64
+    file /oname=$vlcfile ${VLC64DLL}
 SectionEnd
 
 Section "sc68 for foobar2000" s_foo
-    file /oname=$FooFile ${FOODLL}
+    file /oname=$foofile ${FOODLL}
 SectionEnd
 
 SectionGroupEnd
@@ -256,14 +387,14 @@ Section "Uninstall"
 
     ## Remove files
 
-    StrCmp "" $VlcFile +2 0
-    Delete $VlcFile
+    StrCmp "" $vlcfile +2 0
+    Delete $vlcfile
 
-    StrCmp "" $WmpFile +2 0
-    Delete $WmpFile
+    StrCmp "" $wmpfile +2 0
+    Delete $wmpfile
 
-    StrCmp "" $FooFile +2 0
-    Delete $FooFile
+    StrCmp "" $foofile +2 0
+    Delete $foofile
 
     StrCmp "" $INSTDIR +2 0
     RMDir /r $INSTDIR
@@ -288,45 +419,81 @@ Function DisableSection
 FunctionEnd
 
 Function .onInit
-    StrCpy $INSTDIR "$PROGRAMFILES32\sc68"
-    StrCpy $Win "win32"
-    ${If} ${RunningX64}
-        StrCpy $Win "win64"
-        StrCpy $INSTDIR "$PROGRAMFILES64\sc68"
-    ${EndIf}
+
+    !insertmacro SetCommonVars
+    
     Call FindPreviousInstall
-    !insertmacro FindPlugins
 
     # Check and disable individual plugin sections
+
+    # --------------------------------
+    # Winamp
+
     StrCpy $0 ${s_wmp}
-    StrCmp "" $WmpFile 0 +2
-    call DisableSection
+    StrCmp "" $wmpfile 0 +2
+    Call DisableSection
 
-    StrCpy $0 ${s_vlc}
-    StrCmp "" $VlcFile 0 +2
-    call DisableSection
-
+    # --------------------------------
+    # Foobar
+    
     StrCpy $0 ${s_foo}
-    StrCmp "" $FooFile 0 +2
-    call DisableSection
+    StrCmp "" $foofile 0 +2
+    Call DisableSection
 
-    StrCmp $win "win32" +3 0
-    push ${s0_32}
-    goto +2
-    push ${s0_64}
+    # --------------------------------
+    # Vlc
+    
+    StrCmp "" $vlcfile disable_both_vlc
+!ifdef GUESS_PLATFORM_EXE
+    StrCpy $0 "$vlcdir\vlc.exe"
+    call GuessPlatformExe
+!else
+    IntOp $0 $vlcarc + 0
+!endif    
+    IntCmpU $0 32 disable_vlc64
+    IntCmpU $0 64 disable_vlc32
+disable_both_vlc:
+    StrCpy $0 ${s_vlc32}
+    Call DisableSection
+disable_vlc64:
+    StrCpy $0 ${s_vlc64}
+    Call DisableSection
+    goto disable_vlc_end
+disable_vlc32:
+    StrCpy $0 ${s_vlc32}
+    Call DisableSection
+disable_vlc_end:
+
+    # --------------------------------
+    # Disable unwanted platform
+
+    Push ${s0_64}
+    Push ${s0_32}
+    StrCmp $win "win32" +2
+    Exch
+    Pop $0
     pop $0
-    call DisableSection
+    Call DisableSection
     IntOp $0 $0 + 1
-    call DisableSection
+    Call DisableSection
     IntOp $0 $0 + 1
-    call DisableSection
+    Call DisableSection
     IntOp $0 $0 + 1
-    call DisableSection
+    Call DisableSection
     IntOp $0 $0 + 1
-    call DisableSection
+    Call DisableSection
 
 FunctionEnd
 
 Function un.onInit
-    !insertmacro FindPlugins
+    !insertmacro SetCommonVars
 FunctionEnd
+
+# Function .onGUIInit
+#    # 1028 is the id of the branding text control
+#    GetDlgItem $R0 $HWNDPARENT 1028
+#    CreateFont $R1 "Tahoma" 10 700
+#    SendMessage $R0 ${WM_SETFONT} $R1 0
+#    # set background color to white and text color to red
+#    SetCtlColors $R0 FFFFFF FF0000
+#  FunctionEnd

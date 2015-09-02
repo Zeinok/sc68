@@ -23,7 +23,7 @@ $(installer_zip): $(installer_exe)
 	$(ZIP) -0 "$@" "$<"
 
 $(installer_exe): $(srcdir)/sc68.nsi Makefile
-	"$(MAKENSIS)" \
+	"$(MAKENSIS)" $(NSISFLAGS) \
 	/DNAME="@PACKAGE_NAME@" \
 	/DCAPTION="SC68" \
 	/DVERSION="@sc68_version@" \
@@ -34,7 +34,8 @@ $(installer_exe): $(srcdir)/sc68.nsi Makefile
 	/DWIN64DIR=`$(CYGPATH_W) "$(win64_dir)"` \
 	/DDATADIR=`$(CYGPATH_W) "$(sc68_data)"` \
 	/DWMPDLL=`$(CYGPATH_W) "$(winamp_dll)"` \
-	/DVLCDLL=`$(CYGPATH_W) "$(vlc_dll)"` \
+	/DVLC32DLL=`$(CYGPATH_W) "$(vlc_w32_dll)"` \
+	/DVLC64DLL=`$(CYGPATH_W) "$(vlc_w64_dll)"` \
 	/DFOODLL=`$(CYGPATH_W) "$(fb2k_dll)"` \
 	-- `$(CYGPATH_W) "$<"`
 

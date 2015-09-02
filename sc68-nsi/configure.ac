@@ -43,8 +43,12 @@ AC_ARG_WITH(
   [AS_HELP_STRING([--with-winamp-dll],[locate sc68 winamp plugin])])
 
 AC_ARG_WITH(
-  [vlc-dll],
-  [AS_HELP_STRING([--with-vlc-dll],[locate sc68 vlc plugin])])
+  [vlc-w32-dll],
+  [AS_HELP_STRING([--with-vlc-w32-dll],[locate sc68 vlc win32 plugin])])
+
+AC_ARG_WITH(
+  [vlc-w64-dll],
+  [AS_HELP_STRING([--with-vlc-w64-dll],[locate sc68 vlc win64 plugin])])
 
 AC_ARG_WITH(
   [fb2k-dll],
@@ -75,7 +79,7 @@ for winnn in win32 win64; do
   done
 done
 
-for plg in winamp vlc fb2k; do
+for plg in winamp fb2k vlc_w32 vlc_w64; do
   AC_MSG_CHECKING([sc68 [$]plg plugin dll])
   if eval test -r "\"[\$]with_[$]{plg}_dll\""; then
       eval [$]{plg}_dll="\"[\$]with_[$]{plg}_dll\""
@@ -120,7 +124,8 @@ AC_SUBST([win64_info68])
 AC_SUBST([win64_mksc68])
 AC_SUBST([sc68_data])
 AC_SUBST([sc68_version])
-AC_SUBST([vlc_dll])
+AC_SUBST([vlc_w32_dll])
+AC_SUBST([vlc_w64_dll])
 AC_SUBST([winamp_dll])
 AC_SUBST([fb2k_dll])
 
@@ -140,7 +145,8 @@ AC_MSG_NOTICE([| win32 path : [$]win32_dir])
 AC_MSG_NOTICE([| win64 path : [$]win64_dir])
 AC_MSG_NOTICE([|  data path : [$]sc68_data])
 AC_MSG_NOTICE([| winamp dll : [$]winamp_dll])
-AC_MSG_NOTICE([|    vlc dll : [$]vlc_dll])
+AC_MSG_NOTICE([| vlc-32 dll : [$]vlc_w32_dll])
+AC_MSG_NOTICE([| vlc-64 dll : [$]vlc_w64_dll])
 AC_MSG_NOTICE([|   fb2k dll : [$]fb2k_dll])
 AC_MSG_NOTICE([|   makensis : [$]makensis])
 AC_MSG_NOTICE([+-----------------------])
