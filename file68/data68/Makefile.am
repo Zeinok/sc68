@@ -27,25 +27,26 @@ endif
 
 config_files = sc68.cfg
 
-replay_files = Replay/asidifier.bin Replay/dmu.bin Replay/dwaga.bin	\
- Replay/jamcrackerpro.bin Replay/lastninja3.bin Replay/mon.bin		\
- Replay/tcbtracker.bin Replay/aenigmatica.bin Replay/alteredbeast.bin	\
- Replay/armalyte.bin Replay/blipblop.bin Replay/blipp079.bin		\
- Replay/chipmon2.bin Replay/cosotfmx.bin Replay/deltamusic1.bin		\
- Replay/deltamusic2.bin Replay/dyter07.bin Replay/fc13_14.bin		\
- Replay/fireice.bin Replay/fred.bin Replay/gemx.bin			\
- Replay/hpn-jam.bin Replay/huntforredoct.bin Replay/lastninjaiii.bin	\
- Replay/mcoder.bin Replay/midi.bin Replay/mmmesid.bin			\
- Replay/musmon1.bin Replay/musmon2.bin Replay/ninjatfmx.bin		\
- Replay/note.bin Replay/page.bin Replay/protracker.bin			\
- Replay/psgtrackerv2.bin Replay/puma.bin Replay/quartet.bin		\
- Replay/realms.bin Replay/shadowdancer.bin Replay/sidmon1.bin		\
- Replay/sidmon2.bin Replay/sndh_ice.bin Replay/soundfx.bin		\
- Replay/spacegun.bin Replay/ssd1.bin Replay/stos.bin			\
- Replay/synthiv.bin Replay/tao_digi.bin Replay/tao_hubbard.bin		\
- Replay/tao_ms211.bin Replay/tao_ms25.bin Replay/tao_ms27.bin		\
- Replay/tao_tsd.bin Replay/tfmx.bin Replay/tfmx_st.bin			\
- Replay/timerc.bin Replay/xbiossound.bin
+replay_files = Replay/asidifier.bin Replay/azidifier.bin		\
+ Replay/dmu.bin Replay/dwaga.bin Replay/jamcrackerpro.bin		\
+ Replay/lastninja3.bin Replay/mon.bin Replay/tcbtracker.bin		\
+ Replay/aenigmatica.bin Replay/alteredbeast.bin Replay/armalyte.bin	\
+ Replay/blipblop.bin Replay/blipp079.bin Replay/chipmon2.bin		\
+ Replay/cosotfmx.bin Replay/deltamusic1.bin Replay/deltamusic2.bin	\
+ Replay/dyter07.bin Replay/fc13_14.bin Replay/fireice.bin		\
+ Replay/fred.bin Replay/gemx.bin Replay/hpn-jam.bin			\
+ Replay/huntforredoct.bin Replay/lastninjaiii.bin Replay/mcoder.bin	\
+ Replay/midi.bin Replay/mmmesid.bin Replay/musmon1.bin			\
+ Replay/musmon2.bin Replay/ninjatfmx.bin Replay/note.bin		\
+ Replay/page.bin Replay/protracker.bin Replay/psgtrackerv2.bin		\
+ Replay/puma.bin Replay/quartet.bin Replay/realms.bin			\
+ Replay/shadowdancer.bin Replay/sidmon1.bin Replay/sidmon2.bin		\
+ Replay/sndh_ice.bin Replay/soundfx.bin Replay/spacegun.bin		\
+ Replay/ssd1.bin Replay/stos.bin Replay/synthiv.bin			\
+ Replay/tao_digi.bin Replay/tao_hubbard.bin Replay/tao_ms211.bin	\
+ Replay/tao_ms25.bin Replay/tao_ms27.bin Replay/tao_tsd.bin		\
+ Replay/tfmx.bin Replay/tfmx_st.bin Replay/timerc.bin			\
+ Replay/xbiossound.bin
 
 # all replays (including unused)
 allreplay_files = Replay/aenigmatica.bin Replay/alteredbeast.bin	\

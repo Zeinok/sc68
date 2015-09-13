@@ -1,15 +1,14 @@
-;
-; aSIDifier(tm)
-; 
-; Add SID synthesis to classic music.
-;
-; by Benjamin Gerard <https://sourceforge.net/users/benjihan>
-;
-; Time-stamp: <2014-11-07 16:43:08 ben>
-;
-
-;;; TODO: supported replay rates
-
+;;; aZIDifier - sc68 stub
+;;;
+;;; Add ZID synthesis to classic music.
+;;; 
+;;; Init-stamp: <?>
+;;; Time-stamp: <2015-09-05 21:45:40 ben>
+;;;
+;;; by Ben / OVR
+;;;
+;;; <https://sourceforge.net/users/benjihan>
+;;;
 
 NOISE_LATCH   = 5
 NOSOUND_LATCH = 4
@@ -24,9 +23,9 @@ PERIOD_MIN    = 6
 ;;;
 ;;;  Classic sc68/sndh (...) music driver header.
 ;;; 
-	bra	init
-	bra	exit
-	bra	play
+	bra.w	init
+	bra.w	exit
+	bra.w	play
 
 ;;; ------------------------------------------------------------
 ;;; ------------------------------------------------------------
@@ -414,12 +413,13 @@ clear:
 	dbf	d0,.clr
 .nolong:
 	lsr	#1,d1
+	bcc.s	.nobyte
+	clr.b	(a0)+
+	tst.b	d1
+.nobyte:	
 	beq.s	.noword
 	clr.w	(a0)+
 .noword:
-	bcc.s	.nobyte
-	clr.b	(a0)+
-.nobyte:	
 	movem.l	(a7)+,d0-d1/a0
 	rts
 	
