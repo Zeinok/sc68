@@ -936,13 +936,13 @@ static int st_isgraph( int c )
 static int chkstr(char *b, int off, int len)
 {
   const int max = 256, org = off;    /* limit string length to that */
-  int spc = off;
+  int spc = len;                     /* fake value */
   if (off+max < len)
     len = off+max;                      /* limit string length */
   for (; off < len; ++off) {
     int c = b[off];
     if (!c) {                           /* end of string */
-      if (spc+1<len)
+      if (spc+1 < len)
         b[spc+1] = 0;                /* trim space */
       return off-org;                /* return real length not trim */
     }
@@ -1007,9 +1007,16 @@ static int sndh_info(disk68_t * mb, int len)
      some "large" unknown tag to break the parser.
   */
 
-  while (i+4 < len) {
+  for (;;) {
     char ** p;
     int j, t, s, ctypes;
+
+    /* skip zeros */
+    for ( ; i < len && !b[i] ; i++ )
+      ;
+
+    if (i+4 > len)
+      break;
 
     /* check char types for the next 4 chars */
     for (ctypes = 0, j=0; j<4; ++j) {
@@ -1121,6 +1128,10 @@ static int sndh_info(disk68_t * mb, int len)
       mb->nb_mus = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' );
       /* assert(0); */
       t = i; i += 4;
+    } else if ( ( !memcmp(b+i,"!#",2) || !memcmp(b+i,"#!",2) )
+                && ( (ctypes & 0xC00) == 0xC00 ) ) {
+      mb->def_mus = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' ) - 1;
+      t = i; i += 4;
     } else if (!memcmp(b+i,"!#SN",4) || !memcmp(b+i,"#!SN",4)) {
       /* track names (which it is ? The doc uses both ! */
       int torg, tend, j, max=0, tracks = mb->nb_mus <= 0 ? 1 : mb->nb_mus;
@@ -1182,10 +1193,6 @@ static int sndh_info(disk68_t * mb, int len)
         ;
       TRACE68(file68_cat,
               "file68: sndh -- !#SN @%d-%d\n", t, i);
-    } else if ( ( !memcmp(b+i,"!#",2) || !memcmp(b+i,"#!",2) )
-                && ( (ctypes & 0xC00) == 0xC00 ) ) {
-      mb->def_mus = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' ) - 1;
-      t = i; i += 4;
     } else if ( !memcmp(b+i,"!V",2) && ( (ctypes & 0xC00) == 0xC00 ) ) {
       vbl = ( b[i+2] - '0' ) * 10 + ( b[i+3] - '0' );
       i += 4;
@@ -1247,10 +1254,6 @@ static int sndh_info(disk68_t * mb, int len)
             *p = b+s;                   /* store tag */
           i = s + l + 1;
         }
-
-        /* skip trailing '\0' */
-        for ( ; i < len && !b[i] ; i++ )
-          ;
       }
     }
   }
