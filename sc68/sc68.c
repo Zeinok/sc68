@@ -229,8 +229,8 @@ static int print_usage(void)
       "  An /!\\ Atari ST and C= Amiga music player.\n"
       "\n"
       "Options:\n"
-      "  -h --help           Print this message and exit\n"
-      "  -v --version        Print sc68 version x.y.z and licence and exit\n"
+      "  -h --help           Print this message and exit (incremental)\n"
+      "  -v --version        Print sc68 version x.y.z and #licence and exit\n"
       "  -D --debug-list     Print debug categories and exit\n"
 
       "  -C --config         Open configuration dialog and exit\n"
@@ -248,11 +248,13 @@ static int print_usage(void)
       "  -m --memory=<val>   68k memory to allocate (2^<val> bytes)\n"
       );
 
-  option68_help(stdout,print_option);
+  if (opt_help > 1) {
+    option68_help(stdout, print_option, opt_help > 2);
+    puts("");
+  }
 
   puts
     (
-      "\n"
       "URI:\n"
       "  stdin:<name>      Standard input\n"
       "  stdout:<name>     Standard output\n"
@@ -703,7 +705,7 @@ int main(int argc, char *argv[])
 
     switch (val) {
     case  -1: break;                /* Scan finish   */
-    case 'h': opt_help = 1; break;  /* --help        */
+    case 'h': ++opt_help;   break;  /* --help        */
     case 'V': opt_vers = 1; break;  /* --version     */
     case 'D': opt_list = 1; break;  /* --debug-list  */
     case 'C': opt_conf = 1; break;  /* --config      */
