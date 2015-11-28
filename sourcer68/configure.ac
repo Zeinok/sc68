@@ -43,6 +43,7 @@ SC68_WITH([file68],[no],[],[sc68/file68.h])
 # ,----------------------------------------------------------------------.
 # | Standard headers and functions                                       |
 # `----------------------------------------------------------------------'
+
 AC_CHECK_HEADERS([stdint.h unistd.h libgen.h getopt.h])
 AC_CHECK_FUNCS([basename getopt getopt_long])
 

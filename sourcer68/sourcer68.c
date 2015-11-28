@@ -170,12 +170,13 @@ static void print_usage(void)
 #ifdef USE_FILE68
   if (opt_usage > 1) {
     puts("");
-    option68_help(stdout,print_option);
+    option68_help(stdout,print_option, opt_usage > 2);
   }
 #endif
 
   puts
-    ("Copyright (c) 1998-2015 Benjamin Gerard.\n"
+    ("\n"
+     "Copyright (c) 1998-2015 Benjamin Gerard.\n"
      "\n"
      "Visit <" PACKAGE_URL ">\n"
      "Report bugs to <" PACKAGE_BUGREPORT ">");
