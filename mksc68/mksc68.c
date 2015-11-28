@@ -100,7 +100,7 @@ static int print_usage(int more)
     const cmd_t * cmd;
     puts
       ("sc68-options:");
-    option68_help(stdout,print_option);
+    option68_help(stdout, print_option, more > 2);
     puts
       ("");
 
