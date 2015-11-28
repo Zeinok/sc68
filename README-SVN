@@ -20,7 +20,7 @@ QUICK-START
 
   -2- Get sc68 source tree
 
-      $ svn checkout http://svn.code.sf.net/p/sc68/code/ sc68-code
+      $ svn checkout http://svn.code.sf.net/p/sc68/code/ sc68
 
   -3- Prepare source tree (bootstapping)
 
