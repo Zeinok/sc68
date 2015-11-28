@@ -56,6 +56,8 @@ void ym_dump_add_options(void)
 {
   const int n_opts = sizeof(opts) / sizeof(*opts);
 
+  opts[0].hide = 1;                     /* hide -clean-dump */
+
   /* Register ym-dump options */
   option68_append(opts, n_opts);
 
