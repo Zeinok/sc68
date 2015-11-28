@@ -42,36 +42,34 @@
 #include <ctype.h>
 #include <errno.h>
 
+#ifdef HAVE_GETOPT_H
+# include <getopt.h>
+#endif
+
+
 #define BUILD_DATE  __DATE__
 
-static int error(const char *format, ...)
+static char prg[] = "info68";
+static int error(const char *fmt, ...)
 {
   va_list list;
-  va_start(list, format);
-  error68_va(format, list);
+  va_start(list, fmt);
+  fprintf(stderr, "%s: ", prg);
+  vfprintf(stderr, fmt, list);
+  fflush(stderr);
   va_end(list);
   return -1;
 }
 
-/* static void debug(const char *format, ...) */
-/* { */
-/* #ifdef DEBUG */
-/*   va_list list; */
-/*   va_start(list, format); */
-/*   vfprintf(stderr, format, list); */
-/*   va_end(list); */
-/* #endif */
-/* } */
-
 static int file_error(const char *filename)
 {
-  error ("info68: bad or missing sc68 input file \"%s\"\n", filename);
+  error (" bad or missing sc68 input file \"%s\"\n", filename);
   return 2;
 }
 
 static int tracklist_error(const char *command)
 {
-  error("info68: bad track-list \"%s\"\n", command);
+  error("bad track-list \"%s\"\n", command);
   return 4;
 }
 
@@ -90,10 +88,10 @@ static void print_option(void * data,
           desc+1);
 }
 
-static int display_help(int more)
+static int print_help(int more)
 {
   puts
-    ("Usage: info68 [OPTION] [--] <URI> track-list format ...\n"
+    ("Usage: info68 [OPTION] [--] <URI> [track-list] format ...\n"
      "\n"
      "Get and format information on sc68 files.\n");
 
@@ -101,13 +99,13 @@ static int display_help(int more)
     ("Options:\n"
      "\n"
      "  --                  Break option parsing\n"
-     "  -h --help           Display this message and exit\n"
+     "  -h --help           Display this message and exit (incremental)\n"
      "  -V --version        Display version and exit\n"
      "  -o --output=<URI>   Change output to file (- is stdout)\n"
      "  -A --all            Display all information and tags\n");
 
-  if (more) {
-    option68_help(stdout,print_option);
+  if (more > 1) {
+    option68_help(stdout,print_option,more > 2);
     puts("");
   }
 
@@ -127,53 +125,58 @@ static int display_help(int more)
      "    format is a string with special commands sequence. Each of these\n"
      "    commands  start with  a percent '%' char  followed by  a command\n"
      "    identifer.\n");
-  puts
-    ("  disk-commands:\n"
-     "\n"
-     "    `%#'         number of tracks\n"
-     "    `%?'         default track\n"
-     "    `%N'         disk name\n"
-     "    `%A'         default track author name\n"
-     "    `%C'         default track composer name\n"
-     "    `%P'         default track ripper name\n"
-     "    `%V'         default track converter name\n"
-     "    `%T'         disk time in sec\n"
-     "    `%Y'         formated disk time. Format \"TT MM:SS\"\n"
-     "    `%H'         all tracks ORed hardware flags (see %h)\n"
-     "    `%F'         file format (sc68 or sndh)\n"
-     "    `%~'         file hash code (unic-id)\n"
-     "    `%U'         input URI\n");
-  puts
-    ("  track-commands:\n"
-     "\n"
-     "    `%&'         track number\n"
-     "    `%n'         track name\n"
-     "    `%a'         author name\n"
-     "    `%c'         composer name\n"
-     "    `%p'         ripper name\n"
-     "    `%v'         converter name\n"
-     "    `%r'         replay name\n"
-     "    `%t'         time in sec\n"
-     "    `%y'         formated time. Format \"TT MM:SS\"\n"
-     "    `%f'         replay frequency (frame length)\n"
-     "    `%m'         duration in frames\n"
-     "    `%@'         load address (in hexdecimal)\n"
-     "    `%h'         hardware flags [YSAT] uppercase means activated\n"
-     "                 Y:YM-2149 S:STE A:Amiga T:Timers\n");
 
-  puts
-    ("  misc-commands:\n"
-     "\n"
-     "    `%%'         display %\n"
-     "    `%0'         display null char\n"
-     "    `%L'         display a newline character\n");
+  if (more <= 1) {
+    puts("    Use help option one more time for more details on commands\n");
+  } else {
+    puts
+      ("  disk-commands:\n"
+       "\n"
+       "    `%#'         number of tracks\n"
+       "    `%?'         default track\n"
+       "    `%N'         disk name\n"
+       "    `%A'         default track author name\n"
+       "    `%C'         default track composer name\n"
+       "    `%P'         default track ripper name\n"
+       "    `%V'         default track converter name\n"
+       "    `%T'         disk time in sec\n"
+       "    `%Y'         formated disk time. Format \"TT MM:SS\"\n"
+       "    `%H'         all tracks ORed hardware flags (see %h)\n"
+       "    `%F'         file format (sc68 or sndh)\n"
+       "    `%~'         file hash code (unic-id)\n"
+       "    `%U'         input URI\n");
+    puts
+      ("  track-commands:\n"
+       "\n"
+       "    `%&'         track number\n"
+       "    `%n'         track name\n"
+       "    `%a'         author name\n"
+       "    `%c'         composer name\n"
+       "    `%p'         ripper name\n"
+       "    `%v'         converter name\n"
+       "    `%r'         replay name\n"
+       "    `%t'         time in sec\n"
+       "    `%y'         formated time. Format \"TT MM:SS\"\n"
+       "    `%f'         replay frequency (frame length)\n"
+       "    `%m'         duration in frames\n"
+       "    `%@'         load address (in hexdecimal)\n"
+       "    `%h'         hardware flags [YSAT] uppercase means activated\n"
+       "                 Y:YM-2149 S:STE A:Amiga T:Timers\n");
 
-  puts
-    ("  tag-commands:\n"
-     "\n"
-     "    `%{tag}'     display named-tag.\n"
-     "                 Use uppercase first letter to address disk tag\n"
-     "                 and lowercase to address current track tag\n");
+    puts
+      ("  misc-commands:\n"
+       "\n"
+       "    `%%'         display %\n"
+       "    `%0'         display null char\n"
+       "    `%L'         display a newline character\n");
+
+    puts
+      ("  tag-commands:\n"
+       "\n"
+       "    `%{tag}'     display named-tag.\n"
+       "                 Use uppercase first letter to address disk tag\n"
+       "                 and lowercase to address current track tag\n");
+  }
 
   puts
     ("URI:\n"
@@ -191,28 +194,32 @@ static int display_help(int more)
      "  Access sc68 music database. The music file is first searched in\n"
      "  local music path and if not found in remote music path.\n");
 
+#if 0 /* DEPRECATED NEED TO BE UPODATED */
   puts
     ("Examples:\n"
      "\n"
-     "  info68 'sc68://music/Jochen Hippel (Mad Max)/0/Wings Of Death/' '-1,5,4-6' '> %&/%# %N - %a - %n%L'\n"
+     "  info68 'sc68://music/Jochen Hippel (Mad Max)/0/Wings Of Death/'"
+     " '-1,5,4-6' '> %&/%# %N - %a - %n%L'\n"
      "\n"
      "  > 1/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #1\n"
      "  > 5/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #5\n"
      "  > 4/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #4\n"
      "  > 5/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #5\n"
      "  > 6/10 Wings Of Death - Jochen Hippel (Mad Max) - Level #6\n");
+#endif
 
   puts
-    ("Copyright (c) 1998-2015 Benjamin Gerard.\n"
+    ("\n"
+     "Copyright (c) 1998-2015 Benjamin Gerard.\n"
      "\n"
      "Visit <" PACKAGE_URL ">\n"
      "Report bugs to <" PACKAGE_BUGREPORT ">");
 
-  return 1;
+  return 0;
 }
 
 /* Display version number. */
-static int display_version(void)
+static int print_version(void)
 {
   puts
     (PACKAGE_STRING "\n"
@@ -394,77 +401,137 @@ static char * get_tag(const disk68_t * dsk, int trk, const char * key)
 int main(int argc, char ** argv)
 {
   int  i, j, opt_all = 0, code = 127;
-  /*   hwflags68_t diskHW; */
+  int opt_usage = 0, opt_version = 0;
   int has_time, has_loop;
   const disk68_t *d = 0;
   int curTrack, toTrack;
   char *trackList;
   vfs68_t * out = 0;
-  const char * inname  = 0;
+  const char * inpname  = 0;
   const char * outname = "stdout:info68";
 
-  argv[0] = "info68";
+  static const struct option longopts[] = {
+    { "version",    0, 0, 'V' },
+    { "help",       0, 0, 'h' },
+    { "usage",      0, 0, 'h' },
+    { "all",        0, 0, 'A' },
+    { "output",     1, 0, 'o' },
+    { 0,0,0,0 }
+  };
+  static char shortopts[(sizeof(longopts)/sizeof(*longopts))*3+1];
+
+  /* Create short option list from longs */
+  for (j=i=0; longopts[i].name ; ++i) {
+    shortopts[j++] = longopts[i].val;
+    if (longopts[i].has_arg >= 1)
+      shortopts[j++] = ':';
+    if (longopts[i].has_arg >= 2)
+      shortopts[j++] = ':';
+  }
+  shortopts[j++] = 0;
+
+  /* Init file68 library */
+  argv[0] = prg;
   argc = file68_init(argc, argv);
   if (argc < 0) {
-    error("info68: file68 initialisation failed.\n");
+    error("file68 initialisation failed.\n");
     goto exit;
   }
 
-  if (argc < 2) {
-    error("info68: missing argument. Try --help.\n");
-    code = 1;
+  /* Parsing command line with getopt() */
+  opterr = 0;                           /* getopt() doesn't print error */
+  for (;;) {
+    int longindex = 0;
+    int val =
+      getopt_long(argc, argv, shortopts, longopts, &longindex);
+
+    switch (val) {
+    case  -1: break;                /* Scan finish */
+
+    case ':': case '?':             /* Unknown or missing parameter */
+      val = optopt;
+      if (val)
+        error("unknown option -- `%c'\n", val);
+      else {
+        val = optind - 1;
+        error("unknown option -- `%s'\n",
+              (val>0 && val<argc) ?
+              argv[val] + (argv[val][0]=='-') + (argv[val][1]=='-') : "?");
+      }
+      code = 2;
+      goto finish;
+
+    case 'h':                           /* --help */
+      ++opt_usage;
+      break;
+
+    case 'V':                           /* --version */
+      opt_version = 1;
+      break;
+
+    case 'A':                           /* --all= */
+      opt_all = 1;
+      break;
+
+    case 'o':
+      outname = optarg;
+      break;
+
+    default:
+      error("(internal) unhandled option -- `%c' (%d)\n",
+            isgraph(val) ? val:'-', val);
+      code = 2;
+      goto finish;
+    }
+    if (val == -1) break;
+  }
+
+  /* Where option parsing left. */
+  i = optind;
+
+  /* Ask for a bit of help ? */
+  if (opt_usage) {
+    print_help(opt_usage);
+    code = 0;
     goto finish;
   }
 
-  /* Scan options ...  */
-  for (i=1; i<argc; ++i) {
-    if (!strcmp(argv[i],"--")) {
-      ++i;
-      break;
-    } else if (!strcmp(argv[i],"--help") || !strcmp(argv[i],"-h")) {
-      return display_help(1);
-    } else if (!strcmp(argv[i],"--version") || !strcmp(argv[i],"-V")) {
-      return display_version();
-    } else if (!strcmp(argv[i],"--all") || !strcmp(argv[i],"-A")) {
-      opt_all = 1;
-    } else if ((!strcmp(argv[i], "-o") || !strcmp(argv[i],"--output"))) {
-      if (++i >= argc) {
-        error("info69: option `%s' missing argument.\n", argv[i-1]);
-        code = 2;
-        goto finish;
-      }
-      outname = argv[i];
-    } else if (argv[i] == strstr(argv[i],"--output=")) {
-      outname = argv[i]+9;
-    } else {
-      break;
+  /* Ask for version ? */
+  if (opt_version) {
+    print_version();
+    code = 0;
+    goto finish;
+  }
+
+  /* Do we have a input URI already ? */
+  if (!inpname) {
+    if (i < argc)
+      inpname = argv[i++];
+    else {
+      error("missing input <URI> argument. Try --help.\n");
+      code = 3;
+      goto finish;
     }
   }
 
-  if (i >= argc) {
-    error ("info68: missing input file.\n");
-    code = 3;
-    goto finish;
-  }
-  inname = argv[i];
-
+  /* Open output */
   out = uri68_vfs(outname, 2, 0);
   if (vfs68_open(out)) {
-    error ("info68: error opening output (%s).\n",
+    error ("error opening output (%s).\n",
            out ? vfs68_filename(out) : outname);
     code = 4;
     goto finish;
   }
 
-  /* Load input file */
-  d = file68_load_uri(inname);
+  /* Load input URI */
+  d = file68_load_uri(inpname);
   if (!d) {
     code = 5;
-    file_error(inname);
+    file_error(inpname);
     goto finish;
   }
 
-  /* determine if disk has time and loop for all its tracks */
+  /* Determine if disk has time and loop for all its tracks */
   for (has_loop = has_time = j = 0; j<d->nb_mus; ++j) {
     has_time += d->mus[j].has.time;
     has_loop += d->mus[j].has.loop;
@@ -476,7 +543,7 @@ int main(int argc, char ** argv)
     int i, j;
     const char * key, * val;
 
-    PutS(out,"file: ");     PutS(out,inname);     PutC(out,'\n');
+    PutS(out,"file: ");     PutS(out,inpname);     PutC(out,'\n');
     PutS(out,"hash: ");     PutX32(out,d->hash);  PutC(out,'\n');
     PutS(out,"tracks: ");   PutI(out,d->nb_mus);  PutC(out,'\n');
     PutS(out,"default: ");  PutI(out,d->def_mus); PutC(out,'\n');
@@ -536,7 +603,10 @@ int main(int argc, char ** argv)
   toTrack = curTrack = d->def_mus;
 
   /* Main loop */
-  for (++i; i<argc; ++i) {
+  for (; i<argc; ++i) {
+
+    /* This is not ideal ... */
+
     if (!trackList && argv[i][0] == '-' && isdigit((int)argv[i][1])) {
       int res;
       trackList = argv[i]+1;
@@ -545,7 +615,7 @@ int main(int argc, char ** argv)
         return tracklist_error(trackList);
       } else if (!res) {
         /* This can't be coz we check that almost one digit was there above */
-        error("info68: %s(%d) : Internal bug error;"
+        error("%s(%d) : Internal bug error;"
               " program should not reach this point\n", __FILE__, __LINE__);
         code = 66;
         goto finish;
@@ -595,7 +665,7 @@ int main(int argc, char ** argv)
 
             /* DISK commands */
           case 'U':
-            PutS(out,inname);
+            PutS(out,inpname);
             break;
           case '~':
             PutX32(out,d->hash);
