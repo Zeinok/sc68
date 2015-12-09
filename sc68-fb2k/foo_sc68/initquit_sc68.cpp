@@ -28,29 +28,22 @@
 // anything else is printed in foobar2000 console accordingly.
 static void message_cb(const int bit, sc68_t * sc68, const char *fmt, va_list list)
 {
-  //static char tmp[256];
-  pfc::string8_fastalloc temp;
-
-  //vsnprintf(tmp,sizeof(tmp),fmt,list);
-  //tmp[sizeof(tmp)-1] = 0;
-  //temp = tmp;
-
-  // I know uPrintfV() is deprecated don't tell me about it.
-# pragma warning(suppress : 4995) 
-  uPrintfV(temp,fmt,list);
+  char tmp[512];
+  vsnprintf(tmp,sizeof(tmp),fmt,list);
+  tmp[sizeof(tmp)-1] = 0;
   
   switch (bit) {
   case msg68_CRITICAL: case msg68_ERROR:
-    console::error(temp); break;
+    console::error(tmp); break;
   case msg68_WARNING:
-    console::warning(temp); break;
+    console::warning(tmp); break;
   case msg68_INFO: case msg68_NOTICE:
-    console::info(temp); break;
+    console::info(tmp); break;
   default:
     if (bit < msg68_DEBUG)
-      console::print(temp);
+      console::print(tmp);
     else
-      OutputDebugStringA(temp.toString());
+      OutputDebugStringA(tmp);
     break;
   }
 }
