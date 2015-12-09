@@ -1420,7 +1420,7 @@ static int finish(sc68_t * sc68, addr68_t pc, int sr, uint68_t maxinst)
   return status;
 }
 
-static int reset_emulators(sc68_t * sc68, const hwflags68_t const hw)
+static int reset_emulators(sc68_t * sc68, const hwflags68_t hw)
 {
   u8 * memptr;
   const int base = INTR_ADDR;
