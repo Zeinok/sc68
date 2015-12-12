@@ -72,8 +72,7 @@
       <CompileAs>CompileAsC</CompileAs>
       <MinimalRebuild>false</MinimalRebuild>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)$(SolutionName)-$(PlatformToolset).pdb</ProgramDataBaseFileName>
-      <ErrorReporting>None</ErrorReporting>
+      <ErrorReporting>Prompt</ErrorReporting>
       <FloatingPointModel>Fast</FloatingPointModel>
     </ClCompile>
     <Link>
@@ -120,8 +119,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <FloatingPointModel>Fast</FloatingPointModel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <ProgramDataBaseFileName>$(OutDir)$(SolutionName)-$(PlatformToolset).pdb</ProgramDataBaseFileName>
-      <ErrorReporting>None</ErrorReporting>
+      <ErrorReporting>Prompt</ErrorReporting>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
