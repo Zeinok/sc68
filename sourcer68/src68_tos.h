@@ -33,9 +33,63 @@ struct tosfile {
 };
 typedef struct tosfile tosfile_t;
 
+/**
+ * TOS constants.
+ */
 enum {
-  TOS_HEADER_SIZE = 28,
-  TOS_MINT_SIZE = 256
+  TOS_HEADER_SIZE = 28, /**< Classic TOS header size. */
+  TOS_MINT_SIZE = 256   /**< MiNT TOS header size. @see tosfile_t::mint */
+};
+
+/**
+ * TOS program flags (tosfile_t::flags)
+ * @see http://toshyp.atari.org/en/005005.html
+ */
+enum {
+
+   /**
+    * Fastload flag. If this bit is set, then the stack will not be
+    * cleared, but only the BSS segment preinitialized.
+    */
+  TOS_FLG_FASTLOAD = 1,
+
+   /**
+    * The program may be loaded into the fast alternate RAM.
+    */
+  TOS_FLG_FASTRAM = 2,
+
+  TOS_FLG_ALTRAM = 4, /**< Memory requests via Malloc may be allocated
+			  from alternate RAM */
+
+  TOS_FLG_SHL = 8, /**< Reserved for shared library (must be clear). */
+
+  TOS_FLG_MEM_MASK = 0x70,
+  TOS_FLG_MEM_PRIVATE = 0x00, /**< Only the process itself, and the
+				 operating system, may access the
+				 memory */
+  TOS_FLG_MEM_GLOBAL = 0x10, /**< The memory is completely unprotected
+				and hence all programs can access
+				it. */
+
+  TOS_FLG_MEM_SUPER = 0x20, /**< The memory can be accessed by all
+			       processes that run in
+			       supervisor-mode */
+  TOS_FLG_MEM_RO = 0x30, /**< Any process can read from the memory;
+			    but writing is only permitted by the
+			    process itself, as well as the operating
+			    system. */
+  TOS_FLG_RES8_MASK = 0xF00, /**< Reserved (must be 0). */
+
+  TOS_FLG_SHTEXT = 4096, /**< TEXT section may be shared. */
+
+  TOS_FLG_RES13_MASK = 0x0FFFC000, /**< Reserved (must be 0). */
+  TOS_FLG_TPASIZE_MASK = 0xF0000000, /**< Maximum amount of memory to
+					be allocated by the program
+					from alternate RAM if the
+					machine has more ST-RAM than
+					alternate RAM. */
+  
+ 
 };
 
 /**
