@@ -40,12 +40,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)_$(PlatformShortName)-$(Configuration)\</OutDir>
-    <IntDir>_$(PlatformShortName)-$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)_$(PlatformShortName)-$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)_$(PlatformShortName)-$(Configuration)\</OutDir>
-    <IntDir>_$(PlatformShortName)-$(Configuration)\</IntDir>
+    <IntDir>$(SolutionDir)_$(PlatformShortName)-$(Configuration)\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -72,10 +72,9 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>zlib-mtd.lib;shared.lib;shlwapi.lib;pfc.lib;foobar2000_component_client.lib;foobar2000_SDK.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)/../lib/$(ConfigurationName);$(ProjectDir)/../lib;$(ProjectDir)/../../sc68-msvc/zlib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)/../lib/$(ConfigurationName);$(ProjectDir)/../lib;$(ProjectDir)/../../sc68-msvc/zlib;$(FB2KSDK)\foobar2000\shared;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SpecifySectionAttributes>
       </SpecifySectionAttributes>
-      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
       <LinkErrorReporting>NoErrorReport</LinkErrorReporting>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -112,11 +111,10 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <AdditionalDependencies>zlib-mt.lib;shared.lib;shlwapi.lib;pfc.lib;foobar2000_component_client.lib;foobar2000_SDK.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(ProjectDir)/../lib/$(ConfigurationName);$(ProjectDir)/../lib;$(ProjectDir)/../../sc68-msvc/zlib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(ProjectDir)/../lib/$(ConfigurationName);$(ProjectDir)/../lib;$(ProjectDir)/../../sc68-msvc/zlib;$(FB2KSDK)\foobar2000\shared;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SpecifySectionAttributes>
       </SpecifySectionAttributes>
       <LinkErrorReporting>NoErrorReport</LinkErrorReporting>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
