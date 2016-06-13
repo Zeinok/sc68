@@ -2049,6 +2049,7 @@ TIMEDB_ENTRY( 3a1b5564,  4,   5119,          YM), /* 01318 - Matt Furniss - Skul
 TIMEDB_ENTRY( 3a1b5564,  5,   2639,          YM), /* 01318 - Matt Furniss - Skull and Crossbones.sndh */
 TIMEDB_ENTRY( 3a34fc47,  0,   8965,    YM+TA+TD), /* 01864 - Lotek Style - Rays of neon.sndh */
 TIMEDB_ENTRY( 3a35dedc,  0, 246380,       YM+TA), /* 04818 - Powapixel - Prelude.sndh */
+TIMEDB_ENTRY( 3a382acf,  0,   1789,          YM), /* 04918 - 505 - Hires.sndh */
 TIMEDB_ENTRY( 3a3b135b,  0,   3519,       YM+TB), /* 02868 - Monk - Smalltrip.sndh */
 TIMEDB_ENTRY( 3a4bd0b6,  0,  11284, YM+TA+TB+TD), /* 01613 - No More - Face.sndh */
 TIMEDB_ENTRY( 3a4e6052,  0,   9470,       YM+TA), /* 04671 - Unknown (orig Mike Alsop) - Wizardry.sndh */
@@ -6123,6 +6124,7 @@ TIMEDB_ENTRY( a48cdf52,  0,  72781,       YM+TA), /* 04901 - Twitch - It don't m
 TIMEDB_ENTRY( a498b5bd,  0,   6906, YM+TA+TB+TD), /* 02756 - Dma-Sc - Sector One - Burton Tribute Project.sndh */
 TIMEDB_ENTRY( a49eb8c8,  0,  90046,       YM+TA), /* 04038 - Roggie - Roggie 20.sndh */
 TIMEDB_ENTRY( a4a0c69d,  0,   2969,          YM), /* 03055 - Ed Bogas - Latin.sndh */
+TIMEDB_ENTRY( a4a9a356,  0,  27462,          YM), /* 01914 - Titan - Just Buggin - Mate.sndh */
 TIMEDB_ENTRY( a4be8bf8,  0,   2630,          YM), /* 03171 - n-a - Theme From "Star Trek".sndh */
 TIMEDB_ENTRY( a4c88cba,  0,   6144,          YM), /* 01543 - Ralph - Ralph 6.sndh */
 TIMEDB_ENTRY( a4cfbfa7,  0,   2041,          YM), /* 03691 - Dma-Sc - Saboteur 3 - The Mummy Rises.sndh */
@@ -7220,6 +7222,7 @@ TIMEDB_ENTRY( c8859a00,  0,  59887,       YM+TA), /* 03771 - Exarch - Excited.sn
 TIMEDB_ENTRY( c887513e,  0,  15360,          YM), /* 02800 - Starbuck - Her 7.sndh */
 TIMEDB_ENTRY( c896a887,  0,  17271,    YM+TA+TD), /* 02562 - marcer - impossamol mix.sndh */
 TIMEDB_ENTRY( c8a17152,  0,   3456,    YM+TA+TD), /* 02818 - Soulmate #1 - Znax ingame tune 1.sndh */
+TIMEDB_ENTRY( c8b3e6f8,  0,  13558,          YM), /* 04921 - Amplitude Problem (7an) - Bleeps of San Secuestro.sndh */
 TIMEDB_ENTRY( c8ba0fce,  0,  14030,          YM), /* 03533 - Jean Baudlot - Dragon Ninja.sndh */
 TIMEDB_ENTRY( c8ba0fce,  1,  11815,          YM), /* 03533 - Jean Baudlot - Dragon Ninja.sndh */
 TIMEDB_ENTRY( c8ba0fce,  2,   2953,          YM), /* 03533 - Jean Baudlot - Dragon Ninja.sndh */
@@ -7361,7 +7364,6 @@ TIMEDB_ENTRY( ca7f6569,  3,   3560,          YM), /* 04136 - Michael Haar - Der 
 TIMEDB_ENTRY( ca7f6569,  4,     15,          YM), /* 04136 - Michael Haar - Der Wurm 2.sndh */
 TIMEDB_ENTRY( ca7f6569,  5,    103,          YM), /* 04136 - Michael Haar - Der Wurm 2.sndh */
 TIMEDB_ENTRY( ca7f6569,  6,     40,          YM), /* 04136 - Michael Haar - Der Wurm 2.sndh */
-TIMEDB_ENTRY( ca847b86,  0,  27462,          YM), /* 01914 - Mate - Just Buggin - Xenex.sndh */
 TIMEDB_ENTRY( ca87983a,  0, 144625,       YM+TA), /* 03810 - Martin Walker - Spindizzy Worlds.sndh */
 TIMEDB_ENTRY( ca87983a,  1, 121746,       YM+TA), /* 03810 - Martin Walker - Spindizzy Worlds.sndh */
 TIMEDB_ENTRY( ca87983a,  2,  44817,       YM+TA), /* 03810 - Martin Walker - Spindizzy Worlds.sndh */
@@ -7403,6 +7405,7 @@ TIMEDB_ENTRY( cb45266b,  0,  14016,          YM), /* 02173 - Mad Max - Thunderca
 TIMEDB_ENTRY( cb484820,  0,   5376,       YM+TA), /* 00824 - !Cube - Shazam (Cross The Deserts).sndh */
 TIMEDB_ENTRY( cb4da967,  0,   5759, YM+TA+TB+TD), /* 02839 - maktone-fairight - shotgun.sndh */
 TIMEDB_ENTRY( cb67c425,  0,   8912,          YM), /* 00297 - Gary Wheaton - Belgium.sndh */
+TIMEDB_ENTRY( cb71b1cf,  0,   5615,          YM), /* 04917 - 505 - Paradox - Alternative party invite.sndh */
 TIMEDB_ENTRY( cb72e4a4,  0,  19007, YM+TA+TB+TD), /* 03443 - ULTRASYD - LONESOME ROBOT.sndh */
 TIMEDB_ENTRY( cb75192c,  0,  10848,    YM+TB+TD), /* 02855 - Helene - NONONO.sndh */
 TIMEDB_ENTRY( cb75a000,  0,  11264,          YM), /* 00776 - Count Zero - Willy Preview.sndh */
