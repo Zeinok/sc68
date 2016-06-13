@@ -5,7 +5,7 @@
 #
 # this file is part of the sc68 project <http://sc68.atari.org/>
 #
-# Copyright (C) 2007-2015 Benjamin Gerard
+# Copyright (c) 2007-2016 Benjamin Gerard
 #
 
 

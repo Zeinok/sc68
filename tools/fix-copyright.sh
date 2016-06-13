@@ -14,6 +14,7 @@ find . -type f \
      -not -path '*/autom4te.cache/*' \
      -not -name aclocal.m4 \
      \( -name '*.[ch]' \
+     -o -name '*.sh' \
      -o -name '*.m4' \
      -o -name '*.in' \
      -o -name '*.1' \
