@@ -48,7 +48,7 @@ int unice68_ice_version(void)
 
 const char * unice68_versionstr(void)
 {
-  return PACKAGE_NAME " " PACKAGE_VERSION " ICE! 2.25/2.40" ;
+  return PACKAGE_NAME " " PACKAGE_VERSION " ICE! 2.35/2.40" ;
 }
 
 int unice68_version(void)
