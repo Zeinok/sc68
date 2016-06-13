@@ -283,6 +283,7 @@ TIMEDB_ENTRY( 08104278,  0,   5039,          YM), /* 02376 - Nexus 6 - Happy Muf
 TIMEDB_ENTRY( 0812636d,  0,  26894,       YM+TA), /* 03880 - Mad Max - Labello.sndh */
 TIMEDB_ENTRY( 081efa6f,  0,   3072,       YM+TD), /* 02635 - Miggy - Hyper dog poo ( Unfinished ).sndh */
 TIMEDB_ENTRY( 0827bf66,  0,  23802,          YM), /* 01674 - Jess - The Battle of Arpeggios.sndh */
+TIMEDB_ENTRY( 08459fbd,  0,  11645,          YM), /* 04907 - Luebke - Xmas 2000.sndh */
 TIMEDB_ENTRY( 0857c9e8,  0,   5710,         STE), /* 03450 - 505 - Paradox - Megademo Intro.sndh */
 TIMEDB_ENTRY( 0858e24f,  0,   5772,       YM+TA), /* 00821 - !Cube - Admirable's Mod Compil #31.sndh */
 TIMEDB_ENTRY( 0865e3bb,  0,  20736,          YM), /* 01447 - Stax - Revotus - Chip.sndh */
@@ -580,6 +581,7 @@ TIMEDB_ENTRY( 0f9490b8,  5,   5764,          YM), /* 01374 - Justin Scharvona - 
 TIMEDB_ENTRY( 0f9490b8,  6,   5764,          YM), /* 01374 - Justin Scharvona - Armalyte.sndh */
 TIMEDB_ENTRY( 0f9803b3,  0,  13760, YM+TA+TB+TD), /* 00826 - Crazy Q - TiMeBoMb - Evil Chip Of Dr.Zool.sndh */
 TIMEDB_ENTRY( 0fdf6f5e,  0,   1536,       YM+TA), /* 02885 - Deneb - The Puppy Show - Loader.sndh */
+TIMEDB_ENTRY( 0ffe59b8,  0,   3086,          YM), /* 04905 - Mad Max - Demo Music 5.sndh */
 TIMEDB_ENTRY( 1001b206,  0,   7488,          YM), /* 00137 - David Whittaker - Speedball.sndh */
 TIMEDB_ENTRY( 1001b206,  1,   1717,          YM), /* 00137 - David Whittaker - Speedball.sndh */
 TIMEDB_ENTRY( 1001b206,  2,   1703,          YM), /* 00137 - David Whittaker - Speedball.sndh */
@@ -709,6 +711,7 @@ TIMEDB_ENTRY( 13e8f608,  8,   2014,          YM), /* 01303 - Matt Furniss - Mad 
 TIMEDB_ENTRY( 13e8f608,  9,    279,          YM), /* 01303 - Matt Furniss - Mad Professor Mariarti.sndh */
 TIMEDB_ENTRY( 13edb6b6,  0,   3232,          YM), /* 01766 - Lap - Lap 6 - Jarre.sndh */
 TIMEDB_ENTRY( 13f77939,  0,   6912,          YM), /* 00239 - Alx 33 - Sam.sndh */
+TIMEDB_ENTRY( 13fc0e62,  0,   3840,          YM), /* 02113 - Mad Max - Pro BMX Simulator A.sndh */
 TIMEDB_ENTRY( 14019d82,  0,    369,          YM), /* 02218 - Mad Max - Leavin Teramis.sndh */
 TIMEDB_ENTRY( 14019d82,  1,   4608,          YM), /* 02218 - Mad Max - Leavin Teramis.sndh */
 TIMEDB_ENTRY( 14019d82,  2,   7848,          YM), /* 02218 - Mad Max - Leavin Teramis.sndh */
@@ -791,6 +794,7 @@ TIMEDB_ENTRY( 16e4d0e2,  0,   8568,          YM), /* 00147 - David Whittaker - T
 TIMEDB_ENTRY( 16e4d0e2,  1,   1120,          YM), /* 00147 - David Whittaker - Tetris.sndh */
 TIMEDB_ENTRY( 16e4d0e2,  2,     61,          YM), /* 00147 - David Whittaker - Tetris.sndh */
 TIMEDB_ENTRY( 16e61312,  0,   4611,       YM+TA), /* 04409 - Dr Beat - Maziac Unused.sndh */
+TIMEDB_ENTRY( 16fac640,  0,  23851,       YM+TA), /* 04916 - 505 - Sabotage.sndh */
 TIMEDB_ENTRY( 16fedf6d,  0,   8233,          YM), /* 00117 - David Whittaker - Millennium 2.2.sndh */
 TIMEDB_ENTRY( 170813e0,  0,  28032,          YM), /* 02180 - Mad Max - Atomix (Cybermind).sndh */
 TIMEDB_ENTRY( 171600c0,  0,  29536, YM+TA+TB+TD), /* 03358 - Marcer - MIGHT 382.sndh */
@@ -845,7 +849,7 @@ TIMEDB_ENTRY( 196c6bbd,  2,   3070,          YM), /* 01296 - Matt Furniss - E.F.
 TIMEDB_ENTRY( 196c6bbd,  3,    144,          YM), /* 01296 - Matt Furniss - E.F.T.P.O.T.R.M..sndh */
 TIMEDB_ENTRY( 196c6bbd,  4,    119,          YM), /* 01296 - Matt Furniss - E.F.T.P.O.T.R.M..sndh */
 TIMEDB_ENTRY( 196c6bbd,  5,    766,          YM), /* 01296 - Matt Furniss - E.F.T.P.O.T.R.M..sndh */
-TIMEDB_ENTRY( 199176ae,  0,   5794,       YM+TA), /* 00000 - Dhor - Uncomplicated.sndh */
+TIMEDB_ENTRY( 199176ae,  0,   5794,       YM+TA), /* 04874 - Dhor - Uncomplicated.sndh */
 TIMEDB_ENTRY( 19954286,  0,   1280,          YM), /* 01076 - Excellence In Art - Circles.sndh */
 TIMEDB_ENTRY( 19a473a7,  0,   6912,    YM+TA+TD), /* 02326 - Tao - Cream - MV Jeu - Highscore (Steps).sndh */
 TIMEDB_ENTRY( 19ae899a,  0,   3261, YM+TA+TB+TD), /* 00275 - Baggio - Compo.sndh */
@@ -969,6 +973,7 @@ TIMEDB_ENTRY( 1c976fba,  0,  17594,    YM+TA+TD), /* 02626 - sh3-rg - teh won.sn
 TIMEDB_ENTRY( 1ca333b3,  0,   3224,       YM+TA), /* 04304 - 505-checkpoint - Scheme.sndh */
 TIMEDB_ENTRY( 1cbe11b8,  0,  18059,    YM+TB+TD), /* 04574 - Nemo - Undercover Action Agents.sndh */
 TIMEDB_ENTRY( 1ccbc756,  0,   1736,          YM), /* 03089 - Unknown - Don't Stop Believing,"Journey".sndh */
+TIMEDB_ENTRY( 1cd22eb0,  0,   5760,          YM), /* 04914 - Tao - Feelings.sndh */
 TIMEDB_ENTRY( 1cf75009,  0,   3095, YM+TA+TB+TD), /* 03421 - Dubmood - Tempest - Acidjazzed Evenings (Dubmood).sndh */
 TIMEDB_ENTRY( 1d005ee4,  0,   4771,          YM), /* 02033 - Mad Max - Gerry The Germ.sndh */
 TIMEDB_ENTRY( 1d005ee4,  1,   5376,          YM), /* 02033 - Mad Max - Gerry The Germ.sndh */
@@ -1043,6 +1048,7 @@ TIMEDB_ENTRY( 1e62974f,  6,   3059,          YM), /* 04615 - Al Lowe - Leisure S
 TIMEDB_ENTRY( 1e62974f,  7,   1420,          YM), /* 04615 - Al Lowe - Leisure Suit Larry - Lounge Lizards.sndh */
 TIMEDB_ENTRY( 1e6a3f09,  0,   4027,          YM), /* 03108 - Unknown - ST. ELSEWHERE by Dave Grusin.sndh */
 TIMEDB_ENTRY( 1e736ec8,  0,   7424,          YM), /* 04350 - YERZMYEY-AY-RIDERS - OUT OF THE MIST.sndh */
+TIMEDB_ENTRY( 1e800203,  0,   2911,    YM+TB+TD), /* 04891 - Dma-Sc - Sector One - Circle Dots.sndh */
 TIMEDB_ENTRY( 1e841691,  0,  39807, YM+TA+TB+TD), /* 03332 - Marcer - cpu slider preview.sndh */
 TIMEDB_ENTRY( 1e8d2599,  0,  61750,       YM+TA), /* 04356 - X The Beermat - Drag.sndh */
 TIMEDB_ENTRY( 1ea83810,  0,  21504,       YM+TA), /* 00772 - Count Zero - Decade Demo - Wheres My Willy.sndh */
@@ -1314,6 +1320,7 @@ TIMEDB_ENTRY( 25b4b8f3,  2,    207,          YM), /* 03971 - Geoff Camp - Maths 
 TIMEDB_ENTRY( 25b4b8f3,  3,   2708,          YM), /* 03971 - Geoff Camp - Maths X.sndh */
 TIMEDB_ENTRY( 25b4b8f3,  4,   1560,          YM), /* 03971 - Geoff Camp - Maths X.sndh */
 TIMEDB_ENTRY( 25b95675,  0,   5376,          YM), /* 00806 - Crawdaddy - Plazma.sndh */
+TIMEDB_ENTRY( 25d1569c,  0,  24320,    YM+TB+TD), /* 04879 - xFalcon - Christian Bunge - CHILLOUT.sndh */
 TIMEDB_ENTRY( 25d9e06e,  0,    144,          YM), /* 00164 - Martin Walker - Devious Designs.sndh */
 TIMEDB_ENTRY( 25d9e06e,  1,    385,          YM), /* 00164 - Martin Walker - Devious Designs.sndh */
 TIMEDB_ENTRY( 25d9e06e,  2,   1312,          YM), /* 00164 - Martin Walker - Devious Designs.sndh */
@@ -1479,6 +1486,7 @@ TIMEDB_ENTRY( 2b59cb79,  0,  52204,       YM+TA), /* 03797 - Tony Williams - Sta
 TIMEDB_ENTRY( 2b5a715f,  0,   8826,    YM+TA+TD), /* 01848 - Lotek Style - Flainian.sndh */
 TIMEDB_ENTRY( 2b642c52,  0,  68111,       YM+TA), /* 03813 - David Whittaker - Dan Dare III.sndh */
 TIMEDB_ENTRY( 2b642c52,  1,  29749,       YM+TA), /* 03813 - David Whittaker - Dan Dare III.sndh */
+TIMEDB_ENTRY( 2b78a9c5,  0,   6912,          YM), /* 02108 - Mad Max - Arkanoid.sndh */
 TIMEDB_ENTRY( 2b96bb6f,  0,    457,         STE), /* 03453 - Per Almered (XiA) - $14.sndh */
 TIMEDB_ENTRY( 2b97f341,  0,   8505,          YM), /* 04570 - Yerzmyey - SNDH v4.4 Update.sndh */
 TIMEDB_ENTRY( 2b98362c,  0,  12288,       YM+TA), /* 04125 - Tao - Sunriders - STMYGM 2 version.sndh */
@@ -1537,6 +1545,7 @@ TIMEDB_ENTRY( 2c29a738,  6,   3120,          YM), /* 00087 - David Whittaker - C
 TIMEDB_ENTRY( 2c29a738,  7,     48,          YM), /* 00087 - David Whittaker - Cloud Kingdoms.sndh */
 TIMEDB_ENTRY( 2c29a738,  8,   1365,          YM), /* 00087 - David Whittaker - Cloud Kingdoms.sndh */
 TIMEDB_ENTRY( 2c29a738,  9,    512,          YM), /* 00087 - David Whittaker - Cloud Kingdoms.sndh */
+TIMEDB_ENTRY( 2c2b4825,  0,  20186,          YM), /* 04909 - Ged - KGB - Fly Over Fantasy.sndh */
 TIMEDB_ENTRY( 2c5d1243,  0,  10367,       YM+TA), /* 01781 - Lap - Bird Girl Mad Demo Menu Digi.sndh */
 TIMEDB_ENTRY( 2c5e55b7,  0,   2235, YM+TA+TB+TD), /* 04310 - 505-checkpoint - ST_P.sndh */
 TIMEDB_ENTRY( 2c5f33d7,  0,   4608,          YM), /* 01091 - Techno - Mathematiques Squizophrenes End.sndh */
@@ -1623,7 +1632,6 @@ TIMEDB_ENTRY( 2cec5651, 29,    887,          YM), /* 04683 - Unknown - Kids' Aca
 TIMEDB_ENTRY( 2cec5651, 30,   1044,          YM), /* 04683 - Unknown - Kids' Academy - Alvin's puzzles.sndh */
 TIMEDB_ENTRY( 2cedde16,  0,   6656,          YM), /* 02015 - Mad Max - Supersonic.sndh */
 TIMEDB_ENTRY( 2cfd99f3,  0,   7540,          YM), /* 03070 - Chris French - Twelve Days of Christmas.sndh */
-TIMEDB_ENTRY( 2d0618b9,  0,   3840,          YM), /* 02113 - Mad Max - Pro BMX Simulator A.sndh */
 TIMEDB_ENTRY( 2d08da7c,  0,   1800,          YM), /* 02928 - Geoff Camp - Spider Spell.sndh */
 TIMEDB_ENTRY( 2d08da7c,  1,   3554,          YM), /* 02928 - Geoff Camp - Spider Spell.sndh */
 TIMEDB_ENTRY( 2d08da7c,  2,   3385,          YM), /* 02928 - Geoff Camp - Spider Spell.sndh */
@@ -1846,6 +1854,7 @@ TIMEDB_ENTRY( 32e8616d,  0,   8442, YM+TA+TB+TD), /* 02648 - Dma-Sc - ExoCooper.
 TIMEDB_ENTRY( 32e87446,  0,   2304,          YM), /* 01110 - Keith Tinman - Head Over Heels.sndh */
 TIMEDB_ENTRY( 32e87446,  1,    118,          YM), /* 01110 - Keith Tinman - Head Over Heels.sndh */
 TIMEDB_ENTRY( 32f3082d,  0,   7272, YM+TA+TB+TD), /* 00054 - 505 - Headaxe.sndh */
+TIMEDB_ENTRY( 33130f0c,  0,  15350,          YM), /* 04884 - Jovis - If you were a photon.sndh */
 TIMEDB_ENTRY( 332b6163,  0,   5676,       YM+TA), /* 01918 - Mephistow - Ventura - Evil.sndh */
 TIMEDB_ENTRY( 333b47b3,  0,   6526,          YM), /* 03198 - Martin Iveson - Arcade Classix - Breakout.sndh */
 TIMEDB_ENTRY( 33526cb7,  0,  10370,    YM+TA+TD), /* 02311 - Tao - Cream - Intensity.sndh */
@@ -1892,6 +1901,7 @@ TIMEDB_ENTRY( 34affc14,  5,   2688,          YM), /* 03405 - Wally Beben - Ultim
 TIMEDB_ENTRY( 34affc14,  6,   1152,          YM), /* 03405 - Wally Beben - Ultimate Ride.sndh */
 TIMEDB_ENTRY( 34affc14,  7,   9310,          YM), /* 03405 - Wally Beben - Ultimate Ride.sndh */
 TIMEDB_ENTRY( 34ba9d61,  0,   2688,       YM+TA), /* 01692 - Jess - The name's Bond, Jess Bond.sndh */
+TIMEDB_ENTRY( 34c45590,  0,   7165,          YM), /* 04908 - Luebke - Paracon 4 Invite.sndh */
 TIMEDB_ENTRY( 34c46ff5,  0,    393,          YM), /* 02944 - Dave Munsie - Frogger.sndh */
 TIMEDB_ENTRY( 34c46ff5,  1,    323,          YM), /* 02944 - Dave Munsie - Frogger.sndh */
 TIMEDB_ENTRY( 34c46ff5,  2,    185,          YM), /* 02944 - Dave Munsie - Frogger.sndh */
@@ -2228,6 +2238,7 @@ TIMEDB_ENTRY( 4021e89b,  0,   5370, YM+TA+TB+TD), /* 04276 - 505-cpt^pdx - laugh
 TIMEDB_ENTRY( 402d0e07,  0,  14652,    YM+TA+TD), /* 04575 - Crazy Q - Alive Team - Lunar Bounce.sndh */
 TIMEDB_ENTRY( 40311d45,  0,   3453,    YM+TA+TD), /* 00213 - 505 - YM Pop (D-Bug 173).sndh */
 TIMEDB_ENTRY( 40525f4c,  0,  20736,    YM+TA+TD), /* 02259 - Tao - Cream - Mine Sweeper ST (Steps).sndh */
+TIMEDB_ENTRY( 405a7dc2,  0,   9983, YM+TA+TB+TD), /* 04898 - 7an-SYNC=Amplitude Problem - Assembly Line.sndh */
 TIMEDB_ENTRY( 406772da,  0,   7615,    YM+TA+TD), /* 04783 - gwEm - Trans-Debug Express (release edit).sndh */
 TIMEDB_ENTRY( 40845105,  0,   2064,          YM), /* 01411 - Skyline - Snork Intro - PYM.sndh */
 TIMEDB_ENTRY( 40912b3d,  0,    862,          YM), /* 04140 - Claudio Kronmuller - Kaiser.sndh */
@@ -2399,6 +2410,7 @@ TIMEDB_ENTRY( 456297c7,  1,  19776,          YM), /* 02217 - Mad Max - Tangram.s
 TIMEDB_ENTRY( 45657a96,  0,  16890,    YM+TA+TD), /* 01834 - Lotek Style - Ask me about chips.sndh */
 TIMEDB_ENTRY( 4568c87a,  0,    768,    YM+TA+TD), /* 00405 - Big Alec - High Gear.sndh */
 TIMEDB_ENTRY( 45698dbb,  0,   3840,          YM), /* 01045 - Dr Beat - Galtan 6 - Elite Intro 2.sndh */
+TIMEDB_ENTRY( 4578e60c,  0, 241546,       YM+TA), /* 00000 - Twitch - Twitch's Hotmix.sndh */
 TIMEDB_ENTRY( 457c457a,  0,   3528,          YM), /* 04220 - Holger Ghermann - Graffiti Man.sndh */
 TIMEDB_ENTRY( 457c457a,  1,   2688,          YM), /* 04220 - Holger Ghermann - Graffiti Man.sndh */
 TIMEDB_ENTRY( 457c457a,  2,   3528,          YM), /* 04220 - Holger Ghermann - Graffiti Man.sndh */
@@ -2652,6 +2664,9 @@ TIMEDB_ENTRY( 4c195cc7,  0,  23041,       YM+TA), /* 03837 - TPM - Lorna.sndh */
 TIMEDB_ENTRY( 4c3c06bd,  0,   2306,          YM), /* 02172 - Mad Max - Scoop - That's The Way It Is.sndh */
 TIMEDB_ENTRY( 4c3c06bd,  1,  21698,          YM), /* 02172 - Mad Max - Scoop - That's The Way It Is.sndh */
 TIMEDB_ENTRY( 4c66ad56,  0,  27648, YM+TA+TB+TD), /* 02611 - STU - PSYCHOTIC.sndh */
+TIMEDB_ENTRY( 4c7139cf,  0,   5472,          YM), /* 00114 - David Whittaker - Leatherneck.sndh */
+TIMEDB_ENTRY( 4c7139cf,  1,   5376,          YM), /* 00114 - David Whittaker - Leatherneck.sndh */
+TIMEDB_ENTRY( 4c7139cf,  2,    270,          YM), /* 00114 - David Whittaker - Leatherneck.sndh */
 TIMEDB_ENTRY( 4c7d722f,  0,   1608,          YM), /* 01298 - Matt Furniss - Hard Drivin.sndh */
 TIMEDB_ENTRY( 4c7d722f,  1,   2937,          YM), /* 01298 - Matt Furniss - Hard Drivin.sndh */
 TIMEDB_ENTRY( 4c7d722f,  5,     57,          YM), /* 01298 - Matt Furniss - Hard Drivin.sndh */
@@ -3216,6 +3231,7 @@ TIMEDB_ENTRY( 57c18f04,  5,    299,          YM), /* 01319 - Matt Furniss - Spac
 TIMEDB_ENTRY( 57c18f04,  6,   1599,          YM), /* 01319 - Matt Furniss - Space Harrier II.sndh */
 TIMEDB_ENTRY( 57c18f04,  7,   1280,          YM), /* 01319 - Matt Furniss - Space Harrier II.sndh */
 TIMEDB_ENTRY( 57c18f04,  8,    319,          YM), /* 01319 - Matt Furniss - Space Harrier II.sndh */
+TIMEDB_ENTRY( 57cc1866,  0,  14147,       YM+TA), /* 04889 - Jovis - The old odd funstyle of J.sndh */
 TIMEDB_ENTRY( 57cd8977,  0,   3839,          YM), /* 00342 - Tony Williams - Narc.sndh */
 TIMEDB_ENTRY( 57cf2288,  0,   2048,          YM), /* 01519 - Iso - Barst Allen.sndh */
 TIMEDB_ENTRY( 5820dc63,  0,   4473,    YM+TB+TD), /* 00182 - 505 - Paradox Xmas 2003 #2.sndh */
@@ -3370,6 +3386,7 @@ TIMEDB_ENTRY( 5bf3126c,  0,   3171,          YM), /* 00116 - David Whittaker - M
 TIMEDB_ENTRY( 5bf3126c,  1,   2312,          YM), /* 00116 - David Whittaker - Menace.sndh */
 TIMEDB_ENTRY( 5bf3126c,  2,   7184,          YM), /* 00116 - David Whittaker - Menace.sndh */
 TIMEDB_ENTRY( 5c041c45,  0,  11904,       YM+TD), /* 03220 - Tomchi - PTSPTR.sndh */
+TIMEDB_ENTRY( 5c090137,  0,  10184,    YM+TA+TD), /* 04913 - 505 - Pulse.sndh */
 TIMEDB_ENTRY( 5c0bf856,  0,   2880,          YM), /* 00751 - Mark Cooksey - Forgotten Worlds.sndh */
 TIMEDB_ENTRY( 5c0bf856,  1,   6016,          YM), /* 00751 - Mark Cooksey - Forgotten Worlds.sndh */
 TIMEDB_ENTRY( 5c0bf856,  2,   4480,          YM), /* 00751 - Mark Cooksey - Forgotten Worlds.sndh */
@@ -3833,6 +3850,7 @@ TIMEDB_ENTRY( 68cc4dd8, 11,    973,          YM), /* 04488 - Flipside - Alphabet
 TIMEDB_ENTRY( 68cc4dd8, 12,    512,          YM), /* 04488 - Flipside - Alphabet mix.sndh */
 TIMEDB_ENTRY( 68cc4dd8, 13,  44429,          YM), /* 04488 - Flipside - Alphabet mix.sndh */
 TIMEDB_ENTRY( 68e43d5d,  0,   3129, YM+TA+TB+TD), /* 03644 - 505-checkpoint - No Stress.sndh */
+TIMEDB_ENTRY( 68e76f5c,  0,  23044,       YM+TA), /* 04888 - Jovis - Ghost ship, then Fun-board.sndh */
 TIMEDB_ENTRY( 69079f07,  0,  18495,       YM+TA), /* 01747 - Jovis - Lametrop - Minitext.sndh */
 TIMEDB_ENTRY( 69244f58,  0,   4992,          YM), /* 00901 - Danny Oneway - Eat This.sndh */
 TIMEDB_ENTRY( 69296b00,  0,  36897,          YM), /* 00009 - gwEm - Tune 4 My Broken Atari (re-version).sndh */
@@ -4225,11 +4243,13 @@ TIMEDB_ENTRY( 7549d578,  0,   5095,          YM), /* 03141 - Unknown - Music Box
 TIMEDB_ENTRY( 7562aff4,  0,  14665,       YM+TB), /* 01031 - Doclands - Zoomer Preview - FOF.sndh */
 TIMEDB_ENTRY( 7563ab89,  0,   5120,          YM), /* 02118 - Mad Max - Warhawk Remix.sndh */
 TIMEDB_ENTRY( 756f8880,  0,   4602,       YM+TA), /* 01350 - Scavenger - No Muls, Rapido?.sndh */
+TIMEDB_ENTRY( 75763a38,  0,    338,          YM), /* 04912 - 505 - Pulse intro.sndh */
 TIMEDB_ENTRY( 7577cc92,  0,  47528, YM+TA+TB+TD), /* 03427 - cerror - VERMOUTH.sndh */
 TIMEDB_ENTRY( 757c0a86,  0,   6336,          YM), /* 03204 - Steve Wetherill - Tusker.sndh */
 TIMEDB_ENTRY( 757c0a86,  1,   3840,          YM), /* 03204 - Steve Wetherill - Tusker.sndh */
 TIMEDB_ENTRY( 757c4fb6,  0,   6527,    YM+TA+TD), /* 02821 - marcer - first tYMe (Znax credits-scores).sndh */
 TIMEDB_ENTRY( 757e009b,  0,   2239,          YM), /* 01783 - Lap - Phaleon - Change Disks.sndh */
+TIMEDB_ENTRY( 758c6da9,  0,  12663,          YM), /* 04896 - LFEE - LFEE 91.sndh */
 TIMEDB_ENTRY( 759f714f,  0,  43344, YM+TA+TB+TD), /* 03369 - STU - DISCO VER ATARI.sndh */
 TIMEDB_ENTRY( 75a2df71,  0,    706,          YM), /* 01511 - Chris Huelsbeck - Carl Lewis Challenge.sndh */
 TIMEDB_ENTRY( 75a2df71,  1,    110,          YM), /* 01511 - Chris Huelsbeck - Carl Lewis Challenge.sndh */
@@ -4366,6 +4386,7 @@ TIMEDB_ENTRY( 78258491,  0,   7103, YM+TA+TB+TD), /* 03641 - Timbral-DHS-YMR - P
 TIMEDB_ENTRY( 7831c996,  0,  10392, YM+TA+TB+TD), /* 00193 - 505 - Sure Trip 2.sndh */
 TIMEDB_ENTRY( 784a6f4e,  0,  43744,       YM+TA), /* 00002 - gwEm - Hardcore Will Never Die.sndh */
 TIMEDB_ENTRY( 785b5c73,  0,   9220,    YM+TA+TD), /* 02332 - Tao - Cream (orig. Karsten Obarski) - Sleepwalk.sndh */
+TIMEDB_ENTRY( 788de853,  0,  21498,       YM+TA), /* 04882 - Jovis - Travel with Japman.sndh */
 TIMEDB_ENTRY( 788dfc4e,  0,  18529,          YM), /* 04843 - t1000 - Bits 38.sndh */
 TIMEDB_ENTRY( 78a8fed2,  0,   3583,          YM), /* 00219 - Tony Williams - Smash TV.sndh */
 TIMEDB_ENTRY( 78a8fed2,  1,    575,          YM), /* 00219 - Tony Williams - Smash TV.sndh */
@@ -4496,6 +4517,7 @@ TIMEDB_ENTRY( 7bd0c66a,  0,   2560,          YM), /* 01882 - Dave Lowe - E-Swat.
 TIMEDB_ENTRY( 7bd0c66a,  1,    640,          YM), /* 01882 - Dave Lowe - E-Swat.sndh */
 TIMEDB_ENTRY( 7bd0c66a,  2,     73,          YM), /* 01882 - Dave Lowe - E-Swat.sndh */
 TIMEDB_ENTRY( 7bd54594,  0,   1015,          YM), /* 03916 - Unknown - England.sndh */
+TIMEDB_ENTRY( 7bdb5bba,  0,   6265,    YM+TA+TD), /* 04881 - Black - Bladerunner.sndh */
 TIMEDB_ENTRY( 7bdf8712,  0,   2349,          YM), /* 01564 - Jason Page - Ivan Ironman Stewarts Super Off Road.sndh */
 TIMEDB_ENTRY( 7bdf8712,  1,    235,          YM), /* 01564 - Jason Page - Ivan Ironman Stewarts Super Off Road.sndh */
 TIMEDB_ENTRY( 7bdf8712,  2,    216,          YM), /* 01564 - Jason Page - Ivan Ironman Stewarts Super Off Road.sndh */
@@ -4595,7 +4617,6 @@ TIMEDB_ENTRY( 7e4c2abc,  1,   2688,          YM), /* 02055 - Mad Max - Starpaws.
 TIMEDB_ENTRY( 7e4c2abc,  2,    384,          YM), /* 02055 - Mad Max - Starpaws.sndh */
 TIMEDB_ENTRY( 7e4c2abc,  3,     11,          YM), /* 02055 - Mad Max - Starpaws.sndh */
 TIMEDB_ENTRY( 7e705d5d,  0,  20480,          YM), /* 02046 - Mad Max - Nemesis The Warlock.sndh */
-TIMEDB_ENTRY( 7e87073c,  0,   6912,          YM), /* 02108 - Mad Max - Arkanoid.sndh */
 TIMEDB_ENTRY( 7e9147b9,  0,   6903, YM+TA+TB+TD), /* 00178 - 505 - Mystic Bytes 2.sndh */
 TIMEDB_ENTRY( 7ec89c40,  0,   6656,       YM+TA), /* 04408 - Dr Beat - Maziac.sndh */
 TIMEDB_ENTRY( 7ec89c40,  1,   6656,       YM+TA), /* 04408 - Dr Beat - Maziac.sndh */
@@ -4748,6 +4769,7 @@ TIMEDB_ENTRY( 82ebfe04,  3,    395,          YM), /* 00980 - Chris Denman - Warr
 TIMEDB_ENTRY( 82ebfe04,  4,    371,          YM), /* 00980 - Chris Denman - Warriors Of Releyne.sndh */
 TIMEDB_ENTRY( 82ebfe04,  5,    307,          YM), /* 00980 - Chris Denman - Warriors Of Releyne.sndh */
 TIMEDB_ENTRY( 82fbb472,  0,   6144,          YM), /* 01219 - ENS Music - ENS 2.sndh */
+TIMEDB_ENTRY( 82fe33b4,  0,   6144,          YM), /* 04903 - Matrix - Look Whos Coding Too.sndh */
 TIMEDB_ENTRY( 830a7e7e,  0,   5184,          YM), /* 02718 - Chris Denman - Legend of the Lost.sndh */
 TIMEDB_ENTRY( 830a7e7e,  1,   2400,          YM), /* 02718 - Chris Denman - Legend of the Lost.sndh */
 TIMEDB_ENTRY( 830a7e7e,  2,   4032,          YM), /* 02718 - Chris Denman - Legend of the Lost.sndh */
@@ -5197,6 +5219,15 @@ TIMEDB_ENTRY( 8e2e2598,  0,  84708,       YM+TA), /* 04042 - Roggie - F.O.A.D. y
 TIMEDB_ENTRY( 8e349d20,  0,   7424,          YM), /* 02170 - Mad Max - Pandora.sndh */
 TIMEDB_ENTRY( 8e36011b,  0,  12672,    YM+TA+TD), /* 02294 - Tao - Cream - Sense (Alive 2).sndh */
 TIMEDB_ENTRY( 8e378611,  0,   1933,    YM+TA+TD), /* 04205 - Tao - Cream (orig. Jeroen Tel) - Nostalgic-O-Demo Ikari Union (2 Sid Voice).sndh */
+TIMEDB_ENTRY( 8e4b78ab,  0,    131,          YM), /* 04906 - Jas C Brooke - Pac-Land.sndh */
+TIMEDB_ENTRY( 8e4b78ab,  1,   1176,          YM), /* 04906 - Jas C Brooke - Pac-Land.sndh */
+TIMEDB_ENTRY( 8e4b78ab,  2,   1152,          YM), /* 04906 - Jas C Brooke - Pac-Land.sndh */
+TIMEDB_ENTRY( 8e4b78ab,  3,   1536,          YM), /* 04906 - Jas C Brooke - Pac-Land.sndh */
+TIMEDB_ENTRY( 8e4b78ab,  4,   1152,          YM), /* 04906 - Jas C Brooke - Pac-Land.sndh */
+TIMEDB_ENTRY( 8e4b78ab,  5,    192,          YM), /* 04906 - Jas C Brooke - Pac-Land.sndh */
+TIMEDB_ENTRY( 8e4b78ab,  6,     97,          YM), /* 04906 - Jas C Brooke - Pac-Land.sndh */
+TIMEDB_ENTRY( 8e4b78ab,  7,    193,          YM), /* 04906 - Jas C Brooke - Pac-Land.sndh */
+TIMEDB_ENTRY( 8e4b78ab,  8,    265,          YM), /* 04906 - Jas C Brooke - Pac-Land.sndh */
 TIMEDB_ENTRY( 8e4e7df4,  0,   7348,          YM), /* 01817 - Paul Loraine - Huckleberry Hound in Hollywood Capers.sndh */
 TIMEDB_ENTRY( 8e4e7df4,  1,   6671,          YM), /* 01817 - Paul Loraine - Huckleberry Hound in Hollywood Capers.sndh */
 TIMEDB_ENTRY( 8e4e7df4,  2,   8523,          YM), /* 01817 - Paul Loraine - Huckleberry Hound in Hollywood Capers.sndh */
@@ -5242,6 +5273,7 @@ TIMEDB_ENTRY( 8fb5ca0b,  0,   6146,          YM), /* 00403 - Big Alec - Feardrop
 TIMEDB_ENTRY( 8fc80c16,  0,   3083,          YM), /* 01761 - Lap - Lap 1 - Batman.sndh */
 TIMEDB_ENTRY( 8fd390e1,  0,  69605,       YM+TA), /* 03879 - Mad Max - Starpaws.sndh */
 TIMEDB_ENTRY( 8fe9358b,  0,  10875, YM+TA+TB+TD), /* 04290 - 505-checkpoint^paradox - Myth.sndh */
+TIMEDB_ENTRY( 8ffa2b33,  0,   1919,          YM), /* 04897 - Dma-Sc - Sector One - ParaDis3 - Parallax Dist..sndh */
 TIMEDB_ENTRY( 9000c3ab,  0,   7874,          YM), /* 00362 - Steve Barrett - Adv Skiing Simulator.sndh */
 TIMEDB_ENTRY( 9000c3ab,  1,    290,          YM), /* 00362 - Steve Barrett - Adv Skiing Simulator.sndh */
 TIMEDB_ENTRY( 9000c3ab,  2,    218,          YM), /* 00362 - Steve Barrett - Adv Skiing Simulator.sndh */
@@ -5390,6 +5422,7 @@ TIMEDB_ENTRY( 93249f24, 10,    201,          YM), /* 02956 - Rudi Stember - Dyna
 TIMEDB_ENTRY( 93249f24, 11,    257,          YM), /* 02956 - Rudi Stember - Dynablaster.sndh */
 TIMEDB_ENTRY( 9326708f,  0,   8064,          YM), /* 03410 - Riff Raff - T Bird.sndh */
 TIMEDB_ENTRY( 9326708f,  1,   9408,          YM), /* 03410 - Riff Raff - T Bird.sndh */
+TIMEDB_ENTRY( 9341b0aa,  0,  41472,    YM+TB+TD), /* 04880 - xFalcon - Christian Bunge - BRASIPOP.sndh */
 TIMEDB_ENTRY( 9375f2d8,  0,  18432,          YM), /* 01485 - Holger Gehrmann - Hollywood Poker Pro.sndh */
 TIMEDB_ENTRY( 9375f2d8,  1,   3840,          YM), /* 01485 - Holger Gehrmann - Hollywood Poker Pro.sndh */
 TIMEDB_ENTRY( 938d8ca8,  0,  15432, YM+TA+TB+TD), /* 03320 - Marcer - n-a.sndh */
@@ -5489,10 +5522,15 @@ TIMEDB_ENTRY( 969f3663,  2,   2941,          YM), /* 03978 - Paul Summers - Soni
 TIMEDB_ENTRY( 969f3663,  3,   2689,          YM), /* 03978 - Paul Summers - Sonic Boom.sndh */
 TIMEDB_ENTRY( 969f3663,  4,   2304,          YM), /* 03978 - Paul Summers - Sonic Boom.sndh */
 TIMEDB_ENTRY( 96a2d403,  0,  33280, YM+TA+TB+TD), /* 04642 - Jakub Husak - n-a.sndh */
+TIMEDB_ENTRY( 96b358c4,  0,  13174,          YM), /* 04887 - Jovis - Compil with some crap.sndh */
 TIMEDB_ENTRY( 96bf9825,  0,   2879,          YM), /* 01310 - Matt Furniss - Race Drivin.sndh */
 TIMEDB_ENTRY( 96e7cd5d,  0,  12672,          YM), /* 02020 - Mad Max - Balloon Challenge.sndh */
 TIMEDB_ENTRY( 96e7cd5d,  1,    321,          YM), /* 02020 - Mad Max - Balloon Challenge.sndh */
 TIMEDB_ENTRY( 96e80ca2,  0,   6144,          YM), /* 00491 - Ultimatum - Kidney Bean 7.sndh */
+TIMEDB_ENTRY( 96ed669d,  0,   7290,          YM), /* 04910 - Haiko Ruttmann - Great Courts.sndh */
+TIMEDB_ENTRY( 96ed669d,  1,   3096,          YM), /* 04910 - Haiko Ruttmann - Great Courts.sndh */
+TIMEDB_ENTRY( 96ed669d,  2,    768,          YM), /* 04910 - Haiko Ruttmann - Great Courts.sndh */
+TIMEDB_ENTRY( 97098b02,  0,   7314, YM+TA+TB+TD), /* 04895 - tomchi  noextra - ltc0a chom.sndh */
 TIMEDB_ENTRY( 97182e59,  0,   3840,       YM+TA), /* 04428 - Lotus - Synth Dream 2 - Inna Groovy Mood.sndh */
 TIMEDB_ENTRY( 971a913a,  0,   6079,          YM), /* 04130 - Matt Furniss - Shadow Warriors.sndh */
 TIMEDB_ENTRY( 971a913a,  1,    250,          YM), /* 04130 - Matt Furniss - Shadow Warriors.sndh */
@@ -5554,6 +5592,7 @@ TIMEDB_ENTRY( 9805afa1,  0,   5376,       YM+TA), /* 04440 - Lotus - Synth Dream
 TIMEDB_ENTRY( 981baf1f,  0,   1117,          YM), /* 01536 - Iso - Waking Up.sndh */
 TIMEDB_ENTRY( 9828011a,  0,   4986,          YM), /* 00899 - Danny Oneway - Danny O Sidsong.sndh */
 TIMEDB_ENTRY( 98294817,  0,   6528,          YM), /* 04845 - t1000 - Bits 57.sndh */
+TIMEDB_ENTRY( 98369957,  0,   8421, YM+TA+TB+TD), /* 04877 - gwEm-PHF^YM Rockerz - Flash of the ROM.sndh */
 TIMEDB_ENTRY( 98376a21,  0,   5376,       YM+TD), /* 02011 - Jochen Hippel - Loading.sndh */
 TIMEDB_ENTRY( 984089bf,  0,   1536,          YM), /* 02213 - Mad Max - Rollout.sndh */
 TIMEDB_ENTRY( 984089bf,  1,  10677,          YM), /* 02213 - Mad Max - Rollout.sndh */
@@ -5648,6 +5687,7 @@ TIMEDB_ENTRY( 99f889ef,  0,   5435, YM+TA+TB+TD), /* 04568 - Bagarn - Spice Boys
 TIMEDB_ENTRY( 99ff9925,  0,   7680,          YM), /* 03215 - Tomchi - Checkboard.sndh */
 TIMEDB_ENTRY( 9a025a97,  0,  18080,    YM+TB+TD), /* 02604 - STU - MAD CREATURE.sndh */
 TIMEDB_ENTRY( 9a04d1ff,  0,   7913,          YM), /* 00876 - Ben Daglish - Thunderbirds.sndh */
+TIMEDB_ENTRY( 9a103014,  0,  26660,       YM+TA), /* 04890 - Jovis - Sampled Attack.sndh */
 TIMEDB_ENTRY( 9a1dc958,  0,   9689,          YM), /* 03033 - Debbie Davis - Lay Me Down.sndh */
 TIMEDB_ENTRY( 9a315c32,  0,  32256, YM+TA+TB+TD), /* 02536 - Remo - Mia Mia.sndh */
 TIMEDB_ENTRY( 9a321c58,  0,  10368,          YM), /* 01067 - Jonathan Dunn - Rambo III.sndh */
@@ -5822,6 +5862,7 @@ TIMEDB_ENTRY( 9f094e8e,  0,   1275,          YM), /* 00026 - 505 - 18th.sndh */
 TIMEDB_ENTRY( 9f144684,  0,   5787,          YM), /* 01232 - Epic - Lost in Universe.sndh */
 TIMEDB_ENTRY( 9f148304,  0,  35840,          YM), /* 01468 - STU - HEDGEHOG.sndh */
 TIMEDB_ENTRY( 9f1d23bd,  0,   4120,    YM+TA+TD), /* 02260 - Tao - Cream (orig. Rob Hubbard) - Ninja (Steps).sndh */
+TIMEDB_ENTRY( 9f1d2f12,  0,   4607,    YM+TA+TB), /* 04915 - 505-paradox - Sabotage Intro.sndh */
 TIMEDB_ENTRY( 9f265e3d,  0,   7674,          YM), /* 02455 - Timbral - Y'M still here.sndh */
 TIMEDB_ENTRY( 9f2aeb7c,  0,  11065, YM+TA+TB+TD), /* 02100 - Mad Max - Thing on a Spring - Sid.sndh */
 TIMEDB_ENTRY( 9f373ded,  0,  20601,          YM), /* 01672 - Jess - Akira VS Sangoku.sndh */
@@ -6077,9 +6118,8 @@ TIMEDB_ENTRY( a46c1730,  2,   6272,          YM), /* 01397 - Paul Shields - Tetr
 TIMEDB_ENTRY( a46c1730,  3,    150,          YM), /* 01397 - Paul Shields - Tetraquest.sndh */
 TIMEDB_ENTRY( a46c1730,  4,    149,          YM), /* 01397 - Paul Shields - Tetraquest.sndh */
 TIMEDB_ENTRY( a484459b,  0,  12110,    YM+TA+TD), /* 02685 - Donald Fakk - Spanking.sndh */
-TIMEDB_ENTRY( a484c828,  0,  12289,          YM), /* 00386 - Wally Beben aka Hagar - Hyperdrome.sndh */
-TIMEDB_ENTRY( a484c828,  1,    622,          YM), /* 00386 - Wally Beben aka Hagar - Hyperdrome.sndh */
 TIMEDB_ENTRY( a4880e66,  0,   5435, YM+TA+TB+TD), /* 00984 - D-Force - Some How.sndh */
+TIMEDB_ENTRY( a48cdf52,  0,  72781,       YM+TA), /* 04901 - Twitch - It don't matter.sndh */
 TIMEDB_ENTRY( a498b5bd,  0,   6906, YM+TA+TB+TD), /* 02756 - Dma-Sc - Sector One - Burton Tribute Project.sndh */
 TIMEDB_ENTRY( a49eb8c8,  0,  90046,       YM+TA), /* 04038 - Roggie - Roggie 20.sndh */
 TIMEDB_ENTRY( a4a0c69d,  0,   2969,          YM), /* 03055 - Ed Bogas - Latin.sndh */
@@ -6239,6 +6279,7 @@ TIMEDB_ENTRY( aa592647,  0,   2681,          YM), /* 04092 - Gary Wheaton - The 
 TIMEDB_ENTRY( aa6340a9,  0,  11712,          YM), /* 01969 - MSG - MSG 12 - Maggie 24 Intro.sndh */
 TIMEDB_ENTRY( aa703432,  0,   4029, YM+TA+TB+TD), /* 00276 - Baggio - Demo Test.sndh */
 TIMEDB_ENTRY( aa79026a,  0,   1280,          YM), /* 03544 - Dean Evans - One Step Beyond.sndh */
+TIMEDB_ENTRY( aa8b74d7,  0,  15356,          YM), /* 04886 - Jovis - Think About what You Want.sndh */
 TIMEDB_ENTRY( aa90541a,  0,   4351,    YM+TA+TD), /* 02564 - marcer - lotus 1 title remix.sndh */
 TIMEDB_ENTRY( aa9b1cb0,  0,   3839, YM+TA+TB+TD), /* 03998 - XyNo - YS1 MINEA TOWN ST COVER.sndh */
 TIMEDB_ENTRY( aaa45375,  0,   6162,          YM), /* 01291 - Matt Furniss - Botics.sndh */
@@ -6660,6 +6701,7 @@ TIMEDB_ENTRY( b8196d28,  0,   2855,          YM), /* 01200 - Excellence In Art -
 TIMEDB_ENTRY( b83c54a0,  0,  11808,          YM), /* 00611 - Chrispy Noodle - Commando.sndh */
 TIMEDB_ENTRY( b8498af6,  0,  28608,       YM+TA), /* 03636 - Mad Max - International Karate Digi.sndh */
 TIMEDB_ENTRY( b8500cbe,  0,   1599,    YM+TA+TB), /* 02653 - Dma-Sc - POOZ - Mini-Games.sndh */
+TIMEDB_ENTRY( b85fd32a,  0,  12991,    YM+TA+TD), /* 04892 - Dma-Sc - 2149 lives.sndh */
 TIMEDB_ENTRY( b891b124,  0,   3676, YM+TA+TB+TD), /* 04272 - 505 - Checkpoint - Kurts.sndh */
 TIMEDB_ENTRY( b894d191,  0,   2653,          YM), /* 01315 - Matt Furniss - Scramble Spirits.sndh */
 TIMEDB_ENTRY( b894d191,  1,   2703,          YM), /* 01315 - Matt Furniss - Scramble Spirits.sndh */
@@ -6720,6 +6762,7 @@ TIMEDB_ENTRY( bb1c8a06,  5,     96,          YM), /* 04654 - Peter Johnson - Ark
 TIMEDB_ENTRY( bb317266,  0,  10752,       YM+TA), /* 02156 - Mad Max - Ooh Crikey Wot a Scorcher Main Menu.sndh */
 TIMEDB_ENTRY( bb425ad7,  0,   3455, YM+TA+TB+TD), /* 03052 - Orbiter and Timbral - Dubmoods MILF (in da park).sndh */
 TIMEDB_ENTRY( bb470a6d,  0,  14506,          YM), /* 02040 - Mad Max - Saboteur 2.sndh */
+TIMEDB_ENTRY( bb4dfa1d,  0,   9703, YM+TA+TB+TD), /* 04899 - wiecz0r - Square Wars I  Assault YM.sndh */
 TIMEDB_ENTRY( bb65fe65,  0,  11059,    YM+TA+TD), /* 01852 - Lotek Style - Her Face.sndh */
 TIMEDB_ENTRY( bb765c7e,  0,   8442,       YM+TA), /* 02634 - Miggy - EELectric Game Music(90%).sndh */
 TIMEDB_ENTRY( bb7fffa1,  0,  29184, YM+TA+TB+TD), /* 03469 - cerror - Loader tune.sndh */
@@ -6940,9 +6983,6 @@ TIMEDB_ENTRY( c1fec1c6,  0,   6144,          YM), /* 02161 - Mad Max - Syntax Te
 TIMEDB_ENTRY( c2221d2d,  0,   1920,          YM), /* 02144 - Mad Max - International Karate - LSD.sndh */
 TIMEDB_ENTRY( c28d0598,  0,   4096,          YM), /* 01997 - Mad Max - Bach The Future.sndh */
 TIMEDB_ENTRY( c2972abe,  0,   2879, YM+TA+TB+TD), /* 02780 - 505-cpt^pdx - 052.sndh */
-TIMEDB_ENTRY( c2a12b71,  0,   5472,          YM), /* 00114 - David Whittaker - Leathernecks.sndh */
-TIMEDB_ENTRY( c2a12b71,  1,   5376,          YM), /* 00114 - David Whittaker - Leathernecks.sndh */
-TIMEDB_ENTRY( c2a12b71,  2,    270,          YM), /* 00114 - David Whittaker - Leathernecks.sndh */
 TIMEDB_ENTRY( c2a979fb,  0,   6940,          YM), /* 01868 - Lotek Style - Seraphim (Chip).sndh */
 TIMEDB_ENTRY( c2bb978b,  0,   5413,          YM), /* 00380 - Wally Beben - Circus Games.sndh */
 TIMEDB_ENTRY( c2bb978b,  2,   1537,          YM), /* 00380 - Wally Beben - Circus Games.sndh */
@@ -6996,6 +7036,7 @@ TIMEDB_ENTRY( c42e22ed,  0,   4224,          YM), /* 01888 - Dave Lowe - Night S
 TIMEDB_ENTRY( c42e22ed,  1,   8000,          YM), /* 01888 - Dave Lowe - Night Shift.sndh */
 TIMEDB_ENTRY( c42e22ed,  2,    256,          YM), /* 01888 - Dave Lowe - Night Shift.sndh */
 TIMEDB_ENTRY( c45c2d02,  0,   1920,          YM), /* 00815 - Crawdaddy - Tough Guys in Sweden.sndh */
+TIMEDB_ENTRY( c46f9097,  0,  10757,    YM+TA+TD), /* 04878 - Tao - STresSTeST.sndh */
 TIMEDB_ENTRY( c49a99bb,  0,   3204,          YM), /* 03152 - Unknown - Believe It or Not!    Mancini.sndh */
 TIMEDB_ENTRY( c49c7137,  0,  15755,          YM), /* 02012 - Mad Max - Nearly Spherical.sndh */
 TIMEDB_ENTRY( c4a74563,  0,  11867, YM+TA+TB+TD), /* 02097 - Mad Max - Spellbound - Sid.sndh */
@@ -7029,6 +7070,8 @@ TIMEDB_ENTRY( c552efdf,  3,  10560,          YM), /* 00965 - Mike Davies - Last 
 TIMEDB_ENTRY( c56a1afe,  0,   4223, YM+TA+TB+TD), /* 02706 - Dubmood - Toffelskater Interlude.sndh */
 TIMEDB_ENTRY( c56d9fa5,  0,  13600,       YM+TA), /* 04652 - Brain - Supremacy.sndh */
 TIMEDB_ENTRY( c56de18c,  0,   1920,          YM), /* 02411 - Nexus 6 - Theme 1993.sndh */
+TIMEDB_ENTRY( c57f039f,  0,  12289,          YM), /* 00386 - Wally Beben aka Hagar - Hyperdome.sndh */
+TIMEDB_ENTRY( c57f039f,  1,    622,          YM), /* 00386 - Wally Beben aka Hagar - Hyperdome.sndh */
 TIMEDB_ENTRY( c587bd0e,  0,   4973,          YM), /* 01738 - Richard Joseph - Knightmare.sndh */
 TIMEDB_ENTRY( c587bd0e,  1,    101,          YM), /* 01738 - Richard Joseph - Knightmare.sndh */
 TIMEDB_ENTRY( c587bd0e,  2,    389,          YM), /* 01738 - Richard Joseph - Knightmare.sndh */
@@ -7235,6 +7278,7 @@ TIMEDB_ENTRY( c940fc5b,  1,   1791,          YM), /* 03305 - O Cornelius & G Ken
 TIMEDB_ENTRY( c94ae0a1,  0,   3836,       YM+TA), /* 00221 - 7AN - Blip 2.sndh */
 TIMEDB_ENTRY( c96243ab,  0,   7167,    YM+TA+TB), /* 02837 - maktone-fairlight - husselhof.sndh */
 TIMEDB_ENTRY( c9666046,  0,   7008,          YM), /* 04345 - Nexus 6 - Red Movement.sndh */
+TIMEDB_ENTRY( c96a276b,  0,  14070,          YM), /* 04885 - Jovis - Jetset Willy Fantasy.sndh */
 TIMEDB_ENTRY( c979c886,  0,   3064,          YM), /* 04320 - 505-cpt^pdx - Tell me.sndh */
 TIMEDB_ENTRY( c98600ce,  0,   5668,    YM+TA+TD), /* 02658 - ear_dis - peagasm.sndh */
 TIMEDB_ENTRY( c996d5e0,  0,  19201,          YM), /* 00398 - Wally Beben - Wicked.sndh */
@@ -7459,6 +7503,7 @@ TIMEDB_ENTRY( ce081658,  2,    263,          YM), /* 03014 - Unknown - Wanderer 
 TIMEDB_ENTRY( ce081658,  3,    894,          YM), /* 03014 - Unknown - Wanderer 3D.sndh */
 TIMEDB_ENTRY( ce081658,  4,   1988,          YM), /* 03014 - Unknown - Wanderer 3D.sndh */
 TIMEDB_ENTRY( ce10e412,  0,   1536,          YM), /* 01416 - Skyline - Snork Intro - Union.sndh */
+TIMEDB_ENTRY( ce139d70,  0,   7723,       YM+TA), /* 04904 - Matrix - The Coffin Shika.sndh */
 TIMEDB_ENTRY( ce1d88e7,  0,  10362,       YM+TA), /* 01341 - Scavenger - Leif Rular - PYM.sndh */
 TIMEDB_ENTRY( ce2943e0,  0,   7676,          YM), /* 01281 - Frazer - TSC 98.sndh */
 TIMEDB_ENTRY( ce513a50,  0,  12864,          YM), /* 04463 - Charles Callet - Iznogoud.sndh */
@@ -7841,6 +7886,7 @@ TIMEDB_ENTRY( d6fc04a8,  0,  12993,    YM+TA+TD), /* 02296 - Tao - Cream - Thing
 TIMEDB_ENTRY( d71de918,  0,  20616, YM+TA+TB+TD), /* 03345 - Marcer - SORN DESTINY.sndh */
 TIMEDB_ENTRY( d72ee71f,  0,   3410,          YM), /* 02143 - Mad Max - Flash Gordon - LSD.sndh */
 TIMEDB_ENTRY( d730c8db,  0,  13254,          YM), /* 01424 - Spector - Manic Demo - 3D Balls.sndh */
+TIMEDB_ENTRY( d73501d0,  0,   3132,    YM+TA+TB), /* 04875 - No More - Vectronix Xmas.sndh */
 TIMEDB_ENTRY( d745b1fa,  0,   1100,          YM), /* 03684 - Dma-Sc - Saboteur 3 - Crew Logo.sndh */
 TIMEDB_ENTRY( d762ac76,  0,  11744,          YM), /* 01877 - Dave Lowe - Bangkok Knights.sndh */
 TIMEDB_ENTRY( d762ac76,  1,   1024,          YM), /* 01877 - Dave Lowe - Bangkok Knights.sndh */
@@ -8453,6 +8499,7 @@ TIMEDB_ENTRY( e62c9af8,  0,    320,          YM), /* 01208 - Excellence In Art -
 TIMEDB_ENTRY( e633cfd4,  0,  39936,    YM+TB+TD), /* 02607 - STU - MY MELODY SID.sndh */
 TIMEDB_ENTRY( e65f1def,  0,   7672, YM+TA+TB+TD), /* 00544 - Blindio - Decadent.sndh */
 TIMEDB_ENTRY( e67eb69f,  0,   3066,       YM+TA), /* 00902 - Danny Oneway - Frust.sndh */
+TIMEDB_ENTRY( e697763c,  0,   9600,    YM+TA+TD), /* 04900 - Lotek Style - .tSCc. - Neon Lips.sndh */
 TIMEDB_ENTRY( e69c3ee3,  0,  37120, YM+TA+TB+TD), /* 03341 - Marcer - n-a.sndh */
 TIMEDB_ENTRY( e6ab9b25,  0,  35154,       YM+TA), /* 03781 - Jose A Martin - Narco Police.sndh */
 TIMEDB_ENTRY( e6b3f254,  0,   2299,          YM), /* 01826 - Pierre-Eric Loriaux - Toki.sndh */
@@ -9161,6 +9208,9 @@ TIMEDB_ENTRY( f889233b,  0,   1289,          YM), /* 03095 - n-a - .sndh */
 TIMEDB_ENTRY( f88ceda9,  0,   4032,          YM), /* 00766 - Count Zero - Decade Demo - Loader.sndh */
 TIMEDB_ENTRY( f894547e,  0,  94600,       YM+TA), /* 04009 - Manfred Becker - Robert in the Fire Factory.sndh */
 TIMEDB_ENTRY( f8a9b5d0,  0,   6527, YM+TA+TB+TD), /* 03365 - gwEm - The Ancient Art of Chiptune.sndh */
+TIMEDB_ENTRY( f8c64c52,  0,   3456,          YM), /* 04911 - Haiko Ruttmann - Tom And The Ghost.sndh */
+TIMEDB_ENTRY( f8c64c52,  1,   2688,          YM), /* 04911 - Haiko Ruttmann - Tom And The Ghost.sndh */
+TIMEDB_ENTRY( f8c64c52,  2,   6144,          YM), /* 04911 - Haiko Ruttmann - Tom And The Ghost.sndh */
 TIMEDB_ENTRY( f8c6a251,  0,  17952,          YM), /* 02008 - Mad Max - Shades - Giana Sisters Remix.sndh */
 TIMEDB_ENTRY( f8c7f8a6,  0,   7953, YM+TA+TB+TD), /* 04873 - 505 - Courage (compo version).sndh */
 TIMEDB_ENTRY( f8c9634f,  0,   8448,          YM), /* 00492 - Ultimatum - Kidney Bean 8.sndh */
