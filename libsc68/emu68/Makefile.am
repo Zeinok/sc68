@@ -2,7 +2,7 @@
 # |                                                                      |
 # |  emu68 -- Makefile.am -- Use with automake to produce configure.in   |
 # |                                                                      |
-# |               Copyright (C) 1998-2015 Benjamin Gerard                |
+# |               Copyright (c) 1998-2016 Benjamin Gerard                |
 # |                                                                      |
 # |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |

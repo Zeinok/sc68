@@ -6,7 +6,7 @@
  * @brief    sndh creator
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef MKSC68_SND_H
 #define MKSC68_SND_H

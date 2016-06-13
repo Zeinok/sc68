@@ -3,7 +3,7 @@
  * @author  http://sourceforge.net/users/benjihan
  * @brief   sc68 input plugin for foobar2000 class defintion.
  *
- * Copyright (c) 1998-2015 Benjamin Gerard
+ * Copyright (c) 1998-2016 Benjamin Gerard
  *
  * This  program is  free  software: you  can  redistribute it  and/or
  * modify  it under the  terms of  the GNU  General Public  License as

@@ -6,7 +6,7 @@
  * @brief    disk function
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef MKSC68_DSK_H
 #define MKSC68_DSK_H

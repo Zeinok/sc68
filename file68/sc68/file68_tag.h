@@ -6,7 +6,7 @@
  * @brief    Metatags definition header file.
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef FILE68_TAG_H
 #define FILE68_TAG_H

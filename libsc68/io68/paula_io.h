@@ -6,7 +6,7 @@
  * @date      1998/06/18
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef IO68_PAULA_IO_H
 #define IO68_PAULA_IO_H

@@ -6,7 +6,7 @@
  * @author    Benjamin Gerard
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef EMU68_TYPE68_H
 #define EMU68_TYPE68_H

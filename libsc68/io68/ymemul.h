@@ -6,7 +6,7 @@
  * @date      1998/06/24
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef IO68_YM_EMUL_H
 #define IO68_YM_EMUL_H

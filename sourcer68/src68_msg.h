@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef SRC68_MSG_H
 #define SRC68_MSG_H

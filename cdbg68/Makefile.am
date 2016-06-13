@@ -2,7 +2,7 @@
 # |                                                                      |
 # |  cgdb68 -- Makefile.am -- Use with automake to produce Makefile.in   |
 # |                                                                      |
-# |               Copyright (C) 2009-2015 Benjamin Gerard                |
+# |               Copyright (c) 2009-2016 Benjamin Gerard                |
 # |                                                                      |
 # |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |

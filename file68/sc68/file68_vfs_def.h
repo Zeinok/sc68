@@ -6,7 +6,7 @@
  * @brief    Generic stream definition header.
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef FILE68_VFS_DEF_H
 #define FILE68_VFS_DEF_H

@@ -6,7 +6,7 @@
  * @date      2009/05/18
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef INL68_BITMANIP_H
 #define INL68_BITMANIP_H

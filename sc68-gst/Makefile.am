@@ -2,7 +2,7 @@
 # |                                                                      |
 # | gstsc68 -- Makefile.am -- Use with automake to produce configure.in  |
 # |                                                                      |
-# |               Copyright (C) 2010-2015 Benjamin Gerard                |
+# |               Copyright (c) 2010-2016 Benjamin Gerard                |
 # |                                                                      |
 # |               <http://sourceforge.net/users/benjihan>                |
 # |                                                                      |

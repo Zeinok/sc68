@@ -6,7 +6,7 @@
  * @brief    address container
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef SOURCER68_ADR_H
 #define SOURCER68_ADR_H

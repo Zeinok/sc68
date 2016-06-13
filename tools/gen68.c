@@ -3,7 +3,7 @@
  * @brief   "emu68" 68k instruction code generator
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (c) 1998-2015 Benjamin Gerard
+ * Copyright (c) 1998-2016 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -97,7 +97,7 @@ static int Usage(void)
     " - <prefix>line<X>.c for lines 0 to F\n"
     " - <prefix>table.c for function table\n"
     "\n"
-    "Copyright (c) 1998-2015 Benjamin Gerard\n"
+    "Copyright (c) 1998-2016 Benjamin Gerard\n"
     );
   return 1;
 }
@@ -191,7 +191,7 @@ static void print_fileheader(const char * name)
     " * @date    %s\n"
     " * @author  http://sourceforge.net/users/benjihan\n"
     " *\n"
-    " * Copyright (c) 1998-2015 Benjamin Gerard\n"
+    " * Copyright (c) 1998-2016 Benjamin Gerard\n"
     " *\n", name, modifdate);
   outf(
     " * This program is free software: you can redistribute it and/or\n"

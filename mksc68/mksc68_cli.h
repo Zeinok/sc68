@@ -6,7 +6,7 @@
  * @brief    mksc68 command line header.
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef MKSC68_CLI_H
 #define MKSC68_CLI_H

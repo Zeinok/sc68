@@ -3,7 +3,7 @@
  * @brief   68000 disassembler
  * @author  http://sourceforge.net/users/benjihan
  *
- * Copyright (c) 1998-2015 Benjamin Gerard
+ * Copyright (c) 1998-2016 Benjamin Gerard
  *
  * This program is free software: you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as

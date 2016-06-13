@@ -6,7 +6,7 @@
  * @brief    ICE! depacker header
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef UNICE68_H
 #define UNICE68_H

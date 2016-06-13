@@ -7,7 +7,7 @@
  *
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef IO68_SHIFTER_IO_H
 #define IO68_SHIFTER_IO_H

@@ -6,7 +6,7 @@
  * @date      2009/02/10
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef EMU68_EMU68_API_H
 #define EMU68_EMU68_API_H

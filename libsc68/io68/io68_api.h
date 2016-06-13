@@ -6,7 +6,7 @@
  * @brief     io68 export header.
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef IO68_IO68_API_H
 #define IO68_IO68_API_H

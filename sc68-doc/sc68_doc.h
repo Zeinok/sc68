@@ -22,7 +22,7 @@ sc68_doc
 
  @section Copyleft
 
-   Copyright (c) 1993-2015 Benjamin Gerard
+   Copyright (c) 1993-2016 Benjamin Gerard
 
    Permission is granted to copy, distribute and/or modify this
    document under the terms of the GNU Free Documentation License,

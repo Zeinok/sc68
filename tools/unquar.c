@@ -4,7 +4,7 @@
  * Time-stamp: <2014-07-03 07:11:32 ben>
  * Init-stamp: <2013-09-13 21:01:17 ben>
  *
- * Copyright (c) 2013-2015 Ben(jamin) Gerard
+ * Copyright (c) 2013-2016 Benjamin Gerard
  */
 
 #include <stdio.h>

@@ -6,7 +6,7 @@
  * @brief     all io68 headers.
  */
 
-/* Copyright (c) 1998-2015 Benjamin Gerard */
+/* Copyright (c) 1998-2016 Benjamin Gerard */
 
 #ifndef IO68_IO68_H
 #define IO68_IO68_H
