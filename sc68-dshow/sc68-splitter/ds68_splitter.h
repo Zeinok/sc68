@@ -54,7 +54,7 @@ private:
 public:
   // IUnknown
   DECLARE_IUNKNOWN
-    STDMETHODIMP NonDelegatingQueryInterface(REFIID riid, void** ppv);
+  STDMETHODIMP NonDelegatingQueryInterface(REFIID riid, void** ppv);
 
   // IDispatch
   STDMETHODIMP GetTypeInfoCount(UINT* pctinfo) {return E_NOTIMPL;}

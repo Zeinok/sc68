@@ -71,24 +71,33 @@ const AMOVIESETUP_PIN psudPins[] =
 // Filters
 const AMOVIESETUP_FILTER sudSc68Splitter =
 {
-  &__uuidof(Sc68Splitter),              // Filter CLSID
-  L"SC68 Splitter",                             // Filter Name
-  MERIT_UNLIKELY,                                       // Filter Merit
-  2,                                                            // Filter Pin count
-  psudPins,                                             // Filter Pins
-  //CLSID_LegacyAmFilterCategory
+  &__uuidof(Sc68Splitter), // Filter CLSID
+  L"SC68 Splitter",        // Filter Name
+  MERIT_UNLIKELY,          // Filter Merit or may be MERIT_NORMAL
+  2,                       // Filter Pin count
+  psudPins,                // Filter Pins
 };
 
 // Templates
 CFactoryTemplate g_Templates[]=
 {
+  /* This is sc68 splitter filter. */
   {
     L"SC68 Splitter",
     &__uuidof(Sc68Splitter),
     Sc68Splitter::CreateInstance,
     Sc68Splitter::StaticInit,
     &sudSc68Splitter
+  },
+  /* This is for sc68 property pages. */
+  {
+    L"SC68 Splitter Properties",
+    &__uuidof(Sc68Prop),
+    Sc68Prop::CreateInstance,
+    nullptr,
+    nullptr
   }
+
 };
 
 int g_cTemplates = sizeof(g_Templates)/sizeof(g_Templates[0]);

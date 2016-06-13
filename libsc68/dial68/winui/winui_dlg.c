@@ -107,12 +107,23 @@ struct dlgdef_s {
 
 static const int magic = ('W'<<24)|('D'<<16)|('L'<<8)|'G';
 
+struct dialogflags_s {
+  unsigned int modal:1;             /* created modal or modless   */
+  unsigned int frameonly:1;         /* no border and decorations  */
+  unsigned int measuring:1;         /* measuring only             */
+  unsigned int hasfailed:1;         /* has failed somehow ?       */
+  unsigned int connected:1;         /* is connected ?             */
+};
+
+typedef struct dialogflags_s dialflag_t;
+
 struct dialog_s {
   int          magic;                 /* Magic number               */
   HINSTANCE    hinst;                 /* DLL instance (resource)    */
   HWND         hparent;               /* Parent window              */
   HWND         hdlg;                  /* My window                  */
-  int          modal;                 /* created modal or modless   */
+  SIZE         size;                  /* Dialog size in pixels.     */
+  dialflag_t   flags;                 /* Dialog flags.              */
   int          retval;                /* dialog return code         */
   int          iid;                   /* dialog integer identifier  */
   const char * ident;                 /* dialog string identifier   */
@@ -128,7 +139,7 @@ static int  init_config(dialog_t *);
 static int  init_fileinfo(dialog_t *);
 static int  init_trackselect(dialog_t *);
 static void kill_dialog(dialog_t *);
-static dialog_t * new_dialog(void *, dlgmsg_f);
+static dialog_t * new_dialog(void *, dlgmsg_f, dialflag_t *);
 static inline int isdial(dialog_t * dial) {
   return dial && dial->magic == magic;
 }
@@ -771,6 +782,76 @@ static int return_tracksel(dialog_t * dial)
   return dial->retval;
 }
 
+static int dialog_borderless(dialog_t * dial)
+{
+  LONG_PTR styles  = GetWindowLongF(dial->hdlg,GWL_STYLE);
+  LONG_PTR xstyles = GetWindowLongF(dial->hdlg,GWL_EXSTYLE);
+
+  styles &= ~(WS_OVERLAPPEDWINDOW|WS_POPUPWINDOW);
+  styles |= WS_CHILD;
+
+  xstyles |= WS_EX_CONTROLPARENT;
+
+  if (!SetWindowLongF(dial->hdlg, GWL_STYLE, 0)/* ||
+      !SetWindowLongF(dial->hdlg, GWL_EXSTYLE, 0)*/) {
+    DWORD err = GetLastError();
+    ERR(err, "%s/%s (set borderless)", dial->flags.modal?"modal":"modless", dial->ident);
+    return -1;
+  }
+  dial->flags.frameonly = 1;
+  return 0;
+}
+
+// $$$ TEMP for debugging WM_WINDOWPOSCHAGING/WM_WINDOWPOSCHAGED
+static const char * wposfl(DWORD flags)
+{
+  static char s[512];
+  int i = 0;
+
+#define WITH(X) \
+  if (flags&SWP_##X) {\
+    if (i) s[i++]='/';\
+    i += sprintf(s+i,#X);\
+  } else
+
+  // Retains the current size (ignores the cx and cy members).
+  WITH(NOSIZE);
+  // Retains the current position (ignores the x and y members).
+  WITH(NOMOVE);
+  // Retains the current Z order (ignores the hwndInsertAfter member).
+  WITH(NOZORDER);
+  // Does not redraw changes.
+  // If this flag is set, no repainting of any kind occurs.
+  // This applies to the client area, the nonclient area (including the title bar and scroll bars),
+  // and any part of the parent window uncovered as a result of the window being moved. When this flag is set,
+  // the application must explicitly invalidate or redraw any parts of the window and parent window that need redrawing.
+  WITH(NOREDRAW);
+  // Does not activate the window.
+  // If this flag is not set, the window is activated and moved to the top of either the topmost or
+  // non-topmost group (depending on the setting of the hwndInsertAfter member).
+  WITH(NOACTIVATE);
+  // Draws a frame (defined in the window's class description) around the window. 
+  WITH(DRAWFRAME);
+  // Displays the window.
+  WITH(SHOWWINDOW);
+  // Hides the window.
+  WITH(HIDEWINDOW);
+  // Discards the entire contents of the client area.
+  // If this flag is not specified, the valid contents of the client area are saved and
+  // copied back into the client area after the window is sized or repositioned.
+  WITH(NOCOPYBITS);
+  // Does not change the owner window's position in the Z order.
+  // WITH(NOOWNERZORDER); 
+ // Does not change the owner window's position in the Z order. Same as the SWP_NOOWNERZORDER flag.
+  WITH(NOREPOSITION);
+  // Prevents the window from receiving the WM_WINDOWPOSCHANGING message.
+  WITH(NOSENDCHANGING);
+  if (i==0)
+    i = sprintf(s,"<EMPTY>");
+  s[i] = 0;
+  return s;
+}
+
 static intptr_t CALLBACK DialogProc(
   HWND hdlg,      // handle to dialog box
   UINT umsg,      // message
@@ -796,19 +877,32 @@ static intptr_t CALLBACK DialogProc(
     } else {
       const int max_iid = sizeof(dlgdef)/sizeof(*dlgdef);
       dial->hdlg = hdlg;
+      v.s = (char *)hdlg;
+      dial_call(dial,"handle",&v);
       SET_USERCOOKIE(hdlg, dial);
       if (dial->iid >= 0 && dial->iid < max_iid)
         dlgdef[dial->iid].init(dial);
       else
         DBG("%s() -- \"%s\" iid out of range -- %d\n",
             dial->ident, dial->iid);
+      if (dial->flags.frameonly)
+        dialog_borderless(dial);
+
+    DBG("%s(%08x) INIT(%s%s%s%s)\n", __FUNCTION__,
+      (unsigned)hdlg,
+      dial->flags.modal?"modal":"modless",
+      dial->flags.frameonly?"/noborder":"",
+      dial->flags.measuring?"/measuring":"",
+      dial->flags.hasfailed?"/failed":""
+      );
+
     }
     return TRUE; /* set the focus to the control specified by wParam */
 
   case WM_NCDESTROY:
     DBG("WM_NCDESTROY %p\n", (void *) dial);
     if (isdial(dial)) {
-      if (!dial->modal) {
+      if (!dial->flags.modal) {
         DBG("WM_NCDESTROY %p -- Kill modless dialog\n", (void *) dial);
         dial->hdlg = 0;
         kill_dialog(dial);
@@ -823,6 +917,29 @@ static intptr_t CALLBACK DialogProc(
 
   switch(umsg)
   {
+  case WM_WINDOWPOSCHANGING: {
+    WINDOWPOS * pos = (LPWINDOWPOS)lparam, tmp = *pos; 
+    v.s = (char *)&tmp;
+    DBG("WM_WINDOWPOSCHANGING before %dx%d:%d:%d %04x %s",
+      tmp.x,tmp.y,tmp.cx,tmp.cy,tmp.flags,wposfl(tmp.flags));
+    if (!dial_call(dial, "wm_windowposchanging", &v))
+      *pos = tmp;
+    DBG("WM_WINDOWPOSCHANGING after %dx%d:%d:%d %04x %s",
+      pos->x,pos->y,pos->cx,pos->cy,pos->flags,wposfl(pos->flags));
+  } break;
+
+  case WM_WINDOWPOSCHANGED: {
+    WINDOWPOS * pos = (LPWINDOWPOS)lparam, tmp = *pos; 
+    v.s = (char *)&tmp;
+    DBG("WM_WINDOWPOSCHANGED %dx%d:%d:%d %04x %s",
+      tmp.x,tmp.y,tmp.cx,tmp.cy,tmp.flags, wposfl(tmp.flags));
+    dial_call(dial, "wm_windowposchanged", &v);
+    if (dial->flags.measuring) {
+      dial->retval = 0;
+      PostMessage(hdlg, WM_CLOSE, 0, 0);
+    }
+  } break;
+
   case WM_COMMAND: {
     /* int wNotifyCode = HIWORD(wparam); // notification code */
     int wID = LOWORD(wparam); // item, control, or accelerator identifier
@@ -849,11 +966,11 @@ static intptr_t CALLBACK DialogProc(
       default:
         dial->retval = 0; break;
       }
-      PostMessage(hdlg, WM_CLOSE, 0,0);
+      PostMessage(hdlg, WM_CLOSE, 0, 0);
       return TRUE;
 
     case IDCANCEL:
-      PostMessage(hdlg, WM_CLOSE, 0,0);
+      PostMessage(hdlg, WM_CLOSE, 0, 0);
       return TRUE;
 
     case IDC_SEL_ASID:
@@ -916,9 +1033,14 @@ static intptr_t CALLBACK DialogProc(
   } return TRUE;
 
   case WM_CLOSE:
-    DBG("%s(%08x) CLOSE(%s)\n", __FUNCTION__,
-        (unsigned)hdlg, dial->modal?"modal":"modless");
-    if (dial->modal) {
+    DBG("%s(%08x) CLOSE(%s%s%s%s)\n", __FUNCTION__,
+      (unsigned)hdlg,
+      dial->flags.modal?"modal":"modless",
+      dial->flags.frameonly?"/noborder":"",
+      dial->flags.measuring?"/measuring":"",
+      dial->flags.hasfailed?"/failed":""
+      );
+    if (dial->flags.modal) {
       EndDialog(hdlg,1);
     } else {
       SET_RESULT(hdlg,1);
@@ -972,7 +1094,7 @@ static HMODULE get_hmodule(void)
 #endif
 }
 
-static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
+static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl, dialflag_t * flags)
 {
   sc68_dialval_t v;
   dialog_t tmp, *dial = 0;
@@ -982,6 +1104,7 @@ static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
   if (!cntl)
     return 0;
 
+   /* dummy instruction to force resource link */
   dial68_rc_force = ~dial68_rc_force;
 
   ZeroMemory(&tmp,sizeof(tmp));
@@ -996,7 +1119,8 @@ static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
   if (cntl(cookie,SC68_DIAL_HELLO,SC68_DIAL_CALL,&v))
     goto failed;
 
-
+  flags->connected = 1;
+  tmp.flags = *flags;
   DBG("connected to \"%s\"\n", v.s);
 
   /* Do I know you ? */
@@ -1046,8 +1170,8 @@ static dialog_t * new_dialog(void * cookie, dlgmsg_f cntl)
     return dial;
   }
 
-
 failed:
+  flags->hasfailed = 1;
   DBG("%s -- failed to create dialog\n", __FUNCTION__);
   if (cntl) {
     v.i = -1;
@@ -1056,7 +1180,7 @@ failed:
   return 0;
 }
 
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(NDEBUG)
 #define DOENUM 1
 
 static
@@ -1089,10 +1213,10 @@ static void dialog_enum(dialog_t * dial)
 
 #endif
 
-static intptr_t dialog_modal(void * data, dlgmsg_f cntl)
+static intptr_t dialog_modal(void * data, dlgmsg_f cntl, dialflag_t * flags)
 {
   intptr_t ret;
-  dialog_t * dial = new_dialog(data, cntl);
+  dialog_t * dial = new_dialog(data, cntl, flags);
 
   if (!dial)
     ret = -1;
@@ -1104,7 +1228,7 @@ static intptr_t dialog_modal(void * data, dlgmsg_f cntl)
     dialog_enum(dial);
 #endif
 
-    dial->modal = 1;
+    dial->flags.modal = 1;
     SetLastError(ERROR_SUCCESS);
     /* returns the result of EndDialog() */
     ret = DialogBoxParamA(dial->hinst, tpl, dial->hparent,
@@ -1128,10 +1252,10 @@ static intptr_t dialog_modal(void * data, dlgmsg_f cntl)
   return ret;
 }
 
-static intptr_t dialog_modless(void * data, dlgmsg_f cntl)
+static intptr_t dialog_modless(void * data, dlgmsg_f cntl, dialflag_t * flags)
 {
   intptr_t ret;
-  dialog_t * dial = new_dialog(data, cntl);
+  dialog_t * dial = new_dialog(data, cntl,flags);
 
   if (!dial)
     ret = -1;
@@ -1144,7 +1268,7 @@ static intptr_t dialog_modless(void * data, dlgmsg_f cntl)
     dialog_enum(dial);
 #endif
 
-    dial->modal = 0;
+    dial->flags.modal = 0;
     SetLastError(ERROR_SUCCESS);
     dial->hdlg =
       CreateDialogParamA(dial->hinst, tpl, dial->hparent,
@@ -1166,14 +1290,27 @@ static intptr_t dialog_modless(void * data, dlgmsg_f cntl)
 
 int dial68_frontend(void * data, sc68_dial_f cntl)
 {
-  int ret;
+  int ret = -1;
   sc68_dialval_t v;
   assert(cntl && data);
-  if (!data || !cntl)
-    ret = -1;
-  else if (!cntl(data,SC68_DIAL_WAIT,SC68_DIAL_CALL,&v) && v.i)
-    ret = dialog_modal(data,cntl);
-  else
-    ret = dialog_modless(data,cntl);
+  if (data && cntl) {
+    /* setup flags. */
+    dialflag_t flags;
+    memset(&flags,0,sizeof(flags));
+    v.i = 0;
+    if (!cntl(data,SC68_DIAL_WAIT,SC68_DIAL_CALL,&v))
+      flags.modal = !!v.i;
+    if (!cntl(data,"borderless",SC68_DIAL_CALL,&v) ||
+        !cntl(data,"frameonly",SC68_DIAL_CALL,&v))
+      flags.frameonly = !!v.i;
+    if (!cntl(data,"measuring",SC68_DIAL_CALL,&v))
+      flags.measuring = !!v.i;
+
+    ret = (flags.modal || flags.measuring)
+      ? dialog_modal(data,cntl,&flags)
+      : dialog_modless(data,cntl,&flags);
+
+    /* ignoring flags.hasfailed ? */
+  }
   return ret;
 }

@@ -299,29 +299,27 @@ HRESULT Sc68Splitter::Stop()
 }
 #endif
 
+#define MTCHK(X) (riid == X) ? #X
+#define IDCHK(X) (riid == IID_##X) ? #X
+#define IFCHK(X) (riid == __uuidof(X)) ? #X
+
 static const char * Iname(REFIID riid) {
-    return  0 ? 0
-    : (riid == IID_IAMMediaContent)
-    ? "IAMMediaContent"
-
-    : (riid == IID_IMediaPosition)
-    ? "IMediaPosition"
-
+  return  0 ? 0
+    : IDCHK(IAMMediaContent)
+    : IDCHK(IMediaPosition)
 #ifdef WITH_STREAMSELECT
-    : (riid == IID_IAMStreamSelect)
-    ? "IAMStreamSelect"
+    : IFCHK(IAMStreamSelect)
 #endif
 
 #ifdef WITH_TRACKINFO
-    : (riid == __uuidof(ITrackInfo))
-    ? "ITrackInfo"
+    : IFCHK(ITrackInfo)
 #endif
-
-    : (riid == IID_ISpecifyPropertyPages)
-    ? "ISpecifyPropertyPages"
-
-    : (riid == __uuidof(ISc68Prop))
-    ? "ISc68Prop"
+    : IDCHK(ISpecifyPropertyPages)
+    : IFCHK(ISc68Prop)
+    : IFCHK(Sc68Prop)
+    : MTCHK(MEDIATYPE_SC68)
+    : MTCHK(MEDIATYPE_Stream)
+    : MTCHK(MEDIATYPE_Audio)
     : GUIDtoS(&riid)
     ;
 }
@@ -354,9 +352,17 @@ STDMETHODIMP Sc68Splitter::NonDelegatingQueryInterface(REFIID riid, void** ppv)
     ?  GetInterface(static_cast<ISc68Prop*>(this),ppv)
 
     : __super::NonDelegatingQueryInterface(riid, ppv);
+
+#ifdef DEBUG
+  if (riid == __uuidof(ISc68Prop))
+    DebugBreak();
+  else if (riid == __uuidof(Sc68Prop))
+    DebugBreak();
+#endif
+
   if (!hr)
-  DBG("%s() riid=%s ptr=%p -- %s\n", "QI"/*__FUNCTION__*/,
-  Iname(riid), *ppv, !hr?"OK":"FAILED");
+    DBG("%s() riid=%s ptr=%p -- %s\n", "QI"/*__FUNCTION__*/,
+    Iname(riid), *ppv, !hr?"OK":"FAILED");
   return hr;
 }
 

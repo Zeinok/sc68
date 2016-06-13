@@ -114,7 +114,7 @@ static int print_help(int more)
      "\n"
      "  syntax:\n"
      "\n"
-     "    -DIGIT[-DIGIT][,DIGIT[-DIGIT]...]\n"
+     "    %DIGIT[-DIGIT][,DIGIT[-DIGIT]...]\n"
      "\n"
      "    track-list executes the next format string for all listed tracks\n"
      "    one after another  in the given order.  First track is number 1.\n"
@@ -607,7 +607,7 @@ int main(int argc, char ** argv)
 
     /* This is not ideal ... */
 
-    if (!trackList && argv[i][0] == '-' && isdigit((int)argv[i][1])) {
+    if (!trackList && argv[i][0] == '%' && isdigit((int)argv[i][1])) {
       int res;
       trackList = argv[i]+1;
       res = ReadTrackList(&trackList, d->nb_mus, &curTrack , &toTrack);

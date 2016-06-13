@@ -35,10 +35,6 @@ DEFINE_GUID(MEDIATYPE_SC68,
 /// Global Unique IDentifier for the sc68 directshow properties page.
 #define IID_SC68PROP_STR       "43ff413d-f79e-4dcb-9DBA-7C597212959A"
 
-// Global Unique IDentifier for the sc68 directshow properties page.
-// DEFINE_GUID(IID_ISc68Prop,
-// 0x43ff413d,0xf79e,0x4dcb,0x9D,0xBA,0x7C,0x59,0x72,0x12,0x95,0x9A);
-
 /**
  * @}
  */

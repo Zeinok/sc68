@@ -102,6 +102,7 @@
       <LargeAddressAware>true</LargeAddressAware>
       <UACUIAccess>false</UACUIAccess>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <ProjectReference />
     <CustomBuildStep>
@@ -177,6 +178,7 @@
     <ProjectReference />
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\libsc68\dial68\winui\resource.h" />
     <ClInclude Include="ds68_dbg.h" />
     <ClInclude Include="ds68_headers.h" />
     <ClInclude Include="ds68_inppin.h" />
