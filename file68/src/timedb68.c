@@ -36,7 +36,7 @@
 #define HFIX (32-HBIT)
 
 #define TIMEDB_ENTRY(HASH,TRACK,FRAMES,FLAGS) \
-  { 0x##HASH>>HFIX, TRACK, FLAGS, FRAMES }
+  { 0x##HASH>>HFIX, TRACK-1, FLAGS, FRAMES }
 #define E_EMPTY { 0,0,0,0 }
 
 
