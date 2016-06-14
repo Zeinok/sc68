@@ -344,6 +344,14 @@ static void PutC(vfs68_t *out, const int c)
   ioerror |= ( vfs68_putc(out, c) < 0 );
 }
 
+/* Print string without formatting */
+static void PutR(vfs68_t *out, const char *s)
+{
+  if (s) {
+    ioerror |= ( vfs68_puts(out, s) < 0 );
+  }
+}
+
 /* Print a string (honor alignment or length format modifier) */
 static void PutS(vfs68_t *out, const char *s)
 {
@@ -409,56 +417,56 @@ static int output_all(vfs68_t * out, disk_t * disk)
   int i, j;
   const char * key, * val;
 
-  PutS(out,"file: ");     PutS(out,inpname);     PutC(out,'\n');
-  PutS(out,"hash: ");     PutX32(out,d->hash);  PutC(out,'\n');
-  PutS(out,"tracks: ");   PutI(out,d->nb_mus);  PutC(out,'\n');
-  PutS(out,"default: ");  PutI(out,d->def_mus); PutC(out,'\n');
+  PutR(out,"file: ");     PutR(out,inpname);     PutC(out,'\n');
+  PutR(out,"hash: ");     PutX32(out,d->hash);  PutC(out,'\n');
+  PutR(out,"tracks: ");   PutI(out,d->nb_mus);  PutC(out,'\n');
+  PutR(out,"default: ");  PutI(out,d->def_mus); PutC(out,'\n');
   if (disk->has_time) {
-    PutS(out,"time-ms: ");  PutI(out,d->time_ms); PutC(out,'\n');
+    PutR(out,"time-ms: ");  PutI(out,d->time_ms); PutC(out,'\n');
   }
-  PutS(out,"hardware: "); PutS(out,HWflags(d->hwflags)); PutC(out,'\n');
+  PutR(out,"hardware: "); PutR(out,HWflags(d->hwflags)); PutC(out,'\n');
   for (j=0; !file68_tag_enum(d, 0, j, &key, &val); ++j) {
-    PutS(out,key); PutS(out,": "); PutS(out,val); PutC(out,'\n');
+    PutR(out,key); PutR(out,": "); PutR(out,val); PutC(out,'\n');
   }
 
   for (i=1; i<=d->nb_mus; ++i) {
     const music68_t *m = d->mus+(i-1);
 
-    PutS(out,"track: ");    PutI(out,i);           PutC(out,'\n');
-    /* PutS(out,"remap: ");    PutI(out,m->track);    PutC(out,'\n'); */
+    PutR(out,"track: ");    PutI(out,i);           PutC(out,'\n');
+    /* PutR(out,"remap: ");    PutI(out,m->track);    PutC(out,'\n'); */
     if (m->has.time) {
-      PutS(out,"time-ms: ");  PutI(out,m->first_ms); PutC(out,'\n');
-      PutS(out,"time-fr: ");  PutI(out,m->first_fr); PutC(out,'\n');
+      PutR(out,"time-ms: ");  PutI(out,m->first_ms); PutC(out,'\n');
+      PutR(out,"time-fr: ");  PutI(out,m->first_fr); PutC(out,'\n');
     }
     if (m->has.loop) {
-      PutS(out,"loops: ");    PutI(out,m->loops);    PutC(out,'\n');
-      PutS(out,"loop-ms: ");  PutI(out,m->loops_ms); PutC(out,'\n');
-      PutS(out,"loop-fr: ");  PutI(out,m->loops_fr); PutC(out,'\n');
+      PutR(out,"loops: ");    PutI(out,m->loops);    PutC(out,'\n');
+      PutR(out,"loop-ms: ");  PutI(out,m->loops_ms); PutC(out,'\n');
+      PutR(out,"loop-fr: ");  PutI(out,m->loops_fr); PutC(out,'\n');
     }
 
     if (m->replay) {
-      PutS(out,"replay: ");
-      PutS(out, m->replay);
+      PutR(out,"replay: ");
+      PutR(out, m->replay);
       PutC(out,'\n');
     }
 
-    PutS(out,"rate: "); PutI(out,m->frq); PutC(out,'\n');
+    PutR(out,"rate: "); PutI(out,m->frq); PutC(out,'\n');
 
-    PutS(out,"address: ");
+    PutR(out,"address: ");
     if (m->has.pic)
-      PutS(out,"PIC");
+      PutR(out,"PIC");
     else
       PutX(out,m->a0);
     PutC(out,'\n');
 
-    PutS(out,"hardware: "); PutS(out,HWflags(m->hwflags)); PutC(out,'\n');
+    PutR(out,"hardware: "); PutR(out,HWflags(m->hwflags)); PutC(out,'\n');
     if (m->hwflags & SC68_XTD) {
-      PutS(out,"x-hardware: ");
-      PutS(out,Xflags(m->hwflags)); PutC(out,'\n');
+      PutR(out,"x-hardware: ");
+      PutR(out,Xflags(m->hwflags)); PutC(out,'\n');
     }
 
     for (j=0; !file68_tag_enum(d, i, j, &key, &val); ++j) {
-      PutS(out,key); PutS(out,": "); PutS(out,val); PutC(out,'\n');
+      PutR(out,key); PutR(out,": "); PutR(out,val); PutC(out,'\n');
     }
   }
   return ioerror
