@@ -338,13 +338,20 @@ static const char * Xflags(const hwflags68_t f)
   return flags;
 }
 
+/* Reset format */
+static void NoFmt() {
+  fmt_l = 0;
+  fmt_z = ' ';
+}
+
+
 /* Print a char (byte) */
 static void PutC(vfs68_t *out, const int c)
 {
   ioerror |= ( vfs68_putc(out, c) < 0 );
 }
 
-/* Print string without formatting */
+/* Print string without formating */
 static void PutR(vfs68_t *out, const char *s)
 {
   if (s) {
@@ -366,6 +373,7 @@ static void PutS(vfs68_t *out, const char *s)
       for (i=0; i+len < fmt_l; ++len)
         ioerror |= ( vfs68_putc(out, ' ') < 0 );
   }
+  NoFmt();
 }
 
 /* Print a integer number in given format */
@@ -388,6 +396,7 @@ static void PutN(vfs68_t *out, int v, int i)
     ;
 
   ioerror |= ( vfs68_write(out, fmt_b, len) < 0 );
+  NoFmt();
 }
 
 static void PutI(vfs68_t *out, int v) {
