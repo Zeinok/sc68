@@ -132,7 +132,7 @@
  TIMEDB_ENTRY( 053b080a,  1,     17921,            TA+TD+YM), /* 02195 - Tao - Cream - ..do things (intro) */
  TIMEDB_ENTRY( 05462254,  1,      7584,            TB+TD+YM), /* 04765 - 505 - Pulse (compo edit) */
  TIMEDB_ENTRY( 05532f21,  1,      6655,                  YM), /* 03875 - Gary Wheaton - Juandeho */
- TIMEDB_ENTRY( 055f5d72,  1,     36096,         TA+TB+TD+YM), /* 02541 - SCHMX & STU - Q DEDICATION */
+ TIMEDB_ENTRY( 055f5d72,  1,     36096,         TA+TB+TD+YM), /* 02546 - SCHMX & STU - Q DEDICATION */
  TIMEDB_ENTRY( 056a61e5,  1,     17664,                  YM), /* 02903 - Techno - Puppet Show Intro */
  TIMEDB_ENTRY( 056f21c8,  1,      5378,                  YM), /* 00368 - Steve Barrett - Treasure Island Dizzy */
  TIMEDB_ENTRY( 056f21c8,  2,      3366,                  YM), /* 00368 - Steve Barrett - Treasure Island Dizzy */
@@ -602,7 +602,7 @@
  TIMEDB_ENTRY( 1099deae,  1,     10171,                  YM), /* 03145 - n-a - Orange Blossom Special */
  TIMEDB_ENTRY( 10a1171f,  1,      4600,               TA+YM), /* 04227 - 505 - 6th */
  TIMEDB_ENTRY( 10a18d1f,  1,      9412,                  YM), /* 02234 - Tao - Main menu (Nostalgic-O-Demo) */
- TIMEDB_ENTRY( 10a51096,  1,     33792,         TA+TB+TD+YM), /* 02540 - SCHMX & STU - HIGHWAY UP NORTH */
+ TIMEDB_ENTRY( 10a51096,  1,     33792,         TA+TB+TD+YM), /* 02547 - SCHMX & STU - HIGHWAY UP NORTH */
  TIMEDB_ENTRY( 10ab8c09,  1,      3328,                  YM), /* 01222 - ENS Music - ENS 5 */
  TIMEDB_ENTRY( 10c356e4,  1,     13483,               TA+YM), /* 01328 - Scavenger - Cuddly This Year */
  TIMEDB_ENTRY( 10cbaa59,  1,      3200,                  YM), /* 01428 - Starbuck - Living on Video remix */
@@ -1668,7 +1668,7 @@
  TIMEDB_ENTRY( 2f3c94b5,  4,       117,                  YM), /* 01727 - John Michael Phillips - Eliminator */
  TIMEDB_ENTRY( 2f3c94b5,  5,       276,                  YM), /* 01727 - John Michael Phillips - Eliminator */
  TIMEDB_ENTRY( 2f468325,  1,      4610,                  YM), /* 00425 - Big Alec - PYM - Intro (Prime Time) */
- TIMEDB_ENTRY( 2f49781f,  1,     36867,         TA+TB+TD+YM), /* 04754 - xyce & 505 - SPACEDISKO */
+ TIMEDB_ENTRY( 2f49781f,  1,     36867,         TA+TB+TD+YM), /* 04755 - xyce & 505 - SPACEDISKO */
  TIMEDB_ENTRY( 2f4b5c74,  1,      4754,                  YM), /* 04709 - Emphii - Razor's Mega Demo - Screen 4 */
  TIMEDB_ENTRY( 2f4b5c74,  2,      2217,                  YM), /* 04709 - Emphii - Razor's Mega Demo - Screen 4 */
  TIMEDB_ENTRY( 2f4b5c74,  3,      1828,                  YM), /* 04709 - Emphii - Razor's Mega Demo - Screen 4 */
@@ -1730,11 +1730,11 @@
  TIMEDB_ENTRY( 3168eef8,  1,      8835,                  YM), /* 01813 - Barry Leitch - Xenophobe */
  TIMEDB_ENTRY( 316c52b9,  1,      8639,            TA+TD+YM), /* 03213 - marcer 2007 - we remember */
  TIMEDB_ENTRY( 316e1a68,  1,      3834,               TA+YM), /* 01673 - Jess - Unfinished, Sorry AN Cool */
- TIMEDB_ENTRY( 3176b0f3,  1,      6816,                  YM), /* 00217 - Markus Weichselbaum & D Pleiss - Logical */
- TIMEDB_ENTRY( 3176b0f3,  2,      5120,                  YM), /* 00217 - Markus Weichselbaum & D Pleiss - Logical */
- TIMEDB_ENTRY( 3176b0f3,  3,      3840,                  YM), /* 00217 - Markus Weichselbaum & D Pleiss - Logical */
- TIMEDB_ENTRY( 3176b0f3,  4,      6529,                  YM), /* 00217 - Markus Weichselbaum & D Pleiss - Logical */
- TIMEDB_ENTRY( 3176b0f3,  5,      3264,                  YM), /* 00217 - Markus Weichselbaum & D Pleiss - Logical */
+ TIMEDB_ENTRY( 3176b0f3,  1,      6816,                  YM), /* 00218 - Markus Weichselbaum & D Pleiss - Logical */
+ TIMEDB_ENTRY( 3176b0f3,  2,      5120,                  YM), /* 00218 - Markus Weichselbaum & D Pleiss - Logical */
+ TIMEDB_ENTRY( 3176b0f3,  3,      3840,                  YM), /* 00218 - Markus Weichselbaum & D Pleiss - Logical */
+ TIMEDB_ENTRY( 3176b0f3,  4,      6529,                  YM), /* 00218 - Markus Weichselbaum & D Pleiss - Logical */
+ TIMEDB_ENTRY( 3176b0f3,  5,      3264,                  YM), /* 00218 - Markus Weichselbaum & D Pleiss - Logical */
  TIMEDB_ENTRY( 318448b0,  1,     13316,            TA+TD+YM), /* 02295 - Tao - Cream - Pulverize (Alive 3) */
  TIMEDB_ENTRY( 319185e0,  1,      7680,                  YM), /* 00613 - Chrispy Noodle - Hybris */
  TIMEDB_ENTRY( 31995c1b,  1,    112420,               TA+YM), /* 04822 - Twitch - Modelmix 91 */
@@ -2172,7 +2172,7 @@
  TIMEDB_ENTRY( 3e392c78,  1,      3960,                  YM), /* 00488 - Ultimatum - Kidney Bean 4 */
  TIMEDB_ENTRY( 3e405883,  1,      2328,                  YM), /* 02202 - Mad Max - Jinks */
  TIMEDB_ENTRY( 3e405883,  2,       192,                  YM), /* 02202 - Mad Max - Jinks */
- TIMEDB_ENTRY( 3e45d068,  1,     20045,         TA+TB+TD+YM), /* 02444 - Dubmood & Zabutom ! ! ! - SpaceJourney */
+ TIMEDB_ENTRY( 3e45d068,  1,     20045,         TA+TB+TD+YM), /* 02456 - Dubmood & Zabutom ! ! ! - SpaceJourney */
  TIMEDB_ENTRY( 3e5ea92c,  1,      5313,                  YM), /* 00329 - Gary Wheaton - Steel */
  TIMEDB_ENTRY( 3e62c353,  1,     30013,               TA+YM), /* 03948 - Scott Lemmon - Axel F */
  TIMEDB_ENTRY( 3e81befd,  1,      1535,               TA+YM), /* 03475 - gwEm (Follin conversion) - Gabba Bobble */
@@ -3422,7 +3422,7 @@
  TIMEDB_ENTRY( 5c69cf28,  1,      6525,                  YM), /* 00374 - Beast - TSC - TSC 22 */
  TIMEDB_ENTRY( 5c6d53d2,  1,       307,                  YM), /* 04522 - Ian Chapman - Dizzy Fun Time */
  TIMEDB_ENTRY( 5c6ec096,  1,     11516,            TA+TD+YM), /* 02511 - Crazy Q - DHS - Sex Droid */
- TIMEDB_ENTRY( 5c6fdf77,  1,      4607,         TA+TB+TD+YM), /* 04854 - Dubmood & Zabutom ! ! ! - Zabutoms Space Journey (D-Bug remix) */
+ TIMEDB_ENTRY( 5c6fdf77,  1,      4607,         TA+TB+TD+YM), /* 04855 - Dubmood & Zabutom ! ! ! - Zabutoms Space Journey (D-Bug remix) */
  TIMEDB_ENTRY( 5c7fa268,  1,      8857,         TA+TB+TD+YM), /* 04637 - MCH-GenesisProject^Dream - starlight */
  TIMEDB_ENTRY( 5c8150d3,  1,      8098,                  YM), /* 01277 - Frazer - TSC 52 */
  TIMEDB_ENTRY( 5c9f6920,  1,       504,            TA+TB+YM), /* 00834 - Crazy Q - TiMeBoMb - Toxid Tears pattern test */
@@ -3459,7 +3459,7 @@
  TIMEDB_ENTRY( 5ce03029,  4,      1536,                  YM), /* 01497 - Alex Herbert - Guardian */
  TIMEDB_ENTRY( 5ce45268,  1,      8644,                  YM), /* 00272 - Atomic - Last Hero (Phaleon - Albedo) */
  TIMEDB_ENTRY( 5ce57cce,  1,      4486,               TA+YM), /* 02242 - Tao - Cream (orig. Rob Hubbard) - Monty On The Run Highscore (Stmygm) */
- TIMEDB_ENTRY( 5ce7c5f2,  1,      2289,                  YM), /* 03891 - Unknown - Risvegli */
+ TIMEDB_ENTRY( 5ce7c5f2,  1,      2289,                  YM), /* 04157 - Unknown - Risvegli */
  TIMEDB_ENTRY( 5ce8e2e7,  1,      1785,         TA+TB+TD+YM), /* 01957 - MSG - Godpey - Hiscore */
  TIMEDB_ENTRY( 5ced344b,  1,      6528,                  YM), /* 02902 - Techno - Plucked Goose Dune 2 */
  TIMEDB_ENTRY( 5ced4178,  1,      5892,                  YM), /* 00447 - Augustin Vidovic - Heidi */
@@ -4507,7 +4507,7 @@
  TIMEDB_ENTRY( 7b3dc813,  1,     45820,         TA+TB+TD+YM), /* 02575 - STU - ATARI UNDERGROUND CHIPTUNE RESISTANCE */
  TIMEDB_ENTRY( 7b568abe,  1,      3072,               TA+YM), /* 00922 - Dark Angel - Party In Hell! */
  TIMEDB_ENTRY( 7b5f880f,  1,     11519,                  YM), /* 01521 - Iso - Enchanted Lands */
- TIMEDB_ENTRY( 7b62d825,  1,     23552,         TA+TB+TD+YM), /* 02542 - SCHMX & STU - TAKE THIS */
+ TIMEDB_ENTRY( 7b62d825,  1,     23552,         TA+TB+TD+YM), /* 02545 - SCHMX & STU - TAKE THIS */
  TIMEDB_ENTRY( 7b7834ab,  1,      3450,                  YM), /* 04374 - Jess - Vulx (draft) */
  TIMEDB_ENTRY( 7b8256b0,  1,     39168,         TA+TB+TD+YM), /* 03672 - xyce - n-a */
  TIMEDB_ENTRY( 7b8853a3,  1,      2304,                  YM), /* 01427 - Starbuck - Atari Party */
@@ -5171,7 +5171,7 @@
  TIMEDB_ENTRY( 8cf7cc14,  1,       320,                  YM), /* 03687 - Dma-Sc - Saboteur 3 - Game Over */
  TIMEDB_ENTRY( 8d1af88d,  1,      1150,                  YM), /* 02472 - Iso - Last Yell */
  TIMEDB_ENTRY( 8d1c0533,  1,     23040,               TD+YM), /* 01461 - STU - DARK SEASON */
- TIMEDB_ENTRY( 8d210821,  1,      3807,         TA+TB+TD+YM), /* 03328 - Dubmood & Zabutom - 2006 Concrt Intro - Zabutom - Kenny Star */
+ TIMEDB_ENTRY( 8d210821,  1,      3807,         TA+TB+TD+YM), /* 03419 - Dubmood & Zabutom - 2006 Concrt Intro - Zabutom - Kenny Star */
  TIMEDB_ENTRY( 8d2c0721,  1,      9212,            TB+TD+YM), /* 01594 - Nemo - Game Over */
  TIMEDB_ENTRY( 8d2eb1f2,  1,     17920,                  YM), /* 01631 - Carsten Neubauer - Beam */
  TIMEDB_ENTRY( 8d3d8d54,  1,      2687,         TA+TB+TD+YM), /* 03591 - Dma-Sc - Frankiki */
@@ -5435,6 +5435,16 @@
  TIMEDB_ENTRY( 93b4af45,  1,      8191,                  YM), /* 00306 - Gary Wheaton - Fresh */
  TIMEDB_ENTRY( 93db17a9,  1,      6672,                  YM), /* 03872 - Gary Wheaton - Flying */
  TIMEDB_ENTRY( 93db49a4,  1,      4866,                  YM), /* 01778 - Lap - Lap 28 */
+ TIMEDB_ENTRY( 93e124e4,  1,      4004,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename Robocod */
+ TIMEDB_ENTRY( 93e124e4,  2,      6151,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename Robocod */
+ TIMEDB_ENTRY( 93e124e4,  3,      4610,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename Robocod */
+ TIMEDB_ENTRY( 93e124e4,  4,      4613,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename Robocod */
+ TIMEDB_ENTRY( 93e124e4,  5,      3506,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename Robocod */
+ TIMEDB_ENTRY( 93e124e4,  6,       257,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename Robocod */
+ TIMEDB_ENTRY( 93e124e4,  7,       259,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename Robocod */
+ TIMEDB_ENTRY( 93e124e4,  8,       148,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename Robocod */
+ TIMEDB_ENTRY( 93e124e4,  9,      1921,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename Robocod */
+ TIMEDB_ENTRY( 93e124e4, 10,      1155,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename Robocod */
  TIMEDB_ENTRY( 93eabe05,  1,      1541,                  YM), /* 02280 - Tao - Cream ( orig. ??, C64) - Just Feel It 2 (Just Buggin) */
  TIMEDB_ENTRY( 93f41167,  1,     15360,         TA+TB+TD+YM), /* 02814 - Marcer - Paradize - Nuclear Waste Dump - Ingame tune 1 */
  TIMEDB_ENTRY( 93fcbb92,  1,      9696,                  YM), /* 00877 - Ben Daglish - Terramex */
@@ -6329,7 +6339,7 @@
  TIMEDB_ENTRY( ab4fde3b,  1,      3068,               TA+YM), /* 01531 - Iso - Particoloured */
  TIMEDB_ENTRY( ab59c75b,  1,      7680,            TB+TD+YM), /* 03460 - Marcer - Gamet */
  TIMEDB_ENTRY( ab9f613f,  1,      9216,            TA+TD+YM), /* 02348 - Tao - Cream - High Times (UCM 24) */
- TIMEDB_ENTRY( abaca928,  1,      7744,         TA+TB+TD+YM), /* 02873 - gwEm and Dma Sc - Chipping for Ca$h */
+ TIMEDB_ENTRY( abaca928,  1,      7744,         TA+TB+TD+YM), /* 02874 - gwEm and Dma Sc - Chipping for Ca$h */
  TIMEDB_ENTRY( abb5b4e0,  1,     89681,               TA+YM), /* 03747 - Tufty - I Feel Love - Donna Summer */
  TIMEDB_ENTRY( abb78bc7,  1,       412,                  YM), /* 01116 - Keith Tinman - The Untouchables */
  TIMEDB_ENTRY( abb78bc7,  2,       640,                  YM), /* 01116 - Keith Tinman - The Untouchables */
@@ -6657,6 +6667,7 @@
  TIMEDB_ENTRY( b6e84eda,  1,      2067,                  YM), /* 03042 - n-a - Calypso by Ed Bogas */
  TIMEDB_ENTRY( b6f3f526,  1,     13760,                  YM), /* 01790 - Barry Leitch - Combo Racer */
  TIMEDB_ENTRY( b6f4299a,  1,     53356,               TA+YM), /* 03807 - Spaz - Dead Orgy 2 */
+ TIMEDB_ENTRY( b70325f9,  1,      6530,         TA+TB+TD+YM), /* 04927 - tomchi - ltc01 ouacances */
  TIMEDB_ENTRY( b72736bd,  1,     38725,         TA+TB+TD+YM), /* 03394 - cerror - Calculon */
  TIMEDB_ENTRY( b72839f4,  1,     13055,                  YM), /* 00347 - Tony Williams - Onslaught */
  TIMEDB_ENTRY( b72839f4,  2,      2559,                  YM), /* 00347 - Tony Williams - Onslaught */
@@ -6768,7 +6779,7 @@
  TIMEDB_ENTRY( bb1c8a06,  5,      1585,                  YM), /* 04654 - Peter Johnson - Arkanoid - Revenge of Doh */
  TIMEDB_ENTRY( bb1c8a06,  6,        96,                  YM), /* 04654 - Peter Johnson - Arkanoid - Revenge of Doh */
  TIMEDB_ENTRY( bb317266,  1,     10752,               TA+YM), /* 02156 - Mad Max - Ooh Crikey Wot a Scorcher Main Menu */
- TIMEDB_ENTRY( bb425ad7,  1,      3455,         TA+TB+TD+YM), /* 03052 - Orbiter and Timbral - Dubmoods MILF (in da park) */
+ TIMEDB_ENTRY( bb425ad7,  1,      3455,         TA+TB+TD+YM), /* 03053 - Orbiter and Timbral - Dubmoods MILF (in da park) */
  TIMEDB_ENTRY( bb470a6d,  1,     14506,                  YM), /* 02040 - Mad Max - Saboteur 2 */
  TIMEDB_ENTRY( bb4dfa1d,  1,      9703,         TA+TB+TD+YM), /* 04899 - wiecz0r - Square Wars I  Assault YM */
  TIMEDB_ENTRY( bb65fe65,  1,     11059,            TA+TD+YM), /* 01852 - Lotek Style - Her Face */
@@ -7283,8 +7294,8 @@
  TIMEDB_ENTRY( c927db85,  1,     39370,               TA+YM), /* 04046 - Roggie - R.F.C. Ok */
  TIMEDB_ENTRY( c92fb6cf,  1,      5567,                  YM), /* 00335 - Gary Wheaton - Womble Song */
  TIMEDB_ENTRY( c9376313,  1,     10092,            TA+TD+YM), /* 02513 - Crazy Q - Bouncing TITS */
- TIMEDB_ENTRY( c940fc5b,  1,      5921,                  YM), /* 03305 - O Cornelius & G Kennett - Enterprise */
- TIMEDB_ENTRY( c940fc5b,  2,      1791,                  YM), /* 03305 - O Cornelius & G Kennett - Enterprise */
+ TIMEDB_ENTRY( c940fc5b,  1,      5921,                  YM), /* 03306 - O Cornelius & G Kennett - Enterprise */
+ TIMEDB_ENTRY( c940fc5b,  2,      1791,                  YM), /* 03306 - O Cornelius & G Kennett - Enterprise */
  TIMEDB_ENTRY( c94ae0a1,  1,      3836,               TA+YM), /* 00221 - 7AN - Blip 2 */
  TIMEDB_ENTRY( c96243ab,  1,      7167,            TA+TB+YM), /* 02837 - maktone-fairlight - husselhof */
  TIMEDB_ENTRY( c9666046,  1,      7008,                  YM), /* 04345 - Nexus 6 - Red Movement */
@@ -7375,7 +7386,7 @@
  TIMEDB_ENTRY( ca87983a,  2,    121746,               TA+YM), /* 03810 - Martin Walker - Spindizzy Worlds */
  TIMEDB_ENTRY( ca87983a,  3,     44817,               TA+YM), /* 03810 - Martin Walker - Spindizzy Worlds */
  TIMEDB_ENTRY( ca87983a,  4,     70042,               TA+YM), /* 03810 - Martin Walker - Spindizzy Worlds */
- TIMEDB_ENTRY( caa63e4b,  1,     37632,         TA+TB+TD+YM), /* 02543 - SCHMX & STU - TEMPLE OF SHID */
+ TIMEDB_ENTRY( caa63e4b,  1,     37632,         TA+TB+TD+YM), /* 02544 - SCHMX & STU - TEMPLE OF SHID */
  TIMEDB_ENTRY( cabca9c7,  1,      3840,                  YM), /* 01132 - Tyan - Harm */
  TIMEDB_ENTRY( cac3b1bb,  1,      2383,                  YM), /* 03149 - n-a - Rainbows by Davidow */
  TIMEDB_ENTRY( cac60fdd,  1,      2233,               TA+YM), /* 01547 - Redzone - TSC 65 */
@@ -7785,28 +7796,28 @@
  TIMEDB_ENTRY( d4591664,  5,      1280,                  YM), /* 00974 - Chris Denman - Airbucks */
  TIMEDB_ENTRY( d4591664,  6,       512,                  YM), /* 00974 - Chris Denman - Airbucks */
  TIMEDB_ENTRY( d45eefd3,  1,     25984,            TA+TD+YM), /* 02333 - Tao - Cream - Stars (Stmygm2) */
- TIMEDB_ENTRY( d479e1e3,  1,     38755,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3,  2,      4612,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3,  3,      6147,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3,  4,      5123,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3,  5,      6147,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3,  6,      7683,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3,  7,      4611,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3,  8,      4611,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3,  9,      4611,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 10,      6147,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 11,      6147,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 12,     29284,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 13,     28675,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 14,     35475,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 15,     40323,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 16,     35331,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 17,     30820,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 18,     28803,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 19,     33027,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 20,     27651,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 21,     61443,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
- TIMEDB_ENTRY( d479e1e3, 22,      4612,                  YM), /* 01812 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3,  1,     38755,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3,  2,      4612,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3,  3,      6147,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3,  4,      5123,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3,  5,      6147,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3,  6,      7683,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3,  7,      4611,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3,  8,      4611,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3,  9,      4611,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 10,      6147,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 11,      6147,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 12,     29284,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 13,     28675,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 14,     35475,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 15,     40323,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 16,     35331,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 17,     30820,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 18,     28803,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 19,     33027,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 20,     27651,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 21,     61443,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
+ TIMEDB_ENTRY( d479e1e3, 22,      4612,                  YM), /* 04595 - Barry Leitch & Sean Connolly - Prophecy I - Viking Child */
  TIMEDB_ENTRY( d4842722,  1,     12800,                  YM), /* 02048 - Mad Max - Phantom Of The Asteroid */
  TIMEDB_ENTRY( d4842722,  2,      6912,                  YM), /* 02048 - Mad Max - Phantom Of The Asteroid */
  TIMEDB_ENTRY( d48c913d,  1,      8704,                  YM), /* 00014 - 4-Mat - G-Loc */
