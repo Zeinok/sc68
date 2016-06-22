@@ -49,12 +49,11 @@ static char * wo_readline (const char * prompt)
 {
   char tmp[1024], *s;
 
-  if (prompt) {
-    msg_lock();
+  msg_lock();
+  if (prompt)
     fputs(prompt, stdout);
-    fflush(stdout);
-    msg_unlock();
-  }
+  fflush(stdout);
+  msg_unlock();
   errno = 0;
   s = fgets(tmp, sizeof(tmp)-1, stdin);
 
@@ -150,6 +149,9 @@ static char * killspace(char *s)
 }
 
 /* Get word start & end. Could be inside quote.
+ * There is to kind of escape:
+ *  - (") double quote escape following chars upto to the next double quote
+ *  - (\) backslash escape the next char whatever it is (but \0).
  * @retval next word
  */
 static
@@ -168,11 +170,11 @@ char * word(char * word, char ** wordstart)
         --word;
         break;
       } else if (esc == '\\') {
-/* backslashed */
+        /* backslashed */
         esc = 0;
         start[len++] = c;
       } else if (esc == '"') {
-/* quoted string */
+        /* quoted string */
         if (c != '"')
           start[len++] = c;
         else

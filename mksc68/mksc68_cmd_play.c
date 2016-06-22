@@ -172,8 +172,7 @@ static void play_hdl(emu68_t* const emu68, int vector, void * cookie)
 
 static void play_init(playinfo_t * pi)
 {
-  const char * outname = pi->debug ? "null://default" : "audio://default";
-  /* const char * outname = "audio://default"; */
+  const char * outname = pi->debug ? "null:" : "audio:";
   sc68_create_t create68;
 
   pi->isplaying = 2;
@@ -181,8 +180,14 @@ static void play_init(playinfo_t * pi)
   pi->out       = sc68_vfs(outname, 2, 0);
   pi->gdb       = 0;
 
-  if (!pi->out) return;
-  if (vfs68_open(pi->out)) return;
+  if (!pi->out) {
+    msgerr("could not create audio VFS -- %s\n", outname);
+    return;
+  }
+  if (vfs68_open(pi->out) < 0) {
+    msgerr("could not open audio VFS -- %s\n", outname);
+    return;
+  }
 
   memset(&create68,0,sizeof(create68));
   create68.name = pi->debug ? "mksc68-debug" : "mksc68-play";
@@ -450,7 +455,7 @@ cmd_t cmd_play = {
   "  -s --seek=POS       Seek to this position.\n"
   "  -t --to=POS         End position.\n"
   "  -f --fg             Foreground play.\n"
-  "  -m --memory=N       68k memory size of 2^N.\n"
+  "  -m --memory=N       68k memory size of 2^N. bytes\n"
   "  -d --debug          Debug via gdb.\n"
   "\n"
   "POS := [+|-]ms | [+|-]mm:ss[,ms]\n"
@@ -464,24 +469,26 @@ cmd_t cmd_play = {
 static
 int run_stop(cmd_t * cmd, int argc, char ** argv)
 {
-  if (argc > 1) {
-    int i;
-    for (i=1; i<argc; ++i)
-      if (!strcmp(argv[i],"--help") || !strcmp(argv[i],"-h")) {
-        help(argv[0]);
-        return 0;
-      }
-    msgwrn("%d extra parameters ignored\n", argc-i);
+  int i, mask_error = -1;
+  for (i=1; i<argc; ++i) {
+    if (!strcmp(argv[i],"--help") || !strcmp(argv[i],"-h")) {
+      help(argv[0]);
+      return 0;
+    } else if (!strcmp(argv[i],"--no-error") || !strcmp(argv[i],"-n")) {
+      mask_error = 0;
+    } else {
+      msgnot("stop: ignore argument -- `%s'\n", argv[i]);
+    }
   }
   return
-    dsk_stop();
+    dsk_stop() & mask_error;
 }
 
 cmd_t cmd_stop = {
   /* run */ run_stop,
   /* com */ "stop",
   /* alt */ 0,
-  /* use */ 0,
+  /* use */ "[-n|--no-error]",
   /* des */ "stop a background play",
   /* hlp */
   "The `stop' command stops a background music started by the `play' command."

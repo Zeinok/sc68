@@ -43,6 +43,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <errno.h>
 #include <pthread.h>
 
@@ -106,6 +107,7 @@ static const opt_t longopts[] = {
   { "max-time",   1, 0, 'M' },          /* max search time         */
   { "pass-time",  1, 0, 'p' },          /* search pass time        */
   { "silent",     1, 0, 's' },          /* silent detection length */
+  { "memory",     1, 0, 'm' },          /* 68k memory size  */
   { 0,0,0,0 }
 };
 
@@ -144,6 +146,8 @@ struct measureinfo_s {
   sc68_t      * sc68;       /* sc68 instance.    */
   emu68_t     * emu68;      /* emu68 instance.   */
   io68_t     ** ios68;      /* other chip.       */
+
+  unsigned log2mem;         /* 68K memory size (2^log2mem bytes). */
 
   unsigned sampling;        /* sampling rate (in hz) */
   unsigned replayhz;        /* replay rate (in hz)   */
@@ -630,7 +634,7 @@ static void timemeasure_init(measureinfo_t * mi)
   memset(&create68,0,sizeof(create68));
   create68.name        = "mksc68-time";
   create68.emu68_debug = 1;
-  create68.log2mem     = 23;             /* 2Mb */
+  create68.log2mem     = mi->log2mem;
 
   mi->sc68 = sc68_create(&create68);
   if (!mi->sc68)
@@ -1049,7 +1053,7 @@ static void * time_thread(void * userdata)
 
 static
 int time_measure(measureinfo_t * mi, int trk,
-                 int stp_ms, int max_ms, int sil_ms)
+                 int stp_ms, int max_ms, int sil_ms, int log2mem)
 {
   int ret = -1, err;
   const int    tracks = dsk_get_tracks();
@@ -1059,8 +1063,11 @@ int time_measure(measureinfo_t * mi, int trk,
   ts.tv_sec  = 180;
   ts.tv_nsec = 0;
 
-  msgdbg("time_measure() trk:%d, stp:%dms, max:%dms sil:%dms, time-out:%d\n",
-         trk, stp_ms, max_ms, sil_ms, (int)ts.tv_sec);
+  if (log2mem <= 0) log2mem = 23;       /* 8 MiB   */
+  if (log2mem < 17) log2mem = 17;       /* 128 KiB */
+
+  msgdbg("time_measure() trk:%d, stp:%dms, max:%dms sil:%dms, time-out:%d mem:%dKiB\n",
+         trk, stp_ms, max_ms, sil_ms, (int)ts.tv_sec,1<<(log2mem-10));
 
   assert(mi);
   assert(trk > 0 && trk <= tracks);
@@ -1080,6 +1087,7 @@ int time_measure(measureinfo_t * mi, int trk,
   mi->max_ms = max_ms;
   mi->sil_ms = sil_ms;
   mi->track  = trk;
+  mi->log2mem = log2mem;
 
   if ( pthread_create(&mi->thread, 0, time_thread, mi) ) {
     msgerr("#%02d: failed to create time thread\n", trk);
@@ -1160,8 +1168,7 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
   char shortopts[(sizeof(longopts)/sizeof(*longopts))*3];
   int i, tracks;
   const char * tracklist = 0;
-  int max_ms = MAX_TIME, sil_ms = SILENCE_TIME, stp_ms = PASS_TIME;
-
+  int max_ms = MAX_TIME, sil_ms = SILENCE_TIME, stp_ms = PASS_TIME, log2mem = 0;
 
   opt_create_short(shortopts, longopts);
 
@@ -1175,20 +1182,6 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
     case 'h':                           /* --help */
       help(argv[0]); return 0;
 
-    /* case 't':                           /\* --tracks    *\/ */
-    /*   if (tracklist) { */
-    /*     msgerr("multiple track-list not allowed.\n"); */
-    /*     goto error; */
-    /*   } */
-    /*   tracklist = optarg; */
-    /*   /\* check track-list syntax *\/ */
-    /*   while (i = str_tracklist(&tracklist, &a, &b), i > 0) */
-    /*     ; */
-    /*   if (i) */
-    /*     goto error; */
-    /*   tracklist = optarg; */
-    /*   break; */
-
     case 'M':                           /* --max-time  */
       if (str_time_stamp((const char**)&optarg, &max_ms))
         goto error;
@@ -1201,7 +1194,10 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
       if (str_time_stamp((const char**)&optarg, &stp_ms))
         goto error;
       break;
-
+    case 'm':                           /* --memory    */
+      if (isdigit((int)*optarg))
+        log2mem = strtol(optarg,0,0);
+      break;
     case '?':                       /* Unknown or missing parameter */
       goto error;
     default:
@@ -1226,7 +1222,7 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
 
   if (i == argc) {
     int track = dsk_trk_get_current();
-    ret = time_measure(&measureinfo, track, stp_ms, max_ms, sil_ms);
+    ret = time_measure(&measureinfo, track, stp_ms, max_ms, sil_ms, log2mem);
   } else {
     int a, b, e;
 
@@ -1236,7 +1232,7 @@ int run_time(cmd_t * cmd, int argc, char ** argv)
 
     while (e = str_tracklist(&tracklist, &a, &b), e > 0) {
       for (; a <= b; ++a) {
-        ret = time_measure(&measureinfo, a, stp_ms, max_ms, sil_ms);
+        ret = time_measure(&measureinfo, a, stp_ms, max_ms, sil_ms, log2mem);
         if (ret) goto validate;
       }
     }
@@ -1268,5 +1264,6 @@ cmd_t cmd_time = {
   /* *****************   ********************************************** */
   "  -s --silent=MS      Duration for silent detection (0:disable).\n"
   "  -M --max-time=MS    Maximum time.\n"
-  "  -p --pass-time=MS   Search pass duration."
+  "  -p --pass-time=MS   Search pass duration.\n"
+  "  -m --memory=N       68k memory size of 2^N bytes (default:23 -> 8MiB."
 };

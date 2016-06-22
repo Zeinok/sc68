@@ -324,7 +324,11 @@ static int isao_open(vfs68_t * vfs)
       /* anything else is sent to ao driver as option */
       if (!val)
         val = (*key == '!' || *key == '~') ? "0" : "1";
-      /* removed all test for options, juut add */
+      /* removed all test for options, just add.
+       *
+       * $$$ This might causes some problems. Maybe we should come
+       * back to a safer way to only add options the driver know.
+       */
       ao_append_option(&is->ao.options, key, val);
 
       /* if (!info) */

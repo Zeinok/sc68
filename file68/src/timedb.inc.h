@@ -1855,6 +1855,7 @@
  TIMEDB_ENTRY( 3387177e,  1,      1285,                  YM), /* 03980 - Claude Abromont - Killer Ball */
  TIMEDB_ENTRY( 339a471b,  1,      8447,         TA+TB+TD+YM), /* 03452 - Per Almered (XiA) 2009 - Handy-man (The Knife) 1.01 */
  TIMEDB_ENTRY( 339bc133,  1,        91,                  YM), /* 00228 - ACC - Copy Star 1.8 */
+ TIMEDB_ENTRY( 33c002fd,  1,      4608,                  YM), /* 03674 - Dma-Sc - Antiques - Hi-Colors Slideshow */
  TIMEDB_ENTRY( 33cd3499,  1,    375414,               TA+YM), /* 03732 - Waxup - Humuskus (Ventura Reset) */
  TIMEDB_ENTRY( 33e21d35,  1,      3834,               TA+YM), /* 01128 - Tyan - Cruelana */
  TIMEDB_ENTRY( 33e2f4a5,  1,      5759,         TA+TB+TD+YM), /* 02729 - maktone-fairlight - jewel */
@@ -2426,7 +2427,7 @@
  TIMEDB_ENTRY( 45657a96,  1,     16890,            TA+TD+YM), /* 01834 - Lotek Style - Ask me about chips */
  TIMEDB_ENTRY( 4568c87a,  1,       768,            TA+TD+YM), /* 00405 - Big Alec - High Gear */
  TIMEDB_ENTRY( 45698dbb,  1,      3840,                  YM), /* 01045 - Dr Beat - Galtan 6 - Elite Intro 2 */
- TIMEDB_ENTRY( 4578e60c,  1,    241546,               TA+YM), /* 00000 - Twitch - Twitch's Hotmix */
+ TIMEDB_ENTRY( 4578e60c,  1,    241546,               TA+YM), /* 04902 - Twitch - Twitch's Hotmix */
  TIMEDB_ENTRY( 457c457a,  1,      3528,                  YM), /* 04220 - Holger Ghermann - Graffiti Man */
  TIMEDB_ENTRY( 457c457a,  2,      2688,                  YM), /* 04220 - Holger Ghermann - Graffiti Man */
  TIMEDB_ENTRY( 457c457a,  3,      3528,                  YM), /* 04220 - Holger Ghermann - Graffiti Man */
@@ -8293,6 +8294,7 @@
  TIMEDB_ENTRY( df850308,  4,       481,                  YM), /* 00103 - David Whittaker - Gazza 2 */
  TIMEDB_ENTRY( df971bda,  1,      5400,                  YM), /* 00242 - AN Cool - 45-King */
  TIMEDB_ENTRY( df9c0855,  1,     23418,                  YM), /* 01671 - Jess - Concerto for Acid Band */
+ TIMEDB_ENTRY( dfa19694,  1,     14719,         TA+TB+TD+YM), /* 03296 - Dma-Sc - Travellers */
  TIMEDB_ENTRY( dfb00c35,  1,     25536,                  YM), /* 02059 - Mad Max - Make Love Not W.A.R. */
  TIMEDB_ENTRY( dfb138ee,  1,      6166,                  YM), /* 00443 - Big Alec - Wicked */
  TIMEDB_ENTRY( dfedc994,  1,      3916,                  YM), /* 04066 - Gary Wheaton - Circus */
@@ -8553,6 +8555,7 @@
  TIMEDB_ENTRY( e744958f,  1,      6331,            TB+TD+YM), /* 00082 - 505 - Melodie */
  TIMEDB_ENTRY( e74a3255,  1,     76272,            TB+TD+YM), /* 03461 - Marcer - Kid */
  TIMEDB_ENTRY( e76ad285,  1,      4853,            TA+TD+YM), /* 02822 - Marcer - Greasy (Znax Menu) */
+ TIMEDB_ENTRY( e76bd101,  1,     23567,         TA+TB+TD+YM), /* 03522 - Dma-Sc - Troubled Memories */
  TIMEDB_ENTRY( e7754910,  1,     13096,                  YM), /* 01850 - Lotek Style - Hard Rock */
  TIMEDB_ENTRY( e775cf70,  1,      7242,         TA+TB+TD+YM), /* 01873 - Lotek Style - Das Sidhaeuser Tor */
  TIMEDB_ENTRY( e77ec0a9,  1,      4800,                  YM), /* 03242 - T1000 - The Beast Club - TBC 14 */
@@ -9421,15 +9424,6 @@
  TIMEDB_ENTRY( ff106010,  1,      9317,         TA+TB+TD+YM), /* 03588 - Divag - Crash to live */
  TIMEDB_ENTRY( ff1111f4,  1,      6143,                  YM), /* 03675 - Dma-Sc - Antiques - IFF Slideshow */
  TIMEDB_ENTRY( ff34688e,  1,     15360,            TB+TD+YM), /* 02907 - helene - NONONYESYESYES */
- TIMEDB_ENTRY( ff468dd0,  1,      4004,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename  Robocod */
- TIMEDB_ENTRY( ff468dd0,  2,      6151,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename  Robocod */
- TIMEDB_ENTRY( ff468dd0,  3,      4613,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename  Robocod */
- TIMEDB_ENTRY( ff468dd0,  4,      4613,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename  Robocod */
- TIMEDB_ENTRY( ff468dd0,  5,      3506,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename  Robocod */
- TIMEDB_ENTRY( ff468dd0,  6,       257,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename  Robocod */
- TIMEDB_ENTRY( ff468dd0,  7,       259,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename  Robocod */
- TIMEDB_ENTRY( ff468dd0,  8,       148,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename  Robocod */
- TIMEDB_ENTRY( ff468dd0,  9,      1921,                  YM), /* 01737 - Richard Joseph - James Pond 2 Codename  Robocod */
  TIMEDB_ENTRY( ff77da40,  1,     10369,         TA+TB+TD+YM), /* 03670 - 505-paradox - Jacktro */
  TIMEDB_ENTRY( ff7fae4d,  1,      6912,            TA+TB+YM), /* 01334 - Scavenger - Hate */
  TIMEDB_ENTRY( ff7fcdf3,  1,     21690,                  YM), /* 01682 - Jess - I Found The Dead Zone */
