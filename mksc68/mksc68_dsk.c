@@ -27,6 +27,7 @@
 #include "config.h"
 #endif
 
+
 #include "mksc68_dsk.h"
 #include "mksc68_msg.h"
 #include "mksc68_cmd.h"
@@ -272,10 +273,15 @@ int dsk_kill(void)
 }
 
 extern unsigned int fr2ms(unsigned int, unsigned int, unsigned int);
-
 static unsigned int fr_to_ms(unsigned int fr, unsigned int hz)
 {
   return fr2ms(fr,hz,0);
+}
+
+extern unsigned ms2fr(unsigned ms, unsigned cpf_or_hz, unsigned clk);
+static unsigned ms_to_fr(unsigned ms, unsigned cpf_or_hz, unsigned clk)
+{
+  return ms2fr(ms,cpf_or_hz,clk);
 }
 
 int dsk_validate(void)
@@ -285,9 +291,8 @@ int dsk_validate(void)
   if (!is_valid_disk())
     return -1;
 
-  /* Validate time and loop */
-  dsk.disk->time_ms = 0;
-  dsk.disk->hwflags = 0;            /* Clear all disk flags ... */
+  dsk.disk->time_ms = 0;                /* Validate time and loop */
+  dsk.disk->hwflags = 0;                /* Clear all disk flags ... */
 
   for (t = 0; t < dsk.disk->nb_mus; ++t) {
     music68_t * m = dsk.disk->mus + t;
@@ -309,6 +314,8 @@ int dsk_validate(void)
   if (!has_hw)
     dsk.disk->hwflags &= SC68_XTD-1;
 
+  msgdbg("disk validated\n");
+
   return 0;
 }
 
@@ -322,7 +329,9 @@ const char * dsk_tag_get(int trk, const char * var)
     return 0;
   if (trk && !is_valid_track(trk))
     return 0;
+
   val = tag_get(trk, var);
+
   /* Some internal tags */
   if (!val) {
     static char str[64];
@@ -371,13 +380,13 @@ const char * dsk_tag_get(int trk, const char * var)
   return val;
 }
 
-static const char * tostr(int v)
-{
-  static char tmp[64];
-  snprintf(tmp,63,"%d",v);
-  tmp[63] = 0;
-  return tmp;
-}
+/* static const char * tostr(int v) */
+/* { */
+/*   static char tmp[64]; */
+/*   snprintf(tmp,63,"%d",v); */
+/*   tmp[63] = 0; */
+/*   return tmp; */
+/* } */
 
 
 /* Does this memory belongs to the disk data ? */
@@ -394,45 +403,101 @@ static void free_replay(disk68_t * const mb, char ** _s)
   *_s = 0;
 }
 
-static const char * set_trk_tag(int trk, const char * var, const char * val)
+static int set_trk_tag(int trk, const char * var, const char * val)
 {
-  if (trk > 0 && !strcmp(TAG68_REPLAY,var)) {
-    if (!val || !val[0]) {
-      msginf("track #%02d replay has been deleted\n", trk);
-      free_replay(dsk.disk, &dsk.disk->mus[trk-1].replay);
-    } else if (strcmp(val, dsk.disk->mus[trk-1].replay)) {
-      free_replay(dsk.disk, &dsk.disk->mus[trk-1].replay);
-      dsk.disk->mus[trk-1].replay = strdup68(val);
-      msginf("track #%02d replay has changed to -- '%s'\n",
-             trk, dsk.disk->mus[trk-1].replay);
+  char tmp[128]; const int tmpmax = sizeof(tmp);
+
+  if (trk > 0) {
+    music68_t * const mus = dsk.disk->mus+trk-1;
+
+    /* Handle track special tags (ugly hardcode) */
+    if (!strcmp(TAG68_REPLAY,var)) {
+      /* "replay" */
+      if (!val || !*val) {
+        msginf("track #%02d replay has been deleted\n", trk);
+        free_replay(dsk.disk, &mus->replay);
+      } else if (strcmp(val, mus->replay)) {
+        free_replay(dsk.disk, &mus->replay);
+        mus->replay = strdup68(val);
+        msginf("track #%02d replay has changed to -- '%s'\n",
+               trk, mus->replay);
+      }
+      return 0;
     }
-    return dsk.disk->mus[trk-1].replay;
+
+    else if (!strcmp(TAG68_LENGTH,var)) {
+      /* "length" */
+      if (!val) {
+        mus->has.time = 0;
+        mus->first_ms = mus->loops_ms = 0;
+        mus->first_fr = mus->loops_fr = 0;
+        msginf("track #%02d music length has been deleted\n", trk);
+      } else {
+        unsigned int ms; char * e;
+        errno = 0;
+        ms = strtoul(val,&e,10);
+        if (errno || *e) {
+          msgerr("track #%02d invalid \"%s\" value -- \"%s\" (%u)\n",
+                 trk,var,val,ms);
+          return -1;
+        }
+        mus->has.time = ms > 0; /* ??? not sure about that */
+        mus->first_ms = mus->loops_ms = ms;
+        mus->first_fr = mus->loops_fr = ms_to_fr(ms, mus->frq, 0);
+        msginf("track #%02d set \"%s\" to \"%s\" %s (%ufr)\n",
+               trk, var, val,
+               str_timefmt(tmp,tmpmax, ms), mus->first_fr);
+      }
+      return 0;
+    }
+
+    else if (!strcmp(TAG68_HARDWARE,var)) {
+      /* "hardware" */
+      if (!val) {
+        mus->hwflags = 0;
+        msginf("track #%02d hardware flags have been deleted\n", trk);
+      } else {
+        int bits = mus->hwflags = str_hwparse(val);
+        str_hardware(tmp, tmpmax, bits);
+        msginf("track #%02d set \"%s\" to \"%s\" %02x -> \"%s\"\n",
+               trk, var, val, mus->hwflags, tmp);
+      }
+      return 0;
+    }
+
+    else if (!strcmp(TAG68_RATE,var)) {
+      /* "rate" changes "length" */
+      assert(!"TODO");
+    }
+
   }
-  return tag_set(trk, var, val);
+
+  return -!tag_set(trk, var, val);
 }
 
-const char * dsk_tag_set(int trk, const char * var, const char * val)
+int dsk_tag_set(int trk, const char * var, const char * val)
 {
   assert(var);
+  /* TODO: check var validity */
   return (trk == 0 || is_valid_track(trk))
     ? set_trk_tag(trk, var, val)
-    : 0
-    ;
-}
-
-int dsk_tag_seti(int trk, const char * var, int ival)
-{
-  const char * val = tostr(ival);
-  return
-    (trk == 0 || is_valid_track(trk))
-    ? set_trk_tag(trk, var, val), 0
     : -1
     ;
 }
 
+/* int dsk_tag_seti(int trk, const char * var, int ival) */
+/* { */
+/*   const char * val = tostr(ival); */
+/*   return */
+/*     (trk == 0 || is_valid_track(trk)) */
+/*     ? set_trk_tag(trk, var, val), 0 */
+/*     : -1 */
+/*     ; */
+/* } */
+
 void dsk_tag_del(int trk, const char * var)
 {
-  tag_del(trk, var);
+  dsk_tag_set(trk, var, 0);
 }
 
 void dsk_tag_clr(int trk)

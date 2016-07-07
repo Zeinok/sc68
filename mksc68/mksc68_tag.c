@@ -40,34 +40,35 @@
 
 static struct tag_std {
   const char * var;                     /* tag name           */
-  int alias;                            /* is alias           */
+  unsigned int alias:8;                 /* is alias           */
+  unsigned int integer:1;               /* is integer         */
   const char * des;                     /* tag description    */
 } stdtags[] = {
-  { 0, 0, 0 },                              /* ???  */
-  { TAG68_TITLE      ,0, "a name for is track or album" },
-  { TAG68_ARTIST     ,0, "who wrote is track or album" },
-  { TAG68_GENRE      ,0, "kind of music (track only, auto)" },
-  { TAG68_FORMAT     ,0, "file format (album only, auto)"   },
-  { TAG68_AKA        ,0, "scene alias for the artist" },
-  { TAG68_COMMENT    ,0, "tell me something special about it" },
-  { TAG68_COPYRIGHT  ,0, "copyright owner" },
-  { TAG68_IMAGE      ,0, "URI of an illustration for this track/album" },
-  { TAG68_RATE       ,0, "replay rate" },
-  { TAG68_REPLAY     ,0, "replay routine been used by this track" },
-  { TAG68_RIPPER     ,0, "who rips the music from its original environment" },
-  { TAG68_YEAR       ,0, "year (yyyy)" },
-  { TAG68_COMPOSER   ,0, "original composer or author if this is a remake" },
-  { TAG68_CONVERTER  ,0, "who converts the track to this format" },
-  { TAG68_LENGTH     ,0, "duration in milliseconds" },
-  { TAG68_FRAMES     ,0, "duration in frames" },
-  { TAG68_HASH       ,0, "file content hash code" },
-  { TAG68_URI        ,0, "URI or path for this file" },
-  { TAG68_HARDWARE   ,0, "hardware used" },
+  { 0, 0, 0 },                          /* don't use index 0  */
+  { TAG68_TITLE      ,0,0, "a name for is track or album" },
+  { TAG68_ARTIST     ,0,0, "who wrote is track or album" },
+  { TAG68_GENRE      ,0,0, "kind of music (track only, auto)" },
+  { TAG68_FORMAT     ,0,0, "file format (album only, auto)"   },
+  { TAG68_AKA        ,0,0, "scene alias for the artist" },
+  { TAG68_COMMENT    ,0,0, "tell me something special about it" },
+  { TAG68_COPYRIGHT  ,0,0, "copyright owner" },
+  { TAG68_IMAGE      ,0,0, "URI of an illustration for this track/album" },
+  { TAG68_RATE       ,0,1, "replay rate" },
+  { TAG68_REPLAY     ,0,0, "replay routine been used by this track" },
+  { TAG68_RIPPER     ,0,0, "who rips the music from its original environment" },
+  { TAG68_YEAR       ,0,0, "year (yyyy)" }, /* integer or not ? */
+  { TAG68_COMPOSER   ,0,0, "original composer or author if this is a remake" },
+  { TAG68_CONVERTER  ,0,0, "who converts the track to this format" },
+  { TAG68_LENGTH     ,0,1, "duration in milliseconds" },
+  { TAG68_FRAMES     ,0,1, "duration in frames" },
+  { TAG68_HASH       ,0,0, "file content hash code" /* a string indeed */ },
+  { TAG68_URI        ,0,0, "URI or path for this file" },
+  { TAG68_HARDWARE   ,0,0, "hardware used" },
 
   /* Aliases */
-  { "author"         ,1, TAG68_ARTIST },
-  { "album"          ,1, TAG68_TITLE  },
-  { "duration"       ,1, TAG68_LENGTH },
+  { "author"         ,1,0, TAG68_ARTIST },
+  { "album"          ,1,0, TAG68_TITLE  },
+  { "duration"       ,1,1, TAG68_LENGTH },
 
 };
 
@@ -91,6 +92,7 @@ static void setup_stdtags(void)
         j = 0;
       }
       stdtags[i].alias = j;
+      stdtags[i].integer = stdtags[j].integer;
   }
 }
 

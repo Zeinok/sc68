@@ -219,7 +219,7 @@ unsigned fr2ms(unsigned fr, unsigned cpf_or_hz, unsigned clk)
   return (unsigned) ms;
 }
 
-static unsigned ms2fr(unsigned ms, unsigned cpf_or_hz, unsigned clk)
+unsigned ms2fr(unsigned ms, unsigned cpf_or_hz, unsigned clk)
 {
   uint64_t fr;
   unsigned cpf;

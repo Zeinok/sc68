@@ -29,7 +29,7 @@ EXTERN68 int dsk_trk_get_default(void);
 EXTERN68 int dsk_trk_set_default(int track);
 
 EXTERN68 const char * dsk_tag_get(int trk, const char * var);
-EXTERN68 const char * dsk_tag_set(int trk, const char * var, const char * val);
+EXTERN68 int  dsk_tag_set(int trk, const char * var, const char * val);
 
 EXTERN68 int  dsk_validate(void);
 EXTERN68 int  dsk_tag_geti(int trk, const char * var);

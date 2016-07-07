@@ -200,6 +200,7 @@ int run_tag(cmd_t * cmd, int argc, char ** argv)
   switch (action) {
   case 'P':                             /* purge */
     ret = purge_all_tags();
+    dsk_validate();
     break;
   case 'l':                             /* list */
     ret = list_all_tags();
@@ -233,6 +234,7 @@ int run_tag(cmd_t * cmd, int argc, char ** argv)
       }
     }
     ret = 0;
+    dsk_validate();
     break;
 
   case 'A':                             /* add */
@@ -248,9 +250,10 @@ int run_tag(cmd_t * cmd, int argc, char ** argv)
       while (!ret && str_tracklist(&tl, &a, &b) > 0 ) {
         int t;
         for (t = a; !ret && t <= b; ++t)
-          ret = -!dsk_tag_set(t,var,val);
+          ret = dsk_tag_set(t,var,val);
       }
     }
+    dsk_validate();
     break;
 
   default:

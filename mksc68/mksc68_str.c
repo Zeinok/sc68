@@ -282,6 +282,45 @@ static int catflag(char * tmp, int i, int max, int bit, const char * l) {
   return i;
 }
 
+/* Order is mandatory */
+static struct  {
+  const char * str;
+  int bit;
+} hwlut[] = {
+  { "AGA", SC68_AGA },
+  { "PSG", SC68_PSG },
+  { "DMA", SC68_DMA },
+  { "LMC", SC68_LMC },
+  { "?"  ,~SC68_XTD },
+  { "TiA", SC68_MFP_TA },
+  { "TiB", SC68_MFP_TB },
+  { "TiC", SC68_MFP_TC },
+  { "TiD", SC68_MFP_TD} ,
+  { "HBL", SC68_HBL },
+  { "BLT", SC68_BLT },
+  { "DSP", SC68_DSP }
+};
+
+int str_hwparse(const char * hwstr)
+{
+  const int hwlutsz = sizeof(hwlut)/sizeof(*hwlut);
+
+  int i, bit;
+  for (i=0, bit=SC68_XTD; i<hwlutsz; ++i) {
+    if (strstr(hwstr,hwlut[i].str)) {
+      if (hwlut[i].bit < 0)
+        bit &= hwlut[i].bit;
+      else
+        bit |= hwlut[i].bit;
+    }
+  }
+
+  if ( !(bit & SC68_XTD) )
+    bit &= SC68_AGA | SC68_PSG | SC68_DMA;
+
+  return bit;
+}
+
 char * str_hardware(char * const buf, int max, int hwbit)
 {
   int i;
