@@ -13,7 +13,7 @@ dnl#
 
 AC_INIT(
   [mksc68],
-  [20140815],
+  [20160626],
   [http://sourceforge.net/projects/sc68/],
   [mksc68],
   [http://sc68.atari.org])

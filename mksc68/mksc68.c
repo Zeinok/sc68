@@ -133,10 +133,13 @@ static int print_usage(int more)
 }
 
 /* Display version number. */
-static int print_version(void)
+static int print_version(int more)
 {
   puts
-    (PACKAGE_STRING "\n"
+    (PACKAGE_STRING);
+  if (!more)
+    return 0;
+  puts(
      "\n"
      "Copyright (c) 1998-2016 Benjamin Gerard.\n"
      "License GPLv3+ or later <http://gnu.org/licenses/gpl.html>\n"
@@ -144,7 +147,18 @@ static int print_version(void)
      "There is NO WARRANTY, to the extent permitted by law.\n"
      "\n"
      "Written by Benjamin Gerard <" PACKAGE_BUGREPORT ">"
-      );
+    );
+  return 0;
+}
+
+static int run_version(cmd_t * me, int argc, char ** argv)
+{
+  int more = 0, i;
+  for (i=1; i<argc; ++i) {
+    if (!strcmp(argv[i],"-l") || !strcmp(argv[i],"--long"))
+      more++;
+  }
+  print_version(more);
   return 0;
 }
 
@@ -177,7 +191,6 @@ static void cmd_usage(const cmd_t * cmd)
   if (!nl) fputc('\n',stdout);
   fputc('\n',stdout);
 }
-
 
 int eval(char * expr, int * status)
 {
@@ -277,7 +290,8 @@ extern cmd_t cmd_new, cmd_load, cmd_play, cmd_stop, cmd_msg, cmd_tag;
 extern cmd_t cmd_time, cmd_save, cmd_info, cmd_gdb, cmd_extract;
 static cmd_t
 cmd_exit = {
-  run_exit, "exit",  "x", "[exit-code]", "exit command interpreter" },
+  run_exit, "exit",  "x", "[exit-code]", "exit command interpreter"
+},
 cmd_help = {
   run_help, "help",  "?", "[cmd ...]", "print command(s) usage",
   "The `help' command prints command list or usage.\n"
@@ -286,9 +300,14 @@ cmd_help = {
   "Returns the number of error (unknown commands).\n"
 },
 cmd_echo = {
-  run_echo, "echo",  "p", "[...]",       "print informative message",          },
+  run_echo, "echo",  "p", "[...]",       "print informative message",
+},
 cmd_error = {
-  run_error, "error",   0, "[...]",      "print error message"     };
+  run_error, "error",   0, "[...]",      "print error message"
+},
+cmd_version = {
+  run_version, "version", 0, "[-l|--long]", "print version and copyright"
+};
 
 static cmd_t *commands[] = {
   &cmd_msg,
@@ -310,6 +329,7 @@ static cmd_t *commands[] = {
 
   &cmd_exit,
   &cmd_help,
+  &cmd_version,
 
   0
 };
@@ -997,7 +1017,7 @@ int main(int argc, char *argv[])
     switch (val) {
     case  -1: break;                      /* Scan finish   */
     case 'h': opt_help++;       break;    /* --help        */
-    case 'V': opt_vers = 1;     break;    /* --version     */
+    case 'V': opt_vers = 2;     break;    /* --version     */
     case 'v': opt_verb++;       break;    /* --verbose     */
     case 'q': opt_verb--;       break;    /* --quiet       */
     case 'n': no_readline = 1;  break;    /* --no-readline */
@@ -1022,7 +1042,7 @@ int main(int argc, char *argv[])
   }
 
   if (opt_vers) {
-    return print_version();
+    return print_version(opt_vers > 1);
   }
 
   if (!is_interactive)

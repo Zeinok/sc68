@@ -455,7 +455,7 @@ cmd_t cmd_play = {
   "  -s --seek=POS       Seek to this position.\n"
   "  -t --to=POS         End position.\n"
   "  -f --fg             Foreground play.\n"
-  "  -m --memory=N       68k memory size of 2^N. bytes\n"
+  "  -m --memory=N       68k memory size of 2^N bytes\n"
   "  -d --debug          Debug via gdb.\n"
   "\n"
   "POS := [+|-]ms | [+|-]mm:ss[,ms]\n"
