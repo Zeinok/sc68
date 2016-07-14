@@ -45,6 +45,7 @@
  TIMEDB_ENTRY( 01d08df0,  8,      6720,                  YM), /* 00174 - Martin Walker - Atomic Robokid */
  TIMEDB_ENTRY( 01d08df0,  9,      4704,                  YM), /* 00174 - Martin Walker - Atomic Robokid */
  TIMEDB_ENTRY( 01d08df0, 10,      2880,                  YM), /* 00174 - Martin Walker - Atomic Robokid */
+ TIMEDB_ENTRY( 01e30067,  1,      4992,                  YM), /* 04932 - SNC - Pure Energy 38 */
  TIMEDB_ENTRY( 01f8f345,  1,      4000,                  YM), /* 01548 - Rhino - Torment Christmas 2000 Intro */
  TIMEDB_ENTRY( 01fa9141,  1,     37959,                  YM), /* 00328 - Gary Wheaton - Solar Gammon */
  TIMEDB_ENTRY( 01fbd6e2,  1,      4221,               TA+YM), /* 02436 - Beast - Oldie */
@@ -3345,6 +3346,7 @@
  TIMEDB_ENTRY( 59f78bfa,  6,      2048,                  YM), /* 00104 - David Whittaker - Golden Axe */
  TIMEDB_ENTRY( 5a1b0007,  1,     19200,         TA+TB+TD+YM), /* 02565 - Marcer - NEW TIME MARCER */
  TIMEDB_ENTRY( 5a1b7e1d,  1,     98215,               TA+YM), /* 04626 - Michael Opel - Trinomic */
+ TIMEDB_ENTRY( 5a1d431d,  1,      6080,                  YM), /* 04934 - Illusion - Maniac */
  TIMEDB_ENTRY( 5a2fc291,  1,       762,         TA+TB+TD+YM), /* 01942 - MSG - Chu Chu Rocket - Cat Mania */
  TIMEDB_ENTRY( 5a33a74f,  1,     46080,         TA+TB+TD+YM), /* 02560 - Marcer - DRAGONF MIX */
  TIMEDB_ENTRY( 5a3b1f47,  1,     11036,         TA+TB+TD+YM), /* 03005 - 505 - Antique */
@@ -3571,6 +3573,7 @@
  TIMEDB_ENTRY( 5ee39ada,  1,     33699,               TA+YM), /* 04675 - Unknown - BIO C */
  TIMEDB_ENTRY( 5eec5619,  1,      3199,                  YM), /* 02151 - Mad Max - Monty On The Run High - LSD */
  TIMEDB_ENTRY( 5eed22bd,  1,      4608,                  YM), /* 03494 - Shamen - Certified Dope - Attitude Problem */
+ TIMEDB_ENTRY( 5efcffec,  1,      5376,                  YM), /* 00785 - Crawdaddy - Heroes */
  TIMEDB_ENTRY( 5f0e8e84,  1,     12543,                  YM), /* 01491 - Fred Gray - Where Time Stood Still */
  TIMEDB_ENTRY( 5f0e8e84,  2,     12543,                  YM), /* 01491 - Fred Gray - Where Time Stood Still */
  TIMEDB_ENTRY( 5f0e8e84,  3,     12543,                  YM), /* 01491 - Fred Gray - Where Time Stood Still */
@@ -3807,6 +3810,7 @@
  TIMEDB_ENTRY( 67678c83,  1,      8064,            TA+TD+YM), /* 04210 - Tao - Cream - Just Feel It (Steps) */
  TIMEDB_ENTRY( 676f2107,  1,     53052,               TA+YM), /* 04819 - Ace - Demo Tune */
  TIMEDB_ENTRY( 6778bf2e,  1,      1536,                  YM), /* 01412 - Skyline - Snork Intro - So Watt */
+ TIMEDB_ENTRY( 677d5c87,  1,     36480,                  YM), /* 04928 - Black - Turrican 2 Final - release version */
  TIMEDB_ENTRY( 679131f6,  1,      4608,               TA+YM), /* 00820 - !Cube - Japanese (Sinful Sinuses) */
  TIMEDB_ENTRY( 67a3f3db,  1,      5461,            TA+TD+YM), /* 01575 - Jurgen Piscol - X-Out */
  TIMEDB_ENTRY( 67a3f3db,  2,      1306,            TA+TD+YM), /* 01575 - Jurgen Piscol - X-Out */
@@ -4821,6 +4825,7 @@
  TIMEDB_ENTRY( 843e061f,  5,       436,                  YM), /* 04618 - Laserball 2014 - xFalcon */
  TIMEDB_ENTRY( 8446cdb5,  1,      6911,               TD+YM), /* 04353 - gwEm - Fuji Sunset */
  TIMEDB_ENTRY( 846ab268,  1,      4604,         TA+TB+TD+YM), /* 00035 - 505 - Blue Snow (D-Bug 184a) */
+ TIMEDB_ENTRY( 846bac7b,  1,      1792,                  YM), /* 04931 - Crawdaddy - Who Knows */
  TIMEDB_ENTRY( 846e1b3b,  1,      2688,                  YM), /* 03495 - Shamen - Certified Dope - Filled 3D */
  TIMEDB_ENTRY( 846f92cb,  1,      1543,                  YM), /* 00960 - Mike Davies - Alien Storm */
  TIMEDB_ENTRY( 846f92cb,  2,       621,                  YM), /* 00960 - Mike Davies - Alien Storm */
@@ -5726,6 +5731,7 @@
  TIMEDB_ENTRY( 9b2b2f8a,  1,      4224,               TA+YM), /* 04419 - EVE - Sewer 8 */
  TIMEDB_ENTRY( 9b391918,  1,      4092,         TA+TB+TD+YM), /* 04328 - 505-Checkpoint - zuuuuuuu */
  TIMEDB_ENTRY( 9b3cda13,  1,    268756,               TA+YM), /* 03757 - Tufty - Pandemonium - Acid Demo */
+ TIMEDB_ENTRY( 9b3f6ce0,  1,      2688,                  YM), /* 04930 - Crawdaddy - Dark Side of the Spoon - TLB remix */
  TIMEDB_ENTRY( 9b427428,  1,      9967,         TA+TB+TD+YM), /* 04351 - HYLST - H CHIP EWPERIMENT 4 SV2K13 */
  TIMEDB_ENTRY( 9b4f3100,  1,     41554,               TA+YM), /* 04059 - Roggie - The Works */
  TIMEDB_ENTRY( 9b57347c,  1,    153412,               TA+YM), /* 03711 - Wally Beben - Time Machine */
@@ -6467,6 +6473,7 @@
  TIMEDB_ENTRY( b0df1620,  1,      4600,               TA+YM), /* 04763 - Ferox - State of Mind - Tuesday */
  TIMEDB_ENTRY( b10c4711,  1,      1729,               TB+YM), /* 03473 - gwEm - Real Friends */
  TIMEDB_ENTRY( b10c7de8,  1,      1342,                  YM), /* 02462 - Iso - Buzzzzzzzing */
+ TIMEDB_ENTRY( b116d908,  1,     36480,         TA+TB+TD+YM), /* 04929 - Black - Turrican 2 final - Sid */
  TIMEDB_ENTRY( b14cd84f,  1,      3840,            TA+TD+YM), /* 02323 - Tao - Cream (orig. Klaus Ude) - Magic Marble ingame 2 */
  TIMEDB_ENTRY( b14f0777,  1,      9216,                  YM), /* 02163 - Mad Max - Syntax Terror - TEX */
  TIMEDB_ENTRY( b158b1e4,  1,     11454,               TA+YM), /* 01524 - Iso - Fun!!! */
@@ -6827,6 +6834,7 @@
  TIMEDB_ENTRY( bc6ef6f9,  1,     10943,            TA+TD+YM), /* 02696 - Dubmood - RazoR 1911 - Botkyrka VS ST-STYLE */
  TIMEDB_ENTRY( bc857fb3,  1,      3503,         TA+TB+TD+YM), /* 02731 - maktone-fairlight - reason */
  TIMEDB_ENTRY( bc874908,  1,     15354,         TA+TB+TD+YM), /* 01018 - DMA-SC - vistors from dreams */
+ TIMEDB_ENTRY( bc8a86f2,  1,      9600,                  YM), /* 04933 - Crawdaddy - Despair */
  TIMEDB_ENTRY( bc8ba5b8,  1,     31864,               TA+YM), /* 03008 - Mad Max - Stormlord Title Music */
  TIMEDB_ENTRY( bc9380cc,  1,     11684,                  YM), /* 03233 - T1000 - The Beast Club - TBC 3 */
  TIMEDB_ENTRY( bc9c82ce,  1,      6265,         TA+TB+TD+YM), /* 00051 - 505 - Gauloise - Posh Demo original */
