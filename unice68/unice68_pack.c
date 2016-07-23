@@ -24,15 +24,6 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
-#ifndef PACKAGE_NAME
-# define PACKAGE_NAME "unice68"
-#endif
-#ifndef PACKAGE_VERSION
-# define PACKAGE_VERSION __DATE__
-#endif
-#ifndef PACKAGE_VERNUM
-# define PACKAGE_VERNUM 0
-#endif
 
 #include "unice68.h"
 

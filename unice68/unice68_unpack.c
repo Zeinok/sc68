@@ -27,23 +27,13 @@
 
 #include "unice68.h"
 
-#ifdef TYPE_U8
-typedef TYPE_U8 u8
-#else
-typedef unsigned char u8;
+#ifdef HAVE_STDINT_H
+# include <stdint.h>
 #endif
 
-#ifdef TYPE_S8
-typedef TYPE_S8 s8
-#else
-typedef signed char s8;
-#endif
-
-#ifdef TYPE_S16
-typedef TYPE_S16 s16
-#else
-typedef signed short s16;
-#endif
+typedef uint8_t u8;
+typedef  int8_t s8;
+typedef int16_t s16;
 
 typedef u8 * areg_t;
 typedef int dreg_t;
