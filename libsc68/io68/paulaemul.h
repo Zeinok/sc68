@@ -181,7 +181,7 @@ enum amiga_regs_e {
  * Amiga Paula Clock frequencies.
  */
 enum {
-  PAULA_PAL_FRQ     = 3546897u, /**< Paula PAL clock frequency.     */
+  PAULA_PAL_FRQ     = 3546895u, /**< Paula PAL clock frequency.     */
   PAULA_NTSC_FRQ    = 3579545u, /**< Paula NTSC clock frequency.    */
 };
 
