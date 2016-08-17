@@ -31,11 +31,12 @@
  * flags values.
  */
 enum {
-  TDB_STE = 1 << 4,              /**< set if STE hardware is used */
-  TDB_TD  = 1 << 3,              /**< set if timer D *NOT* used   */
-  TDB_TC  = 1 << 2,              /**< set if timer C *NOT* used   */
-  TDB_TB  = 1 << 1,              /**< set if timer B *NOT* used   */
-  TDB_TA  = 1 << 0,              /**< set if timer A *NOT* used   */
+  TDB_STE = 1 << 5,              /**< set if STE-DMA hardware is used. */
+  TDB_PSG = 1 << 4,              /**< set if YM hardware is used. */
+  TDB_TD  = 1 << 3,              /**< set if MFP-timer D is used. */
+  TDB_TC  = 1 << 2,              /**< set if MFP-timer C is used. */
+  TDB_TB  = 1 << 1,              /**< set if MFP-timer B is used. */
+  TDB_TA  = 1 << 0,              /**< set if MFP-timer A is used. */
 };
 
 

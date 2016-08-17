@@ -694,21 +694,23 @@ static int valid(disk68_t * mb)
         m->has.time = 1;
         m->first_fr = frames;
         m->first_ms = fr_to_ms(m->first_fr, m->frq);
-
-        m->hwflags |= SC68_XTD;
+        m->hwflags  = SC68_XTD;
+        if (flags & TDB_PSG)
+          m->hwflags |= SC68_PSG;
         if (flags & TDB_STE)
           m->hwflags |= (SC68_DMA|SC68_LMC);
         /* Invert the flag as timerdb knows about unused timers. */
-        m->hwflags |=
-          (15^(flags&(TDB_TA|TDB_TB|TDB_TC|TDB_TD))/TDB_TA) << SC68_MFP_BIT;
+
+        m->hwflags |= (flags&(TDB_TA|TDB_TB|TDB_TC|TDB_TD)/TDB_TA) << SC68_MFP_BIT;
         TRACE68(file68_cat,
                 "file68: found track #%02d:%08x in sndh timedb"
-                " -- %d ms, %d frames, %c%c%c%c%s\n",
+                " -- %d ms, %d frames, %c%c%c%c%s%s\n",
                 i+1, mb->hash, m->first_ms, m->first_fr,
                 (m->hwflags & SC68_MFP_TA) ? 'A' : '.',
                 (m->hwflags & SC68_MFP_TB) ? 'B' : '.',
                 (m->hwflags & SC68_MFP_TC) ? 'C' : '.',
                 (m->hwflags & SC68_MFP_TD) ? 'D' : '.',
+                (m->hwflags & SC68_PSG) ? ",PSG" : "",
                 (m->hwflags & SC68_DMA) ? ",STE" : "");
       }
     }
