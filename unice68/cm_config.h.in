@@ -1,5 +1,4 @@
-/* cm_config.h.in -- cmake config.h template  */
-
+/* cm_config.h.in -- unice68 template for cmake config.h */
 
 /* ----------------------------------------------------------------------
  *  Package info
@@ -34,7 +33,6 @@
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME PACKAGE
-
 
 /* ----------------------------------------------------------------------
  *  Configured headers

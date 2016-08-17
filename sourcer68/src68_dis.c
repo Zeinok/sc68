@@ -487,7 +487,7 @@ int dis_disa(exe_t * exe, uint_t * adr, char * buf, uint_t max)
   dis.desa.str    = buf;
   dis.desa.strmax = max;
   dis.desa.flags  =
-    DESA68_SYMBOL_FLAG | DESA68_GRAPH_FLAG | DESA68_LCASE_FLAG;
+    DESA68_SYMBOL_FLAG /* | DESA68_GRAPH_FLAG */ | DESA68_LCASE_FLAG;
 
   dis.symbols     = exe->symbols;
   if (dis.symbols)

@@ -25,7 +25,7 @@ pkgconfig_DATA = unice68.pc
 lib_LTLIBRARIES        = libunice68.la
 libunice68_la_SOURCES  = unice68_unpack.c unice68_pack.c unice68_version.c
 libunice68_la_CFLAGS   = $(ALL_CFLAGS) $(LIB_CFLAGS)
-libunice68_la_CPPFLAGS = -DUNICE68_EXPORT=1
+#libunice68_la_CPPFLAGS = $(ALL_EFLAGS) $(LIB_EFLAGS)
 libunice68_la_LDFLAGS  = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
 LFLAGS                 = -avoid-version $(NOINSTALL)
 
@@ -48,6 +48,7 @@ endif
 # `----------------------------------------------------------------------'
 
 include_HEADERS      = unice68.h
+noinst_HEADERS       = unice68_private.h
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |

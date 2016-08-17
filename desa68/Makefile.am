@@ -34,3 +34,4 @@ libdesa68_la_SOURCES  = desa68.c
 # `----------------------------------------------------------------------'
 
 include_HEADERS       = desa68.h
+noinst_HEADERS        = desa68_private.h

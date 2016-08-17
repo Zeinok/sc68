@@ -11,9 +11,11 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
+define([sc_version], esyscmd([sh vcversion.sh 2.0.0]))dnl
+
 AC_INIT(
   [unice68],
-  [20130728],
+  sc_version,
   [http://sourceforge.net/projects/sc68/],
   [unice68],
   [http://sc68.atari.org])
@@ -64,10 +66,8 @@ AC_CHECK_FUNCS([basename _fileno fileno _setmode])
 AC_CONFIG_FILES([
     Makefile
     package.texi
-    unice68-${VERSION}.ebuild:unice68.ebuild.in
     unice68.1.tpl
-    unice68.pc
-    unice68.spec])
+    unice68.pc])
 AC_OUTPUT
 
 # ,----------------------------------------------------------------------.

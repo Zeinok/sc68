@@ -51,9 +51,20 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+#ifdef HAVE_IO_H
+#include <io.h>
+#endif
 
-#if defined(O_BINARY) && ! defined(_O_BINARY)
+#if defined(O_BINARY) && !defined(_O_BINARY)
 # define _O_BINARY O_BINARY
+#endif
+
+#if defined(HAVE__SETMODE) && !defined(HAVE_SETMODE) && !defined(setmode)
+# define setmode(fd,mode) _setmode((fd),(mode))
+#endif
+
+#if !defined(HAVE_SETMODE) && defined(setmode)
+# define HAVE_SETMODE 1
 #endif
 
 static char     * prg;

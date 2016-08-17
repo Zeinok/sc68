@@ -3,7 +3,7 @@
  * @file     unice68_private.h
  * @author   Benjamin Gerard
  * @date     2016/07/29
- * @brief    ICE! depacker private header
+ * @brief    ICE! depacker private header.
  */
 
 /* Copyright (c) 1998-2016 Benjamin Gerard */
@@ -26,13 +26,5 @@
 #ifndef UNICE68_API
 # if defined(UNICE68_WIN32) && defined(unice68_lib_EXPORTS)
 #  define UNICE68_API __declspec(dllexport)
-# elif ! defined()
-
-
-# if defined(unice68_lib_EXPORTS) || 
-
-# if UNICE68_WIN32 && U
-
-
+# endif
 #endif
-

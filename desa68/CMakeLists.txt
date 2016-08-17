@@ -75,6 +75,9 @@ message("${PACKAGE} version ${VERSION} (${PACKAGE_VERNUM})")
 # $$$ Shouldn't those file be by configuration instead of by build ?
 
 set(prefix "${CMAKE_INSTALL_PREFIX}")
+set(exec_prefix "${prefix}")
+set(datarootdir "${DATAROOTDIR}")
+set(datadir "${DATADIR}")
 set(includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
 set(libdir "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
 

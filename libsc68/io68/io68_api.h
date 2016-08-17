@@ -11,21 +11,13 @@
 #ifndef IO68_IO68_API_H
 #define IO68_IO68_API_H
 
+#ifndef IO68_EXTERN
+# include "sc68/sc68.h"
+# define IO68_EXTERN SC68_EXTERN
+#endif
+
 #ifndef IO68_API
-# ifdef IO68_EXPORT
-#  ifndef SC68_EXPORT
-#   define SC68_EXPORT 1
-#  endif
-#  include "sc68/sc68.h"
-#  define IO68_EXTERN SC68_EXTERN
-#  define IO68_API    SC68_API
-# elif defined (__cplusplus)
-#  define IO68_EXTERN extern "C"
-#  define IO68_API    IO68_EXTERN
-# else
-#  define IO68_EXTERN extern
-#  define IO68_API    IO68_EXTERN
-# endif
+# define IO68_API IO68_EXTERN
 #endif
 
 #endif

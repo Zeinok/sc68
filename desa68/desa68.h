@@ -19,26 +19,6 @@
 # endif
 #endif
 
-#ifndef DESA68_API
-/* Building */
-# ifdef DESA68_EXPORT
-#  if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
-#   define DESA68_API __declspec(dllexport)
-#  elif defined(HAVE_VISIBILITY)
-#   define DESA68_API DESA68_EXTERN __attribute__ ((visibility("default")))
-#  else
-#   define DESA68_API DESA68_EXTERN
-#  endif
-/* Using */
-# else
-#  if defined(DESA68_DLL)
-#   define DESA68_API __declspec(dllimport)
-#  else
-#   define DESA68_API DESA68_EXTERN
-#  endif
-# endif
-#endif
-
 /**
  * @defgroup lib_desa68 desa68 library
  * @ingroup  sc68_dev_lib
@@ -92,7 +72,7 @@
  */
 
 #ifndef DESA68_API
-# error "DESA68_API should be defined"
+# define DESA68_API DESA68_EXTERN
 #endif
 
 /**
@@ -135,7 +115,7 @@ enum {
    * to a special char set (alpha-numeric, space and a few other chars
    * [-_!.#]).
    *
-   * @warning The name of this flag cab be misleading.
+   * @warning The name of this flag can be misleading.
    * @see DESA68_ALNUM_FLAG
    * @see DESA68_GRAPH_FLAG
    */
@@ -433,7 +413,7 @@ DESA68_API
 /**
  * Get version number.
  *
- * @return X*100+Y*10+Z.
+ * @return MAJOR*1E8 + MINOR*1E6 + PATCH*1E4 + TWEAK
  */
 int desa68_version(void);
 
@@ -442,7 +422,7 @@ DESA68_API
 /**
  * Get version string.
  *
- * @return version string.
+ * @return version string (MAJOR.MINOR.PATCH.TWEAK).
  */
 const char * desa68_versionstr(void);
 

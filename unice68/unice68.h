@@ -19,26 +19,6 @@
 # endif
 #endif
 
-#ifndef UNICE68_API
-/* Building */
-# ifdef UNICE68_EXPORT
-#  if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
-#   define UNICE68_API __declspec(dllexport)
-#  elif defined(HAVE_VISIBILITY)
-#   define UNICE68_API UNICE68_EXTERN __attribute__ ((visibility("default")))
-#  else
-#   define UNICE68_API UNICE68_EXTERN
-#  endif
-/* Using */
-# else
-#  if defined(UNICE68_DLL)
-#   define UNICE68_API __declspec(dllimport)
-#  else
-#   define UNICE68_API UNICE68_EXTERN
-#  endif
-# endif
-#endif
-
 /**
  *  @defgroup  lib_unice68  unice68 library
  *  @ingroup   sc68_dev_lib
@@ -66,15 +46,14 @@
  *
  *  Define special atributs for importing/exporting unice68 symbols.
  */
-#define UNICE68_API UNICE68_EXTERN
-#error "UNICE68_API should be defined"
+# define UNICE68_API UNICE68_EXTERN
 #endif
 
 UNICE68_API
 /**
  *  Get unice68 version.
  *
- *  @return version number
+ *  @return MAJOR*1E8 + MINOR*1E6 + PATCH*1E4 + TWEAK
  */
 int unice68_version(void);
 

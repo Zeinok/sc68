@@ -2,7 +2,7 @@
                                    
                  unice68 is part of the sc68 project
                        
-                    (C) 1998-2015 Benjamin Gerard
+                    (C) 1998-2016 Benjamin Gerard
 
 
 ABOUT UNICE68
@@ -65,3 +65,16 @@ ABOUT ICE!
     PACK-ICE is simply  the best packer that's available on  the ST. I
     used especially  much time to  get the depacking-routine  as small
     and fast (!!!) as possible
+
+
+HERE COMES A NEW CHALENGER
+
+  pack-ice source code has been release. It's a much comprehensive ice
+  packer/depacker library with various command line utilities.
+
+  pack-ice by lars brinkhoff <lars@nocrew.org> is available at
+  <https://github.com/larsbrinkhoff/pack-ice>
+
+  I might or not use this library in the future. It's clearly cleaner
+  than unice68 rough conversion of the 68K code. However unice68 has
+  been extensively tested and it's working flawlessly (so far).

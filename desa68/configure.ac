@@ -11,9 +11,11 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
+define([sc_version], esyscmd([sh vcversion.sh 2.0.0]))dnl
+
 AC_INIT(
   [desa68],
-  [20150326],
+  sc_version,
   [http://sourceforge.net/projects/sc68/],
   [desa68],
   [libdesa68],
@@ -47,8 +49,6 @@ PAC_LFLAGS="-L[$]libdir -ldesa68"
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([
-    libdesa68.spec
-    libdesa68-${VERSION}.ebuild:libdesa68.ebuild.in
     desa68.pc
     Makefile])
 AC_OUTPUT

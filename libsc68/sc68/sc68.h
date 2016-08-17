@@ -19,26 +19,6 @@
 # endif
 #endif
 
-#ifndef SC68_API
-/* Building */
-# ifdef SC68_EXPORT
-#  if defined(DLL_EXPORT) && defined(HAVE_DECLSPEC)
-#   define SC68_API __declspec(dllexport)
-#  elif defined(HAVE_VISIBILITY)
-#   define SC68_API SC68_EXTERN __attribute__ ((visibility("default")))
-#  else
-#   define SC68_API SC68_EXTERN
-#  endif
-/* Using */
-# else
-#  if defined(SC68_DLL)
-#   define SC68_API __declspec(dllimport)
-#  else
-#   define SC68_API SC68_EXTERN
-#  endif
-# endif
-#endif
-
 /**
  * @defgroup  lib_sc68  sc68 library
  * @ingroup   sc68_dev_lib
@@ -112,7 +92,7 @@
  * - __declspec(dllexport): creating a win32 DLL.
  * - __declspec(dllimport): using a win32 DLL.
  */
-#define SC68_API extern
+# define SC68_API SC68_EXTERN
 #endif
 
 /** API information. */

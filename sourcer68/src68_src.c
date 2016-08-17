@@ -55,8 +55,10 @@ typedef struct {
   /* disassebler options */
   struct {
     uint_t show_opcode:1;         /* show opcodes */
+    uint_t dcb_graph:2;           /* string litteral in data */
     char * star_symbol;           /* symbol for current address (*) */
     uint_t dc_size;               /* default data size */
+    char quote;               /* char used to quote litteral string */
   } opt;
 
   /* disassemby temp buffer */
@@ -76,17 +78,47 @@ enum {
 /* Temporary replacement. Should be consistent with the ischar()
  * function used by desa68()
  */
-static int src_ischar(src_t * src, uint_t v, int type)
+
+static int my_isnever(src_t * src, int c)
+{
+  return 0;
+}
+
+static int my_isalnum(src_t * src, int c)
+{
+  return (c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9');
+}
+
+static int my_isgraph(src_t * src, int c)
+{
+  return c >= 32 && c < 127 && c != src->opt.quote;
+}
+
+static int my_isascii(src_t * src, int c)
+{
+  return
+    c == '-' || c=='_' || c==' ' || c == '!' || c == '.' || c == '#'
+    || (c>='a' && c<='z') || (c>='A' && c<='Z') || (c>='0' && c<='9');
+}
+
+static int src_isgraph_any (src_t * src, uint_t v, int type,
+                        int (*ischar)(src_t *,int))
 {
   while (--type >= 0) {
-    int c = v & 255;
+    const int c = v & 255;
     v >>= 8;
-    if ( ! (c == '-' || c=='_' || c==' ' || c == '!' || c == '.' || c == '#'
-            || (c>='a' && c<='z') || (c>='A' && c<='Z')
-            || (c>='0' && c<='9')))
+    if ( ! ischar(src,c) )
       return 0;
   }
   return 1;
+}
+
+static int src_isgraph(src_t * src, uint_t v, int type)
+{
+  static int (*ischar_lut[4])(src_t *,int) = {
+    my_isnever, my_isascii, my_isalnum, my_isgraph
+  };
+  return src_isgraph_any(src,v,type,ischar_lut[src->opt.dcb_graph]);
 }
 
 static int src_islabel(src_t * src, uint_t adr)
@@ -202,7 +234,7 @@ int data(src_t * src, uint_t max)
 {
   static const int  maxpl[] = { 8,  8,  16, 16, 16 };
   static const char typec[] = {'0','b','w','3','l' };
-  const char quote = '"';
+  const char quote = src->opt.quote;
   mbk_t * const mbk = src->exe->mbk;
 
   int typed = 0;                       /* 0:untyped 1:byte 2:word 4:long */
@@ -279,14 +311,14 @@ int data(src_t * src, uint_t max)
     switch (typed) {
     case 1:
       v = mbk_byte(mbk, iadr);
-      if (src_ischar(src, v, 1))
-        src_putf(src, "%cc%c", quote, v, quote);
+      if (src_isgraph(src, v, 1))
+        src_putf(src, "%c%c%c", quote, v, quote);
       else
         src_putf(src, "$%02X", v);
       break;
     case 2:
       v = mbk_word(mbk, iadr);
-      if (src_ischar(src, v, 2))
+      if (src_isgraph(src, v, 2))
         src_putf(src, "%c%c%c%c",
                  quote, (char)(v>>8), (char)v, quote);
       else
@@ -297,7 +329,7 @@ int data(src_t * src, uint_t max)
       if ( mib & MIB_RELOC ) {
         symbol_at(src, v);
       } else {
-        if (src_ischar(src, v, 4))
+        if (src_isgraph(src, v, 4))
           src_putf(src, "%c%c%c%c%c%c", quote,
                    (char)(v>>24), (char)(v>>16), (char)(v>>8), (char)v,
                    quote) ;
@@ -438,7 +470,9 @@ int src_exec(fmt_t * fmt, exe_t * exe)
   src.str.max = sizeof(strbuf);
   src.opt.star_symbol = "*";            /* star symbol */
   src.opt.show_opcode = 1;              /* show opcodes */
-  src.opt.dc_size = 2;                  /* default to dc.w */
+  src.opt.dc_size = 1;                  /* default to dc.b */
+  src.opt.quote = '"';                  /* default string quote */
+  src.opt.dcb_graph = 0;
 
   symbol_sort_byaddr(exe->symbols);     /* to walk symbols in order */
 

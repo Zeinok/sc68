@@ -8,6 +8,7 @@
 # Copyright (c) 2007-2016 Benjamin Gerard
 #
 
+set -e
 
 me="svn-bootstrap.sh"
 ln_s="ln -sf --"
@@ -109,6 +110,15 @@ ln_or_cp() {
     $cp_r "$1" "$2"
 }
 
+# $1: source  $2: destination
+ln_or_cp_x() {
+    msg "${linking} executable '$1' -> '$2'"
+    $ln_s "$1" "$2" || {
+	$cp_r "$1" "$2";
+	chmod u+x "$2";
+    }
+}
+
 # $1: dir  $2: --force
 bootstrap_dir() {
     local dir="$1" m4file=ac_package_extra.m4 force='' 
@@ -122,6 +132,9 @@ bootstrap_dir() {
     testfile "${dir}/configure.ac"    || return 1
     testfile "${dir}/Makefile.am"     || return 1
     testfile "${dir}/../AUTHORS"      || return 1
+
+    ( cd "${dir}" &&
+	    ln_or_cp_x ../tools/vcversion.sh vcversion.sh )
     
     for obj in m4 AUTHORS README; do
 	test=false
@@ -172,11 +185,14 @@ bootstrap_dir() {
 
 # Test some required tools
 testtool help2man    "missing help2man -- install package 'help2man'"
-testtool texinfo2man "missing textinfo2man -- compile and install 'tools/texinfo2man.c'"
+testtool texinfo2man "missing texinfo2man -- compile and install 'tools/texinfo2man.c'"
 testtool od
 
 # Test for aclocal68 directory
 testdir aclocal68 fatal
+
+# Test for required file
+testfile ./tools/vcversion.sh
 
 # In the top source dir create a m4 directory filled with invidual
 # symbolic links to aclocal68 files. All sub directories only link

@@ -26,6 +26,7 @@
 # include "config.h"
 #endif
 
+#include "desa68_private.h"
 #include "desa68.h"
 
 #ifdef HAVE_ASSERT_H
@@ -39,7 +40,7 @@
  * in most cases.
  * ====================================================================== */
 
-#if defined(HAVE_STDINT_H)
+#ifdef HAVE_STDINT_H
 #include <stdint.h>
 typedef int8_t   s8;
 typedef uint8_t  u8;
@@ -83,7 +84,7 @@ typedef unsigned int uint;
 
 /* Bit macros */
 #define BTST(V,N) ( (V) & ( 1u << (N) ) ) /* bit test */
-#define BITV(V,N) ( ( (V) >> (N) ) & 1u ) /* vit value */
+#define BITV(V,N) ( ( (V) >> (N) ) & 1u ) /* bit value */
 #define BIT8(V)   BITV(V,8)
 
 
@@ -504,7 +505,7 @@ static inline void ref_set(struct desa68_ref * ref, uint v, int rtype)
 
 static void set_branch(desa68_t * d, uint addr, int itype)
 {
-  assert(itype == DESA68_INT || itype ==DESA68_BRA || itype ==DESA68_BSR);
+  assert(itype == DESA68_INT || itype == DESA68_BRA || itype == DESA68_BSR);
   d->itype = itype;
   d->dref.type = SZ_ADDR;
   d->dref.addr = addr;
