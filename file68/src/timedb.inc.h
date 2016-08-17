@@ -1,4 +1,5 @@
  TIMEDB_ENTRY( 000f819c,  1,     73089,               TA+YM), /* 03713 - Chris of TGE - Combo Racer Cracktro */
+ TIMEDB_ENTRY( 003cbe93,  1,     59278,                  YM), /* 03144 - Unknown - OLD JOE CLARK'S BOOGIE */
  TIMEDB_ENTRY( 003ea255,  1,     24720,         TA+TB+TD+YM), /* 04937 - STU - AIR */
  TIMEDB_ENTRY( 00411850,  1,      8277,                  YM), /* 02509 - Crazy Q - Crators-DHS-YMR - Monolouge(1ch Minimalism) */
  TIMEDB_ENTRY( 005a16ee,  1,      8705,                  YM), /* 01049 - Dr Beat - NTM - Menu */
@@ -74,9 +75,9 @@
  TIMEDB_ENTRY( 02efdd55,  1,     18048,                  YM), /* 01650 - Jedi - Megatizer Intro */
  TIMEDB_ENTRY( 030ad120,  1,      8448,               TD+YM), /* 03222 - Tomchi - Sinus Screen */
  TIMEDB_ENTRY( 0310839a,  1,      5376,                  YM), /* 04639 - Crawdaddy - Dropzone */
- TIMEDB_ENTRY( 032b08a1,  1,      4378,                  YM), /* 03157 - n-a - SAILORS' BOOGIE */
  TIMEDB_ENTRY( 0343ebe8,  1,      9971,         TA+TB+TD+YM), /* 03618 - gwEm - Ex in my Bed */
  TIMEDB_ENTRY( 03527bd9,  1,      4095,                  YM), /* 00029 - 505 - Rectangular Waves */
+ TIMEDB_ENTRY( 0378800f,  1,     91168,                  YM), /* 03111 - Unknown - Estrel */
  TIMEDB_ENTRY( 037aecb0,  1,     14976,            TA+TD+YM), /* 03314 - SH3-RG - Saboteur 2 */
  TIMEDB_ENTRY( 03834eef,  1,     11524,            TA+TD+YM), /* 02298 - Tao - Cream - Pop 2149 (Alive 6) */
  TIMEDB_ENTRY( 03840236,  1,      4031,            TA+TD+YM), /* 03339 - marcer - jambala 8 mix */
@@ -86,10 +87,12 @@
  TIMEDB_ENTRY( 03b2ad1f,  1,      1530,         TA+TB+TD+YM), /* 01945 - MSG - Chu Chu Rocket - Hurry Up */
  TIMEDB_ENTRY( 03b4dc3b,  1,     28160,                  YM), /* 01419 - Sonic - Aura */
  TIMEDB_ENTRY( 03c1b536,  1,      3200,               TA+YM), /* 04589 - Illusion - Pure Energy 5 */
+ TIMEDB_ENTRY( 03ccf546,  1,    141237,                  YM), /* 03096 - Unknown - Pachelbel's Canon in D */
  TIMEDB_ENTRY( 03d0fbe6,  1,      1293,                  YM), /* 02966 - Unknown - Quiz Construction Kit */
  TIMEDB_ENTRY( 03d0fbe6,  2,      4042,                  YM), /* 02966 - Unknown - Quiz Construction Kit */
  TIMEDB_ENTRY( 03d0fbe6,  3,      2730,                  YM), /* 02966 - Unknown - Quiz Construction Kit */
  TIMEDB_ENTRY( 03e4f84a,  1,      2319,                  YM), /* 03065 - Chris French - Deck the Halls */
+ TIMEDB_ENTRY( 04126be5,  1,      1227,                  YM), /* 04975 - Unknown - Mash */
  TIMEDB_ENTRY( 0431a07d,  1,      2239,                  YM), /* 02447 - Tony Williams - Teenage Mutant Hero Turtles */
  TIMEDB_ENTRY( 0431a07d,  2,       767,                  YM), /* 02447 - Tony Williams - Teenage Mutant Hero Turtles */
  TIMEDB_ENTRY( 0431a07d,  3,      1455,                  YM), /* 02447 - Tony Williams - Teenage Mutant Hero Turtles */
@@ -128,6 +131,7 @@
  TIMEDB_ENTRY( 04d2a4e4,  1,      6047,                  YM), /* 04753 - 505 - Sommarhack 2015 invite */
  TIMEDB_ENTRY( 04f8965b,  1,      3072,                  YM), /* 02053 - Mad Max - Small Title */
  TIMEDB_ENTRY( 04f9af8d,  1,      5840,               TD+YM), /* 02393 - Nexus 6 - Praximate Digi */
+ TIMEDB_ENTRY( 050e263c,  1,    170169,                  YM), /* 03088 - Unknown - She's Always A Woman */
  TIMEDB_ENTRY( 05259830,  1,      9830,                  YM), /* 00579 - Jas C Brooke - Vixen */
  TIMEDB_ENTRY( 05259830,  2,      2048,                  YM), /* 00579 - Jas C Brooke - Vixen */
  TIMEDB_ENTRY( 05259830,  3,        81,                  YM), /* 00579 - Jas C Brooke - Vixen */
@@ -199,7 +203,6 @@
  TIMEDB_ENTRY( 0680ba94,  1,     11839,                  YM), /* 03444 - Per Almered (XiA) 2009 - (S)ave (T)he (E)arth */
  TIMEDB_ENTRY( 0683027e,  1,     77491,               TA+YM), /* 04665 - Robert Wolf - Bilinski */
  TIMEDB_ENTRY( 06846733,  1,      2685,                  YM), /* 01523 - Iso - Faster and Faster */
- TIMEDB_ENTRY( 068751ac,  1,      3626,                  YM), /* 03127 - n-a - Joy to the World */
  TIMEDB_ENTRY( 06899b0e,  1,     13824,                  YM), /* 01815 - Loony - Loony */
  TIMEDB_ENTRY( 068c5209,  1,      4032,                  YM), /* 00605 - Chris Mad - Phalanx Crazy */
  TIMEDB_ENTRY( 0695fcf3,  1,      4607,         TA+TB+TD+YM), /* 04305 - 505-Checkpoint - sherlock */
@@ -226,7 +229,6 @@
  TIMEDB_ENTRY( 06b5c941, 14,      7732,                  YM), /* 02174 - Mad Max - A Prehistoric Tale */
  TIMEDB_ENTRY( 06b5c941, 15,      3888,                  YM), /* 02174 - Mad Max - A Prehistoric Tale */
  TIMEDB_ENTRY( 06d77e3e,  1,     20730,               TA+YM), /* 01719 - Jess - The Twin Paradox */
- TIMEDB_ENTRY( 06ea5b50,  1,      8561,                  YM), /* 03130 - n-a - Life in a Northern Town */
  TIMEDB_ENTRY( 06edd58b,  1,      1343,                  YM), /* 04776 - V!X - Remote Entry #2 */
  TIMEDB_ENTRY( 06f25069,  1,     11264,               TA+YM), /* 03557 - Tomchi - No Extra */
  TIMEDB_ENTRY( 06fbc75f,  1,      1937,                  YM), /* 02231 - Tao - Ikari (Nostalgic-O-Demo) */
@@ -280,7 +282,6 @@
  TIMEDB_ENTRY( 07f97429,  2,       330,                  YM), /* 00878 - Ben Daglish - Ultimate Darts */
  TIMEDB_ENTRY( 0803a8f3,  1,     10752,         TA+TB+TD+YM), /* 02844 - Marcer - POKER */
  TIMEDB_ENTRY( 08054e98,  1,      2303,                  YM), /* 03438 - Proteque - Ratu */
- TIMEDB_ENTRY( 0809146d,  1,      3350,                  YM), /* 03107 - n-a - Eastenders - May-Osborne */
  TIMEDB_ENTRY( 08104278,  1,      5039,                  YM), /* 02376 - Nexus 6 - Happy Muff */
  TIMEDB_ENTRY( 0812636d,  1,     26894,               TA+YM), /* 03880 - Mad Max - Labello */
  TIMEDB_ENTRY( 081efa6f,  1,      3072,               TD+YM), /* 02635 - Miggy - Hyper dog poo ( Unfinished ) */
@@ -294,6 +295,7 @@
  TIMEDB_ENTRY( 088687c4,  1,      7296,            TA+TD+YM), /* 04577 - Crazy Q - DHS - From Da Ghetto With Love */
  TIMEDB_ENTRY( 0886969b,  1,      2685,                  YM), /* 01530 - Iso - Panache Theme */
  TIMEDB_ENTRY( 0889f290,  1,     39936,                  YM), /* 01437 - Stax - Happy */
+ TIMEDB_ENTRY( 08c13002,  1,      6525,        TA+TD+YM+STE), /* 04999 - Damo - Sillyventure 2013 Invite Main */
  TIMEDB_ENTRY( 08ec970f,  1,     25080,               TA+YM), /* 01216 - Energizer - Floating - Digi */
  TIMEDB_ENTRY( 08f09c66,  1,      2370,                  YM), /* 04697 - Unknown - MGD2 */
  TIMEDB_ENTRY( 09052c4b,  1,      4229,                  YM), /* 00081 - David Whittaker - Buffalo Bill */
@@ -341,7 +343,6 @@
  TIMEDB_ENTRY( 09f8ce12,  1,      4600,                  YM), /* 03679 - Dma-Sc - Antiques - Hidden */
  TIMEDB_ENTRY( 09fcded8,  1,     19793,               TA+YM), /* 03734 - David Whittaker - Gazza 2 */
  TIMEDB_ENTRY( 0a1a5a71,  1,      2707,                  YM), /* 01754 - Dave Kelly - Dragon Spirit */
- TIMEDB_ENTRY( 0a1b1734,  1,      7236,                  YM), /* 03162 - n-a - Sidestep by Davidow */
  TIMEDB_ENTRY( 0a28707f,  1,     11142,                  YM), /* 04098 - Gary Wheaton - Out on the Weekend */
  TIMEDB_ENTRY( 0a2c13b6,  1,     11448,         TA+TB+TD+YM), /* 03471 - gwEm (Jester conversion) - Stardust Memories */
  TIMEDB_ENTRY( 0a62127c,  1,     16513,                  YM), /* 00615 - Chrispy Noodle - Sapiens 1 */
@@ -365,6 +366,7 @@
  TIMEDB_ENTRY( 0af49608,  1,      1926,                  YM), /* 03920 - Unknown - Klassik1 */
  TIMEDB_ENTRY( 0af93806,  1,     17408,                  YM), /* 02139 - Mad Max - One Man And His Droid - LCD */
  TIMEDB_ENTRY( 0b06d0dd,  1,     43995,         TA+TB+TD+YM), /* 02442 - cerror - Kicking it oldskool */
+ TIMEDB_ENTRY( 0b077317,  1,      1015,                  YM), /* 04953 - Unknown - California */
  TIMEDB_ENTRY( 0b19f70f,  1,      2240,                  YM), /* 03189 - n-a - Xeron Overture */
  TIMEDB_ENTRY( 0b1d5135,  1,     59618,               TA+YM), /* 03751 - Tufty - Killer - Adamski */
  TIMEDB_ENTRY( 0b1e485c,  1,      6914,                  YM), /* 02117 - Mad Max - Starball */
@@ -372,7 +374,6 @@
  TIMEDB_ENTRY( 0b2b30f2,  1,      8953,                  YM), /* 03565 - DMA SC - Coast II Coast */
  TIMEDB_ENTRY( 0b33f385,  1,     10301,         TA+TB+TD+YM), /* 02521 - ZABUTOM UNT DUBMOOD - DRUMNBICE */
  TIMEDB_ENTRY( 0b4b79f3,  1,     15231,         TA+TB+TD+YM), /* 02707 - DUBMOOD <DEAD KENNEDYS> - TOO DRUNK TO FUCK! */
- TIMEDB_ENTRY( 0b587f22,  1,      3232,                  YM), /* 03185 - Unknown - The Windmills of Your Mind */
  TIMEDB_ENTRY( 0b5cd2b1,  1,      2309,                  YM), /* 02291 - Tao - Cream (orig. Karsten Obarski) - End Theme */
  TIMEDB_ENTRY( 0b5d1a03,  1,      7040,                  YM), /* 01501 - Dave Hasler - Drivin Force */
  TIMEDB_ENTRY( 0b5d1a03,  2,       180,                  YM), /* 01501 - Dave Hasler - Drivin Force */
@@ -388,6 +389,7 @@
  TIMEDB_ENTRY( 0b6d77af,  1,      6590,                  YM), /* 00512 - Tangens - Synthetic Visions - Parallax */
  TIMEDB_ENTRY( 0b753dff,  1,     16896,            TB+TD+YM), /* 02911 - helene - temptrance */
  TIMEDB_ENTRY( 0b7c380e,  1,      6140,                  YM), /* 00061 - 505 - I Want Sid */
+ TIMEDB_ENTRY( 0b7d8c2a,  1,      1011,                  YM), /* 04955 - Unknown - Circus Renz */
  TIMEDB_ENTRY( 0b8092e4,  1,      1921,                  YM), /* 00392 - Wally Beben - Roadwars */
  TIMEDB_ENTRY( 0b8cc2cd,  1,      3839,                  YM), /* 03685 - Dma-Sc - Saboteur 3 - Ending */
  TIMEDB_ENTRY( 0b934018,  1,    268756,               TA+YM), /* 04795 - Unknown - Acid */
@@ -523,7 +525,6 @@
  TIMEDB_ENTRY( 0d7c187d,  3,      8192,                  YM), /* 01883 - Dave Lowe - F-15 Strike Eagle 2 */
  TIMEDB_ENTRY( 0d7c187d,  4,      1152,                  YM), /* 01883 - Dave Lowe - F-15 Strike Eagle 2 */
  TIMEDB_ENTRY( 0d7c187d,  5,      1920,                  YM), /* 01883 - Dave Lowe - F-15 Strike Eagle 2 */
- TIMEDB_ENTRY( 0dc79d68,  1,      4845,                  YM), /* 03183 - n-a - WhatChildIsThis */
  TIMEDB_ENTRY( 0dc7e44f,  1,      1595,               TA+YM), /* 02638 - Miggy - Meow (Unfinished) */
  TIMEDB_ENTRY( 0dd0f1e9,  1,      2925,         TA+TB+TD+YM), /* 04308 - 505-checkpoint - ST_M */
  TIMEDB_ENTRY( 0ded0765,  1,      4218,         TA+TB+TD+YM), /* 04255 - 505-checkpoint - eighties */
@@ -543,6 +544,7 @@
  TIMEDB_ENTRY( 0e45e998,  1,      5183,                  YM), /* 04095 - Gary Wheaton - Strawberry Fields */
  TIMEDB_ENTRY( 0e636894,  1,      7681,                  YM), /* 00363 - Steve Barrett - Italy 1990 */
  TIMEDB_ENTRY( 0e68ab31,  1,      1536,                  YM), /* 04844 - t1000 - Bits 40 */
+ TIMEDB_ENTRY( 0e7c8353,  1,    191208,                  YM), /* 03126 - Unknown - I Just Called to Say I Love U */
  TIMEDB_ENTRY( 0e9487aa,  1,      8112,                  YM), /* 01259 - Tim Follin - Led Storm */
  TIMEDB_ENTRY( 0e9487aa,  2,      1561,                  YM), /* 01259 - Tim Follin - Led Storm */
  TIMEDB_ENTRY( 0e9487aa,  3,      4032,                  YM), /* 01259 - Tim Follin - Led Storm */
@@ -563,6 +565,7 @@
  TIMEDB_ENTRY( 0f191d4d,  1,      3583,         TA+TB+TD+YM), /* 02838 - maktone-fairlight - nelson */
  TIMEDB_ENTRY( 0f259465,  1,      1920,                  YM), /* 04605 - White Ninja - Love Desaster */
  TIMEDB_ENTRY( 0f2e0c09,  1,     11945,                  YM), /* 04379 - 505 - RoboST (STE) */
+ TIMEDB_ENTRY( 0f4deb4f,  1,      3496,                  YM), /* 04998 - Mr. Man - AFR Intro */
  TIMEDB_ENTRY( 0f540c0c,  1,      4992,                  YM), /* 00497 - Ultimatum - Kidney Bean - Reset */
  TIMEDB_ENTRY( 0f546b2b,  1,      5361,                  YM), /* 02506 - Crazy Q - Crushed Insect (RG mix) */
  TIMEDB_ENTRY( 0f55518f,  1,      2690,               TA+YM), /* 00930 - Dark Angel - Logic Force */
@@ -601,7 +604,6 @@
  TIMEDB_ENTRY( 106bb9c8,  1,     49675,               TA+YM), /* 04667 - Zbyhoo & Kijop - Bob Dylan */
  TIMEDB_ENTRY( 1075f97c,  1,     15354,                  YM), /* 01693 - Jess - Jochen Spirit */
  TIMEDB_ENTRY( 107f3197,  1,      1680,               TA+YM), /* 02886 - Deneb - The Puppy Show - Menu */
- TIMEDB_ENTRY( 1099deae,  1,     10171,                  YM), /* 03145 - n-a - Orange Blossom Special */
  TIMEDB_ENTRY( 10a1171f,  1,      4600,               TA+YM), /* 04227 - 505 - 6th */
  TIMEDB_ENTRY( 10a18d1f,  1,      9412,                  YM), /* 02234 - Tao - Main menu (Nostalgic-O-Demo) */
  TIMEDB_ENTRY( 10a51096,  1,     33792,         TA+TB+TD+YM), /* 02547 - SCHMX & STU - HIGHWAY UP NORTH */
@@ -624,6 +626,7 @@
  TIMEDB_ENTRY( 11786b23,  1,     23808,            TB+TD+YM), /* 04751 - Xrwwr - SOS (2015 Remix) */
  TIMEDB_ENTRY( 11906bd8,  1,     11641,               TA+YM), /* 01936 - Miq - Rolling */
  TIMEDB_ENTRY( 11ae621c,  1,      1339,                  YM), /* 03488 - Kevin Toms - Football Manager */
+ TIMEDB_ENTRY( 11c32d67,  1,    152954,                  YM), /* 03128 - Unknown - Jump */
  TIMEDB_ENTRY( 11dc782e,  1,      5193,               TA+YM), /* 01610 - No More - Blast */
  TIMEDB_ENTRY( 11e19312,  1,      5005,                  YM), /* 01119 - Paul Tonge - Civilisation */
  TIMEDB_ENTRY( 11e19312,  2,       385,                  YM), /* 01119 - Paul Tonge - Civilisation */
@@ -648,8 +651,10 @@
  TIMEDB_ENTRY( 12121edb,  1,      2400,                  YM), /* 04481 - Mad Max - Return of Medusa (unused) */
  TIMEDB_ENTRY( 1215648d,  1,      3840,                  YM), /* 00786 - Crawdaddy - Detonation */
  TIMEDB_ENTRY( 1219e345,  1,      5712,               TA+YM), /* 04439 - Lotus - Synth Dream 2 - Wishful Thinking */
+ TIMEDB_ENTRY( 122cd5ce,  1,      1266,                  YM), /* 04988 - Unknown - Thank You */
  TIMEDB_ENTRY( 122d5a9a,  1,      4608,            TA+TD+YM), /* 02570 - !Cube-Aggression - Earth */
  TIMEDB_ENTRY( 122fe23f,  1,     17019,               TA+YM), /* 03749 - Tufty - Kaos 1 Hyp */
+ TIMEDB_ENTRY( 123b0cd4,  1,      1986,                  YM), /* 04957 - Unknown - Coming Bach */
  TIMEDB_ENTRY( 123b4b2f,  1,     26592,                  YM), /* 03477 - gwEm (Manou conversion) - RetroModern */
  TIMEDB_ENTRY( 1281c6f4,  1,      6138,         TA+TB+TD+YM), /* 00831 - Crazy Q - Timebomb ( 2003 ) - Phat & Phunky Part 1 (YM Rockerz) */
  TIMEDB_ENTRY( 129247c8,  1,      8832,                  YM), /* 04848 - t1000 - Bits 42 */
@@ -771,15 +776,16 @@
  TIMEDB_ENTRY( 15b445e9,  1,     79899,               TA+YM), /* 01372 - Scavenger - Having a Period in 3D Space */
  TIMEDB_ENTRY( 15c672dc,  1,     15360,         TA+TB+TD+YM), /* 03428 - Marcer - n-a */
  TIMEDB_ENTRY( 15d4bdc9,  1,     14592,            TA+TD+YM), /* 02503 - Crazy Q - Creators^DHS - Chameleon */
- TIMEDB_ENTRY( 15e0eb75,  1,      4810,                  YM), /* 03131 - Unknown - O Little Town of Bethlehem */
  TIMEDB_ENTRY( 15ecb8cc,  1,      9600,                  YM), /* 04838 - t1000 - Bits 33 */
  TIMEDB_ENTRY( 160fbf10,  1,      7704,                  YM), /* 00617 - Chrispy Noodle - Tristar */
  TIMEDB_ENTRY( 161a542a,  1,      6079,         TA+TB+TD+YM), /* 01152 - Tyan - Platz 1 */
+ TIMEDB_ENTRY( 162062ad,  1,    156576,                  YM), /* 03186 - Unknown - YANKEE DOODLE BOY */
  TIMEDB_ENTRY( 16228d20,  1,      3079,                  YM), /* 02735 - Jeremy Das - Jungle Boy */
  TIMEDB_ENTRY( 1650dd24,  1,     16144,                  YM), /* 00089 - David Whittaker - Cosmic Pirates */
  TIMEDB_ENTRY( 1650dd24,  2,     15360,                  YM), /* 00089 - David Whittaker - Cosmic Pirates */
  TIMEDB_ENTRY( 1650dd24,  3,        26,                  YM), /* 00089 - David Whittaker - Cosmic Pirates */
  TIMEDB_ENTRY( 1650dd24,  4,       607,                  YM), /* 00089 - David Whittaker - Cosmic Pirates */
+ TIMEDB_ENTRY( 165b51bb,  1,      1486,                  YM), /* 04971 - Unknown - Jukebox */
  TIMEDB_ENTRY( 167e07f3,  1,      6527,         TA+TB+TD+YM), /* 02981 - 505-paradox - disco slide */
  TIMEDB_ENTRY( 1692a08e,  1,      5565,         TA+TB+TD+YM), /* 00203 - 505 - Checkpoint - tripping */
  TIMEDB_ENTRY( 16bfa1c0,  1,      3840,                  YM), /* 01074 - Excellence In Art - Bellis Boot */
@@ -843,7 +849,6 @@
  TIMEDB_ENTRY( 193886d5,  3,       171,                  YM), /* 00338 - Tony Williams - Chuckie Egg */
  TIMEDB_ENTRY( 193cfddc,  1,      6257,         TA+TB+TD+YM), /* 04278 - 505 - Lousy */
  TIMEDB_ENTRY( 19654ee5,  1,      2303,                  YM), /* 02823 - COOPER, ORIGINAL BY CLAWZ - ZNAX HIGHSCORES */
- TIMEDB_ENTRY( 196ad751,  1,      6938,                  YM), /* 03124 - Unknown - I Am A Rock        P.Simon */
  TIMEDB_ENTRY( 196c6bbd,  1,     10253,                  YM), /* 01296 - Matt Furniss - E.F.T.P.O.T.R.M. */
  TIMEDB_ENTRY( 196c6bbd,  2,      1150,                  YM), /* 01296 - Matt Furniss - E.F.T.P.O.T.R.M. */
  TIMEDB_ENTRY( 196c6bbd,  3,      3070,                  YM), /* 01296 - Matt Furniss - E.F.T.P.O.T.R.M. */
@@ -957,7 +962,6 @@
  TIMEDB_ENTRY( 1c0016df,  4,       147,                  YM), /* 00115 - David Whittaker - Licence to Kill */
  TIMEDB_ENTRY( 1c0016df,  5,       668,                  YM), /* 00115 - David Whittaker - Licence to Kill */
  TIMEDB_ENTRY( 1c24767c,  1,     13056,                  YM), /* 01649 - Jedi - Loader */
- TIMEDB_ENTRY( 1c2f24ac,  1,      9560,                  YM), /* 03126 - Unknown - I Just Called to Say I Love U */
  TIMEDB_ENTRY( 1c3714a1,  1,     35506,                  YM), /* 01473 - stu - punkey */
  TIMEDB_ENTRY( 1c432308,  1,      3840,                  YM), /* 01055 - Jonathan Dunn - The Addams Family */
  TIMEDB_ENTRY( 1c432308,  2,      6353,                  YM), /* 01055 - Jonathan Dunn - The Addams Family */
@@ -973,7 +977,6 @@
  TIMEDB_ENTRY( 1c976fba,  1,     17594,            TA+TD+YM), /* 02626 - sh3-rg - teh won */
  TIMEDB_ENTRY( 1ca333b3,  1,      3224,               TA+YM), /* 04304 - 505-checkpoint - Scheme */
  TIMEDB_ENTRY( 1cbe11b8,  1,     18059,            TB+TD+YM), /* 04574 - Nemo - Undercover Action Agents */
- TIMEDB_ENTRY( 1ccbc756,  1,      1736,                  YM), /* 03089 - Unknown - Don't Stop Believing,"Journey" */
  TIMEDB_ENTRY( 1cd22eb0,  1,      5760,                  YM), /* 04914 - Tao - Feelings */
  TIMEDB_ENTRY( 1cf75009,  1,      3095,         TA+TB+TD+YM), /* 03421 - Dubmood - Tempest - Acidjazzed Evenings (Dubmood) */
  TIMEDB_ENTRY( 1d005ee4,  1,      4771,                  YM), /* 02033 - Mad Max - Gerry The Germ */
@@ -1048,7 +1051,6 @@
  TIMEDB_ENTRY( 1e62974f,  6,       457,                  YM), /* 04615 - Al Lowe - Leisure Suit Larry - Lounge Lizards */
  TIMEDB_ENTRY( 1e62974f,  7,      3059,                  YM), /* 04615 - Al Lowe - Leisure Suit Larry - Lounge Lizards */
  TIMEDB_ENTRY( 1e62974f,  8,      1420,                  YM), /* 04615 - Al Lowe - Leisure Suit Larry - Lounge Lizards */
- TIMEDB_ENTRY( 1e6a3f09,  1,      4027,                  YM), /* 03108 - Unknown - ST. ELSEWHERE by Dave Grusin */
  TIMEDB_ENTRY( 1e736ec8,  1,      7424,                  YM), /* 04350 - YERZMYEY-AY-RIDERS - OUT OF THE MIST */
  TIMEDB_ENTRY( 1e800203,  1,      2911,            TB+TD+YM), /* 04891 - Dma-Sc - Sector One - Circle Dots */
  TIMEDB_ENTRY( 1e841691,  1,     39807,         TA+TB+TD+YM), /* 03332 - Marcer - cpu slider preview */
@@ -1101,6 +1103,7 @@
  TIMEDB_ENTRY( 202606bd,  2,       541,                  YM), /* 00741 - Sean Conran - Defenders of the Earth */
  TIMEDB_ENTRY( 202606bd,  3,       543,                  YM), /* 00741 - Sean Conran - Defenders of the Earth */
  TIMEDB_ENTRY( 202606bd,  4,      3540,                  YM), /* 00741 - Sean Conran - Defenders of the Earth */
+ TIMEDB_ENTRY( 203b31c6,  1,     93920,                  YM), /* 03101 - Unknown - Children's Corner # 3 */
  TIMEDB_ENTRY( 20407076,  1,      9109,         TA+TB+TD+YM), /* 03585 - Divag - Mental Fury */
  TIMEDB_ENTRY( 204dfdd6,  1,      3918,                  YM), /* 01288 - Matt Furniss - AV8B Harrier */
  TIMEDB_ENTRY( 2057279c,  1,      9863,               TA+YM), /* 02329 - Tao - Cream - Ride The Sky (Digidrum-version) */
@@ -1119,6 +1122,7 @@
  TIMEDB_ENTRY( 20663a2a,  1,      1538,                  YM), /* 00417 - Big Alec - Offbeat */
  TIMEDB_ENTRY( 206a8bf9,  1,     12931,                  YM), /* 00333 - Gary Wheaton - Boom */
  TIMEDB_ENTRY( 20a6777b,  1,      5621,                  YM), /* 01733 - Jookie - Xmas Intro */
+ TIMEDB_ENTRY( 20a6aa98,  1,    128487,                  YM), /* 03176 - Unknown - Today   Randy Sparks */
  TIMEDB_ENTRY( 20b4380c,  1,      4521,                  YM), /* 03059 - Ed Bogas - Kyrie eleison-Mozart's REQUIEM */
  TIMEDB_ENTRY( 20be5296,  1,      5151,         TA+TB+TD+YM), /* 04243 - 505-Checkpoint (2000) - banga */
  TIMEDB_ENTRY( 20d12ca5,  1,     42411,                  YM), /* 01686 - Jess - See ya Again on Falcon */
@@ -1147,6 +1151,11 @@
  TIMEDB_ENTRY( 21588958,  1,      8256,                  YM), /* 01083 - Techno - X-Show 1 - Intro */
  TIMEDB_ENTRY( 216b8a9a,  1,      4992,                  YM), /* 01175 - Sally - Sally 1 */
  TIMEDB_ENTRY( 216ba57f,  1,     20352,                  YM), /* 02876 - Agrajag - 3.5k Megademo Menu */
+ TIMEDB_ENTRY( 2170c7f4,  1,      7680,                  YM), /* 05002 - Fred Eric Gerard - Super Cauldron */
+ TIMEDB_ENTRY( 2170c7f4,  2,      3840,                  YM), /* 05002 - Fred Eric Gerard - Super Cauldron */
+ TIMEDB_ENTRY( 2170c7f4,  3,      5765,                  YM), /* 05002 - Fred Eric Gerard - Super Cauldron */
+ TIMEDB_ENTRY( 2170c7f4,  4,      3072,                  YM), /* 05002 - Fred Eric Gerard - Super Cauldron */
+ TIMEDB_ENTRY( 2170c7f4,  5,      6144,                  YM), /* 05002 - Fred Eric Gerard - Super Cauldron */
  TIMEDB_ENTRY( 218084c3,  1,      6339,               TA+YM), /* 04586 - Technoblip - Pure Energy 3 */
  TIMEDB_ENTRY( 21c43e70,  1,      3072,                  YM), /* 01496 - Alex Herbert - Delta */
  TIMEDB_ENTRY( 21d10358,  1,     55934,               TA+YM), /* 04808 - Unknown - Oh Yeah */
@@ -1180,13 +1189,13 @@
  TIMEDB_ENTRY( 2251acfe,  1,     13818,         TA+TB+TD+YM), /* 01005 - DMA-SC - Odd Stuff end music */
  TIMEDB_ENTRY( 225519c5,  1,      5760,            TA+TD+YM), /* 02327 - Tao - Cream - MV Jeu - Title (Steps) */
  TIMEDB_ENTRY( 22564cc6,  1,      5374,                  YM), /* 03199 - Martin Iveson - Arcade Classix - Centipede */
+ TIMEDB_ENTRY( 2258ae09,  1,    166528,                  YM), /* 03118 - Unknown - Goodbye Yellow Brick Road */
  TIMEDB_ENTRY( 2271789a,  2,      6144,                  YM), /* 03273 - Haiko Ruttman - Twinworld */
  TIMEDB_ENTRY( 2271789a,  3,      3840,                  YM), /* 03273 - Haiko Ruttman - Twinworld */
  TIMEDB_ENTRY( 2271789a,  4,      3072,                  YM), /* 03273 - Haiko Ruttman - Twinworld */
  TIMEDB_ENTRY( 2271789a,  5,      3507,                  YM), /* 03273 - Haiko Ruttman - Twinworld */
  TIMEDB_ENTRY( 227a9880,  1,     14202,               TA+YM), /* 01707 - Jess - Run for your Life */
  TIMEDB_ENTRY( 2289e38c,  1,    177228,               TA+YM), /* 04805 - Unknown - House */
- TIMEDB_ENTRY( 22a66a81,  1,      5233,                  YM), /* 03174 - n-a - Studio Music by Davidow */
  TIMEDB_ENTRY( 22bd0555,  1,      2194,                  YM), /* 01922 - The Mind - Dizzy Panic */
  TIMEDB_ENTRY( 22bd0555,  2,      3680,                  YM), /* 01922 - The Mind - Dizzy Panic */
  TIMEDB_ENTRY( 22bd0555,  3,      6582,                  YM), /* 01922 - The Mind - Dizzy Panic */
@@ -1260,11 +1269,13 @@
  TIMEDB_ENTRY( 236c66f9,  1,     25761,               TA+YM), /* 04756 - Gilles Soulet - Sapiens */
  TIMEDB_ENTRY( 236c66f9,  2,     17281,               TA+YM), /* 04756 - Gilles Soulet - Sapiens */
  TIMEDB_ENTRY( 236de9cc,  1,     11904,                  YM), /* 03662 - Jedi - So Lame */
+ TIMEDB_ENTRY( 23a2b379,  1,     81266,                  YM), /* 03187 - Unknown - Yoda's Theme */
  TIMEDB_ENTRY( 23ab1ad4,  1,      2559,         TA+TB+TD+YM), /* 02798 - Starbuck^Creative Mind - Every beginning is hard */
  TIMEDB_ENTRY( 23ce900b,  1,      1040,                  YM), /* 02416 - Nexus 6 - X-X-X-X-X */
  TIMEDB_ENTRY( 23dca986,  1,    208901,               TA+YM), /* 03742 - Tufty - Don't Break My Heart (UB40) */
  TIMEDB_ENTRY( 23ec9f6a,  1,      6144,                  YM), /* 03401 - Wally Beben - Time Machine */
  TIMEDB_ENTRY( 23ec9f6a,  2,     10240,                  YM), /* 03401 - Wally Beben - Time Machine */
+ TIMEDB_ENTRY( 23ef1216,  1,     54750,                  YM), /* 03137 - Unknown - It Came Upon a Midnight Clear */
  TIMEDB_ENTRY( 23f0d816,  1,      2304,               TA+YM), /* 04294 - 505 - noix000f */
  TIMEDB_ENTRY( 23f2706b,  1,     39767,               TA+YM), /* 03945 - Unknown - LT Fuge 2 */
  TIMEDB_ENTRY( 23f2a11c,  1,      5178,                  YM), /* 01236 - Epic - Sauvage */
@@ -1279,11 +1290,10 @@
  TIMEDB_ENTRY( 24393c14,  1,     19200,                  YM), /* 01652 - Jedi - NMM */
  TIMEDB_ENTRY( 24447c00,  1,     10362,               TD+YM), /* 04786 - Intruder - Intruder 2 */
  TIMEDB_ENTRY( 2451ae16,  1,     13061,                  YM), /* 02278 - Tao - Cream - Ice Age (Just Buggin) */
+ TIMEDB_ENTRY( 24576928,  1,    136696,                  YM), /* 03097 - Unknown - Carry On */
  TIMEDB_ENTRY( 245a43c9,  1,     10800,         TA+TB+TD+YM), /* 02081 - Mad Max - Hunyer Patrol - Sid */
- TIMEDB_ENTRY( 246f817c,  1,      2527,                  YM), /* 03178 - Unknown - Two Part Invention #13 by Bach */
  TIMEDB_ENTRY( 2471027f,  1,      1070,                  YM), /* 04720 - Peter Hickman - Treasure Search */
  TIMEDB_ENTRY( 24c48017,  1,     21755,                  YM), /* 02240 - Tao - Cream (orig. Rob Hubbard) - Lightforce (Stmygm) */
- TIMEDB_ENTRY( 24d7f769,  1,      2957,                  YM), /* 03160 - Unknown - Santa Claus is comin' to town! */
  TIMEDB_ENTRY( 24dce34b,  1,      2690,                  YM), /* 00436 - Big Alec - What Time is It? (Scrolly) */
  TIMEDB_ENTRY( 24de3165,  1,      1016,               TA+YM), /* 02619 - STU - SPOOKY */
  TIMEDB_ENTRY( 24eaf9b6,  1,      2324,               TA+YM), /* 01332 - Scavenger - Gangstar */
@@ -1298,13 +1308,13 @@
  TIMEDB_ENTRY( 24f4ec97,  7,        64,                  YM), /* 02960 - Unknown - Countout */
  TIMEDB_ENTRY( 24f4ec97,  8,       149,                  YM), /* 02960 - Unknown - Countout */
  TIMEDB_ENTRY( 24f4ec97,  9,      1600,                  YM), /* 02960 - Unknown - Countout */
+ TIMEDB_ENTRY( 25009c31,  1,     38519,                  YM), /* 03179 - Unknown - Two Part Invention by J. Bach */
  TIMEDB_ENTRY( 25191609,  1,     23456,                  YM), /* 01510 - Rob Hubbard - Warhawk */
  TIMEDB_ENTRY( 2521bedd,  1,      3580,               TA+YM), /* 04296 - 505 - Painsid */
  TIMEDB_ENTRY( 25304018,  1,     37120,                  YM), /* 02689 - Philip Linde - breakbeat */
  TIMEDB_ENTRY( 2531e907,  1,      6652,         TA+TB+TD+YM), /* 00280 - Baggio & Aio - Spritze */
  TIMEDB_ENTRY( 2544e432,  1,      9096,         TA+TB+TD+YM), /* 02973 - 505-paradox - shredder (STE only) */
  TIMEDB_ENTRY( 255ae2f1,  1,      1792,                  YM), /* 01402 - Skyline - Snork Intro - Cuddly */
- TIMEDB_ENTRY( 257ad548,  1,     10993,                  YM), /* 03148 - Unknown - He Played Real Good For Free */
  TIMEDB_ENTRY( 258b6b9f,  1,      7678,                  YM), /* 01323 - Matt Furniss - Torvak The Warrior */
  TIMEDB_ENTRY( 258b6b9f,  2,      4699,                  YM), /* 01323 - Matt Furniss - Torvak The Warrior */
  TIMEDB_ENTRY( 258b6b9f,  3,      5566,                  YM), /* 01323 - Matt Furniss - Torvak The Warrior */
@@ -1328,6 +1338,7 @@
  TIMEDB_ENTRY( 25d9e06e,  4,       127,                  YM), /* 00164 - Martin Walker - Devious Designs */
  TIMEDB_ENTRY( 25d9e06e,  5,       159,                  YM), /* 00164 - Martin Walker - Devious Designs */
  TIMEDB_ENTRY( 25df222e,  1,      4662,               TD+YM), /* 03422 - Dubmood - Tempest - Acidjazzed Evenings (D-Bug) */
+ TIMEDB_ENTRY( 25f631b9,  1,    130738,                  YM), /* 03165 - Unknown - Somewhere, My Love */
  TIMEDB_ENTRY( 25f635b6,  1,      1536,                  YM), /* 02896 - Remalon - Unlimited Cho */
  TIMEDB_ENTRY( 25ff6850,  1,      3648,               TA+YM), /* 00252 - Antichrist - Concours CSC2 */
  TIMEDB_ENTRY( 26020c80,  1,      4864,               TA+YM), /* 00796 - Crawdaddy - The Last Cow */
@@ -1379,7 +1390,6 @@
  TIMEDB_ENTRY( 27e9c53f,  1,      3584,                  YM), /* 02935 - Chris Denman - Seige Master */
  TIMEDB_ENTRY( 27fb194e,  1,     11712,                  YM), /* 01433 - Stax - Aciidvsh */
  TIMEDB_ENTRY( 2805c4a0,  1,     48386,            TB+TD+YM), /* 03333 - Marcer - ST KILLS RAMBO */
- TIMEDB_ENTRY( 28125c34,  1,      7390,                  YM), /* 03102 - n-a - Children's Corner # 4 */
  TIMEDB_ENTRY( 281bd3c9,  1,     62902,               TA+YM), /* 04557 - Simon O - Predator */
  TIMEDB_ENTRY( 283bce5d,  1,     11648,               TA+YM), /* 04122 - Tao - Rise - STMYGM 2 version */
  TIMEDB_ENTRY( 284073f5,  1,     42496,               TD+YM), /* 04851 - xFalcon - DEEP THOUGHT */
@@ -1389,6 +1399,7 @@
  TIMEDB_ENTRY( 2869cc2e,  1,      3385,                  YM), /* 04547 - Geoff Camp - Home Worker */
  TIMEDB_ENTRY( 2869cc2e,  2,      3644,                  YM), /* 04547 - Geoff Camp - Home Worker */
  TIMEDB_ENTRY( 28736104,  1,      2708,         TA+TB+TD+YM), /* 00233 - AIO - EIL 3 Invite */
+ TIMEDB_ENTRY( 28772bde,  1,    209134,                  YM), /* 03091 - Unknown - Both Sides Now */
  TIMEDB_ENTRY( 287a3e7b,  1,      4928,                  YM), /* 02289 - Tao - Cream - 128tros (DHS 128byte megademo) */
  TIMEDB_ENTRY( 288347ca,  1,      7168,                  YM), /* 00122 - David Whittaker - Pandora */
  TIMEDB_ENTRY( 288347ca,  2,      3072,                  YM), /* 00122 - David Whittaker - Pandora */
@@ -1629,6 +1640,7 @@
  TIMEDB_ENTRY( 2d4a42cf,  1,      8449,               TA+YM), /* 04813 - Unknown - Outside */
  TIMEDB_ENTRY( 2d5814e3,  1,     16511,                  YM), /* 03688 - Dma-Sc - Saboteur 3 - In Game 1 */
  TIMEDB_ENTRY( 2d6596a3,  1,     17004,               TA+YM), /* 01545 - Ralph - Ralph Digi 2 */
+ TIMEDB_ENTRY( 2d6e15a1,  1,      2664,                  YM), /* 04962 - Unknown - Dampfoot */
  TIMEDB_ENTRY( 2d7f8cc2,  1,     43453,               TA+YM), /* 03956 - Scott Lemmon - Paranoid */
  TIMEDB_ENTRY( 2d80a54d,  1,      4605,            TB+TD+YM), /* 00183 - 505 - Pilz (D-Bug 174) */
  TIMEDB_ENTRY( 2d97a73f,  1,     12800,                  YM), /* 03234 - T1000 - The Beast Club - TBC 4 */
@@ -1660,7 +1672,6 @@
  TIMEDB_ENTRY( 2e99a92d,  1,      9856,                  YM), /* 00910 - Danny Oneway - Scoopex */
  TIMEDB_ENTRY( 2ea4d2f7,  1,    180559,               TA+YM), /* 04031 - Roggie - Interludes 1-4 */
  TIMEDB_ENTRY( 2eac31f3,  1,      3835,               TA+YM), /* 02637 - Miggy - Jeepers(Unfinished) */
- TIMEDB_ENTRY( 2eb03281,  1,      6824,                  YM), /* 03166 - n-a - Soon It's Gonna Rain */
  TIMEDB_ENTRY( 2ecfed70,  1,      1922,                  YM), /* 00412 - Big Alec - What Time Is It - Main Menu */
  TIMEDB_ENTRY( 2eec1b8f,  1,      6155,            TA+TD+YM), /* 02686 - Donald Fakk - Syntax Terror - Loader */
  TIMEDB_ENTRY( 2f0c977c,  1,      1184,                  YM), /* 04722 - Robert Groves - Yahtzee */
@@ -1846,12 +1857,12 @@
  TIMEDB_ENTRY( 33526cb7,  1,     10370,            TA+TD+YM), /* 02311 - Tao - Cream - Intensity */
  TIMEDB_ENTRY( 3355a037,  1,      8192,         TA+TB+TD+YM), /* 03336 - Marcer - n-a */
  TIMEDB_ENTRY( 3356789d,  1,      6541,               TA+YM), /* 02155 - Mad Max - Ooh Crikey Wot a Scorcher Hidden */
+ TIMEDB_ENTRY( 3359e04c,  1,     91481,                  YM), /* 03151 - Unknown - Rest Life */
  TIMEDB_ENTRY( 335b93b1,  1,      8556,         TA+TB+TD+YM), /* 04456 - Frequent--Ephidrena - Revers */
  TIMEDB_ENTRY( 335f6906,  1,      8532,         TA+TB+TD+YM), /* 01481 - Gary - UCM 4 Intro */
  TIMEDB_ENTRY( 33625fef,  1,     26106,                  YM), /* 03874 - Gary Wheaton - Sidelong */
  TIMEDB_ENTRY( 3364a361,  1,      8064,                  YM), /* 01131 - Tyan - Goldrunner */
  TIMEDB_ENTRY( 337a575a,  1,     12171,               TA+YM), /* 02247 - Tao - Cream (orig. Rob Hubbard) - Zoolook (Stmygm) */
- TIMEDB_ENTRY( 337a9ba2,  1,      4984,                  YM), /* 03114 - Unknown - Where Have All th Flowers Gone */
  TIMEDB_ENTRY( 337fe6b7,  1,      8324,                  YM), /* 02924 - Allister Brimble - Pro Boxing Simulator */
  TIMEDB_ENTRY( 337fe6b7,  2,       244,                  YM), /* 02924 - Allister Brimble - Pro Boxing Simulator */
  TIMEDB_ENTRY( 3387177e,  1,      1285,                  YM), /* 03980 - Claude Abromont - Killer Ball */
@@ -1877,6 +1888,7 @@
  TIMEDB_ENTRY( 3425043a,  1,      2466,                  YM), /* 03932 - Unknown - Tango 001 */
  TIMEDB_ENTRY( 344b88ed,  1,     15937,                  YM), /* 02137 - Mad Max - Masters Of Magic - LCD */
  TIMEDB_ENTRY( 34613b0c,  1,      7847,            TA+TB+YM), /* 03200 - monk - disturbance bilocated */
+ TIMEDB_ENTRY( 346819f5,  1,    104657,                  YM), /* 03174 - Davidow - Studio Music */
  TIMEDB_ENTRY( 347b809f,  1,      2304,                  YM), /* 01762 - Lap - Lap 2 */
  TIMEDB_ENTRY( 348a8522,  1,      3328,               TA+YM), /* 04433 - Lotus - Synth Dream 2 - Pace */
  TIMEDB_ENTRY( 34affc14,  1,      1024,                  YM), /* 03405 - Wally Beben - Ultimate Ride */
@@ -1911,9 +1923,8 @@
  TIMEDB_ENTRY( 35073069,  5,        54,                  YM), /* 00132 - David Whittaker - Road Blasters */
  TIMEDB_ENTRY( 3510042a,  1,      3498,                  YM), /* 02406 - ACC - Badine */
  TIMEDB_ENTRY( 3524e07c,  1,     10744,               TA+YM), /* 02418 - Scavenger - Unlimited Bobs */
- TIMEDB_ENTRY( 35344e06,  1,      4558,                  YM), /* 03111 - n-a -  */
  TIMEDB_ENTRY( 353d7660,  1,      5119,                  YM), /* 01784 - Lap - Phaleon - Intro */
- TIMEDB_ENTRY( 35470845,  1,      6542,                  YM), /* 03136 - Unknown - Michelle-Lennon-McCartney */
+ TIMEDB_ENTRY( 35429a84,  1,     64625,                  YM), /* 03185 - Unknown - The Windmills of Your Mind */
  TIMEDB_ENTRY( 354fbef4,  1,       329,                  YM), /* 00069 - David Whittaker - Archipelagos */
  TIMEDB_ENTRY( 354fbef4,  2,       158,                  YM), /* 00069 - David Whittaker - Archipelagos */
  TIMEDB_ENTRY( 354fbef4,  3,       271,                  YM), /* 00069 - David Whittaker - Archipelagos */
@@ -1945,13 +1956,12 @@
  TIMEDB_ENTRY( 362726aa,  1,      6654,                  YM), /* 03553 - Jovis - Spider Ship */
  TIMEDB_ENTRY( 362aaf32,  1,      8687,               TB+YM), /* 02875 - 505-Paradox [nils feske] - fullscreen digin' [2005] */
  TIMEDB_ENTRY( 363afdb3,  1,     75264,                  YM), /* 02430 - Atom - TBC Intro 22 */
- TIMEDB_ENTRY( 363edd1a,  1,      4497,                  YM), /* 03172 - n-a - Star Wars -- Main Theme */
  TIMEDB_ENTRY( 363ede8b,  1,     11173,               TA+YM), /* 04218 - Karsten Obarksi - Window Wizard Digi */
  TIMEDB_ENTRY( 36401902,  1,      3074,               TD+YM), /* 00237 - Alx 33 - BJ */
+ TIMEDB_ENTRY( 367b3031,  1,      1252,                  YM), /* 04964 - Unknown - Dynasty Theme */
  TIMEDB_ENTRY( 36822b7f,  1,      3834,               TA+YM), /* 04244 - 505 - Checkpoint (1999) - Beenden (unreleased) */
  TIMEDB_ENTRY( 3686c8ee,  1,     29952,         TA+TB+TD+YM), /* 04938 - STU - FIRE */
  TIMEDB_ENTRY( 3693d8b4,  1,    103005,               TA+YM), /* 04045 - Roggie - Pocket Warmer */
- TIMEDB_ENTRY( 369a938e,  1,     14311,                  YM), /* 03158 - Unknown - Goodnight Saigon by B. Joel */
  TIMEDB_ENTRY( 369ab556,  1,      5755,            TA+TB+YM), /* 01327 - Scavenger - Crapman Sid */
  TIMEDB_ENTRY( 36b91fbb,  1,      2298,         TA+TB+TD+YM), /* 01130 - Tyan - Dont Know */
  TIMEDB_ENTRY( 36c0b47c,  1,      1580,               TA+YM), /* 03847 - Unknown - Victory - Title */
@@ -1988,6 +1998,7 @@
  TIMEDB_ENTRY( 379f051d,  1,     36096,         TA+TB+TD+YM), /* 04196 - Serpent - Compo Breaker */
  TIMEDB_ENTRY( 37b04015,  1,      8832,                  YM), /* 01915 - Max - Whatta Big Rat */
  TIMEDB_ENTRY( 37b4bacb,  1,    200618,               TA+YM), /* 03718 - Spaz - Ooh Crikey - Intro */
+ TIMEDB_ENTRY( 37d7b1ec,  1,    101919,                  YM), /* 03141 - Unknown - Music Box Dancer - Frank Mills */
  TIMEDB_ENTRY( 37f988bd,  1,      2640,                  YM), /* 01884 - Dave Lowe - Final Fight */
  TIMEDB_ENTRY( 37f988bd,  2,      1632,                  YM), /* 01884 - Dave Lowe - Final Fight */
  TIMEDB_ENTRY( 380b3cec,  1,     12288,                  YM), /* 02115 - Mad Max - Scout Remix */
@@ -1995,7 +2006,6 @@
  TIMEDB_ENTRY( 3838f30a,  1,    179792,               TA+YM), /* 04582 - Gary Wheaton - Shapeshifters */
  TIMEDB_ENTRY( 3839299f,  1,      4986,               TA+YM), /* 04233 - 505 - 11th */
  TIMEDB_ENTRY( 384551a3,  1,      4088,               TA+YM), /* 04761 - Ferox - State of Mind - Victory */
- TIMEDB_ENTRY( 38565ed1,  1,      7829,                  YM), /* 03186 - n-a - YANKEE DOODLE BOY */
  TIMEDB_ENTRY( 38623bdd,  1,     11135,               TA+YM), /* 02493 - gwEm - Golden Years Over (used) */
  TIMEDB_ENTRY( 38678353,  1,     52096,               TA+YM), /* 04396 - Golden Otter - Hibernation Carol Demo 2 */
  TIMEDB_ENTRY( 38678353,  2,     22471,               TA+YM), /* 04396 - Golden Otter - Hibernation Carol Demo 2 */
@@ -2006,7 +2016,6 @@
  TIMEDB_ENTRY( 38691dc2,  1,     30720,         TA+TB+TD+YM), /* 02586 - STU - DATADANCE */
  TIMEDB_ENTRY( 38834d4a,  1,      4989,         TA+TB+TD+YM), /* 00283 - Baggio - Teddy - UCM 20 Intro */
  TIMEDB_ENTRY( 3885b70a,  1,     19135,                  YM), /* 00308 - Gary Wheaton - Goil */
- TIMEDB_ENTRY( 388b52b5,  1,      8509,                  YM), /* 03088 - n-a - She's Always A Woman */
  TIMEDB_ENTRY( 389cb649,  1,      4921,         TA+TB+TD+YM), /* 01956 - MSG - Godpey - Frontend */
  TIMEDB_ENTRY( 38a97c4c,  1,      4798,                  YM), /* 00969 - Demon X - Awesome */
  TIMEDB_ENTRY( 38b24d90,  1,       224,         TA+TB+TD+YM), /* 03624 - Excellence In Art - Sommarhack Report 2011 Pt 3 */
@@ -2024,6 +2033,7 @@
  TIMEDB_ENTRY( 39196440,  8,       862,                  YM), /* 01567 - Jason Page - Realms */
  TIMEDB_ENTRY( 393e5990,  1,      1914,                  YM), /* 00444 - Augustin Vidovic - Ace 2 */
  TIMEDB_ENTRY( 397d0167,  1,      7709,                  YM), /* 01036 - Donald Fakk - ITC Digi */
+ TIMEDB_ENTRY( 39c3aae3,  1,      1807,                  YM), /* 04969 - Unknown - Ilsezlen */
  TIMEDB_ENTRY( 39cfda35,  1,      5832,                  YM), /* 01972 - MSG - MSG 02 */
  TIMEDB_ENTRY( 39ddf67a,  1,     15092,               TD+YM), /* 01989 - Jochen Hippel - Solidify (tSCc's  Modcomp 15) */
  TIMEDB_ENTRY( 39de27ad,  1,     10745,         TA+TB+TD+YM), /* 00829 - Crazy Q - TiMeBoMb - Live vers. Monster Phunk */
@@ -2043,6 +2053,7 @@
  TIMEDB_ENTRY( 3a4e6052,  1,      9470,               TA+YM), /* 04671 - Unknown (orig Mike Alsop) - Wizardry */
  TIMEDB_ENTRY( 3a4ea60b,  1,      5378,               TD+YM), /* 01898 - LTK - PS Harm */
  TIMEDB_ENTRY( 3a544a18,  1,     41323,                  YM), /* 03042 - Ed Bogas - Calypso */
+ TIMEDB_ENTRY( 3a5c5f6b,  1,     46671,                  YM), /* 03120 - Unknown - Hey Hey,My My - Neil Young */
  TIMEDB_ENTRY( 3a5ca48e,  1,      2300,                  YM), /* 02433 - Beast - TSC - Boring */
  TIMEDB_ENTRY( 3a6042e4,  1,      1536,                  YM), /* 01405 - Skyline - Snork Intro - Lightning */
  TIMEDB_ENTRY( 3aa242af,  1,      8953,            TA+TD+YM), /* 01870 - Lotek Style - Silence */
@@ -2095,11 +2106,11 @@
  TIMEDB_ENTRY( 3c381868,  1,      6406,                  YM), /* 04148 - Unknown - City Roads */
  TIMEDB_ENTRY( 3c4609cc,  1,     58904,                  YM), /* 01441 - Stax - Es Geht! Oder */
  TIMEDB_ENTRY( 3c4c8046,  1,      9789,         TA+TB+TD+YM), /* 03503 - 505 - Suretrip 2 - Main */
- TIMEDB_ENTRY( 3c4d57d5,  1,      2080,                  YM), /* 03170 - Unknown - Star-Spangled Banner - F.S.Key */
  TIMEDB_ENTRY( 3c6d4ca1,  1,      2682,               TA+YM), /* 01337 - Scavenger - In Full Effect */
  TIMEDB_ENTRY( 3c6fc76f,  1,      9216,                  YM), /* 01576 - Powa Pixel - GBISTCP - Mega 4 A */
  TIMEDB_ENTRY( 3c78197c,  1,      9262,               TA+YM), /* 01712 - Jess - Dyscomelodus */
  TIMEDB_ENTRY( 3c833d4d,  1,     12075,         TA+TB+TD+YM), /* 03437 - Dma-Sc - Happy Dancefloor */
+ TIMEDB_ENTRY( 3c965364,  1,    219862,                  YM), /* 03148 - Unknown - He Played Real Good For Free */
  TIMEDB_ENTRY( 3c96ac85,  1,      5904,                  YM), /* 00356 - Tony Williams - Viz */
  TIMEDB_ENTRY( 3c96ac85,  2,      1535,                  YM), /* 00356 - Tony Williams - Viz */
  TIMEDB_ENTRY( 3c96ac85,  3,      2063,                  YM), /* 00356 - Tony Williams - Viz */
@@ -2139,9 +2150,7 @@
  TIMEDB_ENTRY( 3d4e2b53,  2,      9216,                  YM), /* 04748 - Mad Max - Warp Preview */
  TIMEDB_ENTRY( 3d55bcc0,  1,      7753,         TA+TB+TD+YM), /* 02713 - lotek style - tscc (2006) - farewell lil ssd */
  TIMEDB_ENTRY( 3d61c948,  1,      6272,                  YM), /* 00948 - Dark Angel - Slow Motion */
- TIMEDB_ENTRY( 3d65e51b,  1,      6218,                  YM), /* 03142 - Unknown - NIGHT MOVES by Marilyn Martin */
  TIMEDB_ENTRY( 3d68b7ad,  1,       192,                  YM), /* 01210 - Excellence In Art - Tra La La */
- TIMEDB_ENTRY( 3d6ad039,  1,      4612,                  YM), /* 03112 - n-a -  */
  TIMEDB_ENTRY( 3d7de33c,  1,      1536,                  YM), /* 00145 - David Whittaker - Supremacy */
  TIMEDB_ENTRY( 3d7de33c,  2,       373,                  YM), /* 00145 - David Whittaker - Supremacy */
  TIMEDB_ENTRY( 3d7de33c,  3,       342,                  YM), /* 00145 - David Whittaker - Supremacy */
@@ -2169,6 +2178,7 @@
  TIMEDB_ENTRY( 3e0c5f1b,  1,      3200,                  YM), /* 04599 - Rude Kid - Match of the Day */
  TIMEDB_ENTRY( 3e13d051,  1,      3499,                  YM), /* 04655 - Eric Kinkead - Nervana Quest */
  TIMEDB_ENTRY( 3e165308,  1,      4927,                  YM), /* 04096 - Gary Wheaton - Don't Let the Sun go down on me */
+ TIMEDB_ENTRY( 3e1980c3,  1,     60001,                  YM), /* 03147 - Unknown - Peter Gunn by JFS */
  TIMEDB_ENTRY( 3e27512d,  1,      5166,         TA+TB+TD+YM), /* 02752 - MSG - reservoir gods - omtrek-uit-lijn */
  TIMEDB_ENTRY( 3e2a318d,  1,      4282,                  YM), /* 00096 - David Whittaker - Emlyn Hughes Football */
  TIMEDB_ENTRY( 3e2a47e1,  1,      2559,                  YM), /* 02845 - Marcer - poker intro */
@@ -2178,6 +2188,7 @@
  TIMEDB_ENTRY( 3e405883,  1,      2328,                  YM), /* 02202 - Mad Max - Jinks */
  TIMEDB_ENTRY( 3e405883,  2,       192,                  YM), /* 02202 - Mad Max - Jinks */
  TIMEDB_ENTRY( 3e45d068,  1,     20045,         TA+TB+TD+YM), /* 02456 - Dubmood & Zabutom ! ! ! - SpaceJourney */
+ TIMEDB_ENTRY( 3e53470d,  1,     76376,                  YM), /* 03103 - Unknown - Children's Corner # 5 */
  TIMEDB_ENTRY( 3e5ea92c,  1,      5313,                  YM), /* 00329 - Gary Wheaton - Steel */
  TIMEDB_ENTRY( 3e62c353,  1,     30013,               TA+YM), /* 03948 - Scott Lemmon - Axel F */
  TIMEDB_ENTRY( 3e81befd,  1,      1535,               TA+YM), /* 03475 - gwEm (Follin conversion) - Gabba Bobble */
@@ -2218,7 +2229,6 @@
  TIMEDB_ENTRY( 3f870be2,  1,      3456,                  YM), /* 00454 - Augustin Vidovic - Noisy Pillars */
  TIMEDB_ENTRY( 3fb6c852,  1,      6590,                  YM), /* 00506 - Tangens - Phaleon - Arsch */
  TIMEDB_ENTRY( 3fe1891d,  1,      5456,         TA+TB+TD+YM), /* 03599 - 505-checkpoint & paradox - Grado Groove */
- TIMEDB_ENTRY( 3ffd8004,  1,      3291,                  YM), /* 03155 - n-a -  */
  TIMEDB_ENTRY( 4005e38e,  1,     48384,                  YM), /* 01440 - Stax - Match */
  TIMEDB_ENTRY( 400d8c94,  1,      3840,               TA+YM), /* 04590 - Illusion - Pure Energy 6 */
  TIMEDB_ENTRY( 400dd2fb,  1,      5183,         TA+TB+TD+YM), /* 00059 - 505 - Checkpoint (2002) - hysteria */
@@ -2317,6 +2327,7 @@
  TIMEDB_ENTRY( 42f07c44,  4,      5642,                  YM), /* 01396 - Paul Shields - ST Soccer */
  TIMEDB_ENTRY( 42f33e2e,  1,     34560,         TA+TB+TD+YM), /* 03598 - xyce - SES SEINS */
  TIMEDB_ENTRY( 42f54684,  1,      9024,                  YM), /* 00804 - Crawdaddy - No Way Out */
+ TIMEDB_ENTRY( 42febfff,  1,      3724,                  YM), /* 04950 - Unknown - Blues */
  TIMEDB_ENTRY( 431cd63b,  1,     11768,         TA+TB+TD+YM), /* 01142 - Tyan - Kanabis */
  TIMEDB_ENTRY( 434ecd34,  1,      8016,            TA+TD+YM), /* 03577 - 505-checkpoint - Zyncyventure */
  TIMEDB_ENTRY( 4351da35,  1,      5760,                  YM), /* 02921 - 4-Mat - Heimdall */
@@ -2392,6 +2403,7 @@
  TIMEDB_ENTRY( 441d9f8b,  1,        96,                  YM), /* 03926 - Unknown - Richtig1 */
  TIMEDB_ENTRY( 442a4206,  1,      4992,                  YM), /* 01184 - Excellence In Art - Hidden */
  TIMEDB_ENTRY( 4438f589,  1,     38400,         TA+TB+TD+YM), /* 02627 - schmx-awp - Bonebreaker */
+ TIMEDB_ENTRY( 44390be1,  1,     72508,                  YM), /* 03127 - Unknown - Joy to the World */
  TIMEDB_ENTRY( 4472aef8,  1,      4372,                  YM), /* 04510 - Edwyn Thomas - Byte-man */
  TIMEDB_ENTRY( 4472aef8,  2,       447,                  YM), /* 04510 - Edwyn Thomas - Byte-man */
  TIMEDB_ENTRY( 4472aef8,  3,       441,                  YM), /* 04510 - Edwyn Thomas - Byte-man */
@@ -2418,7 +2430,6 @@
  TIMEDB_ENTRY( 44bf284b,  1,      7199,         TA+TB+TD+YM), /* 02974 - 505-paradox - cyborg clubbing */
  TIMEDB_ENTRY( 44f3f5ec,  1,     39936,                  YM), /* 02606 - STU - MY MELODY */
  TIMEDB_ENTRY( 4510f9f1,  1,      8064,               TB+YM), /* 01844 - Lotek Style - Echoland */
- TIMEDB_ENTRY( 451130c6,  1,      3449,                  YM), /* 03134 - n-a - Away in a Manger */
  TIMEDB_ENTRY( 45225afa,  1,      4555,                  YM), /* 00459 - Augustin Vidovic - Pyramid */
  TIMEDB_ENTRY( 453eb90b,  1,      6912,                  YM), /* 01064 - Jonathan Dunn - Operation Thunderbolt */
  TIMEDB_ENTRY( 453eb90b,  2,       761,                  YM), /* 01064 - Jonathan Dunn - Operation Thunderbolt */
@@ -2500,10 +2511,12 @@
  TIMEDB_ENTRY( 46a3d7b1,  4,      1153,                  YM), /* 03513 - Dave Kelly - Return of the Jedi */
  TIMEDB_ENTRY( 46a6ab5e,  1,      5762,                  YM), /* 00432 - Big Alec - Poppycock - Stars */
  TIMEDB_ENTRY( 46b04ed3,  1,     28736,         TA+TB+TD+YM), /* 03389 - Tomchi - YM out */
+ TIMEDB_ENTRY( 46b2f01d,  1,     34707,                  YM), /* 03089 - Unknown - Don't Stop Believing,"Journey" */
  TIMEDB_ENTRY( 46b8222c,  1,      2304,               TA+YM), /* 00951 - Dark Angel - Straight Shooter */
  TIMEDB_ENTRY( 46ba2db5,  1,      1152,                  YM), /* 01410 - Skyline - Snork Intro - Overdrive */
  TIMEDB_ENTRY( 46d54b18,  1,      7631,            TA+TB+YM), /* 04659 - Frequent--Ephidrena - Lykkerus */
  TIMEDB_ENTRY( 46df70e6,  1,      3353,                  YM), /* 02716 - Chrispy Noodle - Tiger 2 */
+ TIMEDB_ENTRY( 47021555,  1,     89921,                  YM), /* 03172 - Unknown - Star Wars -- Main Theme */
  TIMEDB_ENTRY( 4711a6b6,  1,      8448,                  YM), /* 00247 - AN Cool - So Watt - Techatron */
  TIMEDB_ENTRY( 4722c6d4,  1,       935,                  YM), /* 04549 - Simon Brown - Inferno */
  TIMEDB_ENTRY( 4722c6d4,  2,      1870,                  YM), /* 04549 - Simon Brown - Inferno */
@@ -2513,7 +2526,7 @@
  TIMEDB_ENTRY( 472fd6cf,  1,      9216,                  YM), /* 01095 - Techno - Omed 1 */
  TIMEDB_ENTRY( 47430808,  1,     10880,               TD+YM), /* 02006 - Mad Max ( ?-2002 ) - Faith (YM Rockerz) */
  TIMEDB_ENTRY( 4746395c,  1,     29184,               TD+YM), /* 02573 - STU - 8 BIT STYLE */
- TIMEDB_ENTRY( 477203a1,  1,      9282,                  YM), /* 03113 - Unknown - Flashdance...What A Feeling */
+ TIMEDB_ENTRY( 4766151d,  1,     50517,                  YM), /* 03135 - Unknown - Have Yourself-Merry Christmas */
  TIMEDB_ENTRY( 47828d84,  1,      9280,               TA+YM), /* 00264 - Antichrist - Stephanie */
  TIMEDB_ENTRY( 47a7ec6e,  1,      2153,                  YM), /* 00085 - David Whittaker - Chronoquest */
  TIMEDB_ENTRY( 47a7ec6e,  2,      2395,                  YM), /* 00085 - David Whittaker - Chronoquest */
@@ -2523,6 +2536,7 @@
  TIMEDB_ENTRY( 47a7ec6e,  6,      2036,                  YM), /* 00085 - David Whittaker - Chronoquest */
  TIMEDB_ENTRY( 47a7ec6e,  7,       437,                  YM), /* 00085 - David Whittaker - Chronoquest */
  TIMEDB_ENTRY( 47be14ac,  1,     10759,               TA+YM), /* 02492 - gwEm - Golden Years Over (orig) */
+ TIMEDB_ENTRY( 47cdd237,  1,    146735,                  YM), /* 03121 - Unknown - Homage to ANDRES SEGOVIA */
  TIMEDB_ENTRY( 47d552ec,  1,     16896,            TB+TD+YM), /* 02904 - Helene - n-a */
  TIMEDB_ENTRY( 47d9555b,  1,      9210,         TA+TB+TD+YM), /* 01831 - Lotek Style - Alpha Proxima */
  TIMEDB_ENTRY( 47ec864a,  1,       910,               TA+YM), /* 01145 - Tyan - Noisy Pillars */
@@ -2540,6 +2554,7 @@
  TIMEDB_ENTRY( 4827f9b6,  1,      3119,                  YM), /* 04923 - Rhino - Have you seen our coder anywhere? */
  TIMEDB_ENTRY( 48318dc0,  1,      2331,                  YM), /* 04531 - Andrew R. Oakley - Flipped */
  TIMEDB_ENTRY( 4842a105,  1,      9600,                  YM), /* 00763 - Count Zero - Decade Flexiscroll */
+ TIMEDB_ENTRY( 485c81c2,  1,       515,                  YM), /* 04959 - Unknown - Cucaracha */
  TIMEDB_ENTRY( 4864e718,  1,     47200,         TA+TB+TD+YM), /* 02597 - STU - INSECTZ */
  TIMEDB_ENTRY( 48651fff,  1,     10752,                  YM), /* 00589 - Celtic - Starworx */
  TIMEDB_ENTRY( 48887d4f,  1,     37120,         TA+TB+TD+YM), /* 03343 - Marcer - I WISH ST VERS */
@@ -2614,6 +2629,7 @@
  TIMEDB_ENTRY( 4a79bd65,  9,      1280,                  YM), /* 00134 - David Whittaker - Slapfight */
  TIMEDB_ENTRY( 4a82eb53,  1,      6913,               TD+YM), /* 01983 - MSG - Outline */
  TIMEDB_ENTRY( 4a844c81,  1,      4224,                  YM), /* 01164 - Tyan - Tyan 3 */
+ TIMEDB_ENTRY( 4a856fef,  1,     47649,                  YM), /* 03149 - Davidow - Rainbows */
  TIMEDB_ENTRY( 4a941b05,  1,      6181,                  YM), /* 03677 - Dma-Sc - Antiques - Physics Part */
  TIMEDB_ENTRY( 4a9d72ff,  1,     43782,         TA+TB+TD+YM), /* 04940 - SCHMX - BOMB FIGHT N RUN */
  TIMEDB_ENTRY( 4ab7ff41,  1,      1152,               TA+YM), /* 00913 - Dark Angel - All Is Lost! */
@@ -2714,6 +2730,7 @@
  TIMEDB_ENTRY( 4cb89c38,  7,     19776,                  YM), /* 04468 - Charles Callet - Passengers in the Wind 2 */
  TIMEDB_ENTRY( 4cb89c38,  8,     15872,                  YM), /* 04468 - Charles Callet - Passengers in the Wind 2 */
  TIMEDB_ENTRY( 4cbebadc,  1,       195,                  YM), /* 03316 - SH3-RG - Fanfare */
+ TIMEDB_ENTRY( 4cc0e5cb,  1,    101579,                  YM), /* 03093 - Unknown - California Girls */
  TIMEDB_ENTRY( 4cc72c6e,  1,      2091,                  YM), /* 00110 - David Whittaker - Jaws */
  TIMEDB_ENTRY( 4cc72c6e,  2,        57,                  YM), /* 00110 - David Whittaker - Jaws */
  TIMEDB_ENTRY( 4cc72c6e,  3,        80,                  YM), /* 00110 - David Whittaker - Jaws */
@@ -2959,6 +2976,7 @@
  TIMEDB_ENTRY( 5105bc1e,  1,      9520,            TA+TD+YM), /* 02438 - bob monkhouze - phoneomenon */
  TIMEDB_ENTRY( 5109cc6d,  1,     14783,         TA+TB+TD+YM), /* 02693 - Dubmood - Razor 1911 - 4Mats AnarchyMenu #3 */
  TIMEDB_ENTRY( 511553f6,  1,      6336,                  YM), /* 00768 - Count Zero - Decade Demo - Parascroll */
+ TIMEDB_ENTRY( 511d32d5,  1,    116173,                  YM), /* 03163 - Unknown - SOUND OF SILENCE By Paul Simon */
  TIMEDB_ENTRY( 511e2226,  1,      9600,                  YM), /* 01508 - The Fate - 3615 Gen4 Demo (Thrust Remix) */
  TIMEDB_ENTRY( 513500c1,  1,      8666,         TA+TB+TD+YM), /* 00234 - AIO - Revive Me */
  TIMEDB_ENTRY( 513618ca,  1,     20730,               TA+YM), /* 01446 - Stax - Revotus - Digi */
@@ -2982,7 +3000,6 @@
  TIMEDB_ENTRY( 519ca005,  8,       988,                  YM), /* 00843 - Ben Daglish - California Games */
  TIMEDB_ENTRY( 519ca005,  9,      1572,                  YM), /* 00843 - Ben Daglish - California Games */
  TIMEDB_ENTRY( 51aee08e,  1,     18816,                  YM), /* 03248 - T1000 - The Bits Club 22 */
- TIMEDB_ENTRY( 51b18088,  1,      4559,                  YM), /* 03119 - Unknown - Han Solo and the Princess */
  TIMEDB_ENTRY( 51b339b1,  1,      3256,                  YM), /* 02879 - Beast - Shitt */
  TIMEDB_ENTRY( 51bc0c87,  1,     73137,               TA+YM), /* 04856 - Michel Winogradoff - Turbo Cup */
  TIMEDB_ENTRY( 51bdedb7,  1,      3834,                  YM), /* 04253 - 505 - Checkpoint - duckwalk */
@@ -2998,6 +3015,7 @@
  TIMEDB_ENTRY( 51fb2e63,  1,     23044,               TA+YM), /* 01741 - Jovis - Lametrop - 3D Bobs */
  TIMEDB_ENTRY( 520064ac,  1,      4992,                  YM), /* 04846 - t1000 - Bits 49 */
  TIMEDB_ENTRY( 5216af14,  1,      7165,                  YM), /* 01118 - Paul Tonge - B17 Flying Fotress */
+ TIMEDB_ENTRY( 5218641c,  1,      1182,                  YM), /* 04990 - Unknown - Tubular Bells */
  TIMEDB_ENTRY( 5220974f,  1,      6719,               TA+YM), /* 04663 - Dave Lowe - Starglider 2 */
  TIMEDB_ENTRY( 522156f8,  1,      9472,                  YM), /* 02736 - Tony Williams - Chuckie Egg 2 */
  TIMEDB_ENTRY( 522156f8,  2,        97,                  YM), /* 02736 - Tony Williams - Chuckie Egg 2 */
@@ -3185,7 +3203,7 @@
  TIMEDB_ENTRY( 55d70968,  1,     18940,         TA+TB+TD+YM), /* 03504 - 505 - Suretrip 2 - Main 2 */
  TIMEDB_ENTRY( 55df043e,  1,      3199,                  YM), /* 01552 - Rhino - Twitching Flannels */
  TIMEDB_ENTRY( 55f2952a,  1,      6948,               TA+YM), /* 01609 - No More - Amazine 4 */
- TIMEDB_ENTRY( 5623d508,  1,      9240,                  YM), /* 03182 - n-a - WE ARE THE WORLD */
+ TIMEDB_ENTRY( 560f0be2,  1,    185627,                  YM), /* 03113 - Unknown - Flashdance...What A Feeling */
  TIMEDB_ENTRY( 5628a985,  1,      9994,               TA+YM), /* 01859 - Lotek Style - Mourning */
  TIMEDB_ENTRY( 564e0f84,  1,     14819,               TA+YM), /* 01167 - Tyan - Xtc */
  TIMEDB_ENTRY( 566094fa,  1,      6577,                  YM), /* 00163 - Matt Bates - Deuteros */
@@ -3203,10 +3221,8 @@
  TIMEDB_ENTRY( 569634ec,  5,       524,                  YM), /* 00173 - Martin Walker - Teenage Mutant Hero Turtles */
  TIMEDB_ENTRY( 569634ec,  6,      2304,                  YM), /* 00173 - Martin Walker - Teenage Mutant Hero Turtles */
  TIMEDB_ENTRY( 569b83dd,  1,      1914,                  YM), /* 01697 - Jess - For your Loader #3 */
- TIMEDB_ENTRY( 56a669f1,  1,      6835,                  YM), /* 03097 - n-a -  */
  TIMEDB_ENTRY( 56c31160,  1,      5138,               TA+YM), /* 04630 - Mephistow - Sound */
  TIMEDB_ENTRY( 56e307f1,  1,      9786,                  YM), /* 01033 - Dolby - A New Great Sound */
- TIMEDB_ENTRY( 56eb9f9b,  1,      5079,                  YM), /* 03093 - n-a -  */
  TIMEDB_ENTRY( 56ec7baa,  1,     21492,               TA+YM), /* 04364 - Jess - Middle-Earth Theme (digit) */
  TIMEDB_ENTRY( 56f627a5,  1,      5984,                  YM), /* 03693 - Yerzmyey - Get Mad */
  TIMEDB_ENTRY( 56f878ff,  1,      6860,                  YM), /* 00231 - ACC - Popcorn */
@@ -3221,6 +3237,7 @@
  TIMEDB_ENTRY( 573c531c,  2,     23680,                  YM), /* 04221 - Paul Shields - Crossland */
  TIMEDB_ENTRY( 57570403,  1,      9216,                  YM), /* 01176 - Sally - Sally 2 */
  TIMEDB_ENTRY( 576960b3,  1,    117647,         TA+TB+TD+YM), /* 04217 - xyce - n-a */
+ TIMEDB_ENTRY( 5770cac8,  1,      2676,                  YM), /* 04943 - ACC - Stupid */
  TIMEDB_ENTRY( 5775383b,  1,      6169,                  YM), /* 02884 - Wally Beben - Ultima V - Warriors of Destiny */
  TIMEDB_ENTRY( 5775383b,  2,      3841,                  YM), /* 02884 - Wally Beben - Ultima V - Warriors of Destiny */
  TIMEDB_ENTRY( 5775383b,  3,      2329,                  YM), /* 02884 - Wally Beben - Ultima V - Warriors of Destiny */
@@ -3338,9 +3355,9 @@
  TIMEDB_ENTRY( 598b5167,  6,        35,                  YM), /* 04513 - Paul Dowers - Classroom maths */
  TIMEDB_ENTRY( 598b5167,  7,       803,                  YM), /* 04513 - Paul Dowers - Classroom maths */
  TIMEDB_ENTRY( 598b5167,  8,       450,                  YM), /* 04513 - Paul Dowers - Classroom maths */
+ TIMEDB_ENTRY( 59bc3a71,  1,    171239,                  YM), /* 03130 - Unknown - Life in a Northern Town */
  TIMEDB_ENTRY( 59c38d29,  1,      9213,         TA+TB+TD+YM), /* 01054 - Dubmood - Razor 1911 ( 2003 ) - Haschkaka (YM Rockerz) */
  TIMEDB_ENTRY( 59c7d1e4,  1,      9555,                  YM), /* 00869 - Ben Daglish - Prison */
- TIMEDB_ENTRY( 59cb6454,  1,      9177,                  YM), /* 03173 - n-a - Stealing the Enterprise */
  TIMEDB_ENTRY( 59f55101,  1,     58554,               TA+YM), /* 03714 - Steve Wetherill - Tusker */
  TIMEDB_ENTRY( 59f78bfa,  1,      3561,                  YM), /* 00104 - David Whittaker - Golden Axe */
  TIMEDB_ENTRY( 59f78bfa,  2,      3252,                  YM), /* 00104 - David Whittaker - Golden Axe */
@@ -3368,13 +3385,15 @@
  TIMEDB_ENTRY( 5ad3d150,  1,     11808,         TA+TB+TD+YM), /* 02070 - Mad Max - Commando - Sid */
  TIMEDB_ENTRY( 5ad3d150,  2,      3072,         TA+TB+TD+YM), /* 02070 - Mad Max - Commando - Sid */
  TIMEDB_ENTRY( 5ad3d150,  3,       289,         TA+TB+TD+YM), /* 02070 - Mad Max - Commando - Sid */
+ TIMEDB_ENTRY( 5adb3626,  1,    165095,                  YM), /* 03177 - Unknown - 76 Trombones */
+ TIMEDB_ENTRY( 5ae225c2,  1,    189886,                  YM), /* 03094 - Unknown - They Call It The Blues */
  TIMEDB_ENTRY( 5af05644,  1,      8832,                  YM), /* 02919 - Richard Joseph - Steel Empire */
  TIMEDB_ENTRY( 5af1eb78,  1,     22393,                  YM), /* 00581 - Buster - Impact - Chip */
  TIMEDB_ENTRY( 5afa0232,  1,     40461,                  YM), /* 04712 - Bob Bath - Real-stat Hockey */
  TIMEDB_ENTRY( 5b04d0b6,  1,      3645,         TA+TB+TD+YM), /* 04266 - 505-cpt^pdx - Impulse */
- TIMEDB_ENTRY( 5b06affa,  1,      8508,                  YM), /* 03167 - n-a - Spanish Eyes */
  TIMEDB_ENTRY( 5b1eb16e,  1,      4986,            TA+TD+YM), /* 01177 - Sally - Sally Tri-Digi music */
  TIMEDB_ENTRY( 5b38008d,  1,     59076,               TA+YM), /* 03796 - F Smadja - Back To The Golden Age */
+ TIMEDB_ENTRY( 5b48ae41,  1,    179399,                  YM), /* 03090 - Unknown - Ben Hur Chariot Race March */
  TIMEDB_ENTRY( 5b5116e7,  1,    121893,               TA+YM), /* 04824 - Twitch - Altogether Now */
  TIMEDB_ENTRY( 5b6c3f7c,  1,      5198,                  YM), /* 01558 - Dave Rogers - Exolon */
  TIMEDB_ENTRY( 5b6c3f7c,  2,       158,                  YM), /* 01558 - Dave Rogers - Exolon */
@@ -3410,6 +3429,7 @@
  TIMEDB_ENTRY( 5bf3126c,  2,      2312,                  YM), /* 00116 - David Whittaker - Menace */
  TIMEDB_ENTRY( 5bf3126c,  3,      7184,                  YM), /* 00116 - David Whittaker - Menace */
  TIMEDB_ENTRY( 5c041c45,  1,     11904,               TD+YM), /* 03220 - Tomchi - PTSPTR */
+ TIMEDB_ENTRY( 5c050899,  1,       833,                  YM), /* 04956 - Unknown - Cockles and Mussels */
  TIMEDB_ENTRY( 5c090137,  1,     10184,            TA+TD+YM), /* 04913 - 505 - Pulse */
  TIMEDB_ENTRY( 5c0bf856,  1,      2880,                  YM), /* 00751 - Mark Cooksey - Forgotten Worlds */
  TIMEDB_ENTRY( 5c0bf856,  2,      6016,                  YM), /* 00751 - Mark Cooksey - Forgotten Worlds */
@@ -3418,6 +3438,7 @@
  TIMEDB_ENTRY( 5c0bf856,  5,      5796,                  YM), /* 00751 - Mark Cooksey - Forgotten Worlds */
  TIMEDB_ENTRY( 5c0bf856,  6,       255,                  YM), /* 00751 - Mark Cooksey - Forgotten Worlds */
  TIMEDB_ENTRY( 5c0bf856,  7,      3168,                  YM), /* 00751 - Mark Cooksey - Forgotten Worlds */
+ TIMEDB_ENTRY( 5c270014,  1,      1373,                  YM), /* 04946 - Unknown - America */
  TIMEDB_ENTRY( 5c2d5f54,  1,      4583,                  YM), /* 01311 - Matt Furniss - Revelation */
  TIMEDB_ENTRY( 5c2d5f54,  2,       191,                  YM), /* 01311 - Matt Furniss - Revelation */
  TIMEDB_ENTRY( 5c2d5f54,  3,       204,                  YM), /* 01311 - Matt Furniss - Revelation */
@@ -3516,6 +3537,7 @@
  TIMEDB_ENTRY( 5d6d8726,  1,      4429,            TA+TD+YM), /* 04252 - 505-cpt^pdx - Destruct */
  TIMEDB_ENTRY( 5d784c68,  1,      8320,                  YM), /* 02817 - Crazy Q - DHS - . Mindwarp . */
  TIMEDB_ENTRY( 5d8e0999,  1,      7433,                  YM), /* 03031 - Ric Clayton - Witchy Woman - Eagles (1972) */
+ TIMEDB_ENTRY( 5db5464c,  1,     99359,                  YM), /* 03175 - Unknown - Talk To Me - by Stevie Nicks */
  TIMEDB_ENTRY( 5dbf134d,  1,      5471,                  YM), /* 00015 - 4-Mat - Magic Dizzy */
  TIMEDB_ENTRY( 5dbf134d,  2,       113,                  YM), /* 00015 - 4-Mat - Magic Dizzy */
  TIMEDB_ENTRY( 5dbf134d,  3,       135,                  YM), /* 00015 - 4-Mat - Magic Dizzy */
@@ -3598,12 +3620,14 @@
  TIMEDB_ENTRY( 5f0e8e84, 19,     12543,                  YM), /* 01491 - Fred Gray - Where Time Stood Still */
  TIMEDB_ENTRY( 5f1170cd,  1,     10452,         TA+TB+TD+YM), /* 02757 - Dma-Sc - Sector One - CRAUFunk */
  TIMEDB_ENTRY( 5f168890,  1,     15216,               TA+YM), /* 01753 - Kanewood - Phantom Demo - Main */
+ TIMEDB_ENTRY( 5f284867,  1,      1100,                  YM), /* 04968 - Unknown - Ghostbuster */
  TIMEDB_ENTRY( 5f2cbdd9,  1,     11852,                  YM), /* 00102 - David Whittaker - Garfield */
  TIMEDB_ENTRY( 5f2cbdd9,  2,       182,                  YM), /* 00102 - David Whittaker - Garfield */
  TIMEDB_ENTRY( 5f2cbdd9,  3,       274,                  YM), /* 00102 - David Whittaker - Garfield */
  TIMEDB_ENTRY( 5f307aaf,  1,     29184,                  YM), /* 02534 - Remo - Bouncy */
  TIMEDB_ENTRY( 5f361be2,  1,      3464,                  YM), /* 01336 - Scavenger - Hotliner */
  TIMEDB_ENTRY( 5f51c888,  1,      4224,               TA+YM), /* 01089 - Techno - Puppet Show Intro digi */
+ TIMEDB_ENTRY( 5f5c8f27,  1,    167412,                  YM), /* 03140 - Unknown - Money for Nothing */
  TIMEDB_ENTRY( 5f671ce9,  1,      5657,                  YM), /* 02134 - Mad Max - Flash Gordon - LCD */
  TIMEDB_ENTRY( 5f6cdfc1,  1,      5369,               TD+YM), /* 04792 - Intruder - Intruder 5 */
  TIMEDB_ENTRY( 5f6d3827,  1,      8505,         TA+TB+TD+YM), /* 01847 - Lotek Style - Fading Twilight Intro Edit */
@@ -3651,6 +3675,7 @@
  TIMEDB_ENTRY( 60f60dd8,  1,      4033,         TA+TB+TD+YM), /* 02995 - 505-paradox - parkbank (STE only) */
  TIMEDB_ENTRY( 611973ab,  1,     24576,         TA+TB+TD+YM), /* 02566 - Marcer - NOISY 05 MARCER */
  TIMEDB_ENTRY( 6119bafd,  1,     13445,         TA+TB+TD+YM), /* 01270 - Frazer - The Syndicate ( 2003 ) - Return Of The Lapplander (YM Rockerz) */
+ TIMEDB_ENTRY( 612992b6,  1,       768,              YM+STE), /* 05001 - Damo - Sillyventure 2013 Invite intro */
  TIMEDB_ENTRY( 612de492,  1,     10752,                  YM), /* 01974 - MSG - MSG 04 */
  TIMEDB_ENTRY( 616a92b9,  1,      3578,                  YM), /* 00561 - Allister Brimble - Super Seymour */
  TIMEDB_ENTRY( 616a92b9,  2,      8506,                  YM), /* 00561 - Allister Brimble - Super Seymour */
@@ -3671,11 +3696,13 @@
  TIMEDB_ENTRY( 61e85111,  1,     10753,         TA+TB+TD+YM), /* 03586 - Divag - medievol */
  TIMEDB_ENTRY( 62020414,  1,      8058,         TA+TB+TD+YM), /* 01358 - Scavenger - Please Wait */
  TIMEDB_ENTRY( 6207fb61,  1,      3129,            TA+TD+YM), /* 04287 - 505-cpt^pdx - messing */
+ TIMEDB_ENTRY( 6229b55d,  1,     53071,                  YM), /* 03125 - Unknown - I Heard the Bells */
  TIMEDB_ENTRY( 622d4c6c,  1,      4599,            TA+TD+YM), /* 02481 - Floopy - Teletubb */
  TIMEDB_ENTRY( 6235abd7,  1,      1040,              YM+STE), /* 01999 - Mad Max - Bomber (STe) */
  TIMEDB_ENTRY( 6242f4be,  1,     15797,                  YM), /* 02720 - Christian Haupt - Wizmo */
  TIMEDB_ENTRY( 6242f4be,  2,      3949,                  YM), /* 02720 - Christian Haupt - Wizmo */
  TIMEDB_ENTRY( 6242f4be,  3,      5920,                  YM), /* 02720 - Christian Haupt - Wizmo */
+ TIMEDB_ENTRY( 6258c301,  1,       769,                  YM), /* 04993 - Unknown - Yankee Doodle */
  TIMEDB_ENTRY( 62760220,  1,      1914,               TA+YM), /* 02639 - Miggy - DevilVer3(Unfinished) */
  TIMEDB_ENTRY( 6289981e,  1,      2304,                  YM), /* 04609 - White Ninja - How forget... */
  TIMEDB_ENTRY( 628f08ca,  1,      5951,         TA+TB+TD+YM), /* 03857 - Yerzmyey+!Cube - Dizzzruptor part 3 (Atari ST remix) */
@@ -3683,6 +3710,7 @@
  TIMEDB_ENTRY( 62a84672,  1,       767,                  YM), /* 04772 - Dma-Sc - Lovetro intro */
  TIMEDB_ENTRY( 62acc74a,  1,      8831,            TB+TD+YM), /* 02657 - DIVAG - La potato */
  TIMEDB_ENTRY( 62afbe50,  1,      4026,                  YM), /* 01243 - Epic - Wonderful Scroll */
+ TIMEDB_ENTRY( 62d23c76,  1,     92257,                  YM), /* 03112 - Unknown - Eye Sky */
  TIMEDB_ENTRY( 62f59ad0,  1,     46080,         TA+TB+TD+YM), /* 02535 - Remo - Fluffy Bunny */
  TIMEDB_ENTRY( 62fc134d,  1,     13096,            TA+TD+YM), /* 01851 - Lotek Style - Hard Sid */
  TIMEDB_ENTRY( 62fe5f12,  1,    178183,               TA+YM), /* 03953 - Scott Lemmon - Instod5 */
@@ -3690,6 +3718,7 @@
  TIMEDB_ENTRY( 63166e49,  1,      5412,                  YM), /* 01253 - Floopy - Vivevent */
  TIMEDB_ENTRY( 632cda62,  1,      3071,            TA+TD+YM), /* 02802 - Starbuck^Creative Mind - Insomnia (Cracktro styled) */
  TIMEDB_ENTRY( 6335a459,  1,      2463,                  YM), /* 01245 - FFT - Phaleon - Beast 1 */
+ TIMEDB_ENTRY( 6343e224,  1,     33694,                  YM), /* 03169 - Unknown - Stand by Me */
  TIMEDB_ENTRY( 634d837a,  1,      3200,                  YM), /* 04206 - Steve Bak - Lands of Havoc */
  TIMEDB_ENTRY( 6357527a,  1,     10257,                  YM), /* 02136 - Mad Max - Human Race Level 4 - LCD */
  TIMEDB_ENTRY( 6361d67f,  1,        64,                  YM), /* 04546 - Peter M. Caddock, Gary P. Tinsley - Hedge Hogger */
@@ -3788,10 +3817,10 @@
  TIMEDB_ENTRY( 65c6be3b,  1,     12993,               TA+YM), /* 03738 - David Whittaker - International Soccer Challenge */
  TIMEDB_ENTRY( 65d3843c,  1,     13304,         TA+TB+TD+YM), /* 01015 - DMA-SC - Spiral Zone - UCM 16 */
  TIMEDB_ENTRY( 65d849af,  1,      8956,                  YM), /* 01273 - Frazer - TSC 27 */
- TIMEDB_ENTRY( 65e9574a,  1,      1222,                  YM), /* 03180 - n-a - Up on the House Top */
  TIMEDB_ENTRY( 65f86d4d,  1,     39936,         TA+TB+TD+YM), /* 02585 - STU - DANGER */
  TIMEDB_ENTRY( 65fd957b,  1,     15275,                  YM), /* 02025 - Mad Max - Confuzion */
  TIMEDB_ENTRY( 661d9cf4,  1,      4602,                  YM), /* 00887 - Adrian Dalecki - Rollin Ronny A */
+ TIMEDB_ENTRY( 6640fab6,  1,      3022,                  YM), /* 04979 - Unknown - Nommage */
  TIMEDB_ENTRY( 6642e0c3,  1,     29952,         TA+TB+TD+YM), /* 02598 - STU - INSTREAMINTRO */
  TIMEDB_ENTRY( 6660ae1a,  1,      6154,         TA+TB+TD+YM), /* 00180 - 505 - old crap - UCM 22 */
  TIMEDB_ENTRY( 66662f74,  1,     64695,               TA+YM), /* 03962 - Scott Lemmon - Thrash 1 */
@@ -3960,6 +3989,7 @@
  TIMEDB_ENTRY( 6b81bbea,  1,       319,                  YM), /* 02471 - Iso - Kop Houwe! */
  TIMEDB_ENTRY( 6b85ea13,  1,      5567,         TA+TB+TD+YM), /* 03002 - 505-paradox - thrust */
  TIMEDB_ENTRY( 6b94f3db,  1,     36864,         TA+TB+TD+YM), /* 03425 - cerror - DATASS */
+ TIMEDB_ENTRY( 6b9e02fa,  1,     80525,                  YM), /* 03108 - Unknown - ST. ELSEWHERE by Dave Grusin */
  TIMEDB_ENTRY( 6babbb1e,  1,     55634,               TA+YM), /* 04810 - Unknown - Tear Drop */
  TIMEDB_ENTRY( 6bb5a80b,  1,      3240,                  YM), /* 00562 - Allister Brimble - Terry's Big Adventure */
  TIMEDB_ENTRY( 6bb5a80b,  2,       384,                  YM), /* 00562 - Allister Brimble - Terry's Big Adventure */
@@ -3970,6 +4000,7 @@
  TIMEDB_ENTRY( 6bc7cbc1,  1,      9220,            TA+TD+YM), /* 02302 - Tao - Cream - Breath (MSB EIL99 demo) */
  TIMEDB_ENTRY( 6bce9bb7,  1,      1792,                  YM), /* 01504 - Rob Hubbard - Battleships */
  TIMEDB_ENTRY( 6bce9bb7,  2,       289,                  YM), /* 01504 - Rob Hubbard - Battleships */
+ TIMEDB_ENTRY( 6bdf2c18,  1,     53986,                  YM), /* 03146 - Unknown - Off To School Boogie */
  TIMEDB_ENTRY( 6c287539,  1,      7296,                  YM), /* 01205 - Excellence In Art - Sweep */
  TIMEDB_ENTRY( 6c287f4e,  1,      6526,                  YM), /* 01321 - Matt Furniss - Subbuteo */
  TIMEDB_ENTRY( 6c2c0a56,  1,      3847,                  YM), /* 02721 - Jeremy Das & Nik Sen - Locomotion */
@@ -4048,6 +4079,7 @@
  TIMEDB_ENTRY( 6da4b105,  4,        78,                  YM), /* 00854 - Ben Daglish - Hotrod */
  TIMEDB_ENTRY( 6da4b105,  5,       668,                  YM), /* 00854 - Ben Daglish - Hotrod */
  TIMEDB_ENTRY( 6da4b105,  6,       603,                  YM), /* 00854 - Ben Daglish - Hotrod */
+ TIMEDB_ENTRY( 6daf622f,  1,     68992,                  YM), /* 03134 - Unknown - Away in a Manger */
  TIMEDB_ENTRY( 6dc56de0,  1,      5370,         TA+TB+TD+YM), /* 00983 - D-Force - Plink */
  TIMEDB_ENTRY( 6de426b0,  1,      3996,                  YM), /* 03324 - Unknown - Medway Boys 11 */
  TIMEDB_ENTRY( 6e0f68c6,  1,      3468,                  YM), /* 03082 - Jim Thomson - Four Leaf Clover */
@@ -4073,7 +4105,6 @@
  TIMEDB_ENTRY( 6e967386,  4,      4480,                  YM), /* 01875 - Dave Lowe - Afterburner */
  TIMEDB_ENTRY( 6e967386,  5,      3840,                  YM), /* 01875 - Dave Lowe - Afterburner */
  TIMEDB_ENTRY( 6ebc3157,  1,     13050,               TA+YM), /* 01453 - Stax - Tauris - Digi */
- TIMEDB_ENTRY( 6ebd51f9,  1,      7879,                  YM), /* 03161 - n-a -  */
  TIMEDB_ENTRY( 6edf2455,  1,      5697,                  YM), /* 00382 - Wally Beben - Elite */
  TIMEDB_ENTRY( 6ee1a637,  1,     12096,                  YM), /* 00596 - Chris Mad - Overdrive Dots */
  TIMEDB_ENTRY( 6ee9c6f1,  1,      3072,                  YM), /* 04005 - Riff Raff - Protector */
@@ -4089,6 +4120,7 @@
  TIMEDB_ENTRY( 6f3f1de7,  1,      9984,               TD+YM), /* 00585 - Celtic - I'm The Deiffel! - TFU End */
  TIMEDB_ENTRY( 6f68a236,  1,      5958,               TA+YM), /* 01349 - Scavenger - Nadaaaaaaaaaahhh! */
  TIMEDB_ENTRY( 6f74f173,  1,      6207,         TA+TB+TD+YM), /* 02561 - marcer - hybris remix */
+ TIMEDB_ENTRY( 6f796805,  1,    147796,                  YM), /* 03102 - Unknown - Children's Corner # 4 */
  TIMEDB_ENTRY( 6f941621,  1,      9409,                  YM), /* 00424 - Big Alec - PYM - Copperkaahbaahnaah */
  TIMEDB_ENTRY( 6f9c6fe4,  1,       762,         TA+TB+TD+YM), /* 04110 - 505-cpt^dox - jingle01 */
  TIMEDB_ENTRY( 6fa98978,  1,      3360,                  YM), /* 04695 - Dean Sharples - Mario's Quest */
@@ -4108,6 +4140,7 @@
  TIMEDB_ENTRY( 6fde453e,  5,       248,                  YM), /* 04714 - Terry Mancey and Kevin Hearson - Reels of Fortune */
  TIMEDB_ENTRY( 6fde453e, 30,        75,                  YM), /* 04714 - Terry Mancey and Kevin Hearson - Reels of Fortune */
  TIMEDB_ENTRY( 6fde453e, 31,        75,                  YM), /* 04714 - Terry Mancey and Kevin Hearson - Reels of Fortune */
+ TIMEDB_ENTRY( 6fec5982,  1,     31168,                  YM), /* 03117 - Unknown - God Father */
  TIMEDB_ENTRY( 700163c3,  1,      2240,                  YM), /* 01109 - Keith Tinman - Batman - The Caped Crusader */
  TIMEDB_ENTRY( 7027d331,  1,      5376,                  YM), /* 01204 - Excellence In Art - Sweat */
  TIMEDB_ENTRY( 702e32b4,  1,     15899,         TA+TB+TD+YM), /* 02794 - Frequent--Ephidrena (2006) - Lambo */
@@ -4129,12 +4162,9 @@
  TIMEDB_ENTRY( 708b613b,  1,      1792,                  YM), /* 04836 - t1000 - Bits 30 */
  TIMEDB_ENTRY( 708bf8fa,  1,      9984,                  YM), /* 00415 - Big Alec - Musical Wonder */
  TIMEDB_ENTRY( 70ac75cf,  1,      9985,            TA+TD+YM), /* 02349 - Tao-Cream - Cutie (UCM 25) */
- TIMEDB_ENTRY( 70af9e1c,  1,      4575,                  YM), /* 03151 - n-a -  */
  TIMEDB_ENTRY( 70b8e905,  1,     18241,               TA+YM), /* 04055 - Roggie - Rissoto supreme & custard */
  TIMEDB_ENTRY( 70be9cba,  1,     17671,                  YM), /* 00437 - Big Alec - Stand By */
- TIMEDB_ENTRY( 70e87410,  1,      9394,                  YM), /* 03099 - n-a - Children's Corner # 1 */
  TIMEDB_ENTRY( 7109672b,  1,      3623,                  YM), /* 00165 - Martin Walker - D-Generation */
- TIMEDB_ENTRY( 71144213,  1,      4106,                  YM), /* 03110 - Unknown - The Entertainer-Scott Joplin */
  TIMEDB_ENTRY( 711628dd,  1,      6335,                  YM), /* 04082 - Gary Wheaton - Miner 2049er */
  TIMEDB_ENTRY( 711f39f2,  1,      4995,                  YM), /* 03543 - David Whittaker - Graham Gooch World Class Cricket */
  TIMEDB_ENTRY( 713a75a3,  1,      3535,                  YM), /* 01559 - Dave Rogers - Ranarama */
@@ -4155,6 +4185,7 @@
  TIMEDB_ENTRY( 71b214ce,  1,     57025,            TB+TD+YM), /* 02714 - naPO - AC 2006 */
  TIMEDB_ENTRY( 71c1575b,  1,      9984,                  YM), /* 01562 - Rude Kid - Knuff - Golden Dawn 52 */
  TIMEDB_ENTRY( 71ca34bd,  1,      9381,         TA+TB+TD+YM), /* 00032 - 505 - Aragorn - UCM 22 */
+ TIMEDB_ENTRY( 71cb3622,  1,     11648,                  YM), /* 05003 - Fred Eric Gerard - Crazy Cars III */
  TIMEDB_ENTRY( 71e67240,  1,      3200,                  YM), /* 02437 - Gari Biasillo - Slayer */
  TIMEDB_ENTRY( 71e67240,  2,       443,                  YM), /* 02437 - Gari Biasillo - Slayer */
  TIMEDB_ENTRY( 71e67240,  3,      4224,                  YM), /* 02437 - Gari Biasillo - Slayer */
@@ -4166,7 +4197,6 @@
  TIMEDB_ENTRY( 7211ab87,  1,     17080,         TA+TB+TD+YM), /* 02076 - Mad Max - Flash Gordon - Sid */
  TIMEDB_ENTRY( 721728d7,  1,       896,                  YM), /* 00958 - Dark Angel - Your Turn */
  TIMEDB_ENTRY( 723e22d3,  1,      8057,               TD+YM), /* 01622 - No More - Night Walk */
- TIMEDB_ENTRY( 724620eb,  1,      7336,                  YM), /* 03121 - n-a - Homage to ANDRES SEGOVIA */
  TIMEDB_ENTRY( 725e3a5a,  1,     20544,         TA+TB+TD+YM), /* 02526 - Salkin-047 - Hero */
  TIMEDB_ENTRY( 7269fca9,  1,     94672,               TA+YM), /* 03726 - Spaz - Dark Side of the Spoon - TLB */
  TIMEDB_ENTRY( 7271e4a4,  1,      8446,                  YM), /* 04395 - Barry Leitch - Back to the Future Part III */
@@ -4179,7 +4209,6 @@
  TIMEDB_ENTRY( 7271e4a4,  8,      4611,                  YM), /* 04395 - Barry Leitch - Back to the Future Part III */
  TIMEDB_ENTRY( 727b0b84,  1,      2304,                  YM), /* 00485 - Ultimatum - Kidney Bean 1 */
  TIMEDB_ENTRY( 727f9716,  1,     87916,               TA+YM), /* 04670 - Kijop - Raaap */
- TIMEDB_ENTRY( 729567dc,  1,      7648,                  YM), /* 03128 - n-a - Jump */
  TIMEDB_ENTRY( 72994953,  1,      6858,                  YM), /* 00123 - David Whittaker - Panther */
  TIMEDB_ENTRY( 72b9137c,  1,      9217,                  YM), /* 00431 - Big Alec - Poppycock - Sprites */
  TIMEDB_ENTRY( 72c1d405,  1,     11332,                  YM), /* 03608 - Tomchi  Noextra - AC 2010 invit */
@@ -4231,6 +4260,7 @@
  TIMEDB_ENTRY( 747eae7e,  1,      9472,               TA+YM), /* 00810 - Crawdaddy - Seekers (Cross The Deserts) */
  TIMEDB_ENTRY( 7485c843,  1,      7674,                  YM), /* 01238 - Epic - Stunt Priest */
  TIMEDB_ENTRY( 7494a084,  1,      6672,                  YM), /* 00905 - Danny Oneway - Lamebrain 2 - Song */
+ TIMEDB_ENTRY( 74a7eaf3,  1,    177260,                  YM), /* 03116 - Unknown - Entry of the Gladiators */
  TIMEDB_ENTRY( 74ae2b50,  1,     12288,                  YM), /* 03256 - T1000 - The Beast Club - TS 4 */
  TIMEDB_ENTRY( 74b82316,  1,      1926,                  YM), /* 03382 - Unknown - Bach */
  TIMEDB_ENTRY( 74bc3732,  1,      7296,                  YM), /* 01641 - JB 007 - Climax - Plastro */
@@ -4249,7 +4279,7 @@
  TIMEDB_ENTRY( 750f2a72,  1,      8280,                  YM), /* 00740 - Connor - UCM 2 Intro */
  TIMEDB_ENTRY( 75176418,  1,     12287,         TA+TB+TD+YM), /* 02486 - gwEm (M. Gray conversion) - Bangin' Nights */
  TIMEDB_ENTRY( 75478a17,  1,     41216,         TA+TB+TD+YM), /* 03426 - cerror - A BEGINNING */
- TIMEDB_ENTRY( 7549d578,  1,      5095,                  YM), /* 03141 - Unknown - Music Box Dancer - Frank Mills */
+ TIMEDB_ENTRY( 75585863,  1,     14601,                  YM), /* 04945 - Unknown - Air on a G-String */
  TIMEDB_ENTRY( 7562aff4,  1,     14665,               TB+YM), /* 01031 - Doclands - Zoomer Preview - FOF */
  TIMEDB_ENTRY( 7563ab89,  1,      5120,                  YM), /* 02118 - Mad Max - Warhawk Remix */
  TIMEDB_ENTRY( 756f8880,  1,      4602,               TA+YM), /* 01350 - Scavenger - No Muls, Rapido? */
@@ -4410,7 +4440,6 @@
  TIMEDB_ENTRY( 790e4d93,  1,     16128,                  YM), /* 00739 - Connor - TFC Spaceballs Demo */
  TIMEDB_ENTRY( 790f5fb6,  1,    141313,               TA+YM), /* 03752 - Tufty - Knucklebusters */
  TIMEDB_ENTRY( 7913a832,  1,      2682,                  YM), /* 04213 - Jess - The name's Bond, Jess Bond (chip) */
- TIMEDB_ENTRY( 7913db4d,  1,      2737,                  YM), /* 03137 - Unknown - It Came Upon a Midnight Clear */
  TIMEDB_ENTRY( 7926f696,  1,     18240,         TA+TB+TD+YM), /* 02065 - Mad Max - Auf Wiedersehen Monty - Sid */
  TIMEDB_ENTRY( 7926f696,  2,       470,         TA+TB+TD+YM), /* 02065 - Mad Max - Auf Wiedersehen Monty - Sid */
  TIMEDB_ENTRY( 7926f696,  3,       600,         TA+TB+TD+YM), /* 02065 - Mad Max - Auf Wiedersehen Monty - Sid */
@@ -4426,7 +4455,6 @@
  TIMEDB_ENTRY( 7926f696, 13,       876,         TA+TB+TD+YM), /* 02065 - Mad Max - Auf Wiedersehen Monty - Sid */
  TIMEDB_ENTRY( 79355a03,  1,     17640,                  YM), /* 02017 - Mad Max - Ace 2 */
  TIMEDB_ENTRY( 793968aa,  1,     13824,                  YM), /* 02133 - Mad Max - Crazy Comets  - LCD */
- TIMEDB_ENTRY( 79400daf,  1,      2273,                  YM), /* 03154 - n-a - THE ROCK ISLAND LINE */
  TIMEDB_ENTRY( 7946ba85,  1,      1536,                  YM), /* 04347 - Chris Denman - Cohort - Fight for Rome */
  TIMEDB_ENTRY( 7953aa0e,  1,       243,                  YM), /* 02141 - Mad Max - Commando Levels - LSD */
  TIMEDB_ENTRY( 795a029e,  1,      2304,              YM+STE), /* 02952 - Chris Scudds - Cisco Heat (STe) */
@@ -4438,7 +4466,7 @@
  TIMEDB_ENTRY( 79683b0b,  4,      1778,                  YM), /* 01731 - Peter Johnson - Wizball */
  TIMEDB_ENTRY( 79683b0b,  5,       138,                  YM), /* 01731 - Peter Johnson - Wizball */
  TIMEDB_ENTRY( 7970cb7a,  1,      3734,                  YM), /* 03080 - Paul Schuh - Cagney & Lacey Theme - B.Conti */
- TIMEDB_ENTRY( 798a20b2,  1,      8970,                  YM), /* 03090 - Unknown - Ben Hur Chariot Race March */
+ TIMEDB_ENTRY( 7971d9e8,  1,      8484,                  YM), /* 04944 - ACC - Ruby */
  TIMEDB_ENTRY( 798bc04e,  1,      6110,                  YM), /* 04346 - Nexus 6 - Nexus of Sominus (Theme) */
  TIMEDB_ENTRY( 799757ee,  1,      4602,               TA+YM), /* 02478 - No More - Unexpected */
  TIMEDB_ENTRY( 79a266bf,  1,      4480,                  YM), /* 02890 - Illusion - Betty (Golden Dawn 40a) */
@@ -4481,6 +4509,7 @@
  TIMEDB_ENTRY( 7aa1f6bf,  1,     63588,               TA+YM), /* 04358 - X The Beermat - Mud */
  TIMEDB_ENTRY( 7aa72754,  1,      4219,                  YM), /* 00377 - 7AN - Nibbel Is Small Kermit Is Fat */
  TIMEDB_ENTRY( 7aacfcc2,  1,     16128,            TA+TD+YM), /* 02257 - Tao - Cream  (orig. Jeroen Tel) - Ice Age (Steps) */
+ TIMEDB_ENTRY( 7ac0f72e,  1,       897,                  YM), /* 04980 - Unknown - Popcorn v2 correct */
  TIMEDB_ENTRY( 7ac51aff,  1,      6652,         TA+TB+TD+YM), /* 00189 - 505 - Sid Rave 3 */
  TIMEDB_ENTRY( 7aca079b,  1,      3839,         TA+TB+TD+YM), /* 00060 - 505 - Ice Storm */
  TIMEDB_ENTRY( 7ad13084,  1,      7164,         TA+TB+TD+YM), /* 03321 - Kenet - Oldiez */
@@ -4629,6 +4658,7 @@
  TIMEDB_ENTRY( 7e4c2abc,  4,        11,                  YM), /* 02055 - Mad Max - Starpaws */
  TIMEDB_ENTRY( 7e705d5d,  1,     20480,                  YM), /* 02046 - Mad Max - Nemesis The Warlock */
  TIMEDB_ENTRY( 7e9147b9,  1,      6903,         TA+TB+TD+YM), /* 00178 - 505 - Mystic Bytes 2 */
+ TIMEDB_ENTRY( 7e9188c4,  1,      1051,                  YM), /* 04974 - Unknown - Magnetic Field */
  TIMEDB_ENTRY( 7ec89c40,  1,      6656,               TA+YM), /* 04408 - Dr Beat - Maziac */
  TIMEDB_ENTRY( 7ec89c40,  2,      6656,               TA+YM), /* 04408 - Dr Beat - Maziac */
  TIMEDB_ENTRY( 7ec89c40,  3,      3241,               TA+YM), /* 04408 - Dr Beat - Maziac */
@@ -4701,6 +4731,7 @@
  TIMEDB_ENTRY( 802725bf,  1,      4620,               TA+YM), /* 01149 - Tyan - No Name */
  TIMEDB_ENTRY( 8027fa17,  1,      3584,               TA+YM), /* 00808 - Crawdaddy - Rezonati */
  TIMEDB_ENTRY( 802c9128,  1,     25094,               TA+YM), /* 04050 - Roggie - Three pints of milk please */
+ TIMEDB_ENTRY( 803457af,  1,       977,                  YM), /* 04992 - Unknown - USA National Anthem */
  TIMEDB_ENTRY( 803eb91c,  1,      4609,                  YM), /* 03404 - Allister Brimble - Pro Powerboat Simulator */
  TIMEDB_ENTRY( 803f0458,  1,      1408,         TA+TB+TD+YM), /* 02497 - gwEm (Ian Howe conversion) - Ravin' */
  TIMEDB_ENTRY( 804d9fc1,  1,     11898,         TA+TB+TD+YM), /* 02758 - Dma-Sc - Sector One - Fighting His Fears */
@@ -4767,10 +4798,9 @@
  TIMEDB_ENTRY( 82a1a072,  1,     15275,         TA+TB+TD+YM), /* 02071 - Mad Max - Confuzion - Sid */
  TIMEDB_ENTRY( 82ab9458,  1,     12288,                  YM), /* 02116 - Mad Max - Scout */
  TIMEDB_ENTRY( 82ab9458,  2,      1536,                  YM), /* 02116 - Mad Max - Scout */
- TIMEDB_ENTRY( 82aee9e4,  1,      7062,                  YM), /* 03096 - n-a - Pachelbel's Canon in D */
+ TIMEDB_ENTRY( 82ae828c,  1,      1168,                  YM), /* 04963 - Unknown - Danube */
  TIMEDB_ENTRY( 82b08ab6,  1,     17663,                  YM), /* 02962 - Unknown - Final Command */
  TIMEDB_ENTRY( 82bb663c,  1,      5954,                  YM), /* 01046 - Dr Beat - Imagination - Many Minis */
- TIMEDB_ENTRY( 82cdfc07,  1,      8256,                  YM), /* 03177 - n-a - 76 Trombones */
  TIMEDB_ENTRY( 82df2d73,  1,     13785,                  YM), /* 04839 - t1000 - Bits 34 */
  TIMEDB_ENTRY( 82e4b442,  1,      1536,               TA+YM), /* 00950 - Dark Angel - It's Spring Time */
  TIMEDB_ENTRY( 82ebfe04,  1,      5120,                  YM), /* 00980 - Chris Denman - Warriors Of Releyne */
@@ -4809,7 +4839,10 @@
  TIMEDB_ENTRY( 83300f99,  1,     24639,         TA+TB+TD+YM), /* 02695 - dubmood (breakmekanix) - Alla vill till himmelen */
  TIMEDB_ENTRY( 833f75a0,  1,      8303,               TA+YM), /* 03669 - Per Almered-XiA-Checkpoint - Sunshine */
  TIMEDB_ENTRY( 835c49fc,  1,      4602,               TA+YM), /* 00825 - Crazy Q - DHS - Nightmare at Beatstreet */
+ TIMEDB_ENTRY( 8360b68d,  1,      1246,                  YM), /* 04989 - Unknown - Top of the World */
+ TIMEDB_ENTRY( 83614586,  1,     16128,                  YM), /* 04997 - Lonestar - Real Cyber Aciiiied */
  TIMEDB_ENTRY( 83652ab4,  1,      6226,                  YM), /* 01927 - The Mind - Genesys Remix - Zeppelin */
+ TIMEDB_ENTRY( 838ced35,  1,      1766,                  YM), /* 04983 - Unknown - Sonata */
  TIMEDB_ENTRY( 839e8649,  1,      7895,                  YM), /* 02460 - Ross Goodley - Bombuzal */
  TIMEDB_ENTRY( 83b8a41f,  1,      4795,         TA+TB+TD+YM), /* 00049 - 505 - Focky2 */
  TIMEDB_ENTRY( 83b9ee01,  1,     31299,               TA+YM), /* 03762 - Tufty - Tuft2a */
@@ -4828,6 +4861,7 @@
  TIMEDB_ENTRY( 843e061f,  4,      1077,               TD+YM), /* 04618 - Laserball 2014 - xFalcon */
  TIMEDB_ENTRY( 843e061f,  5,       436,                  YM), /* 04618 - Laserball 2014 - xFalcon */
  TIMEDB_ENTRY( 8446cdb5,  1,      6911,               TD+YM), /* 04353 - gwEm - Fuji Sunset */
+ TIMEDB_ENTRY( 845ebd1a,  1,      1422,                  YM), /* 04985 - Unknown - Star Wars */
  TIMEDB_ENTRY( 846ab268,  1,      4604,         TA+TB+TD+YM), /* 00035 - 505 - Blue Snow (D-Bug 184a) */
  TIMEDB_ENTRY( 846bac7b,  1,      1792,                  YM), /* 04931 - Crawdaddy - Who Knows */
  TIMEDB_ENTRY( 846e1b3b,  1,      2688,                  YM), /* 03495 - Shamen - Certified Dope - Filled 3D */
@@ -4858,6 +4892,7 @@
  TIMEDB_ENTRY( 856484b0,  8,       193,                  YM), /* 00072 - David Whittaker - Bad Company */
  TIMEDB_ENTRY( 856484b0,  9,        97,                  YM), /* 00072 - David Whittaker - Bad Company */
  TIMEDB_ENTRY( 856484b0, 10,        97,                  YM), /* 00072 - David Whittaker - Bad Company */
+ TIMEDB_ENTRY( 856dad7b,  1,    207992,                  YM), /* 03122 - Unknown - I Honestly Love You */
  TIMEDB_ENTRY( 85755c2d,  1,        18,                  YM), /* 04745 - Margaret Lowe - Police Quest - In the Pursuit of Death Angel */
  TIMEDB_ENTRY( 85755c2d,  2,        18,                  YM), /* 04745 - Margaret Lowe - Police Quest - In the Pursuit of Death Angel */
  TIMEDB_ENTRY( 85755c2d,  3,        18,                  YM), /* 04745 - Margaret Lowe - Police Quest - In the Pursuit of Death Angel */
@@ -4967,13 +5002,13 @@
  TIMEDB_ENTRY( 86ed0e65,  2,       640,                  YM), /* 04544 - Grant Magnuson - Granshot */
  TIMEDB_ENTRY( 86f8c6b0,  1,      6465,               TA+YM), /* 04417 - EVE - Rock & Roll */
  TIMEDB_ENTRY( 86fbb490,  1,      3924,                  YM), /* 03924 - Unknown - Musik 001 */
+ TIMEDB_ENTRY( 87136ca4,  1,    100917,                  YM), /* 03106 - Unknown - Daybreaker-ELO */
  TIMEDB_ENTRY( 8716d8eb,  1,      6725,                  YM), /* 00020 - Martin Iveson - Wolfchild */
  TIMEDB_ENTRY( 872fca5b,  1,    109257,               TA+YM), /* 04060 - Hybrid - Swirl */
  TIMEDB_ENTRY( 876c3fe0,  1,    195903,               TA+YM), /* 04040 - Roggie - Who stood on the caterpillar? */
  TIMEDB_ENTRY( 8777606c,  1,      3823,                  YM), /* 04070 - Gary Wheaton - Fractal */
  TIMEDB_ENTRY( 8779fed0,  1,      5584,                  YM), /* 01230 - Epic - Another Illusion */
  TIMEDB_ENTRY( 87a3e62f,  1,     14208,                  YM), /* 00762 - Count Zero - Decade Demo - Boot */
- TIMEDB_ENTRY( 87a70bcb,  1,     10456,                  YM), /* 03091 - n-a - Both Sides Now */
  TIMEDB_ENTRY( 87a8a5b0,  1,     81189,               TA+YM), /* 03702 - Sparky - Bachola - From a Bach 3-part inv. */
  TIMEDB_ENTRY( 87aa164b,  1,      3241,                  YM), /* 03281 - Thothy - Stille */
  TIMEDB_ENTRY( 87b13082,  1,      1799,                  YM), /* 02723 - Jeremy Das & Nik Sen - Orbit 2000 */
@@ -5114,7 +5149,7 @@
  TIMEDB_ENTRY( 8b1281b1,  1,      4992,                  YM), /* 01173 - Sally - Groovy */
  TIMEDB_ENTRY( 8b25b76f,  1,      9603,               TA+YM), /* 04216 - Big Alec - Best Part of Creation */
  TIMEDB_ENTRY( 8b2795f7,  1,      7680,               TA+YM), /* 04413 - EVE - F Nightmare */
- TIMEDB_ENTRY( 8b53314e,  1,      8863,                  YM), /* 03116 - n-a - Entry of the Gladiators */
+ TIMEDB_ENTRY( 8b56bb8f,  1,    136875,                  YM), /* 03104 - Unknown - Children's Corner # 6 */
  TIMEDB_ENTRY( 8b7693b4,  1,     15583,                  YM), /* 04149 - Unknown - Danza */
  TIMEDB_ENTRY( 8b87fb58,  1,     16128,            TA+TD+YM), /* 02351 - Tao - Cream - Shifter (YM Rockerz 1) */
  TIMEDB_ENTRY( 8bac11ad,  1,      6331,                  YM), /* 00550 - Alistair Brimble - Fast Food */
@@ -5134,6 +5169,7 @@
  TIMEDB_ENTRY( 8bcea812,  4,       377,                  YM), /* 00733 - Sean Connolly - Euro Soccer */
  TIMEDB_ENTRY( 8be0ecd1,  1,       768,               TA+YM), /* 00941 - Dark Angel - On The Road */
  TIMEDB_ENTRY( 8be8f290,  1,      9026,               TA+YM), /* 00434 - Big Alec - Sanxion Loader Digi */
+ TIMEDB_ENTRY( 8bed2c0f,  1,       535,                  YM), /* 04976 - Unknown - Mini */
  TIMEDB_ENTRY( 8c29a260,  1,      7141,               TA+YM), /* 04554 - Flix - Mega Musix Demo */
  TIMEDB_ENTRY( 8c29a260,  2,     12153,               TA+YM), /* 04554 - Flix - Mega Musix Demo */
  TIMEDB_ENTRY( 8c29a260,  3,     71534,               TA+YM), /* 04554 - Flix - Mega Musix Demo */
@@ -5150,7 +5186,6 @@
  TIMEDB_ENTRY( 8c29a260, 14,     31385,               TA+YM), /* 04554 - Flix - Mega Musix Demo */
  TIMEDB_ENTRY( 8c29a260, 15,     29377,               TA+YM), /* 04554 - Flix - Mega Musix Demo */
  TIMEDB_ENTRY( 8c2fb4ec,  1,     11808,               TD+YM), /* 02370 - Nexus 6 - Cyclone's Memory Theme */
- TIMEDB_ENTRY( 8c37b1ae,  1,      3330,                  YM), /* 03181 - n-a -  */
  TIMEDB_ENTRY( 8c4525aa,  1,      5632,                  YM), /* 00124 - David Whittaker - Platoon */
  TIMEDB_ENTRY( 8c4525aa,  2,      4480,                  YM), /* 00124 - David Whittaker - Platoon */
  TIMEDB_ENTRY( 8c4525aa,  3,     13824,                  YM), /* 00124 - David Whittaker - Platoon */
@@ -5183,6 +5218,7 @@
  TIMEDB_ENTRY( 8d210821,  1,      3807,         TA+TB+TD+YM), /* 03419 - Dubmood & Zabutom - 2006 Concrt Intro - Zabutom - Kenny Star */
  TIMEDB_ENTRY( 8d2c0721,  1,      9212,            TB+TD+YM), /* 01594 - Nemo - Game Over */
  TIMEDB_ENTRY( 8d2eb1f2,  1,     17920,                  YM), /* 01631 - Carsten Neubauer - Beam */
+ TIMEDB_ENTRY( 8d38b31c,  1,    286201,                  YM), /* 03158 - Unknown - Goodnight Saigon by B. Joel */
  TIMEDB_ENTRY( 8d3d8d54,  1,      2687,         TA+TB+TD+YM), /* 03591 - Dma-Sc - Frankiki */
  TIMEDB_ENTRY( 8d45cf8a,  1,      7883,               TA+YM), /* 02672 - Donald Fakk - Jag Rullar */
  TIMEDB_ENTRY( 8d48f5b2,  1,      7807,               TA+YM), /* 01757 - Lap - Bird Girl Mad Demo Apart */
@@ -5197,6 +5233,7 @@
  TIMEDB_ENTRY( 8d6949f9,  1,      4224,                  YM), /* 04833 - T1000 - Bits 60 */
  TIMEDB_ENTRY( 8d7895af,  1,      1193,            TA+TD+YM), /* 02678 - Donald Fakk - Porkchop (Logical mix) */
  TIMEDB_ENTRY( 8d939c23,  1,     99220,               TA+YM), /* 04035 - Roggie - Roggie 17 */
+ TIMEDB_ENTRY( 8da218ab,  1,      1249,                  YM), /* 04994 - Unknown - Yellow Rose of Texas */
  TIMEDB_ENTRY( 8dbd7740,  1,      2568,                  YM), /* 00924 - Dark Angel - Hop Jo */
  TIMEDB_ENTRY( 8dbe6511,  1,    137540,               TA+YM), /* 03769 - Count Zero - Decade Demo - Quartet */
  TIMEDB_ENTRY( 8dbe6511,  2,     26113,               TA+YM), /* 03769 - Count Zero - Decade Demo - Quartet */
@@ -5214,7 +5251,6 @@
  TIMEDB_ENTRY( 8dbe6511, 16,     85581,               TA+YM), /* 03769 - Count Zero - Decade Demo - Quartet */
  TIMEDB_ENTRY( 8dbe6511, 17,     98850,               TA+YM), /* 03769 - Count Zero - Decade Demo - Quartet */
  TIMEDB_ENTRY( 8dbe6511, 18,     46081,               TA+YM), /* 03769 - Count Zero - Decade Demo - Quartet */
- TIMEDB_ENTRY( 8dd544db,  1,      8925,                  YM), /* 03101 - n-a -  */
  TIMEDB_ENTRY( 8ddc7e6d,  1,      7680,                  YM), /* 02917 - Richard Joseph - Megalomania */
  TIMEDB_ENTRY( 8decf627,  1,      6048,                  YM), /* 02395 - Nexus 6 - Rainy Days */
  TIMEDB_ENTRY( 8decf627,  2,       419,                  YM), /* 02395 - Nexus 6 - Rainy Days */
@@ -5323,15 +5359,19 @@
  TIMEDB_ENTRY( 912fa995,  1,      1536,                  YM), /* 01401 - Skyline - Snork Intro - BIG */
  TIMEDB_ENTRY( 91310c49,  1,     12540,                  YM), /* 00773 - Count Zero - Go For It - Maggie 8 */
  TIMEDB_ENTRY( 91363e06,  1,      4475,            TA+TB+YM), /* 01605 - Nemo - Short Cuts */
+ TIMEDB_ENTRY( 913670e7,  1,     29778,                  YM), /* 03138 - Unknown - Mini Dance */
  TIMEDB_ENTRY( 9136adf9,  1,      4935,               TD+YM), /* 04787 - Intruder - Intruder 3 */
  TIMEDB_ENTRY( 91399987,  1,      4922,                  YM), /* 02926 - Allister Brimble - Seymour goes to Hollywood */
  TIMEDB_ENTRY( 91399987,  2,      8506,                  YM), /* 02926 - Allister Brimble - Seymour goes to Hollywood */
  TIMEDB_ENTRY( 91521990,  1,      9221,            TA+TD+YM), /* 02197 - Ultra & Tao - Cream - ..do things (reset) */
+ TIMEDB_ENTRY( 915ba3ba,  1,    188974,                  YM), /* 03133 - Unknown - Maggie May */
  TIMEDB_ENTRY( 91718563,  1,      8442,         TA+TB+TD+YM), /* 03415 - lotek style (orig. timbral) - electronica re-shox */
+ TIMEDB_ENTRY( 9176daa9,  1,     87672,                  YM), /* 03139 - Unknown - Minuet in G by J.S. Bach */
  TIMEDB_ENTRY( 91792432,  1,     19776,                  YM), /* 02178 - Mad Max - Astaroth */
  TIMEDB_ENTRY( 91792432,  2,      6912,                  YM), /* 02178 - Mad Max - Astaroth */
  TIMEDB_ENTRY( 91792432,  3,      6144,                  YM), /* 02178 - Mad Max - Astaroth */
  TIMEDB_ENTRY( 91792432,  4,     15616,                  YM), /* 02178 - Mad Max - Astaroth */
+ TIMEDB_ENTRY( 91824364,  1,     99672,                  YM), /* 03114 - Unknown - Where Have All th Flowers Gone */
  TIMEDB_ENTRY( 91857058,  1,      3221,                  YM), /* 03517 - Fred Gray - Victory Road */
  TIMEDB_ENTRY( 91857058,  2,      1933,                  YM), /* 03517 - Fred Gray - Victory Road */
  TIMEDB_ENTRY( 91857058,  3,       181,                  YM), /* 03517 - Fred Gray - Victory Road */
@@ -5339,6 +5379,7 @@
  TIMEDB_ENTRY( 91857058,  5,        81,                  YM), /* 03517 - Fred Gray - Victory Road */
  TIMEDB_ENTRY( 91857058,  6,        31,                  YM), /* 03517 - Fred Gray - Victory Road */
  TIMEDB_ENTRY( 91935cc7,  1,      9986,            TA+TD+YM), /* 02303 - Tao - Cream - Breath 2000 */
+ TIMEDB_ENTRY( 91978e5a,  1,      1408,                  YM), /* 04947 - Unknown - Axel F */
  TIMEDB_ENTRY( 91a0b1c5,  1,      1152,               TA+YM), /* 04447 - Scavenger - Bomb */
  TIMEDB_ENTRY( 91c5ee9a,  1,      4686,                  YM), /* 01299 - Matt Furniss - John Barnes Euro Football */
  TIMEDB_ENTRY( 91c5ee9a,  2,      4702,                  YM), /* 01299 - Matt Furniss - John Barnes Euro Football */
@@ -5478,6 +5519,7 @@
  TIMEDB_ENTRY( 9476a9f7,  1,     10747,                  YM), /* 00559 - Allister Brimble - Spellbound Dizzy */
  TIMEDB_ENTRY( 9476a9f7,  2,       144,                  YM), /* 00559 - Allister Brimble - Spellbound Dizzy */
  TIMEDB_ENTRY( 9476a9f7,  3,       143,                  YM), /* 00559 - Allister Brimble - Spellbound Dizzy */
+ TIMEDB_ENTRY( 948362dd,  1,     91194,                  YM), /* 03119 - Unknown - Han Solo and the Princess */
  TIMEDB_ENTRY( 94855d20,  1,      5568,                  YM), /* 02014 - Mad Max - ST News 6.1 */
  TIMEDB_ENTRY( 94975963,  1,     12384,                  YM), /* 01425 - Spector - Manic Demo - Greets */
  TIMEDB_ENTRY( 949bc29d,  1,      8832,               TA+YM), /* 00789 - Crawdaddy - Freedom */
@@ -5515,6 +5557,7 @@
  TIMEDB_ENTRY( 9552015e,  3,      5444,                  YM), /* 04465 - Charles Callet - La Marque Jaune */
  TIMEDB_ENTRY( 955241c3,  1,        55,                  YM), /* 02407 - Augustin Vidovic - Ploing */
  TIMEDB_ENTRY( 9563057b,  1,     30457,                  YM), /* 01717 - Jess - Tralali and Tralala */
+ TIMEDB_ENTRY( 95a91cc5,  1,      2488,                  YM), /* 04981 - Unknown - Prelude */
  TIMEDB_ENTRY( 95ab22e0,  1,     10944,                  YM), /* 04471 - Charles Callet - Sidewalk */
  TIMEDB_ENTRY( 95c01bf7,  1,     10846,               TA+YM), /* 04781 - LSL - NPRDKT */
  TIMEDB_ENTRY( 95c8b74d,  1,     37202,               TA+YM), /* 03596 - 505-paradox - hushrush (STE) */
@@ -5725,10 +5768,12 @@
  TIMEDB_ENTRY( 9a35c9be,  6,      8577,                  YM), /* 00094 - David Whittaker - Dogs of War */
  TIMEDB_ENTRY( 9a35c9be,  7,       332,                  YM), /* 00094 - David Whittaker - Dogs of War */
  TIMEDB_ENTRY( 9a35c9be,  8,       380,                  YM), /* 00094 - David Whittaker - Dogs of War */
+ TIMEDB_ENTRY( 9aa155c1,  1,    138745,                  YM), /* 03124 - Unknown - I Am A Rock        P.Simon */
  TIMEDB_ENTRY( 9ad9d815,  1,       413,                  YM), /* 03203 - Unknown - World Trophy Soccer */
  TIMEDB_ENTRY( 9ad9d815,  2,       459,                  YM), /* 03203 - Unknown - World Trophy Soccer */
  TIMEDB_ENTRY( 9ad9d815,  3,       312,                  YM), /* 03203 - Unknown - World Trophy Soccer */
  TIMEDB_ENTRY( 9ae3a822,  1,     32256,         TA+TB+TD+YM), /* 03996 - XyNo - XC3N BDAY 48H */
+ TIMEDB_ENTRY( 9ae4c9bd,  1,     82125,                  YM), /* 03110 - Unknown - The Entertainer-Scott Joplin */
  TIMEDB_ENTRY( 9b14e618,  1,     13058,         TA+TB+TD+YM), /* 00206 - 505 - UCM 12 2 */
  TIMEDB_ENTRY( 9b1fc0cc,  1,      2559,                  YM), /* 04209 - Dave Lowe - Ghostbusters II */
  TIMEDB_ENTRY( 9b2b2f8a,  1,      4224,               TA+YM), /* 04419 - EVE - Sewer 8 */
@@ -5759,7 +5804,6 @@
  TIMEDB_ENTRY( 9bf79fd9,  1,      6912,                  YM), /* 01189 - Excellence In Art - Lynx Tune */
  TIMEDB_ENTRY( 9bfc2d55,  1,     49728,            TA+TB+YM), /* 01675 - Jess - Best Part  Ze 16 Mins Hit */
  TIMEDB_ENTRY( 9c00376c,  1,      8832,            TA+TD+YM), /* 02249 - Tao - Cream - Androids */
- TIMEDB_ENTRY( 9c1a5c7a,  1,      4498,                  YM), /* 03143 - Unknown - The First Noel the Angel ... */
  TIMEDB_ENTRY( 9c1ab919,  1,     11787,            TA+TD+YM), /* 02251 - Tao - Cream - Chicago (Steps) */
  TIMEDB_ENTRY( 9c66c9d0,  1,      4352,               TA+YM), /* 00813 - Crawdaddy - The Cave */
  TIMEDB_ENTRY( 9c72511a,  1,      1536,                  YM), /* 02004 - Mad Max - Demo Shorty */
@@ -5839,8 +5883,8 @@
  TIMEDB_ENTRY( 9d70cdba,  1,      3072,                  YM), /* 02131 - Mad Max - Axel F - LCD */
  TIMEDB_ENTRY( 9d8449ea,  1,     12202,         TA+TB+TD+YM), /* 03642 - e^pi-Tristesse - silly cone */
  TIMEDB_ENTRY( 9d96a836,  1,     15546,         TA+TB+TD+YM), /* 00990 - DMA-SC - Chipster */
- TIMEDB_ENTRY( 9da43427,  1,      1759,                  YM), /* 03115 - Unknown - FUR ELISE by L. V. Beethoven */
  TIMEDB_ENTRY( 9df47e85,  1,      4226,                  YM), /* 01228 - Epic - Feed My Frankenstein */
+ TIMEDB_ENTRY( 9e0b8d4c,  1,      1239,                  YM), /* 04952 - Unknown - Brasil */
  TIMEDB_ENTRY( 9e23b2be,  1,      6976,                  YM), /* 01375 - Justin Scharvona & Andy Severn - Kid Gloves 2 */
  TIMEDB_ENTRY( 9e23b2be,  2,      7680,                  YM), /* 01375 - Justin Scharvona & Andy Severn - Kid Gloves 2 */
  TIMEDB_ENTRY( 9e23b2be,  3,      7680,                  YM), /* 01375 - Justin Scharvona & Andy Severn - Kid Gloves 2 */
@@ -5887,6 +5931,7 @@
  TIMEDB_ENTRY( 9f1d2f12,  1,      4607,            TA+TB+YM), /* 04915 - 505-paradox - Sabotage Intro */
  TIMEDB_ENTRY( 9f265e3d,  1,      7674,                  YM), /* 02455 - Timbral - Y'M still here */
  TIMEDB_ENTRY( 9f2aeb7c,  1,     11065,         TA+TB+TD+YM), /* 02100 - Mad Max - Thing on a Spring - Sid */
+ TIMEDB_ENTRY( 9f3016e4,  1,     66603,                  YM), /* 03181 - Unknown - Watch Girl */
  TIMEDB_ENTRY( 9f373ded,  1,     20601,                  YM), /* 01672 - Jess - Akira VS Sangoku */
  TIMEDB_ENTRY( 9f633da5,  1,     16512,                  YM), /* 04457 - Charles Callet - Final Assault */
  TIMEDB_ENTRY( 9f783efb,  1,      4223,               TA+YM), /* 00200 - 505 - TK Machine */
@@ -5903,7 +5948,7 @@
  TIMEDB_ENTRY( 9fb5b4eb,  1,      2688,         TA+TB+TD+YM), /* 01721 - Jess - Wave Mania is my Passion */
  TIMEDB_ENTRY( 9fbc887d,  1,      5763,                  YM), /* 01758 - Lap - Bird Girl Mad Demo Menu */
  TIMEDB_ENTRY( 9fc7da3a,  1,      4607,         TA+TB+TD+YM), /* 02840 - maktone-fairlight - varberga */
- TIMEDB_ENTRY( 9fd943e9,  1,      2458,                  YM), /* 03123 - n-a -  */
+ TIMEDB_ENTRY( 9fded4a0,  1,    124361,                  YM), /* 03142 - Unknown - NIGHT MOVES by Marilyn Martin */
  TIMEDB_ENTRY( 9fe1c921,  1,      6401,                  YM), /* 00361 - Steve Barrett - Adv Fruit Machine Sim */
  TIMEDB_ENTRY( 9fe1c921,  2,       105,                  YM), /* 00361 - Steve Barrett - Adv Fruit Machine Sim */
  TIMEDB_ENTRY( 9fe1c921,  3,       163,                  YM), /* 00361 - Steve Barrett - Adv Fruit Machine Sim */
@@ -5952,8 +5997,10 @@
  TIMEDB_ENTRY( a0e5eff7,  1,      4254,                  YM), /* 04343 - Nexus 6 - Ga! */
  TIMEDB_ENTRY( a0e9f82d,  1,     46810,               TA+YM), /* 04360 - X The Beermat - Night */
  TIMEDB_ENTRY( a0f1e6ed,  1,    103897,               TA+YM), /* 03790 - Roggie - Disk Mag */
+ TIMEDB_ENTRY( a1068bf4,  1,      1092,                  YM), /* 04977 - Unknown - Monty Python */
  TIMEDB_ENTRY( a1159697,  1,      5584,                  YM), /* 01929 - The Mind - Repatriated Nucleus */
  TIMEDB_ENTRY( a129df5f,  1,     29532,            TB+TD+YM), /* 03855 - YERZMYEY-AY-RIDERS - *WAKE UP!* YERZ */
+ TIMEDB_ENTRY( a1332ddc,  1,     45475,                  YM), /* 03154 - Unknown - THE ROCK ISLAND LINE */
  TIMEDB_ENTRY( a136bb47,  1,      5119,            TA+TB+YM), /* 02703 - Dubmood - Speedloader I */
  TIMEDB_ENTRY( a17c886e,  1,      5375,         TA+TB+TD+YM), /* 01016 - DMA-SC - UCM 16 Intro */
  TIMEDB_ENTRY( a184cbea,  1,      2125,         TA+TB+TD+YM), /* 03695 - Per Almered (XiA) 2009 - Injector */
@@ -6034,10 +6081,12 @@
  TIMEDB_ENTRY( a1d04ddb,  8,      3893,                  YM), /* 04503 - Geoff Camp - Brain food - Letters */
  TIMEDB_ENTRY( a1d04ddb,  9,       576,                  YM), /* 04503 - Geoff Camp - Brain food - Letters */
  TIMEDB_ENTRY( a1d04ddb, 10,      1141,                  YM), /* 04503 - Geoff Camp - Brain food - Letters */
+ TIMEDB_ENTRY( a1d55347,  1,      1432,                  YM), /* 04954 - Unknown - Change */
  TIMEDB_ENTRY( a1e592e4,  1,     17684,         TA+TB+TD+YM), /* 02625 - STU - YMETAL */
  TIMEDB_ENTRY( a1e8f58b,  1,      6144,                  YM), /* 00268 - Antichrist - Verity */
  TIMEDB_ENTRY( a205e610,  1,        92,                  YM), /* 03929 - Unknown - Sound 3 */
  TIMEDB_ENTRY( a20ed582,  1,      8658,                  YM), /* 04144 - Unknown - Alture */
+ TIMEDB_ENTRY( a20f0ccb,  1,      1047,                  YM), /* 04961 - Unknown - Dallas Theme */
  TIMEDB_ENTRY( a21825a8,  1,     71723,               TA+YM), /* 04048 - Roggie - STC End */
  TIMEDB_ENTRY( a21c1160,  1,      6647,                  YM), /* 01924 - The Mind - Genesys Remix - Dynamika */
  TIMEDB_ENTRY( a2408d27,  1,      1600,                  YM), /* 00610 - Chrispy Noodle - Chrispy Noodle 1 */
@@ -6046,6 +6095,7 @@
  TIMEDB_ENTRY( a2658ad7,  1,      4608,         TA+TB+TD+YM), /* 02583 - STU - CRAPTRO */
  TIMEDB_ENTRY( a27fabe6,  1,      9215,         TA+TB+TD+YM), /* 02489 - gwEm (Hubbard conversion) - Disco Snax */
  TIMEDB_ENTRY( a295d8c3,  1,     14976,         TA+TB+TD+YM), /* 01604 - Nemo - Real Arcade */
+ TIMEDB_ENTRY( a2b1ffcf,  1,     32369,                  YM), /* 03168 - Unknown - The Spider Dance - Tarantelle */
  TIMEDB_ENTRY( a2b87858,  1,       205,                  YM), /* 02916 - Richard Joseph - Magic Pockets */
  TIMEDB_ENTRY( a2bc8307,  1,     21520,            TA+TD+YM), /* 03051 - STU - DROPDABOMB - Chillout */
  TIMEDB_ENTRY( a2d97155,  1,     35840,               TA+YM), /* 02588 - STU - DEAD HACKER */
@@ -6147,7 +6197,7 @@
  TIMEDB_ENTRY( a49eb8c8,  1,     90046,               TA+YM), /* 04038 - Roggie - Roggie 20 */
  TIMEDB_ENTRY( a4a0c69d,  1,      2969,                  YM), /* 03055 - Ed Bogas - Latin */
  TIMEDB_ENTRY( a4a9a356,  1,     27462,                  YM), /* 01914 - Titan - Just Buggin - Mate */
- TIMEDB_ENTRY( a4be8bf8,  1,      2630,                  YM), /* 03171 - n-a - Theme From "Star Trek" */
+ TIMEDB_ENTRY( a4affb00,  1,      2386,                  YM), /* 04987 - Unknown - Tango */
  TIMEDB_ENTRY( a4c88cba,  1,      6144,                  YM), /* 01543 - Ralph - Ralph 6 */
  TIMEDB_ENTRY( a4cfbfa7,  1,      2041,                  YM), /* 03691 - Dma-Sc - Saboteur 3 - The Mummy Rises */
  TIMEDB_ENTRY( a4d22f03,  1,     14592,         TA+TB+TD+YM), /* 01105 - Timbral - Before The Raw */
@@ -6159,11 +6209,9 @@
  TIMEDB_ENTRY( a50f1db7,  1,      3269,         TA+TB+TD+YM), /* 04300 - 505-checkpoint - Reaching */
  TIMEDB_ENTRY( a512f2d6,  1,      3450,                  YM), /* 03077 - Tom Marvin - THUNDERER          J.P.Sousa */
  TIMEDB_ENTRY( a51df7b2,  1,     11520,                  YM), /* 00337 - Paul Tonge - Bloody Money */
- TIMEDB_ENTRY( a529bfa1,  1,      6844,                  YM), /* 03104 - n-a - Children's Corner # 6 */
  TIMEDB_ENTRY( a5407018,  1,      7691,                  YM), /* 02125 - Mad Max - Cuddly Demos - Reset */
  TIMEDB_ENTRY( a5596fe4,  1,     10746,            TA+TD+YM), /* 01369 - Scavenger - Wicked Polygons */
  TIMEDB_ENTRY( a55d69b8,  1,     25977,                  YM), /* 01681 - Jess - Cubase VS Notator */
- TIMEDB_ENTRY( a55fe2d6,  1,      5236,                  YM), /* 03109 - n-a - The Imperial Death March */
  TIMEDB_ENTRY( a562de36,  1,     15344,               TA+YM), /* 04128 - Tao - Wide Awake - STMYGM 2 version */
  TIMEDB_ENTRY( a573e77b,  1,     23809,            TA+TD+YM), /* 02293 - Tao - Cream - Alive (Birth, part 2 - Alive 1) */
  TIMEDB_ENTRY( a5762364,  1,      1152,                  YM), /* 02390 - Nexus 6 - Please Wait While Loading 1 */
@@ -6231,7 +6279,6 @@
  TIMEDB_ENTRY( a6e104c4,  1,      4632,            TB+TD+YM), /* 02858 - Helene - STRAYKITTENS1 */
  TIMEDB_ENTRY( a6ee5e2e,  1,      5447,                  YM), /* 02715 - Chrispy Noodle - Tiger 1 */
  TIMEDB_ENTRY( a6f1c155,  1,     10752,         TA+TB+TD+YM), /* 03304 - Marcer - COCO-COOOPER */
- TIMEDB_ENTRY( a6f824c6,  1,      5284,                  YM), /* 03129 - n-a - La Virgen de la Macarena */
  TIMEDB_ENTRY( a7151188,  1,     25080,                  YM), /* 01215 - Energizer - Floating - Chip */
  TIMEDB_ENTRY( a7188afa,  1,      9984,                  YM), /* 01821 - Lord - Ambition Menu */
  TIMEDB_ENTRY( a735aab7,  1,      2304,                  YM), /* 00837 - Crawdaddy - Ninja */
@@ -6244,7 +6291,6 @@
  TIMEDB_ENTRY( a807f6bd,  1,     12800,                  YM), /* 00144 - David Whittaker - Stormtrooper */
  TIMEDB_ENTRY( a807f6bd,  2,      5376,                  YM), /* 00144 - David Whittaker - Stormtrooper */
  TIMEDB_ENTRY( a807f6bd,  3,        66,                  YM), /* 00144 - David Whittaker - Stormtrooper */
- TIMEDB_ENTRY( a818b3bd,  1,      4384,                  YM), /* 03139 - n-a - Minuet in G by J.S. Bach */
  TIMEDB_ENTRY( a819a501,  1,      4606,         TA+TB+TD+YM), /* 04285 - 505 - Checkpoint - Lovesong (Unrel.) */
  TIMEDB_ENTRY( a81da630,  1,      2730,                  YM), /* 00118 - David Whittaker - Mr Heli */
  TIMEDB_ENTRY( a81da630,  2,       560,                  YM), /* 00118 - David Whittaker - Mr Heli */
@@ -6261,6 +6307,7 @@
  TIMEDB_ENTRY( a85da635,  1,      3336,            TB+TD+YM), /* 02712 - Marcer - SIMPLY LARRY */
  TIMEDB_ENTRY( a89eb139,  1,     12282,         TA+TB+TD+YM), /* 02828 - Msg - Superfly tune 5 */
  TIMEDB_ENTRY( a8a808e3,  1,      9984,                  YM), /* 03219 - Tomchi - Parallax */
+ TIMEDB_ENTRY( a8b92869,  1,     59153,                  YM), /* 03160 - Unknown - Santa Claus is comin' to town! */
  TIMEDB_ENTRY( a8e71704,  1,      3092,                  YM), /* 00870 - Ben Daglish - Rick Dangerous 2 */
  TIMEDB_ENTRY( a8e71704,  2,        47,                  YM), /* 00870 - Ben Daglish - Rick Dangerous 2 */
  TIMEDB_ENTRY( a8e71704,  3,       187,                  YM), /* 00870 - Ben Daglish - Rick Dangerous 2 */
@@ -6281,11 +6328,13 @@
  TIMEDB_ENTRY( a981ef77,  1,    106431,               TA+YM), /* 03733 - David Whittaker - Shadow of the Beast */
  TIMEDB_ENTRY( a9840451,  1,     17828,                 STE), /* 03448 - 505 - Paradox - Cernit Trandafir */
  TIMEDB_ENTRY( a98f4a8a,  1,      1047,               TD+YM), /* 02665 - Donald Fakk - Countdown */
+ TIMEDB_ENTRY( a99170c3,  1,      5375,         TA+TB+TD+YM), /* 04996 - YQN - last attempt */
  TIMEDB_ENTRY( a9a4e1e2,  1,      2560,                  YM), /* 04604 - White Ninja - Unchanged */
  TIMEDB_ENTRY( a9a63e99,  1,     10486,                  YM), /* 03241 - T1000 - The Beast Club - TBC 13 */
  TIMEDB_ENTRY( a9a79d0b,  1,      7199,         TA+TB+TD+YM), /* 03832 - Rhino - Torment (D Newman) - Three out of Four */
  TIMEDB_ENTRY( a9bf9dca,  1,      6144,                  YM), /* 03254 - T1000 - The Bits Club 35 */
  TIMEDB_ENTRY( a9df42c6,  1,      8736,                  YM), /* 01392 - Shaft - Ninja Spirit */
+ TIMEDB_ENTRY( a9f87735,  1,      1038,                  YM), /* 04948 - Unknown - Big Spender */
  TIMEDB_ENTRY( aa09bd9d,  1,      3680,                  YM), /* 03261 - Justin Ward - Deadland */
  TIMEDB_ENTRY( aa0c2a3a,  1,       904,                  YM), /* 03383 - Unknown - Ballade */
  TIMEDB_ENTRY( aa1bc80a,  1,      4096,                  YM), /* 02934 - Chris Denman - Discovery */
@@ -6333,10 +6382,8 @@
  TIMEDB_ENTRY( aaeb85e3,  1,     33024,            TA+TD+YM), /* 03049 - Marcer - Elite - Traxxer 2 */
  TIMEDB_ENTRY( aaf096c2,  1,        99,              YM+STE), /* 03231 - Mad Max - Chambers of Shaolin - STe */
  TIMEDB_ENTRY( ab084016,  1,       398,                  YM), /* 03013 - Unknown - Heroes of the Lance */
- TIMEDB_ENTRY( ab1c924b,  1,      1558,                  YM), /* 03117 - n-a -  */
  TIMEDB_ENTRY( ab25346b,  1,     23348,            TB+TD+YM), /* 03340 - Marcer - TURRICANA */
  TIMEDB_ENTRY( ab2725b6,  1,      4607,                  YM), /* 01305 - Matt Furniss - Manchester United */
- TIMEDB_ENTRY( ab3cf2f3,  1,      9449,                  YM), /* 03133 - n-a - Maggie May */
  TIMEDB_ENTRY( ab412ce5,  1,      1600,                  YM), /* 04769 - blind io - borderline bacon */
  TIMEDB_ENTRY( ab452992,  1,      5765,         TA+TB+TD+YM), /* 01153 - Tyan - Platz 2 */
  TIMEDB_ENTRY( ab471e96,  1,      1792,                  YM), /* 01893 - Dave Lowe - Time Scanner */
@@ -6373,7 +6420,6 @@
  TIMEDB_ENTRY( ac68d080,  1,     12000,                  YM), /* 01426 - Spector - Manic Demo - Main Menu */
  TIMEDB_ENTRY( ac8da535,  1,      3433,                  YM), /* 03047 - Ed Bogas - Five Four */
  TIMEDB_ENTRY( ac9c9eda,  1,      1380,                  YM), /* 03388 - Al Lowe - Kings Quest 2 */
- TIMEDB_ENTRY( acac9885,  1,      9494,                  YM), /* 03094 - n-a - They Call It The Blues */
  TIMEDB_ENTRY( acb77857,  1,      5934,                  YM), /* 00567 - Jas C Brooke - Hellfire */
  TIMEDB_ENTRY( acb77857,  2,       512,                  YM), /* 00567 - Jas C Brooke - Hellfire */
  TIMEDB_ENTRY( acb77857,  3,       310,                  YM), /* 00567 - Jas C Brooke - Hellfire */
@@ -6418,6 +6464,7 @@
  TIMEDB_ENTRY( ae7b8d79,  1,      2688,                  YM), /* 01169 - Sally - Stax 53 - Tune 1 */
  TIMEDB_ENTRY( ae8e4d6b,  1,      3584,                  YM), /* 00563 - Jas C Brooke - 1943 */
  TIMEDB_ENTRY( aef26aa2,  1,      4609,         TA+TB+TD+YM), /* 03643 - 505-checkpoint - Stress */
+ TIMEDB_ENTRY( af239f12,  1,      2125,                  YM), /* 04965 - Unknown - Entertainer */
  TIMEDB_ENTRY( af5dfc0d,  1,     12192,         TA+TB+TD+YM), /* 02073 - Mad Max - Deep Strike - Sid */
  TIMEDB_ENTRY( af682d9c,  1,       431,                  YM), /* 00067 - David Whittaker - APB */
  TIMEDB_ENTRY( af682d9c,  2,      2155,                  YM), /* 00067 - David Whittaker - APB */
@@ -6504,6 +6551,7 @@
  TIMEDB_ENTRY( b1f6ff32,  1,     48603,               TA+YM), /* 03741 - Tufty - Aces High (orig Romeo Knight) */
  TIMEDB_ENTRY( b202b6c6,  1,      2881,                  YM), /* 02142 - Mad Max - Commando High - LSD */
  TIMEDB_ENTRY( b22e35a0,  1,     83269,               TA+YM), /* 04053 - Roggie - Ooooer my digits fell off */
+ TIMEDB_ENTRY( b249341e,  1,      1006,                  YM), /* 04986 - Unknown - Swanee */
  TIMEDB_ENTRY( b24bc173,  1,     20352,                  YM), /* 02107 - Mad Max - Alloy Run */
  TIMEDB_ENTRY( b24bc173,  2,      2304,                  YM), /* 02107 - Mad Max - Alloy Run */
  TIMEDB_ENTRY( b2810651,  1,       504,                  YM), /* 03680 - Dma-Sc - Antiques - Loader 1 */
@@ -6582,6 +6630,7 @@
  TIMEDB_ENTRY( b4273de8,  1,     37248,         TA+TB+TD+YM), /* 02548 - cerror - Make some sense */
  TIMEDB_ENTRY( b42bb328,  1,      8064,            TA+TD+YM), /* 01867 - Lotek Style - Sense.net */
  TIMEDB_ENTRY( b42f4e44,  1,      5368,               TA+YM), /* 03483 - Peter Jorgensen - Boesseti */
+ TIMEDB_ENTRY( b44e0a09,  1,     50522,                  YM), /* 03178 - Unknown - Two Part Invention #13 by Bach */
  TIMEDB_ENTRY( b4625ffd,  1,     29185,               TA+YM), /* 04357 - X The Beermat - Dunno */
  TIMEDB_ENTRY( b467d863,  1,      3097,                  YM), /* 03280 - Thothy - Jingle */
  TIMEDB_ENTRY( b4685082,  1,     15675,            TB+TD+YM), /* 01107 - Timbral - DHS - RI Rebellion (YM Rockerz) */
@@ -6604,6 +6653,7 @@
  TIMEDB_ENTRY( b4d2b8ca,  4,      4607,                  YM), /* 00346 - Tony Williams - Oh No! More Lemmings */
  TIMEDB_ENTRY( b4d2b8ca,  5,      6559,                  YM), /* 00346 - Tony Williams - Oh No! More Lemmings */
  TIMEDB_ENTRY( b4d2b8ca,  6,      3839,                  YM), /* 00346 - Tony Williams - Oh No! More Lemmings */
+ TIMEDB_ENTRY( b4de5bc3,  1,    136471,                  YM), /* 03166 - Unknown - Soon It's Gonna Rain */
  TIMEDB_ENTRY( b4ebda37,  1,      6239,                  YM), /* 02363 - Nexus 6 - Big Jelly Fish V1 */
  TIMEDB_ENTRY( b4ee1085,  1,      2878,               TA+YM), /* 01522 - Iso - Family Dog */
  TIMEDB_ENTRY( b506f527,  1,      8194,               TA+YM), /* 04441 - Joard - Synth Dream 2 - Joardy Blitter */
@@ -6662,6 +6712,7 @@
  TIMEDB_ENTRY( b611e966,  4,        89,                  YM), /* 01484 - Holger Gehrmann - Hollywood Poker */
  TIMEDB_ENTRY( b611e966,  5,       115,                  YM), /* 01484 - Holger Gehrmann - Hollywood Poker */
  TIMEDB_ENTRY( b612927e,  1,      3839,                  YM), /* 04647 - ActoDi - No Timer SV'14 */
+ TIMEDB_ENTRY( b625c5a1,  1,      1141,                  YM), /* 04958 - Unknown - Country Boy */
  TIMEDB_ENTRY( b648c266,  1,      4927,                  YM), /* 03621 - Dma-Sc - SV2011INTRO */
  TIMEDB_ENTRY( b64a9732,  1,     15356,                  YM), /* 01748 - Jovis - Lametrop - Starfield */
  TIMEDB_ENTRY( b665d7fe,  1,     16524,                  YM), /* 02061 - Mad Max - Wiz */
@@ -6676,6 +6727,7 @@
  TIMEDB_ENTRY( b69262a3,  1,      1786,            TA+TB+YM), /* 04279 - 505 - Loop00 */
  TIMEDB_ENTRY( b6b816bd,  1,     41601,               TA+YM), /* 03754 - Tufty - NSynth */
  TIMEDB_ENTRY( b6c1f2ed,  1,     17280,                  YM), /* 00602 - Chris Mad - Overdrive Snurkle */
+ TIMEDB_ENTRY( b6cfd76e,  1,     24457,                  YM), /* 03180 - Unknown - Up on the House Top */
  TIMEDB_ENTRY( b6f3f526,  1,     13760,                  YM), /* 01790 - Barry Leitch - Combo Racer */
  TIMEDB_ENTRY( b6f4299a,  1,     53356,               TA+YM), /* 03807 - Spaz - Dead Orgy 2 */
  TIMEDB_ENTRY( b70325f9,  1,      6530,         TA+TB+TD+YM), /* 04927 - tomchi - ltc01 ouacances */
@@ -6699,6 +6751,7 @@
  TIMEDB_ENTRY( b75f8ae7,  1,     28800,         TA+TB+TD+YM), /* 02083 - Mad Max - International Karate - Sid */
  TIMEDB_ENTRY( b762df58,  1,      6719,         TA+TB+TD+YM), /* 04760 - Shinobi - Outgoing */
  TIMEDB_ENTRY( b76f5fb4,  1,      9849,               TA+YM), /* 01694 - Jess - Lemon Squeezer's Dream */
+ TIMEDB_ENTRY( b787c849,  1,    121711,                  YM), /* 03098 - Unknown - Good Time Charlie */
  TIMEDB_ENTRY( b7b182ac,  1,      5160,         TA+TB+TD+YM), /* 03876 - Hylst - Murdered */
  TIMEDB_ENTRY( b7b64257,  1,      8914,               TA+YM), /* 04425 - Lotus - Synth Dream 2 - Big Bubble */
  TIMEDB_ENTRY( b7bb39fc,  1,      2688,            TA+TD+YM), /* 02315 - Tao - Cream (orig. Klaus Ude) - Lin Wu's Challenge 2 */
@@ -6748,7 +6801,6 @@
  TIMEDB_ENTRY( b8dd9ce0,  1,      1536,                  YM), /* 01418 - Skyline - Snork Intro - Vodka */
  TIMEDB_ENTRY( b8e70c7e,  1,     14208,                  YM), /* 02120 - Mad Max - Bangkok Nights - Loader */
  TIMEDB_ENTRY( b8fc4054,  1,      8069,            TA+TD+YM), /* 02320 - Tao - Cream - Mad Vision (never used) */
- TIMEDB_ENTRY( b90c66ef,  1,      6095,                  YM), /* 03087 - n-a - 12 Bar Blues-IRK */
  TIMEDB_ENTRY( b91f61fe,  1,      8352,                  YM), /* 01996 - Mad Max - Axel F */
  TIMEDB_ENTRY( b9267165,  1,     10752,                  YM), /* 01623 - No More - No More */
  TIMEDB_ENTRY( b9589a0f,  1,      8058,               TA+YM), /* 00896 - Danny Oneway - C64 */
@@ -6757,8 +6809,8 @@
  TIMEDB_ENTRY( b98f03fb,  1,     15842,               TA+YM), /* 04767 - Dave Lowe - After Burner digi */
  TIMEDB_ENTRY( b9b50cb1,  1,      7947,                  YM), /* 01038 - Donald Fakk - Pressure */
  TIMEDB_ENTRY( b9c04132,  1,      2688,               TA+YM), /* 00250 - Antichrist - Chelou No!! */
- TIMEDB_ENTRY( b9f1d758,  1,      5046,                  YM), /* 03106 - n-a - Daybreaker-ELO */
  TIMEDB_ENTRY( b9fde005,  1,      3072,                  YM), /* 03654 - Jedi - Nothing Is More - Song 3 */
+ TIMEDB_ENTRY( ba1473fb,  1,     89960,                  YM), /* 03143 - Unknown - The First Noel the Angel ... */
  TIMEDB_ENTRY( ba2c50f8,  1,      6138,                  YM), /* 03287 - Adrian Dalecki - Logo */
  TIMEDB_ENTRY( ba2c50f8,  2,      8826,                  YM), /* 03287 - Adrian Dalecki - Logo */
  TIMEDB_ENTRY( ba2c50f8,  3,      2682,                  YM), /* 03287 - Adrian Dalecki - Logo */
@@ -6774,7 +6826,6 @@
  TIMEDB_ENTRY( ba708458,  2,      2304,                  YM), /* 01057 - Jonathan Dunn - Darkman */
  TIMEDB_ENTRY( ba708458,  3,       385,                  YM), /* 01057 - Jonathan Dunn - Darkman */
  TIMEDB_ENTRY( ba708458,  4,      5376,                  YM), /* 01057 - Jonathan Dunn - Darkman */
- TIMEDB_ENTRY( ba71e92e,  1,      5809,                  YM), /* 03163 - Unknown - SOUND OF SILENCE By Paul Simon */
  TIMEDB_ENTRY( ba886f7d,  1,     40729,                  YM), /* 00007 - gwEm - Space Trip (dub mix) */
  TIMEDB_ENTRY( baa002c0,  1,      9724,            TA+TB+YM), /* 00212 - 505 - Vagrant */
  TIMEDB_ENTRY( bab4b43b,  1,     20992,                  YM), /* 04459 - Charles Callet - Bob Morane - Chevalerie */
@@ -6796,7 +6847,6 @@
  TIMEDB_ENTRY( bb65fe65,  1,     11059,            TA+TD+YM), /* 01852 - Lotek Style - Her Face */
  TIMEDB_ENTRY( bb765c7e,  1,      8442,               TA+YM), /* 02634 - Miggy - EELectric Game Music(90%) */
  TIMEDB_ENTRY( bb7fffa1,  1,     29184,         TA+TB+TD+YM), /* 03469 - cerror - Loader tune */
- TIMEDB_ENTRY( bb8432f7,  1,      2964,                  YM), /* 03144 - n-a - OLD JOE CLARK'S BOOGIE */
  TIMEDB_ENTRY( bb8625e1,  1,     19578,               TA+YM), /* 01678 - Jess - Sharpness Buzztone */
  TIMEDB_ENTRY( bb875700,  1,      9600,                  YM), /* 03260 - T1000 - The Beast Club - TS 11 */
  TIMEDB_ENTRY( bb96bca5,  1,      3480,               TA+YM), /* 03601 - Excellence in Art - Sommarhack 2011 Invite */
@@ -6817,7 +6867,6 @@
  TIMEDB_ENTRY( bbcb5276,  1,      1248,                  YM), /* 02955 - Skinnybone - Special Forces */
  TIMEDB_ENTRY( bbe35e3b,  1,      1179,                  YM), /* 04499 - C.R.G. Johnson - Boing */
  TIMEDB_ENTRY( bbe35e3b,  2,      1280,                  YM), /* 04499 - C.R.G. Johnson - Boing */
- TIMEDB_ENTRY( bbed6592,  1,      6537,                  YM), /* 03165 - n-a - Somewhere, My Love */
  TIMEDB_ENTRY( bbf23b4e,  1,      4112,                  YM), /* 01668 - Stefan Jerowski - Sarakon */
  TIMEDB_ENTRY( bbf23b4e,  2,      5376,                  YM), /* 01668 - Stefan Jerowski - Sarakon */
  TIMEDB_ENTRY( bbf23b4e,  3,      2560,                  YM), /* 01668 - Stefan Jerowski - Sarakon */
@@ -6880,7 +6929,6 @@
  TIMEDB_ENTRY( bd619255,  8,       104,                  YM), /* 04516 - Ross McNaughton - Confusion */
  TIMEDB_ENTRY( bd640e59,  1,     22272,         TA+TB+TD+YM), /* 02441 - cerror (or.by.4mat.c64) - VERY BLAND */
  TIMEDB_ENTRY( bd75fdd2,  1,      8384,         TA+TB+TD+YM), /* 02079 - Mad Max - Harvey Smiths Show Jumping - Sid */
- TIMEDB_ENTRY( bdac181f,  1,     10399,                  YM), /* 03122 - n-a - I Honestly Love You */
  TIMEDB_ENTRY( bdad5be6,  1,     11904,                  YM), /* 01633 - Nexus - Dreamzone - Cool J */
  TIMEDB_ENTRY( bdb1ca4d,  1,      3775,                  YM), /* 01246 - FFT - Phaleon - Beast 2 */
  TIMEDB_ENTRY( bdc295cc,  1,     11089,                  YM), /* 01182 - Excellence In Art - Get into The Groove */
@@ -6922,6 +6970,7 @@
  TIMEDB_ENTRY( be9e7cd2,  1,       381,            TA+TD+YM), /* 04283 - 505 - Loop07 */
  TIMEDB_ENTRY( bea40b51,  1,     12282,                  YM), /* 01688 - Jess - Generation 2.0 */
  TIMEDB_ENTRY( beb1517f,  1,        25,                  YM), /* 01357 - Scavenger - Password */
+ TIMEDB_ENTRY( beb6ddfc,  1,     87580,                  YM), /* 03157 - Unknown - SAILORS' BOOGIE */
  TIMEDB_ENTRY( beb89041,  1,      2303,               TA+YM), /* 03423 - Dubmood - D-Bug 197 Jam Version */
  TIMEDB_ENTRY( bec0d438,  1,     24372,                  YM), /* 01092 - Techno - Mathematiques Squizophrenes Intro */
  TIMEDB_ENTRY( bec625b1,  1,     11315,                  YM), /* 00879 - Ben Daglish - Ultimate Golf */
@@ -6929,6 +6978,7 @@
  TIMEDB_ENTRY( bef28cde,  1,     13443,                  YM), /* 02243 - Tao - Cream (orig. Rob Hubbard) - Rasputin (Stmygm) */
  TIMEDB_ENTRY( bef28cde,  2,      2179,                  YM), /* 02243 - Tao - Cream (orig. Rob Hubbard) - Rasputin (Stmygm) */
  TIMEDB_ENTRY( befa3934,  1,     11066,                  YM), /* 02058 - Mad Max - Thing On A Spring */
+ TIMEDB_ENTRY( bf08b0e9,  1,     64086,                  YM), /* 03152 - Unknown - Believe It or Not!    Mancini */
  TIMEDB_ENTRY( bf0e1fae,  1,     26463,               TA+YM), /* 03808 - Spherical - Quartet Music Demo II */
  TIMEDB_ENTRY( bf0e1fae,  2,     39429,               TA+YM), /* 03808 - Spherical - Quartet Music Demo II */
  TIMEDB_ENTRY( bf0e1fae,  3,     34309,               TA+YM), /* 03808 - Spherical - Quartet Music Demo II */
@@ -6947,7 +6997,7 @@
  TIMEDB_ENTRY( bf721338,  4,      1921,                  YM), /* 01792 - Barry Leitch - Frankenstein */
  TIMEDB_ENTRY( bf9c5998,  1,      2880,                  YM), /* 00778 - Crawdaddy - Blazer */
  TIMEDB_ENTRY( bfb64ee2,  1,       768,                  YM), /* 00934 - Dark Angel - Mathematica Intro */
- TIMEDB_ENTRY( bfb698ca,  1,      3000,                  YM), /* 03147 - n-a - Peter Gunn by JFS */
+ TIMEDB_ENTRY( bfd86250,  1,    105686,                  YM), /* 03129 - Unknown - La Virgen de la Macarena */
  TIMEDB_ENTRY( bfd90bda,  1,      5772,               TA+YM), /* 01619 - No More - GSC 56 */
  TIMEDB_ENTRY( bfdcbcb2,  1,      6940,         TA+TB+TD+YM), /* 01869 - Lotek Style - Seraphim */
  TIMEDB_ENTRY( bffa5268,  1,      4369,                  YM), /* 00099 - David Whittaker - Eye of Horus */
@@ -6972,7 +7022,6 @@
  TIMEDB_ENTRY( c0a4682e,  1,      3072,               TA+YM), /* 00256 - Antichrist - Melody */
  TIMEDB_ENTRY( c0ba0415,  1,      9210,               TA+YM), /* 04225 - 505 - 4th */
  TIMEDB_ENTRY( c0bfa7c8,  1,     33061,               TA+YM), /* 04814 - Unknown - Tin */
- TIMEDB_ENTRY( c0c5ae91,  1,      1926,                  YM), /* 03179 - Unknown - Two Part Invention by J. Bach */
  TIMEDB_ENTRY( c0c689b3,  1,      6630,                  YM), /* 00574 - Jas C Brooke - Savage */
  TIMEDB_ENTRY( c0c689b3,  2,      7416,                  YM), /* 00574 - Jas C Brooke - Savage */
  TIMEDB_ENTRY( c0c689b3,  3,       141,                  YM), /* 00574 - Jas C Brooke - Savage */
@@ -6988,7 +7037,6 @@
  TIMEDB_ENTRY( c11d69b3,  1,      7680,                  YM), /* 01554 - Rhino - Xmas 2003 Intro - Song 2 */
  TIMEDB_ENTRY( c125f0b1,  1,     26490,                  YM), /* 01680 - Jess - Throw The Confettis */
  TIMEDB_ENTRY( c12837c7,  1,      1536,                  YM), /* 01388 - Andy Severn - Joe Blade */
- TIMEDB_ENTRY( c133576c,  1,      6424,                  YM), /* 03176 - Unknown -        Today   Randy Sparks */
  TIMEDB_ENTRY( c14407ec,  1,      2486,            TA+TB+YM), /* 00202 - 505 - Trace */
  TIMEDB_ENTRY( c162d957,  1,      9216,                  YM), /* 01099 - Techno - Rigolo */
  TIMEDB_ENTRY( c1ae24ca,  1,      1920,                  YM), /* 02167 - Mad Max - Ikari Union */
@@ -7012,7 +7060,9 @@
  TIMEDB_ENTRY( c1f36a07,  4,      6528,                  YM), /* 02176 - Mad Max - In 80 Days Around the World */
  TIMEDB_ENTRY( c1f36a07,  5,      6336,                  YM), /* 02176 - Mad Max - In 80 Days Around the World */
  TIMEDB_ENTRY( c1fec1c6,  1,      6144,                  YM), /* 02161 - Mad Max - Syntax Terror - Loader */
+ TIMEDB_ENTRY( c20626bb,  1,       986,                  YM), /* 04973 - Unknown - Larry Laffer */
  TIMEDB_ENTRY( c2221d2d,  1,      1920,                  YM), /* 02144 - Mad Max - International Karate - LSD */
+ TIMEDB_ENTRY( c2491d3d,  1,    130847,                  YM), /* 03136 - Unknown - Michelle-Lennon-McCartney */
  TIMEDB_ENTRY( c28d0598,  1,      4096,                  YM), /* 01997 - Mad Max - Bach The Future */
  TIMEDB_ENTRY( c2972abe,  1,      2879,         TA+TB+TD+YM), /* 02780 - 505-cpt^pdx - 052 */
  TIMEDB_ENTRY( c2a979fb,  1,      6940,                  YM), /* 01868 - Lotek Style - Seraphim (Chip) */
@@ -7046,12 +7096,14 @@
  TIMEDB_ENTRY( c38dfe7f,  5,      4096,                  YM), /* 02207 - Mad Max - Pablo Gold Of Montezuma */
  TIMEDB_ENTRY( c38dfe7f,  6,      3584,                  YM), /* 02207 - Mad Max - Pablo Gold Of Montezuma */
  TIMEDB_ENTRY( c39436dd,  1,     53704,               TA+YM), /* 04013 - Mad Max - Thalion Fever */
+ TIMEDB_ENTRY( c397fa50,  1,    183529,                  YM), /* 03173 - Unknown - Stealing the Enterprise */
  TIMEDB_ENTRY( c3af3bf5,  1,      7209,                  YM), /* 03511 - Unknown - Cybernoid */
  TIMEDB_ENTRY( c3af3bf5,  2,      2693,                  YM), /* 03511 - Unknown - Cybernoid */
  TIMEDB_ENTRY( c3c98efc,  1,      3600,                  YM), /* 02377 - Nexus 6 - Headbomb */
  TIMEDB_ENTRY( c3d0833a,  1,     11867,                  YM), /* 02054 - Mad Max - Spellbound */
  TIMEDB_ENTRY( c3fa1d2f,  1,      2880,                  YM), /* 01515 - Illusion - Blutack */
  TIMEDB_ENTRY( c3fd98f9,  1,      5802,                  YM), /* 04386 - Paul Summers - Stryx */
+ TIMEDB_ENTRY( c3ff6575,  1,      3787,                  YM), /* 04991 - Unknown - Ultmusic */
  TIMEDB_ENTRY( c404f606,  1,      8448,                  YM), /* 00584 - Celtic - Collision - TFU Intro */
  TIMEDB_ENTRY( c4267165,  1,      1785,         TA+TB+TD+YM), /* 01959 - MSG - Godpey - Losing */
  TIMEDB_ENTRY( c42df652,  1,      1080,                  YM), /* 00752 - Mark Cooksey - Ghost N Goblins */
@@ -7069,7 +7121,6 @@
  TIMEDB_ENTRY( c42e22ed,  3,       256,                  YM), /* 01888 - Dave Lowe - Night Shift */
  TIMEDB_ENTRY( c45c2d02,  1,      1920,                  YM), /* 00815 - Crawdaddy - Tough Guys in Sweden */
  TIMEDB_ENTRY( c46f9097,  1,     10757,            TA+TD+YM), /* 04878 - Tao - STresSTeST */
- TIMEDB_ENTRY( c49a99bb,  1,      3204,                  YM), /* 03152 - Unknown - Believe It or Not!    Mancini */
  TIMEDB_ENTRY( c49c7137,  1,     15755,                  YM), /* 02012 - Mad Max - Nearly Spherical */
  TIMEDB_ENTRY( c4a74563,  1,     11867,         TA+TB+TD+YM), /* 02097 - Mad Max - Spellbound - Sid */
  TIMEDB_ENTRY( c4b42ef2,  1,     25984,            TA+TD+YM), /* 02264 - Tao - Cream - Stars (Steps) */
@@ -7158,6 +7209,7 @@
  TIMEDB_ENTRY( c6ea90a6,  2,       640,                  YM), /* 01248 - Janko Mrsic Flogel - Fireblaster */
  TIMEDB_ENTRY( c6fc56df,  1,       860,              YM+STE), /* 01907 - Marcer - Marcer 79 - STE only */
  TIMEDB_ENTRY( c6fd617f,  1,      9218,                  YM), /* 02419 - Tangens - The 2nd Try - Multi Colour */
+ TIMEDB_ENTRY( c70e2988,  1,      1441,                  YM), /* 04970 - Unknown - Irritate */
  TIMEDB_ENTRY( c711e291,  1,     13275,                  YM), /* 02738 - Tony Williams & The Spoon - Nevermind */
  TIMEDB_ENTRY( c711e291,  2,        17,                  YM), /* 02738 - Tony Williams & The Spoon - Nevermind */
  TIMEDB_ENTRY( c711e291,  3,        49,                  YM), /* 02738 - Tony Williams & The Spoon - Nevermind */
@@ -7173,7 +7225,6 @@
  TIMEDB_ENTRY( c711e291, 13,       161,                  YM), /* 02738 - Tony Williams & The Spoon - Nevermind */
  TIMEDB_ENTRY( c711e291, 14,       124,                  YM), /* 02738 - Tony Williams & The Spoon - Nevermind */
  TIMEDB_ENTRY( c711e291, 15,       681,                  YM), /* 02738 - Tony Williams & The Spoon - Nevermind */
- TIMEDB_ENTRY( c7147a34,  1,      1685,                  YM), /* 03169 - n-a - Stand by Me */
  TIMEDB_ENTRY( c71a18ad,  1,      8735,         TA+TB+TD+YM), /* 03396 - Ultrasyd - CORSAIR (mB cover) */
  TIMEDB_ENTRY( c71ef6ab,  1,      8703,                  YM), /* 00309 - Gary Wheaton - Hey Hey, My My */
  TIMEDB_ENTRY( c722956b,  1,      4782,                  YM), /* 00013 - 4-Mat - Captain Dynamo */
@@ -7209,6 +7260,7 @@
  TIMEDB_ENTRY( c7c162f8,  4,       960,                  YM), /* 04533 - Greg George - Four-F */
  TIMEDB_ENTRY( c7c162f8,  5,      1660,                  YM), /* 04533 - Greg George - Four-F */
  TIMEDB_ENTRY( c7ca5444,  1,      6265,                  YM), /* 04370 - Jess - Rock (draft) */
+ TIMEDB_ENTRY( c7e54d12,  1,     65812,                  YM), /* 03155 - Unknown - Russian */
  TIMEDB_ENTRY( c7eb6d07,  1,      4320,                  YM), /* 03302 - CRAZY Q - TWISTED LIFE SYLE */
  TIMEDB_ENTRY( c7ec04eb,  1,      7679,            TA+TB+YM), /* 02698 - Dubmood (The Herbalizer) - Herbalizer Live Interlude */
  TIMEDB_ENTRY( c7fc24fe,  1,      6138,            TB+TD+YM), /* 01021 - Dma Sc - Sector One - YM Racing (YM Rockerz) */
@@ -7253,6 +7305,7 @@
  TIMEDB_ENTRY( c887513e,  1,     15360,                  YM), /* 02800 - Starbuck - Her 7 */
  TIMEDB_ENTRY( c896a887,  1,     17271,            TA+TD+YM), /* 02562 - marcer - impossamol mix */
  TIMEDB_ENTRY( c8a17152,  1,      3456,            TA+TD+YM), /* 02818 - Soulmate #1 - Znax ingame tune 1 */
+ TIMEDB_ENTRY( c8aa020a,  1,    170149,                  YM), /* 03167 - Unknown - Spanish Eyes */
  TIMEDB_ENTRY( c8b3e6f8,  1,     13558,                  YM), /* 04921 - Amplitude Problem (7an) - Bleeps of San Secuestro */
  TIMEDB_ENTRY( c8ba0fce,  1,     14030,                  YM), /* 03533 - Jean Baudlot - Dragon Ninja */
  TIMEDB_ENTRY( c8ba0fce,  2,     11815,                  YM), /* 03533 - Jean Baudlot - Dragon Ninja */
@@ -7401,7 +7454,6 @@
  TIMEDB_ENTRY( ca87983a,  4,     70042,               TA+YM), /* 03810 - Martin Walker - Spindizzy Worlds */
  TIMEDB_ENTRY( caa63e4b,  1,     37632,         TA+TB+TD+YM), /* 02544 - SCHMX & STU - TEMPLE OF SHID */
  TIMEDB_ENTRY( cabca9c7,  1,      3840,                  YM), /* 01132 - Tyan - Harm */
- TIMEDB_ENTRY( cac3b1bb,  1,      2383,                  YM), /* 03149 - n-a - Rainbows by Davidow */
  TIMEDB_ENTRY( cac60fdd,  1,      2233,               TA+YM), /* 01547 - Redzone - TSC 65 */
  TIMEDB_ENTRY( cacb2888,  1,      4992,                  YM), /* 01192 - Excellence In Art - New */
  TIMEDB_ENTRY( cacd3efd,  1,      6528,            TA+TD+YM), /* 03188 - Crazy Q and dIRTY 120o - SEXGAMES */
@@ -7419,6 +7471,7 @@
  TIMEDB_ENTRY( cad3c9c5, 12,        58,                  YM), /* 01063 - Jonathan Dunn - New Zealand Story */
  TIMEDB_ENTRY( cade30a5,  1,      9215,         TA+TB+TD+YM), /* 03848 - lotek style-.tscc.^ymr - approaching the endzeit */
  TIMEDB_ENTRY( cae010b8,  1,      8719,                  YM), /* 04150 - Unknown - GGGra125 */
+ TIMEDB_ENTRY( cae52f45,  1,      1726,                  YM), /* 04967 - Unknown - F r Elize */
  TIMEDB_ENTRY( caebabb8,  1,      5887,               TD+YM), /* 03226 - Peace <-> Oxyron - Oxyron Party v2 */
  TIMEDB_ENTRY( caf45579,  1,      9665,                  YM), /* 03538 - Dave Lowe - Black Hornet */
  TIMEDB_ENTRY( caf45579,  2,      3328,                  YM), /* 03538 - Dave Lowe - Black Hornet */
@@ -7540,6 +7593,7 @@
  TIMEDB_ENTRY( ce139d70,  1,      7723,               TA+YM), /* 04904 - Matrix - The Coffin Shika */
  TIMEDB_ENTRY( ce1d88e7,  1,     10362,               TA+YM), /* 01341 - Scavenger - Leif Rular - PYM */
  TIMEDB_ENTRY( ce2943e0,  1,      7676,                  YM), /* 01281 - Frazer - TSC 98 */
+ TIMEDB_ENTRY( ce2d0e52,  1,    104281,                  YM), /* 03105 - Unknown - I Can See Clearly Now */
  TIMEDB_ENTRY( ce513a50,  1,     12864,                  YM), /* 04463 - Charles Callet - Iznogoud */
  TIMEDB_ENTRY( ce513a50,  2,      3392,                  YM), /* 04463 - Charles Callet - Iznogoud */
  TIMEDB_ENTRY( ce7065c1,  1,      8184,         TA+TB+TD+YM), /* 01860 - Lotek Style - In my Heart */
@@ -7582,7 +7636,6 @@
  TIMEDB_ENTRY( cf56db36,  1,     10955,         TA+TB+TD+YM), /* 03283 - 505-checkpoint (2003) - ahead */
  TIMEDB_ENTRY( cf823424,  1,      1182,                  YM), /* 03690 - Dma-Sc - Saboteur 3 - Introduction */
  TIMEDB_ENTRY( cf9c3df9,  1,      3840,               TA+YM), /* 01750 - Kanewood - Paradise */
- TIMEDB_ENTRY( cfb71ab0,  1,      2333,                  YM), /* 03120 - Unknown - Hey Hey,My My - Neil Young */
  TIMEDB_ENTRY( cfb75681,  1,     11134,               TA+YM), /* 02464 - Iso - Crazy Thing - DBA 9 */
  TIMEDB_ENTRY( cfcd90d1,  1,     20448,         TA+TB+TD+YM), /* 02859 - Helene - tull */
  TIMEDB_ENTRY( cfec4101,  1,    110212,               TA+YM), /* 03960 - Scott Lemmon - SRL4 */
@@ -7613,6 +7666,7 @@
  TIMEDB_ENTRY( d0a0478f,  1,     18431,         TA+TB+TD+YM), /* 03441 - ULTRASYD - THE DAY YM KILLED FAKEBIT */
  TIMEDB_ENTRY( d0a543c5,  1,      9985,            TA+TD+YM), /* 02299 - Tao - Cream - Still Alive (Alive 7) */
  TIMEDB_ENTRY( d0a77676,  1,      2564,                  YM), /* 00291 - Gary Wheaton - Bandit */
+ TIMEDB_ENTRY( d0aeded1,  1,      1253,                  YM), /* 04984 - Unknown - Star Trek */
  TIMEDB_ENTRY( d0c202f0,  1,      7153,                  YM), /* 04385 - Paul Summers - Everton FC Intelligensia */
  TIMEDB_ENTRY( d0c202f0,  2,       205,                  YM), /* 04385 - Paul Summers - Everton FC Intelligensia */
  TIMEDB_ENTRY( d0c202f0,  3,       185,                  YM), /* 04385 - Paul Summers - Everton FC Intelligensia */
@@ -7637,6 +7691,7 @@
  TIMEDB_ENTRY( d158574e,  2,       225,                  YM), /* 00077 - David Whittaker - BMX Simulator */
  TIMEDB_ENTRY( d158574e,  3,       193,                  YM), /* 00077 - David Whittaker - BMX Simulator */
  TIMEDB_ENTRY( d15fed50,  1,      6176,                  YM), /* 00327 - Gary Wheaton - Ram on */
+ TIMEDB_ENTRY( d17de26c,  1,    104701,                  YM), /* 03109 - Unknown - The Imperial Death March */
  TIMEDB_ENTRY( d192467c,  1,     63799,               TA+YM), /* 04624 - Andre Hollweg - Explorer */
  TIMEDB_ENTRY( d1a32da4,  1,      6080,            TA+TD+YM), /* 02863 - marcer - souns of 1985-2006 */
  TIMEDB_ENTRY( d1a7dd4b,  1,      3119,                  YM), /* 01292 - Matt Furniss - Carvup */
@@ -7684,6 +7739,7 @@
  TIMEDB_ENTRY( d212a72f,  3,        91,                  YM), /* 00560 - Allister Brimble - Spellfire The Sorceror */
  TIMEDB_ENTRY( d2224e7c,  1,     43201,               TA+YM), /* 04664 - Przybyszewski - Anthrax */
  TIMEDB_ENTRY( d2473448,  1,      8057,               TA+YM), /* 01713 - Jess - My ST suntans in Brazil */
+ TIMEDB_ENTRY( d24d3210,  1,      1585,                  YM), /* 04972 - Unknown - Kleine Nachtmusik */
  TIMEDB_ENTRY( d24de703,  1,      5957,         TA+TB+TD+YM), /* 04483 - corpsicle - olympian */
  TIMEDB_ENTRY( d25aaebf,  1,      9952,                  YM), /* 04470 - Charles Callet - Les Ripoux */
  TIMEDB_ENTRY( d268a213,  1,     11321,                  YM), /* 04132 - Wally Beben - Superman - The Man of Steel */
@@ -7709,7 +7765,6 @@
  TIMEDB_ENTRY( d2c50ea8,  1,      8320,         TA+TB+TD+YM), /* 03331 - Marcer - n-a */
  TIMEDB_ENTRY( d2c9a559,  1,      6272,                  YM), /* 00603 - Chris Mad - Overdrive Vector */
  TIMEDB_ENTRY( d2caa33f,  1,      1275,         TA+TB+TD+YM), /* 01950 - MSG - Chu Chu Rocket - Speed Up */
- TIMEDB_ENTRY( d2cae2b6,  1,      8370,                  YM), /* 03140 - n-a - Money for Nothing */
  TIMEDB_ENTRY( d2df67b7,  1,      4992,         TA+TB+TD+YM), /* 00185 - 505 - Posh - Part 2 */
  TIMEDB_ENTRY( d2e36b56,  1,    123011,               TA+YM), /* 03776 - Stewart Gardner - Stampede 5 */
  TIMEDB_ENTRY( d2edab52,  1,      9212,         TA+TB+TD+YM), /* 04112 - 505 - Checkpoint - mysery */
@@ -7744,6 +7799,7 @@
  TIMEDB_ENTRY( d2f3c6bb, 29,      2560,               TA+YM), /* 02221 - Mad Max - Turrican 2 */
  TIMEDB_ENTRY( d2fc8516,  1,     26731,            TB+TD+YM), /* 02443 - cerror - Taoism */
  TIMEDB_ENTRY( d3098d04,  1,      4708,                  YM), /* 00316 - Gary Wheaton - Lisa */
+ TIMEDB_ENTRY( d31291f1,  1,     52609,                  YM), /* 03171 - Unknown - Theme From "Star Trek" */
  TIMEDB_ENTRY( d31c66cf,  1,      6403,               TA+YM), /* 02675 - Donald Fakk - Kvant Krull Kompott */
  TIMEDB_ENTRY( d31de3bf,  1,      7530,                  YM), /* 00012 - 4-Mat - Chuck Rock */
  TIMEDB_ENTRY( d33eddd9,  1,    177228,               TA+YM), /* 03942 - Unknown - Adamski 7 */
@@ -7769,6 +7825,7 @@
  TIMEDB_ENTRY( d3a23289,  1,      2592,                  YM), /* 00575 - Jas C Brooke - Sidearms */
  TIMEDB_ENTRY( d3a23289,  2,       512,                  YM), /* 00575 - Jas C Brooke - Sidearms */
  TIMEDB_ENTRY( d3a23289,  3,       288,                  YM), /* 00575 - Jas C Brooke - Sidearms */
+ TIMEDB_ENTRY( d3a49331,  1,    184794,                  YM), /* 03182 - Unknown - WE ARE THE WORLD */
  TIMEDB_ENTRY( d3ab72da,  1,      6144,                  YM), /* 04829 - T1000 - Bits 55b */
  TIMEDB_ENTRY( d3b0e310,  1,     28736,         TA+TB+TD+YM), /* 03468 - Marcer - YM Out */
  TIMEDB_ENTRY( d3b4c932,  1,     46416,               TA+YM), /* 03792 - Roggie - Minuet 2 */
@@ -7850,6 +7907,7 @@
  TIMEDB_ENTRY( d50127c9,  9,     17676,                  YM), /* 01495 - Alex Herbert - Bombz */
  TIMEDB_ENTRY( d50127c9, 10,      2096,                  YM), /* 01495 - Alex Herbert - Bombz */
  TIMEDB_ENTRY( d5060e28,  1,      6857,                  YM), /* 01302 - Matt Furniss - Lords Of Chaos */
+ TIMEDB_ENTRY( d5091b02,  1,     35177,                  YM), /* 03115 - Unknown - FUR ELISE by L. V. Beethoven */
  TIMEDB_ENTRY( d514da56,  1,       378,                  YM), /* 01911 - Marcer - Ojoj */
  TIMEDB_ENTRY( d52ed309,  1,     13056,                  YM), /* 01653 - Jedi - Nuisance */
  TIMEDB_ENTRY( d5309031,  1,      3072,               TA+YM), /* 00792 - Crawdaddy - Indian */
@@ -8070,6 +8128,7 @@
  TIMEDB_ENTRY( d9e49cb5, 18,      1155,                  YM), /* 01793 - Barry Leitch - Gemini Wing */
  TIMEDB_ENTRY( d9e49cb5, 19,      3201,                  YM), /* 01793 - Barry Leitch - Gemini Wing */
  TIMEDB_ENTRY( d9e49cb5, 20,      1539,                  YM), /* 01793 - Barry Leitch - Gemini Wing */
+ TIMEDB_ENTRY( d9e49efe,  1,     96897,                  YM), /* 03183 - Unknown - What Child Is This */
  TIMEDB_ENTRY( d9f1537f,  1,     10656,                  YM), /* 02153 - Mad Max - Ooh Crikey - No Sheep */
  TIMEDB_ENTRY( d9f719cd,  1,     14604,               TA+YM), /* 02682 - Donald Fakk - Steam Dream */
  TIMEDB_ENTRY( da11e462,  1,     21928,         TA+TB+TD+YM), /* 03464 - Marcer - Popcorn */
@@ -8119,7 +8178,6 @@
  TIMEDB_ENTRY( db20f6e5,  1,     15680,            TA+TB+YM), /* 01866 - Lotek Style - Sad */
  TIMEDB_ENTRY( db35c13a,  1,     10362,         TA+TB+TD+YM), /* 01008 - DMA-SC - Pie Bill Gates - Menu */
  TIMEDB_ENTRY( db376cf4,  1,     23041,               TA+YM), /* 04803 - Unknown - Flying Shark */
- TIMEDB_ENTRY( db561d60,  1,      8327,                  YM), /* 03118 - Unknown - Goodbye Yellow Brick Road */
  TIMEDB_ENTRY( db572f78,  1,      8826,         TA+TB+TD+YM), /* 03195 - Carbon - UCM 18 */
  TIMEDB_ENTRY( db595e25,  1,     23552,         TA+TB+TD+YM), /* 03523 - BIOSCILLATOR - ROTTERDAM ATARI ACID */
  TIMEDB_ENTRY( db59b2e8,  1,     20736,                  YM), /* 00441 - Big Alec - Twilight Beyond */
@@ -8181,7 +8239,6 @@
  TIMEDB_ENTRY( dbd3c7e1,  1,    235825,               TA+YM), /* 03701 - Sparky - Absentia */
  TIMEDB_ENTRY( dbd90140,  1,     10068,                  YM), /* 01486 - Holger Gehrmann - Oil Imperium */
  TIMEDB_ENTRY( dbd90140,  2,      5076,                  YM), /* 01486 - Holger Gehrmann - Oil Imperium */
- TIMEDB_ENTRY( dc20e456,  1,      5214,                  YM), /* 03105 - n-a - I Can See Clearly Now */
  TIMEDB_ENTRY( dc24995a,  1,      2682,               TA+YM), /* 04323 - 505-cpt^pdx - Tsrups */
  TIMEDB_ENTRY( dc2a5e38,  1,      9726,                  YM), /* 04065 - Gary Wheaton - Chuckie Egg 2 */
  TIMEDB_ENTRY( dc2fea6d,  1,       959,            TA+TD+YM), /* 02654 - Dma-Sc - POOZ - The Lab */
@@ -8196,7 +8253,6 @@
  TIMEDB_ENTRY( dca399f9,  1,      2875,                  YM), /* 01639 - Jason - Silly - STE only */
  TIMEDB_ENTRY( dca4cc63,  1,      5115,         TA+TB+TD+YM), /* 00190 - 505 - Smurfy */
  TIMEDB_ENTRY( dca92951,  1,     47631,            TA+TD+YM), /* 03564 - Tao - Cream (2010) - Heftig (Sillyventure 2010) */
- TIMEDB_ENTRY( dcb3ba9b,  1,      4298,                  YM), /* 03164 - Unknown - Silent Night - Franz Gruber */
  TIMEDB_ENTRY( dcc31ecc,  1,    227495,               TA+YM), /* 04806 - Unknown - Magnetic Fields */
  TIMEDB_ENTRY( dcc68a4d,  1,     12160,                  YM), /* 03649 - Chris Mad - David Whittaker Demo */
  TIMEDB_ENTRY( dcd09be2,  1,      7493,               TA+YM), /* 04414 - EVE - Loading & Decrunching */
@@ -8290,7 +8346,6 @@
  TIMEDB_ENTRY( dee9caa6,  1,     93993,               TA+YM), /* 03784 - Mr Micro - Magic Fly */
  TIMEDB_ENTRY( deebacbe,  1,       508,               TA+YM), /* 02645 - Miggy - stinky(Unfinished) */
  TIMEDB_ENTRY( def1319f,  1,     51783,               TA+YM), /* 04052 - Roggie - Beef Barbeque */
- TIMEDB_ENTRY( def9a728,  1,      3819,                  YM), /* 03103 - n-a - Children's Corner # 5 */
  TIMEDB_ENTRY( df0f0e71,  1,      3577,         TA+TB+TD+YM), /* 00279 - Baggio - Softly */
  TIMEDB_ENTRY( df112436,  1,     15335,            TA+TD+YM), /* 02772 - Chromex - Hydroxid Dentro */
  TIMEDB_ENTRY( df183024,  1,      1535,                  YM), /* 04085 - Gary Wheaton - Necro */
@@ -8304,6 +8359,7 @@
  TIMEDB_ENTRY( df850308,  2,      1117,                  YM), /* 00103 - David Whittaker - Gazza 2 */
  TIMEDB_ENTRY( df850308,  3,       509,                  YM), /* 00103 - David Whittaker - Gazza 2 */
  TIMEDB_ENTRY( df850308,  4,       481,                  YM), /* 00103 - David Whittaker - Gazza 2 */
+ TIMEDB_ENTRY( df85c9aa,  1,    203422,                  YM), /* 03145 - Unknown - Orange Blossom Special */
  TIMEDB_ENTRY( df971bda,  1,      5400,                  YM), /* 00242 - AN Cool - 45-King */
  TIMEDB_ENTRY( df9c0855,  1,     23418,                  YM), /* 01671 - Jess - Concerto for Acid Band */
  TIMEDB_ENTRY( dfa19694,  1,     14719,         TA+TB+TD+YM), /* 03296 - Dma-Sc - Travellers */
@@ -8364,7 +8420,6 @@
  TIMEDB_ENTRY( e1a66b55,  2,       256,                  YM), /* 02963 - Unknown - Henriettas Book of Spells */
  TIMEDB_ENTRY( e1a66b55,  3,       320,                  YM), /* 02963 - Unknown - Henriettas Book of Spells */
  TIMEDB_ENTRY( e1a66b55,  4,       643,                  YM), /* 02963 - Unknown - Henriettas Book of Spells */
- TIMEDB_ENTRY( e1cbb5fa,  1,      2654,                  YM), /* 03125 - n-a - I Heard the Bells */
  TIMEDB_ENTRY( e1d5a4e3,  1,      2864,                  YM), /* 04716 - Geoff Camp - Spider Spell 2 */
  TIMEDB_ENTRY( e1d5a4e3,  2,      3644,                  YM), /* 04716 - Geoff Camp - Spider Spell 2 */
  TIMEDB_ENTRY( e1d5a4e3,  3,      1800,                  YM), /* 04716 - Geoff Camp - Spider Spell 2 */
@@ -8389,6 +8444,8 @@
  TIMEDB_ENTRY( e1feabd9,  1,     20480,         TA+TB+TD+YM), /* 02090 - Mad Max - Nemesis - Sid */
  TIMEDB_ENTRY( e207c574,  1,       896,               TA+YM), /* 00954 - Dark Angel - The Walk */
  TIMEDB_ENTRY( e20c2c4b,  1,      3447,               TA+YM), /* 01745 - Jovis - Lametrop - Intro */
+ TIMEDB_ENTRY( e20c3942,  1,     25797,                  YM), /* 03095 - Unknown - Cavlary */
+ TIMEDB_ENTRY( e230d294,  1,     85972,                  YM), /* 03164 - Unknown - Silent Night - Franz Gruber */
  TIMEDB_ENTRY( e2614bdc,  1,     10745,            TA+TB+YM), /* 01592 - Nemo - Endpart M2V */
  TIMEDB_ENTRY( e26bf07b,  1,     14400,               TA+YM), /* 01287 - Furax - Virtual Escape Theme */
  TIMEDB_ENTRY( e275ea20,  1,     59848,               TA+YM), /* 03822 - Tufty - My Digi 2 */
@@ -8404,7 +8461,6 @@
  TIMEDB_ENTRY( e2a3859f,  1,      5759,         TA+TB+TD+YM), /* 03150 - Rubbish - Almost Happy */
  TIMEDB_ENTRY( e2a56417,  1,      8326,                  YM), /* 01568 - Jason Page - Simulcra */
  TIMEDB_ENTRY( e2a56417,  2,      3209,                  YM), /* 01568 - Jason Page - Simulcra */
- TIMEDB_ENTRY( e2bbc9e5,  1,      2525,                  YM), /* 03135 - Unknown - Have Yourself-Merry Christmas */
  TIMEDB_ENTRY( e2db2940,  1,      8960,            TB+TD+YM), /* 02849 - Helene - Carsong2 */
  TIMEDB_ENTRY( e2dce743,  1,      4799,                  YM), /* 00352 - Tony Williams - Shadow of the Beast 2 */
  TIMEDB_ENTRY( e2dce743,  2,      3519,                  YM), /* 00352 - Tony Williams - Shadow of the Beast 2 */
@@ -8528,6 +8584,7 @@
  TIMEDB_ENTRY( e598f127,  1,      4608,            TA+TD+YM), /* 00833 - Crazy Q - DHS - TAC-2 Memories */
  TIMEDB_ENTRY( e5a3c2c6,  1,     39892,         TA+TB+TD+YM), /* 03561 - !Cube - Blink */
  TIMEDB_ENTRY( e5ff165b,  1,      5120,                  YM), /* 02799 - Starbuck - Her 5 */
+ TIMEDB_ENTRY( e601bf6b,  1,    121915,                  YM), /* 03087 - Unknown - 12 Bar Blues-IRK */
  TIMEDB_ENTRY( e62c9af8,  1,       320,                  YM), /* 01208 - Excellence In Art - Tarzan */
  TIMEDB_ENTRY( e633cfd4,  1,     39936,            TB+TD+YM), /* 02607 - STU - MY MELODY SID */
  TIMEDB_ENTRY( e65f1def,  1,      7672,         TA+TB+TD+YM), /* 00544 - Blindio - Decadent */
@@ -8570,6 +8627,7 @@
  TIMEDB_ENTRY( e74a3255,  1,     76272,            TB+TD+YM), /* 03461 - Marcer - Kid */
  TIMEDB_ENTRY( e76ad285,  1,      4853,            TA+TD+YM), /* 02822 - Marcer - Greasy (Znax Menu) */
  TIMEDB_ENTRY( e76bd101,  1,     23567,         TA+TB+TD+YM), /* 03522 - Dma-Sc - Troubled Memories */
+ TIMEDB_ENTRY( e772f93c,  1,      3286,                  YM), /* 04982 - Unknown - Sailors */
  TIMEDB_ENTRY( e7754910,  1,     13096,                  YM), /* 01850 - Lotek Style - Hard Rock */
  TIMEDB_ENTRY( e775cf70,  1,      7242,         TA+TB+TD+YM), /* 01873 - Lotek Style - Das Sidhaeuser Tor */
  TIMEDB_ENTRY( e77ec0a9,  1,      4800,                  YM), /* 03242 - T1000 - The Beast Club - TBC 14 */
@@ -8582,6 +8640,7 @@
  TIMEDB_ENTRY( e782759a,  6,       802,                  YM), /* 01794 - Barry Leitch - Gilbert - Escape from Drill */
  TIMEDB_ENTRY( e782759a,  7,       452,                  YM), /* 01794 - Barry Leitch - Gilbert - Escape from Drill */
  TIMEDB_ENTRY( e782759a,  8,      1443,                  YM), /* 01794 - Barry Leitch - Gilbert - Escape from Drill */
+ TIMEDB_ENTRY( e79a9bf3,  1,      1341,                  YM), /* 04949 - Unknown - Blueberry Hill */
  TIMEDB_ENTRY( e79dcd5c,  1,       663,                  YM), /* 00846 - Ben Daglish - Continental Circus */
  TIMEDB_ENTRY( e79dcd5c,  2,       430,                  YM), /* 00846 - Ben Daglish - Continental Circus */
  TIMEDB_ENTRY( e79dcd5c,  3,       369,                  YM), /* 00846 - Ben Daglish - Continental Circus */
@@ -8634,6 +8693,7 @@
  TIMEDB_ENTRY( e825e877,  1,     15743,                  YM), /* 04564 - Charles Callet - The Toyottes */
  TIMEDB_ENTRY( e8337ccb,  1,     10880,                  YM), /* 02801 - Starbuck - Inside */
  TIMEDB_ENTRY( e836372d,  1,      6914,            TA+TD+YM), /* 04203 - Tao - Cream - Nostalgic-O-Demo Dots Revenge (2 Sid Voice) */
+ TIMEDB_ENTRY( e8520364,  1,    144715,                  YM), /* 03162 - Davidow - Sidestep */
  TIMEDB_ENTRY( e864f155,  1,      5385,                  YM), /* 02160 - Mad Max - Syntax Terror - Level 16 */
  TIMEDB_ENTRY( e86a731e,  1,     16384,         TA+TB+TD+YM), /* 02581 - STU - CHASER */
  TIMEDB_ENTRY( e876f525,  1,     10304,            TB+TD+YM), /* 01607 - Nemo - tambumbi */
@@ -8658,7 +8718,6 @@
  TIMEDB_ENTRY( e8e24519,  7,      7645,                  YM), /* 01736 - Richard Joseph - James Pond */
  TIMEDB_ENTRY( e8e24519,  8,       133,                  YM), /* 01736 - Richard Joseph - James Pond */
  TIMEDB_ENTRY( e8e98938,  1,      6880,                  YM), /* 02358 - Nexus 6 - 5-16-38 */
- TIMEDB_ENTRY( e8e9b785,  1,      1491,                  YM), /* 03138 - n-a - Mini Dance */
  TIMEDB_ENTRY( e8f066f3,  1,      1624,                  YM), /* 00841 - Ben Daglish - Blasteroids */
  TIMEDB_ENTRY( e8f066f3,  2,      3448,                  YM), /* 00841 - Ben Daglish - Blasteroids */
  TIMEDB_ENTRY( e8f3e611,  1,       768,               TA+YM), /* 04436 - Lotus - Synth Dream 2 - Shuffle Express */
@@ -8687,6 +8746,7 @@
  TIMEDB_ENTRY( e9c08462,  5,       208,                  YM), /* 03979 - Claude Abromont - Iron Trackers */
  TIMEDB_ENTRY( e9c08462,  6,       183,                  YM), /* 03979 - Claude Abromont - Iron Trackers */
  TIMEDB_ENTRY( e9c5ceb5,  1,      7680,                  YM), /* 04629 - Tarzan Boy - Hier Sind Noch Zweu Greetings */
+ TIMEDB_ENTRY( e9c95ba4,  1,     41596,                  YM), /* 03170 - Unknown - Star-Spangled Banner - F.S.Key */
  TIMEDB_ENTRY( e9efb3f5,  1,     15216,         TA+TB+TD+YM), /* 02857 - Helene - Rescued */
  TIMEDB_ENTRY( e9f6bccf,  1,     32256,                  YM), /* 03374 - STU - PIRATE SHOWDOWN */
  TIMEDB_ENTRY( e9fe50e9,  1,    105124,               TA+YM), /* 03710 - Sparky - War and Pieces (Nuke Iraq?) */
@@ -8726,6 +8786,7 @@
  TIMEDB_ENTRY( eaefed23,  1,      6680,                  YM), /* 02123 - Mad Max - Cuddly Demos - Main Menu */
  TIMEDB_ENTRY( eafa7d19,  1,     11039,         TA+TB+TD+YM), /* 04757 - Shinobi - Biomechanoid Locomotion */
  TIMEDB_ENTRY( eb185808,  1,      8505,                  YM), /* 03076 - Tom Marvin - CLOSE ENCOUNT.OF THE 3rd KIND */
+ TIMEDB_ENTRY( eb20be97,  1,      4088,         TA+TB+TD+YM), /* 04995 - yqn - Sidisord */
  TIMEDB_ENTRY( eb21c301,  1,      1761,                  YM), /* 04771 - V0yager - Boobswatch theme */
  TIMEDB_ENTRY( eb6719a5,  1,     10176,                  YM), /* 03006 - New Frequency - ZPC TLT Demo */
  TIMEDB_ENTRY( eb6719a5,  2,      2339,                  YM), /* 03006 - New Frequency - ZPC TLT Demo */
@@ -8838,6 +8899,7 @@
  TIMEDB_ENTRY( ee5b2513,  1,      1791,               TD+YM), /* 03289 - Dma-Sc - ATIPYK Developments - Manical Drop - 2 Players music #2 */
  TIMEDB_ENTRY( ee692bca,  1,      2304,               TA+YM), /* 02951 - Chris Scudds - Cisco Heat (STfm) */
  TIMEDB_ENTRY( ee692bca,  2,      2688,               TA+YM), /* 02951 - Chris Scudds - Cisco Heat (STfm) */
+ TIMEDB_ENTRY( ee6ac121,  1,    187869,                  YM), /* 03099 - Unknown - Children's Corner # 1 */
  TIMEDB_ENTRY( ee7330c7,  1,     27644,                  YM), /* 01709 - Jess - I Want U 2 Shoot'em UP */
  TIMEDB_ENTRY( ee7447f1,  1,      8320,                  YM), /* 04699 - D. Haylett - Moneymania 2 */
  TIMEDB_ENTRY( ee7447f1,  2,      2496,                  YM), /* 04699 - D. Haylett - Moneymania 2 */
@@ -8884,6 +8946,7 @@
  TIMEDB_ENTRY( ef1693ba,  1,      9213,               TA+YM), /* 04865 - Jovis - Cannon F */
  TIMEDB_ENTRY( ef255e42,  1,      8257,                  YM), /* 03884 - Unknown - Andalusa */
  TIMEDB_ENTRY( ef4650fc,  1,     21332,               TA+YM), /* 01743 - Jovis - Lametrop - End Part 2 */
+ TIMEDB_ENTRY( ef4bfd7f,  1,    178520,                  YM), /* 03100 - Unknown - Children's Corner # 2 */
  TIMEDB_ENTRY( ef4de347,  1,     21792,         TA+TB+TD+YM), /* 04400 - Skaven (ST adaption by mOdmate) - Second Reality 2013 intro */
  TIMEDB_ENTRY( ef63b160,  1,      5654,                  YM), /* 03035 - Barry Deutsch - SANTA CLAUS Arr. by B. Deutsch */
  TIMEDB_ENTRY( ef770201,  1,      5375,         TA+TB+TD+YM), /* 02699 - Dubmood & Zabutom - Pampradion livebeat */
@@ -8936,7 +8999,6 @@
  TIMEDB_ENTRY( f0ba9bde,  1,      7674,            TB+TD+YM), /* 00995 - Dma-Sc-Sector1^YM-Rockerz - Fantasia Tune 2 */
  TIMEDB_ENTRY( f0be2ab0,  1,     71891,               TA+YM), /* 03966 - Unknown - Sanxion Loader */
  TIMEDB_ENTRY( f0e33ae4,  1,      7424,                  YM), /* 03190 - n-a - Improvisation */
- TIMEDB_ENTRY( f10cf937,  1,      1619,                  YM), /* 03168 - Unknown - The Spider Dance - Tarantelle */
  TIMEDB_ENTRY( f1211a3c,  1,       225,                  YM), /* 04454 - Mike Davies - Human Killing Machine */
  TIMEDB_ENTRY( f1211a3c,  2,       289,                  YM), /* 04454 - Mike Davies - Human Killing Machine */
  TIMEDB_ENTRY( f1211a3c,  3,     10080,                  YM), /* 04454 - Mike Davies - Human Killing Machine */
@@ -9043,7 +9105,6 @@
  TIMEDB_ENTRY( f31b12f8,  1,      5534,                  YM), /* 04076 - Gary Wheaton - Like a Hurricane */
  TIMEDB_ENTRY( f3240c01,  1,      3552,                  YM), /* 01203 - Excellence In Art - Summer */
  TIMEDB_ENTRY( f32dd5b3,  1,     60930,               TA+YM), /* 04811 - Unknown - Spr */
- TIMEDB_ENTRY( f35b9845,  1,      1686,                  YM), /* 03184 - n-a - William Tell Overture */
  TIMEDB_ENTRY( f363560d,  1,     28160,         TA+TB+TD+YM), /* 02601 - STU - LAST MINUTE */
  TIMEDB_ENTRY( f3637837,  1,      4475,         TA+TB+TD+YM), /* 04322 - 505 - Three */
  TIMEDB_ENTRY( f365698b,  1,      9600,         TA+TB+TD+YM), /* 03026 - !Cube - Agent Hippel To The Rescue */
@@ -9059,6 +9120,7 @@
  TIMEDB_ENTRY( f37a6157,  1,      6912,                  YM), /* 02002 - Mad Max - Demo Music 8 */
  TIMEDB_ENTRY( f37a73b3,  1,      5327,            TA+TB+YM), /* 00215 - 505 - Zirkuss */
  TIMEDB_ENTRY( f3992b60,  1,      8824,               TA+YM), /* 02502 - lotekstyle - Spieler 1, Los! */
+ TIMEDB_ENTRY( f3a2c601,  1,     49145,                  YM), /* 03123 - Unknown - Honkitnk */
  TIMEDB_ENTRY( f3acc758,  1,      2400,            TA+TD+YM), /* 00411 - Big Alec - Magick */
  TIMEDB_ENTRY( f3b3dc75,  1,      3120,                  YM), /* 00152 - David Whittaker - Warlock The Avenger */
  TIMEDB_ENTRY( f3b4254a,  1,      5771,               TD+YM), /* 01614 - No More - Groovy */
@@ -9072,7 +9134,9 @@
  TIMEDB_ENTRY( f4570dd1,  1,      5600,            TA+TD+YM), /* 02571 - !Cube-Aggression - Water */
  TIMEDB_ENTRY( f45e0431,  1,     65185,               TA+YM), /* 03950 - Scott Lemmon - Fish */
  TIMEDB_ENTRY( f4602101,  1,     18240,               TA+YM), /* 02182 - Mad Max - Bad Cat */
+ TIMEDB_ENTRY( f46357f4,  1,     33720,                  YM), /* 03184 - Unknown - William Tell Overture */
  TIMEDB_ENTRY( f46d5b97,  1,      5396,               TA+YM), /* 04008 - Per Almered-XiA-Checkpoint - Idas Sommarvisa (G Riedel) */
+ TIMEDB_ENTRY( f46dc352,  1,     67028,                  YM), /* 03107 - Unknown - Eastenders - May-Osborne */
  TIMEDB_ENTRY( f471ff46,  1,      2305,                  YM), /* 03889 - Unknown - Menuet */
  TIMEDB_ENTRY( f476f830,  1,      3264,                  YM), /* 04835 - t1000 - Bits 29 */
  TIMEDB_ENTRY( f47ce127,  1,     12640,                  YM), /* 00760 - Count Zero - Hidden Easter Egg */
@@ -9085,6 +9149,7 @@
  TIMEDB_ENTRY( f4a2cb20,  2,      1877,                  YM), /* 00135 - David Whittaker - Snoopy */
  TIMEDB_ENTRY( f4a2cb20,  3,       145,                  YM), /* 00135 - David Whittaker - Snoopy */
  TIMEDB_ENTRY( f4a2cb20,  4,       145,                  YM), /* 00135 - David Whittaker - Snoopy */
+ TIMEDB_ENTRY( f4a698fb,  1,     78323,                  YM), /* 03092 - Unknown - Every Breath You Take - Sting */
  TIMEDB_ENTRY( f4b5c9f5,  1,      4096,                  YM), /* 02932 - Chris Denman - Crime City */
  TIMEDB_ENTRY( f4b5c9f5,  2,      2560,                  YM), /* 02932 - Chris Denman - Crime City */
  TIMEDB_ENTRY( f4b5c9f5,  3,      1024,                  YM), /* 02932 - Chris Denman - Crime City */
@@ -9118,7 +9183,6 @@
  TIMEDB_ENTRY( f548f91d,  1,      1536,                  YM), /* 01102 - Techno - Techno 7 */
  TIMEDB_ENTRY( f54dd8a5,  1,      1536,                  YM), /* 01413 - Skyline - Snork Intro - Syntax Terror */
  TIMEDB_ENTRY( f550d110,  1,      8471,         TA+TB+TD+YM), /* 02778 - !Cube - Back To Basics */
- TIMEDB_ENTRY( f55d8144,  1,      4968,                  YM), /* 03175 - Unknown - Talk To Me - by Stevie Nicks */
  TIMEDB_ENTRY( f55e7bae,  1,      4473,               TA+YM), /* 01689 - Jess - Guile */
  TIMEDB_ENTRY( f58379d5,  1,     20928,                  YM), /* 01796 - Barry Leitch - Hero Quest */
  TIMEDB_ENTRY( f58379d5,  2,     10864,                  YM), /* 01796 - Barry Leitch - Hero Quest */
@@ -9147,8 +9211,8 @@
  TIMEDB_ENTRY( f65c50e0,  1,      6583,         TA+TB+TD+YM), /* 02992 - 505-paradox - on behalf of the queen (STE only) */
  TIMEDB_ENTRY( f668e3f0,  1,     10471,            TA+TD+YM), /* 03647 - 505 - Base Case */
  TIMEDB_ENTRY( f699428a,  1,      5412,            TA+TD+YM), /* 04316 - 505-checkpoint - synthpop */
+ TIMEDB_ENTRY( f69b5f9f,  1,    157576,                  YM), /* 03161 - Unknown - Sensation */
  TIMEDB_ENTRY( f6b1345a,  1,      3072,                  YM), /* 04519 - Antichrist - Robocop */
- TIMEDB_ENTRY( f6b1d5ee,  1,      6086,                  YM), /* 03098 - n-a - Good Time Charlie */
  TIMEDB_ENTRY( f6d73f8f,  1,      2562,                  YM), /* 04535 - Jan Holmgren - Frog Race */
  TIMEDB_ENTRY( f6d73f8f,  2,       155,                  YM), /* 04535 - Jan Holmgren - Frog Race */
  TIMEDB_ENTRY( f6d73f8f,  3,       116,                  YM), /* 04535 - Jan Holmgren - Frog Race */
@@ -9164,7 +9228,6 @@
  TIMEDB_ENTRY( f6e2634e,  1,      9978,         TA+TB+TD+YM), /* 02423 - 505 - Checkpoint - hybrid */
  TIMEDB_ENTRY( f6e83698,  1,     36992,         TA+TB+TD+YM), /* 03863 - xyce - Cpp is Forbidden - Part 1 (sid) */
  TIMEDB_ENTRY( f71a80a8,  1,     21760,               TD+YM), /* 02608 - STU - NAUGHTY BRAT */
- TIMEDB_ENTRY( f72491f6,  1,      2700,                  YM), /* 03146 - n-a - Off To School Boogie */
  TIMEDB_ENTRY( f72e19e6,  1,      2298,                  YM), /* 04273 - 505 - lame01 */
  TIMEDB_ENTRY( f7376718,  1,     16984,               TA+YM), /* 00725 - Tebirod - No Cooper End Screen */
  TIMEDB_ENTRY( f7441a76,  1,       743,                  YM), /* 04491 - Unknown - Anti matter */
@@ -9188,6 +9251,7 @@
  TIMEDB_ENTRY( f7441a76, 19,       480,                  YM), /* 04491 - Unknown - Anti matter */
  TIMEDB_ENTRY( f7441a76, 20,       896,                  YM), /* 04491 - Unknown - Anti matter */
  TIMEDB_ENTRY( f74f2e17,  1,      6144,                  YM), /* 04445 - Iso - Smooth Talking */
+ TIMEDB_ENTRY( f75e8021,  1,     96203,                  YM), /* 03131 - Unknown - O Little Town of Bethlehem */
  TIMEDB_ENTRY( f791df96,  1,     31040,                  YM), /* 02690 - Philip Linde - RAS ATARI */
  TIMEDB_ENTRY( f7ce16da,  1,     33024,            TB+TD+YM), /* 04850 - xFalcon - LASER CHIP TALK */
  TIMEDB_ENTRY( f7d382af,  1,     12288,                  YM), /* 01082 - Excellence In Art - Elftec 2 */
@@ -9201,7 +9265,6 @@
  TIMEDB_ENTRY( f7f9c7da,  1,     52263,               TA+YM), /* 03777 - Stewart Gardner - Stampede 6 */
  TIMEDB_ENTRY( f7fe995e,  1,      5373,         TA+TB+TD+YM), /* 04258 - 505 - Checkpoint (2000) - Fettiger (Unrel.) */
  TIMEDB_ENTRY( f8105359,  1,     40512,         TA+TB+TD+YM), /* 04349 - YERZMYEY-AY-RIDERS - CELESTIAL SPHERE */
- TIMEDB_ENTRY( f81187b5,  1,      3916,                  YM), /* 03092 - Unknown - Every Breath You Take - Sting */
  TIMEDB_ENTRY( f8255e0a,  1,     19199,                  YM), /* 04474 - Charles Callet - Murders in Venice */
  TIMEDB_ENTRY( f839d7b9,  1,      5631,         TA+TB+TD+YM), /* 02987 - 505-paradox - for the moon */
  TIMEDB_ENTRY( f83d8b09,  1,      2300,            TB+TD+YM), /* 04261 - 505-checkpoint - Granit */
@@ -9240,7 +9303,7 @@
  TIMEDB_ENTRY( f85661a4, 20,     12291,                  YM), /* 01814 - Zone Warrior - Barry Leitch */
  TIMEDB_ENTRY( f85661a4, 21,     21507,                  YM), /* 01814 - Zone Warrior - Barry Leitch */
  TIMEDB_ENTRY( f888195c,  1,     24832,         TA+TB+TD+YM), /* 02086 - Mad Max - Lightforce - Sid */
- TIMEDB_ENTRY( f889233b,  1,      1289,                  YM), /* 03095 - n-a -  */
+ TIMEDB_ENTRY( f88b7e05,  1,       806,                  YM), /* 04966 - Unknown - French National Anthem */
  TIMEDB_ENTRY( f88ceda9,  1,      4032,                  YM), /* 00766 - Count Zero - Decade Demo - Loader */
  TIMEDB_ENTRY( f894547e,  1,     94600,               TA+YM), /* 04009 - Manfred Becker - Robert in the Fire Factory */
  TIMEDB_ENTRY( f8a9b5d0,  1,      6527,         TA+TB+TD+YM), /* 03365 - gwEm - The Ancient Art of Chiptune */
@@ -9258,7 +9321,6 @@
  TIMEDB_ENTRY( f9026221,  1,      8058,                  YM), /* 00885 - Adrian Dalecki - Leonardo 1 */
  TIMEDB_ENTRY( f9026221,  2,      1146,                  YM), /* 00885 - Adrian Dalecki - Leonardo 1 */
  TIMEDB_ENTRY( f90bccb5,  1,     17045,     TA+TB+TD+YM+STE), /* 03604 - Per Almered (XiA) 2010 - Talk Talk 2 - The Church of Excellence in Art main tune */
- TIMEDB_ENTRY( f920fd49,  1,      4697,                  YM), /* 03100 - n-a - Children's Corner # 2 */
  TIMEDB_ENTRY( f92ebe35,  1,       768,               TA+YM), /* 00944 - Dark Angel - Rantan Plan */
  TIMEDB_ENTRY( f936b5c6,  1,     14669,                  YM), /* 00917 - Dark Angel - Blood Theme */
  TIMEDB_ENTRY( f946b406,  1,      2699,               TA+YM), /* 01703 - Jess - Once Again */
@@ -9290,6 +9352,7 @@
  TIMEDB_ENTRY( f9e4b826,  3,      1514,                  YM), /* 00139 - David Whittaker - Sporting Triangles */
  TIMEDB_ENTRY( f9e4b826,  4,       179,                  YM), /* 00139 - David Whittaker - Sporting Triangles */
  TIMEDB_ENTRY( f9e4b826,  5,       179,                  YM), /* 00139 - David Whittaker - Sporting Triangles */
+ TIMEDB_ENTRY( fa141b7a,  1,      1071,                  YM), /* 04978 - Unknown - Muppet Show */
  TIMEDB_ENTRY( fa335012,  1,      2664,                  YM), /* 03927 - Unknown - Sound 1 */
  TIMEDB_ENTRY( fa34dc4a,  1,     14339,                  YM), /* 01809 - Barry Leitch - Switchblade 2 */
  TIMEDB_ENTRY( fa34dc4a,  2,      9219,                  YM), /* 01809 - Barry Leitch - Switchblade 2 */
@@ -9336,6 +9399,7 @@
  TIMEDB_ENTRY( fb5bb413, 11,       511,                  YM), /* 00350 - Tony Williams - Shinobi */
  TIMEDB_ENTRY( fb5c1c6e,  1,      6144,                  YM), /* 01982 - MSG - MSG 14 */
  TIMEDB_ENTRY( fb5d6332,  1,     10756,                  YM), /* 02229 - Tao - Fractal Blast (Nostalgic-O-Demo) */
+ TIMEDB_ENTRY( fb5e64ca,  1,      1114,                  YM), /* 04951 - Unknown - Boxer */
  TIMEDB_ENTRY( fb67d77b,  1,      5384,                  YM), /* 01034 - Donald Fakk - Bluespace */
  TIMEDB_ENTRY( fb7d564d,  1,      2080,                  YM), /* 03060 - Ed Bogas - Star-Spangled Banner - F.S.Key */
  TIMEDB_ENTRY( fb7d9ba0,  1,     13825,                  YM), /* 04926 - Stefan Jerowski - Synth Sample V */
@@ -9460,6 +9524,5 @@
  TIMEDB_ENTRY( ffc8af8b,  4,      7984,                  YM), /* 04467 - Charles Callet - Passengers in the Wind */
  TIMEDB_ENTRY( ffc8af8b,  5,     17408,                  YM), /* 04467 - Charles Callet - Passengers in the Wind */
  TIMEDB_ENTRY( ffc8af8b,  6,     18408,                  YM), /* 04467 - Charles Callet - Passengers in the Wind */
- TIMEDB_ENTRY( ffe1c341,  1,      4063,                  YM), /* 03187 - n-a - Yoda's Theme */
  TIMEDB_ENTRY( fff98e01,  1,      9983,            TA+TB+YM), /* 01361 - Scavenger - Readers Digest */
  TIMEDB_ENTRY( fffaeaae,  1,     10362,            TB+TD+YM), /* 02477 - No More - leif Rullar conversion */
