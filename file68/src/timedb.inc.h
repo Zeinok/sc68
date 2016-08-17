@@ -910,6 +910,7 @@
  TIMEDB_ENTRY( 1ae0d0e0,  4,       192,                  YM), /* 00882 - Ben Daglish - Wizard Warz */
  TIMEDB_ENTRY( 1ae0d0e0,  5,       420,                  YM), /* 00882 - Ben Daglish - Wizard Warz */
  TIMEDB_ENTRY( 1ae10543,  1,     12672,               TA+YM), /* 00401 - Big Alec - Bangkok Knights Loader */
+ TIMEDB_ENTRY( 1ae4e706,  1,     16640,            TB+TD+YM), /* 05004 - Marcer - Davids Raster Demo */
  TIMEDB_ENTRY( 1ae6ad10,  1,      9595,         TA+TB+TD+YM), /* 01865 - Lotek Style - tSCc^Vinyl Kartell - Rise Of The RI-Machines (YM Rockerz) */
  TIMEDB_ENTRY( 1af0890d,  1,      6197,                  YM), /* 00354 - David Whittaker - Trantor */
  TIMEDB_ENTRY( 1af0890d,  2,      1285,                  YM), /* 00354 - David Whittaker - Trantor */
@@ -2056,6 +2057,7 @@
  TIMEDB_ENTRY( 3a5c5f6b,  1,     46671,                  YM), /* 03120 - Unknown - Hey Hey,My My - Neil Young */
  TIMEDB_ENTRY( 3a5ca48e,  1,      2300,                  YM), /* 02433 - Beast - TSC - Boring */
  TIMEDB_ENTRY( 3a6042e4,  1,      1536,                  YM), /* 01405 - Skyline - Snork Intro - Lightning */
+ TIMEDB_ENTRY( 3a84f6ea,  1,      9214,                  YM), /* 01024 - Stan Mercury - Delirious Demo 2 - Reset */
  TIMEDB_ENTRY( 3aa242af,  1,      8953,            TA+TD+YM), /* 01870 - Lotek Style - Silence */
  TIMEDB_ENTRY( 3aac495c,  1,     29185,                  YM), /* 00397 - Wally Beben - Total Eclipse */
  TIMEDB_ENTRY( 3acbd283,  1,      7983,               TB+YM), /* 04104 - Per Almered-XiA-Checkpoint - SledgeBusters */
@@ -5283,7 +5285,6 @@
  TIMEDB_ENTRY( 8e5379b3,  1,     19968,         TA+TB+TD+YM), /* 02591 - STU - FIRST SID */
  TIMEDB_ENTRY( 8e7fd9cc,  1,     13439,         TA+TB+TD+YM), /* 02490 - gwEm (Jeff Wayne remix) - Forever 'Ardcore */
  TIMEDB_ENTRY( 8e95a515,  1,      5175,               TA+YM), /* 01123 - Tooseb - Bob Morane (Indochine) */
- TIMEDB_ENTRY( 8eac0fea,  1,      9214,                  YM), /* 01024 - Doclands - Delirious Demo 2 - Reset */
  TIMEDB_ENTRY( 8ebe66b0,  1,      4979,            TB+TD+YM), /* 00181 - 505 - Paradox Xmas 2003 #1 */
  TIMEDB_ENTRY( 8eca3208,  1,      8386,                  YM), /* 01267 - Frazer - If Pigs Could Fly End */
  TIMEDB_ENTRY( 8ef3c08c,  1,      5375,                  YM), /* 04062 - Gary Wheaton - Backlash */
