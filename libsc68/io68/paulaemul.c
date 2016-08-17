@@ -345,7 +345,7 @@ static void poll_irq(paula_t * const paula, unsigned int N)
     uint68_t a,l;
 
     /* Get sample pointer. */
-    a = (uint68_t) ( ((p[1] << 16) | (p[2] << 8) | p[3]) & 0x7FFFE )
+    a = (uint68_t) ( ((p[1] << 16) | (p[2] << 8) | (p[3]&0xFE)) & 0x7FFFE )
       << PAULA_ct_fix;
     w->adr = w->start = a;
     /* Get length */
@@ -400,7 +400,7 @@ static void mix_one(paula_t * const paula,
   /* Audio irq disable for this voice :
    * Internal will be reload at end of block
    */
-  readr   = ( p[1] << 16 ) | ( p[2] << 8 ) | p[3];
+  readr   = ( p[1] << 16 ) | ( p[2] << 8 ) | ( p[3] & 0xFE );
   readr <<= ct_fix;
   reend   = ((p[4] << 8) | p[5]);
   reend  |= (!reend) << 16;           /* 0 is 0x10000 */

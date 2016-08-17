@@ -189,7 +189,7 @@ static void reload(paulav_t * const v, const u8 * const p, const int fix)
 {
   plct_t len;
 
-  v->start = v->adr = (plct_t) ( (p[1]<<16) | (p[2]<<8) | p[3] ) << fix;
+  v->start = v->adr = (plct_t) ( (p[1]<<16) | (p[2]<<8) | (p[3]&0xFE) ) << fix;
   len = (p[4]<<8) | p[5];
   len |= (!len) << 16;
   len <<= 1+fix;
