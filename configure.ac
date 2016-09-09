@@ -55,7 +55,7 @@ AC_ARG_ENABLE(
 AC_ARG_ENABLE(
   [sc68-bins],
   [AS_HELP_STRING(
-      [--disable-sc68-programs],
+      [--disable-sc68-bins],
       [disable recommanded programs])],
   [],[enable_sc68_bins=yes])
 
@@ -71,16 +71,17 @@ SC68_ENABLE_PACKAGE([as68],[68k macro assembler],[$enable_sc68_tools])
 SC68_ENABLE_PACKAGE([sourcer68],[68k sourcer],[$enable_sc68_tools])
 SC68_ENABLE_PACKAGE([mksc68],[sc68 toolbox],[$enable_sc68_tools])
 SC68_ENABLE_PACKAGE([desa68],[68k disassembler library],[$enable_sc68_tools])
+
 # API Libraries
 SC68_ENABLE_PACKAGE([unice68],[ice depacker support],[$enable_sc68_libs])
 SC68_ENABLE_PACKAGE([file68],[file68 library],[$enable_sc68_libs])
 SC68_ENABLE_PACKAGE([libsc68],[sc68 engine],[$enable_sc68_libs])
 
 # CLI programs
-SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[$enable_sc68_clis])
-SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[$enable_sc68_clis])
+SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[$enable_sc68_bins])
+SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[$enable_sc68_bins])
 
-# DOC
+# DOC (disable for now)
 SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])
 
 # ,----------------------------------------------------------------------.
@@ -125,6 +126,10 @@ fi
 
 if test Xyes = X"${enable_sc68}"
 then AC_CONFIG_SUBDIRS([sc68])
+fi
+
+if test Xyes = X"${enable_mksc68}"
+then AC_CONFIG_SUBDIRS([mksc68])
 fi
 
 # if test Xyes = X"${enable_sc68_doc}"

@@ -37,8 +37,6 @@ if UNICE68_CLI
 bin_PROGRAMS    = unice68
 unice68_SOURCES = unice68.c
 unice68_LDADD   = libunice68.la
-unice68_CFLAGS  = $(gb_CFLAGS)
-unice68_LDFLAGS = $(gb_LDFLAGS)
 
 endif
 

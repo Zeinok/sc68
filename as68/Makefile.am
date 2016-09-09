@@ -21,17 +21,3 @@ bin_PROGRAMS = as68
 as68_SOURCES = $(mysources) $(myheaders)
 as68_CFLAGS  = $(gb_CFLAGS)
 as68_LDFLAGS = $(gb_LDFLAGS)
-
-# ,----------------------------------------------------------------------.
-# | Documentation                                                        |
-# `----------------------------------------------------------------------'
-
-# dist_man_MANS        = as68.1
-# info_TEXINFOS        = as68.texi
-# MAINTAINERCLEANFILES = $(srcdir)/as68.1
-
-# TEXINFO2MAN          = $(texinfo2man)
-# fail                 = { test -e '$@' && rm '$@'; test a = b; }
-
-# $(srcdir)/as68.1: as68.1.tpl.in $(srcdir)/as68.texi
-#       $(TEXINFO2MAN) as68.1.tpl $(srcdir)/as68.texi >$@ || $(fail)

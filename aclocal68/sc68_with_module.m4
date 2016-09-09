@@ -43,9 +43,11 @@ AC_DEFUN([SC68_CHECK_HEADERS],
   []dnl # INDENTATION
   [AS_IF(
       [test "X[$]has_$1" != Xno],
-      [save_$1_CPPFLAGS="$CPPFLAGS"; CPPFLAGS="$CPPFLAGS [$]$1_CPPFLAGS"
+      [save_$1_CPPFLAGS="$CPPFLAGS"
+       SC68_CPPFLAGS([CPPFLAGS],[$1_CFLAGS])
        AC_CHECK_HEADERS([$2],[$3],[$4],[$5])
-       CPPFLAGS="$save_$1_CPPFLAGS"; AS_UNSET(save_$1_CPPFLAGS)
+       CPPFLAGS="$save_$1_CPPFLAGS"
+       AS_UNSET(save_$1_CPPFLAGS)
       ])
   ])
 
@@ -60,11 +62,15 @@ AC_DEFUN([SC68_CHECK_FUNCS],
   []dnl # INDENTATION
   [AS_IF(
       [test "X[$]has_$1" != Xno],
-      [save_$1_LIBS="$LIBS"; LIBS="$LIBS [$]$1_LIBS"
-       save_$1_CFLAGS="$CFLAGS"; CFLAGS="$CFLAGS [$]$1_CFLAGS"
+      [save_$1_LIBS="$LIBS"
+       save_$1_CFLAGS="$CFLAGS"
+       LIBS="$LIBS [$]$1_LIBS"
+       CFLAGS="$CFLAGS [$]$1_CFLAGS"
        AC_CHECK_FUNCS([$2],[$3],[$4])
-       CFLAGS="$save_$1_CFLAGS"; AS_UNSET(save_$1_CFLAGS)
-       LIBS="$save_$1_LIBS"; AS_UNSET(save_$1_LIBS)
+       LIBS="$save_$1_LIBS"
+       CFLAGS="$save_$1_CFLAGS"
+       AS_UNSET(save_$1_LIBS)
+       AS_UNSET(save_$1_CFLAGS)
       ])
   ])
 
@@ -82,12 +88,13 @@ m4_define([_SC68_WITH_DUMP],
  $1[]m4_ifnblank([$2],[ (m4_normalize([$2]))])
 ---------------
  has_$1        : ${has_$1-<unset>}
- with_$1       : ${with_$1-<unset>}
  org_$1        : ${org_$1-<unset>}
+--
+ with_$1       : ${with_$1-<unset>}
+ with_$1_src   : ${with_$1_srcdir-<unset>}
 ...............
  $1_VERSION    : [$]{$1_VERSION-<unset>}
  $1_CFLAGS     : [$]{$1_CFLAGS-<unset>}
- $1_CPPFLAGS   : [$]{$1_CPPFLAGS-<unset>}
  $1_LIBS       : [$]{$1_LIBS-<unset>}
  $1_PKG_EXISTS : [$]{$1_PKG_EXISTS-<unset>}
  $1_PKG_ERRORS : [$]{$1_PKG_ERRORS-<unset>}
@@ -99,7 +106,12 @@ m4_define([_SC68_WITH_DUMP],
  PAC_REQUIRES=[$]{PAC_REQUIRES-<unset>}
  PAC_LIBS=[$]{PAC_LIBS-<unset>}
  PAC_PRIV_LIBS=[$]{PRIV_LIBS-<unset>}
----------------
+--------
+ srcdir : [$]{srcdir}
+--------
+ LIBS   : [$]LIBS
+ CFLAGS : [$]CFLAGS
+--------
 
 __EOF
   ])
@@ -121,16 +133,13 @@ m4_define([_SC68_WITH_INIT],
           [--without-$1],
           [Disable $2 support @<:@default is to check@:>@])],
       [with_$1="$withval"],[with_$1=check])
-    
+
     dnl # Declare persistent ENVVARs
     dnl # __________________________
 
     AC_ARG_VAR(
       $1[_VERSION],
       [$1 version; overriding pkg-config.])
-    AC_ARG_VAR(
-      $1[_CPPFLAGS],
-      [$1 CPPFLAGS; Default is built from $1_CFLAGS.])
     AC_ARG_VAR(
       $1[_CFLAGS],
       [$1 CFLAGS; overriding pkg-config.])
@@ -186,13 +195,6 @@ m4_define([_SC68_WITH_MODULE],
       ])
 
     AS_IF(
-      [test "x[$]has_$1" != Xno],
-      [AS_IF(
-          [test "X${$1_CFLAGS+Y}${$1_CPPFLAGS+Z}" = XY],
-          [SC68_CPPFLAGS([$1_CPPFLAGS],[$1_CFLAGS])])
-      ])
-
-    AS_IF(
       [test "X[$]has_$1" = Xcheck],
       [m4_ifnblank([$3],[SC68_CHECK_HEADERS([$1],[$3],,[has_$1=no])])])
     AS_IF(
@@ -236,10 +238,6 @@ m4_define([_SC68_WITH_CLOSE],
            AC_MSG_ERROR([Unexpected $1 value -- '$org_$1'])])
 
         AS_IF(
-          [test "X${$1_srcdir+set}" = Xset],
-          [$1_CPPFLAGS="${$1_CPPFLAGS}${$1_CPPFLAGS+ }-I${$1_srcdir}"])
-        
-        AS_IF(
           [test "X${$1_REQUIRED+set}" = Xset],
           [PAC_REQUIRES="${PAC_REQUIRES}${PAC_REQUIRES+ }$2"])
         AC_DEFINE_UNQUOTED(AS_TR_CPP([AC_PACKAGE_NAME[]_$1]),
@@ -262,7 +260,7 @@ m4_define([_SC68_WITH_CLOSE],
             _SC68_WITH_DUMP([$1],[error requested])
             AC_MSG_ERROR([unable to configure requested module -- $2])
           ])
-    
+
     AC_SUBST([$1_builddir])
     AC_SUBST([$1_srcdir])
     _SC68_WITH_DUMP([$1],[finally])
@@ -275,16 +273,15 @@ m4_define([_SC68_WITH_CLOSE],
 # $3: relative path to package source
 # $4: headers (if non-blank)
 #
-AC_DEFUN([SC68_WITH_SOURCE],
+m4_define([_SC68_WITH_SOURCE],
   []dnl # INDENTATION
   [
-    AS_UNSET([$1_srcdir])
     AC_ARG_WITH(
-      [$1],
+      [$1-srcdir],
       [AS_HELP_STRING(
           [--with-$1-srcdir],
           [Locate or disable $2 source @<:@default is to check@:>@])],
-      [with_$1="$withval"],[with_$1='yes'])
+      [with_$1_srcdir="$withval"],[with_$1_srcdir='yes'])
 
     AS_CASE(
       ["X$with_$1_srcdir"],
@@ -296,7 +293,8 @@ AC_DEFUN([SC68_WITH_SOURCE],
       [test X${$1_srcdir+set} = Xset],
       [AC_MSG_CHECKING([whether $1 srcdir ([$]$1_srcdir) exists])
        AS_IF([test -d "${$1_srcdir}"],
-             [AC_MSG_RESULT([yes])],
+             [AC_MSG_RESULT([yes])
+              $1_srcdir=`cd "${$1_srcdir}"; pwd`],
              [AC_MSG_RESULT([no])
               AS_UNSET([$1_srcdir])])])
 
@@ -308,10 +306,21 @@ AC_DEFUN([SC68_WITH_SOURCE],
            AS_IF([test -r "${$1_srcdir}/xHdr"],
                  [AC_MSG_RESULT([yes])],
                  [AC_MSG_RESULT([no])
-                  AS_UNSET([$1_srcdir])])])
-      ])
-
+                  AS_UNSET([$1_srcdir])])])])
   ])
+
+AC_DEFUN([SC68_WITH_SOURCE],
+  []dnl # INDENTATION
+  [
+    AS_UNSET([$1_srcdir])
+    _SC68_WITH_SOURCE($@)
+    AS_IF(
+      [test X${$1_srcdir+set} = Xset],
+      [$1_CFLAGS="-I${$1_srcdir}${$1_CFLAGS+:}${$1_CFLAGS}"])
+    AC_SUBST([$1_srcdir])
+    AC_SUBST([$1_CFLAGS])
+  ])
+
 
 # SC68_WITH_MODULE(prefix,mod,[headers],[funcs],[req])
 # ----------------
@@ -344,7 +353,7 @@ AC_DEFUN([SC68_WITH_PACKAGE],
   []dnl # INDENTATION
   [
     _SC68_WITH_INIT([$1],[$2])
-    
+
     AS_CASE(
       ["X$with_$1"],
       [Xno],[has_$1=no; org_$1=user],
@@ -352,8 +361,8 @@ AC_DEFUN([SC68_WITH_PACKAGE],
       [Xcheck],[$1_builddir="./$4"],
       [$1_builddir="$with_$1"])
 
-    SC68_WITH_SOURCE([$1],[$2],[$4],[$5])
-    
+    _SC68_WITH_SOURCE([$1],[$2],[$4],[$5])
+
     AS_IF(
       [test "X${$1_builddir+set}" = Xset],
       [
@@ -401,6 +410,21 @@ AC_DEFUN([SC68_WITH_PACKAGE],
       ],
       [
         AS_UNSET([$1_builddir])
+      ])
+
+    AS_IF(
+      [test "$has_$1/${$1_srcdir+set}" = yes/set],
+      [AC_MSG_CHECKING([whether $1 source is at '$4' ])
+
+       echo '$1_srcdir: '"${$1_srcdir}"
+       echo '.........  '"`cd $srcdir/$4 2>/dev/null && pwd`"
+       
+       AS_IF(
+         [test X"${$1_srcdir}" = X`cd $srcdir/$4 2>/dev/null && pwd`],
+         [AC_MSG_RESULT([yes])
+          $1_CFLAGS="-I\$(top_srcdir)/$4${$1_CFLAGS+:}${$1_CFLAGS}"],
+         [AC_MSG_RESULT([no])
+          $1_CFLAGS="-I${$1_srcdir}${$1_CFLAGS+:}${$1_CFLAGS}"])
       ])
 
     AS_IF(

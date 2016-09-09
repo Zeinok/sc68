@@ -115,7 +115,7 @@ SC68_WITH_MODULE([z],[zlib],[zlib.h],[gzopen])
 # libao
 
 SC68_WITH_MODULE([ao],[ao],[ao/ao.h],[ao_initialize])
-SC68_CHECK_FUNCS([a0],[ao_file_extension])
+SC68_CHECK_FUNCS([ao],[ao_file_extension])
 
 # ------------------------------------------------------------------------
 # cURL

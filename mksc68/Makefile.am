@@ -15,16 +15,8 @@ ACLOCAL_AMFLAGS = -I m4 --install
 # | Libtool program                                                      |
 # `----------------------------------------------------------------------'
 
-if SOURCE_LIBSC68
-LIBSC68_LA = $(libsc68_builddir)/libsc68.la
-@SET_MAKE@
-$(libsc68_builddir)/libsc68.la:
-	cd "$(libsc68_builddir)" && $(MAKE) $(AM_MAKEFLAGS)
-else
-LIBSC68_LA =
-endif
-
 bin_PROGRAMS = mksc68
+
 mksc68_SOURCES = src/mksc68.c src/mksc68_cli.c src/mksc68_cli.h		\
  src/mksc68_cmd.c src/mksc68_cmd.h src/mksc68_cmd_extract.c		\
  src/mksc68_cmd_gdb.c src/mksc68_cmd_info.c src/mksc68_cmd_load.c	\
@@ -36,22 +28,18 @@ mksc68_SOURCES = src/mksc68.c src/mksc68_cli.c src/mksc68_cli.h		\
  src/mksc68_snd.c src/mksc68_snd.h src/mksc68_str.c src/mksc68_str.h	\
  src/mksc68_tag.c src/mksc68_tag.h
 
-mksc68_CFLAG    = $(libsc68_CFLAGS) $(gb_CFLAGS)
-mksc68_CPPFLAGS = $(libsc68_CPPFLAGS)
-mksc68_LDADD    = $(LIBSC68_LA)
-mksc68_LDFLAGS  = $(LIBSC68_LIBS) $(gb_LDFLAGS)
+mksc68_CFLAGS   = $(libsc68_CFLAGS) $(gb_CFLAGS)
+mksc68_CPPFLAGS = $(file68_CFLAGS) $(edit_CFLAGS)
+mksc68_LDFLAGS  = $(gb_LDFLAGS)
+mksc68_LDADD    = $(LIBSC68_LA) $(libsc68_LIBS) $(edit_LIBS)
 
-# ,----------------------------------------------------------------------.
-# | Documentation                                                        |
-# `----------------------------------------------------------------------'
+if SOURCE_LIBSC68
 
-# dist_man1_MANS       = mksc68.man
+LIBSC68_LA = $(libsc68_builddir)/libsc68.la
+BUILT_SOURCES = $(LIBSC68_LA)
 
-# info_TEXINFOS        = mksc68.texi
-# MAINTAINERCLEANFILES = $(srcdir)/mksc68.1
+@SET_MAKE@
+$(LIBSC68_LA):
+	cd "$(libsc68_builddir)" && $(MAKE) $(AM_MAKEFLAGS)
 
-# TEXINFO2MAN          = $(SHELL) $(top_srcdir)/missing --run texinfo2man
-# fail                 = { test -e '$@' && rm '$@'; test a = b; }
-
-# $(srcdir)/mksc68.1: mksc68.1.tpl.in $(srcdir)/mksc68.texi
-# 	$(TEXINFO2MAN) mksc68.1.tpl $(srcdir)/mksc68.texi >$@ || $(fail)
+endif

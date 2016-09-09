@@ -364,7 +364,7 @@ static int isao_open(vfs68_t * vfs)
 
   if (!is->outname) {
 #ifdef HAVE_AO_FILE_EXTENSION
-    char * ext = ao_file_extension(is->ao.driver_id);
+    const char * ext = ao_file_extension(is->ao.driver_id);
 #else
     const char * ext = ".out";
     static const char * exts[] = {

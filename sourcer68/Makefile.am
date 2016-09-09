@@ -15,24 +15,7 @@ ACLOCAL_AMFLAGS = -I m4 --install
 # | Libtool program                                                      |
 # `----------------------------------------------------------------------'
 
-DESA68_LA =
-if SOURCE_DESA68
-DESA68_LA += $(desa68_builddir)/libdesa68.la
-@SET_MAKE@
-$(desa68_builddir)/libdesa68.la:
-	cd "$(desa68_builddir)" && $(MAKE) $(AM_MAKEFLAGS)
-endif
-
-FILE68_LA =
-if SOURCE_FILE68
-FILE68_LA += $(file68_builddir)/libfile68.la
-@SET_MAKE@
-$(file68_builddir)/libfile68.la:
-	 cd "$(file68_builddir)" && $(MAKE) $(AM_MAKEFLAGS)
-endif
-
 bin_PROGRAMS = sourcer68
-
 sourcer68_SOURCES = src/sourcer68.c src/src68_adr.c src/src68_adr.h     \
  src/src68_def.h src/src68_dis.c src/src68_dis.h src/src68_eva.c        \
  src/src68_eva.h src/src68_exe.c src/src68_exe.h src/src68_fmt.c        \
@@ -41,21 +24,27 @@ sourcer68_SOURCES = src/sourcer68.c src/src68_adr.c src/src68_adr.h     \
  src/src68_rel.h src/src68_sec.c src/src68_sec.h src/src68_src.c        \
  src/src68_src.h src/src68_sym.c src/src68_sym.h src/src68_tos.c        \
  src/src68_tos.h src/src68_vec.c src/src68_vec.h
-sourcer68_CFLAGS   = $(desa68_CFLAGS) $(file68_CFLAGS) $(gb_CFLAGS)
-sourcer68_CPPFLAGS = $(desa68_CPPFLAGS) $(file68_CPPFLAGS)
-sourcer68_LDFLAGS  = $(desa68_LIBS) $(file68_LIBS) $(gb_LDFLAGS)
-sourcer68_LDADD    = $(FILE68_LA) $(DESA68_LA)
+sourcer68_CFLAGS  = $(desa68_CFLAGS) $(file68_CFLAGS) $(gb_CFLAGS)
+sourcer68_LDFLAGS = $(gb_LDFLAGS)
+sourcer68_LDADD   = $(FILE68_LA) $(file68_LIBS) $(DESA68_LA) $(desa68_LIBS)
 
-# ,----------------------------------------------------------------------.
-# | Documentation                                                        |
-# `----------------------------------------------------------------------'
+if SOURCE_DESA68
+DESA68_LA = $(desa68_builddir)/libdesa68.la
+@SET_MAKE@
+$(DESA68_LA):
+	cd "$(desa68_builddir)" && $(MAKE) $(AM_MAKEFLAGS)
+else
+DESA68_LA=
+endif
 
-# dist_man1_MANS       = sourcer68.man
-# info_TEXINFOS        = sourcer68.texi
-# MAINTAINERCLEANFILES = $(srcdir)/sourcer68.1
+if SOURCE_FILE68
+FILE68_LA = $(file68_builddir)/libfile68.la
+@SET_MAKE@
+$(FILE68_LA):
+	 cd "$(file68_builddir)" && $(MAKE) $(AM_MAKEFLAGS)
+else
+FILE68_LA =
+endif
 
-# TEXINFO2MAN          = $(texinfo2man)
-# fail                 = { test -e '$@' && rm '$@'; test a = b; }
-
-# $(srcdir)/sourcer68.1: sourcer68.1.tpl.in $(srcdir)/sourcer68.texi
-#       $(TEXINFO2MAN) sourcer68.1.tpl $(srcdir)/sourcer68.texi >$@ || $(fail)
+# Force early build
+BUILT_SOURCES = $(DESA68_LA) $(FILE68_LA)

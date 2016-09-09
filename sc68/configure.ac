@@ -50,6 +50,8 @@ AC_PROG_INSTALL
 SC68_WITH_PACKAGE([libsc68],[libsc68],[sc68],[../libsc68],
                   [sc68/sc68.h],[sc68_version],[req])
 
+SC68_WITH_SOURCE([file68],[file68],[../file68],[sc68/file68_vfs.h])
+
 # ,----------------------------------------------------------------------.
 # | Some headers, types and functions                                    |
 # `----------------------------------------------------------------------'

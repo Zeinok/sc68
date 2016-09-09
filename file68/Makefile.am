@@ -46,24 +46,27 @@ myheaders = $(apiheaders) $(otherheaders)
 # | Libtool library                                                      |
 # `----------------------------------------------------------------------'
 
+lib_LTLIBRARIES = libfile68.la
+
+libfile68_la_SOURCES = $(mysources) $(myheaders)
+libfile68_la_CFLAGS =\
+ $(unice68_CFLAGS) $(z_CFLAGS) $(ao_CFLAGS) $(curl_CFLAGS) $(gb_CFLAGS)
+libfile68_la_CPPFLAGS = -I$(top_srcdir)/sc68
+libfile68_la_LDFLAGS = -version-info $(LIB_VER) $(gb_LDFLAGS)
+libfile68_la_LIBADD =\
+ $(UNICE68_LA) $(unice68_LIBS) $(curl_LIBS) $(ao_LIBS) $(z_LIBS)
+
 if SOURCE_UNICE68
+
 UNICE68_LA = $(unice68_builddir)/libunice68.la
+
 @SET_MAKE@
-$(unice68_builddir)/libunice68.la:
+$(UNICE68_LA):
 	cd "$(unice68_builddir)" && $(MAKE) $(AM_MAKEFLAGS)
-else
-UNICE68_LA = $(unice68_LIBS)
+
 endif
 
-lib_LTLIBRARIES        = libfile68.la
-libfile68_la_SOURCES   = $(mysources) $(myheaders)
-libfile68_la_LIBADD    = $(UNICE68_LA) $(z_LIBS) $(ao_LIBS) $(curl_LIBS)
-libfile68_la_LDFLAGS   = -version-info $(LIB_VER) $(gb_LDFLAGS)
-libfile68_la_CFLAGS    = $(unice68_CFLAGS) $(z_CFLAGS) $(ao_CFLAGS)
-libfile68_la_CFLAGS   += $(curl_CFLAGS) $(gb_CFLAGS)
-libfile68_la_CPPFLAGS  = -I$(top_srcdir)/sc68
-libfile68_la_CPPFLAGS += $(unice68_CPPFLAGS) $(z_CPPFLAGS)
-libfile68_la_CPPFLAGS += $(ao_CPPFLAGS) $(curl_CPPFLAGS)
+BUILT_SOURCES = $(UNICE68_LA)
 
 # ,----------------------------------------------------------------------.
 # | Headers                                                              |

@@ -59,6 +59,6 @@ noinst_LTLIBRARIES   = libemu68.la
 libemu68_la_SOURCES  = $(mysources) $(myheaders)
 libemu68_la_LDFLAGS  = -avoid-version $(gb_LDFLAGS)
 libemu68_la_CFLAGS   = $(file68_CFLAGS) $(gb_CFLAGS)
-libemu68_la_CPPFLAGS = $(MONO) -I$(top_srcdir) $(file68_CPPFLAGS)
+libemu68_la_CPPFLAGS = $(MONO) -I$(top_srcdir)
 
 noinst_HEADERS = $(extrasources) $(alternatesources) $(myinlines)

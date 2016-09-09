@@ -49,19 +49,22 @@ AC_PROG_INSTALL
 SC68_WITH_PACKAGE([libsc68],[libsc68],[sc68],[../libsc68],
                   [sc68/sc68.h],[sc68_version],[req])
 
+SC68_WITH_SOURCE([file68],[file68],[../file68],[sc68/file68.h])
+
+
 [SAVE_CPPFLAGS="$CPPFLAGS"]
-[CPPFLAGS="$CPPFLAGS $sc68_CPPFLAGS $XT_CPPFLAGS"]
+SC68_CPPFLAGS([CPPFLAGS],[CPPFLAGS libsc68_CFLAGS])
 AC_CHECK_HEADERS([emu68/emu68.h])
 AS_IF(
   [test ${libsc68_srcdir+set}/$ac_cv_header_emu68_emu68_h = set/no],
-  [AC_MSG_CHECKING(["for emu68/emu68.h presence in $srcdir/../libsc68"])
-   AS_IF([test -e "$srcdir/../libsc68/emu68/emu68.h"],
+  [AC_MSG_CHECKING(["for emu68/emu68.h presence in libsc68 srcdir"])
+   AS_IF([test -e "$libsc68_srcdir/emu68/emu68.h"],
          [AC_MSG_RESULT([yes])
-          CPPFLAGS="${CPPFLAGS} -I$srcdir/../libsc68"
+          CPPFLAGS="${CPPFLAGS} -I$libsc68_srcdir"
           AS_UNSET([ac_cv_header_emu68_emu68_h])
           AC_CHECK_HEADERS(
             [emu68/emu68.h],
-            [sc68_CPPFLAGS="${sc68_CPPFLAGS} -I\$(srcdir)/../libsc68"],
+            [libsc68_CFLAGS="${libsc68_CFLAGS} -I$libsc68_srcdir"],
             [AC_MSG_RESULT([no])])
          ])
   ])

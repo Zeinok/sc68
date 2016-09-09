@@ -28,10 +28,14 @@ srcextra= ym_atarist_table.c ym_linear_table.c
 # | Libtool library                                                      |
 # `----------------------------------------------------------------------'
 
+if SOURCE_FILE68
+file68_CPPFLAGS = -I$(top_builddir)/$(file68_builddir)
+endif
+
 noinst_LTLIBRARIES  = libio68.la
 libio68_la_SOURCES  = $(mysources) $(myheaders)
 libio68_la_LDFLAGS  = -avoid-version $(gb_LDFLAGS)
 libio68_la_CFLAGS   = $(file68_CFLAGS) $(gb_CFLAGS)
-libio68_la_CPPFLAGS = $(file68_CPPFLAGS) -I$(top_srcdir)
+libio68_la_CPPFLAGS = -I$(top_srcdir) $(file68_CPPFLAGS)
 
 noinst_HEADERS      = $(srcextra)
