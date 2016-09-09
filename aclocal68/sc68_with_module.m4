@@ -93,6 +93,7 @@ m4_define([_SC68_WITH_DUMP],
  $1_PKG_ERRORS : [$]{$1_PKG_ERRORS-<unset>}
  $1_builddir   : [$]{$1_builddir-<unset>}
  $1_srcdir     : [$]{$1_srcdir-<unset>}
+ $1_prefix     : [$]{$1_prefix-<unset>}
  $1_REQUIRED   : [$]{$1_REQUIRED-<unset>}
 ...............
  PAC_REQUIRES=[$]{PAC_REQUIRES-<unset>}
@@ -147,6 +148,7 @@ m4_define([_SC68_WITH_INIT],
     AS_UNSET([org_$1])
     AS_UNSET([$1_builddir])
     AS_UNSET([$1_srcdir])
+    AS_UNSET([$1_prefix])
   ])
 
 # _SC68_WITH_MODULE(prefix,mod,[headers],[funcs])
@@ -171,6 +173,11 @@ m4_define([_SC68_WITH_MODULE],
         AS_IF(
           [test "A${$1_PKG_ERRORS+B}X${$1_LIBS+Y}" = AX],
           [SC68_PKG_CONFIG($1,$2,[LIBS],[--libs])])
+        AS_IF(
+          [test "A${$1_PKG_ERRORS+B}X${$1_prefix+Y}" = AX],
+          [SC68_PKG_CONFIG($1,$2,[prefix],[--variable=prefix])
+           AS_UNSET([$1_PKG_ERRORS])
+          ])
         AS_IF([test "A${$1_PKG_ERRORS+B}" = AB],[has_$1=no],[has_$1=check])
       ],
       [
@@ -227,6 +234,10 @@ m4_define([_SC68_WITH_CLOSE],
           [Xuser],[],
           [_SC68_WITH_DUMP([$1],[internal error])
            AC_MSG_ERROR([Unexpected $1 value -- '$org_$1'])])
+
+        AS_IF(
+          [test "X${$1_srcdir+set}" = Xset],
+          [$1_CPPFLAGS="${$1_CPPFLAGS}${$1_CPPFLAGS+ }-I${$1_srcdir}"])
         
         AS_IF(
           [test "X${$1_REQUIRED+set}" = Xset],
@@ -340,7 +351,6 @@ AC_DEFUN([SC68_WITH_PACKAGE],
       [X|Xyes],[has_$1=yes; org_$1=user],
       [Xcheck],[$1_builddir="./$4"],
       [$1_builddir="$with_$1"])
-
 
     SC68_WITH_SOURCE([$1],[$2],[$4],[$5])
     

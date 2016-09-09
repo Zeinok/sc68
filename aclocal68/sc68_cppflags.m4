@@ -14,7 +14,7 @@ dnl# Distribued under the term of the GPL3+
 AC_DEFUN([SC68_CPPFLAGS],
   []dnl # INDENTATION
   [
-    $1=''
+    AS_UNSET([$1])
     set -- [$]$2
     while test [$]# -gt 0; do
       AS_CASE(

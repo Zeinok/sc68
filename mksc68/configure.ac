@@ -53,7 +53,7 @@ SC68_WITH_PACKAGE([libsc68],[libsc68],[sc68],[../libsc68],
 [CPPFLAGS="$CPPFLAGS $sc68_CPPFLAGS $XT_CPPFLAGS"]
 AC_CHECK_HEADERS([emu68/emu68.h])
 AS_IF(
-  [test X$ac_cv_header_emu68_emu68_h != Xyes],
+  [test ${libsc68_srcdir+set}/$ac_cv_header_emu68_emu68_h = set/no],
   [AC_MSG_CHECKING(["for emu68/emu68.h presence in $srcdir/../libsc68"])
    AS_IF([test -e "$srcdir/../libsc68/emu68/emu68.h"],
          [AC_MSG_RESULT([yes])
@@ -122,5 +122,5 @@ AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION) for $host])
 AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_VERSION)])
+AC_MSG_NOTICE([|   libsc68             : $has_libsc68 ($libsc68_VERSION)])
 AC_MSG_NOTICE([+-----------------------])
