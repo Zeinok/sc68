@@ -25,7 +25,7 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
-
+#include "file68_private.h"
 #include "file68_api.h"
 #include "file68.h"
 #include "file68_opt.h"
@@ -63,7 +63,7 @@ static char * mygetenv(const char *name)
 #endif
 }
 
-#ifdef NATIVE_WIN32
+#ifdef WIN32
 /* Get path from registry, converts '\' to '/' and remove trailing '/'.
  *
  * @return pointer to the end of string
@@ -229,7 +229,7 @@ int file68_init(int argc, char **argv)
   /* Loader */
   file68_loader_init();
 
-#ifdef NATIVE_WIN32
+#ifdef WIN32
   /* Get share path from registry */
   opt = option68_get("share-path", opt68_ALWAYS);
   if (opt) {
@@ -246,7 +246,7 @@ int file68_init(int argc, char **argv)
   opt = option68_get("user-path", opt68_ALWAYS);
   if (opt) {
 
-#ifdef NATIVE_WIN32
+#ifdef WIN32
     static const char path[] = "/sc68";
 
     /* Get user path from registry */
@@ -327,12 +327,29 @@ void file68_shutdown(void)
   }
 }
 
-int file68_version(void)
-{
-  return PACKAGE_VERNUM;
-}
-
-const char * file68_versionstr()
+const char * file68_versionstr(void)
 {
   return PACKAGE_STRING;
+}
+
+int file68_version(void)
+{
+  unsigned int v[4] = {0,0,0,0};      /* major, minor, patch, tweak */
+  const char * s = file68_versionstr();
+  int i, c;
+
+  /* find 1st <space> ' ' */
+  while (c = *s++, (c && c != ' '));
+  for (i=0; c && i<4; ++i) {
+    /* find 1st digit [0-9] */
+    while (c = *s++, (c && c<'0' && c>'9'));
+    for (; c >= '0' && c <= '9'; c = *s++)
+      v[i] = v[i]*10 + ( c - '0' );
+  }
+  return 0
+    + v[0] * 100000000u
+    + v[1] *   1000000u
+    + v[2] *     10000u
+    + v[3]
+    ;
 }

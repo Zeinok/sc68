@@ -25,11 +25,12 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include "file68_private.h"
 #include "file68_api.h"
 #include "file68_ice.h"
 #include "file68_vfs_def.h"
 #include "file68_err.h"
-#ifdef USE_UNICE68
+#ifdef FILE68_UNICE68
 # include "file68_msg.h"
 # include "file68_uri.h"
 # include "unice68.h"
@@ -113,7 +114,7 @@ void * file68_ice_load_file(const char * fname, int * ulen)
   return ret;
 }
 
-#else /* #ifdef USE_UNICE68 */
+#else /* #ifdef FILE68_UNICE68 */
 
 int file68_ice_version(void)
 {
@@ -142,4 +143,4 @@ void * file68_ice_load_file(const char * fname, int * ulen)
   return 0;
 }
 
-#endif /* #ifdef USE_UNICE68 */
+#endif /* #ifdef FILE68_UNICE68 */

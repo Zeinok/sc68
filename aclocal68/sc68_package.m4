@@ -2,7 +2,7 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2015 Benjamin Gerard <http://sourceforge.net/users/benjihan>
+dnl# (C) 2009-2016 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 dnl# Distribued under the term of the GPL3+
 
@@ -12,6 +12,7 @@ dnl# Distribued under the term of the GPL3+
 # --------------------
 # Common package info for sc68 related packages.
 AC_DEFUN_ONCE([SC68_PACKAGE],[
+    AC_MSG_ERROR([Deprecated macro SC68_[]PACKAGE])
     AC_PACKAGE_INFO(
       [$1 It is part of the sc68 project.])
     [PACKAGE_INFOCAT='sc68 - /|\ Atari ST and C= Amiga music player']

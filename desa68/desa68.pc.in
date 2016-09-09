@@ -22,6 +22,6 @@ URL:              @PACKAGE_URL@
 #Requires:
 #Requires.private:
 #Conflicts:
-Libs:             -L${libdir} -l@PACKAGE@
+Libs:             -L${libdir} -ldesa68
 #Libs.private:
 Cflags:           -I${includedir}

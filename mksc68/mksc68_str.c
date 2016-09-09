@@ -353,7 +353,7 @@ char * str_hardware(char * const buf, int max, int hwbit)
 
 #ifndef PATHSEP
 # define PATHSEP '/'
-# if defined(NATIVE_WIN32) && ! defined(PATHSEP2)
+# if defined(WIN32) && ! defined(PATHSEP2)
 #  define PATHSEP2 '\\'
 # endif
 #endif
@@ -378,7 +378,7 @@ const char * str_fileext(const char * path)
     if (c == PATHSEP2)
       break;
 #endif
-#ifdef NATIVE_WIN32
+#ifdef WIN32
     if (c == ':' && l == 1)
       break;
 #endif

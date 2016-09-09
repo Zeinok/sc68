@@ -50,10 +50,27 @@ int unice68_ice_version(void)
 
 const char * unice68_versionstr(void)
 {
-  return PACKAGE_NAME " " PACKAGE_VERSION " ICE! 2.35/2.40" ;
+  return PACKAGE_STRING " ICE! 2.35/2.40" ;
 }
 
 int unice68_version(void)
 {
-  return PACKAGE_VERNUM;
+  unsigned int v[4] = {0,0,0,0};      /* major, minor, patch, tweak */
+  const char * s = unice68_versionstr();
+  int i, c;
+
+  /* find 1st <space> ' ' */
+  while (c = *s++, (c && c != ' '));
+  for (i=0; c && i<4; ++i) {
+    /* find 1st digit [0-9] */
+    while (c = *s++, (c && c<'0' && c>'9'));
+    for (; c >= '0' && c <= '9'; c = *s++)
+      v[i] = v[i]*10 + ( c - '0' );
+  }
+  return 0
+    + v[0] * 100000000u
+    + v[1] *   1000000u
+    + v[2] *     10000u
+    + v[3]
+    ;
 }

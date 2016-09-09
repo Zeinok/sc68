@@ -25,19 +25,20 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include "file68_private.h"
 #include "file68_api.h"
 #include "file68_vfs_curl.h"
 #include "file68_msg.h"
 
 /* Define this if you want CURL support. */
-#ifdef USE_CURL
+#ifdef FILE68_CURL
 
 #ifndef DEBUG_CURL_O
 # define DEBUG_CURL_O 0
 #endif
 static int curl_cat = msg68_DEFAULT;
 
-static const char curl_schemes[] = CURL_SCHEMES;
+static const char * curl_schemes[] = { CURL_SCHEMES, 0 };
 
 #include "file68_vfs_def.h"
 #include "file68_uri.h"
@@ -126,17 +127,15 @@ static int curl_ismine(const char * uri)
 
   if (dot) {
     const int len = dot - uri;
-    if (len < 16 && uri[len+1] == '/' && uri[len+2] == '/') {
-      int l;
-      const char * c;
-      for (c = curl_schemes; l = strlen(c), l; c += l+1)
-        if (l == len &&  !strncmp68(uri,c,l))
+    if (len < 8 && uri[len+1] == '/' && uri[len+2] == '/') {
+      const char ** c;
+      for (c = curl_schemes; *c; ++c)
+        if (!strncmp68(uri,*c,strlen(*c)))
           return ok;
     }
   }
   return 0;
 }
-
 
 static int mysleep(unsigned long ms)
 {
@@ -787,7 +786,7 @@ static vfs68_t * curl_create(const char *uri, int mode,
 }
 
 
-#else /* #ifdef USE_CURL */
+#else /* #ifdef FILE68_CURL */
 
 /* vfs curl must not be include in this package. Anyway the creation
  * still exist but it always returns error.

@@ -219,7 +219,7 @@ static uint_t address_from_name(char *uri)
   uint_t org = EXE_DEFAULT, adr; int c;
   char *sl1 = strrchr(uri,'/');
   char *sl2 = 0;
-#ifdef NATIVE_WIN32
+#ifdef WIN32
   sl2 = strrchr(uri,'\\');
 #endif
   if (sl2 > sl1)

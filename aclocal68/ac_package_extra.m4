@@ -2,7 +2,7 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2015 Benjamin Gerard <http://sourceforge.net/users/benjihan>
+dnl# (C) 2009-2016 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 dnl# Distribued under the term of the GPL3+
 
@@ -12,6 +12,8 @@ dnl# Distribued under the term of the GPL3+
 # ------------------------------
 # Defines supplemental package info strings
 AC_DEFUN_ONCE([AC_PACKAGE_INFO],[
+    AC_MSG_ERROR([Deprecated macro AC_[]PACKAGE_[]INFO])
+                
     m4_ifval([$1],
       [
 	m4_define([AX_PACKAGE_DESC],

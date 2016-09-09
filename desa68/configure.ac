@@ -18,7 +18,6 @@ AC_INIT(
   sc_version,
   [http://sourceforge.net/projects/sc68/],
   [desa68],
-  [libdesa68],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([desa68.c])
 AC_CONFIG_MACRO_DIR([m4])
@@ -32,21 +31,24 @@ LT_INIT([win32-dll])
 # | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
-SC68_PACKAGE([Motoral MC68000 disassembler library.])
-SC68_SYSTEM
-SC68_OPTIONS
-SC68_TOOLS
-SC68_CHECKS
+AC_SUBST([PACKAGE_SHORTDESC],["Motoral MC68000 disassembler library"])
+SC68_CC
+AC_PROG_INSTALL
 
-AX_CHECK_COMPILER_FLAGS([-Wno-multichar],
-  SC68_ADD_FLAG(ALL_CFLAGS,[-Wno-multichar]))
+# ,----------------------------------------------------------------------.
+# | Functions and Headers
+# `----------------------------------------------------------------------'
 
-PAC_CFLAGS="-I[$]includedir"
-PAC_LFLAGS="-L[$]libdir -ldesa68"
+AC_HEADER_ASSERT
+AC_CHECK_HEADERS([assert.h stdint.h])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
+
+AC_ARG_VAR([lib_LDFLAGS],
+           [Supplemental LDFLAGS for building the library.
+            Typically libtool flags such as -no-undefined.])
 
 AC_CONFIG_FILES([
     desa68.pc
@@ -57,12 +59,8 @@ AC_OUTPUT
 # | Summary                                                              |
 # `----------------------------------------------------------------------'
 
-SC68_DUMPVARS
-
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
-AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   compile mode        : $compile_mode])
 AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])

@@ -25,9 +25,10 @@
 /* TODO: remove the recursive stuff as it is totally useless. */
 
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+# include "config.h"
 #endif
-
+#include "file68_private.h"
+#include "file68_api.h"
 #include "file68_reg.h"
 
 #ifdef USE_REGISTRY68

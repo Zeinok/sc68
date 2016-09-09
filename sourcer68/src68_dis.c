@@ -376,7 +376,9 @@ static int r_dis_pass(dis_t * dis)
           if ( (opw^w) & mask )
             break;
           dis->addr = nxtpc;
+          --dis->curdepth;  /* XXX: tricks: this is not a subroutine */
           r_dis_pass(dis);
+          ++dis->curdepth;  /* XXX: tricks: this is not a subroutine */
         }
 
         //////////////////////////////////////////////////////////////////////

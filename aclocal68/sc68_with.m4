@@ -2,56 +2,12 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2015 Benjamin Gerard <http://sourceforge.net/users/benjihan>
+dnl# (C) 2009-2016 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 dnl# Distributed under the term of the GPL
 dnl#
 
 # serial 20140310 sc68_with.m4
-
-# DUMP_SC68_PACKAGE_VARS
-# ----------------------
-# $1:package var name
-# $2:label
-m4_define([DUMP_SC68_PACKAGE_VARS],[
-    cat <<EOF
-==$2==========================================================
- --  $1_has=[$]has_$1
- --  $1_req=[$]$1_req
- --  $1_ver=[$]$1_ver
- --  $1_org=[$]$1_org
- --  $1_fct=[$]$1_fct
- --  $1_hdr=[$]$1_hdr
- --  $1_ccf=[$]$1_ccf
- --  $1_def=[$]$1_def
- --  $1_inc=[$]$1_inc
- --  $1_ldf=[$]$1_ldf
- --  $1_src=[$]$1_src
- --  $1_abs=[$]$1_abs
- --  $1_dir=[$]$1_dir
- --  $1_dbn=[$]$1_dbn
- --  $1_pkg=[$]$1_pkg
- --  LIB_CFLAGS=[$]LIB_CFLAGS
- --  LIB_LFLAGS=[$]LIB_LFLAGS
- --  BIN_CFLAGS=[$]BIN_CFLAGS
- --  BIN_LFLAGS=[$]BIN_LFLAGS
- --  ALL_CFLAGS=[$]ALL_CFLAGS
- --  ALL_LFLAGS=[$]ALL_LFLAGS
- --  PAC_REQUIRES=[$]PAC_REQUIRES
- --  PAC_PRIVREQ=[$]PAC_PRIVREQ
- --  PAC_CONFLICTS=[$]PAC_CONFLICTS
- --  PAC_CFLAGS=[$]PAC_CONFLICTS
- --  PAC_LFLAGS=[$]PAC_LFLAGS
- --  PAC_PRIVLIB=[$]PAC_PRIVLIB
- -- 
- --  LIBS=[$]LIBS
- --  LDFLAGS=[$]LDFLAGS
- --  CFLAGS=[$]CFLAGS
- --  CPPFLAGS=[$]CPPFLAGS
-======================================================================
-EOF
-    ])
-
 
 # UNSET_SC68_PACKAGE_VARS
 # -----------------------
@@ -448,8 +404,11 @@ m4_define([DO_SC68_PACKAGE],[
 # SC68_WITH([PACKAGE],[REQ],[FUNC],[HEADER],[DIRNAME])
 # ----------------------------------------------------
 # 
-AC_DEFUN([SC68_WITH],
+AC_DEFUN(
+  [SC68_WITH],
   [
+    AC_MSG_ERROR([Deprecated macro SC68_[]WITH])
+           
     DO_SC68_PACKAGE(
       AS_TR_SH(m4_strip[$1]),
       m4_strip([$1]),
@@ -463,8 +422,11 @@ AC_DEFUN([SC68_WITH],
 # SC68_WITH_HEADER([PACKAGE],[REQ],[HEADER],[DIRNAME])
 # ----------------------------------------------------
 # 
-AC_DEFUN([SC68_WITH_HEADER],
+AC_DEFUN(
+  [SC68_WITH_HEADER],
   [
+    AC_MSG_ERROR([Deprecated macro SC68_[]WITH_[]HEADER])
+
     DO_SC68_PACKAGE(
       AS_TR_SH(m4_strip[$1]),
       m4_strip([$1]),

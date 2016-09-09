@@ -23,6 +23,10 @@
 # endif
 #endif
 
+#if defined(DLL_EXPORT) && !defined(desa68_lib_EXPORTS)
+# define desa68_lib_EXPORTS DLL_EXPORT
+#endif
+
 #ifndef DESA68_API
 # if defined(DESA68_WIN32) && defined(desa68_lib_EXPORTS)
 #  define DESA68_API __declspec(dllexport)

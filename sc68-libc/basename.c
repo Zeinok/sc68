@@ -33,7 +33,7 @@
 #include "libc68.h"
 
 #ifndef PATH_SEP
-# ifdef NATIVE_WIN32
+# ifdef WIN32
 #  define PATH_SEP { '/' , '\\' }
 # else
 #  define PATH_SEP { '/' }
@@ -49,7 +49,7 @@ char *basename(char *path)
   static const char sep[] = PATH_SEP;
   int i,c,j,k;
 
-#ifdef NATIVE_WIN32
+#ifdef WIN32
   c = path[0] | 0x20;
   if (c >= 'a' && c <= 'z' && path[1] == ':')
     path += 2;                          /* skip drive letter */

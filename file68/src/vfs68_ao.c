@@ -25,6 +25,7 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include "file68_private.h"
 #include "file68_api.h"
 #include "file68_vfs_ao.h"
 #include "file68_msg.h"
@@ -36,7 +37,7 @@
 #endif
 
 /* Define this if you want xiph libao support. */
-#ifdef USE_AO
+#ifdef FILE68_AO
 
 static int ao68_cat = msg68_DEFAULT;
 
@@ -72,9 +73,9 @@ typedef struct {
 } vfs68_ao_t;
 
 enum {
-  AO_SPR_MIN = FILE68_SPR_MIN,
-  AO_SPR_MAX = FILE68_SPR_MAX,
-  AO_SPR_DEF = FILE68_SPR_DEF
+  AO_SPR_MIN = 6250,
+  AO_SPR_MAX = 125166,
+  AO_SPR_DEF = 48000
 };
 
 static volatile int init;
@@ -613,7 +614,7 @@ static vfs68_t * ao_create(const char * uri, int mode, int argc, va_list list)
   return vfs68_ao_create(uri, mode, rate);
 }
 
-#else /* #ifdef USE_AO */
+#else /* #ifdef FILE68_AO */
 
 /* vfs ao must not be include in this package. Anyway the creation
  * still exist but it always returns error.

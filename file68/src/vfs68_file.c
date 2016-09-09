@@ -25,6 +25,7 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include "file68_private.h"
 #include "file68_api.h"
 #include "file68_vfs_file.h"
 
@@ -63,7 +64,7 @@ static int file_ismine(const char * uri)
   if (!i)
     return SCHEME68_ISMINE|SCHEME68_READ|SCHEME68_WRITE;
   else if (i > 0) {
-#ifdef NATIVE_WIN32
+#ifdef WIN32
     if (i == 2 && isalpha((int)uri[0]))
       return SCHEME68_ISMINE|SCHEME68_READ|SCHEME68_WRITE;
 #endif

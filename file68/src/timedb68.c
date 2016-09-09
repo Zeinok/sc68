@@ -25,6 +25,7 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include "file68_private.h"
 #include "file68_tdb.h"
 
 #include <stdlib.h>

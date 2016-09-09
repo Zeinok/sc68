@@ -25,6 +25,8 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include "file68_private.h"
+#include "file68_api.h"
 #include "file68_zip.h"
 
 #ifdef HAVE_STDLIB_H
@@ -41,7 +43,7 @@ typedef uint8_t byte;
 typedef unsigned char byte;
 #endif
 
-#ifdef USE_Z
+#ifdef FILE68_Z
 # include <zlib.h>
 /* gzip flag byte (from gzio.c) */
 # define ASCII_FLAG   0x01 /* bit 0 set: file probably ascii text   */
@@ -62,7 +64,7 @@ int gzip68_is_magic(const void * buffer)
   return !memcmp(gz_magic, buffer, sizeof(gz_magic));
 }
 
-#ifdef USE_Z
+#ifdef FILE68_Z
 
 #include "file68_err.h"
 

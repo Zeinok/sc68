@@ -74,7 +74,7 @@ static unsigned   memmax = 1<<24;
 
 #ifndef HAVE_BASENAME
 # ifndef PATHSEP
-#  ifdef NATIVE_WIN32
+#  ifdef UNICE68_WIN32
 #   define PATHSEP '\\'
 #  else
 #   define PATHSEP '/'
@@ -142,7 +142,7 @@ static int print_usage(void)
       "Usage: %s [MODE] [OPTION...] [--] [[<input>] <output>]\n"
       "\n"
       "ICE! depacker %d.%02d\n"
-      "       packer %d.%-2d\n"
+      "       packer %d.%02d\n"
       "\n"
       " `-' as input/output uses respectively stdin/stdout.\n"
       " If output is stdout all messages are diverted to stderr.\n"

@@ -1,3 +1,4 @@
+
 # -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 #
 # pkg-config file for @PACKAGE@
@@ -22,6 +23,6 @@ URL:              @PACKAGE_URL@
 #Requires:
 #Requires.private:
 #Conflicts:
-Libs:             -L${libdir} -l@PACKAGE@
+Libs:             -L${libdir} -lunice68
 #Libs.private:
 Cflags:           -I${includedir}

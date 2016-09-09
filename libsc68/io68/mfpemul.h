@@ -1104,8 +1104,8 @@ enum mfp_timer_e {
  * (a mutliple of 4 because the YM clock is 1/4 of the CPU clock)
  * However usually the Atari ST clock and the YM clock are rounded to
  * respectively 8Mhz/2Mhz. Here in order to fasten the caculation the
- * CPU clock is approxinate to 8006400Hz. As the MFP timer clocks runs
- * at 2457600hz we got a power of 2 in the ratio (256:834).
+ * CPU clock is approximated to 8006400Hz. As the MFP timer clocks
+ * runs at 2457600hz we got a power of 2 in the ratio (256:834).
  *
  * @{
  */

@@ -2,7 +2,7 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2015 Benjamin Gerard <http://sourceforge.net/users/benjihan>
+dnl# (C) 2009-2016 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 dnl# Distribued under the term of the GPL3+
 
@@ -12,7 +12,9 @@ dnl# Distribued under the term of the GPL3+
 # ------------
 # Check for build tools for sc68 related package.
 AC_DEFUN_ONCE([SC68_TOOLS],[
-    AC_REQUIRE([SC68_SYSTEM])
+  AC_MSG_ERROR([DEPRECATED USE OF SC68_[]TOOLS MACRO])
+
+  AC_REQUIRE([SC68_SYSTEM])
     # compiler
     AC_LANG([C])
     AC_PROG_CC

@@ -23,6 +23,10 @@
 # endif
 #endif
 
+#if defined(DLL_EXPORT) && !defined(unice68_lib_EXPORTS)
+# define unice68_lib_EXPORTS DLL_EXPORT
+#endif
+
 #ifndef UNICE68_API
 # if defined(UNICE68_WIN32) && defined(unice68_lib_EXPORTS)
 #  define UNICE68_API __declspec(dllexport)

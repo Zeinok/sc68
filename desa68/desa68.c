@@ -1955,18 +1955,32 @@ int desa68(desa68_t * d)
   return d->error ? DESA68_ERR : d->itype;
 }
 
-int desa68_version(void)
-{
-#ifndef PACKAGE_VERNUM
-# define PACKAGE_VERNUM 0
-#endif
-  return PACKAGE_VERNUM;
-}
-
 const char * desa68_versionstr(void)
 {
 #ifndef PACKAGE_STRING
-# define PACKAGE_STRING "desa68 n/a"
+# error PACKAGE_STRING not defined
 #endif
   return PACKAGE_STRING;
+}
+
+int desa68_version(void)
+{
+  unsigned int v[4] = {0,0,0,0};      /* major, minor, patch, tweak */
+  const char * s = desa68_versionstr();
+  int i, c;
+
+  /* find 1st <space> ' ' */
+  while (c = *s++, (c && c != ' '));
+  for (i=0; c && i<4; ++i) {
+    /* find 1st digit [0-9] */
+    while (c = *s++, (c && c<'0' && c>'9'));
+    for (; c >= '0' && c <= '9'; c = *s++)
+      v[i] = v[i]*10 + ( c - '0' );
+  }
+  return 0
+    + v[0] * 100000000u
+    + v[1] *   1000000u
+    + v[2] *     10000u
+    + v[3]
+    ;
 }

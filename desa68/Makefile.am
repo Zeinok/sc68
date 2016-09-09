@@ -10,10 +10,6 @@
 # @configure_input@
 
 ACLOCAL_AMFLAGS       = -I m4 --install
-AM_CPPFLAGS           = -DDESA68_EXPORT=1
-AM_CFLAGS             = $(ALL_CFLAGS) $(LIB_CFLAGS)
-AM_LDFLAGS            = $(ALL_LFLAGS) $(LIB_LFLAGS) $(LFLAGS)
-LFLAGS                = -avoid-version $(NOINSTALL)
 
 # ,----------------------------------------------------------------------.
 # | pkg-config                                                           |
@@ -26,12 +22,19 @@ pkgconfig_DATA = desa68.pc
 # | Libtool library                                                      |
 # `----------------------------------------------------------------------'
 
-lib_LTLIBRARIES       = libdesa68.la
-libdesa68_la_SOURCES  = desa68.c
+lib_LTLIBRARIES      = libdesa68.la
+libdesa68_la_SOURCES = desa68.c
+libdesa68_la_LDFLAGS = -avoid-version $(lib_LDFLAGS)
 
 # ,----------------------------------------------------------------------.
-# | Installed headers                                                    |
+# | Headers                                                              |
 # `----------------------------------------------------------------------'
 
-include_HEADERS       = desa68.h
-noinst_HEADERS        = desa68_private.h
+include_HEADERS = desa68.h
+noinst_HEADERS  = desa68_private.h
+
+# ,----------------------------------------------------------------------.
+# | Distrib                                                              |
+# `----------------------------------------------------------------------'
+
+EXTRA_DIST = CMakeLists.txt cm_config.h.in

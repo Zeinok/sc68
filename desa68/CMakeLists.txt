@@ -59,16 +59,6 @@ set(PACKAGE_URL "http://sc68.atari.org")
 set(PACKAGE_DESC "Motoral MC68000 disassembler library")
 set(PACKAGE_SHORTDESC "${PACKAGE_DESC}")
 
-string(REGEX REPLACE "^0*(0$|[1-9]+[0-9]*$)" "\\1"
-  VNUM_MAJOR 00${PROJECT_VERSION_MAJOR})
-string(REGEX MATCH "([0-9][0-9])$" VNUM_MINOR 00${PROJECT_VERSION_MINOR})
-string(REGEX MATCH "([0-9][0-9])$" VNUM_PATCH 00${PROJECT_VERSION_PATCH})
-string(REGEX MATCH "([0-9][0-9][0-9][0-9])$"
-  VNUM_TWEAK 0000${PROJECT_VERSION_TWEAK})
-set(PACKAGE_VERNUM ${VNUM_MAJOR}${VNUM_MINOR}${VNUM_PATCH}${VNUM_TWEAK})
-
-message("${PACKAGE} version ${VERSION} (${PACKAGE_VERNUM})")
-
 # ======================================================================
 # Configs
 #

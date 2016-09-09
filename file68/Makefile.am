@@ -13,9 +13,8 @@ SUBDIRS          = data68 $(subdirs)
 ACLOCAL_AMFLAGS  = -I m4 --install
 AUTOMAKE_OPTIONS = subdir-objects
 
-AM_CFLAGS       = $(ALL_CFLAGS) $(LIB_CFLAGS)
-AM_LDFLAGS      = $(ALL_LFLAGS) $(LIB_LFLAGS) -version-info 3:0:0
-AM_CPPFLAGS     = -DFILE68_EXPORT=1 -I$(top_srcdir)/sc68 $(unice68_inc)
+AM_CFLAGS   = $(unice68_CFLAGS) $(zlib_CFLAGS) $(ao_CFLAGS) $(curl_CFLAGS)
+AM_CPPFLAGS = -I$(top_srcdir)/sc68 $(unice68_inc)
 
 null=
 
@@ -39,10 +38,11 @@ apiheaders = sc68/file68_chk.h sc68/file68_ord.h sc68/file68_err.h	\
  sc68/file68_str.h sc68/file68_tag.h sc68/file68_uri.h			\
  sc68/file68_tdb.h $(null)
 
-otherheaders = sc68/file68_zip.h sc68/file68_ice.h			\
- sc68/file68_vfs_ao.h sc68/file68_vfs_curl.h sc68/file68_vfs_fd.h	\
- sc68/file68_vfs_file.h sc68/file68_vfs_mem.h sc68/file68_vfs_null.h	\
- sc68/file68_vfs_z.h src/timedb.inc.h src/replay.inc.h $(null)
+otherheaders = sc68/file68_private.h sc68/file68_zip.h			\
+ sc68/file68_ice.h sc68/file68_vfs_ao.h sc68/file68_vfs_curl.h		\
+ sc68/file68_vfs_fd.h sc68/file68_vfs_file.h sc68/file68_vfs_mem.h	\
+ sc68/file68_vfs_null.h sc68/file68_vfs_z.h src/timedb.inc.h		\
+ src/replay.inc.h $(null)
 
 myheaders = $(apiheaders) $(otherheaders)
 
@@ -63,15 +63,16 @@ UNICE68_LA           = $(unice68_dir)/libunice68.la
 $(unice68_dir)/libunice68.la:
 	$(MAKE) -C $(unice68_dir) $(AM_MAKEFLAGS) libunice68.la
 else
-UNICE68_LA           =
+UNICE68_LA           = $(unice68_LIBS)
 endif
 
 lib_LTLIBRARIES      = libfile68.la
 libfile68_la_SOURCES = $(mysources) $(myheaders)
-libfile68_la_LIBADD  = $(UNICE68_LA)
+libfile68_la_LIBADD  = $(UNICE68_LA) $(zlib_LIBS) $(ao_LIBS) $(curl_LIBS)
+libfile68_la_LDFLAGS = -version-info 3:0:0 $(lib_LDFLAGS)
 
 # ,----------------------------------------------------------------------.
-# | Install headers                                                      |
+# | Headers                                                              |
 # `----------------------------------------------------------------------'
 
 pkginclude_HEADERS   = $(apiheaders)

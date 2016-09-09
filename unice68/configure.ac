@@ -29,16 +29,11 @@ LT_INIT([win32-dll])
 
 # ,----------------------------------------------------------------------.
 # | sc68                                                                 |
-# `----------------------------------------------------------------------'
+# `-------------------------------------------------------------------
 
-SC68_PACKAGE([ice packer/depacker program and library.])
-SC68_SYSTEM
-SC68_OPTIONS
-SC68_TOOLS
-SC68_CHECKS
-
-PAC_CFLAGS="-I[$]includedir"
-PAC_LFLAGS="-L[$]libdir -lunice68"
+AC_SUBST([PACKAGE_SHORTDESC],["ice packer/depacker program and library"])
+SC68_CC
+AC_PROG_INSTALL
 
 # ,----------------------------------------------------------------------.
 # | Optionnal features                                                   |
@@ -55,7 +50,8 @@ AM_CONDITIONAL([UNICE68_CLI],[test "x$enable_unice68_cli" = "xyes"])
 # ,----------------------------------------------------------------------.
 # | Functions and headers                                                |
 # `----------------------------------------------------------------------'
-AC_CHECK_HEADERS([stdio.h stdlib.h string.h stdarg.h])
+AC_HEADER_ASSERT
+AC_CHECK_HEADERS([assert.h stdio.h stdlib.h string.h stdarg.h])
 AC_CHECK_HEADERS([unistd.h fcntl.h errno.h libgen.h io.h])
 AC_CHECK_FUNCS([basename _fileno fileno _setmode])
 
@@ -63,24 +59,27 @@ AC_CHECK_FUNCS([basename _fileno fileno _setmode])
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
+AC_ARG_VAR([lib_LDFLAGS],
+           [Supplemental LDFLAGS for building the library.
+            Typically libtool flags such as -no-undefined.])
+
+AC_ARG_VAR([bin_LDFLAGS],
+           [Supplemental LDFLAGS for building the binary.
+            Typically libtool flags such as -all-static.])
+
 AC_CONFIG_FILES([
-    Makefile
-    package.texi
-    unice68.1.tpl
-    unice68.pc])
+    unice68.pc
+    Makefile])
 AC_OUTPUT
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |
 # `----------------------------------------------------------------------'
 
-SC68_DUMPVARS
-
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   compile mode        : $compile_mode])
 AC_MSG_NOTICE([|   build cli           : $enable_unice68_cli])
 AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])
