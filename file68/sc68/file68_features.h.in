@@ -11,24 +11,15 @@
 #ifndef FILE68_FEATURES_H
 #define FILE68_FEATURES_H
 
-/**
- * Defined if file68 supports !ice depacker (via unice68)
- */
 #undef FILE68_UNICE68
-
-/**
- * Defined if file68 supports deflate (via zlib).
- */
 #undef FILE68_Z
-
-/**
- * Defined if file68 supports remote files (via libcurl).
- */
 #undef FILE68_CURL
-
-/**
- * Defined if file68 supports audio (via libao).
- */
 #undef FILE68_AO
+
+enum {
+  FILE68_SPR_MIN = 6250,
+  FILE68_SPR_DEF = 48000,
+  FILE68_SPR_MAX = 125166
+};
 
 #endif

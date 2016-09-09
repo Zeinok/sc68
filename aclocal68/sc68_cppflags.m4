@@ -2,27 +2,36 @@ dnl# -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 dnl#
 dnl# autoconf macros
 dnl#
-dnl# (C) 2009-2015 Benjamin Gerard <http://sourceforge.net/users/benjihan>
+dnl# (C) 2009-2016 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20110910 sc68_cppflags.m4
+# serial 20160902 sc68_cppflags.m4
 
-# SC68_CPPFLAGS([VAR],[CFLAGS])
-# -----------------------------
-# Filter CPPFLAGS out of CFLAGS into VAR
-AC_DEFUN([SC68_CPPFLAGS],[
+# SC68_CPPFLAGS([CPPFLAGS-VAR],[CFLAGS-VAR])
+# -------------
+# Filter preprocessor flags out of CFLAGS into CPPFLAGS
+AC_DEFUN([SC68_CPPFLAGS],
+  []dnl # INDENTATION
+  [
     $1=''
-    set -- $2
+    set -- [$]$2
     while test [$]# -gt 0; do
-      case [$]1 in
-        -D* | -I* | -U* | -undef | -nostdinc | -nostdinc++)
-          $1="[$]$1 [$]1";;
-      esac
+      AS_CASE(
+        ["[$]1"],
+        [-D?*|-U?*|-I?*|-undef|-nostdinc|-nostdinc++|-Wp,?*|-trigraph],
+        [$1="${$1-}${$1+ }[$]1"],
+        [-Xpreprocessor|dnl
+         -D|-U|-I|dnl
+         -x|dnl
+         -include|-imacros|dnl
+         -isystem|-imultilib|-isysroot|dnl
+         -idirafter|dnl
+         -iprefix|-iwithprefix|-iwithprefixbefore],
+        [$1="${$1-}${$1+ }[$]1 [$]2"; shift])
       shift
     done
-    $1=`echo [$]$1`
-    ])
+  ])
 
 dnl# ----------------------------------------------------------------------
 dnl#

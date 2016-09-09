@@ -8,6 +8,8 @@
 
 /* Copyright (c) 1998-2016 Benjamin Gerard */
 
+#define BUILD_UNICE68 1
+
 #ifdef UNICE68_H
 # error unice68_private.h must be include before unice68.h
 #endif
@@ -17,8 +19,20 @@
 #endif
 #define UNICE68_PRIVATE_H 1
 
+#ifdef HAVE_PRIVATE_H
+# include "private.h"
+#endif
+
+/* ---------------------------------------------------------------- */
+
+#if defined(DEBUG) && !defined(_DEBUG)
+# define _DEBUG DEBUG
+#elif !defined(DEBUG) && defined(_DEBUG)
+# define DEBUG _DEBUG
+#endif
+
 #ifndef UNICE68_WIN32
-# if defined(WIN32) || defined(_WIN32)
+# if defined(WIN32) || defined(_WIN32) || defined(__SYMBIAN32__)
 #  define UNICE68_WIN32 1
 # endif
 #endif

@@ -11,11 +11,19 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
-define([sc_version], esyscmd([sh vcversion.sh 2.0.0]))dnl
+dnl # This library does not use interface versioning
+dnl # m4_define([LIBCUR],2)
+dnl # m4_define([LIBREV],0)
+dnl # m4_define([LIBAGE],0)
+
+m4_define([VERSION_MAJOR],2)
+m4_define([VERSION_MINOR],0)
+m4_define([VERSION_PATCH],0)
+m4_define([VERSION_TWEAK],esyscmd([sh vcversion.sh]))dnl
 
 AC_INIT(
   [unice68],
-  sc_version,
+  VERSION_MAJOR[.]VERSION_MINOR[.]VERSION_PATCH[.]VERSION_TWEAK,
   [http://sourceforge.net/projects/sc68/],
   [unice68],
   [http://sc68.atari.org])
@@ -31,46 +39,48 @@ LT_INIT([win32-dll])
 # | sc68                                                                 |
 # `-------------------------------------------------------------------
 
-AC_SUBST([PACKAGE_SHORTDESC],["ice packer/depacker program and library"])
+SC68_PACKAGE(
+  [
+
+    Ice packer/depacker program and library.
+
+    A small library and a command line program to pack (ice) and
+    unpack (melt) Atari-ST ICE! files.
+
+  ])
+
 SC68_CC
 AC_PROG_INSTALL
 
 # ,----------------------------------------------------------------------.
-# | Optionnal features                                                   |
+# | Optional features                                                    |
 # `----------------------------------------------------------------------'
 
 # Command line depacker.
 AC_ARG_ENABLE(
   [unice68-cli],
-  [AS_HELP_STRING([--enable-unice68-cli],
-      [enable command line program @<:@default=yes@:>@])],
+  [AS_HELP_STRING([--disable-unice68-cli],
+      [discard the cli program; only build the library])],
   [],[enable_unice68_cli="yes"])
-AM_CONDITIONAL([UNICE68_CLI],[test "x$enable_unice68_cli" = "xyes"])
+AM_CONDITIONAL([UNICE68_CLI],[test "X$enable_unice68_cli" = Xyes])
 
 # ,----------------------------------------------------------------------.
 # | Functions and headers                                                |
 # `----------------------------------------------------------------------'
+
+AC_CHECK_HEADERS([limits.h assert.h])
 AC_HEADER_ASSERT
-AC_CHECK_HEADERS([assert.h stdio.h stdlib.h string.h stdarg.h])
+AC_CHECK_HEADERS([stdint.h stdio.h stdlib.h string.h stdarg.h])
 AC_CHECK_HEADERS([unistd.h fcntl.h errno.h libgen.h io.h])
-AC_CHECK_FUNCS([basename _fileno fileno _setmode])
+AC_CHECK_FUNCS([basename])
+AC_CHECK_FUNCS([_fileno fileno _setmode])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
-AC_ARG_VAR([lib_LDFLAGS],
-           [Supplemental LDFLAGS for building the library.
-            Typically libtool flags such as -no-undefined.])
-
-AC_ARG_VAR([bin_LDFLAGS],
-           [Supplemental LDFLAGS for building the binary.
-            Typically libtool flags such as -all-static.])
-
-AC_CONFIG_FILES([
-    unice68.pc
-    Makefile])
-AC_OUTPUT
+AC_CONFIG_FILES([unice68.pc Makefile])
+SC68_OUTPUT
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |
@@ -78,7 +88,7 @@ AC_OUTPUT
 
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
-AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
+AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION) for $host])
 AC_MSG_NOTICE([|-----------------------])
 AC_MSG_NOTICE([|   build cli           : $enable_unice68_cli])
 AC_MSG_NOTICE([+-----------------------])

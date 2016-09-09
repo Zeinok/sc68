@@ -29,8 +29,8 @@
  * determines possible program branch. Together with it helps to
  * source machine code.
  *
- * Optionnally the disassembler may disassemble with symbol instead of
- * absolute address or long immediat. A supplemental control is
+ * Optionally the disassembler may disassemble with symbol instead of
+ * absolute address or long immediate. A supplemental control is
  * available to choose the range of address that must be disassembled
  * as symbol.
  *
@@ -51,7 +51,7 @@
  *   it's mostly the same (depending on the user callback
  *   complexity). When using the callback method desa68_t::memptr can
  *   be null. It's also possible not to set desa68_t::memorg and
- *   desa68_t::memlen fileds, only if a user callback is used for
+ *   desa68_t::memlen fields, only if a user callback is used for
  *   symbols or the disassembler is set not to generated symbols.
  *
  * Symbol lookup
@@ -64,7 +64,7 @@
  *   is limited to simple generated symbol (L123456). If the
  *   DESA68_SYMBOL_FLAG is set in desa68_t::flags and the value is in
  *   the memory range, an address will be replaced by its
- *   symbol. There is an additionnal range for immediat long to be
+ *   symbol. There is an additional range for immediate long to be
  *   replace defined by the 2 fields desa68_t::immsym_min and
  *   desa68_t::immsym_max.
  *
@@ -79,7 +79,7 @@
  * Disassembly option flags.
  * @anchor desa68_opt_flags
  *
- * Use bitwise OR operation with these values to set the the
+ * Use bit-wise OR operation with these values to set the the
  * desa68_parm_t::flags in order to configure the disassembler.
  *
  * @note DESA68_ASCII_FLAG, DESA68_ALNUM_FLAG and DESA68_GRAPH_FLAG
@@ -90,20 +90,20 @@ enum {
    * Disassemble with symbol.
    *
    * DESA68_SYMBOL_FLAG bit controls the general symbolic
-   * disassembly. If it is set all valid candidats are transformed to
-   * symbol. A valid candidat is an address within the memory range or
-   * an immediat higher or equal to desa68_t::immsym_min and lower
+   * disassembly. If it is set all valid candidates are transformed to
+   * symbol. A valid candidate is an address within the memory range or
+   * an immediate higher or equal to desa68_t::immsym_min and lower
    * than desa68_t::immsym_max.
    */
   DESA68_SYMBOL_FLAG = (1<<0),
 
   /**
-   * Force source operand to be a valid candidat for symbol.
+   * Force source operand to be a valid candidate for symbol.
    */
   DESA68_SRCSYM_FLAG = (1<<1),
 
   /**
-   * Force destination operand to be a valid candidat for symbol.
+   * Force destination operand to be a valid candidate for symbol.
    */
   DESA68_DSTSYM_FLAG = (1<<2),
 
@@ -155,11 +155,11 @@ enum {
  * @anchor desa68_inst_types
  *
  * These values are used by the desa68_t::itype to help determine what
- * kind of instruction was disassenbled.
+ * kind of instruction was disassembled.
  *
  */
 enum {
-  /* An error occured. */
+  /* An error occurred. */
   DESA68_ERR = -1,
 
   /** Invalid instruction (disassembled as data). */
@@ -171,7 +171,7 @@ enum {
   /** Branch always instruction (bra/jmp). */
   DESA68_BRA,
 
-  /** Subroutine (bsr/jsr) or Conditionnal branch instruction (bcc/dbcc). */
+  /** Subroutine (bsr/jsr) or Conditional branch instruction (bcc/dbcc). */
   DESA68_BSR,
 
   /** Return from subroutine/Interruption instruction (rts/rte). */
@@ -244,9 +244,9 @@ enum {
   DESA68_SYM_DABL,       /**< destination operand absolute address. */
   DESA68_SYM_SABW,       /**< source operand absolute address.      */
   DESA68_SYM_SABL,       /**< source operand absolute address.      */
-  DESA68_SYM_SIMM,       /**< source operand immediat value.        */
-  DESA68_SYM_SPCR,       /**< source operand pc relativ address.    */
-  DESA68_SYM_SPCI,       /**< source operand pc indexed address.    */
+  DESA68_SYM_SIMM,       /**< source operand immediate value.       */
+  DESA68_SYM_SPCR,       /**< source operand PC relative address.   */
+  DESA68_SYM_SPCI,       /**< source operand PC indexed address.    */
 
   DESA68_SYM_LAST
 };

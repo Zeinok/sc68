@@ -11,9 +11,14 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
+m4_define([VERSION_MAJOR],3)
+m4_define([VERSION_MINOR],0)
+m4_define([VERSION_PATCH],0)
+m4_define([VERSION_TWEAK],esyscmd([sh vcversion.sh]))dnl
+
 AC_INIT(
   [sc68],
-  [3.0.0b],
+  VERSION_MAJOR[.]VERSION_MINOR[.]VERSION_PATCH[.]VERSION_TWEAK,
   [http://sourceforge.net/projects/sc68/],
   [sc68-cli],
   [http://sc68.atari.org])
@@ -29,23 +34,36 @@ LT_INIT([win32-dll])
 # | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
-SC68_PACKAGE([Atari ST and Amiga command line player.])
-SC68_SYSTEM
-SC68_OPTIONS
-SC68_TOOLS
-SC68_CHECKS
-SC68_WITH([sc68],[yes],[sc68_version],[sc68/sc68.h],[libsc68])
-SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
+SC68_PACKAGE(
+  [
+
+    Atari ST and Amiga command line player.
+
+    The command line program to play sc68 compatible music files or record
+    them into audio files.
+
+  ])
+
+SC68_CC
+AC_PROG_INSTALL
+
+SC68_WITH_PACKAGE([libsc68],[libsc68],[sc68],[../libsc68],
+                  [sc68/sc68.h],[sc68_version],[req])
 
 # ,----------------------------------------------------------------------.
 # | Some headers, types and functions                                    |
 # `----------------------------------------------------------------------'
 
-AC_CHECK_HEADERS(
-  [stdarg.h stdio.h stdlib.h string.h errno.h ctype.h unistd.h getopt.h])
+# ,----------------------------------------------------------------------.
+# | Functions and Headers                                                |
+# `----------------------------------------------------------------------'
 
-AC_CHECK_FUNCS(
-  [getopt getopt_long])
+AC_CHECK_HEADERS([limits.h assert.h])
+AC_HEADER_ASSERT
+AC_CHECK_HEADERS([stdarg.h stdint.h stdio.h stdlib.h string.h])
+AC_CHECK_HEADERS([ctype.h errno.h unistd.h getopt.h])
+
+AC_CHECK_FUNCS([getopt getopt_long])
 
 AC_CHECK_TYPES(
   [struct option],[],[],[
@@ -59,25 +77,16 @@ AC_INCLUDES_DEFAULT
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
-AC_CONFIG_FILES([
-    Makefile
-    package.texi
-    sc68-${VERSION}.ebuild:sc68.ebuild.in
-    sc68.1.tpl
-    sc68.spec])
-AC_OUTPUT
+AC_CONFIG_FILES([Makefile])
+SC68_OUTPUT
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |
 # `----------------------------------------------------------------------'
 
-SC68_DUMPVARS
-
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
-AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
+AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION) for $host])
 AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   compile mode        : $compile_mode])
-AC_MSG_NOTICE([|   file68 headers      : $has_file68 ($file68_ver)])
-AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
+AC_MSG_NOTICE([|   libsc68             : $has_libsc68 ($libsc68_VERSION)])
 AC_MSG_NOTICE([+-----------------------])

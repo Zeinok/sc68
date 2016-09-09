@@ -15,12 +15,13 @@
 #
 
 export LC_ALL=C
-exec 2>/dev/null
+
+cleanexpr='s/^[[:space:]]*\([0-9][-_0-9A-Za-z]*\).*/\1/p'
 
 base=
 rev=
 
-while [ $# -gt 0 ]; do
+while test $# -gt 0; do
     case "$1" in
 	-h | --help | --usage)
 	    cat <<EOF
@@ -35,33 +36,30 @@ EOF
     shift
 done
 
-if [ -n "${base}" ]; then
+if test X"$base" != X ; then
     base="${base}."
 fi
 
-cleanrev() {
-    echo -n `expr "$rev" : '^\([0-9]\+\)'`
-}
-
 # svn ? (default sc68 source control)
-if [ -z "$rev" ] && rev=`svnversion -nq`; then
-    rev=`cleanrev "$rev"`
-fi
+if test X"$rev" = X; then
+    rev=`svnversion -nq | sed -ne "$cleanexpr"`
+fi 2>/dev/null
 
 # git-svn ?
-if [ -z "$rev" ] && rev=`git svn find-rev HEAD`; then
-    rev=`cleanrev "$rev"`
-fi
+if test X"$rev" = X; then
+   rev=`git svn find-rev HEAD | sed -ne "$cleanexpr"`
+fi 2>/dev/null
 
 # git ?
-if [ -z "$rev" ] && rev=`git rev-list --count HEAD`; then
-    rev=`cleanrev "$rev"`
-fi
+if test X"$rev" = X; then
+    rev=`git rev-list --count HEAD | sed -ne "$cleanexpr"`
+fi 2>/dev/null
 
-if [ -n "$rev" ]; then
-    echo -n ${base}${rev}
-    exit 0
-fi
-
-# Last resort: UTC YYYY-MM-DD
-echo -n ${base}`date -u +%F`
+if test "X$rev" != X; then
+    # Have something lets print it
+    echo -n "${base}${rev}"
+else
+    # Else use date as default
+    today=`date -u "+%Y%m%d" 2>/dev/null || echo 66600666`
+    echo -n "${base}${today}"
+fi 2>/dev/null

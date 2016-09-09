@@ -11,9 +11,14 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
+m4_define([VERSION_MAJOR],3)
+m4_define([VERSION_MINOR],0)
+m4_define([VERSION_PATCH],0)
+m4_define([VERSION_TWEAK],esyscmd([sh vcversion.sh]))dnl
+
 AC_INIT(
   [sc68-ng],
-  [3.0.0b],
+  VERSION_MAJOR[.]VERSION_MINOR[.]VERSION_PATCH[.]VERSION_TWEAK,
   [http://sourceforge.net/projects/sc68/],
   [sc68-ng],
   [http://sc68.atari.org])
@@ -27,78 +32,53 @@ LT_INIT([win32-dll])
 # | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
-SC68_PACKAGE([Atari ST and Amiga music player.])
-SC68_SYSTEM
-SC68_OPTIONS
-SC68_TOOLS
-SC68_CHECKS
+SC68_PACKAGE(
+  [
+    Atari ST and Amiga music player.
+
+    This is sc68 next generation meta package. Each sub package can be
+    distributed or built as a sperate package.
+
+  ])
 
 # ,----------------------------------------------------------------------.
-# | Optional Packages                                                    |
+# | Packages                                                             |
 # `----------------------------------------------------------------------'
 
 AC_ARG_ENABLE(
   [sc68-tools],
   [AS_HELP_STRING(
       [--enable-sc68-tools],
-      [optionnal developer tools @<:@default=no@:>@])],
+      [enable optionnal developer tools])],
   [],[enable_sc68_tools=no])
 
 AC_ARG_ENABLE(
-  [sc68-plugin],
+  [sc68-bins],
   [AS_HELP_STRING(
-      [--enable-sc68-plugin],
-      [enable plugin-packages @<:@default=no@:>@])],
-  [],[enable_sc68_plugin="check"])
+      [--disable-sc68-programs],
+      [disable recommanded programs])],
+  [],[enable_sc68_bins=yes])
 
 AC_ARG_ENABLE(
-  [sc68-all],
+  [sc68-libs],
   [AS_HELP_STRING(
-      [--enable-sc68-all],
-      [enable all sub-packages @<:@default=no@:>@])],
-  [],[enable_sc68_all="check"])
-
-AS_CASE(["x$enable_sc68_all"],
-  [xno|xyes],
-  [
-    enable_sc68_tools="[$]enable_sc68_all"
-    enable_sc68_plugin="[$]enable_sc68_all"
-    ],
-  [enable_sc68_all="check"])
-enable_sc68_cli="[$]enable_sc68_all"
-enable_sc68_lib="[$]enable_sc68_all"
+      [--disable-sc68-libs],
+      [disable required libraries])],
+  [],[enable_sc68_libs=yes])
 
 # Dev Tools
-SC68_ENABLE_PACKAGE([as68],[68k macro assembler],[[$]enable_sc68_tools])
-SC68_ENABLE_PACKAGE([sourcer68],[68k sourcer],[[$]enable_sc68_tools])
-SC68_ENABLE_PACKAGE([mksc68],[sc68 toolbox],[[$]enable_sc68_tools])
-SC68_ENABLE_PACKAGE([desa68],[68k disassembler library],[[$]enable_sc68_tools])
-
+SC68_ENABLE_PACKAGE([as68],[68k macro assembler],[$enable_sc68_tools])
+SC68_ENABLE_PACKAGE([sourcer68],[68k sourcer],[$enable_sc68_tools])
+SC68_ENABLE_PACKAGE([mksc68],[sc68 toolbox],[$enable_sc68_tools])
+SC68_ENABLE_PACKAGE([desa68],[68k disassembler library],[$enable_sc68_tools])
 # API Libraries
-SC68_ENABLE_PACKAGE([unice68],[ice depacker support],[[$]enable_sc68_lib])
-SC68_ENABLE_PACKAGE([file68],[file68 library],[[$]enable_sc68_lib])
-SC68_ENABLE_PACKAGE([libsc68],[sc68 engine],[[$]enable_sc68_lib])
+SC68_ENABLE_PACKAGE([unice68],[ice depacker support],[$enable_sc68_libs])
+SC68_ENABLE_PACKAGE([file68],[file68 library],[$enable_sc68_libs])
+SC68_ENABLE_PACKAGE([libsc68],[sc68 engine],[$enable_sc68_libs])
 
 # CLI programs
-SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[[$]enable_sc68_cli])
-SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[[$]enable_sc68_cli])
-
-# PLUGINS
-def_audacious=no; def_sc68_gst=no; def_sc68_vlc=no
-AS_CASE(["x$enable_sc68_plugin"],
-  [xno|xyes],
-  [
-    def_audacious=[$]enable_sc68_plugin
-    def_sc68_gst=[$]enable_sc68_plugin
-    def_sc68_vlc=[$]enable_sc68_plugin],
-  [
-    $pkgconfig audacious --exists && def_audacious=check
-    $pkgconfig gstreamer-0.10 --exists && def_sc68_gst=check
-    $pkgconfig vlc-plugin --exists && def_sc68_vlc=check
-  ])
-SC68_ENABLE_PACKAGE([sc68-audacious],[sc68 plugin for audacious],[$def_audacious])
-SC68_ENABLE_PACKAGE([sc68-gst],[sc68 plugin for gstreamer (0.10)],[$def_sc68_gst])
-SC68_ENABLE_PACKAGE([sc68-vlc],[sc68 plugin for vlc],[$def_sc68_vlc])
+SC68_ENABLE_PACKAGE([info68],[sc68 files info program],[$enable_sc68_clis])
+SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[$enable_sc68_clis])
 
 # DOC
 SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])
@@ -107,9 +87,9 @@ SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])
 # | Package Dependencies                                                 |
 # `----------------------------------------------------------------------'
 
-## Don't check dependencies on the source tree. Some packages may not
-## be present here but available by others means (may be installed or
-## out of tree sources).
+# Do not check dependencies on the source tree. Some packages may not
+# be present here but available by others means (may be installed or
+# out of tree sources).
 
 # ,----------------------------------------------------------------------.
 # | Subdirs                                                              |
@@ -147,25 +127,9 @@ if test Xyes = X"${enable_sc68}"
 then AC_CONFIG_SUBDIRS([sc68])
 fi
 
-if test Xyes = X"${enable_sc68_audacious}"
-then AC_CONFIG_SUBDIRS([sc68-audacious])
-fi
-
-if test Xyes = X"${enable_sc68_gst}"
-then AC_CONFIG_SUBDIRS([sc68-gst])
-fi
-
-if test Xyes = X"${enable_sc68_vlc}"
-then AC_CONFIG_SUBDIRS([sc68-vlc])
-fi
-
-if test Xyes = X"${enable_mksc68}"
-then AC_CONFIG_SUBDIRS([mksc68])
-fi
-
-if test Xyes = X"${enable_sc68_doc}"
-then AC_CONFIG_SUBDIRS([sc68-doc])
-fi
+# if test Xyes = X"${enable_sc68_doc}"
+# then AC_CONFIG_SUBDIRS([sc68-doc])
+# fi
 
 AC_SUBST([subdirs])
 
@@ -174,18 +138,17 @@ AC_SUBST([subdirs])
 # `----------------------------------------------------------------------'
 
 AC_CONFIG_FILES([Makefile])
-AC_OUTPUT
+SC68_OUTPUT
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |
 # `----------------------------------------------------------------------'
 
-[subdirs=$(echo $subdirs)]
+[subdirs=`echo $subdirs`]
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   compile mode        : $compile_mode])
 AC_MSG_NOTICE([|   sub-dirs            : $subdirs])
 AC_MSG_NOTICE([+-----------------------])
 AC_MSG_NOTICE([])

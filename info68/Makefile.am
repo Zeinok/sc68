@@ -1,6 +1,6 @@
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# |  info68 -- Makefile.am -- Use with automake to produce Makefile.in   | 
+# |  info68 -- Makefile.am -- Use with automake to produce Makefile.in   |
 # |                                                                      |
 # |               Copyright (c) 2006-2016 Benjamin Gerard                |
 # |                                                                      |
@@ -9,11 +9,8 @@
 # `----------------------------------------------------------------------'
 # @configure_input@
 
-SUBDIRS              = @subdirs@
-ACLOCAL_AMFLAGS      = -I m4 --install
-
-AM_CFLAGS            = $(ALL_CFLAGS) $(BIN_CFLAGS) $(file68_inc)
-AM_LDFLAGS           = $(ALL_LFLAGS) $(BIN_LFLAGS)
+ACLOCAL_AMFLAGS = -I m4 --install
+file68_dir      = @file68_builddir@
 
 # ,----------------------------------------------------------------------.
 # | Libtool program                                                      |
@@ -22,16 +19,18 @@ AM_LDFLAGS           = $(ALL_LFLAGS) $(BIN_LFLAGS)
 if SOURCE_FILE68
 FILE68_LA = $(file68_dir)/libfile68.la
 @SET_MAKE@
-$(file68_dir)/libfile68.la:
-	cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libfile68.la
+$(FILE68_LA):
+	cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS)
 else
-FILE68_LA            =
+FILE68_LA = -LNOT_SOURCE
 endif
 
-bin_PROGRAMS         = info68
-info68_SOURCES       = info68.c
-info68_LDADD         = $(FILE68_LA) $(DESA68_LA)
-noinst_HEADERS       =
+bin_PROGRAMS    = info68
+info68_SOURCES  = info68.c
+info68_CFLAGS   = $(file68_CFLAGS) $(gb_CFLAGS)
+info68_CPPFLAGS = $(file68_CPPFLAGS)
+info68_LDFLAGS  = $(file68_LIBS) $(gb_LDFLAGS)
+info68_LDADD    = $(FILE68_LA)
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |
@@ -42,8 +41,8 @@ noinst_HEADERS       =
 # info_TEXINFOS        = info68.texi
 # MAINTAINERCLEANFILES = $(srcdir)/info68.1
 
-# TEXINFO2MAN          = $(texinfo2man)	
+# TEXINFO2MAN          = $(texinfo2man)
 # fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
 # $(srcdir)/info68.1: info68.1.tpl.in $(srcdir)/info68.texi
-# 	$(TEXINFO2MAN) info68.1.tpl $(srcdir)/info68.texi >$@ || $(fail)
+#       $(TEXINFO2MAN) info68.1.tpl $(srcdir)/info68.texi >$@ || $(fail)

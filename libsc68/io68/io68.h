@@ -12,7 +12,6 @@
 #define IO68_IO68_H
 
 #include "io68_api.h"
-
 #include "ym_io.h"
 #include "mw_io.h"
 #include "shifter_io.h"

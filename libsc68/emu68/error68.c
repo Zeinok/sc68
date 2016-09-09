@@ -31,6 +31,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "emu68_private.h"
 #include "error68.h"
 
 #ifdef MAXERROR

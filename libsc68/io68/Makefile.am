@@ -9,20 +9,20 @@
 # `----------------------------------------------------------------------'
 # @configure_input@
 
-ACLOCAL_AMFLAGS    = -I ../m4 --install
-AM_CFLAGS          = $(ALL_CFLAGS) $(LIB_CFLAGS)
-AM_CPPFLAGS        = -I$(top_srcdir) $(file68_inc) -DIO68_EXPORT
+ACLOCAL_AMFLAGS = -I ../m4 --install
 
-mysources= io68.c mfp_io.c mfpemul.c mw_io.c mwemul.c paula_io.c	\
- paulaemul.c shifter_io.c ym_envel.c ym_blep.c ym_dump.c ym_io.c	\
- ym_puls.c ymemul.c
+mysources=\
+ io68.c mfp_io.c mfpemul.c mw_io.c mwemul.c paula_io.c paulaemul.c	\
+ shifter_io.c ym_envel.c ym_blep.c ym_dump.c ym_io.c ym_puls.c		\
+ ymemul.c
 
-myheaders= default.h io68.h io68_api.h mfp_io.h mfpemul.h mw_io.h	\
- mwemul.h paula_io.h paulaemul.h shifter_io.h ym_blep.h ym_dump.h	\
- ym_fixed_vol.h ym_io.h ym_puls.h ymemul.h ymoutorg.h ymout2k9.h
+myheaders=\
+ io68_private.h default.h io68.h io68_api.h mfp_io.h mfpemul.h	\
+ mw_io.h mwemul.h paula_io.h paulaemul.h shifter_io.h ym_blep.h	\
+ ym_dump.h ym_fixed_vol.h ym_io.h ym_puls.h ymemul.h ymoutorg.h	\
+ ymout2k9.h
 
-srcextra=\
- ym_atarist_table.c ym_linear_table.c
+srcextra= ym_atarist_table.c ym_linear_table.c
 
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |
@@ -30,5 +30,8 @@ srcextra=\
 
 noinst_LTLIBRARIES  = libio68.la
 libio68_la_SOURCES  = $(mysources) $(myheaders)
-libio68_la_LDFLAGS  = -avoid-version
+libio68_la_LDFLAGS  = -avoid-version $(gb_LDFLAGS)
+libio68_la_CFLAGS   = $(file68_CFLAGS) $(gb_CFLAGS)
+libio68_la_CPPFLAGS = $(file68_CPPFLAGS) -I$(top_srcdir)
+
 noinst_HEADERS      = $(srcextra)

@@ -25,6 +25,7 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include "io68_private.h"
 
 #include "mw_io.h"
 #include "mwemul.h"

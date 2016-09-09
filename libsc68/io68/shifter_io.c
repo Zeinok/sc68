@@ -25,6 +25,7 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include "io68_private.h"
 
 #include "emu68/struct68.h"
 

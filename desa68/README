@@ -1,7 +1,7 @@
                 desa68 - a 68000 disassembler library
-                                   
+
                   desa68 is part of the sc68 project
-                       
+
                     (C) 1998-2016 Benjamin Gerard
 
 
@@ -11,11 +11,11 @@ ABOUT DESA68
   extended support to help building a sourcer.
 
   * Produce Motorola dialect (syntax).
-  
+
   * Does not support extended instruction for 68020 or later CPUs.
 
   * Lower/upper case control.
-  
+
   * Allow symbolic disassembly (automatic symbol or callback).
 
   * Extended information on the disassembled instruction allows to use

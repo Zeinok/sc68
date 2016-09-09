@@ -41,40 +41,21 @@
 #include <sc68/file68_msg.h>
 #include <sc68/file68_features.h>
 
-
 /* Standard Includes */
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif
-#ifdef HAVE_STDIO_H
-# include <stdio.h>
-#endif
-#ifdef HAVE_STDLIB_H
-# include <stdlib.h>
-#endif
-#ifdef HAVE_STRING_H
-# include <string.h>
-#else
-# ifdef HAVE_MEMORY_H
-#  include <memory.h>
-# endif
-# ifdef HAVE_STRINGS_H
-#  include <strings.h>
-# endif
-#endif
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <ctype.h>
+
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#ifdef HAVE_ERRNO_H
-# include <errno.h>
-#endif
-#ifdef HAVE_CTYPE_H
-# include <ctype.h>
-#endif
+
 #ifdef HAVE_GETOPT_H
 # include <getopt.h>
 #endif
-
 
 #ifdef HAVE_STRUCT_OPTION
 typedef struct option my_option_t;

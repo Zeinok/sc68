@@ -1,7 +1,7 @@
                   unice68 - ice packer and depacker
-                                   
+
                  unice68 is part of the sc68 project
-                       
+
                     (C) 1998-2016 Benjamin Gerard
 
 
@@ -67,12 +67,12 @@ ABOUT ICE!
     and fast (!!!) as possible
 
 
-HERE COMES A NEW CHALENGER
+HERE COMES A NEW CHALLENGER
 
   pack-ice source code has been release. It's a much comprehensive ice
   packer/depacker library with various command line utilities.
 
-  pack-ice by lars brinkhoff <lars@nocrew.org> is available at
+  pack-ice by Lars Brinkhoff <lars@nocrew.org> is available at
   <https://github.com/larsbrinkhoff/pack-ice>
 
   I might or not use this library in the future. It's clearly cleaner

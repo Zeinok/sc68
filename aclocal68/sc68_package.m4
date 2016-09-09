@@ -6,22 +6,74 @@ dnl# (C) 2009-2016 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 dnl#
 dnl# Distribued under the term of the GPL3+
 
-# serial 20140310 sc68_package.m4
+# serial 20160825 sc68_package.m4
 
 # SC68_PACKAGE([DESC])
-# --------------------
+# ------------
 # Common package info for sc68 related packages.
-AC_DEFUN_ONCE([SC68_PACKAGE],[
-    AC_MSG_ERROR([Deprecated macro SC68_[]PACKAGE])
-    AC_PACKAGE_INFO(
-      [$1 It is part of the sc68 project.])
-    [PACKAGE_INFOCAT='sc68 - /|\ Atari ST and C= Amiga music player']
-    AC_SUBST([PACKAGE_INFOCAT])
-    m4_define([PKG],AS_TR_CPP(AC_PACKAGE_NAME))
-    ALL_CFLAGS=''; BIN_CFLAGS=''; LIB_CFLAGS=''; PAC_CFLAGS=''
-    ALL_LFLAGS=''; BIN_LFLAGS=''; LIB_LFLAGS=''; PAC_LFLAGS=''
-    PAC_REQUIRES=''; PAC_CONFLICTS=''; PAC_PRIVLIB=''; PAC_PRIVREQ=''
-    ])
+AC_DEFUN_ONCE([SC68_PACKAGE],
+  []dnl # INDENTATION
+  [
+    dnl # Declare persistant ENVVARS
+    dnl # --------------------------
+
+    AC_ARG_VAR(
+      [gb_LDFLAGS],
+      [Supplemental libtool LDFLAGS])
+
+    AC_ARG_VAR(
+      [gb_CFLAGS],
+      [Supplemental libtool CFLAGS])
+
+    SC68_CPPFLAGS([gb_CPPFLAGS],[gb_CFLAGS])
+
+    dnl # Define PACKAGE description
+    dnl # --------------------------
+
+    m4_define(
+      [AX_PACKAGE_NORMDESC],
+      [m4_normalize(
+          m4_quote(
+            [$1]
+            AC_PACKAGE_NAME is part of the sc68 project <AC_PACKAGE_URL>.))])
+
+    m4_define([AX_PACKAGE_SHORTDESC],
+              [m4_bpatsubst(AX_PACKAGE_NORMDESC,[\..*])])
+
+    AC_SUBST([PACKAGE_SHORTDESC],['AX_PACKAGE_SHORTDESC'])
+    AS_UNSET([PAC_CFLAGS])
+    AS_UNSET([PAC_LIBS])
+    AS_UNSET([PAC_PRIV_LIBS])
+    AS_UNSET([PAC_REQUIRES])
+  ])
+
+
+# SC68_OUTPUT()
+# -----------
+# Produces finale output
+AC_DEFUN_ONCE([SC68_OUTPUT],
+  []dnl # INDENTATION
+  [
+    AS_IF([test "X${gb_LDFLAGS+set}" != Xset],
+          [AS_CASE(["X$host_os"],
+                   [*cygwin* | *mingw*],[gb_LDFLAGS=-no-undefined])])
+
+    dnl # libtool interface versioning
+    dnl # ----------------------------
+    AC_SUBST([LIB_CUR],m4_ifset([LIBCUR],LIBCUR,0))
+    AC_SUBST([LIB_REV],m4_ifset([LIBREV],LIBREV,0))
+    AC_SUBST([LIB_AGE],m4_ifset([LIBAGE],LIBAGE,0))
+
+    dnl # pkgconfig subsitution
+    dnl # ---------------------
+    AC_SUBST([PAC_CFLAGS])
+    AC_SUBST([PAC_LIBS])
+    AC_SUBST([PAC_PRIV_LIBS])
+    AC_SUBST([PAC_REQUIRES])
+
+    AC_OUTPUT
+  ])
+
 
 dnl# ----------------------------------------------------------------------
 dnl#

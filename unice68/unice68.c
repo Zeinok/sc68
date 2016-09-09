@@ -55,16 +55,13 @@
 #include <io.h>
 #endif
 
-#if defined(O_BINARY) && !defined(_O_BINARY)
-# define _O_BINARY O_BINARY
-#endif
-
-#if defined(HAVE__SETMODE) && !defined(HAVE_SETMODE) && !defined(setmode)
-# define setmode(fd,mode) _setmode((fd),(mode))
-#endif
-
-#if !defined(HAVE_SETMODE) && defined(setmode)
-# define HAVE_SETMODE 1
+/* define _O_BINARY */
+#ifndef _O_BINARY
+# ifdef O_BINARY
+#  define _O_BINARY O_BINARY
+# else
+#  define _O_BINARY 0
+# endif
 #endif
 
 static char     * prg;
@@ -208,6 +205,82 @@ static unsigned hash_buffer(const char * buf, unsigned int len)
 
   return h;
 }
+
+#if _O_BINARY
+
+/* Fallback file descriptors if all other methods failed */
+#ifndef STDIN_FILENO
+# define STDIN_FILENO 0
+#endif
+#ifndef STDOUT_FILENO
+# define STDOUT_FILENO 1
+#endif
+#ifndef STDERR_FILENO
+# define STDERR_FILENO 2
+#endif
+
+/* If _fileno is a macro just pretends we have the function. */
+#if defined(_fileno) && !defined(HAVE__FILENO)
+# define HAVE__FILENO 1
+#endif
+/* If fileno is a macro just pretends we have the function. */
+#if defined(fileno) && !defined(HAVE_FILENO)
+# define HAVE_FILENO 1
+#endif
+
+/* If _setmode is a macro just pretend we have the function. */
+#if defined(_setmode) && !defined(HAVE__SETMODE)
+# define HAVE__SETMODE 1
+#endif
+/* If setmode is a macro just pretend we have the function. */
+#if defined(setmode) && !defined(HAVE_SETMODE)
+# define HAVE_SETMODE 1
+#endif
+
+static int myfileno(FILE * file)
+{
+#if defined(HAVE_FILENO)
+  return fileno(file);
+#elif defined(HAVE__FILENO)
+  return _fileno(file);
+#else
+  if (file == stdin)
+    return STDIN_FILENO
+  else if (file == stdout)
+    return STDOUT_FILENO;
+  else if (file == stderr)
+    return STDERR_FILENO;
+  return -1;
+#endif
+}
+
+static int set_binary_mode(FILE *file, const char * path)
+{
+  int fd = myfileno(file);
+
+  if (fd != -1) {
+    int res = -1;
+#if defined(HAVE__SETMODE)
+    res = _setmode(fd,_O_BINARY);
+#elif defined(HAVE_SETMODE)
+    res = setmode(fd,O_BINARY);
+#endif
+    if (res != -1) {
+      message(D,"%s (%d) set to binary mode\n", path, fd);
+      return 0;
+    }
+  }
+  return -1;
+}
+
+#else
+
+static int set_binary_mode(FILE *file, const char * path)
+{
+  return 0;
+}
+
+#endif
 
 static void * myalloc(void * buf, int len, char * name)
 {
@@ -396,23 +469,7 @@ int main(int argc, char *argv[])
   err = ERR_INPUT;
   ilen = -1;
   if (!finp) {
-#if defined(_O_BINARY) && defined(HAVE__SETMODE)
-    int fd;
-# if defined(HAVE__FILENO)
-    fd = _fileno(stdin);
-# elif defined(HAVE_FILENO)
-    fd = fileno(stdin);
-# elif defined(STDIN_FILENO)
-    fd = STDIN_FILENO;
-#else
-    fd = -1;
-# endif
-    if (fd != -1)
-      if (_setmode(fd, _O_BINARY) != -1)
-        message(D,"stdin (%d) setmode binary\n", fd);
-#endif
-    finp = "<stdin>";
-    inp  = stdin;
+    set_binary_mode(inp=stdin, finp="<stdin>");
   } else {
     inp = fopen(finp,"rb");
     if (inp) {
@@ -599,23 +656,7 @@ int main(int argc, char *argv[])
   if (!oneop && !err) {
     err = ERR_OUTPUT;
     if (!fout) {
-#if defined(_O_BINARY) && defined(HAVE__SETMODE)
-      int fd;
-# if defined(HAVE__FILENO)
-      fd = _fileno(stdout);
-# elif defined(HAVE_FILENO)
-      fd = fileno(stdout);
-# elif defined(STDOUT_FILENO)
-      fd = STDOUT_FILENO;
-#else
-      fd = -1;
-# endif
-      if (fd != -1)
-        if (_setmode(fd, _O_BINARY) != -1)
-          message(D,"stdout (%d) setmode binary\n", fd);
-#endif
-      fout = "<stdout>";
-      out  = stdout;
+      set_binary_mode(out=stdout, fout="<stdout>");
     } else {
       out = fopen(fout,"wb");
     }

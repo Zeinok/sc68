@@ -11,9 +11,8 @@
 
 ACLOCAL_AMFLAGS = -I m4 --install
 
-ALL_SUBDIRS = as68 desa68 file68 info68 libsc68 mksc68 sc68 sourcer68	\
-unice68 sc68-audacious sc68-doc sc68-fb2k sc68-gst sc68-msvc sc68-nsi	\
-sc68-vlc
+ALL_SUBDIRS = as68 desa68 unice68 file68 info68 sourcer68 libsc68	\
+ mksc68 sc68
 
 DIST_SUBDIRS = $(SUBDIRS)
 SUBDIRS      = $(subdirs)

@@ -1,4 +1,3 @@
-
 # -*- cmake -*-
 #
 # unice68
@@ -62,7 +61,7 @@ set(PACKAGE "${PROJECT_NAME}")
 set(VERSION "${PROJECT_VERSION}")
 set(PACKAGE_BUGREPORT "http://sourceforge.net/projects/sc68")
 set(PACKAGE_URL "http://sc68.atari.org")
-set(PACKAGE_DESC "ice packer/depacker program and library")
+set(PACKAGE_DESC "Ice packer/depacker program and library")
 set(PACKAGE_SHORTDESC "${PACKAGE_DESC}")
 
 # ======================================================================
@@ -71,9 +70,9 @@ set(PACKAGE_SHORTDESC "${PACKAGE_DESC}")
 # $$$ Shouldn't those file be by configuration instead of by build ?
 
 set(prefix "${CMAKE_INSTALL_PREFIX}")
-set(exec_prefix "${prefix}")
-set(datarootdir "${DATAROOTDIR}")
-set(datadir "${DATADIR}")
+set(exec_prefix "\${prefix}")
+set(datarootdir "\${prefix}/${CMAKE_INSTALL_DATAROOTDIR}")
+set(datadir "\${datarootdir}")
 set(includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
 set(libdir "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
 

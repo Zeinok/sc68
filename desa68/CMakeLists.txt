@@ -65,9 +65,9 @@ set(PACKAGE_SHORTDESC "${PACKAGE_DESC}")
 # $$$ Shouldn't those file be by configuration instead of by build ?
 
 set(prefix "${CMAKE_INSTALL_PREFIX}")
-set(exec_prefix "${prefix}")
-set(datarootdir "${DATAROOTDIR}")
-set(datadir "${DATADIR}")
+set(exec_prefix "\${prefix}")
+set(datarootdir "\${prefix}/${CMAKE_INSTALL_DATAROOTDIR}")
+set(datadir "\${datarootdir}")
 set(includedir "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
 set(libdir "\${prefix}/${CMAKE_INSTALL_LIBDIR}")
 

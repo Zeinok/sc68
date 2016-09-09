@@ -19,6 +19,7 @@
 # include "config.h"
 #endif
 
+#include "emu68_private.h"
 #include "assert68.h"
 #include "excep68.h"
 #include "emu68.h"

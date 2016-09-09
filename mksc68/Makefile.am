@@ -9,57 +9,40 @@
 # `----------------------------------------------------------------------'
 # @configure_input@
 
-SUBDIRS              = $(subdirs)
-ACLOCAL_AMFLAGS      = -I m4 --install
-AM_CFLAGS            = $(ALL_CFLAGS) $(BIN_CFLAGS)
-AM_LDFLAGS           = $(ALL_LFLAGS) $(BIN_LFLAGS)
-AM_CPPFLAGS          = $(sc68_inc) $(file68_inc) $(desa68_inc)
+ACLOCAL_AMFLAGS = -I m4 --install
+desa68_dir      = @desa68_builddir@
+file68_dir      = @file68_builddir@
+libsc68_dir        = @libsc68_builddir@
 
 # ,----------------------------------------------------------------------.
 # | Libtool program                                                      |
 # `----------------------------------------------------------------------'
 
-# if SOURCE_DESA68
-# DESA68_LA  = $(desa68_dir)/libdesa68.la
-# @SET_MAKE@
-# $(desa68_dir)/libdesa68.la:
-# 	cd "$(desa68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libdesa68.la
-# else
-# DESA68_LA  = 
-# endif
-
-if SOURCE_SC68
-SC68_LA = $(sc68_dir)/libsc68.la
+if SOURCE_LIBSC68
+LIBSC68_LA = $(libsc68_dir)/libsc68.la
 @SET_MAKE@
-$(sc68_dir)/libsc68.la:
-	cd "$(sc68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libsc68.la
+$(libsc68_dir)/libsc68.la:
+	cd "$(libsc68_dir)" && $(MAKE) $(AM_MAKEFLAGS)
 else
-SC68_LA =
+LIBSC68_LA =
 endif
 
-if SOURCE_FILE68
-FILE68_LA = $(file68_dir)/libfile68.la
-@SET_MAKE@
-$(file68_dir)/libfile68.la:
-	cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libfile68.la
-else
-FILE68_LA =
-endif
+bin_PROGRAMS = mksc68
+mksc68_SOURCES = src/mksc68.c src/mksc68_cli.c src/mksc68_cli.h		\
+ src/mksc68_cmd.c src/mksc68_cmd.h src/mksc68_cmd_extract.c		\
+ src/mksc68_cmd_gdb.c src/mksc68_cmd_info.c src/mksc68_cmd_load.c	\
+ src/mksc68_cmd_msg.c src/mksc68_cmd_new.c src/mksc68_cmd_play.c	\
+ src/mksc68_cmd_save.c src/mksc68_cmd_tag.c src/mksc68_cmd_time.c	\
+ src/mksc68_def.h src/mksc68_dsk.c src/mksc68_dsk.h src/mksc68_eva.h	\
+ src/mksc68_gdb.c src/mksc68_gdb.h src/mksc68_msg.c src/mksc68_msg.h	\
+ src/mksc68_oplen.h src/mksc68_opt.c src/mksc68_opt.h			\
+ src/mksc68_snd.c src/mksc68_snd.h src/mksc68_str.c src/mksc68_str.h	\
+ src/mksc68_tag.c src/mksc68_tag.h
 
-sources = mksc68.c mksc68_opt.c mksc68_msg.c mksc68_cmd.c		\
-mksc68_cli.c mksc68_dsk.c mksc68_gdb.c mksc68_snd.c mksc68_str.c	\
-mksc68_tag.c mksc68_cmd_new.c mksc68_cmd_load.c mksc68_cmd_play.c	\
-mksc68_cmd_time.c mksc68_cmd_tag.c mksc68_cmd_msg.c mksc68_cmd_save.c	\
-mksc68_cmd_info.c mksc68_cmd_gdb.c mksc68_cmd_extract.c
-
-headers = mksc68_cli.h mksc68_cmd.h mksc68_def.h mksc68_dsk.h		\
-mksc68_eva.h mksc68_gdb.h mksc68_msg.h mksc68_opt.h mksc68_snd.h	\
-mksc68_str.h mksc68_tag.h mksc68_oplen.h
-
-bin_PROGRAMS         = mksc68
-mksc68_SOURCES       = $(sources)
-mksc68_LDADD         = $(SC68_LA) $(FILE68_LA) $(DESA68_LA)
-noinst_HEADERS       = $(headers)
+mksc68_CFLAG    = $(libsc68_CFLAGS) $(gb_CFLAGS)
+mksc68_CPPFLAGS = $(libsc68_CPPFLAGS)
+mksc68_LDADD    = $(LIBSC68_LA)
+mksc68_LDFLAGS  = $(LIBSC68_LIBS) $(gb_LDFLAGS)
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |

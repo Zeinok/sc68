@@ -27,6 +27,7 @@
 # include "config.h"
 #endif
 
+#include "emu68_private.h"
 #include "struct68.h"
 #include "srdef68.h"
 #include "excep68.h"

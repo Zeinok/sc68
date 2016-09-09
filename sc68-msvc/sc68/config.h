@@ -1,5 +1,7 @@
 #include "config_msvc.h"
 
+#error need editing
+
 #define EMU68_MONOLITIC 1
 #define EMU68_EXPORT 1
 

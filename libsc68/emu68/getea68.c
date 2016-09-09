@@ -26,6 +26,7 @@
 # include "config.h"
 #endif
 
+#include "emu68_private.h"
 #include "error68.h"
 #include "assert68.h"
 #include "excep68.h"

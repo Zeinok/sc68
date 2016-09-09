@@ -28,14 +28,13 @@ LT_INIT([win32-dll disable-static])
 # | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
-SC68_PACKAGE([Atari ST and Amiga audio plugin for audacious.])
-SC68_SYSTEM
-SC68_OPTIONS
-SC68_TOOLS
-SC68_CHECKS
-SC68_THREADS
-SC68_WITH([sc68],[yes],[sc68_version],[sc68/sc68.h],[libsc68])
-SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
+AC_SUBST([PACKAGE_SHORTDESC],["Atari ST and Amiga audio plugin for audacious"])
+SC68_CC
+AC_PROG_INSTALL
+
+# $$$ TEMP $$$
+AM_CONDITIONAL([SOURCE_SC68],[test 1 = 1])
+AM_CONDITIONAL([SOURCE_FILE68],[test 1 = 1])
 
 AC_ARG_WITH(
   [audacious-dir],
@@ -118,8 +117,7 @@ fi
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
-AC_CONFIG_FILES([
-    Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
 # ,----------------------------------------------------------------------.
@@ -128,13 +126,10 @@ AC_OUTPUT
 
 audacious_plugin_dir=`echo $with_audacious_dir | sed 's#^'"$prefix"'#$prefix#'`
 
-SC68_DUMPVARS
-
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
 AC_MSG_NOTICE([|-----------------------])
-AC_MSG_NOTICE([|   compile mode        : $compile_mode])
 AC_MSG_NOTICE([|   file68 headers      : $has_file68 ($file68_ver)])
 AC_MSG_NOTICE([|   libsc68             : $has_sc68 ($sc68_ver)])
 AC_MSG_NOTICE([|   audacious           : $audacious_ver ($audvnum)])

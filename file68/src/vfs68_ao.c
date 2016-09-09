@@ -27,6 +27,7 @@
 #endif
 #include "file68_private.h"
 #include "file68_api.h"
+#include "file68_features.h"
 #include "file68_vfs_ao.h"
 #include "file68_msg.h"
 
@@ -44,7 +45,6 @@ static int ao68_cat = msg68_DEFAULT;
 #include "file68_vfs_def.h"
 #include "file68_str.h"
 #include "file68_uri.h"
-#include "file68_features.h"
 
 #include <ao/ao.h>
 #include <string.h>
@@ -73,9 +73,9 @@ typedef struct {
 } vfs68_ao_t;
 
 enum {
-  AO_SPR_MIN = 6250,
-  AO_SPR_MAX = 125166,
-  AO_SPR_DEF = 48000
+  AO_SPR_MIN = FILE68_SPR_MIN,
+  AO_SPR_MAX = FILE68_SPR_MAX,
+  AO_SPR_DEF = FILE68_SPR_DEF
 };
 
 static volatile int init;

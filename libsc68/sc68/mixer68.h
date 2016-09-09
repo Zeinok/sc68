@@ -13,11 +13,13 @@
 
 #include "emu68/type68.h"
 
-#ifndef SC68_EXTERN
-# ifdef __cplusplus
-#  define SC68_EXTERN extern "C"
+#ifndef MIXER68_API
+# ifdef SC68_EXTERN
+#  define MIXER68_API SC68_EXTERN
+# elif defined(__cplusplus)
+#  define MIXER68_API extern "C"
 # else
-#  define SC68_EXTERN
+#  define MIXER68_API
 # endif
 #endif
 
@@ -53,7 +55,7 @@
  * @}
  */
 
-SC68_EXTERN
+MIXER68_API
 /**
  * Copy 16-bit-stereo PCM with optionnal sign change.
  *
@@ -65,7 +67,7 @@ SC68_EXTERN
 void mixer68_stereo_16_LR(u32 * dst, u32 * src, int nb,
                           const u32 sign);
 
-SC68_EXTERN
+MIXER68_API
 /**
  * Copy 16-bit-stereo PCM with channel swapping and optionnal sign
  * change.
@@ -80,7 +82,7 @@ SC68_EXTERN
 void mixer68_stereo_16_RL(u32 * dst, u32 * src, int nb,
                           const u32 sign);
 
-SC68_EXTERN
+MIXER68_API
 /**
  * Copy 16-bit-stereo PCM into normalized float-stereo (-norm..+norm).
  *
@@ -98,7 +100,7 @@ SC68_EXTERN
 void mixer68_stereo_FL_LR(float * dst, u32 * src, int nb,
                           const u32 sign, const float norm);
 
-SC68_EXTERN
+MIXER68_API
 /**
  * Copy left channel of 16-bit stereo PCM into L/R channels with
  * optionnal sign change.
@@ -110,7 +112,7 @@ SC68_EXTERN
  */
 void mixer68_dup_L_to_R(u32 * dst, u32 * src, int nb, const u32 sign);
 
-SC68_EXTERN
+MIXER68_API
 /**
  * Copy right channel of 16-bit stereo PCM into L/R channels
  * with optionnal sign change.
@@ -122,7 +124,7 @@ SC68_EXTERN
  */
 void mixer68_dup_R_to_L(u32 * dst, u32 * src, int nb, const u32 sign);
 
-SC68_EXTERN
+MIXER68_API
 /**
  * Copy 16-bit-stereo PCM with L/R blending and optionnal sign change.
  *
@@ -150,7 +152,7 @@ void mixer68_blend_LR(u32 * dst, u32 * src, int nb,
                       int factor,
                       const u32 sign_r, const u32 sign_w);
 
-SC68_EXTERN
+MIXER68_API
 /**
  * Copy 16-bit-stereo PCM with L/R amplitude factor and optionnal sign
  * change.
@@ -179,7 +181,7 @@ void mixer68_mult_LR(u32 * dst, u32 * src, int nb,
                      const int ml, const int mr,
                      const u32 sign_r, const u32 sign_w);
 
-SC68_EXTERN
+MIXER68_API
 /**
  * Fill 16-bit-stereo buffer with sign value (RRRRLLLL).
  *
@@ -190,7 +192,7 @@ SC68_EXTERN
 void mixer68_fill(u32 * dst, int nb,
                   const u32 sign);
 
-SC68_EXTERN
+MIXER68_API
 /**
  * Copy 16-bit-stereo buffer.
  *

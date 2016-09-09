@@ -174,7 +174,6 @@ static const u16 dbcc_ascii[16] = {
  * String functions
  * ====================================================================== */
 
-
 static int my_isfalse(desa68_t * d, int c)
 {
   return 0;
@@ -337,8 +336,8 @@ static void desa_ascii(desa68_t * d, uint n)
   }
 }
 
-/* Add a N-digit unsigned hexa number with header char
-   to disassembly string */
+/* Add a N-digit unsigned hexadecimal number with header char to
+   disassembly string */
 static void desa_uhexacat(desa68_t * d, uint n,
                           int ndigit, int header_char)
 {
@@ -349,10 +348,10 @@ static void desa_uhexacat(desa68_t * d, uint n,
   }
 }
 
-/* Add a signifiant digit only unsigned hexa number
- * with heading '$' to disassembly string
+/* Add a significant digit only unsigned hexadecimal number with
+ * heading '$' to disassembly string
  */
-static void desa_usignifiant(desa68_t * d, uint n)
+static void desa_usignificant(desa68_t * d, uint n)
 {
   int shf;
   desa_char(d,'$');
@@ -363,14 +362,14 @@ static void desa_usignifiant(desa68_t * d, uint n)
     desa_char(d,Thex[(n>>shf)&15] );
 }
 
-/* idem desa_usignifiant, but signed */
-static void desa_signifiant(desa68_t * d, int n)
+/* idem desa_usignificant, but signed */
+static void desa_significant(desa68_t * d, int n)
 {
   if ( n < 0 ) {
     desa_char(d,'-');
     n = -n;
   }
-  desa_usignifiant(d,n);
+  desa_usignificant(d,n);
 }
 
 /* ======================================================================
@@ -625,7 +624,7 @@ static void desa_immL(desa68_t * d, uint v)
 #if 0                                   /* See comment paragraph 2. */
   } else if ( v >= d->immsym_min && v < d->immsym_max ) {
     ref_set(&d->sref, v, SZ_ADDR);
-    desa_signifiant(d,S32(v));
+    desa_significant(d,S32(v));
 #endif
   } else {
     const int q = '\'';
@@ -638,7 +637,7 @@ static void desa_immL(desa68_t * d, uint v)
       /* d->_quote = 0; */
       desa_char(d,q);
     } else {
-      desa_signifiant(d,S32(v));
+      desa_significant(d,S32(v));
     }
   }
 }
@@ -649,7 +648,7 @@ static void desa_addr(desa68_t * d, uint v, int stype)
   if (symb)
     desa_str_notr(d,symb);
   else
-    desa_usignifiant(d, v);
+    desa_usignificant(d, v);
 }
 
 static void desa_absL(desa68_t * d, uint v, int stype)
@@ -692,14 +691,14 @@ static void get_ea_2(desa68_t * d,
     break;
   case MODE_dAN:
     _pcW(d);
-    desa_signifiant(d,d->_w);
+    desa_significant(d,d->_w);
     /* continue on MODE_iAN */
   case MODE_iAN:
     desa_op_iAN(d,reg);
     break;
   case MODE_dANXI:
     v = _pcW(d);                       /* control word */
-    desa_signifiant(d,S8(v));
+    desa_significant(d,S8(v));
     desa_char(d,'(');
     desa_op_AN(d,reg);
     desa_comma(d);
@@ -755,12 +754,12 @@ static void get_ea_2(desa68_t * d,
     case SZ_BYTE:
       v = immB(d);
       if (v < -0x3f) v = U8(v);
-      desa_signifiant(d,v);
+      desa_significant(d,v);
       break;
     case SZ_WORD:
       v = immW(d);
       if (v < -0x3fff) v = U16(v);
-      desa_signifiant(d,v);
+      desa_significant(d,v);
       break;
     case SZ_LONG:
       v = U32(immL(d));
@@ -777,7 +776,7 @@ static void get_ea_2(desa68_t * d,
   default:
     assert(!"invalid addressing mode");
     desa_char(d,'?');
-    desa_usignifiant(d, mode);
+    desa_usignificant(d, mode);
     desa_char(d,'?');
     break;
   }
@@ -878,7 +877,7 @@ static int desa_check_bitop(desa68_t * d)
     desa_space(d);
     desa_char(d,'#');
     _pcW(d);
-    desa_usignifiant(d,U8(d->_w));
+    desa_usignificant(d,U8(d->_w));
   } else {
     /* B... dn,<AE>*/
     desa_ascii(d,inst);
@@ -1541,7 +1540,7 @@ static void desa_line7(desa68_t * d)
     desa_str(d,"MOVEQ");
     desa_space(d);
     desa_char(d,'#');
-    desa_signifiant(d,v);
+    desa_significant(d,v);
     desa_comma(d);
     desa_op_DN(d,d->_reg9);
   }
@@ -1977,6 +1976,15 @@ int desa68_version(void)
     for (; c >= '0' && c <= '9'; c = *s++)
       v[i] = v[i]*10 + ( c - '0' );
   }
+
+  if (v[0] >= 19700101 && !v[2] && !v[3]) {
+    /* Date conversion. */
+    v[3] = v[1];
+    v[1] = v[0] / 100u % 100u;
+    v[2] = v[0] % 100u;
+    v[0] = v[0] / 10000u;
+  }
+
   return 0
     + v[0] * 100000000u
     + v[1] *   1000000u

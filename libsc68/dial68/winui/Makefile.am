@@ -10,8 +10,6 @@
 # @configure_input@
 
 ACLOCAL_AMFLAGS = -I m4 --install
-AM_CFLAGS       = $(ALL_CFLAGS) $(LIB_CFLAGS) -mwin32
-AM_CPPFLAGS     = -I$(top_srcdir) -DFORCE_RSC=1
 
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |
@@ -22,8 +20,10 @@ noinst_LTLIBRARIES        = libwinui.la
 libwinui_la_SOURCES       = winui_dlg.c resource.h
 libwinui_la_DEPENDENCIES  = do-glued
 libwinui_la_LIBADD        = winui_glu.lo
+libwinui_la_LDFLAGS       = -avoid-version $(lib_LDFLAGS)
+libwinui_la_CFLAGS        = -mwin32
+libwinui_la_CPPFLAGS      = -I$(top_srcdir) -DFORCE_RSC=1
 EXTRA_libwinui_la_SOURCES = resource.rc winui_rsc.c winui_dll.c
-libwinui_la_LDFLAGS       = -avoid-version
 
 do-glued: winui_glu.lo
 

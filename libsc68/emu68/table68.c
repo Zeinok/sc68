@@ -2,5 +2,6 @@
 # include "config.h"
 #endif
 
+#include "emu68_private.h"
 #include "emu68_api.h"
 #include "lines/table.c"

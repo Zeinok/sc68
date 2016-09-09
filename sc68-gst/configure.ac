@@ -28,13 +28,13 @@ LT_INIT([win32-dll])
 # | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
-SC68_PACKAGE([Atari ST and Amiga audio decoder for gstreamer.])
-SC68_SYSTEM
-SC68_OPTIONS
-SC68_TOOLS
-SC68_CHECKS
-SC68_WITH([sc68],[yes],[sc68_version],[sc68/sc68.h],[libsc68])
-SC68_WITH_HEADER([file68],[yes],[sc68/file68.h])
+AC_SUBST([PACKAGE_SHORTDESC],["Atari ST and Amiga audio decoder for gstreamer"])
+SC68_CC
+AC_PROG_INSTALL
+
+# $$$ TEMP $$$
+AM_CONDITIONAL([SOURCE_SC68],[test 1 = 1])
+AM_CONDITIONAL([SOURCE_FILE68],[test 1 = 1])
 
 # ,----------------------------------------------------------------------.
 # | gstreamer                                                            |
@@ -89,15 +89,12 @@ AM_CONDITIONAL([TYPEFIND_SC68],[test "x${enable_gst_typefinder}" = 'xyes'])
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
-AC_CONFIG_FILES([
-    Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |
 # `----------------------------------------------------------------------'
-
-SC68_DUMPVARS
 
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,-----------------------])

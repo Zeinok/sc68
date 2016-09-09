@@ -1,7 +1,6 @@
-
 # -*- mode:sh; sh-basic-offset:2; indent-tabs-mode:nil -*-
 #
-# pkg-config file for @PACKAGE@
+# pkg-config file for unice68 @VERSION@
 #
 # (C) 2011-2016 Benjamin Gerard <http://sourceforge.net/users/benjihan>
 #
@@ -16,13 +15,11 @@ includedir=@includedir@
 datarootdir=@datarootdir@
 datadir=@datadir@
 
-Name:             @PACKAGE@
-Version:          @VERSION@
-Description:      @PACKAGE_SHORTDESC@
-URL:              @PACKAGE_URL@
-#Requires:
-#Requires.private:
-#Conflicts:
-Libs:             -L${libdir} -lunice68
-#Libs.private:
-Cflags:           -I${includedir}
+Name:         unice68
+Version:      @VERSION@
+Description:  @PACKAGE_SHORTDESC@
+URL:          @PACKAGE_URL@
+Requires:     @PAC_REQUIRES@
+Libs:         -L${libdir} -lunice68 @PAC_LIBS@
+Libs.private: @PAC_PRIV_LIBS@
+Cflags:       -I${includedir} @PAC_CFLAGS@

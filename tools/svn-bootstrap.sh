@@ -121,7 +121,7 @@ ln_or_cp_x() {
 
 # $1: dir  $2: --force
 bootstrap_dir() {
-    local dir="$1" m4file=ac_package_extra.m4 force='' 
+    local dir="$1" m4file=sc68_package.m4 force='' 
     local test skip obj src lnk dst
 
     msg "Bootstrapping directory '${dir}'"
@@ -184,15 +184,25 @@ bootstrap_dir() {
 ######################################################################
 
 # Test some required tools
-testtool help2man    "missing help2man -- install package 'help2man'"
-testtool texinfo2man "missing texinfo2man -- compile and install 'tools/texinfo2man.c'"
-testtool od
+# ------------------------
+
+# ben (2016-08-29): not required anymore since doc is disable
+#testtool help2man    "missing help2man -- install package 'help2man'"
+#testtool texinfo2man "missing texinfo2man -- compile and install 'tools/texinfo2man.c'"
+
+# ben (2016-08-29): command used to convert 68000 binary to C includes 
+#                   is using hexdump instead of od
+# testtool od
+testtool hexdump
 
 # Test for aclocal68 directory
 testdir aclocal68 fatal
 
 # Test for required file
 testfile ./tools/vcversion.sh
+
+# Install vcversion script in the top source dir
+ln_or_cp_x ./tools/vcversion.sh vcversion.sh
 
 # In the top source dir create a m4 directory filled with invidual
 # symbolic links to aclocal68 files. All sub directories only link
@@ -206,15 +216,17 @@ mkdir -p m4 && testdir m4 fatal
 )
 
 # Bootstrap all sub-directories.
-dirs="as68 desa68 file68 info68 unice68 file68 sourcer68 libsc68"
-dirs="$dirs sc68 mksc68 sc68-gst sc68-audacious sc68-vlc sc68-doc"
-err=0
+dirs="as68 desa68 unice68 "
+dirs="$dirs file68 info68 sourcer68 "
+dirs="$dirs libsc68 sc68 mksc68"
+edirs=
 for dir in ${dirs}; do
-    bootstrap_dir ${dir} "$@" || let err=err+1
+    bootstrap_dir ${dir} "$@" || edirs="$edirs $dir"
 done
 
-if test ${err} -ne 0; then
-    fatal "${err} error(s): Not running autoreconf"
+if test "X${edirs}" != X; then
+    set -- $edirs
+    fatal "$# errors ($edirs): Not running autoreconf"
 fi
 
 # No error runs autoreconf to create missing files.

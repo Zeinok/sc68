@@ -25,9 +25,9 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include "io68_private.h"
 
 #include <assert.h>
-
 #include "io68.h"
 #include "sc68/file68_msg.h"
 

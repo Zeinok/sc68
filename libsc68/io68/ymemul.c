@@ -25,6 +25,8 @@
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
+#include "io68_private.h"
+
 #include "default.h"
 #include "ymemul.h"
 #include "emu68/assert68.h"

@@ -1,6 +1,6 @@
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# |  unice68 -- Makefile.am -- Use with automake to produce Makefile.in  | 
+# |  unice68 -- Makefile.am -- Use with automake to produce Makefile.in  |
 # |                                                                      |
 # |               Copyright (c) 2007-2016 Benjamin Gerard                |
 # |                                                                      |
@@ -10,6 +10,7 @@
 # @configure_input@
 
 ACLOCAL_AMFLAGS = -I m4 --install
+LIB_VER         = @LIB_CUR@:@LIB_REV@:@LIB_AGE@
 
 # ,----------------------------------------------------------------------.
 # | pkg-config                                                           |
@@ -22,9 +23,10 @@ pkgconfig_DATA = unice68.pc
 # | Libtool library                                                      |
 # `----------------------------------------------------------------------'
 
-lib_LTLIBRARIES        = libunice68.la
-libunice68_la_SOURCES  = unice68_unpack.c unice68_pack.c unice68_version.c
-libunice68_la_LDFLAGS  = -avoid-version $(lib_LDFLAGS)
+lib_LTLIBRARIES       = libunice68.la
+libunice68_la_SOURCES = unice68_unpack.c unice68_pack.c unice68_version.c
+libunice68_la_CFLAGS  = $(gb_CFLAGS)
+libunice68_la_LDFLAGS = -avoid-version $(gb_LDFLAGS)
 
 # ,----------------------------------------------------------------------.
 # | Libtool binary                                                       |
@@ -32,10 +34,11 @@ libunice68_la_LDFLAGS  = -avoid-version $(lib_LDFLAGS)
 
 if UNICE68_CLI
 
-bin_PROGRAMS     = unice68
-unice68_SOURCES  = unice68.c
-unice68_LDADD    = libunice68.la
-unice68_LDFLAGS  = $(bin_LDFLAGS)
+bin_PROGRAMS    = unice68
+unice68_SOURCES = unice68.c
+unice68_LDADD   = libunice68.la
+unice68_CFLAGS  = $(gb_CFLAGS)
+unice68_LDFLAGS = $(gb_LDFLAGS)
 
 endif
 

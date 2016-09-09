@@ -1,6 +1,6 @@
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# |  desa68 -- Makefile.am -- Use with automake to produce Makefile.in   | 
+# |  desa68 -- Makefile.am -- Use with automake to produce Makefile.in   |
 # |                                                                      |
 # |               Copyright (c) 2007-2016 Benjamin Gerard                |
 # |                                                                      |
@@ -9,7 +9,8 @@
 # `----------------------------------------------------------------------'
 # @configure_input@
 
-ACLOCAL_AMFLAGS       = -I m4 --install
+ACLOCAL_AMFLAGS = -I m4 --install
+LIB_VER         = @LIB_CUR@:@LIB_REV@:@LIB_AGE@
 
 # ,----------------------------------------------------------------------.
 # | pkg-config                                                           |
@@ -23,15 +24,15 @@ pkgconfig_DATA = desa68.pc
 # `----------------------------------------------------------------------'
 
 lib_LTLIBRARIES      = libdesa68.la
-libdesa68_la_SOURCES = desa68.c
-libdesa68_la_LDFLAGS = -avoid-version $(lib_LDFLAGS)
+libdesa68_la_SOURCES = desa68.c desa68.h desa68_private.h
+libdesa68_la_CFLAGS  = $(gb_CFLAGS)
+libdesa68_la_LDFLAGS = -avoid-version $(gb_LDFLAGS)
 
 # ,----------------------------------------------------------------------.
 # | Headers                                                              |
 # `----------------------------------------------------------------------'
 
 include_HEADERS = desa68.h
-noinst_HEADERS  = desa68_private.h
 
 # ,----------------------------------------------------------------------.
 # | Distrib                                                              |

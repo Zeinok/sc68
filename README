@@ -1,55 +1,21 @@
-		      **sc68-ng - meta package**
+                      sc68 - command line player
 
-sc68 packages
-=============
+                   sc68 is part of the sc68 project
 
-  Required packages
-  -----------------
-
-  o libsc68 (sc68 lib API)
-  o libfile68 (sc68 file lib)
-
-  Recommended packages
-  --------------------
-
-  o unice68 (ice! depacker lib and cli)
-  o sc68 (command line player)
-  o info68 (sc68 file info cli)
-
-  Developper tools
-  ----------------
-   
-  o desa68 (68k disassembler lib)
-  o sourcer68 (68k sourcer cli)
-  o debug68 (sc68 file toolkit cli)
-  o as68 (68k macro assembler)
+                    (C) 1998-2016 Benjamin Gerard
 
 
-sc68 package dependencies
-=========================
+ABOUT SC68
 
-  o sc68 (command line player)
-    o libsc68 (sc68 lib API)
-      o libfile68 (sc68 file lib)
-        o libunice68 (ice! depacker lib)
-        o (curl)
-        o (zlib)
-        o (libao)
+  sc68 is the command line music player for sc68 compatible files.
 
-  o unice68 (ice! depacker cli)
-    o libunice68 (ice! depacker lib)
 
-  o info68 (sc68 file info cli)
-    o libfile68 
-      o libunice68
+AUTHOR
 
-  o sourcer68 (68k sourcer cli)
-    o desa68 (68k disassembler)
-    o libfile68
-      o libunice68
+  Benjamin Gerard AKA Ben/OVR <https://sourceforge.net/users/benjihan>
 
-  o debug68 (sc68 toolbox cli)
-    o desa68 
-    o libsc68
 
-  o as68 (68k macro assembler)
+LINKS
+
+  website <http://sc68.atari.org>
+  project <https://sourceforge.net/p/sc68>

@@ -11,11 +11,13 @@
 #ifndef SC68_CONF68_H
 #define SC68_CONF68_H
 
-#ifndef SC68_EXTERN
-# ifdef __cplusplus
-#  define SC68_EXTERN extern "C"
+#ifndef CONF68_API
+# ifdef SC68_EXTERN
+#  define CONF68_API SC68_EXTERN
+# elif defined(__cplusplus)
+#  define CONF68_API extern "C"
 # else
-#  define SC68_EXTERN
+#  define CONF68_API
 # endif
 #endif
 
@@ -28,7 +30,7 @@
  *  @{
  */
 
-SC68_EXTERN
+CONF68_API
 /**
  *  Load config.
  *
@@ -40,7 +42,7 @@ SC68_EXTERN
  */
 int config68_load(const char * name);
 
-SC68_EXTERN
+CONF68_API
 /**
  *  Save config.
  *
@@ -53,7 +55,7 @@ SC68_EXTERN
 int config68_save(const char * name);
 
 
-SC68_EXTERN
+CONF68_API
 /**
  *  Library one time init.
  *
@@ -66,7 +68,7 @@ SC68_EXTERN
  */
 int config68_init(int argc, char * argv[]);
 
-SC68_EXTERN
+CONF68_API
 /**
  *  Library one time shutdown shutdown.
  */

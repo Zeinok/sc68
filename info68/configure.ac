@@ -11,9 +11,14 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
+m4_define([VERSION_MAJOR],2)
+m4_define([VERSION_MINOR],0)
+m4_define([VERSION_PATCH],0)
+m4_define([VERSION_TWEAK],esyscmd([sh vcversion.sh]))dnl
+
 AC_INIT(
   [info68],
-  [20140815],
+  VERSION_MAJOR[.]VERSION_MINOR[.]VERSION_PATCH[.]VERSION_TWEAK,
   [http://sourceforge.net/projects/sc68/],
   [info68],
   [http://sc68.atari.org])
@@ -29,43 +34,49 @@ LT_INIT([win32-dll])
 # | sc68                                                                 |
 # `----------------------------------------------------------------------'
 
-SC68_PACKAGE([Formats info from sc68 music files.])
-SC68_SYSTEM
-SC68_OPTIONS
-SC68_TOOLS
-SC68_CHECKS
-SC68_WITH([file68],[yes],[],[sc68/file68.h])
+SC68_PACKAGE(
+  [
+
+    format sc68 files meta-tags.
+
+    info68 programs allow to retrieve and display meta-tags information
+    from sc68 compatible files and to print them on a formatted
+    fashion.
+
+  ])
+
+SC68_CC
+AC_PROG_INSTALL
+
+SC68_WITH_PACKAGE([file68],[file68],[file68],[../file68],
+                  [sc68/file68.h],[file68_version],[req])
 
 # ,----------------------------------------------------------------------.
-# | Standard headers and functions                                       |
+# | Headers and Functions                                                |
 # `----------------------------------------------------------------------'
 
-AC_CHECK_HEADERS([stdint.h unistd.h libgen.h getopt.h])
+AC_CHECK_HEADERS([limits.h assert.h])
+AC_HEADER_ASSERT
+AC_CHECK_HEADERS([stdarg.h stdio.h stdlib.h string.h])
+AC_CHECK_HEADERS([ctype.h errno.h libgen.h getopt.h])
+
 AC_CHECK_FUNCS([basename getopt getopt_long])
 
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
 
-AC_CONFIG_FILES([
-    Makefile
-    info68-${VERSION}.ebuild:info68.ebuild.in
-    info68.1.tpl
-    info68.spec
-    package.texi])
-AC_OUTPUT
+AC_CONFIG_FILES([Makefile])
+SC68_OUTPUT
 
 # ,----------------------------------------------------------------------.
 # | Summary                                                              |
 # `----------------------------------------------------------------------'
 
-SC68_DUMPVARS
-
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([,----------------------])
-AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION)])
+AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION) for $host])
 AC_MSG_NOTICE([|----------------------])
-AC_MSG_NOTICE([|   compile mode        : $compile_mode])
-AC_MSG_NOTICE([|   file68              : $has_file68 ($file68_ver)])
+AC_MSG_NOTICE([|   file68              : $has_file68 ($file68_VERSION)])
 AC_MSG_NOTICE([+----------------------])
 AC_MSG_NOTICE([])

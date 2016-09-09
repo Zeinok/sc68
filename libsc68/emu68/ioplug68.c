@@ -26,6 +26,7 @@
 # include "config.h"
 #endif
 
+#include "emu68_private.h"
 #include "ioplug68.h"
 #include "mem68.h"
 #include "assert68.h"

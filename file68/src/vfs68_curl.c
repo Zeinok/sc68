@@ -44,6 +44,22 @@ static const char * curl_schemes[] = { CURL_SCHEMES, 0 };
 #include "file68_uri.h"
 #include "file68_str.h"
 
+/* In order to have libcurl using non-decorated symbols CURL_STATICLIB
+ * must be set. This is for system that use DLL (Windows and
+ * Symbian). However it's probably best to let that a user
+ * choices. After one might want to build a static lib that link the
+ * DLL version of curl (I would not).
+ */
+#if 0 && !defined(CURL_STATICLIB)
+# if defined(FILE68_WIN32) && !defined(file68_lib_EXPORTS)
+#  define CURL_STATICLIB 1
+#  ifdef DLL_EXPORT
+#   error DLL_EXPORT with CURL_STATICLIB
+#   undef DLL_EXPORT
+#  endif
+# endif
+#endif
+
 #include <curl/curl.h>
 #include <string.h>
 #include <stdlib.h>

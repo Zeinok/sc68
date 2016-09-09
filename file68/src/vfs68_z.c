@@ -38,7 +38,7 @@ const vfs68_z_option_t vfs68_z_default_option = {
   1    /* name      */
 };
 
-#ifdef USE_Z
+#ifdef FILE68_Z
 
 #include "file68_vfs_def.h"
 #include "file68_str.h"
@@ -833,7 +833,7 @@ out:
   return (vfs68_t *) isf;
 }
 
-#else /* #ifndef USE_Z */
+#else /* #ifndef FILE68_Z */
 
 # include "file68_vfs_z.h"
 
@@ -848,11 +848,11 @@ vfs68_t * vfs68_z_create(vfs68_t * is, int mode,
   return 0;
 }
 
-#endif /* #ifndef USE_Z */
+#endif /* #ifndef FILE68_Z */
 
 int vfs68_z_init(void)
 {
-#ifdef USE_Z
+#ifdef FILE68_Z
   zlib_cat = msg68_cat("zlib","Zlib VFS",DEBUG_ZLIB_O);
 #endif
   return 0;
@@ -860,7 +860,7 @@ int vfs68_z_init(void)
 
 void vfs68_z_shutdown(void)
 {
-#ifdef USE_Z
+#ifdef FILE68_Z
   if (zlib_cat > 0) {
     msg68_cat_free(zlib_cat);
     zlib_cat = msg68_NEVER;

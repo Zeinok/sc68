@@ -1,6 +1,6 @@
 # ,----------------------------------------------------------------------.
 # |                                                                      |
-# |    sc68 -- Makefile.am -- Use with automake to produce Makefile.in   |
+# |   sc68 -- Makefile.am -- Use with automake to produce Makefile.in    |
 # |                                                                      |
 # |               Copyright (c) 2007-2016 Benjamin Gerard                |
 # |                                                                      |
@@ -9,37 +9,35 @@
 # `----------------------------------------------------------------------'
 # @configure_input@
 
-SUBDIRS              = $(subdirs)
-ACLOCAL_AMFLAGS      = -I m4 --install
-AM_CFLAGS            = $(ALL_CFLAGS) $(BIN_CFLAGS)
-AM_CPPFLAGS          = $(sc68_inc) $(file68_inc)
-AM_LDFLAGS           = $(ALL_LFLAGS) $(BIN_LFLAGS)
+ACLOCAL_AMFLAGS = -I m4 --install
+libsc68_dir     = @libsc68_builddir@
 
 # ,----------------------------------------------------------------------.
 # | Libtool program                                                      |
 # `----------------------------------------------------------------------'
 
-if SOURCE_SC68
-SC68_LA = $(sc68_dir)/libsc68.la
+LIBSC68_LA =
+if SOURCE_LIBSC68
+LIBSC68_LA += $(libsc68_dir)/libsc68.la
 @SET_MAKE@
-$(sc68_dir)/libsc68.la:
-	$(MAKE) -C "$(sc68_dir)" $(AM_MAKEFLAGS)
-else
-SC68_LA =
+$(libsc68_dir)/libsc68.la:
+	cd "$(libsc68_dir)" && $(MAKE) $(AM_MAKEFLAGS)
 endif
 
-if SOURCE_FILE68
-FILE68_LA = $(file68_dir)/libfile68.la
-@SET_MAKE@
-$(file68_dir)/libfile68.la:
-	$(MAKE) -C "$(file68_dir)" $(AM_MAKEFLAGS)
-else
 FILE68_LA =
-endif
+# if SOURCE_FILE68
+# FILE68_LA += $(file68_dir)/libfile68.la
+# @SET_MAKE@
+# $(file68_dir)/libfile68.la:
+#       $(MAKE) -C "$(file68_dir)" $(AM_MAKEFLAGS)
+# endif
 
-bin_PROGRAMS         = sc68
-sc68_SOURCES         = sc68.c
-sc68_LDADD           = $(SC68_LA) $(FILE68_LA)
+bin_PROGRAMS  = sc68
+sc68_SOURCES  = sc68.c
+sc68_CFLAGS   = $(libsc68_CFLAGS) $(gb_CFLAGS)
+sc68_CPPFLAGS = $(libsc68_CPPFLAGS)
+sc68_LDFLAGS  = $(libsc68_LIBS) $(gb_LDFLAGS)
+sc68_LDADD    = $(LIBSC68_LA) $(FILE68_LA)
 
 # ,----------------------------------------------------------------------.
 # | Documentation                                                        |
@@ -53,4 +51,4 @@ sc68_LDADD           = $(SC68_LA) $(FILE68_LA)
 # fail                 = { test -e '$@' && rm '$@'; test a = b; }
 
 # $(srcdir)/sc68.1: sc68.1.tpl.in $(srcdir)/sc68.texi
-# 	$(TEXINFO2MAN) sc68.1.tpl $(srcdir)/sc68.texi >$@ || $(fail)
+#       $(TEXINFO2MAN) sc68.1.tpl $(srcdir)/sc68.texi >$@ || $(fail)

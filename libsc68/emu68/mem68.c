@@ -27,6 +27,7 @@
 # include "config.h"
 #endif
 
+#include "emu68_private.h"
 #include "mem68.h"
 #include "error68.h"
 #include "emu68.h"
