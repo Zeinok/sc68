@@ -92,6 +92,7 @@ m4_define([_SC68_WITH_DUMP],
  $1_PKG_EXISTS : [$]{$1_PKG_EXISTS-<unset>}
  $1_PKG_ERRORS : [$]{$1_PKG_ERRORS-<unset>}
  $1_builddir   : [$]{$1_builddir-<unset>}
+ $1_srcdir     : [$]{$1_srcdir-<unset>}
  $1_REQUIRED   : [$]{$1_REQUIRED-<unset>}
 ...............
  PAC_REQUIRES=[$]{PAC_REQUIRES-<unset>}
@@ -144,6 +145,8 @@ m4_define([_SC68_WITH_INIT],
     AS_UNSET([$1_REQUIRED])
     AS_UNSET([has_$1])
     AS_UNSET([org_$1])
+    AS_UNSET([$1_builddir])
+    AS_UNSET([$1_srcdir])
   ])
 
 # _SC68_WITH_MODULE(prefix,mod,[headers],[funcs])
@@ -250,7 +253,53 @@ m4_define([_SC68_WITH_CLOSE],
           ])
     
     AC_SUBST([$1_builddir])
+    AC_SUBST([$1_srcdir])
     _SC68_WITH_DUMP([$1],[finally])
+  ])
+
+# SC68_WITH_SOURCE(prefix,pkg,to-source,headers)
+# ----------------
+# $1: prefix
+# $2: package-name
+# $3: relative path to package source
+# $4: headers (if non-blank)
+#
+AC_DEFUN([SC68_WITH_SOURCE],
+  []dnl # INDENTATION
+  [
+    AS_UNSET([$1_srcdir])
+    AC_ARG_WITH(
+      [$1],
+      [AS_HELP_STRING(
+          [--with-$1-srcdir],
+          [Locate or disable $2 source @<:@default is to check@:>@])],
+      [with_$1="$withval"],[with_$1='yes'])
+
+    AS_CASE(
+      ["X$with_$1_srcdir"],
+      [Xno],[AS_UNSET([$1_builddir]); has_$1=no],
+      [X|Xyes],[$1_srcdir="$srcdir/$3"],
+      [$1_srcdir="$with_$1_srcdir"])
+
+    AS_IF(
+      [test X${$1_srcdir+set} = Xset],
+      [AC_MSG_CHECKING([whether $1 srcdir ([$]$1_srcdir) exists])
+       AS_IF([test -d "${$1_srcdir}"],
+             [AC_MSG_RESULT([yes])],
+             [AC_MSG_RESULT([no])
+              AS_UNSET([$1_srcdir])])])
+
+    m4_foreach_w(
+      [xHdr],[$4],
+      [AS_IF(
+          [test X${$1_srcdir+set} = Xset],
+          [AC_MSG_CHECKING([for xHdr presence in $1 srcdir])
+           AS_IF([test -r "${$1_srcdir}/xHdr"],
+                 [AC_MSG_RESULT([yes])],
+                 [AC_MSG_RESULT([no])
+                  AS_UNSET([$1_srcdir])])])
+      ])
+
   ])
 
 # SC68_WITH_MODULE(prefix,mod,[headers],[funcs],[req])
@@ -284,7 +333,7 @@ AC_DEFUN([SC68_WITH_PACKAGE],
   []dnl # INDENTATION
   [
     _SC68_WITH_INIT([$1],[$2])
-    AS_UNSET([$1_builddir])
+    
     AS_CASE(
       ["X$with_$1"],
       [Xno],[has_$1=no; org_$1=user],
@@ -292,6 +341,9 @@ AC_DEFUN([SC68_WITH_PACKAGE],
       [Xcheck],[$1_builddir="./$4"],
       [$1_builddir="$with_$1"])
 
+
+    SC68_WITH_SOURCE([$1],[$2],[$4],[$5])
+    
     AS_IF(
       [test "X${$1_builddir+set}" = Xset],
       [

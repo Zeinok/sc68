@@ -10,19 +10,16 @@
 # @configure_input@
 
 ACLOCAL_AMFLAGS = -I m4 --install
-desa68_dir      = @desa68_builddir@
-file68_dir      = @file68_builddir@
-libsc68_dir        = @libsc68_builddir@
 
 # ,----------------------------------------------------------------------.
 # | Libtool program                                                      |
 # `----------------------------------------------------------------------'
 
 if SOURCE_LIBSC68
-LIBSC68_LA = $(libsc68_dir)/libsc68.la
+LIBSC68_LA = $(libsc68_builddir)/libsc68.la
 @SET_MAKE@
-$(libsc68_dir)/libsc68.la:
-	cd "$(libsc68_dir)" && $(MAKE) $(AM_MAKEFLAGS)
+$(libsc68_builddir)/libsc68.la:
+	cd "$(libsc68_builddir)" && $(MAKE) $(AM_MAKEFLAGS)
 else
 LIBSC68_LA =
 endif

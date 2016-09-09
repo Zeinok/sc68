@@ -10,8 +10,6 @@
 # @configure_input@
 
 ACLOCAL_AMFLAGS = -I m4 --install
-desa68_dir      = @desa68_builddir@
-file68_dir      = @file68_builddir@
 
 # ,----------------------------------------------------------------------.
 # | Libtool program                                                      |
@@ -19,18 +17,18 @@ file68_dir      = @file68_builddir@
 
 DESA68_LA =
 if SOURCE_DESA68
-DESA68_LA += $(desa68_dir)/libdesa68.la
+DESA68_LA += $(desa68_builddir)/libdesa68.la
 @SET_MAKE@
-$(desa68_dir)/libdesa68.la:
-	cd "$(desa68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libdesa68.la
+$(desa68_builddir)/libdesa68.la:
+	cd "$(desa68_builddir)" && $(MAKE) $(AM_MAKEFLAGS)
 endif
 
 FILE68_LA =
 if SOURCE_FILE68
-FILE68_LA += $(file68_dir)/libfile68.la
+FILE68_LA += $(file68_builddir)/libfile68.la
 @SET_MAKE@
-$(file68_dir)/libfile68.la:
-	 cd "$(file68_dir)" && $(MAKE) $(AM_MAKEFLAGS) libfile68.la
+$(file68_builddir)/libfile68.la:
+	 cd "$(file68_builddir)" && $(MAKE) $(AM_MAKEFLAGS)
 endif
 
 bin_PROGRAMS = sourcer68

@@ -13,7 +13,6 @@ SUBDIRS          = data68
 ACLOCAL_AMFLAGS  = -I m4 --install
 AUTOMAKE_OPTIONS = subdir-objects
 LIB_VER          = @LIB_CUR@:@LIB_REV@:@LIB_AGE@
-unice68_dir      = @unice68_builddir@
 
 # ,----------------------------------------------------------------------.
 # | Source files                                                         |
@@ -48,10 +47,10 @@ myheaders = $(apiheaders) $(otherheaders)
 # `----------------------------------------------------------------------'
 
 if SOURCE_UNICE68
-UNICE68_LA = $(unice68_dir)/libunice68.la
+UNICE68_LA = $(unice68_builddir)/libunice68.la
 @SET_MAKE@
-$(unice68_dir)/libunice68.la:
-	cd "$(unice68_dir)" && $(MAKE) $(AM_MAKEFLAGS)
+$(unice68_builddir)/libunice68.la:
+	cd "$(unice68_builddir)" && $(MAKE) $(AM_MAKEFLAGS)
 else
 UNICE68_LA = $(unice68_LIBS)
 endif
