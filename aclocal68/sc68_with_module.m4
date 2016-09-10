@@ -389,7 +389,7 @@ AC_DEFUN([SC68_WITH_PACKAGE],
       [
         has_$1=no; org_$1=source
         AC_MSG_CHECKING([whether $1 builddir is configured])
-        set -- `sed -ne 's/^#define PACKAGE_STRING "$2 \(@<:@^ "@:>@\+\)".*/\1/p' "${$1_builddir}/config.h"`
+        set -- `sed -ne 's/^#define PACKAGE_STRING "$2 \(@<:@^"@:>@\{1,\}\)".*/\1/p' "${$1_builddir}/config.h"`
         AS_IF(
           [test "X[$]#" != X1 || test "X[$1]" = X],
           [
