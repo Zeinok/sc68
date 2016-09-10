@@ -71,6 +71,25 @@ AC_DEFUN_ONCE([SC68_OUTPUT],
     AC_SUBST([PAC_PRIV_LIBS])
     AC_SUBST([PAC_REQUIRES])
 
+
+    dnl # !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    dnl # !!! EVIL DIRTY UGLY HACK !!!
+    dnl # !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    dnl #
+    dnl # https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=702737
+    dnl #
+    dnl # Because Debian patch libtool to disable link_all_deplibs
+    dnl # this project won't link properly when compiling the whole
+    dnl # tree as ies Makefile.am files rely on dependencies being
+    dnl # inherited accross .la files.
+    dnl #
+    dnl # While I'm sure Debian developpers have excellent reasons to
+    dnl # modify what is documented as libtool default behavior it's
+    dnl # yet another querk in the autotool build system.
+    dnl #
+    dnl # This should force libtool to link all dependencies.
+    AC_CONFIG_COMMANDS_PRE([link_all_deplibs=yes])
+
     AC_OUTPUT
   ])
 
