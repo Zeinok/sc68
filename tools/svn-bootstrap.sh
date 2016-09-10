@@ -13,6 +13,7 @@ set -e
 me="svn-bootstrap.sh"
 ln_s="ln -sf --"
 cp_r="cp -R --"
+rm_f="rm -f --"
 vifs="-vifs"
 linking="Linking"
 
@@ -103,8 +104,16 @@ testdir() {
     return 0
 }
 
+rm_if_exists() {
+    if [ -e "$1" ]; then
+	msg "Removing $1"
+	$rm_f "$1"
+    fi
+}
+
 # $1: source  $2: destination
 ln_or_cp() {
+    rm_if_exists "$2"
     msg "${linking} '$1' -> '$2'"
     $ln_s "$1" "$2" ||
     $cp_r "$1" "$2"
@@ -112,6 +121,7 @@ ln_or_cp() {
 
 # $1: source  $2: destination
 ln_or_cp_x() {
+    rm_if_exists "$2"
     msg "${linking} executable '$1' -> '$2'"
     $ln_s "$1" "$2" || {
 	$cp_r "$1" "$2";
