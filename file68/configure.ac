@@ -150,7 +150,7 @@ AS_IF(
   [
     AC_DEFINE_UNQUOTED(
       [CURL_SCHEMES],
-      [`AS_ECHO_N(["$curl_SCHEMES"])|sed -e 's/ \{1,\}/,/g; s/\(@<:@_a-zA-Z0-9@:>@{1,\}\)/"\1"/g'`],
+      [`AS_ECHO_N(["$curl_SCHEMES"])|sed -e 's/ \{1,\}/,/g; s/\(@<:@_a-zA-Z0-9@:>@\{1,\}\)/"\1"/g'`],
       [Supported curl schemes])
    ])
 
