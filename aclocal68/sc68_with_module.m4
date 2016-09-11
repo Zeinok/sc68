@@ -415,10 +415,6 @@ AC_DEFUN([SC68_WITH_PACKAGE],
     AS_IF(
       [test "$has_$1/${$1_srcdir+set}" = yes/set],
       [AC_MSG_CHECKING([whether $1 source is at '$4' ])
-
-       echo '$1_srcdir: '"${$1_srcdir}"
-       echo '.........  '"`cd $srcdir/$4 2>/dev/null && pwd`"
-       
        AS_IF(
          [test X"${$1_srcdir}" = X`cd $srcdir/$4 2>/dev/null && pwd`],
          [AC_MSG_RESULT([yes])
