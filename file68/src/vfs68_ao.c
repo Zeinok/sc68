@@ -366,20 +366,27 @@ static int isao_open(vfs68_t * vfs)
 #ifdef HAVE_AO_FILE_EXTENSION
     const char * ext = ao_file_extension(is->ao.driver_id);
 #else
-    const char * ext = ".out";
+    /* If ao_file_extension() is missing (libao export bug) try to
+     * guess the extension based on the short name of the driver.
+     */
+    const char * ext = "out";
     static const char * exts[] = {
-      ".wav", ".iff", ".raw", ".au", ".mp3", ".ogg"
+      "wav", "iff", "raw", "au", "mp3", "ogg"
     };
     int e;
     for (e = 0; e < sizeof(exts)/sizeof(*exts); ++e)
-      if (!strcmp68(info->short_name,exts[e]+1)) {
+      if (!strcmp68(info->short_name,exts[e])) {
         ext = exts[e];
         break;
       }
 
 #endif
-    strcpy(is->defoutname,"sc68");
-    strcat68(is->defoutname,ext,sizeof(is->defoutname)-1);
+    strcpy(is->defoutname,"sc68-out");
+    if (ext && *ext) {
+      if (*ext != '.')
+        strcat68(is->defoutname,".",sizeof(is->defoutname)-1);
+      strcat68(is->defoutname,ext,sizeof(is->defoutname)-1);
+    }
     is->outname = is->defoutname;
     TRACE68(ao68_cat,
             AOHD "open -- default *FILENAME* '%s'\n", is->outname);
