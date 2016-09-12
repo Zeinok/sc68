@@ -108,6 +108,7 @@ m4_define([_SC68_WITH_DUMP],
  PAC_PRIV_LIBS=[$]{PRIV_LIBS-<unset>}
 --------
  srcdir : [$]{srcdir}
+ PKG_CONFIG: [$]{PKG_CONFIG-<unset>}
 --------
  LIBS   : [$]LIBS
  CFLAGS : [$]CFLAGS
