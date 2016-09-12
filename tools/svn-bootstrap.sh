@@ -57,6 +57,34 @@ EOF
     shift
 done    
 
+# $1:VARNAME $2:toolname
+testautotool() {
+    local tool res
+    eval tool=\"\$$1\"
+    if test X"$tool" != X; then
+	msg "Checking for $2 defined by $1 as '$tool'"
+	if test -x "$tool"; then
+	    eval export $1
+	    return 0
+	else
+	    error "missing preconfigured $2 -- '$tool'"
+	    return 1
+	fi
+    fi
+
+    if testtool "$2"; then
+	return 0
+    fi
+
+    if test $1 = LIBTOOLIZE; then
+	if testtool glibtoolize; then
+	    export LIBTOOLIZE="`which glibtoolize`"
+	    return 0
+	fi
+    fi
+    return 1
+}
+
 # $1:tool  $2:what-if-not
 testtool() {
     local tool="$1"
@@ -195,6 +223,20 @@ bootstrap_dir() {
 
 # Test some required tools
 # ------------------------
+
+# Added test for autotools trying to honor user defined environment
+# variables
+set -e
+testautotool AUTOCONF autoconf
+testautotool AUTOM4TE autom4te
+testautotool AUTOCONF autoconf
+testautotool AUTOHEADER autoheader
+testautotool AUTOMAKE automake
+testautotool ACLOCAL aclocal
+# testautotool AUTOPOINT autopoint # Don't need autopoint for now
+testautotool LIBTOOLIZE libtoolize
+testautotool M4 m4
+testautotool MAKE make 
 
 # ben (2016-08-29): not required anymore since doc is disable
 #testtool help2man    "missing help2man -- install package 'help2man'"
