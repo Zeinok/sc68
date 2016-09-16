@@ -25,7 +25,24 @@ AC_DEFUN_ONCE([SC68_PACKAGE],
       [gb_CFLAGS],
       [Supplemental libtool CFLAGS])
 
+    dnl # Disable assert by default
+    dnl # --enable-assert we'll trigger debug mode
+    AS_IF([test X${enable_assert+set} != Xset],[enable_assert=no],
+          [AS_IF([test X${enable_assert} = Xyes],
+                 [set -- $CPPFLAGS $gb_CFLAGS $CFLAGS $CXXFLAGS
+                  while test [$]# -ne 0; do
+                    AS_CASE(["X[$]1"],
+                            [X-UDEBUG | X-DDEBUG | X-DDEBUG=*],
+                            [break])
+                    shift
+                  done
+                  AS_IF([test [$]# -eq 0],
+                        [gb_CFLAGS="${gb_CFLAGS}${gb_CFLAGS+ }-DDEBUG=0"])
+                 ])
+          ])
+
     SC68_CPPFLAGS([gb_CPPFLAGS],[gb_CFLAGS])
+
 
     dnl # Define PACKAGE description
     dnl # --------------------------
