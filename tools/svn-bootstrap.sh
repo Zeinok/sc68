@@ -238,6 +238,8 @@ testautotool LIBTOOLIZE libtoolize
 testautotool M4 m4
 testautotool MAKE make 
 
+testtool pkg-config
+
 # ben (2016-08-29): not required anymore since doc is disable
 #testtool help2man    "missing help2man -- install package 'help2man'"
 #testtool texinfo2man "missing texinfo2man -- compile and install 'tools/texinfo2man.c'"
