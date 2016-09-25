@@ -40,7 +40,6 @@
 #define timerfrq(V) bogotohz(cpp(V))
 
 #define MYHD "mfp    : "
-
 #define MFP_VECTOR_BASE (mfp->map[0x17] & 0xF0)
 #define SEI             (mfp->map[0x17] & 0x08)
 #define AEI             (!SEI)
@@ -180,7 +179,7 @@ void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
   if (bogoc > ptimer->cti) {
     TRACE68(mfp_cat,
           MYHD "timer-%c -- reconf out of range -- @%u > cti:%u\n",
-          ptimer->def.letter, (unsigned) bogoc, (unsigned) ptimer->cti);
+          ptimer->def.letter, (uint_t) bogoc, (uint_t) ptimer->cti);
     ptimer->cti = bogoc + psw * ptimer->tdr_res;
   } else {
     ptimer->cti = bogoc + psr + (tdr-1) * new_psw;
@@ -191,9 +190,9 @@ void reconf_timer(mfp_timer_t * const ptimer, int tcr, const bogoc68_t bogoc)
 
   TRACE68(mfp_cat,
           MYHD "timer-%c -- reconf @%u cti:%u cpp:%u -- %u:%uhz\n",
-          ptimer->def.letter, (unsigned) bogoc,
-          (unsigned) ptimer->cti, (unsigned) cpp(ptimer->tdr_res),
-          (unsigned) frq, (unsigned) timerfrq(ptimer->tdr_res));
+          ptimer->def.letter, (uint_t) bogoc,
+          (uint_t) ptimer->cti, (uint_t) cpp(ptimer->tdr_res),
+          (uint_t) frq, (uint_t) timerfrq(ptimer->tdr_res));
 }
 
 /* Stop a running timer: tcr !0->0
@@ -237,11 +236,11 @@ void resume_timer(mfp_timer_t * const ptimer, int tcr, bogoc68_t bogoc)
   TRACE68(mfp_cat,
           MYHD "timer-%c  -- resume @%u cti:%u cpp:%u "
           "tdr:%u/%u psw:%u(%u) -- %uhz\n",
-          ptimer->def.letter, (unsigned) bogoc, (unsigned) ptimer->cti,
-          (unsigned) cpp(ptimer->tdr_res),
-          (unsigned) ptimer->tdr_cur, (unsigned) ptimer->tdr_res,
-          (unsigned) prediv_width[ptimer->tcr], (unsigned) ptimer->tcr,
-          (unsigned) timerfrq(ptimer->tdr_res));
+          ptimer->def.letter, (uint_t) bogoc, (uint_t) ptimer->cti,
+          (uint_t) cpp(ptimer->tdr_res),
+          (uint_t) ptimer->tdr_cur, (uint_t) ptimer->tdr_res,
+          (uint_t) prediv_width[ptimer->tcr], (uint_t) ptimer->tcr,
+          (uint_t) timerfrq(ptimer->tdr_res));
 }
 
 /* Read timer data register:
@@ -303,7 +302,7 @@ void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
     ptimer->tdr_cur = v;
     TRACE68(mfp_cat,
           MYHD "timer-%c -- reload TDR @%u -- %u\n",
-            ptimer->def.letter, (unsigned) bogoc, (unsigned) ptimer->tdr_res);
+            ptimer->def.letter, (uint_t) bogoc, (uint_t) ptimer->tdr_res);
   }
 #ifndef NDEBUG
   else if (ptimer->tcr && v != old_tdr) {
@@ -311,11 +310,11 @@ void mfp_put_tdr(mfp_t * const mfp, int timer, int68_t v, const bogoc68_t bogoc)
     TRACE68(mfp_cat,
             MYHD "timer-%c -- change @%u cti:%u psw:%u(%u) cpp:%u"
             " -- %u(%u) -> %u(%u)hz\n",
-            ptimer->def.letter, (unsigned) bogoc, (unsigned) ptimer->cti,
-            (unsigned) prediv_width[ptimer->tcr], (unsigned) ptimer->tcr,
-            (unsigned) cpp(ptimer->tdr_res),
-            (unsigned) old_frq, (unsigned) old_tdr,
-            (unsigned) timerfrq(ptimer->tdr_res), (unsigned) ptimer->tdr_res);
+            ptimer->def.letter, (uint_t) bogoc, (uint_t) ptimer->cti,
+            (uint_t) prediv_width[ptimer->tcr], (uint_t) ptimer->tcr,
+            (uint_t) cpp(ptimer->tdr_res),
+            (uint_t) old_frq, (uint_t) old_tdr,
+            (uint_t) timerfrq(ptimer->tdr_res), (uint_t) ptimer->tdr_res);
   }
 #endif
 }
@@ -357,7 +356,7 @@ void mfp_put_tcr(mfp_t * const mfp,
       TRACE68(mfp_cat,
               MYHD "timer-%c -- %s-mode not supported --  %02x\n",
               timer_def[timer].letter,
-              v == 8 ? "event-count" : "pulse-width", v);
+              v == 8 ? "event-count" : "pulse-width", (uint_t) v);
       assert(!"mfp mode not supported");
       v = 0;                            /* stop timer disable  */
     }
@@ -462,7 +461,7 @@ void mfp_adjust_bogoc(mfp_t * const mfp, const bogoc68_t bogoc)
       if (ptimer->cti < bogoc) {
         TRACE68(mfp_cat,
               MYHD "timer-%c -- adjust -- cti:%u cycle:%u\n",
-              ptimer->def.letter, (unsigned) ptimer->cti, (unsigned) bogoc);
+              ptimer->def.letter, (uint_t) ptimer->cti, (uint_t) bogoc);
       }
       assert(ptimer->cti >= bogoc);
       while (ptimer->cti < bogoc) {
