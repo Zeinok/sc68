@@ -39,20 +39,52 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#if defined(_MSC_VER)
+
+#ifdef _MSC_VER
 # include <stdio.h>
 # include <io.h>
+# include <fcntl.h>
 #else
-# include <unistd.h>
+# ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+# endif
+# ifdef HAVE_FCNTL_H
+#  include <fcntl.h>
+# endif
 #endif
-#include <fcntl.h>
+
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 
+#ifndef STDIN_FILENO
+# define STDIN_FILENO 0
+#endif
+
+#ifndef STDOUT_FILENO
+# define STDOUT_FILENO 1
+#endif
+
+#ifndef STDERR_FILENO
+# define STDERR_FILENO 2
+#endif
+
+/* TODO: maybe a better version of that */
+static int stdin_fileno(void) {
+  return STDIN_FILENO;
+}
+
+static int stdout_fileno(void) {
+  return STDOUT_FILENO;
+}
+
+static int stderr_fileno(void) {
+  return STDERR_FILENO;
+}
+
 /** vfs file structure. */
 typedef struct {
-  vfs68_t vfs;            /**< vfs function.            */
+  vfs68_t vfs;                    /**< vfs function.                */
   int fd;                         /**< File descriptor (-1:closed). */
   int org_fd;                     /**< Original file descriptor.    */
   int mode;                       /**< Open modes.                  */
@@ -113,7 +145,7 @@ static int ifdopen(vfs68_t * vfs)
   int imode;
   vfs68_fd_t * isf = (vfs68_fd_t *)vfs;
 
-  if (!isf->name || isf->fd != -1) {
+  if (!*isf->name || isf->fd != -1) {
     return -1;
   }
 
@@ -174,10 +206,10 @@ static int ifdwrite(vfs68_t * vfs, const void * data, int n)
     ;
 }
 
-#if defined(HAVE_FDATASYNC)
-# define MY_FSYNC(fd) fdatasync(fd)
-#elif defined(HAVE_FSYNC)
+#if defined(HAVE_FSYNC)
 # define MY_FSYNC(fd) fsync(fd)
+#elif defined(HAVE_FDATASYNC)
+# define MY_FSYNC(fd) fdatasync(fd)
 #else
 # define MY_FSYNC(fd) 0
 #endif
@@ -304,17 +336,17 @@ static vfs68_t * fd_create(const char * uri, int mode,
     uri += 8;
   else if (!strncmp68(uri,"stdin:", 6))
     return (mode & 3) == 1
-      ? create(0, 0, mode)
+      ? create(0, stdin_fileno(), mode)
       : 0
       ;
   else if (!strncmp68(uri,"stdout:", 7))
     return (mode & 3) == 2
-      ? create(0, 1, mode)
+      ? create(0, stdout_fileno(), mode)
       : 0
       ;
   else if (!strncmp68(uri,"stderr:", 7))
     return (mode & 3) == 2
-      ? create(0, 2, mode)
+      ? create(0, stderr_fileno(), mode)
       : 0
       ;
 
