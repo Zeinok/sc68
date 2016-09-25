@@ -367,8 +367,6 @@ int option68_append(option68_t * options, int n)
 {
   int i;
 
-  if (! (options && n > 0) )
-    *(int*)0 = 0;
   assert(options && n > 0);
 
   for (i=0; i<n; ++i) {
