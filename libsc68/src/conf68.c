@@ -196,7 +196,7 @@ int config68_save(const char * confname)
     const int sizeof_config_hd = sizeof(config_header)-1;
 
     strncpy(tmp, "sc68://config/", sizeof(tmp));
-    strncat(tmp, confname, sizeof(tmp));
+    strcat68(tmp, confname, sizeof(tmp));
     os = uri68_vfs(tmp, 2, 0);
     err = vfs68_open(os);
     if (!err) {
@@ -256,7 +256,7 @@ static int load_from_registry(const char * confname)
 
     for (k=0; k<2; ++k) {
       strncpy(path, paths[k], sizeof(path));
-      strncat(path, opt->name, sizeof(path));
+      strcat68(path, opt->name, sizeof(path));
 
       TRACE68(config68_cat, "conf68: trying -- '%s'\n", path);
       switch (opt->type) {

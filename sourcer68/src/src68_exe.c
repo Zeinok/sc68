@@ -42,6 +42,7 @@
 # include <sc68/file68_msg.h>
 # include <sc68/file68_opt.h>
 # include <sc68/file68_zip.h>
+# include <sc68/file68_str.h>
 
 static void * myopen(char * uri)
 {
@@ -311,7 +312,7 @@ static exe_t * load_as_sc68(char * uri, uint_t org, uint8_t * data, int size)
     if (mus->replay) {
       char replay[64];
       strcpy(replay,"sc68://replay/");
-      strncat(replay,mus->replay, sizeof(replay));
+      strcat68(replay,mus->replay, sizeof(replay));
       replay[sizeof(replay)-1] = 0;
       replay_len = load_bin(replay, &replay_buf);
       dmsg("replay '%s'  loaded as %d bytes\n", replay, replay_len);
