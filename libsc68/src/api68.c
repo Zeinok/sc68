@@ -1621,6 +1621,9 @@ static int run_music_init(sc68_t * sc68, const music68_t * m, int a0, int a6)
   sc68->emu68->reg.a[6] = a6;           /* original replay address  */
   sc68->emu68->reg.d[7] = sc68->asid_timers;
 
+  /* Tell dirty sndh we support them */
+  sc68->emu68->reg.d[3] = MK4CC('S','N','D','P');
+
   /* Run music init code. */
   sc68->emu68->cycle = 0;
   TRACE68(sc68_cat," -> %s\n","running music init code ...");
