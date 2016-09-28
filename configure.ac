@@ -50,7 +50,7 @@ AC_ARG_ENABLE(
   [AS_HELP_STRING(
       [--enable-sc68-tools],
       [enable optionnal developer tools])],
-  [],[enable_sc68_tools=no])
+  [],[enable_sc68_tools=tbd])
 
 AC_ARG_ENABLE(
   [sc68-bins],
@@ -68,6 +68,8 @@ AC_ARG_ENABLE(
 
 # Dev Tools
 SC68_ENABLE_PACKAGE([as68],[68k macro assembler],[$enable_sc68_tools])
+AS_IF([test X"$enable_sc68_tools" = Xtbd],[enable_sc68_tools=no])
+
 SC68_ENABLE_PACKAGE([sourcer68],[68k sourcer],[$enable_sc68_tools])
 SC68_ENABLE_PACKAGE([mksc68],[sc68 toolbox],[$enable_sc68_tools])
 SC68_ENABLE_PACKAGE([desa68],[68k disassembler library],[$enable_sc68_tools])
@@ -84,6 +86,26 @@ SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[$enable_sc68_bins])
 # DOC (disable for now)
 SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])
 
+AS_IF(
+  [test X"$enable_as68" = Xtbd],
+  [
+    AS_IF(
+      [test "$enable_libsc68/$cross_compiling" != yes/no],
+      [enable_as68=no],
+      [AC_MSG_CHECKING([for trap68.h i][n libsc68])
+       AS_IF(
+         [test -e "$srcdir/libsc68/sc68/trap68.h"],
+         [enable_as68=no;
+          AC_MSG_RESULT([yes])],
+         [AC_MSG_RESULT([no])
+          AC_CHECK_PROG([as68],[as68],[],[false])
+          AS_IF([test X"$as68" = Xfalse],
+                [AS_UNSET([as68])
+                 AS_UNSET([ac_cv_prog_as68])
+                 enable_as68=yes],
+                [enable_as68=no])])])
+  ])
+
 # ,----------------------------------------------------------------------.
 # | Package Dependencies                                                 |
 # `----------------------------------------------------------------------'
@@ -96,45 +118,41 @@ SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])
 # | Subdirs                                                              |
 # `----------------------------------------------------------------------'
 
-if test Xyes = X"${enable_as68}"
-then AC_CONFIG_SUBDIRS([as68])
-fi
+AS_IF([test Xyes = X"$enable_as68"],
+      [AC_CONFIG_SUBDIRS([as68])
+       AS_IF(
+         [test yes = "$enable_libsc68${as68+no}"],
+         [as68='$(builddir)/../as68/as68$(EXEEXT)'
+          ac_configure_args="$ac_configure_args 'as68=$as68'"
+         ])
+      ])
 
-if test Xyes = X"${enable_desa68}"
-then AC_CONFIG_SUBDIRS([desa68])
-fi
+AS_IF([test Xyes = X"$enable_desa68"],
+      [AC_CONFIG_SUBDIRS([desa68])])
 
-if test Xyes = X"${enable_unice68}"
-then AC_CONFIG_SUBDIRS([unice68])
-fi
+AS_IF([test Xyes = X"$enable_unice68"],
+      [AC_CONFIG_SUBDIRS([unice68])])
 
-if test Xyes = X"${enable_file68}"
-then AC_CONFIG_SUBDIRS([file68])
-fi
+AS_IF([test Xyes = X"$enable_file68"],
+      [AC_CONFIG_SUBDIRS([file68])])
 
-if test Xyes = X"${enable_info68}"
-then AC_CONFIG_SUBDIRS([info68])
-fi
+AS_IF([test Xyes = X"$enable_info68"],
+      [AC_CONFIG_SUBDIRS([info68])])
 
-if test Xyes = X"${enable_sourcer68}"
-then AC_CONFIG_SUBDIRS([sourcer68])
-fi
+AS_IF([test Xyes = X"$enable_sourcer68"],
+      [AC_CONFIG_SUBDIRS([sourcer68])])
 
-if test Xyes = X"${enable_libsc68}"
-then AC_CONFIG_SUBDIRS([libsc68])
-fi
+AS_IF([test Xyes = X"$enable_libsc68"],
+      [AC_CONFIG_SUBDIRS([libsc68])])
 
-if test Xyes = X"${enable_sc68}"
-then AC_CONFIG_SUBDIRS([sc68])
-fi
+AS_IF([test Xyes = X"$enable_sc68"],
+      [AC_CONFIG_SUBDIRS([sc68])])
 
-if test Xyes = X"${enable_mksc68}"
-then AC_CONFIG_SUBDIRS([mksc68])
-fi
+AS_IF([test Xyes = X"$enable_mksc68"],
+      [AC_CONFIG_SUBDIRS([mksc68])])
 
-# if test Xyes = X"${enable_sc68_doc}"
-# then AC_CONFIG_SUBDIRS([sc68-doc])
-# fi
+# AS_IF([test Xyes = X"$enable_sc68_doc"],
+#       [AC_CONFIG_SUBDIRS([sc68-doc])])
 
 AC_SUBST([subdirs])
 

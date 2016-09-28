@@ -30,7 +30,6 @@ m4_define([SC68__ENABLE_PACKAGE],
           [test "$has_$2/$enable_$2" = "no/yes"],
           [AC_MSG_ERROR([unable to configure requested package ($1)])])
       ])
-    enable_$2=$has_$2
   ])
 
 # SC68_ENABLE_PACKAGE([PACKAGE],[DESC],[DEFVAL])
