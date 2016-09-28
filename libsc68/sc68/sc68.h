@@ -333,13 +333,17 @@ enum sc68_cntl_e {
 
 SC68_API
 /**
- * Get version number
+ * Get version number.
+ *
+ * @retval MAJOR<<28 + MINOR<<20 + PATCH<<12 + TWEAK
  */
 int sc68_version(void);
 
 SC68_API
 /**
- * Get version string
+ * Get version string.
+ *
+ * @retval "libsc68 MAJOR.MINOR.PATCH.TWEAK"
  *
  */
 const char * sc68_versionstr(void);

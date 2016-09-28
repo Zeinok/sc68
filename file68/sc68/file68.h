@@ -96,25 +96,6 @@ enum  {
  */
 typedef unsigned int hwflags68_t;
 
-/* typedef union { */
-/*   struct { */
-/*     unsigned psg:1;       /\**< Require YM-2149 (ST PSG)       *\/ */
-/*     unsigned dma:1;       /\**< Require STE DMA sound.         *\/ */
-/*     unsigned aga:1;       /\**< Require Amiga/paula hardware.  *\/ */
-/*     unsigned xtd:1;       /\**< Extended info available.       *\/ */
-/*     unsigned lmc:1;       /\**< xtd: Require LMC-1992.         *\/ */
-/*     unsigned mfp:4;       /\**< xtd: MFP timers (1 bit/timer). *\/ */
-/*     unsigned hbl:1;       /\**< xtd: HBL interrupt.            *\/ */
-/*     unsigned blt:1;       /\**< xtd: STE/Mega-ST blitter.      *\/ */
-/*     unsigned dsp:1;       /\**< xtd: Falcon DSP.               *\/ */
-/*   } bit;                  /\**< Flags bit field.               *\/ */
-/*   unsigned clr;           /\**< All flags (clear only).        *\/ */
-/* } hwflags68_t; */
-
-
-
-
-
 /**
  * SC68 music (track) structure.
  */
@@ -456,7 +437,7 @@ FILE68_API
 /**
  * Get package version string.
  *
- * @return "file68 X.Y.Z"
+ * @retval "file68 MAJOR.MINOR.PATCH.TWEAK"
  */
 const char * file68_versionstr(void);
 
@@ -464,7 +445,7 @@ FILE68_API
 /**
  * Get package version number.
  *
- * @return X*100+Y*10+Z
+ * @retval MAJOR<<28 + MINOR<<20 + PATCH<<12 + TWEAK
  */
 int file68_version(void);
 

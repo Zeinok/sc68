@@ -408,21 +408,19 @@ DESA68_API
  */
 int desa68(desa68_t *d);
 
-
 DESA68_API
 /**
- * Get version number.
+ * Get desa68 version number.
  *
- * @return MAJOR*1E8 + MINOR*1E6 + PATCH*1E4 + TWEAK
+ * @retval MAJOR<<28 + MINOR<<20 + PATCH<<12 + TWEAK
  */
 int desa68_version(void);
 
-
 DESA68_API
 /**
- * Get version string.
+ * Get desa68 version string.
  *
- * @return version string (MAJOR.MINOR.PATCH.TWEAK).
+ * @retval "desa68 MAJOR.MINOR.PATCH.TWEAK"
  */
 const char * desa68_versionstr(void);
 

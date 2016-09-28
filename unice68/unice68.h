@@ -51,33 +51,33 @@
 
 UNICE68_API
 /**
- *  Get unice68 version.
+ *  Get unice68 version number.
  *
- *  @return MAJOR*1E8 + MINOR*1E6 + PATCH*1E4 + TWEAK
+ *  @retval MAJOR<<28 + MINOR<<20 + PATCH<<12 + TWEAK
  */
 int unice68_version(void);
 
 UNICE68_API
 /**
- *  Get unice68 version.
+ *  Get unice68 version string.
  *
- *  @return version string
+ *  @retval "unice68 MAJOR.MINOR.PATCH.TWEAK ICE! 2.35/2.40"
  */
 const char * unice68_versionstr(void);
 
 UNICE68_API
 /**
- *  Get ICE depacker version.
+ *  Get ICE depacker version number.
  *
- *  @return version number (MAJOR*100+MINOR)
+ *  @retval 0x240 (MAJOR*256+MINOR)
  */
 int unice68_unice_version(void);
 
 UNICE68_API
 /**
- *  Get ICE packer version.
+ *  Get ICE packer version number.
  *
- *  @return version number (MAJOR*100+MINOR)
+ *  @retval 0x235 (MAJOR*256+MINOR)
  */
 int unice68_ice_version(void);
 

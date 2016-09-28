@@ -348,17 +348,15 @@ int file68_version(void)
   }
 
   if (v[0] >= 19700101 && !v[2] && !v[3]) {
-    /* Date conversion. */
-    v[3] = v[1];
-    v[1] = v[0] / 100u % 100u;
-    v[2] = v[0] % 100u;
-    v[0] = v[0] / 10000u;
+    /* Date conversion (after year 2047 32bit int be negative). */
+    unsigned int y = v[0]/1000u, m = v[0]/100u%100u, d=v[0]%100u;
+    return (y<<21) | (m<<17) | (d<<12) | v[1];
   }
 
   return 0
-    + v[0] * 100000000u
-    + v[1] *   1000000u
-    + v[2] *     10000u
+    + (v[0] << 28)
+    + (v[1] << 20)
+    + (v[2] << 12)
     + v[3]
     ;
 }
