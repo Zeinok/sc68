@@ -36,6 +36,11 @@ AC_USE_SYSTEM_EXTENSIONS
 LT_INIT([win32-dll])
 LT_LANG([Windows Resource])
 
+AC_SUBST([VER_MAJOR],[VERSION_MAJOR])
+AC_SUBST([VER_MINOR],[VERSION_MINOR])
+AC_SUBST([VER_PATCH],[VERSION_PATCH])
+AC_SUBST([VER_TWEAK],[VERSION_TWEAK])
+
 # ,----------------------------------------------------------------------.
 # | sc68                                                                 |
 # `----------------------------------------------------------------------'
@@ -155,13 +160,14 @@ AC_CHECK_FUNCS(
 # ,----------------------------------------------------------------------.
 # | Output                                                               |
 # `----------------------------------------------------------------------'
-AC_CONFIG_FILES([
-    Makefile
-    emu68/Makefile
-    io68/Makefile
-    dial68/Makefile
-    dial68/winui/Makefile
-    sc68.pc])
+AC_CONFIG_FILES(
+  [Makefile
+   asm/version.s
+   emu68/Makefile
+   io68/Makefile
+   dial68/Makefile
+   dial68/winui/Makefile
+   sc68.pc])
 SC68_OUTPUT
 
 # ,----------------------------------------------------------------------.

@@ -5,10 +5,6 @@
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
 
-	;; Unhandled trap vector and function will execute a stop with a
-	;; special value followed by a reset. The value is used to detect
-	;; this code and to identify which vector was called.
-
 StackSize = 1024	
 STOP_VAL  = $2F20
 
@@ -17,10 +13,9 @@ MACHINE_FALCON30	= $00030000
 MACHINE_STE 		= $00010000
 MACHINE_MEGA_STE	= $00010010
 MACHINE_TT		= $00020000
-
-	;; This is the address used by libsc68/api.c but it should be
-	;; PIC anyway. Still mksc68 rely on this code to be loaded at
-	;; $1000 and timerc being at $1002
+MACHINE_ARANYM		= $00000005
+MACHINE_MILAN		= $00040000
+MACHINE_FREESLOT	= $00060000
 	
 	org	$1000
 	
@@ -34,6 +29,9 @@ timerc:
 .aei:	
 	rte
 
+	;; Unhandled trap vector and function will execute a stop with a
+	;; special value followed by a reset. The value is used to detect
+	;; this code and to identify which vector was called.
 	
 ;;; Install trap vectors
 ;;; 
@@ -46,9 +44,10 @@ install_trap:
 	;; Install cookie jar for machine detection
 	;;
 	;; $$$ Disable ATM because it breaks sndh quartet replay
-	;; 
 	;; lea	cookie_jar(pc),a0
-	;; move.l	a0,$5a0.w
+	;; Still installing "SC68" cookie for dirty sndh hack.
+	lea	cookie_sc68(pc),a0
+	move.l	a0,$5a0.w
 
 	;; Install trap vectors for GEMDOS and XBIOS
 	lea	irte(pc),a0
@@ -458,4 +457,8 @@ xbtimer:
 	bra	trap_close
 	
 cookie_jar:
-	dc.l	"_MCH",MACHINE_STE,0
+	dc.l	"_MCH",MACHINE_STE
+cookie_sc68:
+	include	"asm/version.s"
+	dc.l	"SC68",VERNUM
+	dc.l	0

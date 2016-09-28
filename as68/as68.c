@@ -105,7 +105,7 @@ void find_curdir(char *n)
   memcpy(cur_dir, n, l);
   cur_dir[l] = 0;
 
-  debug_printf("find_curdir(\"%s\") = \"%s\"/n", n, cur_dir);
+  debug_printf("find_curdir(\"%s\") = \"%s\"\n", n, cur_dir);
 }
 
 /* ext = ".xxx" */
