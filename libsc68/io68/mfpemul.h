@@ -20,8 +20,8 @@
  * @brief     MFP-68901 (Atari-ST timers) emulator.
  *
  *  Motorola Multi Function Peripheral is a multi purpose IO chip:
- * - 8 bit parallele port.
- * - Each bit has indepedant direction
+ * - 8 bit parallel port.
+ * - Each bit has independent direction
  * - Each bit can be a interruption source
  * - 16 interruption sources
  * - 4 universal timers (most part of this emulator)
@@ -33,14 +33,14 @@
  * - 00 @b GPIP (General Purpose I/O Interrupt port):
  *
  *   Data Register for the 8 bit port for reading or writing.
- *   - bit#0 : Centronics (parrallele port)
+ *   - bit#0 : Centronics (parallel port)
  *   - bit#1 : Rs232 carrier detection
  *   - bit#1 : Rs232 CTS (clear to send)
  *   - bit#3 : Blitter
  *   - bit#4 : MIDI/Keyboard irq
  *   - bit#5 : FDC/DMA interrupt
  *   - bit#6 : Rs232 ring
- *   - bit#7 : Monochorm monitor detect
+ *   - bit#7 : Monochrome monitor detect
  *
  * - 01 @b AER (Active Edge Register):
  *
@@ -53,7 +53,7 @@
  *   generate an interrupt on the one-to-zero transition. Writing a
  *   one to the edge bit produces an interrupt on the zero-to-one
  *   transition of the corresponding line. When the processor sets a
- *   bit, inter-rupts will be generated on the rising edge of the
+ *   bit, interrupts will be generated on the rising edge of the
  *   associated input signal. When the processor clears a bit,
  *   interrupts will be generated on the falling edge of the
  *   associated input signal.
@@ -148,12 +148,12 @@
  *
  *   In AEI mode the bit is cleared after the MFP has produced the
  *   interruption vector and a new event can trigger a new
- *   interruption while another is been proced by the CPU. In SEI mode
- *   the bit is set and the interrupt routine have to clear it by
+ *   interruption while another is been proceed by the CPU. In SEI
+ *   mode the bit is set and the interrupt routine have to clear it by
  *   writing this register (~1<<bit). While ISR bit is 1 all less
- *   prioritary bit are unmasked (?). When IPR is cleared (vector has
+ *   proprietary bit are unmasked (?). When IPR is cleared (vector has
  *   been produced) a similar interrupt may occur. Anyway this
- *   interruption and the one less prioritary can be process only if
+ *   interruption and the one less proprietary can be process only if
  *   ISR is disabled.
  *
  *   These registers indicate whether interrupt processing is in
@@ -167,7 +167,7 @@
  * - 09 @b IMRA (Interrupt Mask Register A)
  * - 0A @b IMRB (Interrupt Mask Register B)
  *
- *   If register allow ennable interrupt event to occur but not to
+ *   If register allow enable interrupt event to occur but not to
  *   produce an interrupt if corresponding bit in IMR is clear.
  *
  *   Interrupts are masked for a channel by clearing the appropriate
@@ -216,8 +216,8 @@
  *
  * - 13 @b SCR (Synchronous Character Register)
  *
- *   Within a syncronous data transfer writing a specific value in
- *   this register use to start transfer as soon has it is recieved.
+ *   Within a synchronous data transfer writing a specific value in
+ *   this register use to start transfer as soon has it is received.
  *
  * - 14 UCR,USART (Control Register)
  *
@@ -225,14 +225,14 @@
  *   - bit#0   : unused
  *   - bit#1   : 0:odd 1:even
  *   - bit#2   : 0:parity-off 1:parity-on
- *   - bit#3-4 : Transfert mode
+ *   - bit#3-4 : Transfer mode
  *              -00 Start 0, Stop 0, Synchronous
  *              -01 Start 1, Stop 1, Asynchronous
  *              -10 Start 1, Stop 1.5, Asynchronous
  *              -11 Start 1, Stop 2, Asynchronous
  *   - bit#5-6 : Data Length (8-value)
- *   - bit#7   : 0 use Timer-C frequency directly (synchornous only),
- *              1 use predivisor by 16
+ *   - bit#7   : 0 use Timer-C frequency directly (synchronous only),
+ *              1 use pre-divisor by 16
  *
  * - 15 RSR (Receiver Status Register)
  *
@@ -245,7 +245,7 @@
  *   - bit#6 : Overrun Error
  *   - bit#7 : Buffer Full
  *
- * - 16 TSR (Tranmitter Status Register)
+ * - 16 TSR (Transmitter Status Register)
  *
  *   - bit#0 : Transmitter Enable
  *   - bit#1 : High bit
@@ -256,9 +256,9 @@
  *   - bit#6 : Underrun Error
  *   - bit#7 : Buffer Empty
  *
- * - 17 UDR,USART (DataRegister)
+ * - 17 UDR,USART (Data Register)
  *
- *      Data to send (write access) or recieve (read access)
+ *      Data to send (write access) or receive (read access)
  *
  * @p MFP interrupt vector table
  *
@@ -268,7 +268,7 @@
  * - x0 (initially disabled)-Parallel port interrupt handler
  * - x1 (initially disabled)-RS-232 carrier detect pin handler
  * - x2 (initially disabled)-RS-232 clear to send pin handler
- * - x3 (initially disabled)-Graphics blitter chip done interrupt
+ * - x3 (initially disabled)-Graphics Blitter chip done interrupt
  *      handler (see below!)
  * - x4 (initially disabled) MFP Timer D done handler
  * - x5 200Hz System Clock (MFP Timer C) Handler
@@ -281,14 +281,14 @@
  * - xC RS-232 receive buffer full handler
  * - xD (initially disabled) MFP timer A
  * - xE (initially disabled) RS-232 ring detect pin
- * - xF (initially disabled) Monochrome/color monitor change detecter
+ * - xF (initially disabled) Monochrome/color monitor change detected
  *
  *
  * Technical Summary
  *
  * Multifunction Peripheral
  *
- *   The MC68901 multifunction peripheral (MFP) is a member of the
+ *   The MC68901 multi-function peripheral (MFP) is a member of the
  *   M68000 Family of peripherals. The MFP directly interfaces with
  *   the MC68000 microprocessor via the asynchronous bus
  *   structure. Both vectored and polled interrupt schemes are
@@ -305,7 +305,7 @@
  *     Capability
  *   * 16-Source Interrupt Controller with Individual Source Enable
  *     and Masking
- *   * Four Timers, Two of which Are Multimode Timers
+ *   * Four Timers, Two of which Are multi-mode Timers
  *   * Single-Channel, Full-Duplex Universal Synchronous/Asynchronous
  *     Receiver-Transmitter (USART) That Supports Asynchronous and,
  *     with the Addition of a Polynomial Generator Checker, Byte
@@ -335,13 +335,13 @@
  *   is internally generated by the MFP. Pending interrupts are
  *   presented to the processor in order of priority unless they have
  *   been masked. By selectively masking interrupts, the channels are,
- *   in effect, reprioritized.
+ *   in effect, re-prioritized.
  *
  * Interrupt Vector Number
  *
  *   During an interrupt acknowledge cycle, a unique 8-bit interrupt
  *   vector number, which corresponds to the specific interrupt source
- *   requesting service, is pre-sented to the system.
+ *   requesting service, is presented to the system.
  *
  *   [ V7 | V6 | V5 |V4 | !V3 | !V2 | !V1 | !V0 ]
  *
@@ -369,7 +369,7 @@
  *   preempt or delay interrupt processing of an earlier channel's
  *   interrupt service request. It may be desirable to only allow
  *   subsequent higher priority channel interrupt requests to
- *   supercede previously recognized lower priority interrupt
+ *   supersede previously recognized lower priority interrupt
  *   requests. The MFP interrupt structure provides the flexibility by
  *   offering two end-of-interrupt options for vectored interrupt
  *   schemes. Note that the end-of-interrupt modes are not active in a
@@ -395,10 +395,10 @@
  *
  *   The MFP interrupt controller is particularly useful in a system
  *   having many M6800-type devices.  Typically, in a vectored M68000
- *   system, M6800 peripherals use the autovector corresponding to
+ *   system, M6800 peripherals use the auto-vector corresponding to
  *   their assigned interrupt level since they cannot provide a vector
  *   number in response to an interrupt acknowledge cycle. The
- *   autovector interrupt handler must then poll all M6800 devices at
+ *   auto-vector interrupt handler must then poll all M6800 devices at
  *   that interrupt level to determine which device is requesting
  *   service. However, by tying the IRQ output from an M6800
  *   peripheral to the GPIP of an MFP, a unique vector number is
@@ -461,7 +461,7 @@
  *   signal transitions. In addition, two timers have waveform
  *   generation capability.
  *
- *   All timers are prescalericounter timers with a common independent
+ *   All timers are pre-scaled counter timers with a common independent
  *   clock input (XTAL1 and XTAL2) and are not required to be operated
  *   from the system clock. Each timer's output signal toggles when
  *   the timer's main counter times out. Additionally, timers A and B
@@ -481,7 +481,7 @@
  * Delay Mode
  *
  *   All timers can operate in the delay mode. In this mode, the
- *   prescaler is always active. The prescaler specifies the number of
+ *   pre-scale is always active. The pre-scale specifies the number of
  *   timer clock cycles that must elapse before a count pulse is
  *   applied to the main counter. A count pulse causes the main
  *   counter to decrement by one. When the timer has decremented down
@@ -507,7 +507,7 @@
  *
  *   The pulse-width measurement mode functions similarly to the delay
  *   mode, with the auxiliary control signal acting as an enable to
- *   the timer. When the control signal is active, the prescaler and
+ *   the timer. When the control signal is active, the pre-scale and
  *   main counter are allowed to operate. When the control signal is
  *   negated, the timer is stopped. Thus, the width of the active
  *   pulse on TAI or TBI is measured by the number of timer counts
@@ -552,7 +552,7 @@
  *   TBI. General-purpose lines 13 and 14 can be used for I/O or as
  *   interrupt-producing inputs.
  *
- *   In the event count mode, the prescaler is disabled, allowing each
+ *   In the event count mode, the pre-scale is disabled, allowing each
  *   active transition on TAI and TBI to produce a count pulse. The
  *   count pulse causes the main counter to decrement by one. When the
  *   timer counts through $01, a timeout pulse is generated that
@@ -574,7 +574,7 @@
  *
  *   The four TDRs are designed as timer A (TADR), timer B (TBDR),
  *   timer C (TCDR), and timer D (TDDR). Each timer's main counter is
- *   an 8-bit binary downcounter. The TDRs contain the value of their
+ *   an 8-bit binary down-counter. The TDRs contain the value of their
  *   respective main counter. This value was captured on the last
  *   low-to-high transition of the data strobe pin.
  *
@@ -592,7 +592,7 @@
  *   (TBCR) are associated with timers A and B, respectively. Timers C
  *   and D are programmed using one control register—the timer C and D
  *   control register (TCDCR). The bits in the TCR select the
- *   operation mode, prescaler value, and disable the timers. Both
+ *   operation mode, pre-scale value, and disable the timers. Both
  *   TCRs have bits that allow the programmer to reset output lines
  *   TAO and TBO.
  *
@@ -609,18 +609,18 @@
  *
  *   When the timer is stopped, counting is inhibited. The contents of
  *   the timer's main counter are not affected although any residual
- *   count in the prescaler is lost.
+ *   count in the pre-scale is lost.
  *
  * CC3-CCO/DC3-DCO — Select Timer C/Timer D Operation Mode
  *
  *   When the timer is stopped, counting is inhibited. The contents of
  *   the timer's main counter are not affected although any residual
- *   count in the prescaler is lost.
+ *   count in the pre-scale is lost.
  *
  * USART
  *
  *   The single-channel full-duplex USART has a double-buffered
- *   receiver and trans-mitter. There are separate receive and
+ *   receiver and transmitter. There are separate receive and
  *   transmit clocks and separate receive and transmit status and data
  *   bytes. The receive and transmit sections are also assigned
  *   separate interrupt channels. Each section has two interrupt
@@ -648,11 +648,11 @@
  *   all normal asynchronous format features apply.
  *
  *   When the divide-by-1 clock mode is selected, synchronization must
- *   be accom-plished externally. The receiver will sample serial data
+ *   be accomplished externally. The receiver will sample serial data
  *   on the rising edge of the receiver clock. In the divide-by-16
  *   clock mode, the data is sampled at mid-bit time to increase
  *   transient noise rejection. Also, when the divide-by-16 clock mode
- *   is selected, the USART resynchronization logic is enabled,
+ *   is selected, the USART re-synchronization logic is enabled,
  *   increasing the channel clock skew tolerance.
  *
  * Asynchronous Format
@@ -677,7 +677,7 @@
  *   further transition checking is initiated until state four. At
  *   state eight, the previous state of the transition checking logic
  *   is clocked into the receiver. As a result of this
- *   resynchronization logic, it is possible to run with asynchronous
+ *   re-synchronization logic, it is possible to run with asynchronous
  *   clocks without start and stop bits if there are sufficient valid
  *   transitions in the data streams.
  *
@@ -688,7 +688,7 @@
  *   register (SCR) is compared to received serial data until a match
  *   is found. Once synchronization is established, incoming data is
  *   clocked into the receiver. The synchronous word is continuously
- *   transmitted during an underrun condition. All synchronous
+ *   transmitted during an under-run condition. All synchronous
  *   characters can be optionally stripped from the receiver buffer
  *   (i.e., taken out of the data stream and thrown away) by clearing
  *   the appropriate bit in the receiver status register (RSR).
@@ -742,7 +742,7 @@
  * PE — Parity Enable
  *
  *   Parity is not automatically appended to the synchronous character
- *   for char-acter lengths of less than eight bits. Therefore, parity
+ *   for character lengths of less than eight bits. Therefore, parity
  *   should be written into the SCR along with the synchronous
  *   character.
  *
@@ -802,7 +802,7 @@
  *     While only one interrupt is generated per character received,
  *     two dedicated interrupt channels allow separate vector numbers
  *     to be assigned for normal and abnormal receiver
- *     conditions. When a received word has an error asso-ciated with
+ *     conditions. When a received word has an error associated with
  *     it and the error interrupt channel is enabled, an interrupt
  *     will be generated on the error channel only. However, if the
  *     error channel is disabled, an interrupt for an error condition
@@ -869,11 +869,11 @@
  *    - MICIP — Match/Character in Progress
  *
  *      The M bit is used in the synchronous character format and
- *      indicates a syn-chronous character has been received.
+ *      indicates a synchronous character has been received.
  *      - 1= Character transferred to the receiver buffer matches the
  *           synchronous character.
  *      - 0= Character transferred to the receiver buffer does not match
- *           the syn-chronous character.
+ *           the synchronous character.
  *
  *      The CIP bit is used in the asynchronous character format and
  *      indicates that a character is being assembled.
@@ -892,7 +892,7 @@
  *    - RE — Receiver Enable
  *
  *      This bit should not be set until the receiver clock is
- *      active. When the trans-mitter is disabled in auto-turnaround
+ *      active. When the transmitter is disabled in auto-turnaround
  *      mode, this bit is set.
  *      - 1= Receiver is enabled.
  *      - 0= Receiver is disabled.
@@ -905,7 +905,7 @@
  *
  *   -# A break is received while the receiver buffer is full, which
  *      does not produce an overrun condition. Only the B flag will
- *      be set after the re-ceiver buffer is read.
+ *      be set after the receiver buffer is read.
  *
  *   -# A new word is received, and the receiver buffer is full. A break
  *      is received before the receiver buffer is read.
@@ -921,7 +921,7 @@
  *   transmitted. This transfer will produce a buffer empty
  *   condition. If the transmitter completes the transmission of the
  *   character in the shift register before a new character is written
- *   to the transmitter buffer, an underrun error will occur. In the
+ *   to the transmitter buffer, an under-run error will occur. In the
  *   asynchronous character format, the transmitter will send a mark
  *   until the transmitter buffer is written. In the synchronous
  *   character format, the transmitter will continuously send the
@@ -939,7 +939,7 @@
  *   transmitter is enabled. If the high-impedance mode is selected
  *   prior to the transmitter being enabled, the first bit transmitted
  *   is indeterminate. Note that the SO line will always be driven
- *   high for one bit time prior to the character in the trans-mitter
+ *   high for one bit time prior to the character in the transmitter
  *   shift register being transmitted when the transmitter is first
  *   enabled.
  *
@@ -948,7 +948,7 @@
  *   in the transmitter buffer will not be transmitted and will remain
  *   in the buffer. Thus, no buffer empty condition will occur. If the
  *   buffer is empty when the transmitter is disabled, the buffer
- *   empty condition will remain, but no underrun condition will be
+ *   empty condition will remain, but no under-run condition will be
  *   generated when the character in transmission is completed. If no
  *   character is being transmitted when the transmitter is disabled,
  *   the transmitter will stop at the next rising edge of the internal
@@ -962,7 +962,7 @@
  *   every normal character boundary to aid in timing the break
  *   transmission. The contents of the TSR are not affected,
  *   however. The break will continue until the break bit is
- *   cleared. The underrun error bit must be cleared in the TSR. Also,
+ *   cleared. The under-run error bit must be cleared in the TSR. Also,
  *   the IPR must be cleared of pending transmitter errors at the
  *   beginning of the break transmission, or no interrupts will be
  *   generated at the character boundary time. The break bit cannot be
@@ -975,20 +975,20 @@
  *   transmitter is still enabled. If the transmitter buffer is empty
  *   at the start of a break, it may be written at any time during the
  *   break. If the buffer is still empty at the end of the break, an
- *   underrun condition will exist.
+ *   under-run condition will exist.
  *
  *   Disabling the transmitter during a break condition causes the
  *   transmitter to cease transmission of the break character at the
  *   end of the current character. No end-of-break stop bit will be
  *   transmitted. Even if the transmitter buffer is empty, neither a
- *   buffer empty condition nor an underrun condition will
+ *   buffer empty condition nor an under-run condition will
  *   occur. Also, any word in the transmitter buffer will remain.
  *
  * Transmitter Interrupt Channels
  *
  *   The USART transmitter section is assigned two interrupt
  *   channels. The normal channel indicates a buffer empty condition,
- *   and the error channel indicates an underrun or end
+ *   and the error channel indicates an under-run or end
  *   condition. These interrupting conditions correspond to the BE,
  *   UE, and END flags in the TSR. The flag bits will function
  *   regardless of whether their associated interrupt channel is
@@ -997,7 +997,7 @@
  * Transmitter Status Register (TSR)
  *
  *   The TSR contains various transmitter error flags and transmitter
- *   control bits for selecting auto-turnaround and loopback mode.
+ *   control bits for selecting auto-turnaround and loop-back mode.
  *
  *   [ BE | UE | AT | I | ENO | B | I | H | L | TE ]
  *   Reset: 00000000
@@ -1007,7 +1007,7 @@
  *       shift register.
  *     - 0= Transmitter buffer reloaded by writing to the UDR.
  *
- *   - UE Underrun Error
+ *   - UE Under-run Error
  *
  *     One full transmitter clock cycle is required after UE is set
  *     before it can be cleared. This bit does not require clearing
@@ -1027,14 +1027,14 @@
  *     If the transmitter is disabled while a character is being
  *     transmitted, this bit is set after transmission has
  *     completed. If no character is being transmitted, then this bit
- *     is set immediately. Reenabling the transmitter clears this bit.
+ *     is set immediately. Re-enabling the transmitter clears this bit.
  *
  *   - B Break
  *
  *     This bit only functions in the asynchronous format. When B is
  *     set, BE cannot be set. A break consists of all zeros with no
  *     stop bit. This bit cannot be set until the transmitter is
- *     enabled and internal reset and initialization is com-plete.
+ *     enabled and internal reset and initialization is complete.
  *     - 1= Break is transmitted and transmission stops.
  *     - 0= Break ceases and transmission resumes.
  *
@@ -1047,9 +1047,9 @@
  *     - [0,0] High Impedance
  *     - [0,1] Low
  *     - [1,0] High
- *     - [1,1] Loopback Mode
+ *     - [1,1] Loop-back Mode
  *
- *   Loopback mode internally connects the transmitter output to the
+ *   Loop-back mode internally connects the transmitter output to the
  *   receiver input and the transmitter clock to the receiver clock
  *   internally. The receiver clock (RC) and the serial input (SI) are
  *   not used. When the transmitter is disabled, SO is forced high.
@@ -1101,11 +1101,17 @@ enum mfp_timer_e {
 
 /**
  * CPU clock of the Atari ST is 8010613Hz. sc68 rounds it to 8010612Hz
- * (a mutliple of 4 because the YM clock is 1/4 of the CPU clock)
+ * (a multiple of 4 because the YM clock is 1/4 of the CPU clock)
  * However usually the Atari ST clock and the YM clock are rounded to
- * respectively 8Mhz/2Mhz. Here in order to fasten the caculation the
+ * respectively 8Mhz/2Mhz. Here in order to fasten the calculation the
  * CPU clock is approximated to 8006400Hz. As the MFP timer clocks
- * runs at 2457600hz we got a power of 2 in the ratio (256:834).
+ * runs at 2457600 hz we got a power of 2 in the ratio (128:417).
+ *
+ * @notice According to Hatari comments the real CPU clock for a PAL
+ * European STF is 8021247-Hz, which they round up to 8021248 for a
+ * ratio of 31333/9600. Keep in mind that for sc68 what is important
+ * is the ratio between the YM clock (which AFAIK is CPU-clock/4) and
+ * the MFP clock.
  *
  * @{
  */
@@ -1115,8 +1121,8 @@ enum mfp_timer_e {
  */
 typedef cycle68_t bogoc68_t;
 
-#define MFP_BOGO_MUL 256u               /**< BOGO cycles/cpu clock  */
-#define MFP_BOGO_DIV 834u               /**< BOGO cycle/mfp clock */
+#define MFP_BOGO_MUL 128               /**< BOGO cycles/cpu clock  */
+#define MFP_BOGO_DIV 417               /**< BOGO cycle/mfp clock */
 /**
  * @}
  */
@@ -1125,11 +1131,11 @@ typedef cycle68_t bogoc68_t;
  * Timer definition struct.
  */
 typedef struct {
-  addr68_t vector; /**< Interrupt vector.                         */
-  u8 level;        /**< Interrupt level.                          */
-  u8 bit;          /**< Bit mask for Interrupt stuffes registers. */
-  u8 channel;      /**< Channel A=0 or B=2.                       */
-  u8 letter;       /**< 'A','B','C' or 'D'.                       */
+  addr68_t vector; /**< Interrupt vector.                       */
+  u8 level;        /**< Interrupt level.                        */
+  u8 bit;          /**< Bit mask for Interrupt stuff registers. */
+  u8 channel;      /**< Channel A=0 or B=2.                     */
+  u8 letter;       /**< 'A','B','C' or 'D'.                     */
 } mfp_timer_def_t;
 
 /**
@@ -1142,9 +1148,9 @@ typedef struct
   bogoc68_t cti;       /**< bogo-cycle to next timer interrupt.        */
   uint_t    tdr_cur;   /**< Timer Data register current value.         */
   uint_t    tdr_res;   /**< Timer Data register reset value.           */
-  uint_t    tcr;       /**< Timer control register (prescaler) [0..7]. */
+  uint_t    tcr;       /**< Timer control register (pre-scale) [0..7]. */
 
-  bogoc68_t psc;       /**< prescale counter.                          */
+  bogoc68_t psc;       /**< pre-scale counter.                         */
 
   /* On Interrupt */
   uint_t   int_lost;   /**< Interrupts missed (should be 0).           */
@@ -1204,7 +1210,7 @@ IO68_EXTERN
 /**
  * MFP-68901 emulator library initialization.
  *
- *     The mfp_init() function intialize MFP emulator library.  It
+ *     The mfp_init() function initialize MFP emulator library.  It
  *     must be call prior to any other mfp_ function.
  *
  * @return  error-code

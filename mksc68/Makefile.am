@@ -29,7 +29,7 @@ mksc68_SOURCES = src/mksc68.c src/mksc68_cli.c src/mksc68_cli.h		\
  src/mksc68_tag.c src/mksc68_tag.h
 
 mksc68_CFLAGS   = $(libsc68_CFLAGS) $(gb_CFLAGS)
-mksc68_CPPFLAGS = $(file68_CFLAGS) $(edit_CFLAGS)
+mksc68_CPPFLAGS = $(unice68_CFLAGS) $(file68_CFLAGS) $(edit_CFLAGS)
 mksc68_LDFLAGS  = $(gb_LDFLAGS)
 mksc68_LDADD    = $(LIBSC68_LA) $(libsc68_LIBS) $(edit_LIBS)
 

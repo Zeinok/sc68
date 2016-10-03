@@ -37,8 +37,11 @@
 #include <sc68/file68_uri.h>
 #include <sc68/file68_vfs.h>
 #include <sc68/sc68.h>
-#ifdef MKSC68_UNICE68
-#include <unice68.h>
+#include <sc68/file68_features.h>
+
+#ifdef FILE68_UNICE68
+# define MKSC68_UNICE68 FILE68_UNICE68
+# include <unice68.h>
 #endif
 
 /* #include <assert.h> */

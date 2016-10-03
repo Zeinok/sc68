@@ -1,6 +1,6 @@
 ;;; Atari ST GEMDOS and XBIOS emulator
 ;;;
-;;; (C) COPYRIGHT 2011-2013 Benjamin Gerard
+;;; (C) COPYRIGHT 2011-2016 Benjamin Gerard
 ;;;
 ;;; Gemdos (trap #1) and Xbios (trap #14) functions
 ;;;
@@ -9,13 +9,17 @@ StackSize = 1024
 STOP_VAL  = $2F20
 
 	;; Machine definitions for '_MCH' cookie
+MACHINE_ATARIST:	= $00000000 ; 260 ST,520 ST,1040 ST,Mega ST,...
+MACHINE_MEDUSA_NOSCSI:	= $00004D34
+MACHINE_STE:		= $00010000
+MACHINE_MEGA_STE:	= $00010010
+MACHINE_SPARROW:	= $00010100 ; Falcon pre-prod
+MACHINE_TT		= $00020000 ; TT or Hades
+MACHINE_MEDUSA:		= $00024D34
 MACHINE_FALCON30	= $00030000
-MACHINE_STE 		= $00010000
-MACHINE_MEGA_STE	= $00010010
-MACHINE_TT		= $00020000
-MACHINE_ARANYM		= $00000005
-MACHINE_MILAN		= $00040000
-MACHINE_FREESLOT	= $00060000
+MACHINE_MILAN:		= $00040000
+MACHINE_ARANYM:		= $00050000 ; ARAnyM >=v0.8.5beta
+MACHINE_FREESLOT:	= $00060000
 	
 	org	$1000
 	
@@ -458,6 +462,7 @@ xbtimer:
 	
 cookie_jar:
 	dc.l	"_MCH",MACHINE_STE
+	dc.l	"_CPU",0	; 68020 is 20 ...
 cookie_sc68:
 	include	"asm/version.s"
 	dc.l	"SC68",VERNUM
