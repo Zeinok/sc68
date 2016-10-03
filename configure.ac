@@ -86,6 +86,7 @@ SC68_ENABLE_PACKAGE([sc68],[sc68 command line player],[$enable_sc68_bins])
 # DOC (disable for now)
 SC68_ENABLE_PACKAGE([sc68-doc],[sc68 documentation],[no])
 
+build_as68='$(builddir)/../as68/as68$(EXEEXT)'
 AS_IF(
   [test X"$enable_as68" = Xtbd],
   [
@@ -98,9 +99,13 @@ AS_IF(
          [enable_as68=no;
           AC_MSG_RESULT([yes])],
          [AC_MSG_RESULT([no])
+          AS_IF([test X"$as68" = X"$build_as68"],
+                [AS_UNSET([as68])
+                 AS_UNSET([ac_cv_prog_as68])])
           AC_CHECK_PROG([as68],[as68],[],[false])
           AS_IF([test X"$as68" = Xfalse],
-                [AS_UNSET([as68])
+                [AC_MSG_NOTICE([will build as68 to bootstrap libsc68.])
+                 AS_UNSET([as68])
                  AS_UNSET([ac_cv_prog_as68])
                  enable_as68=yes],
                 [enable_as68=no])])])
@@ -122,9 +127,7 @@ AS_IF([test Xyes = X"$enable_as68"],
       [AC_CONFIG_SUBDIRS([as68])
        AS_IF(
          [test yes = "$enable_libsc68${as68+no}"],
-         [as68='$(builddir)/../as68/as68$(EXEEXT)'
-          ac_configure_args="$ac_configure_args 'as68=$as68'"
-         ])
+         [ac_configure_args="$ac_configure_args 'as68=$build_as68'"])
       ])
 
 AS_IF([test Xyes = X"$enable_desa68"],
