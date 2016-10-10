@@ -87,25 +87,26 @@ m4_define([_SC68_WITH_DUMP],
  with_$1       : ${with_$1-<unset>}
  with_$1_src   : ${with_$1_srcdir-<unset>}
 ...............
- $1_VERSION    : [$]{$1_VERSION-<unset>}
- $1_CFLAGS     : [$]{$1_CFLAGS-<unset>}
- $1_LIBS       : [$]{$1_LIBS-<unset>}
- $1_PKG_EXISTS : [$]{$1_PKG_EXISTS-<unset>}
- $1_PKG_ERRORS : [$]{$1_PKG_ERRORS-<unset>}
- $1_builddir   : [$]{$1_builddir-<unset>}
- $1_srcdir     : [$]{$1_srcdir-<unset>}
- $1_prefix     : [$]{$1_prefix-<unset>}
- $1_REQUIRED   : [$]{$1_REQUIRED-<unset>}
+ $1_VERSION    : ${$1_VERSION-<unset>}
+ $1_CFLAGS     : ${$1_CFLAGS-<unset>}
+ $1_LIBS       : ${$1_LIBS-<unset>}
+ $1_PKG_EXISTS : ${$1_PKG_EXISTS-<unset>}
+ $1_PKG_ERRORS : ${$1_PKG_ERRORS-<unset>}
+ $1_builddir   : ${$1_builddir-<unset>}
+ $1_srcdir     : ${$1_srcdir-<unset>}
+ $1_prefix     : ${$1_prefix-<unset>}
+ $1_REQUIRED   : ${$1_REQUIRED-<unset>}
+ $1_lname      : ${$1_lname-<unset>}
 ...............
- PAC_REQUIRES=[$]{PAC_REQUIRES-<unset>}
- PAC_LIBS=[$]{PAC_LIBS-<unset>}
- PAC_PRIV_LIBS=[$]{PRIV_LIBS-<unset>}
+ PAC_REQUIRES=${PAC_REQUIRES-<unset>}
+ PAC_LIBS=${PAC_LIBS-<unset>}
+ PAC_PRIV_LIBS=${PRIV_LIBS-<unset>}
 --------
- srcdir : [$]{srcdir}
- PKG_CONFIG: [$]{PKG_CONFIG-<unset>}
+ srcdir : ${srcdir}
+ PKG_CONFIG: ${PKG_CONFIG-<unset>}
 --------
- LIBS   : [$]LIBS
- CFLAGS : [$]CFLAGS
+ LIBS   : $LIBS
+ CFLAGS : $CFLAGS
 --------
 
 __EOF
@@ -166,39 +167,46 @@ m4_define([_SC68_WITH_MODULE],
       [Xno],[has_$1=no],
       [Xyes],[has_$1=yes; org_$1=user],
       [Xcheck],
-      [
-        org_$1=pkgconfig
-        AS_IF(
-          [test "A${$1_PKG_ERRORS+B}X${$1_VERSION+Y}" = AX],
-          [SC68_PKG_CONFIG($1,$2,[VERSION],[--modversion])])
-        AS_IF(
-          [test "A${$1_PKG_ERRORS+B}X${$1_CFLAGS+Y}" = AX],
-          [SC68_PKG_CONFIG($1,$2,[CFLAGS],[--cflags])])
-        AS_IF(
-          [test "A${$1_PKG_ERRORS+B}X${$1_LIBS+Y}" = AX],
-          [SC68_PKG_CONFIG($1,$2,[LIBS],[--libs])])
-        AS_IF(
-          [test "A${$1_PKG_ERRORS+B}X${$1_prefix+Y}" = AX],
-          [SC68_PKG_CONFIG($1,$2,[prefix],[--variable=prefix])
-           AS_UNSET([$1_PKG_ERRORS])])
-        AS_IF([test "A${$1_PKG_ERRORS+B}" = AB],[has_$1=no],[has_$1=check])
+      [org_$1=pkgconfig
+       AS_IF(
+         [test "A${$1_PKG_ERRORS+B}X${$1_VERSION+Y}" = AX],
+         [SC68_PKG_CONFIG($1,$2,[VERSION],[--modversion])])
+       AS_IF(
+         [test "A${$1_PKG_ERRORS+B}X${$1_CFLAGS+Y}" = AX],
+         [SC68_PKG_CONFIG($1,$2,[CFLAGS],[--cflags])])
+       AS_IF(
+         [test "A${$1_PKG_ERRORS+B}X${$1_LIBS+Y}" = AX],
+         [SC68_PKG_CONFIG($1,$2,[LIBS],[--libs])])
+       AS_IF(
+         [test "A${$1_PKG_ERRORS+B}X${$1_prefix+Y}" = AX],
+         [SC68_PKG_CONFIG($1,$2,[prefix],[--variable=prefix])
+          AS_UNSET([$1_PKG_ERRORS])])
+       AS_IF([test "A${$1_PKG_ERRORS+B}" = AB],[has_$1=no],[has_$1=check])
       ],
-      [
-        _SC68_WITH_DUMP([$1],[internal error])
-        AC_MSG_ERROR([Invalid argument --with-$1='$with_$1'])
-      ])
-
-    AS_IF([test "$has_$1/${$1_VERSION+set}" = no/set],
-          [has_$1=check; org_$1=system])
-
+      [_SC68_WITH_DUMP([$1],[internal error])
+       AC_MSG_ERROR([Invalid argument --with-$1='$with_$1'])])
+    AS_IF(
+      [test "$has_$1/${$1_VERSION-unset}" = no/unset],
+      [has_$1=check
+       org_$1=system
+       AS_IF(
+         [test X${$1_LIBS+Y}${$1_lname+Z} = X],
+         [$1_lname=`echo $2 |sed 's/^lib\(.\{1,\}\)\|\(.\{1,\}\)lib$/\1\2/'`])
+      ],[AS_UNSET([$1_lname])])
     AS_IF(
       [test "X$has_$1" = Xcheck],
       [m4_ifnblank([$3],[SC68_CHECK_HEADERS([$1],[$3],,[has_$1=no])])])
     AS_IF(
+      [test X${$1_LIBS+Y}${$1_lname+Z} = XZ],
+      [$1_LIBS=-l${$1_lname}],
+      [AS_UNSET([$1_lname])])
+    AS_IF(
       [test "X$has_$1" = Xcheck],
       [m4_ifnblank([$4],[SC68_CHECK_FUNCS([$1],[$4],,[has_$1=no])])])
-    AS_IF([test "X$has_$1" = Xcheck],[has_$1=yes])
-
+    AS_IF(
+      [test "X$has_$1" = Xcheck],
+      [has_$1=yes],
+      [AS_IF([test X${$1_lname+Z} = XZ],[AS_UNSET([$1_LIBS])])])
   ])
 
 # _SC68_WITH_CLOSE(prefix,pkg-or-mod,[required])
@@ -214,12 +222,14 @@ m4_define([_SC68_WITH_CLOSE],
       ["X$has_$1"],
       [Xno|Xyes],[],
       [AC_MSG_WARN([INTERNAL -- invalid value for has_$1 ($has_$1)])])
-
     AS_IF(
       [test "X$has_$1" != Xyes],
-      [has_$1=no; AS_UNSET([$1_VERSION]); AS_UNSET([$1_builddir])])
-
-    AS_IF([test "X${$1_VERSION+set}" != Xset],[$1_VERSION=n/a])
+      [has_$1=no
+       AS_UNSET([$1_VERSION])
+       AS_UNSET([$1_builddir])
+       AS_UNSET([org_$1])])
+    AS_IF(
+      [test "X${$1_VERSION+set}" != Xset],[$1_VERSION=n/a])
 
     dnl # Things to do if the package has been configured
     AS_IF(
@@ -299,7 +309,7 @@ m4_define([_SC68_WITH_BUILD],
             [$1_VERSION="[$]1"; has_$1=yes
              AC_MSG_RESULT([yes (${$1_VERSION})])])])],
       [AS_UNSET([$1_builddir])])
-    
+
   ])
 
 m4_define([_SC68_WITH_SOURCE],
