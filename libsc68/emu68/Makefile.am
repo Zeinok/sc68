@@ -51,6 +51,14 @@ extrasources=\
  lines/lineA.c lines/lineB.c lines/lineC.c lines/lineD.c lines/lineE.c  \
  lines/lineF.c lines/table.c
 
+MAINTAINERCLEANFILES = $(extrasources)
+
+# Special rule to rebuild the 68k emulator "C" files.
+# gen68 is built from its source file {sc68}/tools/gen68.c
+genlines:
+	gen68 all lines/
+.PHONY: genlines
+
 # ,----------------------------------------------------------------------.
 # | Libtool library                                                      |
 # `----------------------------------------------------------------------'
