@@ -134,12 +134,12 @@ static const char thex[16] = {
   '0','1','2','3','4','5','6','7',
   '8','9','A','B','C','D','E','F'
 };
-  
+
 /*
-static char * cc_name[16] = {
+  static char * cc_name[16] = {
   "T ", "F ", "HI", "LS", "CC", "CS", "NE", "EQ",
   "VC", "VS", "PL", "MI", "GE", "LT", "GT", "LE"
-};
+  };
 */
 
 /* Operation Code Map */
@@ -642,7 +642,7 @@ static void gene_any_rn(int n, char * s, int no_an, int hax_size, int immode)
  * | s   : name (ADD,CMP,SUB)                                         |
  * '------------------------------------------------------------------'
  */
-  static void gene_any_an(int n, char * s)
+static void gene_any_an(int n, char * s)
 {
   const int L = n & 040;
   const int O = L ? 0222 : 0221;
