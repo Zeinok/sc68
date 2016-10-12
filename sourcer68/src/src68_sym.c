@@ -27,6 +27,7 @@
 #endif
 
 #include "src68_sym.h"
+#include "src68_msg.h"
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
@@ -88,7 +89,7 @@ static int isymb_byaddr(const obj_t * oa,const obj_t * ob)
 
 static void isymb_del(obj_t * obj)
 {
-  sym_t * sym = (sym_t *) obj;
+  sym_t * const sym = (sym_t *) obj;
   free(sym->name);
   free(sym);
 }
@@ -107,15 +108,26 @@ vec_t * symbols_new(unsigned int max)
   return vec_new(max,&if_symbol);
 }
 
-static int isvalid_name(const char * name)
+/**
+ * @retval 0 not a valid name
+ * @retval 1 a valid name
+ */
+
+static int isvalid_name(const char * name, const int flag)
+
 {
   int c;
   assert(name);
-  c = *name;
-  c = c != '_' && !isalpha(c);          /* true if not a start char */
-  if (!c)
-    while (c=*++name, ( c == '_' || isalnum(c) ) )
-      ;
+
+  c = *name;                            /* get first char */
+  if (flag & SYM_FILE)
+    c = !c;                            /* filename can not be empty */
+  else {
+    c = c != '.' && c != '_' && !isalpha(c); /* true if not a start char */
+    if (!c)
+      while (c = *++name, ( c == '.' || c == '_' || isalnum(c) ) )
+        ;
+  }
   return !c;
 }
 
@@ -128,7 +140,7 @@ sym_t * symbol_new(const char * name, unsigned int addr, unsigned int flag)
     tmp[sizeof(tmp)-1] = 0;
     name = tmp;
   }
-  if (isvalid_name(name)) {
+  if (isvalid_name(name,flag)) {
     sym = (sym_t *) isymb_new();
     if (sym) {
       sym->name = strdup((char*)name);

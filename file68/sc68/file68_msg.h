@@ -16,7 +16,7 @@
 #endif
 #include <stdarg.h>
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 # define FMT12 __attribute__ ((format (printf, 1, 2)))
 # define FMT23 __attribute__ ((format (printf, 2, 3)))
 # define FMT34 __attribute__ ((format (printf, 3, 4)))

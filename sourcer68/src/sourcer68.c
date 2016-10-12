@@ -321,9 +321,9 @@ int main(int argc, char **argv)
     errstr = eva_expr(&tmporg, &argstr,0, 0,0,0);
     if (errstr || *argstr) {
       emsg(-1,"failed to evaluate origin -- \"%s\"\n", opt_origin);
-      dmsg("> %s (%d)\n",opt_origin, (argstr - opt_origin));
-      dmsg("> %+*s^_ %s\n",
-           (argstr - opt_origin),"",  errstr?errstr:"trailing char");
+      dmsg("> %s (%u)\n",opt_origin, (uint_t)(argstr - opt_origin));
+      dmsg("> %*s^_ %s\n",
+           (uint_t)(argstr - opt_origin),"",  errstr?errstr:"trailing char");
       return ECODE_ARG;
     }
     if ( (uint_t)tmporg > 0x1000000u &&

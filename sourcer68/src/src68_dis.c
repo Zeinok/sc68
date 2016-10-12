@@ -218,7 +218,8 @@ static int r_dis_pass(dis_t * dis)
   ++dis->curdepth;
 
   dis->desa.pc = dis->addr;
-  dmsg("%*s$%06x (%u)\n", dis->curdepth, "", dis->curdepth);
+  dmsg("%*s$%06x (%u)\n", dis->curdepth,"",
+       (uint_t)dis->addr, (uint_t)dis->curdepth);
 
   for (rts=BRK_NOT; rts == BRK_NOT; ) {
     uint_t off = dis->desa.pc - dis->mbk->org;

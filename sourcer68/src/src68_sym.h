@@ -17,15 +17,23 @@
  * Symbol flags.
  */
 enum {
-  SYM_INST = 1<<0,        /**< is a disassembled instruction. */
-  SYM_BRA  = 1<<1,        /**< is jump/branch to. */
-  SYM_BSR  = 1<<2,        /**< is a subroutine. */
+//  SYM_INST = 1<<0,        /**< is a disassembled instruction. */
+  SYM_JUMP = 1<<1,        /**< is jump/branch to. */
+  SYM_FUNC = 1<<2,        /**< is a subroutine. */
   SYM_DATA = 1<<3,        /**< is data  */
-  SYM_BYTE = 1<<4,        /**< byte access. */
-  SYM_WORD = 1<<5,        /**< word access. */
-  SYM_LONG = 1<<6,        /**< long access. */
+
+//  SYM_BYTE = 1<<4,        /**< byte access. */
+//  SYM_WORD = 1<<5,        /**< word access. */
+//  SYM_LONG = 1<<6,        /**< long access. */
+
   SYM_XTRN = 1<<8,        /**< External symbol */
-  SYM_WEAK = 1<<9,        /**< Weak symbol */
+  SYM_GLOB = 1<<9,        /**< Global symbol */
+  SYM_WEAK = 1<<10,       /**< Weak symbol */
+  SYM_LOCL = 1<<10,       /**< Weak symbol */
+
+
+  SYM_FILE = 1<<11,       /**< Symbol is a file name */
+  SYM_ARCH = 1<<12        /**< SYM_FILE is an archive. */
 };
 
 /**

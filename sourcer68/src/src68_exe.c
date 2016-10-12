@@ -30,6 +30,7 @@
 #include "src68_msg.h"
 #include "src68_tos.h"
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
@@ -333,9 +334,9 @@ static exe_t * load_as_sc68(char * uri, uint_t org, uint8_t * data, int size)
     memcpy(e->mbk->mem+data_off, mus->data, mus->datasz);
 
     /* symbols */
-    symbol_add(e->symbols, "sc68_init", org+0, SYM_INST|SYM_BSR);
-    symbol_add(e->symbols, "sc68_kill", org+4, SYM_INST|SYM_BSR);
-    symbol_add(e->symbols, "sc68_play", org+8, SYM_INST|SYM_BSR);
+    symbol_add(e->symbols, "sc68_init", org+0, /* SYM_INST| */SYM_FUNC);
+    symbol_add(e->symbols, "sc68_kill", org+4, /* SYM_INST| */SYM_FUNC);
+    symbol_add(e->symbols, "sc68_play", org+8, /* SYM_INST| */SYM_FUNC);
     if (data_off) {
       symbol_add(e->symbols, "sc68_data", org+data_off, SYM_DATA);
       symbol_add(e->symbols, "sc68_datasz", mus->datasz, 0);
@@ -367,12 +368,85 @@ error:
 
 static void reloc_callback(tosexec_t * e, unsigned int org, unsigned int off)
 {
-  vec_t * rel = e->user;
+  exe_t * const exe = e->user;
+  vec_t * const rel = exe->relocs;
 
   assert(rel);
-  dmsg("relocating org:%06x off:$%06x\n", org, off);
+  /* DMSG("relocating org:%06x off:$%06x\n", org, off); */
   addr_add(rel, org+off);
-  /* mbk_setmib(mbk, org+off, 0, MIB_RELOC); */
+  assert(exe->mbk);
+  mbk_setmib(exe->mbk, org+off, 0, MIB_RELOC);
+}
+
+
+#include <stdio.h>
+static const char * dri_flagstr(uint_t flags)
+{
+  static char temp[256];
+  const int m = sizeof(temp)-1;
+  int i = 0;
+
+  assert( (flags & 0xFFFF) == flags );
+  flags &= 0xFFFF;
+
+  if (!flags)
+    i += snprintf(temp+i,m-i,"<NDEF>");
+
+  if ( flags & TOS_SYMB_DEF ) {
+    i += snprintf(temp+i,m-i,",DEF"+!i);
+    flags &= ~TOS_SYMB_DEF;
+  }
+
+  if ( flags & TOS_SYMB_EQU ) {
+    i += snprintf(temp+i,m-i,",EQU"+!i);
+    flags &= ~TOS_SYMB_EQU;
+  }
+
+  if ( flags & TOS_SYMB_GLOBAL ) {
+    i += snprintf(temp+i,m-i,",GBL"+!i);
+    flags &= ~TOS_SYMB_GLOBAL;
+  }
+
+  if ( flags & TOS_SYMB_REG ) {
+    i += snprintf(temp+i,m-i,",REG"+!i);
+    flags &= ~TOS_SYMB_REG;
+  }
+
+  if ( flags & TOS_SYMB_XREF ) {
+    i += snprintf(temp+i,m-i,",XRF"+!i);
+    flags &= ~TOS_SYMB_XREF;
+  }
+
+  if ( flags & TOS_SYMB_DATA ) {
+    i += snprintf(temp+i,m-i,",DAT"+!i);
+    flags &= ~TOS_SYMB_DATA;
+  }
+  if ( (flags & (TOS_SYMB_TEXT|0x80)) == TOS_SYMB_TEXT) {
+    i += snprintf(temp+i,m-i,",TXT"+!i);
+    flags &= ~TOS_SYMB_TEXT;
+  }
+
+  if ( flags & TOS_SYMB_BSS ) {
+    i += snprintf(temp+i,m-i,",BSS"+!i);
+    flags &= ~TOS_SYMB_BSS;
+  }
+
+  if ( (flags & TOS_SYMB_LNAM) == TOS_SYMB_LNAM ) {
+    i += snprintf(temp+i,m-i,",LNG"+!i);
+    flags &= ~TOS_SYMB_LNAM;
+  }
+
+  if ( (flags & TOS_SYMB_FARC) == TOS_SYMB_FILE ) {
+    i += snprintf(temp+i,m-i,",FIL"+!i);
+    flags &= ~TOS_SYMB_FILE;
+  } else if ( (flags & TOS_SYMB_FARC) == TOS_SYMB_FARC ) {
+    i += snprintf(temp+i,m-i,",ARC"+!i);
+    flags &= ~TOS_SYMB_FARC;
+  }
+  if (flags)
+    i += snprintf(temp+i,m-i,(",{%x}"+!i), flags);
+  temp[m] = 0;
+  return temp;
 }
 
 static exe_t * load_as_tos(char * uri, uint_t org, uint8_t * data, int size)
@@ -390,10 +464,12 @@ static exe_t * load_as_tos(char * uri, uint_t org, uint8_t * data, int size)
 
   if (tos_header(&tosexec, tosfile, size))
     goto error;
+  e->ispic = !tosexec.rel.len;
 
   e->mbk = mbk_new(org, tosexec.txt.len+tosexec.dat.len+tosexec.bss.len);
-  tosexec.user = e->mbk;
-  tos_reloc(&tosexec, org, reloc_callback);
+  assert(e->mbk);
+  if (!e->mbk)
+    goto error;
 
   if (tosexec.txt.len) {
     off = tosexec.txt.off;
@@ -411,52 +487,110 @@ static exe_t * load_as_tos(char * uri, uint_t org, uint8_t * data, int size)
     section_add(e->sections, "BSS", org+off, tosexec.bss.len, SECTION_0);
   }
 
+  /* Hook (hack) tosexec::img so that relocations occur in the memory
+   * block instead of the tos file image. Alternatively we could use
+   * the reloc_callback() function for this task.
+   */
+  tosexec.user = e;
+  tosexec.img  = e->mbk->mem;
+  tos_reloc(&tosexec, org, reloc_callback);
+  tosexec.img  = tosfile->xt.jump;
+
+  assert(e->mbk->org == org);
+
   if (tosexec.sym.len) {
+    const uint_t top = org;
+    const uint_t bot = top + e->mbk->len;
     sym_t * symb;
     tosxymb_t xymb;
-    int walk = 0, idx;
+    int walk;
 
-    unsigned int addr = 0, flag = 0;
+    DMSG("TOS image<$%08X-$%08X> +%u\n",top,bot-1,bot-top);
 
-    while ( walk = tos_symbol(&xymb, &tosexec, tosfile, walk), walk > 0) {
-      /* dmsg("got symbol \"%s\" $%06x [$%04x], next at %d\n", */
-      /*      xymb.name, xymb.addr, xymb.type, walk); */
+    for (walk=0; (walk = tos_symbol(&xymb,&tosexec,tosfile,walk)) > 0;) {
+      int flags = 0, type = xymb.type, idx;
+      struct tossection * tos_section = 0;
+      uint_t addr;
 
-      switch (xymb.type & (TOS_SYMB_BMASK)) {
+      /* DMSG("TOS: got a symbol, next at %u\n", walk); */
+      DMSG("SYMB<$%08x $%04x> \"%s\" [%s]\n",
+           xymb.addr, xymb.type, xymb.name, dri_flagstr(xymb.type) );
 
-      case TOS_SYMB_DATA:
-        addr = org + tosexec.dat.off;
-        flag |= SYM_DATA;
-        break;
+      if ( (type & TOS_SYMB_LNAM) == TOS_SYMB_LNAM )
+        type &= ~TOS_SYMB_LNAM;
+      if ( (type & TOS_SYMB_FILE) == TOS_SYMB_FILE )
+        continue;
+      switch (type & TOS_SYMB_0F00) {
 
       case TOS_SYMB_TEXT:
-        addr = org + tosexec.txt.off;
+        tos_section = &tosexec.txt;
+
+
+        if (tosexec.has.mint && xymb.name[0] == '_')
+          /* HACK: probably a "C" function */
+          /* flags |= SYM_FUNC */;
+
+        break;
+
+      case TOS_SYMB_DATA:
+        tos_section = &tosexec.dat;
+        flags |= SYM_DATA;
         break;
 
       case TOS_SYMB_BSS:
-        addr = org + tosexec.bss.off; break;
-        flag |= SYM_DATA;
+        tos_section = &tosexec.bss;
+        flags |= SYM_DATA;
+        break;
 
       default:
-        wmsg(-1,"TOS symbol type with multiple section (\"%s\",$%x,$%x)\n",
-             xymb.name,xymb.addr,xymb.type);
-
-      case TOS_SYMB_XREF:
-        addr = 0;
-        flag |= SYM_XTRN;
+        wmsg(-1,
+             "TOS unexpected symbol type\n"
+             "SYM<$%08X,$%04X,\"%s\">\n",
+             xymb.addr,xymb.type,xymb.name);
         break;
       }
-      addr += xymb.addr;
 
-      idx = symbol_add(e->symbols, xymb.name, addr, flag);
-      if (idx < 0)
-        emsg(-1, "failed to add symbol (\"%s\",$%x,$%x)\n",
-             xymb.name,addr,flag);
-      symb = symbol_get(e->symbols,idx);
-      assert(symb);
-      dmsg("symb #%d %p \"%s\" $%x $%x\n", idx, symb,
-           symb->name, symb->addr, symb->flag);
+      if (!tos_section)
+        continue;
+
+      addr = xymb.addr;
+      if (addr >= tos_section->len) {
+        wmsg(-1,
+             "TOS symbol out of section range [$%08X-$%08X] +%u\n"
+             "SYM<$%08X,$%04X,\"%s\">\n",
+             tos_section->off,
+             tos_section->off+tos_section->len-1,
+             tos_section->len,
+             xymb.addr,xymb.type,xymb.name);
+      }
+
+      addr += org + tos_section->off;
+      if (addr < top || addr > bot) {
+        wmsg(-1,
+             "TOS symbol out of range\n"
+             "SYM<$%08X,$%04X,\"%s\">\n",
+             addr,xymb.type,xymb.name);
+      }
+      else if (flags & SYM_FUNC) {
+        addr_add(e->entries,addr);
+      }
+
+      idx = symbol_add(e->symbols, xymb.name, addr, flags);
+      if (idx < 0) {
+        emsg(-1,
+             "TOS failed to add symbol\n"
+             "SYM<$%08X,$%04X,\"%s\">\n",
+             xymb.addr,xymb.type,xymb.name);
+        /* goto error; */
+      } else {
+        symb = symbol_get(e->symbols,idx);
+        assert(symb);
+        dmsg("TOS symb #%05d "
+             "SYM<$%08X,$%04X,\"%s\">\n",
+             idx,xymb.addr,xymb.type,xymb.name);
+      }
     }
+
     if (walk < 0)
       wmsg(-1, "failed to walk TOS symbol table (%d bytes)\n",
            tosexec.sym.len);
@@ -467,18 +601,22 @@ static exe_t * load_as_tos(char * uri, uint_t org, uint8_t * data, int size)
     int idx;
     symbol_sort_byname(e->symbols);
     idx = 0;
+    DMSG("%d symbols sorted by name\n",e->symbols->cnt);
     while (symb = symbol_get(e->symbols,idx++), symb)
-      dmsg("symb #%d %p \"%s\" $%x $%x\n", idx, symb,
-           symb->name, symb->addr, symb->flag);
+      DMSG("symb #%04d %p $%08x $%04x \"%s\"\n", idx, symb,
+           symb->addr, symb->flag, symb->name);
 
     symbol_sort_byaddr(e->symbols);
     idx = 0;
+    DMSG("%d symbols sorted by address\n",e->symbols->cnt);
     while (symb = symbol_get(e->symbols,idx++), symb)
-      dmsg("symb #%d %p \"%s\" $%x $%x\n", idx, symb,
-           symb->name, symb->addr, symb->flag);
+      DMSG("symb #%04d %p $%08x $%04x \"%s\"\n", idx, symb,
+           symb->addr, symb->flag, symb->name);
   }
 
   mbk_setmib(e->mbk, e->mbk->org+0, 0, MIB_ENTRY);
+  if (tosexec.start)
+    mbk_setmib(e->mbk, e->mbk->org+tosexec.start, 0, MIB_ENTRY);
 
   exe = e;
   e = 0;

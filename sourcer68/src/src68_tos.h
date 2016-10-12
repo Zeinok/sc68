@@ -27,9 +27,42 @@ struct tosfile {
   uint8_t noreloc[2];                   /* 18 True if absolute */
   /* 1C TEXT section starts here.  in case of MiNT it's a sequance of
    *    m68k instructions to jump to the real entry point
-   *    [0x203a001a4efb08fa]
+   *    203a-001a-4efb08fa
    */
-  uint8_t text[8];
+
+  /**
+   * mint extended header (rip from prg-mint.c)
+   */
+  struct mint_xt {
+    uint8_t jump[8];           /* jump instructions (203a-001a-4efb08fa) */
+    uint8_t info[4];           /* Magic number and stuff.  */
+    uint8_t text[4];           /* Length of text section in bytes. */
+    uint8_t data[4];           /* Length of data section.  */
+    uint8_t bss[4];            /* Length of standard symbol table. */
+    uint8_t syms[4];           /* Length of symbol table. */
+    uint8_t entry[4];          /* Start address. */
+    uint8_t trsize[4];         /* Length of text relocation info. */
+    uint8_t drsize[4];         /* Length of data relocation info. */
+    uint8_t tparel_pos[4]; /* File position of TPA relative relocation
+                            * info.
+                            */
+    uint8_t tparel_size[4]; /* Length of TPA relative relocation info. */
+
+    /* This is for extensions.
+     *
+     * If stacksize is hardcoded into the executable you will find it
+     * at file offset g_stkpos. If not this is nil.
+     */
+    uint8_t stkpos[4];
+
+    /* Format of the symbol table. See definitions for
+      * _MINT_SYMBOL_FORMAT above.
+      */
+    uint8_t symbol_format[4];
+
+    /* Pad with zeros. */
+    uint8_t pad0[172];
+  } xt;
 };
 typedef struct tosfile tosfile_t;
 
@@ -37,8 +70,8 @@ typedef struct tosfile tosfile_t;
  * TOS constants.
  */
 enum {
-  TOS_HEADER_SIZE = 28, /**< Classic TOS header size. */
-  TOS_MINT_SIZE = 256   /**< MiNT TOS header size. @see tosfile_t::mint */
+  TOS_HEADER_SIZE = 28,               /**< Classic TOS header size. */
+  TOS_MINT_STD_SIZE = 256 /**< MiNT TOS header size. @see tosfile_t::mint */
 };
 
 /**
@@ -58,38 +91,66 @@ enum {
     */
   TOS_FLG_FASTRAM = 2,
 
-  TOS_FLG_ALTRAM = 4, /**< Memory requests via Malloc may be allocated
-			  from alternate RAM */
+   /**
+    * Memory requests via Malloc may be allocated from alternate
+    * RAM.
+    */
+  TOS_FLG_ALTRAM = 4,
 
-  TOS_FLG_SHL = 8, /**< Reserved for shared library (must be clear). */
+  /**
+   * Reserved for shared library (must be clear).
+   */
+  TOS_FLG_SHL = 8,
 
   TOS_FLG_MEM_MASK = 0x70,
-  TOS_FLG_MEM_PRIVATE = 0x00, /**< Only the process itself, and the
-				 operating system, may access the
-				 memory */
-  TOS_FLG_MEM_GLOBAL = 0x10, /**< The memory is completely unprotected
-				and hence all programs can access
-				it. */
 
-  TOS_FLG_MEM_SUPER = 0x20, /**< The memory can be accessed by all
-			       processes that run in
-			       supervisor-mode */
-  TOS_FLG_MEM_RO = 0x30, /**< Any process can read from the memory;
-			    but writing is only permitted by the
-			    process itself, as well as the operating
-			    system. */
-  TOS_FLG_RES8_MASK = 0xF00, /**< Reserved (must be 0). */
+   /**
+    * Only the process itself, and the operating system, may access
+    * the memory.
+    */
+  TOS_FLG_MEM_PRIVATE = 0x00,
 
-  TOS_FLG_SHTEXT = 4096, /**< TEXT section may be shared. */
+  /**
+   * The memory is completely unprotected and hence all programs can
+   * access it.
+   */
+  TOS_FLG_MEM_GLOBAL = 0x10,
 
-  TOS_FLG_RES13_MASK = 0x0FFFC000, /**< Reserved (must be 0). */
-  TOS_FLG_TPASIZE_MASK = 0xF0000000, /**< Maximum amount of memory to
-					be allocated by the program
-					from alternate RAM if the
-					machine has more ST-RAM than
-					alternate RAM. */
-  
- 
+  /**
+   * The memory can be accessed by all processes that run in
+   * supervisor-mode
+   */
+  TOS_FLG_MEM_SUPER = 0x20,
+
+ /**
+  * Any process can read from the memory; but writing is only
+  * permitted by the process itself, as well as the operating
+  * system.
+  */
+  TOS_FLG_MEM_RO = 0x30,
+
+  /**
+   * Reserved (must be 0).
+   */
+  TOS_FLG_RES8_MASK = 0xF00,
+
+  /**
+   * TEXT section may be shared.
+   */
+  TOS_FLG_SHTEXT = 4096,
+
+  /**
+   * Reserved (must be 0).
+   */
+  TOS_FLG_RES13_MASK = 0x0FFFC000,
+
+  /**
+   * Maximum amount of memory to be allocated by the program from
+   * alternate RAM if the machine has more ST-RAM than alternate
+   * RAM.
+   */
+  TOS_FLG_TPASIZE_MASK = 0xF0000000,
+
 };
 
 /**
@@ -117,22 +178,30 @@ typedef struct {
 enum {
   TOS_SYMB_UNDF   = 0x0000,
 
-  TOS_SYMB_AMASK  = 0xF000,
-  TOS_SYMB_DEF    = 0x8000,
+  /* TOS_SYMB_AMASK  = 0xF000, */
+  TOS_SYMB_DEF    = 0x8000,             /* Defined */
   TOS_SYMB_EQU    = 0x4000,
   TOS_SYMB_GLOBAL = 0x2000,
   TOS_SYMB_REG    = 0x1000,
 
-  TOS_SYMB_BMASK  = 0x0F00,
+  TOS_SYMB_0F00   = 0x0F00,
   TOS_SYMB_XREF   = 0x0800,
-  TOS_SYMB_DATA   = 0x0400,
-  TOS_SYMB_TEXT   = 0x0200,
-  TOS_SYMB_BSS    = 0x0100,
+  TOS_SYMB_DATA   = 0x0400,             /* DATA section */
+  TOS_SYMB_TEXT   = 0x0200,             /* TEXT section */
+  TOS_SYMB_BSS    = 0x0100,             /* BSS section  */
 
-  TOS_SYMB_CMASK  = 0x00FF,
+  /* TOS_SYMB_CMASK  = 0x00FF, */
   TOS_SYMB_LNAM   = 0x0048, /* GST compatible long name.                 */
-  TOS_SYMB_TFILE  = 0x0280, /* Text file corresponding to object module. */
-  TOS_SYMB_TFARC  = 0x02C0, /* Text file archive (conflicts).            */
+  TOS_SYMB_FILE   = 0x0280, /* Text file corresponding to object module. */
+  TOS_SYMB_FARC   = 0x02C0, /* Text file archive (conflicts).            */
+};
+
+/**
+ * TOS MiNT symbol format (mint_xt::symbol_format).
+ */
+enum {
+  TOS_MINT_SYMB_GNU,
+  TOS_MINT_SYMB_DRI
 };
 
 /**
@@ -141,14 +210,18 @@ enum {
 struct tosexec {
   void * user;                          /**< user data (cookie). */
   uint8_t * img;
-  struct section {
+  uint8_t * reltbl;
+
+  struct tossection {
     uint_t off,len;
   } txt, dat, bss, sym, rel;
   uint_t flags;
-  struct {
-    uint_t mint:1;
-    uint_t abs:1;
+  struct tosflags {
+    uint_t mint   : 1;
+    uint_t abs    : 1;
+    uint_t symfmt : 1;
   } has;
+  uint_t start;
 };
 typedef struct tosexec tosexec_t;
 
@@ -161,15 +234,16 @@ typedef void (*toscall_f)(tosexec_t *, uint_t, uint_t);
  * Error codes.
  */
 enum {
-  TOS_ERR_SUCCESS = 0,          /* no error */
-  TOS_ERR_GENERIC,              /* generic error */
-  TOS_ERR_NOT_TOS,              /* not a tos file */
-  TOS_ERR_SEC_OOR,              /* section out of range */
-  TOS_ERR_SEC_ODD,              /* section odd address */
-  TOS_ERR_SYM_SIZ,              /* symbol section size not multiple */
-  TOS_ERR_REL_OOR,              /* relocation addr out of range  */
-  TOS_ERR_REL_ODD,              /* relocation addr is not even */
-  TOS_ERR_REL_IDX,              /* relocation table ran out of data */
+  TOS_ERR_SUCCESS = 0,          /**< no error */
+  TOS_ERR_GENERIC,              /**< generic error */
+  TOS_ERR_NOT_TOS,              /**< not a tos file */
+  TOS_ERR_SEC_OOR,              /**< section out of range */
+  TOS_ERR_SEC_ODD,              /**< section odd address */
+  TOS_ERR_JMP_OOR,              /**< start address out of range */
+  TOS_ERR_SYM_SIZ,              /**< symbol section size not multiple */
+  TOS_ERR_REL_OOR,              /**< relocation addr out of range  */
+  TOS_ERR_REL_ODD,              /**< relocation addr is not even */
+  TOS_ERR_REL_IDX,              /**< relocation table ran out of data */
   TOS_ERR_INTERNAL = 66
 };
 
