@@ -1121,8 +1121,8 @@ enum mfp_timer_e {
  */
 typedef cycle68_t bogoc68_t;
 
-#define MFP_BOGO_MUL 128               /**< BOGO cycles/cpu clock  */
-#define MFP_BOGO_DIV 417               /**< BOGO cycle/mfp clock */
+#define MFP_BOGO_MUL 128u               /**< BOGO cycles/cpu clock  */
+#define MFP_BOGO_DIV 417u               /**< BOGO cycle/mfp clock */
 /**
  * @}
  */

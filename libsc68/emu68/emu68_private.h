@@ -74,7 +74,7 @@
 #define NRM_WORD_MSK ( (int68_t) ( (uint68_t) 0x0000FFFF << WORD_FIX ) )
 #define NRM_LONG_MSK ( (int68_t) ( (uint68_t) 0xFFFFFFFF << LONG_FIX ) )
 /* L={7,15,31} */
-#define NRM_MSK(L)   ( (int68_t) ( (uint68_t) ((int68_t) 1 << SIGN_BIT) >> (L)))
+#define NRM_MSK(L)   ( (int68_t) ( (int68_t) ((uint68_t) 1 << SIGN_BIT) >> (L)))
 
 #define NRM_BYTE_ONE ( (int68_t) ( (uint68_t) 0x00000001 << BYTE_FIX ) )
 #define NRM_WORD_ONE ( (int68_t) ( (uint68_t) 0x00000001 << WORD_FIX ) )
