@@ -1819,6 +1819,7 @@
  TIMEDB_ENTRY( 30688f23,  1,      3548,                  YM), /* 02550 - Ben Daglish - Xybots */
  TIMEDB_ENTRY( 30688f23,  2,       105,                  YM), /* 02550 - Ben Daglish - Xybots */
  TIMEDB_ENTRY( 306d7273,  1,      5759,            TA+TB+YM), /* 03294 - Dma-Sc - ATIPYK Developments - Manical Drop - Introduction */
+ TIMEDB_ENTRY( 30b57404,  1,     28699,               TA+YM), /* 05075 - 505 - Unglobal */
  TIMEDB_ENTRY( 30b5e9ba,  1,      4061,              YM+STE), /* 01638 - Jason - Jason Mix - STE only */
  TIMEDB_ENTRY( 30c9d495,  1,      1536,                  YM), /* 02482 - ENS Music - ENS 8 */
  TIMEDB_ENTRY( 30cf6273,  1,     13824,                  YM), /* 01072 - Excellence In Art - Battle Tris */
@@ -4609,6 +4610,7 @@
  TIMEDB_ENTRY( 7e4c2abc,  2,      2688,                  YM), /* 02055 - Mad Max - Starpaws */
  TIMEDB_ENTRY( 7e4c2abc,  3,       384,                  YM), /* 02055 - Mad Max - Starpaws */
  TIMEDB_ENTRY( 7e4c2abc,  4,        11,                  YM), /* 02055 - Mad Max - Starpaws */
+ TIMEDB_ENTRY( 7e659c44,  1,      9215,         TA+TB+TD+YM), /* 05078 - MotionRide - Spy vs Spy Theme */
  TIMEDB_ENTRY( 7e705d5d,  1,     20480,                  YM), /* 02046 - Mad Max - Nemesis The Warlock */
  TIMEDB_ENTRY( 7e9147b9,  1,      6903,         TA+TB+TD+YM), /* 00178 - 505 - Mystic Bytes 2 */
  TIMEDB_ENTRY( 7e9188c4,  1,      1051,                  YM), /* 04974 - Unknown - Magnetic Field */
@@ -5714,7 +5716,6 @@
  TIMEDB_ENTRY( 9867eb14, 13,       570,                  YM), /* 00341 - Tony Williams - International Ice Hockey */
  TIMEDB_ENTRY( 9867eb14, 14,      1200,                  YM), /* 00341 - Tony Williams - International Ice Hockey */
  TIMEDB_ENTRY( 9867eb14, 15,        40,                  YM), /* 00341 - Tony Williams - International Ice Hockey */
- TIMEDB_ENTRY( 9874059f,  1,      9226,                  YM), /* 00426 - Big Alec - PYM - Isido Way Of The Stones */
  TIMEDB_ENTRY( 9880a1dd,  1,     14495,                  YM), /* 02375 - Nexus 6 - Hans A. aus Dortmund */
  TIMEDB_ENTRY( 988903d2,  1,      3838,                  YM), /* 04219 - Karsten Obarksi - Window Wizard */
  TIMEDB_ENTRY( 988903d2,  2,      6079,                  YM), /* 04219 - Karsten Obarksi - Window Wizard */
@@ -5733,6 +5734,7 @@
  TIMEDB_ENTRY( 990a94c4,  1,      2309,            TA+TD+YM), /* 02230 - Tao - Cream - Chased-3D Cube (Nostalgic-O-Demo) */
  TIMEDB_ENTRY( 9911c535,  1,    226959,               TA+YM), /* 04672 - Unknown - Sweet Dreams */
  TIMEDB_ENTRY( 99327bfa,  1,      1152,                  YM), /* 01087 - Techno - Dentro 2 */
+ TIMEDB_ENTRY( 994524cd,  1,      6144,               TA+YM), /* 05074 - Furax - Return */
  TIMEDB_ENTRY( 99671248,  1,      3450,                  YM), /* 01342 - Scavenger - Leif Rular */
  TIMEDB_ENTRY( 997d6e29,  1,     27648,         TA+TB+TD+YM), /* 03376 - STU - SINGING ROBOT */
  TIMEDB_ENTRY( 999d9ffe,  1,      7296,               TA+YM), /* 04422 - Lotus - Synth Dream 2 - Bionic Fields */
@@ -6368,6 +6370,7 @@
  TIMEDB_ENTRY( a9a4e1e2,  1,      2560,                  YM), /* 04604 - White Ninja - Unchanged */
  TIMEDB_ENTRY( a9a63e99,  1,     10486,                  YM), /* 03241 - T1000 - The Beast Club - TBC 13 */
  TIMEDB_ENTRY( a9a79d0b,  1,      7199,         TA+TB+TD+YM), /* 03832 - Rhino - Torment (D Newman) - Three out of Four */
+ TIMEDB_ENTRY( a9a81379,  1,      7679,                  YM), /* 05077 - 505 - Mosquidots */
  TIMEDB_ENTRY( a9bf9dca,  1,      6144,                  YM), /* 03254 - T1000 - The Bits Club 35 */
  TIMEDB_ENTRY( a9df42c6,  1,      8736,                  YM), /* 01392 - Shaft - Ninja Spirit */
  TIMEDB_ENTRY( a9f87735,  1,      1038,                  YM), /* 04948 - Unknown - Big Spender */
@@ -6516,6 +6519,7 @@
  TIMEDB_ENTRY( ae8e4d6b,  1,      3584,                  YM), /* 00563 - Jas C Brooke - 1943 */
  TIMEDB_ENTRY( aef26aa2,  1,      4609,         TA+TB+TD+YM), /* 03643 - 505-checkpoint - Stress */
  TIMEDB_ENTRY( af239f12,  1,      2125,                  YM), /* 04965 - Unknown - Entertainer */
+ TIMEDB_ENTRY( af36543d,  1,      4992,                  YM), /* 05076 - V!X - Remote Entry 2 */
  TIMEDB_ENTRY( af5dfc0d,  1,     12192,         TA+TB+TD+YM), /* 02073 - Mad Max - Deep Strike - Sid */
  TIMEDB_ENTRY( af682d9c,  1,       431,                  YM), /* 00067 - David Whittaker - APB */
  TIMEDB_ENTRY( af682d9c,  2,      2155,                  YM), /* 00067 - David Whittaker - APB */
@@ -7586,6 +7590,7 @@
  TIMEDB_ENTRY( cb230ceb,  2,       386,                  YM), /* 02927 - Allister Brimble - Wacky Darts */
  TIMEDB_ENTRY( cb277471,  1,      6912,                  YM), /* 04831 - T1000 - Bits 55e */
  TIMEDB_ENTRY( cb27c767,  1,     11292,         TA+TB+TD+YM), /* 03665 - The Estate - Blackbird */
+ TIMEDB_ENTRY( cb2f8e67,  1,      9226,                  YM), /* 00426 - Big Alec - PYM - Ishido Way Of The Stones */
  TIMEDB_ENTRY( cb45266b,  1,     14016,                  YM), /* 02173 - Mad Max - Thundercats */
  TIMEDB_ENTRY( cb484820,  1,      5376,               TA+YM), /* 00824 - !Cube - Shazam (Cross The Deserts) */
  TIMEDB_ENTRY( cb4da967,  1,      5759,         TA+TB+TD+YM), /* 02839 - maktone-fairight - shotgun */
