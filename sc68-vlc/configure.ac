@@ -11,9 +11,11 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
+m4_define([VERSION_TWEAK],esyscmd([sh vcversion.sh]))dnl
+
 AC_INIT(
   [sc68-vlc],
-  [0.8.0],
+  [0.8.0.VERSION_TWEAK],
   [http://sourceforge.net/projects/sc68/],
   [sc68-vlc],
   [http://sc68.atari.org])
@@ -35,6 +37,8 @@ AC_PROG_INSTALL
 # $$$ TEMP $$$
 AM_CONDITIONAL([SOURCE_SC68],[test 1 = 1])
 AM_CONDITIONAL([SOURCE_FILE68],[test 1 = 1])
+
+AC_HEADER_ASSERT
 
 # ,----------------------------------------------------------------------.
 # | vlc                                                                  |

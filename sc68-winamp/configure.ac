@@ -11,15 +11,17 @@ dnl#
 # | Autotools and Package                                                |
 # `----------------------------------------------------------------------'
 
+m4_define([VERSION_TWEAK],esyscmd([sh vcversion.sh]))dnl
+
 AC_INIT(
   [sc68-winamp],
-  [0.5],
+  [VERSION_TWEAK],
   [http://sourceforge.net/projects/sc68/],
   [sc68-winamp],
   [http://sc68.atari.org])
 AC_CONFIG_SRCDIR([in_sc68.c])
 AC_CONFIG_HEADERS([config.h])
-
+AC_HEADER_ASSERT
 
 # ,----------------------------------------------------------------------.
 # | build tools                                                          |
@@ -34,7 +36,6 @@ AC_CHECK_TOOL([STRIP],[strip],[false])
 if test x/"$STRIP" = x/false; then
   AC_MSG_ERROR([Missing required build tool -- strip])
 fi
-
 
 # ,----------------------------------------------------------------------.
 # | Locate sdks                                                          |
