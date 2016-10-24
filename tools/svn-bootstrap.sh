@@ -157,6 +157,13 @@ ln_or_cp_x() {
     }
 }
 
+# $1: dir
+vcversion_dir() {
+    local dir="$1"
+    ( cd "${dir}" &&
+	  ln_or_cp_x ../tools/vcversion.sh vcversion.sh )
+}
+
 # $1: dir  $2: --force
 bootstrap_dir() {
     local dir="$1" m4file=sc68_package.m4 force='' 
@@ -171,8 +178,7 @@ bootstrap_dir() {
     testfile "${dir}/Makefile.am"     || return 1
     testfile "${dir}/../AUTHORS"      || return 1
 
-    ( cd "${dir}" &&
-	    ln_or_cp_x ../tools/vcversion.sh vcversion.sh )
+    vcversion_dir "${dir}"
     
     for obj in m4 AUTHORS README; do
 	test=false
@@ -276,6 +282,14 @@ dirs="$dirs libsc68 sc68 mksc68"
 edirs=
 for dir in ${dirs}; do
     bootstrap_dir ${dir} "$@" || edirs="$edirs $dir"
+done
+
+# Install vcversion.sh script in these directories
+for dir in sc68-winamp sc68-vlc sc68-audacity
+do
+    if [ -d ${dir} ] && [ -f ${dir}/configure.ac ]; then
+	 vcversion_dir ${dir} "$@" || edirs="$edirs $dir"
+    fi
 done
 
 if test "X${edirs}" != X; then
