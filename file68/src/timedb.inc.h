@@ -1406,6 +1406,7 @@
  TIMEDB_ENTRY( 24c48017,  1,     21755,                  YM), /* 02240 - Tao - Cream (orig. Rob Hubbard) - Lightforce (Stmygm) */
  TIMEDB_ENTRY( 24dce34b,  1,      2690,                  YM), /* 00436 - Big Alec - What Time is It? (Scrolly) */
  TIMEDB_ENTRY( 24de3165,  1,      1016,               TA+YM), /* 02619 - STU - SPOOKY */
+ TIMEDB_ENTRY( 24e1e21b,  1,     11569,         TA+TB+TD+YM), /* 05099 - AceMan - Pumpkin Hop */
  TIMEDB_ENTRY( 24eaf9b6,  1,      2324,               TA+YM), /* 01332 - Scavenger - Gangstar */
  TIMEDB_ENTRY( 24eb3117,  1,      9367,         TA+TB+TD+YM), /* 03584 - Divag - Technorobotic */
  TIMEDB_ENTRY( 24eb9818,  1,      1543,                  YM), /* 03919 - Unknown - Holland */
@@ -5597,6 +5598,7 @@
  TIMEDB_ENTRY( 96415d60,  5,     11732,               TA+YM), /* 02193 - Mad Max - Ghostbattle */
  TIMEDB_ENTRY( 96415d60,  6,      8383,               TA+YM), /* 02193 - Mad Max - Ghostbattle */
  TIMEDB_ENTRY( 96415d60,  7,      8192,               TA+YM), /* 02193 - Mad Max - Ghostbattle */
+ TIMEDB_ENTRY( 964473e5,  1,      9728,         TA+TB+TD+YM), /* 05098 - !Cube - Hyper Ocean Ride */
  TIMEDB_ENTRY( 96568789,  1,     29952,                  YM), /* 00852 - Ben Daglish - 3d Galax */
  TIMEDB_ENTRY( 9676dae3,  1,     29121,            TA+TD+YM), /* 02338 - Tao - Cream - Magnetic (UCM 12) */
  TIMEDB_ENTRY( 9688321a,  1,     12000,               TD+YM), /* 02360 - Nexus 6 - Arie EXX */
