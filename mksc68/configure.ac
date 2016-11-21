@@ -88,14 +88,16 @@ AC_CHECK_HEADERS([sys/socket.h sys/ioctl.h netdb.h])
 # | Extra libraries                                                      |
 # `----------------------------------------------------------------------'
 
-AS_UNSET([has_edit])
-AS_CASE(
-  ["${host_vendor}-${host_os}"],
-  [w64-mingw32 | apple-darwin*],
-  [SC68_WITH_MODULE([edit],[libedit],[readline],[readline.h])]
-  [AC_SEARCH_LIBS([readline],[readline],[has_edit=maybe])])
-AS_IF([test "X${has_edit-no}" != Xno],
-      [AC_CHECK_HEADERS([readline/readline.h readline/history.h])])
+SC68_READLINE
+
+# AS_UNSET([has_edit])
+# AS_CASE(
+#   ["${host_vendor}-${host_os}"],
+#   [w64-mingw32 | apple-darwin*],
+#   [SC68_WITH_MODULE([edit],[libedit],[readline],[readline.h])]
+#   [AC_SEARCH_LIBS([readline],[readline],[has_edit=maybe])])
+# AS_IF([test "X${has_edit-no}" != Xno],
+#       [AC_CHECK_HEADERS([readline/readline.h readline/history.h])])
 
 SC68_THREADS
 AS_IF([test "X$ac_cv_header_sys_socket_h" != Xyes],
@@ -127,4 +129,5 @@ AC_MSG_NOTICE([,-----------------------])
 AC_MSG_NOTICE([| $PACKAGE_NAME ($PACKAGE_VERSION) for $host])
 AC_MSG_NOTICE([|-----------------------])
 AC_MSG_NOTICE([|   libsc68             : $has_libsc68 ($libsc68_VERSION)])
+AC_MSG_NOTICE([|   readline            : $has_readline ($readline_VERSION)])
 AC_MSG_NOTICE([+-----------------------])
