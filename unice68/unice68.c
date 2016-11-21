@@ -138,8 +138,8 @@ static int print_usage(void)
     (
       "Usage: %s [MODE] [OPTION...] [--] [[<input>] <output>]\n"
       "\n"
-      "ICE! depacker %d.%02d\n"
-      "       packer %d.%02d\n"
+      "ICE! depacker %x.%02x\n"
+      "       packer %x.%02x\n"
       "\n"
       " `-' as input/output uses respectively stdin/stdout.\n"
       " If output is stdout all messages are diverted to stderr.\n"
@@ -170,8 +170,8 @@ static int print_usage(void)
       "Visit <" PACKAGE_URL ">\n"
       "Report bugs to <" PACKAGE_BUGREPORT ">\n",
       prg,
-      ice_d_version/100, ice_d_version%100,
-      ice_p_version/100, ice_p_version%100
+      ice_d_version>>8, ice_d_version&255,
+      ice_p_version>>8, ice_p_version&255
       );
   return 0;
 }
