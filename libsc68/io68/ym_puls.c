@@ -113,7 +113,7 @@ static int reset(ym_t * const ym, const cycle68_t ymcycle)
   PULS.envel_ct           = 1;
 
   /* Reset noise generator */
-  PULS.noise_bit          = 1;
+  PULS.noise_bit          = 2;          /* Do not use 1 or 0 !!!  */
   PULS.noise_ct           = 1;
 
   /* Reset tone generator (add bias to avoid cancel-out sync effect). */
@@ -160,7 +160,7 @@ static int generator(ym_t  * const ym, int ymcycles)
 
   /* int ctA,  ctB,  ctC,  ctN,  ctE; */
   int perA, perB, perC, perN, perE;
-  int smsk, emsk, vols, nmsk;
+  int smsk, emsk, vols, nmsk, nbit;
   int rem_cycles, v;
 
   rem_cycles = ymcycles & 7;
@@ -169,6 +169,7 @@ static int generator(ym_t  * const ym, int ymcycles)
 
   smsk = ym_smsk_table[7 &  ym->reg.name.ctl_mixer      ];
   nmsk = ym_smsk_table[7 & (ym->reg.name.ctl_mixer >> 3)];
+  nbit = -(PULS.noise_bit&1);
 
   /* 3 voices buzz or lvl mask */
   emsk = vols = 0;
@@ -189,39 +190,44 @@ static int generator(ym_t  * const ym, int ymcycles)
   perB = ym->reg.name.per_b_lo | ((ym->reg.name.per_b_hi&0xF)<<8);
   perC = ym->reg.name.per_c_lo | ((ym->reg.name.per_c_hi&0xF)<<8);
   perE = ym->reg.name.per_env_lo | (ym->reg.name.per_env_hi<<8);
-  perN = (ym->reg.name.per_noise & 0x1F) << 1;
+  perN = (ym->reg.name.per_noise & 0x1F);
+  perN |= !perN;
+  perN <<= 1;
 
   /* $$$ X/ME << 1 because the noise generator base frequency is
      master/16 but we have to match the envelop generator frequency
      which is master/8. */
 
   /* $$$ x/ME DELME XXX TEST */
-  if (!perA) perA = 1;
-  if (PULS.voice_ctA > perA) PULS.voice_ctA %= perA;
-  if (!perB) perB = 1;
-  if (PULS.voice_ctB > perB) PULS.voice_ctB %= perB;
-  if (!perC) perC = 1;
-  if (PULS.voice_ctC > perC) PULS.voice_ctC %= perC;
-  if (!perE) perE = 1;
-  if (PULS.envel_ct > perE) PULS.envel_ct %= perE;
-  if (!perN) perN = 1;
-  if (PULS.noise_ct > perN) PULS.noise_ct %= perN;
+  /* if (!perA) perA = 1; */
+  /* if (PULS.voice_ctA > perA) PULS.voice_ctA %= perA; */
+  /* if (!perB) perB = 1; */
+  /* if (PULS.voice_ctB > perB) PULS.voice_ctB %= perB; */
+  /* if (!perC) perC = 1; */
+  /* if (PULS.voice_ctC > perC) PULS.voice_ctC %= perC; */
+  /* if (!perE) perE = 1; */
+  /* if (PULS.envel_ct > perE) PULS.envel_ct %= perE; */
+  /* if (!perN) perN = 1; */
+  /* if (PULS.noise_ct > perN) PULS.noise_ct %= perN; */
 
   do {
     int sq;
 
     if (--PULS.noise_ct <= 0) {
       PULS.noise_ct = perN;
-      /* *** Based on MAME. Bit have been reversed for optimzation :) ***
+      /*
+       * Hatari-devel discussion conclusion:
+       * -----------------------------------
        *
-       *   The Random Number Generator of the 8910 is a 17-bit shift
-       *   register. The input to the shift register is bit0 XOR bit2.
-       *   bit0 is the output.
+       * The YM2149 uses a 17 bit LFSR pseudo-random noise generator
+       * with taps on bits 17 and 14.
+       *
+       * This is a special implementation with one supplemental bit
+       * (bit#0) carrying the output bit.
        */
-
-      /* bit 17 := bit 0 ^ bit 2 */
-      PULS.noise_bit |= ((PULS.noise_bit^(PULS.noise_bit>>2)) & 1)<<17;
       PULS.noise_bit >>= 1;
+      nbit = -(PULS.noise_bit&1);
+      PULS.noise_bit ^= nbit & 0x24000;
     }
 
     if (--PULS.envel_ct <= 0) {
@@ -244,10 +250,10 @@ static int generator(ym_t  * const ym, int ymcycles)
       PULS.voice_ctC = perC;
     }
 
-    sq = PULS.levels | smsk;                      /* Apply tone. */
-    sq &= (-(PULS.noise_bit&1) | nmsk);           /* Apply noise. */
+    sq  = PULS.levels | smsk;                     /* Apply tone. */
+    sq &= nbit | nmsk;                            /* Apply noise. */
     sq &= (waveform[PULS.envel_idx]&emsk) | vols; /* Apply volume. */
-    sq &= ym->voice_mute;                          /* Apply mute. */
+    sq &= ym->voice_mute;                         /* Apply mute. */
     *ym->outptr++ = sq;
 
   } while (--ymcycles);

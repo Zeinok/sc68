@@ -212,12 +212,14 @@ static void ym2149_clock(ym_t * const ym, cycle68_t cycles)
     assert(blep->noise_count >= 0);
     if (blep->noise_count == 0) {
       u16 new_noise;
-      blep->noise_state =
-        (blep->noise_state >> 1) |
-        (((blep->noise_state ^ (blep->noise_state >> 2)) & 1) << 16);
+      if (blep->noise_state & 1) {
+        blep->noise_state = (blep->noise_state >> 1) ^ 0x12000;
+        new_noise = 0xffff;
+      } else {
+        blep->noise_state >>= 1;
+        new_noise = 0x0000;
+      }
       blep->noise_count = blep->noise_event;
-
-      new_noise = blep->noise_state & 1 ? 0xffff : 0x0000;
       change = change || blep->noise_output != new_noise;
       blep->noise_output = new_noise;
     }
@@ -245,11 +247,11 @@ static s32 ym2149_output(ym_t * const ym, const u8 subsample)
   u32 i = blep->blep_idx;
   s32 output = 0;
 
-  /* Workaround bug #30: 
+  /* Workaround bug #30:
    * https://sourceforge.net/p/sc68/bugs/30/
    */
   blep->blepstate[(i-1)&(MAX_BLEPS-1)].stamp = blep->time - BLEP_SIZE;
-  
+
   while (1) {
     u16 age = blep->time - blep->blepstate[i].stamp;
     if (age >= BLEP_SIZE-1)
