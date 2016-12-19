@@ -585,6 +585,7 @@
  TIMEDB_ENTRY( 0f546b2b,  1,      5361,                  YM), /* 02506 - Crazy Q - Crushed Insect (RG mix) */
  TIMEDB_ENTRY( 0f55518f,  1,      2690,               TA+YM), /* 00930 - Dark Angel - Logic Force */
  TIMEDB_ENTRY( 0f6c0b66,  1,      6528,               TD+YM), /* 01385 - Scy - TSCC Mod Compil 13 */
+ TIMEDB_ENTRY( 0f7888ab,  1,      3580,                  YM), /* 05100 - Epic - Hydroxid */
  TIMEDB_ENTRY( 0f797ef0,  1,      7680,               TD+YM), /* 00586 - Celtic - Lethal Suck */
  TIMEDB_ENTRY( 0f7cd0f4,  1,     28561,               TA+YM), /* 03850 - Mr Saigon - MSI Sound Demo */
  TIMEDB_ENTRY( 0f7cd0f4,  2,     27272,               TA+YM), /* 03850 - Mr Saigon - MSI Sound Demo */
@@ -4215,6 +4216,7 @@
  TIMEDB_ENTRY( 750f2a72,  1,      8280,                  YM), /* 00740 - Connor - UCM 2 Intro */
  TIMEDB_ENTRY( 75176418,  1,     12287,         TA+TB+TD+YM), /* 02486 - gwEm (M. Gray conversion) - Bangin' Nights */
  TIMEDB_ENTRY( 75478a17,  1,     41216,         TA+TB+TD+YM), /* 03426 - cerror - A BEGINNING */
+ TIMEDB_ENTRY( 75485e65,  1,      6768,                  YM), /* 05103 - Grease Monkey - Cheqular */
  TIMEDB_ENTRY( 75585863,  1,     14601,                  YM), /* 04945 - Unknown - Air on a G-String */
  TIMEDB_ENTRY( 7562aff4,  1,     14665,               TB+YM), /* 01031 - Doclands - Zoomer Preview - FOF */
  TIMEDB_ENTRY( 7563ab89,  1,      5120,                  YM), /* 02118 - Mad Max - Warhawk Remix */
@@ -6059,6 +6061,7 @@
  TIMEDB_ENTRY( a129df5f,  1,     29532,            TB+TD+YM), /* 03855 - YERZMYEY-AY-RIDERS - *WAKE UP!* YERZ */
  TIMEDB_ENTRY( a1332ddc,  1,     45475,                  YM), /* 03154 - Unknown - THE ROCK ISLAND LINE */
  TIMEDB_ENTRY( a136bb47,  1,      5119,            TA+TB+YM), /* 02703 - Dubmood - Speedloader I */
+ TIMEDB_ENTRY( a1401c8a,  1,      6757,                  YM), /* 05102 - rm-dkd - trax */
  TIMEDB_ENTRY( a17c886e,  1,      5375,         TA+TB+TD+YM), /* 01016 - DMA-SC - UCM 16 Intro */
  TIMEDB_ENTRY( a184cbea,  1,      2125,         TA+TB+TD+YM), /* 03695 - Per Almered (XiA) 2009 - Injector */
  TIMEDB_ENTRY( a18a672c,  1,      6412,                  YM), /* 00855 - Ben Daglish - Kingmaker */
@@ -6151,6 +6154,7 @@
  TIMEDB_ENTRY( a20f0ccb,  1,      1047,                  YM), /* 04961 - Unknown - Dallas Theme */
  TIMEDB_ENTRY( a21825a8,  1,     71723,               TA+YM), /* 04048 - Roggie - STC End */
  TIMEDB_ENTRY( a21c1160,  1,      6647,                  YM), /* 01924 - The Mind - Genesys Remix - Dynamika */
+ TIMEDB_ENTRY( a23127f6,  1,      6913,                  YM), /* 05101 - michu-genesis project - datastorm 2017 invite */
  TIMEDB_ENTRY( a2408d27,  1,      1600,                  YM), /* 00610 - Chrispy Noodle - Chrispy Noodle 1 */
  TIMEDB_ENTRY( a24ee054,  1,     14480,         TA+TB+TD+YM), /* 03883 - LSL - Morphonic Lab XI */
  TIMEDB_ENTRY( a259b297,  1,      2560,                  YM), /* 01921 - The Mind - Phaleon - Aenigmatica */
